@@ -18,6 +18,9 @@
 // @match              https://drive.mypikpak.com/*
 // @icon               https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/logo.svg
 // @homepage           https://github.com/digbug82/PikPak_Enhancement_Master
+// @supportURL         https://github.com/digbug82/PikPak_Enhancement_Master/issues
+// @downloadURL        https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js
+// @updateURL          https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js
 // @grant              GM_setClipboard
 // @grant              GM_setValue
 // @grant              GM_getValue
@@ -34,7 +37,6 @@
 // @run-at             document-start
 // @require            https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js
 // @require            https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js
-// @supportURL         https://github.com/digbug82/PikPak_Enhancement_Master/issues
 // ==/UserScript==
 
 /*
