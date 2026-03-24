@@ -8,11 +8,7 @@
 
 ## 🌍 対応言語 (Languages)
 
-* 日本語
-* 简体中文
-* 繁體中文
-* English
-* 한국어
+[日本語](https://github.com/digbug82/PikPak_Enhancement_Master/blob/3ec52a7029ee311abefeb7c7e0375a4c1f2787c7/i18n/README(ja).md) | [简体中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/3ec52a7029ee311abefeb7c7e0375a4c1f2787c7/i18n/README(zh).md) | [繁體中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/3ec52a7029ee311abefeb7c7e0375a4c1f2787c7/i18n/README(tc).md) | [English](https://github.com/digbug82/PikPak_Enhancement_Master/blob/3ec52a7029ee311abefeb7c7e0375a4c1f2787c7/README.md) | [한국어](https://github.com/digbug82/PikPak_Enhancement_Master/blob/3ec52a7029ee311abefeb7c7e0375a4c1f2787c7/i18n/README(ko).md)
 
 ---
 
