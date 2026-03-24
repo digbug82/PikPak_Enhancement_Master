@@ -1,46 +1,46 @@
 // ==UserScript==
-// @name               PikPak Enhancement Master
-// @name:en            PikPak Enhancement Master
-// @name:zh-CN         PikPak 增强大师
-// @name:zh-TW         PikPak 增強大師
-// @name:ko            PikPak 인핸서 마스터
-// @name:ja            PikPak 拡張マスター
-// @namespace          https://github.com/digbug82/
-// @version            1.0.0
-// @author             digbug82
-// @license            CC-BY-NC-SA-4.0
-// @description        A desktop-grade file manager featuring batch extraction, smart deduplication, multi-modal bulk renaming, Aria2 pushing, junk file cleanup, directory export, and an enhanced media playback engine.
-// @description:en     A desktop-grade file manager featuring batch extraction, smart deduplication, multi-modal bulk renaming, Aria2 pushing, junk file cleanup, directory export, and an enhanced media playback engine.
-// @description:zh-CN  集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的网盘管理器。
-// @description:zh-TW  整合批量解壓縮、智慧重複檢查、多模態批量重新命名、Aria2 推送、垃圾檔案清理、匯出目錄、媒體播放引擎增強等功能的網盤管理器。
-// @description:ko     일괄 압축 해제, 스마트 중복 체크, 멀티모달 일괄 이름 변경, Aria2 푸시, 정크 파일 정리, 디렉토리 내보내기, 미디어 재생 엔진 강화 기능을 통합한 클라우드 드라이브 관리자입니다.
-// @description:ja     一括解凍、スマート重複チェック、マルチモーダル一括リネーム、Aria2 プッシュ、不要ファイル削除、ディレクトリ書き出し、メディア再生エンジン強化などの機能を統合したクラウドストレージマネージャー。
-// @match              https://mypikpak.com/drive/*
-// @match              https://app.mypikpak.com/*
-// @match              https://drive.mypikpak.com/*
-// @icon               https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/logo.svg
-// @homepage           https://github.com/digbug82/PikPak_Enhancement_Master
-// @supportURL         https://github.com/digbug82/PikPak_Enhancement_Master/issues
-// @downloadURL        https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js
-// @updateURL          https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js
-// @compatible         chrome
-// @compatible         edge
-// @grant              GM_setClipboard
-// @grant              GM_setValue
-// @grant              GM_getValue
-// @grant              GM_deleteValue
-// @grant              GM_listValues
-// @grant              GM_xmlhttpRequest
-// @connect            catbox.moe
-// @connect            litterbox.catbox.moe
-// @connect            uguu.se
-// @connect            missav123.com
-// @connect            njavtv.com
-// @connect            mypikpak.com
-// @connect            localhost
-// @run-at             document-start
-// @require            https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js
-// @require            https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js
+// @name         PikPak Enhancement Master
+// @name:en      PikPak Enhancement Master
+// @name:zh-CN   PikPak 增强大师
+// @name:zh-TW   PikPak 增強大師
+// @name:ko      PikPak 인핸서 마스터
+// @name:ja      PikPak 拡張マスター
+// @namespace    https://github.com/digbug82/
+// @version      1.0.0
+// @author       digbug82
+// @license      CC-BY-NC-SA-4.0
+// @description  A desktop-grade file manager featuring batch extraction, smart deduplication, multi-modal bulk renaming, Aria2 pushing, junk file cleanup, directory export, and an enhanced media playback engine.
+// @description:en A desktop-grade file manager featuring batch extraction, smart deduplication, multi-modal bulk renaming, Aria2 pushing, junk file cleanup, directory export, and an enhanced media playback engine.
+// @description:zh-CN 集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的网盘管理器。
+// @description:zh-TW 整合批量解壓縮、智慧重複檢查、多模態批量重新命名、Aria2 推送、垃圾檔案清理、匯出目錄、媒體播放引擎增強等功能的網盤管理器。
+// @description:ko 일괄 압축 해제, 스마트 중복 체크, 멀티모달 일괄 이름 변경, Aria2 푸시, 정크 파일 정리, 디렉토리 내보내기, 미디어 재생 엔진 강화 기능을 통합한 클라우드 드라이브 관리자입니다.
+// @description:ja 一括解凍、スマート重複チェック、マルチモーダル一括リネーム、Aria2 プッシュ、不要ファイル削除、ディレクトリ書き出し、メディア再生エンジン強化などの機能を統合したクラウドストレージマネージャー。
+// @match        https://mypikpak.com/drive/*
+// @match        https://app.mypikpak.com/*
+// @match        https://drive.mypikpak.com/*
+// @icon         https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/logo.svg
+// @homepage     https://github.com/digbug82/PikPak_Enhancement_Master
+// @supportURL   https://github.com/digbug82/PikPak_Enhancement_Master/issues
+// @downloadURL  https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js
+// @updateURL    https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js
+// @compatible   chrome
+// @compatible   edge
+// @grant        GM_setClipboard
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_deleteValue
+// @grant        GM_listValues
+// @grant        GM_xmlhttpRequest
+// @connect      catbox.moe
+// @connect      litterbox.catbox.moe
+// @connect      uguu.se
+// @connect      missav123.com
+// @connect      njavtv.com
+// @connect      mypikpak.com
+// @connect      localhost
+// @run-at       document-start
+// @require      https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js
+// @require      https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js
 // ==/UserScript==
 
 /*
