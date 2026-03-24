@@ -1,8 +1,8 @@
-![커버](https://github.com/digbug82/PikPak_Enhancement_Master/blob/9aa67ac2eb4ae25d9192fbebbdd184aec78253db/img/cover_ko.png)
+![커버](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/9aa67ac2eb4ae25d9192fbebbdd184aec78253db/img/cover_ko.png)
 
 # 📦 PikPak 강화 마스터
 
-> 🚀 PikPak 웹용 클라우드 드라이브 관리 도구로, 웹에서도 로컬 파일 시스템과 유사한 작업 환경 제공
+> 일괄 압축 해제, 스마트 중복 검사, 다중 모드 일괄 이름 변경, Aria2 전송, 정크 파일 정리, 디렉터리 내보내기, 미디어 재생 엔진 강화 등의 기능을 통합한 데스크톱급 파일 관리자.
 
 ---
 
