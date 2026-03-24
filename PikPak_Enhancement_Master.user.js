@@ -8,11 +8,11 @@
 // @version            1.0.0
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
-// @description        Reconstructing PikPak Web: A desktop-grade file manager featuring batch extraction, smart deduplication, multi-modal bulk renaming, Aria2 pushing, junk file cleanup, directory export, and an enhanced media playback engine.
-// @description:zh-CN  重构 PikPak 网页端：集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的桌面级文件管理器。
-// @description:zh-TW  重構 PikPak 網頁端：整合批次解壓縮、智慧查重、多模態批次重新命名、Aria2 推送、垃圾檔案清理、匯出目錄、媒體播放引擎增強等功能的桌面級檔案管理器。
-// @description:ko     PikPak 웹 재구축: 일괄 압축 해제, 스마트 중복 검사, 다중 모드 일괄 이름 변경, Aria2 전송, 정크 파일 정리, 디렉터리 내보내기, 미디어 재생 엔진 강화 등의 기능을 통합한 데스크톱급 파일 관리자.
-// @description:ja     PikPak Web版を再構築：一括解凍、スマート重複チェック、マルチモーダル一括リネーム、Aria2転送、ジャンクファイルクリーンアップ、ディレクトリエクスポート、メディア再生エンジン強化などの機能を統合したデスクトップ級ファイルマネージャー。
+// @description        A desktop-grade file manager featuring batch extraction, smart deduplication, multi-modal bulk renaming, Aria2 pushing, junk file cleanup, directory export, and an enhanced media playback engine.
+// @description:zh-CN  集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的网盘管理器。
+// @description:zh-TW  整合批量解壓縮、智慧重複檢查、多模態批量重新命名、Aria2 推送、垃圾檔案清理、匯出目錄、媒體播放引擎增強等功能的網盤管理器。
+// @description:ko     일괄 압축 해제, 스마트 중복 체크, 멀티모달 일괄 이름 변경, Aria2 푸시, 정크 파일 정리, 디렉토리 내보내기, 미디어 재생 엔진 강화 기능을 통합한 클라우드 드라이브 관리자입니다.
+// @description:ja     一括解凍、スマート重複チェック、マルチモーダル一括リネーム、Aria2 プッシュ、不要ファイル削除、ディレクトリ書き出し、メディア再生エンジン強化などの機能を統合したクラウドストレージマネージャー。
 // @match              https://mypikpak.com/drive/*
 // @match              https://app.mypikpak.com/*
 // @match              https://drive.mypikpak.com/*
@@ -34,6 +34,7 @@
 // @run-at             document-start
 // @require            https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js
 // @require            https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js
+// @supportURL         https://github.com/digbug82/PikPak_Enhancement_Master/issues
 // ==/UserScript==
 
 /*
