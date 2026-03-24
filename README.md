@@ -1,8 +1,8 @@
-![封面](https://github.com/digbug82/PikPak_Enhancement_Master/blob/bc0ed7099bc945c7b3a07acf2cc6a723e2fdb2f4/img/cover_zh.png)
+![封面](https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@bc0ed7099bc945c7b3a07acf2cc6a723e2fdb2f4/img/cover_zh.png)
 
 # 📦 PikPak 增强大师
 
-> 🚀 适用于 PikPak 网页端的云盘管理器，让 Web 端也拥有媲美本地文件系统的操作能力
+> 集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的桌面级文件管理器。
 
 ---
 
