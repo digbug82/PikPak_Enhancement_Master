@@ -1,23 +1,13 @@
-PikPak Enhancement Master
-Copyright (c) 2025-2026 digbug82. All rights reserved.
+## ACKNOWLEDGEMENT & ORIGINAL MIT LICENSE
 
-This project is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC-BY-NC-SA-4.0). 
-
-You may view a copy of this license at: 
-http://creativecommons.org/licenses/by-nc-sa/4.0/
-
-Under this license:
-- You must give appropriate credit (Attribution).
-- You may NOT use the material for commercial purposes (NonCommercial).
-- If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original (ShareAlike).
-
-=======================================================================
-ACKNOWLEDGEMENT & ORIGINAL MIT LICENSE
-=======================================================================
 Portions of this software (specifically the underlying PikPak API interaction framework) were originally developed in the project "PikPak File Manager v1.2.0".
+
 Original Repository: https://github.com/poihoii/PikPak_FileManager
 
+MIT License applies to this part:
+
 MIT License
+
 Copyright (c) 2025 브랜뉴
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
