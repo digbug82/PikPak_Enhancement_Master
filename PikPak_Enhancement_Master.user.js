@@ -1,38 +1,39 @@
 // ==UserScript==
-// @name           PikPak Enhancement Master
-// @name:zh-CN     PikPak 增强大师
-// @name:zh-TW     PikPak 增強大師
-// @name:ja        PikPak 拡張マスター
-// @name:ko        PikPak 인핸서 마스터
-// @namespace      https://github.com/digbug82/
-// @version        1.0.0
-// @author         digbug82
-// @license        CC-BY-NC-SA-4.0
-// @description    Enhance the PikPak web experience: Features include batch extraction, smart duplicate file detection, batch renaming, advanced downloading, one-click junk file cleanup, and an immersive media playback experience.
-// @description:zh-CN 增强PikPak网页端体验：提供批量解压、智能查重、批量重命名、高级下载功能、一键清理垃圾文件、沉浸式媒体播放体验等功能。
-// @description:zh-TW 增強 PikPak 網頁端體驗：提供批次解壓縮、智慧查重、批次重新命名、進階下載功能、一鍵清理垃圾檔案、沉浸式媒體播放體驗等功能。
-// @description:ja PikPak Web版の体験を向上：一括解凍、スマート重複チェック、一括名前変更、高度なダウンロード機能、ワンクリックでの不要ファイルクリーンアップ、没入型のメディア再生体験などの機能を提供します。
-// @description:ko PikPak 웹 경험 향상: 일괄 압축 해제, 스마트 중복 파일 검사, 일괄 이름 변경, 고급 다운로드 기능, 원클릭 정크 파일 정리, 몰입형 미디어 재생 환경 등의 기능을 제공합니다.
-// @match          https://mypikpak.com/drive/*
-// @match          https://app.mypikpak.com/*
-// @match          https://drive.mypikpak.com/*
-// @icon           https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/logo.svg
-// @homepage       https://github.com/digbug82/PikPak_Enhancement_Master
-// @grant          GM_setClipboard
-// @grant          GM_setValue
-// @grant          GM_getValue
-// @grant          GM_listValues
-// @grant          GM_xmlhttpRequest
-// @connect        catbox.moe
-// @connect        litterbox.catbox.moe
-// @connect        uguu.se
-// @connect        missav123.com
-// @connect        njavtv.com
-// @connect        mypikpak.com
-// @connect        localhost
-// @run-at         document-start
-// @require        https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js
-// @require        https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js
+// @name               PikPak Enhancement Master
+// @name:zh-CN         PikPak 增强大师
+// @name:zh-TW         PikPak 增強大師
+// @name:ko            PikPak 인핸서 마스터
+// @name:ja            PikPak 拡張マスター
+// @namespace          https://github.com/digbug82/
+// @version            1.0.0
+// @author             digbug82
+// @license            CC-BY-NC-SA-4.0
+// @description        Reconstructing PikPak Web: A desktop-grade file manager featuring batch extraction, smart deduplication, multi-modal bulk renaming, Aria2 pushing, junk file cleanup, directory export, and an enhanced media playback engine.
+// @description:zh-CN  重构 PikPak 网页端：集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的桌面级文件管理器。
+// @description:zh-TW  重構 PikPak 網頁端：整合批次解壓縮、智慧查重、多模態批次重新命名、Aria2 推送、垃圾檔案清理、匯出目錄、媒體播放引擎增強等功能的桌面級檔案管理器。
+// @description:ko     PikPak 웹 재구축: 일괄 압축 해제, 스마트 중복 검사, 다중 모드 일괄 이름 변경, Aria2 전송, 정크 파일 정리, 디렉터리 내보내기, 미디어 재생 엔진 강화 등의 기능을 통합한 데스크톱급 파일 관리자.
+// @description:ja     PikPak Web版を再構築：一括解凍、スマート重複チェック、マルチモーダル一括リネーム、Aria2転送、ジャンクファイルクリーンアップ、ディレクトリエクスポート、メディア再生エンジン強化などの機能を統合したデスクトップ級ファイルマネージャー。
+// @match              https://mypikpak.com/drive/*
+// @match              https://app.mypikpak.com/*
+// @match              https://drive.mypikpak.com/*
+// @icon               https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/logo.svg
+// @homepage           https://github.com/digbug82/PikPak_Enhancement_Master
+// @grant              GM_setClipboard
+// @grant              GM_setValue
+// @grant              GM_getValue
+// @grant              GM_deleteValue
+// @grant              GM_listValues
+// @grant              GM_xmlhttpRequest
+// @connect            catbox.moe
+// @connect            litterbox.catbox.moe
+// @connect            uguu.se
+// @connect            missav123.com
+// @connect            njavtv.com
+// @connect            mypikpak.com
+// @connect            localhost
+// @run-at             document-start
+// @require            https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js
+// @require            https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js
 // ==/UserScript==
 
 /*
@@ -40,33 +41,33 @@
  * COPYRIGHT & LICENSE NOTICE
  * ============================================================================
  * This project (PikPak Enhancement Master) is a derivative work created by digbug82.
- * 
+ *
  * [1] NEW CONTRIBUTIONS & ENHANCEMENTS:
- * All new features, extensive refactoring, UI overhaul, and advanced management 
- * suites (e.g., Image Search, Blacklist, Smart Deduplication, Aria2 integration) 
- * are licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 
+ * All new features, extensive refactoring, UI overhaul, and advanced management
+ * suites (e.g., Image Search, Blacklist, Smart Deduplication, Aria2 integration)
+ * are licensed under the Creative Commons Attribution-NonCommercial-ShareAlike
  * 4.0 International License (CC-BY-NC-SA-4.0).
  * Copyright (c) 2025-2026 digbug82.
  * You may NOT use this material for commercial purposes.
- * 
+ *
  * ----------------------------------------------------------------------------
  * [2] ORIGINAL PROJECT ACKNOWLEDGEMENT (MIT License):
- * The base framework and original API logics are derived from 
- * "PikPak File Manager v1.2.0".
- * 
+ * The base framework and original API logics are derived from
+ * "PikPak File Manager v1.2.0" (Original Repository: https://github.com/poihoii/PikPak_FileManager).
+ *
  * MIT License
  * Copyright (c) 2025 브랜뉴
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -82,6 +83,8 @@
 
 const NativeTokenSniffer = {
     init: () => {
+        const isTurbo = typeof GM_getValue !== 'undefined' ? GM_getValue('pk_turbo_mode', false) : false;
+        if (!isTurbo) { console.log('🚀 [PikPak Master] Turbo Mode OFF. Native Hijacking Disabled.'); return; }
         if (location.href.includes('/login') || location.pathname.includes('login')) {
             console.log('🚀 [PikPak Master] Login page detected. OOM-Guard suspended.');
             return;
@@ -166,6 +169,7 @@ const CONF = {
     dupHashSVG: `<svg style="width:24px;height:24px;margin-right:8px;flex-shrink:0;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M798 322.42A308.78 308.78 0 0 0 676.73 211.1a17.5 17.5 0 1 0-15.94 31.16 272.73 272.73 0 0 1 148.71 243v63.83c0 25.58-3.14 134.1-8.62 159.68a17.5 17.5 0 0 0 13.44 20.78 17.94 17.94 0 0 0 3.69 0.39 17.5 17.5 0 0 0 17.09-13.83c6.81-31.76 9.4-148.75 9.4-167v-63.88A307 307 0 0 0 798 322.42zM365.68 272.82a273.38 273.38 0 0 1 231.18-53.68 17.5 17.5 0 1 0 7.68-34.14 307.93 307.93 0 0 0-367.72 231.18 17.5 17.5 0 1 0 34.11 7.82 273.89 273.89 0 0 1 94.75-151.18zM246.54 467.73a17.49 17.49 0 0 0-17.5 17.5v69c0 50.29-14.45 87.61-44.18 114.11a17.5 17.5 0 0 0 23.28 26.13c22.56-20.11 38.52-45.63 47.43-75.85 5.7-19.34 8.47-40.4 8.47-64.39v-69a17.5 17.5 0 0 0-17.5-17.5zM743.42 636.35v-0.17l-0.5-52.83a17.5 17.5 0 1 0-35 0.34l0.5 52.74c0 4.2 0 8.79 0.05 13.68 0.21 34.94 0.53 87.74-9.16 116.81a17.5 17.5 0 1 0 33.2 11.08c11.52-34.56 11.2-88.62 11-128.09-0.07-4.85-0.09-9.4-0.09-13.56z" fill="currentColor"></path><path d="M707.92 527.26a17.5 17.5 0 0 0 35 0v-45c0-114.17-92.89-207-207.06-207a207.35 207.35 0 0 0-58.49 8.38 17.5 17.5 0 0 0 9.87 33.58 172.24 172.24 0 0 1 48.62-7c94.87 0 172.06 77.18 172.06 172.05zM363.81 482.22A172.4 172.4 0 0 1 437 341.4a17.5 17.5 0 1 0-20.14-28.62 207.45 207.45 0 0 0-88 169.44v108.39a203 203 0 0 1-6.86 55.17 162.05 162.05 0 0 1-47.22 77.75 17.5 17.5 0 1 0 23.65 25.8c27.84-25.53 47.13-57.24 57.32-94.26a236.32 236.32 0 0 0 8.09-64.46zM440.83 566a17.5 17.5 0 0 0-17.5 17.47l-0.11 56.86c0 12.5-2.7 77.59-56 131.85a17.5 17.5 0 1 0 25 24.53 229.06 229.06 0 0 0 56.17-94.59c8.93-29.25 9.89-53 9.89-61.75l0.11-56.84A17.5 17.5 0 0 0 440.83 566z" fill="currentColor"></path><path d="M604.17 419.76a17.5 17.5 0 0 0-4.71-24.3 113 113 0 0 0-176.16 93.68v38.12a17.5 17.5 0 0 0 35 0v-38.12a78 78 0 0 1 121.57-64.68 17.49 17.49 0 0 0 24.3-4.7zM618.85 438.05a17.51 17.51 0 0 0-9.92 22.68 77.55 77.55 0 0 1 5.33 28.41v206.29c0 33.49-6.45 66.07-19.71 99.61a17.5 17.5 0 1 0 32.55 12.87c14.9-37.71 22.16-74.51 22.16-112.48V489.14a112.38 112.38 0 0 0-7.74-41.14 17.5 17.5 0 0 0-22.67-9.95z" fill="currentColor"></path><path d="M549.91 488a17.5 17.5 0 0 0-35 0v174.37c0 0.51 0 1 0.06 1.52 0.08 0.88 7 89.15-51.16 152.8a17.5 17.5 0 0 0 25.83 23.62c66-72.15 61-168 60.27-178.62z" fill="currentColor"></path></svg>`,
     dupSimSVG: `<svg style="width:18px;height:18px;margin-right:8px;flex-shrink:0;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M956.416 348.864a328.512 328.512 0 0 1-245.12 363.2 328.576 328.576 0 0 1-643.712-36.928 328.512 328.512 0 0 1 245.12-363.2 328.576 328.576 0 0 1 643.712 36.928zM534.336 639.808a263.04 263.04 0 0 0 121.92 16.96c1.28-12.736 1.664-25.728 1.024-38.848l-122.88 21.888z m-75.136-45.12l189.056-33.664a263.488 263.488 0 0 0-14.272-39.808l-211.072 35.648c10.88 13.824 23.04 26.432 36.288 37.76zM390.528 503.936l211.456-35.712a265.28 265.28 0 0 0-34.176-36.288l-192.256 30.336c3.84 14.464 8.96 28.416 14.976 41.6z m-23.808-98.56l126.08-19.84a263.04 263.04 0 0 0-125.056-18.304 263.68 263.68 0 0 0-1.024 38.144z m351.744 180.48c2.56 18.944 3.52 37.76 2.88 56.32a264.576 264.576 0 0 0-126.336-510.72A264.448 264.448 0 0 0 382.72 302.144a328.512 328.512 0 0 1 335.744 283.712zM305.536 438.144a330.624 330.624 0 0 1-2.88-56.32 264.576 264.576 0 0 0 126.336 510.72 264.448 264.448 0 0 0 212.288-170.688 328.512 328.512 0 0 1-335.744-283.712z" fill="currentColor" fill-opacity=".9"></path></svg>`,
     dupNameSVG: `<svg style="width:18px;height:18px;margin-right:8px;flex-shrink:0;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M478.144 947.328c-120.448 0-176.96 0.128-297.408-0.064-104.384-0.128-146.432-42.56-146.496-147.264 0-195.008-0.128-389.952 0-584.96 0.064-92.224 44.48-137.792 137.152-137.984 247.04-0.576 430.144-0.64 677.184 0.064 95.104 0.256 140.992 47.36 141.056 141.696 0.128 196.032 0.128 392 0 588.032-0.064 95.872-44.16 140.096-140.992 140.416-123.456 0.384-246.976 0.064-370.496 0.064z m375.296-51.52c62.016-0.128 84.224-22.72 84.288-85.248v-596.992c0-62.528-22.208-85.312-84.16-85.312-248.96-0.128-433.984-0.128-682.944 0-62.016 0.064-84.224 22.72-84.288 85.248v596.992c0 62.592 22.208 85.248 84.16 85.312 123.456 0.192 182.976 0.064 306.432 0.064 125.44 0 251.008 0.128 376.512-0.064z" fill="currentColor"></path><path d="M594.176 358.912c0.576-26.24-2.432-50.88 8.768-74.048 27.264-56.576 77.952-56.896 130.624-57.024 49.024-0.128 94.272 7.232 114.304 57.6 19.776 49.664 20.864 103.296-0.576 152.256-25.984 59.456-82.368 58.048-136.64 57.28-46.912-0.704-86.464-13.632-108.224-59.584-11.968-25.216-6.912-52.032-8.256-76.48z m51.84 1.024c-0.384 76.544 6.144 82.944 83.328 82.944 7.104 0 14.208 0.128 21.312-0.064 32.832-1.024 53.44-14.656 56.128-44.096 5.12-56.512 6.208-99.84-26.752-114.048a58.112 58.112 0 0 0-20.736-3.84 1113.856 1113.856 0 0 0-67.008 0c-29.184 1.152-44.16 16.32-46.144 45.632-0.768 11.136-0.128 22.336-0.128 33.472z m-319.232 416.768c-58.176 0-52.288 0.064-110.464-0.064-9.152 0-18.496 0.256-27.456-1.28-13.12-2.24-23.488-9.6-23.872-23.808-0.384-15.744 10.24-25.6 24.896-25.664 135.68-0.576 207.296-0.576 342.976 0 13.312 0.064 23.104 8.768 23.424 23.488 0.384 16.32-10.112 24.832-24.576 25.92-23.36 1.664-46.848 1.28-70.336 1.344-44.8 0.192-89.728 0.064-134.592 0.064z m-121.792-109.376c-19.2 0-40.256-1.216-39.552-26.496 0.576-22.976 21.376-24.512 38.976-24.576 125.248-0.32 186.56-0.32 311.808-0.128 18.88 0.064 39.872 1.728 39.232 27.328-0.64 24.064-20.928 23.808-38.656 23.808-63.168 0.128-126.272 0.064-189.44 0.064h-122.368z" fill="currentColor"></path></svg>`,
+    dupContainSVG: `<svg style="width:18px;height:18px;margin-right:8px;flex-shrink:0;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M784 64a144 144 0 0 1 144 144v96A144 144 0 0 1 784 448H320v200.32c0 44.16 35.84 80 80 80H448v-8.32A144 144 0 0 1 592 576h192a144 144 0 0 1 144 144v96A144 144 0 0 1 784 960h-192a144 144 0 0 1-143.744-135.68H400a176 176 0 0 1-176-176V447.104a144 144 0 0 1-128-143.104v-96A144 144 0 0 1 240 64h544z m0 608h-192a48 48 0 0 0-48 48v96a48 48 0 0 0 48 48h192a48 48 0 0 0 48-48v-96a48 48 0 0 0-48-48z m0-512h-544a48 48 0 0 0-48 48v96c0 26.496 21.504 48 48 48h544a48 48 0 0 0 48-48v-96a48 48 0 0 0-48-48z" fill="currentColor"></path></svg>`,
     crumbIcons: {
     right: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`,
     down: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`,
@@ -188,7 +192,7 @@ const CONF = {
         emptyTrash: `<svg width="16" height="24" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M870.45 231.23h-139.82l-0.01-111.86c0-30.89-25.04-55.93-55.93-55.93h-335.58c-30.89 0-55.93 25.04-55.93 55.93l0 111.86h-139.82c-15.44 0-27.96 12.52-27.96 27.96s12.52 27.96 27.96 27.96l27.96 0 0 559.3c0 61.78 50.08 111.86 111.86 111.86h447.44c61.78 0 111.86-50.08 111.86-111.86l0-559.3 27.96 0c15.44 0 27.96-12.52 27.96-27.96s-12.52-27.96-27.96-27.96zM339.12 119.37h335.58v111.86h-335.58V119.37zM786.56 846.46c0 30.89-25.04 55.93-55.93 55.93h-447.44c-30.89 0-55.93-25.04-55.93-55.93v-559.3h559.3v559.3z" /><path d="M620 440l-216 216m216 0l-216-216" stroke="currentColor" stroke-width="70" stroke-linecap="round"/></svg>`,
         restore: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>`,
         delForever: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>`,
-        newfolder: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><line x1="12" x2="12" y1="10" y2="16"/><line x1="9" x2="15" y1="13" y2="13"/></svg>`,
+        newfolder: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform: scale(1.2); transform-origin: center;"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><line x1="12" x2="12" y1="10" y2="16"/><line x1="9" x2="15" y1="13" y2="13"/></svg>`,
         del: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
         deselect: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="m9 9 6 6"/><path d="m15 9-6 6"/></svg>`,
         copy: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`,
@@ -196,14 +200,14 @@ const CONF = {
         paste: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>`,
         rename: `<svg width="16" height="16" viewBox="0 0 1024 1024" fill="currentColor" version="1.1"><path d="M56.925091 777.495273v189.579636h189.579636L805.655273 407.924364l-189.579637-189.579637L56.925091 777.495273zM952.32 261.306182a50.315636 50.315636 0 0 0 0-71.354182L834.048 71.68a50.315636 50.315636 0 0 0-71.400727 0L670.254545 164.165818 859.787636 353.745455l92.532364-92.439273v-0.093091z" fill="currentColor"></path></svg>`,
         bulkrename: `<svg width="16" height="16" viewBox="0 0 1024 1024" fill="currentColor" version="1.1" style="transform: scale(1.2);"><path d="M882.88 280.64l42.88-45.76a13.76 13.76 0 0 0 0-19.2L829.12 128a13.12 13.12 0 0 0-18.88 0L768 173.12zM739.84 202.56l-218.88 234.88a17.28 17.28 0 0 0-3.52 8.64L512 547.84a13.44 13.44 0 0 0 15.04 14.08l102.08-12.48a13.76 13.76 0 0 0 7.68-5.44l218.88-233.6z" fill="currentColor"></path><path d="M864 381.12a24 24 0 0 0-24 24v317.76H304.96V189.12h317.76a24 24 0 0 0 0-48H296.96A40 40 0 0 0 256 181.12v82.56H174.72a40 40 0 0 0-40 40v549.44a40 40 0 0 0 40 40h549.44a40 40 0 0 0 40-40v-75.84a20.8 20.8 0 0 0 0-6.4h83.84a40.32 40.32 0 0 0 40-40V405.12a24.32 24.32 0 0 0-24-24z m-147.84 396.16v67.84H182.72V311.68H256v419.2a40 40 0 0 0 40 40h421.44a20.8 20.8 0 0 0-1.28 6.4z" fill="currentColor" stroke="currentColor" stroke-width="35"></path></svg>`,
-        unzip: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v-4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4"/><path d="M15 4v16"/><path d="M15 8h7"/><path d="M15 12h7"/><path d="M15 16h7"/></svg>`,
+        unzip: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M1024 927.168V237.696c0-37.12-29.248-74.112-73.152-74.112H526.72L394.88 30.08H65.92C29.248 30.08 0 59.776 0 96.832v830.336c0 37.12 29.248 66.688 65.856 66.688h892.352c36.48 0 65.792-29.632 65.792-66.688zM943.552 245.12v667.2H80.448V111.68H358.4L497.344 245.12h146.304v96.384h95.104v96.384h-95.104v96.384h95.104v96.32h-95.104v185.344h190.208V534.272h-95.104V437.888h95.104V341.504h-95.104V245.12h204.8z" fill="currentColor"></path></svg>`,
         prune: `<svg width="16" height="16" viewBox="0 0 1064 1024" fill="currentColor" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M155.648 419.84H909.312l15.40096 369.90976a215.04 215.04 0 0 1-214.8352 224.01024H355.1232a215.04 215.04 0 0 1-214.8352-224.01024L155.648 419.84z m98.26304 102.4l-11.34592 271.81056A112.64 112.64 0 0 0 355.1232 911.36h354.7136a112.64 112.64 0 0 0 112.51712-117.30944l-11.30496-271.81056H253.91104z" /><path d="M358.4 184.32a174.08 174.08 0 0 1 348.16 0v30.72h133.12a174.08 174.08 0 0 1 174.08 174.08V450.56A71.68 71.68 0 0 1 942.08 522.24H122.88A71.68 71.68 0 0 1 51.2 450.56V389.12A174.08 174.08 0 0 1 225.28 215.04h133.12V184.32zM532.48 112.64a71.68 71.68 0 0 0-71.68 71.68v81.92c0 28.2624-22.9376 51.2-51.2 51.2H225.28A71.68 71.68 0 0 0 153.6 389.12v30.72h757.76V389.12a71.68 71.68 0 0 0-71.68-71.68H655.36c-28.2624 0-51.2-22.9376-51.2-51.2v-81.92A71.68 71.68 0 0 0 532.48 112.64zM442.90048 686.16192a51.2 51.2 0 0 1 48.5376 53.6576l-10.24 204.8a51.2 51.2 0 0 1-102.23616-5.07904l10.24-204.8a51.2 51.2 0 0 1 53.6576-48.57856z" /></svg>`,
-        scan: `<svg width="16" height="16" viewBox="0 0 1024 1024" fill="currentColor" version="1.1"><path d="M512 0C229.449143 0 0 229.449143 0 512s229.449143 512 512 512 512-229.449143 512-512-229.449143-512-512-512z m-18.285714 949.979429A438.564571 438.564571 0 0 1 74.020571 530.285714h146.285715a292.571429 292.571429 0 0 0 273.408 273.408v146.285715z m0-219.428572A220.745143 220.745143 0 0 1 293.449143 530.285714h148.187428c6.363429 25.6 26.477714 45.714286 52.077715 52.077715v148.187428z m0-288.914286c-25.6 6.363429-44.836571 26.477714-52.077715 52.077715H293.449143A220.745143 220.745143 0 0 1 493.714286 293.449143v148.187428z m0-221.330285A292.571429 292.571429 0 0 0 220.306286 493.714286h-146.285715A438.564571 438.564571 0 0 1 493.714286 74.020571v146.285715z m36.571428 73.142857c20.114286 1.901714 39.350857 6.436571 56.685715 12.873143 5.485714-25.6 20.114286-47.542857 40.228571-63.122286A313.929143 313.929143 0 0 0 530.285714 219.428571V73.142857A437.540571 437.540571 0 0 1 804.571429 184.685714l-52.077715 53.028572c10.020571 6.363429 20.041143 14.628571 27.428572 24.649143l51.2-51.2A437.028571 437.028571 0 0 1 950.857143 493.714286h-146.285714a289.060571 289.060571 0 0 0-22.893715-96.914286 108.470857 108.470857 0 0 1-63.049143 40.228571c6.436571 18.285714 10.971429 36.571429 12.8 56.685715H583.314286a72.557714 72.557714 0 0 0-11.849143-23.771429l53.906286-53.906286a142.628571 142.628571 0 0 1-24.722286-27.428571l-57.563429 57.563429c-4.534857-1.828571-8.192-3.657143-13.677714-4.534858V293.449143h0.877714z m0 289.865143a72.630857 72.630857 0 0 0 53.028572-53.028572h147.236571A220.745143 220.745143 0 0 1 530.285714 730.550857V583.314286z m0 366.665143v-146.285715a292.571429 292.571429 0 0 0 273.408-273.408h146.285715a437.906286 437.906286 0 0 1-419.693715 419.693715z m163.693715-546.816c-40.228571 0-73.142857-32.914286-73.142858-73.142858s32.914286-73.142857 73.142858-73.142857 73.142857 32.914286 73.142857 73.142857-32.914286 73.142857-73.142857 73.142858z"></path></svg>`,
         blacklist: `<svg width="16" height="16" viewBox="0 0 1024 1024" fill="currentColor" version="1.1"><path d="M134.8 86.7H261c25.1 0 46.6 17.9 51.2 42.6l20.9 111.9c11.7 62.6 66.4 108 130.1 108h385.6c29.9 0 54.2 24.3 54.2 54.3v45.8c0 22.2 18 40.3 40.3 40.3s40.3-18 40.3-40.3v-45.8c0-74.3-60.5-134.8-134.8-134.8H463.3c-24.9 0-46.3-17.8-50.9-42.3l-20.9-111.9C379.7 51.8 324.9 6.2 261 6.2H134.8C60.5 6.2 0 66.7 0 141v633.6C0 847 58.9 905.9 131.3 905.9h279.4c22.2 0 40.3-18 40.3-40.3 0-22.2-18-40.3-40.3-40.3H131.3c-28 0-50.7-22.8-50.7-50.7V141c-0.1-29.9 24.3-54.3 54.2-54.3z" p-id="32404"></path><path d="M554.2 140.4h338.3c22.2 0 40.3-18 40.3-40.3 0-22.2-18-40.3-40.3-40.3H554.2c-22.2 0-40.3 18-40.3 40.3 0.1 22.3 18.1 40.3 40.3 40.3zM792.7 555.1c-127.6 0-231.4 103.8-231.4 231.4 0 127.6 103.8 231.3 231.4 231.3 127.6 0 231.3-103.8 231.3-231.3 0-127.6-103.8-231.4-231.3-231.4z m0 64.4c34.4 0 66.4 10.5 93 28.4L654.1 879.4c-17.9-26.6-28.4-58.6-28.4-93 0-92 74.9-166.9 167-166.9z m0 333.9c-34.4 0-66.4-10.5-93-28.4l231.5-231.5c17.9 26.6 28.4 58.6 28.4 93 0 92-74.9 166.9-166.9 166.9z" p-id="32405"></path></svg>`,
         invert: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M910.69 235.796H788.834V112.482c0-61.833-50.136-112.01-112.01-112.01H113.232C51.318 0.473 1.18 50.61 1.18 112.483v563.673c0 61.873 50.137 112.05 112.05 112.05h121.895v123.273c0 61.873 50.137 112.05 112.05 112.05H910.69c61.913 0 112.09-50.137 112.09-112.05V347.845c0-61.873-50.177-112.05-112.09-112.05zM235.126 347.845V712.9h-91.412c-37.14 0-67.23-30.13-67.23-67.23V143.006c0-37.1 30.09-67.23 67.23-67.23H646.38c37.061 0 67.151 30.13 67.151 67.23v92.79H347.175c-61.912 0-112.049 50.176-112.049 112.049zM844.25 533.937L598.016 780.091c-4.923 4.923-11.146 7.365-17.605 8.192-11.618 6.499-26.466 5.238-36.352-4.687L413.735 653.273c-12.012-12.013-12.012-31.469 0-43.481l14.455-14.454c12.012-12.012 31.468-12.012 43.48 0l97.595 97.634 217.088-217.009c11.934-12.012 31.39-12.012 43.402 0l14.533 14.494c11.855 12.012 11.855 31.468-0.04 43.48z" fill="currentColor"></path></svg>`,
         folderFirst: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="17" height="17"><path d="M496.439 270.671l5.909 4.937 256 256c16.662 16.662 16.662 43.677 0 60.34-14.811 14.811-37.802 16.457-54.431 4.937l-5.909-4.937L514.981 408.929l0.041 494.182c0 23.564-19.103 42.667-42.667 42.667-21.422 0-39.157-15.787-42.204-36.362l-0.463-6.305-0.041-494.592-183.3 183.429c-14.811 14.811-37.802 16.457-54.431 4.937l-5.909-4.937c-14.811-14.811-16.457-37.802-4.937-54.431l4.937-5.909 256-256c14.812-14.811 37.803-16.457 54.432-4.937z m231.739-178.227c23.564 0 42.667 19.103 42.667 42.667 0 21.422-15.787 39.157-36.362 42.204l-6.305 0.463h-512c-23.564 0-42.667-19.103-42.667-42.667 0-21.422 15.787-39.157 36.362-42.204l6.305-0.463h512z" fill="currentColor" stroke="currentColor" stroke-width="35" stroke-linejoin="round"></path></svg>`,
         analyze: `<svg width="18" height="18" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M529.664 213.333333H896a42.666667 42.666667 0 0 1 42.666667 42.666667v597.333333a42.666667 42.666667 0 0 1-42.666667 42.666667H128a42.666667 42.666667 0 0 1-42.666667-42.666667V170.666667a42.666667 42.666667 0 0 1 42.666667-42.666667h316.330667zM170.666667 213.333333v597.333334h682.666666V298.666667h-358.997333l-85.333333-85.333334z m341.333333 170.666667v170.666667h170.666667a170.666667 170.666667 0 1 1-170.666667-170.666667z"></path></svg>`,
-        dup: `<svg width="16" height="16" viewBox="0 0 1024 1024" fill="currentColor" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M398.647652 513.558261c51.333565 0 89.84487 38.511304 94.118957 89.800348l4.274087 278.038261c0 51.333565-38.511304 94.118957-89.84487 94.118956l-277.993739 4.274087c-51.333565 0-94.118957-38.511304-94.118957-89.84487l-4.274087-277.993739c0-51.333565 38.511304-94.118957 89.84487-94.118956z m504.698435-8.548174c51.333565 0 94.118957 42.74087 94.118956 89.800348L1001.73913 872.848696c0 51.333565-38.511304 94.074435-89.800347 94.074434l-278.038261 4.274087c-51.333565 0-94.118957-38.466783-94.118957-89.800347l-4.274087-278.038261c0-51.289043 38.511304-94.074435 89.84487-94.074435zM398.647652 556.343652l-277.993739 4.274087c-25.689043 0-47.059478 21.370435-47.059478 47.059478l4.274087 277.99374c0 25.689043 21.370435 47.059478 47.059478 47.059478l277.993739-4.274087c25.689043 0 47.059478-21.370435 47.059478-47.059478l-4.274087-278.038261c0-25.644522-21.370435-47.014957-47.059478-47.014957zM903.346087 552.069565l-277.993739 4.274087c-25.689043 0-47.059478 21.370435-47.059478 47.014957l4.274087 278.038261c0 25.644522 21.370435 47.059478 47.059478 47.059478l277.993739-4.274087c25.689043 0 47.059478-21.370435 47.059478-47.059478l-4.274087-278.038261c0-25.644522-21.370435-47.014957-47.059478-47.014957zM390.099478 4.585739c51.333565 0 94.118957 38.466783 94.118957 89.800348l4.274087 278.038261c0 51.333565-38.511304 94.074435-89.84487 94.074435l-277.993739 4.274087c-51.333565 0-94.118957-38.466783-94.118956-89.800348L22.26087 102.934261C22.26087 51.645217 60.772174 8.904348 112.061217 8.904348zM899.072 0.311652c51.333565-4.274087 94.118957 38.466783 94.118957 89.800348l4.274086 278.038261c0 51.289043-38.511304 94.074435-89.844869 94.074435l-277.993739 4.274087c-51.333565 0-94.118957-38.466783-94.118957-89.800348l-4.274087-278.038261c0-51.333565 38.511304-94.074435 89.84487-94.074435zM390.099478 51.600696l-278.038261 4.318608c-21.370435 0-42.74087 21.370435-42.740869 47.014957v273.764174c0 25.644522 21.370435 47.059478 47.059478 47.059478l277.993739-4.318609c25.644522 0 47.059478-21.370435 47.059478-47.014956l-4.274086-273.764174c0-25.644522-21.370435-47.059478-47.059479-47.059478zM899.072 43.052522l-277.993739 4.274087c-25.689043 0-47.059478 21.370435-47.059478 47.059478l4.274087 278.038261c0 25.644522 21.370435 47.014957 47.059478 47.014956l277.993739-4.274087c25.689043 0 47.059478-21.370435 47.059478-47.014956l-4.274087-278.038261c0-25.644522-21.370435-47.059478-47.059478-47.059478z m-48.217043 93.050435l2.31513 188.148869-175.326609 2.137044-2.359652-188.14887 175.371131-2.137043z" /></svg>`,
+        scanDup: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" style="transform: scale(1.2); transform-origin: center;"><path d="M200.1408 123.3408A115.2 115.2 0 0 1 281.6 89.6h326.4a38.4 38.4 0 0 1 27.136 11.264l211.2 211.2c7.2192 7.168 11.264 16.9472 11.264 27.136V819.2a115.2 115.2 0 0 1-115.2 115.2H614.4a38.4 38.4 0 0 1 0-76.8h128a38.4 38.4 0 0 0 38.4-38.4V355.1232L592.0768 166.4H281.6a38.4 38.4 0 0 0-38.4 38.4v204.8a38.4 38.4 0 0 1-76.8 0V204.8c0-30.5664 12.1344-59.8528 33.7408-81.4592z" fill="currentColor"></path><path d="M588.8 89.6a38.4 38.4 0 0 1 38.4 38.4v192H819.2a38.4 38.4 0 0 1 0 76.8h-230.4a38.4 38.4 0 0 1-38.4-38.4V128a38.4 38.4 0 0 1 38.4-38.4zM201.0112 537.856a38.4 38.4 0 0 1-3.584 54.2208 166.4 166.4 0 0 0-56.5248 119.04 165.5296 165.5296 0 0 0 48.128 122.6752 167.2704 167.2704 0 0 0 122.88 49.3568 167.936 167.936 0 0 0 120.4224-55.04 38.4 38.4 0 0 1 56.9344 51.456 243.968 243.968 0 0 1-175.5136 80.384 244.7872 244.7872 0 0 1-179.2-72.0384 243.0464 243.0464 0 0 1-70.4-179.4048 242.432 242.432 0 0 1 82.6368-174.1824 38.4 38.4 0 0 1 54.2208 3.584z" fill="currentColor"></path><path d="M280.064 484.864A38.4 38.4 0 0 1 307.2 473.6 243.2 243.2 0 0 1 550.4 716.8a38.4 38.4 0 0 1-38.4 38.4H307.2a38.4 38.4 0 0 1-38.4-38.4v-204.8a38.4 38.4 0 0 1 11.264-27.136z m65.536 70.0416v123.4944h123.4944a166.4 166.4 0 0 0-123.4944-123.4944z" fill="currentColor"></path></svg>`,
+        export: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M392.843947 286.762667h508.16a122.538667 122.538667 0 0 0 0-244.096H392.843947a122.538667 122.538667 0 0 0 0 244.096z m0-151.04h508.16a29.098667 29.098667 0 0 1 0 57.984H392.843947a29.098667 29.098667 0 0 1 0-57.984z" fill="currentColor"></path><path d="M425.099947 576.384a112.384 112.384 0 0 0 103.253333 75.52h372.650667a122.538667 122.538667 0 0 0 0-244.138667h-372.650667a112.298667 112.298667 0 0 0-103.253333 75.562667H163.211947v-203.093333a121.088 121.088 0 0 0 77.909333-115.712 117.418667 117.418667 0 0 0-111.786667-122.026667h-17.408A117.418667 117.418667 0 0 0 0.09728 164.522667a121.130667 121.130667 0 0 0 77.909333 115.712v539.050666a117.418667 117.418667 0 0 0 111.658667 122.282667h235.306667a112.341333 112.341333 0 0 0 103.253333 75.52h372.650667a122.538667 122.538667 0 0 0 0-244.138667h-372.650667a112.256 112.256 0 0 0-103.253333 75.52H189.66528a27.904 27.904 0 0 1-26.581333-28.970666v-243.2z m103.253333-75.52h372.650667a29.098667 29.098667 0 0 1 0 57.941333h-372.650667a29.098667 29.098667 0 0 1 0-57.941333z m0 365.098667h372.650667a29.098667 29.098667 0 0 1 0 57.984h-372.650667a29.098667 29.098667 0 0 1 0-57.984zM111.926613 135.722667h17.408a29.098667 29.098667 0 0 1 0 57.984h-17.408a29.098667 29.098667 0 0 1 0-57.984z" fill="currentColor"></path></svg>`,
         stop: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></svg>`,
         ext: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform: scale(1.1);"><polygon points="6 3 20 12 6 21 6 3" fill="var(--pk-bg)" stroke="currentColor"></polygon></svg>`,
         download: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform: scale(1.1);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>`,
@@ -226,7 +230,10 @@ const CONF = {
         navUpload: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
         taskStart: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`,
         taskPause: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
-        cleanAll: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>`
+        cleanAll: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>`,
+        logout: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+        blMarker: `<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" style="width:100% !important; height:100% !important; display:block;"><path d="M512.3 64.2c-247.4 0-448 200.6-448 448s200.6 448 448 448 448-200.6 448-448-200.6-448-448-448z m0 61.4c95.6 0 183.2 34.9 250.8 92.6L218.2 763c-57.7-67.6-92.6-155.2-92.6-250.8 0-213.2 173.5-386.6 386.7-386.6z m0 773.3c-95.6 0-183.2-34.9-250.7-92.6l544.9-544.9c57.7 67.6 92.6 155.2 92.6 250.7-0.2 213.3-173.6 386.8-386.8 386.8z" fill="#d93025"/></svg>`,
+        vault: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M512 981.333c-211.2 0-384-172.8-384-384V563.2c0-89.6 72.533-164.267 164.267-164.267H755.2c78.933 0 142.933 64 142.933 142.934v55.466c-2.133 211.2-174.933 384-386.133 384z m-221.867-518.4c-55.466 0-100.266 44.8-100.266 100.267v34.133c0 177.067 142.933 320 320 320s320-142.933 320-320V544c0-44.8-36.267-78.933-78.934-78.933h-460.8z" fill="currentColor"></path><path d="M697.6 422.4c-17.067 0-32-14.933-32-32V260.267c0-85.334-68.267-153.6-153.6-153.6s-153.6 68.266-153.6 153.6V390.4c0 17.067-14.933 32-32 32s-32-14.933-32-32V260.267c0-119.467 98.133-217.6 217.6-217.6s217.6 98.133 217.6 217.6V390.4c0 17.067-14.933 32-32 32z" fill="currentColor"></path><path d="M512 759.467c-17.067 0-32-14.934-32-32V588.8c0-17.067 14.933-32 32-32s32 14.933 32 32v138.667c0 17.066-14.933 32-32 32z" fill="currentColor"></path></svg>`
     },
     typeIcons: {
         folder: `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="#E8A723"/><rect x="4.5" y="7" width="15" height="9" rx="1.5" fill="white" fill-opacity="0.95"/><path d="M2 11C2 9.895 2.895 9 4 9H20C21.105 9 22 9.895 22 11V18C22 19.105 21.105 20 20 20H4C2.895 20 2 19.105 2 18V11Z" fill="#FFC107"/></svg>`,
@@ -247,13 +254,14 @@ const CONF = {
 };
 ;// ./src/style.js
 const CSS = `
-    :root { --pk-bg: #ffffff; --pk-fg: #1a1a1a; --pk-bd: #e5e5e5; --pk-hl: #f0f0f0; --pk-sel-bg: #e6f3ff; --pk-sel-bd: #cce8ff; --pk-pri: #0067c0; --pk-btn-hov: #e0e0e0; --pk-gh: #f5f5f5; --pk-gh-fg: #333; --pk-sb-bg: transparent; --pk-sb-th: #ccc; --pk-sb-hov: #aaa; --pk-icon-c: #888; --pk-tip-bg: rgba(255, 255, 255, 0.95); --pk-tip-fg: #1a1a1a; --pk-tip-bd: rgba(0, 0, 0, 0.06); --pk-tip-sd: rgba(0, 0, 0, 0.12); --pk-toast-bg: rgba(255, 255, 255, 0.95); --pk-toast-fg: #1a1a1a; --pk-toast-bd: rgba(0, 0, 0, 0.08); --pk-match-bg: #fff2cc; --pk-match-fg: #d93025; }
+    :root { --pk-zoom: 1; --pk-bg: #ffffff; --pk-bg-rgb: 255, 255, 255; --pk-fg: #1a1a1a; --pk-bd: #e5e5e5; --pk-hl: #f0f0f0; --pk-sel-bg: #e6f3ff; --pk-sel-bd: #cce8ff; --pk-pri: #0067c0; --pk-btn-hov: #e0e0e0; --pk-gh: #f5f5f5; --pk-gh-fg: #333; --pk-sb-bg: transparent; --pk-sb-th: #ccc; --pk-sb-hov: #aaa; --pk-icon-c: #888; --pk-tip-bg: rgba(255, 255, 255, 0.95); --pk-tip-fg: #1a1a1a; --pk-tip-bd: rgba(0, 0, 0, 0.06); --pk-tip-sd: rgba(0, 0, 0, 0.12); --pk-toast-bg: rgba(255, 255, 255, 0.95); --pk-toast-fg: #1a1a1a; --pk-toast-bd: rgba(0, 0, 0, 0.08); --pk-match-bg: #fff2cc; --pk-match-fg: #d93025; --pk-v-line: #d1d1d1; }
     .pk-no-transition, .pk-no-transition * { transition: none !important; }
-    .pk-dark { --pk-bg: #202020; --pk-fg: #f5f5f5; --pk-bd: #333333; --pk-hl: #2d2d2d; --pk-sel-bg: #2b3a4a; --pk-sel-bd: #0067c0; --pk-pri: #4cc2ff; --pk-btn-hov: #3a3a3a; --pk-gh: #2a2a2a; --pk-gh-fg: #eee; --pk-sb-th: #555; --pk-sb-hov: #777; --pk-icon-c: #aaa; --pk-tip-bg: rgba(20, 20, 20, 0.95); --pk-tip-fg: #ffffff; --pk-tip-bd: rgba(255, 255, 255, 0.1); --pk-tip-sd: rgba(0, 0, 0, 0.4); --pk-toast-bg: rgba(45, 45, 45, 0.95); --pk-toast-fg: #ffffff; --pk-toast-bd: rgba(255, 255, 255, 0.15); }
+    .pk-dark { --pk-bg: #202020; --pk-bg-rgb: 32, 32, 32; --pk-fg: #f5f5f5; --pk-bd: #333333;
+    --pk-hl: #2d2d2d; --pk-sel-bg: #2b3a4a; --pk-sel-bd: #0067c0; --pk-pri: #4cc2ff; --pk-btn-hov: #3a3a3a; --pk-gh: #2a2a2a; --pk-gh-fg: #eee; --pk-sb-th: #555; --pk-sb-hov: #777; --pk-icon-c: #aaa; --pk-tip-bg: rgba(20, 20, 20, 0.95); --pk-tip-fg: #ffffff; --pk-tip-bd: rgba(255, 255, 255, 0.1); --pk-tip-sd: rgba(0, 0, 0, 0.4); --pk-toast-bg: rgba(45, 45, 45, 0.95); --pk-toast-fg: #ffffff; --pk-toast-bd: rgba(255, 255, 255, 0.15); --pk-v-line: rgba(255, 255, 255, 0.25); }
     .pk-dark .pk-loading-ov { background: rgba(0,0,0,0.8); }
-    .pk-ov { position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; font-family: inherit; outline: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none; }
+    .pk-ov { position: fixed; top: 0; left: 0; width: calc(100vw / var(--pk-zoom, 1)); height: calc(100vh / var(--pk-zoom, 1)); zoom: var(--pk-zoom, 1); transform-origin: top left; z-index: 10000; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; font-family: inherit; outline: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none; }
     .pk-ov input, .pk-ov textarea { -webkit-user-select: text !important; user-select: text !important; cursor: text; }
-    .pk-win { width: 90vw; max-width: 1600px; min-width: 720px; min-height: 340px; height: 80vh; background: var(--pk-bg); color: var(--pk-fg); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); display: flex; flex-direction: row; overflow: hidden; border: 1px solid var(--pk-bd); position: relative; }
+    .pk-win { width: 90%; max-width: calc(1600px / var(--pk-zoom, 1)); min-width: 720px; min-height: 340px; height: 80%; background: var(--pk-bg); color: var(--pk-fg); border-radius: 8px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); display: flex; flex-direction: row; overflow: hidden; border: 1px solid var(--pk-bd); position: relative; }
     .pk-sidebar { width: 68px; background: var(--pk-bg); border-right: 1px solid var(--pk-bd); display: flex; flex-direction: column; align-items: center; padding: 16px 0; flex-shrink: 0; z-index: 10; gap: 0; }
     .pk-nav-btn { width: 44px !important; height: 44px !important; border-radius: 10px; color: var(--pk-icon-c); padding: 0 !important; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-bottom: 0; transition: background-color 0.1s ease, color 0.1s ease; position: relative !important; }
     .pk-nav-btn:hover { background: var(--pk-hl); color: var(--pk-fg); }
@@ -287,8 +295,10 @@ const CSS = `
     .pk-btn.pri { color: var(--pk-pri); font-weight: 600; }
     .pk-btn svg { width: 18px; height: 18px; flex-shrink: 0; display: inline-block; vertical-align: -4px; }
     .pk-btn span { white-space: nowrap; pointer-events: none; }
-    @media (max-width: 1360px) { .pk-btn span { display: none !important; } .pk-btn { padding: 0 8px !important; } }
-    @media (max-width: 1400px) { #pk-btn-folder-first span, #pk-btn-invert span { display: none !important; } }
+    @media (max-width: 1550px) { .pk-maximized .pk-btn:not(#pk-btn-folder-first):not(#pk-btn-invert):not(#pk-filter-btn):not(#pk-btn-exit):not(#pk-scan-dup):not(#pk-analyze):not(#pk-export):not(#pk-ext):not(#pk-aria2):not(#pk-down) span { display: none !important; } .pk-maximized .pk-btn { padding: 0 8px !important; } }
+    @media (max-width: 1360px) { .pk-btn:not(#pk-btn-folder-first):not(#pk-btn-invert):not(#pk-filter-btn):not(#pk-btn-exit):not(#pk-scan-dup):not(#pk-analyze):not(#pk-export):not(#pk-ext):not(#pk-aria2):not(#pk-down):not(#btn_cfg_clean):not(#btn_cfg_export):not(#btn_cfg_import) span { display: none !important; } .pk-btn { padding: 0 8px !important; } }
+    @media (max-width: 1150px) { #pk-btn-folder-first span, #pk-btn-invert span, #pk-filter-btn span, #pk-btn-exit span, #pk-scan-dup span, #pk-analyze span, #pk-export span { display: none !important; } }
+    @media (max-width: 1000px) { #pk-ext span, #pk-aria2 span, #pk-down span { display: none !important; } }
     .pk-blacklist-area { display: flex; align-items: center; gap: 8px; margin-left: auto; max-width: 300px; min-width: 150px; flex-shrink: 1; }
     .pk-blacklist-area input { height: 32px; padding: 0 8px; border: 1px solid var(--pk-bd); border-radius: 4px; background: var(--pk-bg); color: var(--pk-fg); font-size: 13px; width: 100%; transition: border-color 0.2s; }
     .pk-blacklist-area input:focus { border-color: var(--pk-pri); outline: none; }
@@ -302,7 +312,7 @@ const CSS = `
     .pk-f-ext { cursor: pointer; color: var(--pk-fg); padding: 4px 8px; border-radius: 4px; transition: background 0.2s, color 0.2s; font-weight: 500; font-size: 13px; }
     .pk-f-ext:hover { background: var(--pk-hl); }
     .pk-f-ext.act { color: var(--pk-pri); font-weight: bold; }
-    .pk-fc-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 0; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; background: var(--pk-hl); color: var(--pk-fg); transition: all 0.2s; border: 1px solid transparent; }
+    .pk-fc-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; background: var(--pk-hl); color: var(--pk-fg); transition: all 0.2s; border: 1px solid transparent; white-space: nowrap; }
     .pk-fc-btn:hover { background: rgba(0, 103, 192, 0.05); color: var(--pk-pri); border-color: var(--pk-pri); }
     .pk-fc-btn.act { background: var(--pk-pri); color: #fff; border: none; font-weight: bold; }
     .pk-fc-btn.act:hover { background: var(--pk-pri); color: #fff; }
@@ -323,7 +333,7 @@ const CSS = `
     .pk-txt-long { display: inline; }
     #pk-search-path-con .pk-txt-short { font-weight: 500; color: var(--pk-fg); }
     #pk-dup-folder-sel { max-width: 300px !important; min-width: auto; height: 30px !important; transition: max-width 0.2s; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: left; padding-right: 20px; }
-    @media (max-width: 1540px) { .pk-txt-long { display: none !important; } .pk-txt-short { display: inline !important; } #pk-btn-exit span, #pk-dup span { display: none !important; } #pk-btn-exit, #pk-dup { padding: 0 8px !important; } #pk-dup-folder-sel { max-width: 100px !important; } }
+    @media (max-width: 1150px) { .pk-txt-long { display: none !important; } .pk-txt-short { display: inline !important; } #pk-btn-exit, #pk-scan-dup { padding: 0 8px !important; } #pk-dup-folder-sel { max-width: 100px !important; } }
     .pk-btn-toggle { border: 1px solid var(--pk-bd); background: var(--pk-bg); color: var(--pk-fg); height: 30px; border-radius: 4px; padding: 0 10px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; flex-shrink: 0; }
     .pk-btn-toggle:hover { background: var(--pk-btn-hov); border-color: var(--pk-pri); }
     .pk-btn-toggle span { font-weight: 700; color: var(--pk-pri); }
@@ -334,7 +344,7 @@ const CSS = `
     .pk-nav span.act { font-weight: 600; color: var(--pk-fg); cursor: default; }
     .pk-grid-hd, .pk-row { display: grid; column-gap: 10px; align-items: center; font-size: 14px; color: var(--pk-fg); box-sizing: border-box; width: 100%; }
     .pk-grid-hd > div, .pk-row > div { display: flex; align-items: center; justify-content: flex-start !important; overflow: hidden; white-space: nowrap; text-align: left; }
-    .pk-grid-hd > div:first-child, .pk-row > div:first-child { justify-content: center !important; }
+    .pk-grid-hd > div:first-child, .pk-row > div:first-child { justify-content: center !important; overflow: visible !important; }
     .pk-grid-hd { height: 36px; border-bottom: 1px solid var(--pk-bd); font-size: 13px; color: #666; user-select: none; padding: 0 22px 0 16px; }
     .pk-row { padding: 0 16px; }
     .pk-col { cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: flex-start; }
@@ -344,7 +354,7 @@ const CSS = `
     .pk-no-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; }
     .pk-vp::-webkit-scrollbar-track, .pk-modal::-webkit-scrollbar-track, .pk-prev-list::-webkit-scrollbar-track, .pk-scroll::-webkit-scrollbar-track, #pk-rn-vp::-webkit-scrollbar-track, .pk-bl-area::-webkit-scrollbar-track, textarea::-webkit-scrollbar-track, .pk-sub-pane::-webkit-scrollbar-track, #pk_sub_search_list::-webkit-scrollbar-track, .pk-p-pop::-webkit-scrollbar-track { background: var(--pk-sb-bg); }
     .pk-vp::-webkit-scrollbar-thumb, .pk-modal::-webkit-scrollbar-thumb, .pk-prev-list::-webkit-scrollbar-thumb, .pk-scroll::-webkit-scrollbar-thumb, #pk-rn-vp::-webkit-scrollbar-thumb, .pk-bl-area::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb, .pk-sub-pane::-webkit-scrollbar-thumb, #pk_sub_search_list::-webkit-scrollbar-thumb, .pk-p-pop::-webkit-scrollbar-thumb { background: var(--pk-sb-th); border-radius: 3px; }
-    .pk-vp::-webkit-scrollbar-thumb:hover, .pk-modal::-webkit-scrollbar-thumb:hover, .pk-prev-list::-webkit-scrollbar-thumb:hover, .pk-scroll::-webkit-scrollbar-thumb:hover { background: var(--pk-sb-hov); }
+    .pk-vp::-webkit-scrollbar-thumb:hover, .pk-modal::-webkit-scrollbar-thumb:hover, .pk-prev-list::-webkit-scrollbar-thumb:hover, .pk-scroll::-webkit-scrollbar-thumb:hover { background: var(--pk-sb-hov); } ::-webkit-scrollbar { cursor: default; }
     .pk-vp { flex: 1; overflow-y: auto; position: relative; background: var(--pk-bg); scrollbar-gutter: stable; }
     .pk-in { position: absolute; width: 100%; top: 0; }
     .pk-row { height: 40px; border: 1px solid transparent; cursor: default; padding: 0 16px; border-radius: 4px; }
@@ -362,10 +372,11 @@ const CSS = `
     .pk-group-hd { display: flex; background: var(--pk-gh); color: var(--pk-gh-fg); font-weight: bold; align-items: center; padding: 0 16px; border-top: 4px solid var(--pk-bg) !important; border-bottom: 4px solid var(--pk-bg) !important; background-clip: padding-box; height: 40px !important; box-sizing: border-box; margin-top: 0 !important; }
     .pk-group-hd .pk-tag { margin-left: auto; background: #666; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid #555; }
     .pk-group-hd .pk-cnt { margin-left: 10px; color: var(--pk-fg); font-size: 12px; opacity: 0.9; }
-    .pk-loading-ov { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.8); z-index: 999; display: none; flex-direction: column; align-items: center; justify-content: center; color: var(--pk-fg); gap: 20px; backdrop-filter: blur(2px); }
-    @media (prefers-color-scheme: dark) { .pk-loading-ov { background: rgba(0, 0, 0, 0.8); } }
-    .pk-spin-lg { width: 48px; height: 48px; border: 5px solid rgba(128, 128, 128, 0.2); border-top-color: var(--pk-pri); border-radius: 50%; animation: spin 1s linear infinite; }
-    .pk-loading-txt { font-size: 15px; font-weight: 600; text-align: center; white-space: pre-line; line-height: 1.5; }
+    .pk-loading-ov { position: absolute; inset: 0; background: rgba(var(--pk-bg-rgb), 0.75); z-index: 999; display: none; flex-direction: column; align-items: center; justify-content: center; color: var(--pk-fg); gap: 28px; backdrop-filter: blur(10px) saturate(180%); -webkit-backdrop-filter: blur(10px) saturate(180%); transition: all 0.3s ease; }
+    .pk-spin-lg { width: 56px; height: 56px; border: 4px solid rgba(136, 136, 136, 0.25); border-top-color: var(--pk-pri); border-radius: 50%; position: relative; animation: pk-ultra-spin 1s linear infinite; transform: translateZ(0); }
+    .pk-loading-txt { font-size: 15px; font-weight: 600; text-align: center; white-space: pre-line; line-height: 1.6; letter-spacing: 1px; }
+    @keyframes pk-ultra-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes pk-text-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.98); } }
     .pk-stop-btn { display: flex !important; align-items: center !important; justify-content: center !important; gap: 6px; padding: 8px 24px; background: #d93025; color: white; border: none; border-radius: 20px; font-size: 14px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(217, 48, 37, 0.3); transition: transform 0.1s; }
     .pk-stop-btn svg { display: block; }
     .pk-stop-btn:hover { background: #b02a20; transform: scale(1.05); }
@@ -379,8 +390,9 @@ const CSS = `
     .pk-ctx-item { padding: 8px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--pk-fg); }
     .pk-ctx-item:hover { background: var(--pk-hl); }
     .pk-ctx-sep { height: 1px; background: var(--pk-bd); margin: 4px 0; }
-    .pk-modal-ov { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 10001; display: flex; align-items: center; justify-content: center; }
-    .pk-modal { position: relative; background: var(--pk-bg); padding: 25px; border-radius: 12px; width: 500px; max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; border: 1px solid var(--pk-bd); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); }
+    .pk-modal-ov { position: fixed; top: 0; left: 0; width: calc(100vw / var(--pk-zoom, 1)); height: calc(100vh / var(--pk-zoom, 1)); zoom: var(--pk-zoom, 1); transform-origin: top left; background: rgba(0, 0, 0, 0.5); z-index: 10001; display: flex; align-items: center; justify-content: center; }
+    .pk-modal { position: relative; background: var(--pk-bg); padding: 25px; border-radius: 12px; width: 500px; max-height: 85vh; overflow: hidden !important; display: flex; flex-direction: column; gap: 15px; border: 1px solid var(--pk-bd); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); overscroll-behavior: none; }
+    .pk-modal-ov { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 10001; display: flex; align-items: center; justify-content: center; overscroll-behavior: none; overflow: hidden; }
     .pk-modal h3 { margin: 0 0 5px 0; font-size: 16px; border-bottom: 1px solid var(--pk-bd); padding-bottom: 10px; padding-right: 40px; color: var(--pk-fg); }
     .pk-modal-close { position: absolute; top: 15px; right: 15px; cursor: pointer; color: var(--pk-icon-c); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: background 0.1s, color: 0.1s; }
     .pk-modal-close:hover { background: var(--pk-hl); color: var(--pk-fg); }
@@ -398,7 +410,7 @@ const CSS = `
     .pk-sep-sm { width: 1px; height: 16px; background: var(--pk-bd); margin: 0 8px; flex-shrink: 0; }
     #pk-refresh, #pk-trash-refresh { width: auto !important; justify-content: center !important; flex-shrink: 0; }
     #pk-refresh svg, #pk-trash-refresh svg { width: 18px !important; height: 18px !important; transform: none !important; stroke-width: 2 !important; }
-    .pk-grid-hd input[type="checkbox"], .pk-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; margin: 0; vertical-align: middle; accent-color: var(--pk-pri); }
+    .pk-grid-hd input[type="checkbox"], .pk-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; margin: 0 auto !important; flex-shrink: 0; accent-color: var(--pk-pri); box-sizing: content-box; transform: translateZ(0); display: block; position: relative; }
     .pk-player-box { position: relative; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; user-select: none; overflow: hidden; }
     .pk-player-video { width: 100%; height: 100%; object-fit: contain; outline: none; transform: translateZ(0); backface-visibility: hidden; image-rendering: -webkit-optimize-contrast; -webkit-font-smoothing: antialiased; }
     .pk-player-top { position: absolute; top: 0; left: 0; right: 0; height: 64px; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100 !important; opacity: 1; transition: opacity 0.3s; pointer-events: auto; }
@@ -440,7 +452,8 @@ const CSS = `
     .pk-p-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; display: none; }
     .pk-player-box.buffering:not(.pk-is-seeking) .pk-p-loading { display: block; }
     .pk-player-box.pk-is-seeking .pk-p-loading { display: none !important; }
-    .pk-p-center-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) translateZ(0); width: 72px; height: 72px; background: rgba(0, 0, 0, 0.35); border-radius: 50%; display: none; align-items: center; justify-content: center; z-index: 10; pointer-events: none; border: 1px solid rgba(255, 255, 255, 0.25); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); backface-visibility: hidden; will-change: transform, opacity; }
+    .pk-p-center-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) translateZ(0); width: 72px; height: 72px; background: rgba(0, 0, 0, 0.35); border-radius: 50%; display: none; align-items: center; justify-content: center; z-index: 36; pointer-events: none; border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); backface-visibility: hidden; will-change: transform, opacity; }
     .pk-p-center-play svg { width: 36px; height: 36px; fill: #fff; margin-left: 4px; filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.3)); }
     .pk-player-box.paused.pk-v-started:not(.buffering):not(.pk-is-seeking) .pk-p-center-play { display: flex !important; animation: pkPlayPop 0.35s cubic-bezier(0.2, 0, 0.2, 1) forwards; }
     .pk-player-box.buffering .pk-p-center-play { display: none !important; opacity: 0 !important; }
@@ -460,8 +473,8 @@ const CSS = `
     .pk-p-plist-tab:hover, .pk-player-box.plist-active .pk-p-plist-tab, .pk-img-box.plist-active .pk-p-plist-tab { opacity: 1; }
     .pk-p-plist-tab::before { content: ''; position: absolute; inset: 0; z-index: -1; left: -50px; right: -50px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='20' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M0 20 C 25 20, 25 0, 40 0 H 60 C 75 0, 75 20, 100 20 Z' fill='rgba(20, 20, 20, 0.9)'/%3E%3Cpath d='M0 20 C 25 20, 25 0, 40 0 H 60 C 75 0, 75 20, 100 20' fill='none' stroke='rgba(255,255,255,0.1)' stroke-width='1' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); background-size: 100% 100%; background-repeat: no-repeat; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); transform: translateZ(0); backface-visibility: hidden; -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='20' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M0 20 C 25 20, 25 0, 40 0 H 60 C 75 0, 75 20, 100 20 Z' fill='black'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='20' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M0 20 C 25 20, 25 0, 40 0 H 60 C 75 0, 75 20, 100 20 Z' fill='black'/%3E%3C/svg%3E"); -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
     #pk_p_box:fullscreen, #pk_p_box:-webkit-full-screen, #pk_p_box:-moz-full-screen { width: 100vw !important; height: 100vh !important; top: 0 !important; left: 0 !important; transform: none !important; margin: 0 !important; border-radius: 0 !important; overflow: hidden !important; }
-    #pk_p_box:fullscreen #pk_video, #pk_p_box:-webkit-full-screen #pk_video, #pk_p_box:fullscreen #pk_p_poster, #pk_p_box:-webkit-full-screen #pk_p_poster { height: calc(100% - 0px) !important; bottom: auto !important; top: 0 !important; transform: translateZ(0); will-change: height; transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important; }
-    #pk_p_box:fullscreen.plist-active #pk_video, #pk_p_box:-webkit-full-screen.plist-active #pk_video, #pk_p_box:fullscreen.plist-active #pk_p_poster, #pk_p_box:-webkit-full-screen.plist-active #pk_p_poster { height: calc(100% - 84px) !important; }
+    #pk_p_box:fullscreen #pk_video, #pk_p_box:-webkit-full-screen #pk_video, #pk_p_box.full #pk_video, #pk_p_box:fullscreen #pk_p_poster, #pk_p_box:-webkit-full-screen #pk_p_poster, #pk_p_box.full #pk_p_poster { height: 100% !important; bottom: auto !important; top: 0 !important; transform: translateZ(0); }
+    #pk_p_box:fullscreen.plist-active #pk_video, #pk_p_box:-webkit-full-screen.plist-active #pk_video, #pk_p_box.full.plist-active #pk_video, #pk_p_box:fullscreen.plist-active #pk_p_poster, #pk_p_box:-webkit-full-screen.plist-active #pk_p_poster, #pk_p_box.full.plist-active #pk_p_poster { height: calc(100% - 84px) !important; }
     #pk_p_box:fullscreen.plist-active .pk-p-side-nav, #pk_p_box:fullscreen.plist-active .pk-p-center-play, #pk_p_box:fullscreen.plist-active .pk-p-seek-indicator, #pk_p_box:-webkit-full-screen.plist-active .pk-p-side-nav, #pk_p_box:-webkit-full-screen.plist-active .pk-p-center-play, #pk_p_box:-webkit-full-screen.plist-active .pk-p-seek-indicator { top: calc(50% - 42px) !important; }
     #pk_p_box:fullscreen #pk_p_plist, #pk_p_box:-webkit-full-screen #pk_p_plist { top: auto !important; bottom: 0 !important; transform: translateY(100%) translateZ(0); backface-visibility: hidden; perspective: 1000px; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     #pk_p_box:fullscreen .pk-p-plist-tab, #pk_p_box:-webkit-full-screen .pk-p-plist-tab { bottom: auto !important; top: 0 !important; transform: translateY(-100%) translateZ(0) !important; margin-top: 1px !important; margin-bottom: 0 !important; backface-visibility: hidden; z-index: 100 !important; }
@@ -484,15 +497,15 @@ const CSS = `
     .pk-p-plist-nav.L { left: 0; }
     .pk-p-plist-nav.R { right: 0; }
     .pk-p-plist-nav svg { width: 28px; height: 28px; stroke-width: 3; }
-    .pk-p-plist-tip { position: fixed; background: rgba(0, 0, 0, 0.9); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 12px; pointer-events: none; z-index: 2147483647; max-width: 300px; line-height: 1.4; display: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .pk-p-plist-tip { position: fixed; background: rgba(0, 0, 0, 0.9); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 12px; pointer-events: none; z-index: 2147483647; max-width: 340px; line-height: 1.4; display: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .pk-p-resume-btn { color: #4aa1ff; cursor: pointer; font-weight: bold; text-decoration: none; }
     .pk-p-resume-btn:hover { text-decoration: underline; }
     .pk-p-resume-close { cursor: pointer; color: #888; margin-left: 4px; display: flex; align-items: center; }
     @keyframes pkFadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .pk-img-ov { position: fixed; inset: 0; z-index: 2147483640; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; outline: none; user-select: none; }
-    .pk-img-box { position: absolute !important; top: 10vh; left: 50%; transform: translateX(-50%); background: #000; border-radius: 8px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); overflow: visible !important; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 90vw; max-width: 1600px; min-width: 480px; height: 80vh; transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1), height 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.2s, top 0.2s, left 0.2s, transform 0.2s; z-index: 10; box-sizing: border-box; border: none; }
-    .pk-img-box.plist-active { height: calc(80vh - 84px); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-    .pk-img-box.full { width: 100vw; max-width: none; height: 100vh; border-radius: 0; top: 0 !important; left: 0 !important; transform: none !important; }
+    .pk-img-ov { position: fixed; top: 0; left: 0; width: calc(100vw / var(--pk-zoom, 1)); height: calc(100vh / var(--pk-zoom, 1)); zoom: var(--pk-zoom, 1); transform-origin: top left; z-index: 2147483640; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; outline: none; user-select: none; }
+    .pk-img-box { position: absolute !important; top: 10%; left: 50%; transform: translateX(-50%); background: #000; border-radius: 8px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); overflow: visible !important; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 90%; max-width: calc(1600px / var(--pk-zoom, 1)); min-width: 480px; height: 80%; transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1), height 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.2s, top 0.2s, left 0.2s, transform 0.2s; z-index: 10; box-sizing: border-box; border: none; }
+    .pk-img-box.plist-active { height: calc(80% - 84px); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+    .pk-img-box.full { width: 100%; max-width: none; height: 100%; border-radius: 0; top: 0 !important; left: 0 !important; transform: none !important; }
     .pk-img-box.full.plist-active { height: calc(100vh - 84px); }
     .pk-img-obj { flex: 1; width: 100%; height: 100%; min-height: 0; object-fit: contain; cursor: grab; transition: transform 0.1s linear; transform-origin: center center; }
     #pk_img_plist { position: absolute; top: 100%; left: 0; right: 0; z-index: 25; height: 84px; display: flex; flex-direction: column; pointer-events: none; }
@@ -518,7 +531,7 @@ const CSS = `
     .pk-img-btn svg { width: 20px; height: 20px; }
     .pk-tag-default { margin-top: -1px; margin-left: 10px; flex-shrink: 0; min-width: 32px; box-sizing: border-box; font-size: 10px; height: 18px; padding: 1px 6px 0 6px !important; border-radius: 20px; font-weight: normal; white-space: nowrap; cursor: default; display: inline-flex; align-items: center; justify-content: center; user-select: none; background-color: transparent; color: #999; border: 1px solid #ccc; }
     .pk-ov.pk-dark .pk-tag-default { background-color: transparent; color: #888; border-color: #555; text-shadow: none; }
-    #pk-scan, #pk-dup, #pk-btn-exit { align-items: center !important; margin: 0 !important; flex-shrink: 0 !important; }
+    #pk-scan-dup, #pk-btn-exit { align-items: center !important; margin: 0 !important; flex-shrink: 0 !important; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .pk-status-dot::after { content: ''; position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: #1a5eff; border-radius: 50%; border: 2px solid var(--pk-bg); box-shadow: 0 0 5px rgba(26, 94, 255, 0.5); animation: pk-pulse 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; z-index: 11; pointer-events: none; }
     @keyframes pk-pulse { 0% { transform: scale(0.9); opacity: 0.6; box-shadow: 0 0 0 0 rgba(26, 94, 255, 0.7); } 50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 0 4px rgba(26, 94, 255, 0); } 100% { transform: scale(0.9); opacity: 0.6; box-shadow: 0 0 0 0 rgba(26, 94, 255, 0); } }
@@ -538,9 +551,9 @@ const CSS = `
     .pk-is-vol-active .pk-p-center-play, .pk-is-vol-active .pk-p-loading { display: none !important; opacity: 0 !important; }
     .pk-input-err-msg { color: #ff4d4f; font-size: 12px; margin-top: 8px; min-height: 18px; visibility: hidden; transition: opacity 0.2s; }
     .pk-ana-select { position: relative; width: 85px; flex-shrink: 0; }
-    #an_val::-webkit-outer-spin-button, #an_val::-webkit-inner-spin-button, #sh_mod_cnt_val::-webkit-outer-spin-button, #sh_mod_cnt_val::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    #an_val, #sh_mod_cnt_val { -moz-appearance: textfield; }
-    #an_val { padding-right:32px !important; }
+    #an_val_min::-webkit-outer-spin-button, #an_val_min::-webkit-inner-spin-button, #an_val_max::-webkit-outer-spin-button, #an_val_max::-webkit-inner-spin-button, #sc_val_min::-webkit-outer-spin-button, #sc_val_min::-webkit-inner-spin-button, #sc_val_max::-webkit-outer-spin-button, #sc_val_max::-webkit-inner-spin-button, #sh_mod_cnt_val::-webkit-outer-spin-button, #sh_mod_cnt_val::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    #an_val_min, #an_val_max, #sc_val_min, #sc_val_max, #sh_mod_cnt_val { -moz-appearance: textfield; }
+    #an_val_min, #an_val_max { padding-right:32px !important; }
     .pk-num-ctrl { position: absolute; right: 8px; top: 4px; bottom: 4px; display: flex; flex-direction: column; width: 24px; gap: 1px; z-index: 5; }
     .pk-num-btn { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--pk-icon-c); border-radius: 3px; transition: all 0.1s; }
     .pk-num-btn:hover { background: var(--pk-hl); color: var(--pk-pri); }
@@ -559,10 +572,10 @@ const CSS = `
     .pk-crumb-sep svg { width: 14px; height: 14px; stroke-width: 3.5; transition: transform 0.2s ease; }
     .pk-crumb-pop { position: fixed; background: var(--pk-bg); border: 1px solid var(--pk-bd); border-radius: 8px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); z-index: 2147483647 !important; min-width: 180px; max-width: 320px; max-height: 50vh; overflow-y: auto; padding: 6px 0; opacity: 0; pointer-events: none; transition: opacity 0.1s ease; border-top: 1px solid rgba(255, 255, 255, 0.05); }
     .pk-crumb-pop.pk-show { opacity: 1; pointer-events: auto; }
-    .pk-crumb-item { padding: 8px 12px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--pk-fg); }
+    .pk-crumb-item { padding: 8px 12px; font-size: 13px; line-height: 1.5; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--pk-fg); }
     .pk-crumb-item:hover { background: var(--pk-hl); }
     .pk-crumb-item svg { flex-shrink: 0; }
-    .pk-crumb-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .pk-crumb-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; padding-bottom: 2px; margin-bottom: -2px; }
     @keyframes pkFadeInOnly { from { opacity: 0; } to { opacity: 1; } }
     .pk-share-modal { width: 540px !important; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; padding: 0 !important; overflow: visible !important; }
     .pk-s-sec { display: flex; flex-direction: column; gap: 12px; padding: 0 28px; box-sizing: border-box; }
@@ -621,14 +634,15 @@ const CSS = `
     .pk-select-item { padding: 10px 12px; border-radius: 5px; cursor: pointer; color: var(--pk-fg); font-size: 14px; transition: background 0.1s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .pk-select-item:hover { background: var(--pk-hl); color: var(--pk-pri); }
     .pk-select-item.act { background: rgba(0, 103, 192, 0.1); color: var(--pk-pri); font-weight: 700; }
-    .pk-select-label { position: absolute; top: 0; transform: translateY(-50%); left: 10px; background: var(--pk-bg); padding: 0 5px; font-size: 11px; color: var(--pk-pri); font-weight: bold; pointer-events: none; z-index: 10; line-height: 1; }
-    .pk-maximized { position: fixed !important; width: 100vw !important; height: 100vh !important; max-width: none !important; top: 0 !important; left: 0 !important; border-radius: 0 !important; border: none !important; z-index: 2147483647 !important; }
-    .pk-maximized .pk-sidebar { width: 160px !important; align-items: flex-start !important; padding: 20px 10px !important; }
+    .pk-select-label { position: absolute; top: 0; transform: translate3d(0, -50%, 0); -webkit-transform: translate3d(0, -50%, 0); backface-visibility: hidden; -webkit-backface-visibility: hidden; will-change: transform; left: 10px; background: var(--pk-bg); padding: 0 5px; font-size: 11px; color: var(--pk-pri); font-weight: bold; pointer-events: none; z-index: 10; line-height: 1; pointer-events: none; }
+    .pk-field input, .pk-field select, .pk-share-modal input, .pk-ov input { transform: translateZ(0); will-change: transform; }
+    .pk-maximized { position: fixed !important; width: 100% !important; height: 100% !important; max-width: none !important; top: 0 !important; left: 0 !important; border-radius: 0 !important; border: none !important; z-index: 2147483647 !important; }
+    .pk-maximized .pk-sidebar { width: 190px !important; align-items: flex-start !important; padding: 20px 10px !important; }
     .pk-maximized .pk-nav-btn { width: 100% !important; justify-content: flex-start !important; padding: 0 15px !important; gap: 10px; height: 54px !important; border-radius: 8px !important; }
     .pk-nav-btn span { display: none; font-size: 14px; font-weight: 600; white-space: nowrap; }
     .pk-maximized .pk-nav-btn span { display: inline-block; }
     .pk-maximized #pk-quota-panel { align-items: flex-start !important; padding: 0 10px !important; margin-bottom: 6px !important; opacity: 0.9 !important; gap: 4px !important; transition: none !important; }
-    .pk-cloud-area { width: 100%; height: 180px; background: #f1f3f5; border: none; border-radius: 8px; padding: 15px; font-size: 14px; line-height: 1.6; color: #1a1a1a; resize: none; outline: none; font-family: inherit; }
+    .pk-cloud-area { width: 100%; height: 180px; background: #f1f3f5; border: none; border-radius: 8px; padding: 15px; font-size: 14px; line-height: 1.6; color: #1a1a1a; resize: none; outline: none; font-family: inherit; cursor: auto; }
     .pk-dark .pk-cloud-area { background: #2d2d2d !important; color: #f5f5f5 !important; caret-color: #fff !important; }
     .pk-dark .pk-cloud-area::placeholder { color: #666 !important; }
     .pk-cloud-area::placeholder { color: #adb5bd; }
@@ -659,8 +673,8 @@ const CSS = `
     .pk-maximized .pk-share-icon-wrap { width: 50px !important; height: 50px !important; margin-right: 20px !important; background: transparent !important; overflow: visible !important; }
     .pk-maximized .pk-row:has(.pk-max-thumb) .pk-name-txt { padding-left: 0 !important; }
     .pk-maximized .pk-nav-btn svg { width: 28px !important; height: 28px !important; }
-    body:not(.pk-body-max):has(.pk-modal-ov, .pk-img-ov, #pk-player-ov) #pk-launch { filter: grayscale(1) brightness(0.6) !important; opacity: 0.5 !important; pointer-events: none !important; cursor: not-allowed !important; transition: filter 0.3s, opacity 0.3s; }
-    body.pk-body-max #pk-launch { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important; }
+    body:not(.pk-body-max):has(.pk-modal-ov) #pk-launch { filter: grayscale(1) brightness(0.6) !important; opacity: 0.5 !important; pointer-events: none !important; cursor: not-allowed !important; transition: filter 0.3s, opacity 0.3s; }
+    body:has(.pk-ov:not([style*="display: none"])), body:has(.pk-img-ov), body:has(#pk-player-ov) { #pk-launch { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; } }
     .pk-maximized .pk-search input { height: 40px !important; font-size: 15px !important; padding: 0 70px 0 15px !important; }
     .pk-maximized #pk-search-btn { width: 18px !important; height: 18px !important; right: 14px !important; }
     .pk-maximized .pk-search-clear { width: 24px !important; height: 24px !important; right: 40px !important; }
@@ -681,7 +695,13 @@ const CSS = `
     .pk-maximized .pk-ft { height: 50px !important; font-size: 15px !important; padding: 0 20px !important; }
     .pk-maximized .pk-stat { font-size: 15px !important; }
     .pk-maximized .pk-ft .pk-btn { height: 36px !important; font-size: 15px !important; }
+    .pk-maximized #pk-filter-cat-label { height: 40px !important; font-size: 15px !important; padding: 0 16px !important; }
+    .pk-maximized #pk-filter-exts-wrap { height: 40px !important; }
+    .pk-maximized .pk-f-ext { font-size: 15px !important; padding: 6px 12px !important; }
+    .pk-maximized #pk-filter-exit-btn { height: 40px !important; font-size: 15px !important; padding: 0 20px !important; }
     .pk-maximized .pk-bl-area { font-size: 15px !important; line-height: 1.6 !important; }
+    .pk-maximized #pk-crumb span { font-size: 16px !important; display: inline-flex !important; align-items: center !important; height: 32px !important; padding: 0 8px !important; border-radius: 4px !important; margin: auto 2px !important; } .pk-maximized #pk-crumb div span { font-size: 18px !important; } .pk-maximized #pk-crumb div span[style*="font-size:11px"], .pk-maximized #pk-crumb div span[style*="font-size: 11px"] { font-size: 14px !important; margin-left: 12px !important; } .pk-maximized #pk-crumb svg { width: 18px !important; height: 18px !important; vertical-align: middle !important; margin-top: -1px !important; }
+    .pk-maximized .pk-crumb-sep { width: 26px !important; height: 26px !important; margin: auto 4px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; } .pk-maximized .pk-crumb-sep svg { width: 20px !important; height: 20px !important; }
     .pk-custom-select { position: relative; width: 100%; }
     .pk-select-trigger { display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 15px; border: 2px solid var(--pk-bd); border-radius: 8px; background: var(--pk-bg); color: var(--pk-fg); font-size: 14px; font-weight: 600; cursor: pointer; box-sizing: border-box; transition: all 0.2s; }
     .pk-select-trigger:hover { border-color: var(--pk-pri); }
@@ -690,13 +710,26 @@ const CSS = `
     .pk-dropdown-menu { position: absolute; top: 100%; right: 0; background: var(--pk-bg); border: 1px solid var(--pk-bd); border-radius: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); display: none; z-index: 10010; min-width: 140px; padding: 4px 0; margin-top: 6px; flex-direction: column; overflow: hidden; }
     .pk-dropdown-item { padding: 10px 16px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--pk-fg); font-size: 13px; transition: background 0.1s; white-space: nowrap; }
     .pk-dropdown-item:hover { background: var(--pk-hl); color: var(--pk-pri); }
+    .pk-pop-max { width: 170px !important; min-width: 170px !important; padding: 6px 0 !important; border-radius: 10px !important; box-shadow: 0 8px 30px rgba(0,0,0,0.3) !important; }
+    .pk-pop-max .pk-dropdown-item { padding: 12px 15px !important; font-size: 15px !important; gap: 10px !important; font-weight: 600 !important; }
+    .pk-pop-max .pk-dropdown-item svg { width: 22px !important; height: 22px !important; }
     .pk-btn-arrow { margin-left: 2px; opacity: 0.6; transition: transform 0.2s; }
+    .pk-aria-status-box { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: bold; margin-top: 6px; transform: translateZ(0); -webkit-transform: translateZ(0); backface-visibility: hidden; will-change: transform; cursor: default; }
+    .pk-aria-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; transform: translateZ(0); }
+    .pk-aria-dot.ok { background: #52c41a; box-shadow: 0 0 8px rgba(82, 196, 26, 0.5); }
+    .pk-aria-dot.err { background: #ff4d4f; }
+    .pk-aria-dot.wait { background: var(--pk-pri); animation: pk-pulse 1.5s infinite; }
     .pk-dropdown-wrap.active .pk-btn-arrow { transform: rotate(180deg); }
     .pk-select-menu { position: absolute; top: 100%; left: 0; right: 0; background: var(--pk-bg); border: 1px solid var(--pk-bd); border-radius: 8px; margin-top: 6px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); z-index: 10010; display: none; overflow: hidden; max-height: 240px; }
     .pk-share-icon-wrap { position: relative; width: 30px; height: 30px; margin-right: 12px; flex-shrink: 0; }
     .pk-share-icon-wrap > svg, .pk-share-icon-wrap > img { width: 100%; height: 100%; display: block; flex-shrink: 0; }
     .pk-share-lock { position: absolute; bottom: -3px; right: -6px; width: 17px; height: 17px; background: transparent; display: flex; align-items: center; justify-content: center; z-index: 10; filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.5)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)); border: none; box-shadow: none; pointer-events: none; }
     .pk-ov.pk-dark .pk-share-lock { filter: drop-shadow(0 0 2px rgba(0, 0, 0, 1)) drop-shadow(0 2px 5px rgba(0, 0, 0, 1)); }
+    .pk-bl-marker { position: absolute !important; bottom: 0px !important; left: 4px !important; width: 10px !important; height: 10px !important; display: flex !important; align-items: center; justify-content: center; z-index: 99 !important; pointer-events: none; filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 2px rgba(255,255,255,0.5)); }
+    .pk-maximized .pk-bl-marker { width: 18px !important; height: 18px !important; bottom: -1px !important; left: 9px !important; }
+    .pk-min-icon, .pk-max-icon-box { position: relative !important; overflow: visible !important; display: inline-flex !important; }
+    .pk-active-border { border-color: var(--pk-pri) !important; } #pk_dl_group { transform: translateZ(0); backface-visibility: hidden; will-change: border-color; } #pk_dl_group:hover { border-color: var(--pk-pri) !important; } #pk_dl_group.pk-typing-active:hover { border-color: var(--pk-bd) !important; }
+    .pk-row > div.pk-name, .pk-min-icon, .pk-max-icon-box, .pk-min-media-box { overflow: visible !important; }
     .pk-maximized .pk-row .pk-name>img[style*="width:24px"] { width: 48px !important; height: 48px !important; margin-right: 20px !important; margin-left: -4px !important; }
     .pk-maximized .pk-row .pk-name>div[style*="width:24px"] { width: 48px !important; height: 48px !important; margin-right: 20px !important; margin-left: -4px !important; }
     .pk-maximized .pk-row .pk-name>div[style*="width:24px"] svg { width: 36px !important; height: 36px !important; }
@@ -711,6 +744,13 @@ const CSS = `
     .pk-drag-path { font-size: 14px; color: #888; display: flex; align-items: center; gap: 6px; }
     .pk-help-scroll { max-height: 380px; overflow-y: auto; overscroll-behavior: contain; }
     .pk-body-max .pk-help-scroll { max-height: 75vh; }
+    body.pk-hide-all-ui #pk-launch, body.pk-hide-all-ui .pk-ov, body.pk-hide-all-ui .pk-modal-ov, body.pk-hide-all-ui .pk-img-ov, body.pk-hide-all-ui #pk-player-ov, body.pk-hide-all-ui .pk-cal-pop, body.pk-hide-all-ui .pk-crumb-pop, body.pk-hide-all-ui .pk-hist-pop, body.pk-hide-all-ui .pk-tooltip, body.pk-hide-all-ui .pk-msg-toast, body.pk-hide-all-ui .pk-float-bar-item, body.pk-hide-all-ui .pk-selection-box, body.pk-hide-all-ui .pk-drag-ghost { display: none !important; opacity: 0 !important; pointer-events: none !important; }
+    .pk-ana-select-btn { border: 1px solid var(--pk-bd); background: var(--pk-bg); color: var(--pk-fg); height: 32px; border-radius: 6px; padding: 0 10px; font-size: 13px; cursor: pointer; display: none; align-items: center; gap: 6px; transition: all 0.2s; white-space: nowrap; margin-right: 8px; }
+    .pk-ana-select-btn:hover { border-color: var(--pk-pri); color: var(--pk-pri); background: rgba(var(--pk-bg-rgb), 0.05); }
+    .pk-ana-pop { position: absolute; background: var(--pk-bg); border: 1px solid var(--pk-bd); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 1000; display: none; flex-direction: column; padding: 8px; width: 340px; gap: 4px; pointer-events: auto; }
+    .pk-ana-pop-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .pk-ana-opt { padding: 8px 4px; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--pk-fg); transition: background 0.1s; text-align: center; border: 1px solid transparent; background: var(--pk-hl); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pk-ana-opt:hover { background: var(--pk-sel-bg); color: var(--pk-pri); border-color: var(--pk-sel-bd); }
 `;
 
 ;// ./src/utils.js
@@ -730,7 +770,7 @@ const fmtDur = s => {
     const mmss = String(m).padStart(2, '0') + ':' + String(sc).padStart(2, '0');
     return h > 0 ? String(h).padStart(2, '0') + ':' + mmss : mmss;
 };
-function gmGet(key, def) { if (typeof GM_getValue !== 'undefined') return GM_getValue(key, def); return def; }
+function gmGet(key, def) { if (typeof GM_getValue !== 'undefined') { let v = GM_getValue(key, def); return (v === null) ? def : v; } return def; }
 function gmSet(key, val) { if (typeof GM_setValue !== 'undefined') GM_setValue(key, val); }
 
 const calcSha1 = async (file) => {
@@ -757,10 +797,11 @@ const calcSha1 = async (file) => {
     function getLang(){const u=gmGet('pk_lang','');if(u)return u;const n=navigator.language.toLowerCase();return (n==='zh'||n.startsWith('zh-cn')||n.startsWith('zh-sg'))?'zh':(n.startsWith('zh-tw')||n.startsWith('zh-hk')||n.startsWith('zh-mo'))?'tc':n.startsWith('ko')?'ko':n.startsWith('ja')?'ja':'en';}
 const T = {
     zh: {
-        /* --- 通用与基础UI (General & UI Basics) --- */
+        /* --- 通用与基础UI --- */
         title: "PikPak 增强大师",
         str_original: "原画",
         str_original_fast: "原画 (高速)",
+        str_folders: "文件夹",
         str_files: "文件",
         unit_folders: "个文件夹",
         unit_days: "天",
@@ -799,10 +840,11 @@ const T = {
         cat_document: "文档",
         cat_software: "软件",
         cat_archive: "压缩包",
+        cat_torrent: "BT种子",
         cat_other: "其他",
         btn_exit_filter: "退出筛选",
 
-        /* --- 属性面板 (Properties) --- */
+        /* --- 属性面板 --- */
         ctx_property: "属性",
         title_property: "文件属性",
         lbl_prop_name: "文件名称",
@@ -820,7 +862,7 @@ const T = {
         fmt_prop_count: "包含 {f} 个文件，{d} 个文件夹",
         str_prop_offline: "离线任务",
 
-        /* --- 导航、视图模式与右键菜单 (Navigation & Context Menu) --- */
+        /* --- 导航、视图模式与右键菜单 --- */
         btn_nav_home: "主页",
         btn_nav_share: "我的分享",
         btn_nav_offline: "离线下载",
@@ -832,9 +874,10 @@ const T = {
         title_offline: "我的离线",
         trash_title: "回收站",
         trash_notice: "回收站的文件最多保存15天",
+        history_notice: "仅记录在脚本环境内产生的播放进度",
         ctx_open: "打开",
-        ctx_add_bl: "添加到黑名单",
-        ctx_remove_bl: "从黑名单移除",
+        ctx_add_bl: "添加到资源管理器",
+        ctx_remove_bl: "从资源管理器移除",
         ctx_rename: "重命名",
         ctx_copy: "复制",
         ctx_copy_name: "复制文件名",
@@ -847,7 +890,7 @@ const T = {
         ctx_locate: "在文件夹中查看",
         ctx_share: "分享",
 
-        /* --- 通用文件操作按钮 (General Operations) --- */
+        /* --- 通用文件操作按钮 --- */
         btn_down: "下载",
         tip_down: "下载 [Alt] + [D]",
         btn_aria2: "发送 Aria2",
@@ -881,6 +924,7 @@ const T = {
         tip_theme: "切换主题 [Alt] + [T]",
         tip_rotate: "旋转 [R]",
         tip_mirror: "镜像翻转 [H]",
+        tip_flip_v: "垂直翻转 [V]",
         tip_maximize: "最大化 [M]",
         tip_minimize: "最小化 [M]",
         tip_full_screen: "全屏 [Enter]",
@@ -892,11 +936,13 @@ const T = {
         btn_stop: "停止",
         tip_stop: "立即停止当前操作",
         btn_settings: "设置",
-        tip_settings: "系统设置 [Alt] + [S]",
+        btn_logout: "退出 PikPak",
+        msg_logout_confirm: "确定要退出登录吗？",
+        tip_settings: "设置和更多 [Alt] + [S]",
         lbl_upload_to: "上传文件至: ",
         msg_move_done: "移动完成。",
 
-        /* --- 离线、上传与云下载 (Offline, Upload & Cloud Download) --- */
+        /* --- 离线、上传与云下载 --- */
         btn_upload: "本地上传",
         btn_up_file: "上传文件",
         btn_up_folder: "上传文件夹",
@@ -928,6 +974,7 @@ const T = {
         lbl_save_to: "文件将被保存至：",
         lbl_default_folder: "默认文件夹",
         btn_via_torrent: "通过 Torrent 创建",
+        tip_cloud_save_path: "常规云下载文件会保存在 My Pack 目录，来自其他 App 的云下载文件会保存至 My [XYZ] 目录，[XYZ] 为 App 名称。",
         title_save_method: "保存方式",
         msg_save_snapshot_desc: "此链接只能被存储为网页快照。",
         tip_snapshot_details: "PikPak 不能从此链接中直接采集媒体文件，您可以保存网页快照。PikPak 将尽可能保存完整的网页内容到快照文件中。",
@@ -936,7 +983,7 @@ const T = {
         btn_modify: "修改",
         str_snap_link_count_suffix: " 等 {n} 个链接",
 
-        /* --- 分享管理 (Share Management) --- */
+        /* --- 分享管理 --- */
         btn_cancel_share: "取消分享",
         share_copy_suffix: "复制这段内容后打开 PikPak-App，畅享极速秒播",
         share_copy_pwd: "密码",
@@ -991,12 +1038,17 @@ const T = {
         cal_week_days:["日", "一", "二", "三", "四", "五", "六"],
         cal_months:["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
 
-        /* --- 结构扁平化、查重与空间分析 (Flatten, Dup & Analyze) --- */
-        btn_scan: "文件扁平化",
-        tip_scan: "获取子文件夹中的所有文件以供后续查重",
-        btn_dup: "查找重复",
-        tip_dup: "查重文件",
-        modal_dup_title: "查重选项",
+        /* --- 文件分析与文件夹分析 --- */
+        title_file_analysis: "文件分析",
+        btn_scan: "文件透视",
+        lbl_scan_selected: "对选中的 {n} 个项目执行文件透视",
+        lbl_keyword_filter: "排除关键词",
+        ph_keyword_filter: "排除包含的关键词，多个用逗号分隔",
+        lbl_scan_current: "对当前路径下所有项目执行文件透视",
+        tip_dup: "文件查重",
+        lbl_dup_selected: "对选中的 {n} 个项目执行文件查重",
+        lbl_dup_current: "对当前路径下所有项目执行文件查重",
+        tip_scan_dup: "筛选或查重文件",
         lbl_dup_tool: "选择删除对象:",
         lbl_dup_reset: "↺ 复原 (取消置顶 & 清空选择)",
         lbl_dup_select_folder: "📂 按文件夹选择",
@@ -1008,52 +1060,61 @@ const T = {
         btn_start_scan: "开始扫描",
         tag_hash: "精准匹配",
         tag_hash_short: "精准",
-        tag_name: "名称匹配",
+        tag_name: "名称相似",
         tag_name_short: "名称",
-        tag_sim: "相似匹配",
-        tag_sim_short: "相似",
-        label_dup_video: "视频文件 (精准匹配 + 相似匹配 + 名称匹配)",
-        label_dup_image: "图片文件 (仅精准匹配)",
-        label_dup_other: "其他文件 (仅精准匹配)",
-        btn_toggle_size: "文件大小",
-        tip_toggle_size: "根据文件大小自动选择重复文件。",
-        btn_toggle_date: "上传日期",
-        tip_toggle_date: "根据上传日期自动选择重复文件。",
-        cond_small: "选择最大",
-        cond_large: "选择最小",
-        cond_small_short: "最小",
-        cond_large_short: "最大",
-        cond_old: "选择最新",
-        cond_new: "选择最旧",
-        cond_old_short: "最旧",
-        cond_new_short: "最新",
-        btn_analyze: "空间分析",
-        tip_analyze: "筛选当前目录下的大文件夹",
+        tag_sim: "时长相似",
+        tag_sim_short: "时长",
+        label_dup_video: "视频文件 (精准匹配 + 时长相似 + 名称相似)",
+        label_dup_image: "图片文件 (精准匹配 + 名称相似)",
+        label_dup_other: "其他文件 (精准匹配 + 名称相似)",
+        btn_analyze: "文件夹分析",
+        tip_analyze: "筛选或查重文件夹",
+        btn_export: "导出目录",
+        tip_export: "生成并下载当前路径的文件树列表",
+        title_export_format: "导出目录样式",
+        lbl_export_current: "对当前路径下所有项目执行目录导出",
+        opt_tree_view: "目录树",
+        opt_list_view: "目录列表",
+        msg_exporting: "正在生成目录树...",
         str_analyze_results: "匹配结果",
-        lbl_analyze_title: "空间分析",
-        lbl_analyze_desc: "查找当前路径下所有大于指定大小的文件夹：",
         lbl_size_threshold: "检测阈值",
-        title_analyze_result: "空间分析结果",
+        title_analyze_result: "文件夹分析结果",
+        opt_ana_large: "文件夹透视",
+        lbl_analyze_selected: "对选中的 {n} 个项目执行文件夹透视",
+        lbl_analyze_current: "对当前路径下所有项目执行文件夹透视",
+        opt_ana_sim: "文件夹查重",
+        lbl_ana_sim_selected: "对选中的 {n} 个项目执行文件夹查重",
+        lbl_ana_sim_current: "对当前路径下所有项目执行文件夹查重",
+        title_algo_help: "查重算法说明",
+        algo_help_content: "名称匹配：查找名称和体积相近的文件夹群组。\n相似度匹配：查找内部文件高度重合的文件夹群组。\n包含率匹配：查找小文件夹的内容被大文件夹完全覆盖的子集冗余。\n\n精度：相似度匹配 > 包含率匹配 > 名称匹配\n范围：包含率匹配 > 相似度匹配",
+        lbl_threshold: "阈值",
+        lbl_sim_score: "相似度",
+        lbl_containment: "包含率",
+        lbl_name_match: "名称匹配",
+        lbl_sim_match: "相似度匹配",
+        lbl_contain_match: "包含率匹配",
+        lbl_ana_min: "下限",
+        lbl_ana_max: "上限",
 
-        /* --- 重命名、清理与黑名单 (Rename, Prune & Blacklist) --- */
+        /* --- 重命名、清理与资源管理器 --- */
         btn_prune: "清理空文件夹",
         tip_prune: "清理空文件夹 [Ctrl] + [Delete]",
         btn_rename: "重命名",
         tip_rename: "重命名 [F2]",
         btn_bulkrename: "批量重命名",
         tip_bulkrename: "批量重命名 [F2]",
-        title_blacklist: "文件黑名单管理",
+        title_blacklist: "资源管理器",
         btn_blacklist_run: "立即运行清理",
         btn_clear_list: "清空列表",
         tip_bl_desc: "下列项目在【删除】时会跳过，仅通过【立即运行清理】查找删除",
-        tip_blacklist_input: "文件黑名单管理 [Alt] +[Delete]",
-        label_bl_folder: "文件夹黑名单 (精准查找)",
-        label_bl_file: "文件黑名单 (精准查找)",
+        tip_blacklist_input: "资源管理器 [Alt] +[Delete]",
+        label_bl_folder: "文件夹名单 (精准查找)",
+        label_bl_file: "文件名单 (精准查找)",
         lbl_type_folder: "文件夹",
         lbl_type_file: "文件",
-        ph_bl_folder: "请通过“粘贴”或文件右键菜单“添加到黑名单”导入。",
-        ph_bl_file: "请通过“粘贴”或文件右键菜单“添加到黑名单”导入。",
-        modal_bl_preview: "黑名单检索结果",
+        ph_bl_folder: "请通过“粘贴”或文件右键菜单“添加到资源管理器”导入。",
+        ph_bl_file: "请通过“粘贴”或文件右键菜单“添加到资源管理器”导入。",
+        modal_bl_preview: "检索结果",
         btn_bl_delete: "删除选中项",
         modal_rename_title: "重命名",
         modal_rename_multi_title: "批量重命名",
@@ -1087,7 +1148,7 @@ const T = {
         label_replace_find: "查找内容",
         label_replace_to: "替换为",
 
-        /* --- 解压相关 (Archive & Unzip) --- */
+        /* --- 解压相关 --- */
         btn_unzip: "批量解压",
         tip_unzip: "批量解压 [Alt] + [U]",
         btn_unzip_all: "全部解压",
@@ -1095,7 +1156,7 @@ const T = {
         title_input_pwd: "需要解压密码",
         lbl_pwd_prompt: "请输入密码：",
 
-        /* --- 媒体播放器与以图搜图 (Media Player & Image Search) --- */
+        /* --- 媒体播放器与以图搜图 --- */
         btn_ext: "外部播放",
         tip_ext: "使用PotPlayer播放或获取播放链接 [Alt] +[E]",
         btn_img_search: "以图搜图 [F]",
@@ -1143,6 +1204,7 @@ const T = {
         export_link_title: "导出视频串流链接",
         btn_start_play: "开始播放",
         btn_copy_link: "复制链接",
+        tip_copy_link: "复制链接 [Alt] + [C]",
         opt_player_other: "其他 (导出链接)",
         lbl_player: "播放器",
         btn_mark: "标记",
@@ -1155,7 +1217,15 @@ const T = {
         type_app: "应用程序",
         type_suffix: "文件",
 
-        /* --- 选择器、设置与搜索 (Pickers, Settings & Search) --- */
+        /* --- 设置与搜索 --- */
+        label_turbo_mode: "极速模式",
+        desc_turbo_mode: "自动开启并屏蔽网页原生同步 (推荐)",
+        lbl_aria2_status: "连接状态",
+        ph_aria2_secret: "密钥 (选填)",
+        str_connected: "连接成功",
+        str_conn_fail: "连接失败",
+        str_connecting: "正在测试...",
+        tip_mixed_content: "常用端口参考：\n• 6800 (Aria2 标准版)\n• 16800 (Motrix 默认)\n• 6881 (其他集成版)",
         picker_title: "选择文件夹",
         picker_all: "全部文件",
         picker_new: "新建文件夹",
@@ -1185,22 +1255,51 @@ const T = {
         opt_engine_saucenao: "SauceNAO (Pixiv/插画)",
         opt_engine_tracemoe: "trace.moe (动漫截图)",
         label_dup_strictness: "相似匹配阈值",
-        opt_strict: "时长±1s, 大小±5%",
-        opt_loose: "时长±2s, 大小±10%",
+        opt_strict: "严格",
+        opt_loose: "宽松",
         label_comic_mode: "媒体模式",
         desc_comic_mode: "纯图片或纯视频文件夹默认 A-Z 排序",
         label_aria2_url: "Aria2 地址",
-        label_aria2_token: "Token",
+        label_aria2_token: "Aria2 密钥",
         label_privacy_mode: "隐私模式",
         label_blur_cover: "模糊封面图",
+        label_dl_filter_ext: "下载后缀过滤 (例: .txt, .jpg)",
+        label_dl_filter_name: "下载名称过滤 (关键词或全名)",
+        lbl_dl_filter: "文件夹下载过滤",
+        desc_dl_filter: "文件夹下载/推送时自动排除匹配的文件",
+        lbl_config_manage: "配置管理",
+        btn_export_data: "导出备份",
+        btn_import_data: "导入备份",
+        btn_clean_data: "清除本地数据",
+        title_clean_data: "选择清理项目",
+        msg_clean_confirm: "确定要彻底删除选中的本地数据吗？此操作无法撤销。",
+        msg_clean_success: "本地数据已清理，页面即将刷新...",
+        opt_cfg_index: "全盘索引 (已同步的目录结构/文件快照)",
+        opt_cfg_pref: "偏好设置 (UI 外观/操作习惯/排序偏好)",
+        opt_cfg_rules: "管理规则 (资源管理器/分享次数限制/搜索记录/下载规则)",
+        opt_cfg_vault: "密码金库 (解压密码记忆)",
+        opt_cfg_history: "视频缓存 (视频播放进度/视频时长缓存)",
+        opt_cfg_cache: "运行缓存 (文件夹修改时间/最后浏览位置/指纹)",
+        msg_import_confirm: "导入配置将覆盖当前所有设置，是否继续？",
+        msg_import_success: "配置导入成功，页面即将刷新...",
+        err_invalid_config: "无效的配置文件：未检测到指纹标识或格式错误",
+        err_json_format: "文件解析失败：JSON 语法错误或文件已损坏",
         lbl_storage: "存储空间",
         lbl_browse_exp: "浏览体验",
-        lbl_skip_bl_on_del: "删除时跳过黑名单文件",
+        lbl_skip_bl_on_del: "删除时跳过管理器中记录资源",
+        lbl_pwd_manage: "解压密码管理",
+        title_pwd_vault: "密码金库",
+        lbl_pwd_try_count: "单个压缩包密码匹配上限",
+        tip_pwd_manual: "每行记录一个密码，回车换行",
         str_root_dir_cn: "根目录",
+        btn_ana_select: "一键勾选",
+        opt_keep_new: "保留最新的", opt_keep_old: "保留最旧的",
+        opt_keep_large: "保留最大的", opt_keep_small: "保留最小的",
+        opt_keep_short: "保留名称最短的", opt_keep_long: "保留名称最长的",
 
-        /* --- 状态、进度与加载短语 (Status, Progress & Loading) --- */
+        /* --- 状态、进度与加载短语 --- */
         loading: "加载中...",
-        loading_detail: "正在获取文件列表...",
+        loading_detail: "正在全速索引目录结构...",
         loading_fetch: "获取中... ({n})",
         loading_dup: "分析重复项... ({p}%)",
         str_loading_placeholder: "加载中...",
@@ -1223,8 +1322,8 @@ const T = {
         str_deleting: "删除中...",
         str_saving: "保存中...",
         str_saving_dots: "保存中...",
-        str_checking_bl: "检查黑名单中...",
-        str_processing: "处理中...",
+        str_checking_bl: "匹配名单记录中...",
+        str_processing: "系统正在全速处理中...",
         str_cleanup_done: "清理完成。",
         str_waiting_preload: "等待预加载...",
         str_copying: "复制到剪贴板...",
@@ -1247,7 +1346,6 @@ const T = {
         str_upload_2: "节点1超时，切换节点 2...",
         str_upload_3: "节点2超时，尝试最后节点...",
         str_upload_fail_copy: "上传失败，准备写入剪贴板...",
-        btn_scanning: "扫描中...",
         msg_transcoding: "云端转码中...",
         msg_transcoding_wait: "服务器正在处理此视频，请稍候",
         str_preparing: "准备解压...",
@@ -1274,7 +1372,7 @@ const T = {
         lbl_done_check: "✔ 完成",
         msg_limit_updated: "提取次数已更新",
 
-        /* --- 提示、确认与交互消息 (Messages, Alerts, Dialogs) --- */
+        /* --- 提示、确认与交互消息 --- */
         title_alert: "提示",
         title_confirm: "确认",
         title_prompt: "输入",
@@ -1288,9 +1386,8 @@ const T = {
         msg_down_success: "已成功调用浏览器下载 {n} 个文件。",
         msg_batch_txt: "已生成下载列表 (.txt)。",
         msg_clear_history_done: "已从历史记录中移除",
-        msg_unzip_confirm_batch: "已检测到 {n} 个压缩包，是否开始批量解压到对应目录？",
         msg_skip_unzipped: "已跳过 {n} 个已解压的项目。",
-        msg_auto_cancel_done: "后台巡检：已自动取消 {n} 个达到次数限制的分享。",
+        msg_unzip_skip_del_confirm: "检测到 {n} 个已解压的压缩包，是否将其移入回收站？",
         msg_cancel_share_confirm: "确定要取消选中的 {n} 个分享吗？\n链接将立即失效。",
         msg_pwd_updating: "正在更新密码...",
         msg_pwd_updated: "密码已更新",
@@ -1306,7 +1403,6 @@ const T = {
         msg_clear_sel_confirm: "已选中 {n} 个重复文件，确认要取消当前的勾选吗？",
         str_bl_stat: "匹配: {n} 项 | 已选中: {m} 项",
         str_hits: "命中",
-        msg_exit_confirm: "确定要关闭文件管理器吗？",
         msg_settings_saved: "设置已保存。页面将刷新。",
         msg_name_exists: "名称已存在: {n}",
         str_name_conflict: "(可能重名)",
@@ -1321,7 +1417,6 @@ const T = {
         msg_del_select: "请先点击选中要删除的行！",
         msg_del_items_done: "已删除 {n} 个项目。",
         msg_copy_success: "复制成功",
-        copy_failed: "复制失败，请保持网页在前台，重新点击此处触发",
         str_redirecting: "正在跳转 Google Lens...",
         msg_manual_paste: "图床上传超时。已复制截图，请在新窗口按 {cmd}",
         msg_starring: "正在添加星标...",
@@ -1341,7 +1436,6 @@ const T = {
         msg_sub_drop_load: "已通过拖拽加载字幕：{n}",
         msg_resume_hint: "已为您从 {t} 继续播放，点击这里 ",
         msg_unzip_confirm_n: "确定要在当前目录解压这 {n} 个文件吗？",
-        log_upgrade_cache: "♻️ 检测到旧版缓存，正在升级数据结构以同步星标状态...",
         msg_task_paused: "已暂停",
         msg_task_added: "已添加 {n} 个上传任务",
         msg_task_fast_success: "秒传成功",
@@ -1353,6 +1447,9 @@ const T = {
         msg_skip_conflict: "{n} 个子路径忙碌",
         msg_skip_invalid: "已自动跳过无效项: ",
         msg_creating_cloud_task: "正在创建云下载任务...",
+        str_parsing_torrent: "正在解析种子文件...",
+        err_torrent_no_info: "解析失败：未发现有效信息",
+        err_file_read: "文件读取失败",
         msg_cloud_task_finish: "创建完成：{s} 成功，{f} 失败",
         msg_cloud_task_success: "🎉 已成功创建 {n} 个任务",
         msg_prepare_restore: "准备还原...",
@@ -1363,17 +1460,16 @@ const T = {
         msg_retry_submitted: "已重试提交 {n} 个任务",
         msg_jav_fetching_net: "正在联网获取 MissAV 数据...",
         msg_op_blocked_moving: "⚠️ 操作拦截\n\n后台正在执行文件搬运，请等待当前任务完成后再操作。",
-        msg_op_blocked_analyzing: "⚠️ 操作拦截\n\n后台正在执行文件搬运。为确保空间统计数据准确，请等待当前任务完成后再操作。",
-        msg_analyze_only_normal_dir: "请在普通目录下使用。",
-        msg_analyze_no_large_folders: "没有发现大于 {s} 的文件夹。",
+        msg_op_blocked_analyzing: "⚠️ 操作拦截\n\n后台正在执行文件搬运。为确保文件夹分析数据准确，请等待当前任务完成后再操作。",
+        msg_op_blocked_exporting: "⚠️ 操作拦截\n\n后台正在执行文件搬运。为确保导出目录文本准确，请等待当前任务完成后再操作。",
+        msg_analyze_only_normal_dir: "请选择文件夹。",
+        msg_analyze_no_large_folders: "没有发现符合阈值范围的文件夹 ({s})",
         msg_analyze_summary_fmt: "共发现 <b>{n}</b> 个大于 {s}GB 的文件夹 (已按大小降序排列)",
-        msg_rn_blocked_moving: "⚠️ 操作拦截\n\n后台正在执行文件搬运，为确保空间统计数据准确，请等待当前任务完成后再操作。",
         msg_prune_blocked_moving: "⚠️ 操作拦截\n\n后台正在执行文件搬运，暂时无法执行清理。",
-        msg_batch_download_blocked: "⚠️ 操作拦截\n\n后台正在执行文件搬运。为保证下载列表完整性，请等待当前任务完成后再操作。",
         msg_global_index_blocked_moving: "⚠️ 操作拦截\n\n后台正在执行文件搬运。全盘索引需要稳定的目录结构，请等待当前任务完成后再开启全盘搜索。",
         msg_resource_locked_download: "⚠️ 操作拦截\n\n选中项包含正在移动的文件或文件夹。请等待搬运完成后再发起下载。",
         msg_resource_locked_aria2: "⚠️ 操作拦截\n\n选中项包含正在移动的文件或文件夹。请等待搬运完成后再推送至 Aria2。",
-        msg_flatten_blocked_moving: "⚠️ 操作拦截\n\n后台正在执行文件搬运。此时执行扁平化会导致文件列表缺失或重复，请稍后再试。",
+        msg_flatten_blocked_moving: "⚠️ 操作拦截\n\n后台正在执行文件搬运。此时执行文件分析会导致文件列表缺失或重复，请稍后再试。",
         err_task_conflict: "⚠️ 操作拦截\n\n后台正在执行文件搬运。全局清理需要稳定的目录结构，请等待搬运完成后再执行。",
         title_del_task_confirm_fmt: "确认删除 {n} 条传输任务?",
         lbl_del_cloud_files_too: "同时删除云盘内的文件",
@@ -1383,14 +1479,11 @@ const T = {
         msg_task_clear_success_fmt: "已清空 {n} 个上传任务",
         msg_unzip_virtual_view_warn: "您正在虚拟视图中操作。解压后的文件将存放在<b>各压缩包所在的原始文件夹</b>中，而<b>不会</b>直接出现在当前列表中。<br><br>是否继续？",
         msg_smart_matching_file: "智能匹配密码中... ({n})",
-        msg_unzip_batch_submitted: "✅ 已提交 {n} 个解压任务",
+        msg_unzip_batch_submitted: "✅ 已完成 {n} 个解压任务",
         msg_unzip_batch_skipped: " ({n} 个跳过)",
         msg_unzip_check_source: "。请前往源目录查看结果。",
         tip_jump_to_folder: "跳转到此文件夹",
         msg_task_deleted: "任务已删除",
-        msg_flatten_warn: "结构扁平化将搜索当前路径下所有文件。\n是否继续？",
-        msg_flatten_selected: "对选中的 {n} 个项目执行结构扁平化。\n\n仅递归扫描选中的文件夹。\n是否继续？",
-        msg_flatten_done: " 选中项扁平化完成。\n共发现 {n} 个文件。",
         msg_scan_done: "扫描完成！\n共发现 {n} 个文件，遍历了 {f} 个文件夹。",
         msg_scan_fail: "\n\n❌ 有 {n} 个失败。",
         msg_scan_fix: "\n\n✅ 自动修复了 {n} 次网络错误。",
@@ -1409,26 +1502,25 @@ const T = {
         msg_dup_warn: "是否开始搜索重复文件？",
         msg_dup_result: "发现 {n} 组重复项。",
         msg_dup_none: "未发现重复文件。",
-        msg_bl_add_done: "已将 {n} 个项目添加到黑名单。",
-        msg_bl_remove_done: "已从黑名单移除 {n} 个项目。",
         msg_bl_stop: "操作已停止。",
-        msg_bl_empty: "黑名单列表为空，无法运行。",
-        msg_bl_clear_confirm: "确定要清空所有黑名单条目吗？此操作不可恢复。",
-        msg_blacklist_run_none: "网盘中未发现符合黑名单条件的项目。",
-        msg_blacklist_run_confirm: "在网盘中发现了 {n} 个黑名单项目。\n\n是否立即移入回收站？",
-        msg_bl_run_limit: "⚠️ 模式限制\n\n黑名单清理涉及物理文件递归操作。目前处于非标准目录，无法准确定位物理扫描范围。\n\n请返回主页常规文件夹后再执行清理。",
-        msg_del_protected: "已保护 {n} 个黑名单文件不被删除。",
+        msg_bl_add_done: "已将 {n} 个项目添加到记录。",
+        msg_bl_remove_done: "已从记录中移除 {n} 个项目。",
+        msg_bl_empty: "名单列表为空，无法运行。",
+        msg_bl_clear_confirm: "确定要清空所有记录条目吗？此操作不可恢复。",
+        msg_blacklist_run_none: "网盘中未发现符合名单条件的项目。",
+        msg_blacklist_run_confirm: "在网盘中发现了 {n} 个已记录项目。\n\n是否立即移入回收站？",
+        msg_bl_run_limit: "⚠️ 模式限制\n\n清理操作涉及物理文件递归操作。目前处于非标准目录，无法准确定位物理扫描范围。\n\n请返回主页常规文件夹后再执行清理。",
+        msg_del_protected: "已保护 {n} 个已记录文件不被删除。",
         msg_del_none: "没有可删除的文件。",
         msg_bl_scanning: "全盘搜索中... \n已扫描目录: {d} | 命中: {f}",
         rn_tip_wait: "请设置规则",
+        rn_tip_jav: "点击上方按钮开始智能匹配",
         rn_tip_none: "没有匹配的项目或名称",
         rn_stat: "匹配: {n} 项 | 有效变更: {m} 项",
         rn_warn_confirm: "确定要重命名 {n} 个文件吗？",
         msg_bulkrename_done: "已重命名 {n} 个项目。",
         msg_rn_all_skipped: "❌ 所有项目均因重名被跳过，未执行任何操作。",
-        msg_rn_part_skipped: "\n⚠️ (另有 {n} 个文件因重名将被跳过)",
-        msg_rn_fail_count: "\n({n} 个失败)",
-        msg_rn_success_skip: "\n⚠️ 已跳过 {n} 个重名文件",
+        msg_rn_fail_count: "跳过已重名 {n} 个项目",
         msg_prune_confirm: "是否开始搜索当前列表中的空文件夹？",
         msg_prune_none: "未发现空文件夹。",
         msg_prune_found: "发现了 {n} 个空文件夹。\n是否立即删除？",
@@ -1442,9 +1534,14 @@ const T = {
         msg_unzip_fail: "解压请求失败",
         msg_jszip_fail: "JSZip 加载失败，请检查网络。",
 
-        /* --- 错误提示 (Error Messages) --- */
+        /* --- 错误提示 --- */
         err_invalid_links: "请输入正确的链接",
         err_pwd_format: "密码必须为 4-10 位字母或数字",
+        err_invalid_torrent: "无效的种子文件格式",
+        err_torrent_complex: "解析复杂度过高，可能是非法文件",
+        err_torrent_format: "种子文件结构损坏",
+        err_torrent_len: "字段长度解析异常",
+        err_torrent_char: "解析遇到非法字符",
         err_share_code_exists: "该分享代码已被占用",
         err_folder_not_ready: "云端文件夹正在创建中，请稍后再试",
         err_item_deleted: "该项目不存在",
@@ -1481,53 +1578,66 @@ const T = {
         str_action_failed: "操作失败",
         str_scan_error: "扫描错误",
         err_limit_too_low: "修改失败：新次数 ({n}) 必须大于当前已保存次数 ({s})",
+        err_vault_max: "密码金库最多仅支持存储 50 个常用密码",
+        err_pwd_len: "单个密码长度不能超过 127 个字符",
 
-        /* --- 帮助文档 (Help Documentation) --- */
+        /* --- 帮助文档 --- */
         modal_help_title: "帮助",
         help_desc: `
         <div class="pk-no-scrollbar pk-help-scroll" style="font-size:13px;line-height:1.6;color:var(--pk-fg);text-align:justify;text-justify:inter-ideograph;word-break:break-all;pointer-events:auto;display:block;">
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">✨ 体验与导航引擎</b><br>
-                • <b>交互重构</b>：在官方功能基础上，界面仿 <b>Windows 文件资源管理器</b> 重构；在拖拽文件时支持向路径栏（含下拉列表）精准投递。<br>
-                • <b>高级路径栏</b>：支持滚轮滑动、下拉菜单同级切换定位。全盘搜索、查重、空间分析与文件扁平化均集成路径栏，支持路径回显与溯源跳转。<br>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">✨ 体验与导航引擎</b><br>
+                • <b>交互重构</b>：在官方功能基础上，界面仿 <b>Windows 文件资源管理器</b> 重构。<br>
+                • <b>极速模式</b>：开启后支持脚本自动加载并物理屏蔽网页原生同步逻辑。可显著降低内存溢出风险，保障脚本极致的响应速度与运行稳定。<br>
+                • <b>高级路径栏</b>：支持滚轮滑动、下拉菜单同级切换定位。全盘搜索、文件/文件夹分析均集成路径栏，支持路径回显与溯源跳转。<br>
                 • <b>体验增强</b>：支持星标、文件类型优先级等多维度排序。支持浅色/暗黑皮肤自由切换，及一键<b>模糊封面</b>隐私保护。<br>
-                • <b>窗口管理</b>：支持一键<b>最大化/最小化</b>，最大化模式下自动开启大行高（60px）适配模式，获得更清晰的图标与缩略图展示。<br>
                 • <b>后台索引</b>：主页图标出现<b>蓝色呼吸点</b>表示后台正自动同步目录树。<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* 注：系统默认文件夹（My Pack）受绝对物理保护，严防误删、复制、移动及重命名。</i>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：默认文件夹（My Pack）受官方保护，严防误删、复制、移动及重命名。</div>
             </div>
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">📂 批量与空间管理</b><br>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 批量与空间管理</b><br>
                 • <b>批量重命名</b>：支持<b>正则替换/删除</b>、<b>剧集流水号</b>生成、文本<b>格式化</b>(大小写/全半角)、<b>番号/FC2 ID</b> 智能命名、<b>前缀去广告</b>及基于 MIME 的<b>后缀修复</b>。<br>
-                • <b>空间分析</b>：筛选列表符合大小的文件夹，支持显示文件夹大小。<br>
-                • <b>智能整理</b>：一键清理空文件夹；<b>文件扁平化</b>提取选择目录内所有层级文件，并支持后缀筛选。<b>智能查重</b>在文件扁平化后进入，提供<b>精准哈希</b>、<b>相似特征</b>(时长/大小容差设定) 及 <b>名称匹配</b> 三模态联动。<br>
-                • <b>批量解压</b>：集成<b>密码金库</b>实现跨文件、跨批次密码自动记忆与智能填充。<br>
-                • <b>精准清理</b>：自定义<b>文件黑名单</b>，可实现全盘垃圾资源清理。同时可在设置里将记录文件保存为白名单，执行批量删除时自动跳过记录文件。<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* 注：所有加载缓存在关闭或刷新网页前持续记录，处理期间请勿在其他客户端修改文件以免产生脏数据。</i>
+                • <b>分析套件</b>：<b>文件分析</b>整合了“文件筛选”与“文件查重”（哈希/时长/名称三模态）；<b>文件夹分析</b>整合了“文件夹筛选”与“文件夹查重”（名称/相似度/包含率三模态）；并支持生成及下载当前路径的<b>目录树</b>列表。<br>
+                • <b>智能整理</b>：一键清理空文件夹；<b>批量解压</b>集成解压密码自动记忆与智能填充，支持自动跳过并删除已解压项目。<br>
+                • <b>资源管理器</b>：既可作为<b>文件黑名单</b>，一键清理垃圾资源；也可作为<b>文件白名单</b>，在执行批量删除操作时自动跳过并予以保护。<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：为避免数据同步冲突，处理期间请勿在其他客户端修改文件。</div>
             </div>
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">🌐 传输与分享中心</b><br>
-                • <b>分享管理</b>：支持设定提取次数与有效期。脚本运行时实时监测，提取次数达标即自动熔断销毁。<br>
-                • <b>离线与云存</b>：支持磁力、电驴及短视频链接批量云下载，集成网页快照永久存档。<br>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🌐 传输与分享中心</b><br>
+                • <b>分享管理</b>：支持设定提取次数，提取次数达标自动取消分享。<br>
+                • <b>离线下载</b>：支持链接批量离线下载与资源链接批量导出。<br>
                 • <b>极速上传</b>：支持本地超大文件与嵌套文件夹拖拽直传，突破官方网页端上传限制并<b>大幅降低小文件传输中断率</b>。
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：提取次数拦截仅在网页保持开启且电脑未休眠时生效。</div>
             </div>
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">🎬 沉浸式媒体增强</b><br>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🎬 沉浸式媒体增强</b><br>
                 • <b>播放引擎</b>：支持 0.5x-3.0x 倍速、画面多向旋转/镜像翻转、强制比例调节。支持记忆播放、自动跳过片头片尾，及多视频<b>连播/循环</b>模式。进度条支持实时生成<b>缩略图预览</b>。<br>
                 • <b>字幕系统</b>：支持加载云端同名字幕、本地文件及跨站在线搜索。支持字幕轴毫秒级偏移微调，及本地文本直接<b>拖拽解析</b>挂载。<br>
-                • <b>视觉辅助</b>：内嵌多引擎 (Google/Yandex/SauceNAO/trace.moe) 支持图片或视频当前帧<b>以图搜图</b>；设置中可激活“媒体模式”，使纯剧集或漫画文件夹自动按名称 A-Z 顺序排列。<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* 注：播放历史列表仅记录在脚本环境内产生的播放进度。</i>
+                • <b>视觉辅助</b>：内嵌多引擎支持图片或视频当前帧<b>以图搜图</b>；设置中可激活“媒体模式”，使纯剧集或漫画文件夹自动按名称 A-Z 顺序排列。<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：播放历史列表持续记录在脚本环境内产生的播放进度。</div>
             </div>
-            <div>
-                <b style="font-size:14px; color:var(--pk-pri);">⚡ 下载与分发</b><br>
-                • <b>外部直连</b>：支持将文件通过 RPC 协议免下载一键并推送到 <b>Aria2</b> 节点。
+            <div style="margin-bottom:12px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ 配置与数据管理</b><br>
+                • <b>配置备份</b>：支持将偏好设置、管理规则、密码金库与历史数据导出为附带数字指纹的 JSON 备份文件，便于跨设备平滑迁移。<br>
+                • <b>数据清理</b>：支持对全盘索引、偏好设置、管理规则、密码金库与历史数据按需清除，以释放本地存储空间并保障隐私。<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：全盘索引在网页关闭后清空，而偏好设置、管理规则、密码金库与历史数据则持久化保存。</div>
+            </div>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚡ 下载与分发</b><br>
+                • <b>外部直连</b>：支持将文件通过 RPC 协议免下载一键并推送到 <b>Aria2</b> 节点。<br>
+                • <b>下载过滤</b>：支持设置<b>文件夹下载过滤</b>。可按后缀或关键词自动排除特定文件，实现精细化分发。
+            </div>
+            <div style="margin-top:16px; color:#d93025; font-weight:bold; text-align:center; font-size:11px; border-top:1px dashed rgba(217,48,37,0.2); padding-top:12px; letter-spacing:0.5px; opacity:0.9;">
+                本项目严格遵循 CC-BY-NC-SA-4.0 协议，严禁用于任何形式的商业用途
             </div>
         </div>`
     },
     tc: {
-        /* --- 通用與基礎UI (General & UI Basics) --- */
+        /* --- 通用与基础UI --- */
         title: "PikPak 增強大師",
         str_original: "原畫",
         str_original_fast: "原畫 (高速)",
+        str_folders: "資料夾",
         str_files: "檔案",
         unit_folders: "個資料夾",
         unit_days: "天",
@@ -1566,10 +1676,11 @@ const T = {
         cat_document: "文件",
         cat_software: "軟體",
         cat_archive: "壓縮檔",
+        cat_torrent: "BT種子",
         cat_other: "其他",
         btn_exit_filter: "退出篩選",
 
-        /* --- 屬性面板 (Properties) --- */
+        /* --- 属性面板 --- */
         ctx_property: "屬性",
         title_property: "檔案屬性",
         lbl_prop_name: "檔案名稱",
@@ -1587,21 +1698,22 @@ const T = {
         fmt_prop_count: "包含 {f} 個檔案，{d} 個資料夾",
         str_prop_offline: "離線任務",
 
-        /* --- 導航、視圖模式與右鍵選單 (Navigation & Context Menu) --- */
+        /* --- 导航、视图模式与右键菜单 --- */
         btn_nav_home: "首頁",
         btn_nav_share: "我的分享",
         btn_nav_offline: "離線下載",
         btn_nav_recent: "最近加入",
         btn_nav_history: "播放歷史",
         btn_nav_starred: "收藏夾",
-        btn_nav_trash: "資源回收筒",
+        btn_nav_trash: "回收站",
         btn_nav_upload: "我的上傳",
         title_offline: "我的離線",
-        trash_title: "資源回收筒",
+        trash_title: "回收站",
         trash_notice: "資源回收筒的檔案最多儲存 15 天",
+        history_notice: "僅記錄在腳本環境內產生的播放進度",
         ctx_open: "開啟",
-        ctx_add_bl: "加入黑名單",
-        ctx_remove_bl: "從黑名單移除",
+        ctx_add_bl: "添加到資源管理器",
+        ctx_remove_bl: "從資源管理器移除",
         ctx_rename: "重新命名",
         ctx_copy: "複製",
         ctx_copy_name: "複製檔名",
@@ -1614,7 +1726,7 @@ const T = {
         ctx_locate: "在資料夾中檢視",
         ctx_share: "分享",
 
-        /* --- 通用檔案操作按鈕 (General Operations) --- */
+        /* --- 通用文件操作按钮 --- */
         btn_down: "下載",
         tip_down: "下載 [Alt] + [D]",
         btn_aria2: "傳送至 Aria2",
@@ -1648,6 +1760,7 @@ const T = {
         tip_theme: "切換主題 [Alt] + [T]",
         tip_rotate: "旋轉 [R]",
         tip_mirror: "鏡像翻轉 [H]",
+        tip_flip_v: "垂直翻轉 [V]",
         tip_maximize: "最大化 [M]",
         tip_minimize: "最小化 [M]",
         tip_full_screen: "全螢幕 [Enter]",
@@ -1659,15 +1772,17 @@ const T = {
         btn_stop: "停止",
         tip_stop: "立即停止目前操作",
         btn_settings: "設定",
-        tip_settings: "系統設定 [Alt] + [S]",
+        btn_logout: "登出 PikPak",
+        msg_logout_confirm: "確定要登出嗎？",
+        tip_settings: "設定與更多 [Alt] + [S]",
         lbl_upload_to: "上傳檔案至： ",
         msg_move_done: "移動完成。",
 
-        /* --- 離線、上傳與雲端下載 (Offline, Upload & Cloud Download) --- */
+        /* --- 离线、上传与云下载 --- */
         btn_upload: "本機上傳",
         btn_up_file: "上傳檔案",
         btn_up_folder: "上傳資料夾",
-        btn_cloud_download: "雲端下載",
+        btn_cloud_download: "雲下載",
         btn_up_pause: "暫停任務",
         tip_up_pause: "暫停任務 [Alt] + [P]",
         btn_up_start: "開始任務",
@@ -1695,6 +1810,7 @@ const T = {
         lbl_save_to: "檔案將被儲存至：",
         lbl_default_folder: "預設資料夾",
         btn_via_torrent: "透過 Torrent 建立",
+        tip_cloud_save_path: "正規雲端下載檔案會儲存在 My Pack 目錄，來自其他 App 的雲端下載檔案會儲存至 My [XYZ] 目錄，[XYZ] 為 App 名稱。",
         title_save_method: "儲存方式",
         msg_save_snapshot_desc: "此連結只能被儲存為網頁快照。",
         tip_snapshot_details: "PikPak 無法從此連結中直接擷取媒體檔案，您可以儲存網頁快照。PikPak 將盡可能儲存完整的網頁內容到快照檔案中。",
@@ -1703,7 +1819,7 @@ const T = {
         btn_modify: "修改",
         str_snap_link_count_suffix: " 等 {n} 個連結",
 
-        /* --- 分享管理 (Share Management) --- */
+        /* --- 分享管理 --- */
         btn_cancel_share: "取消分享",
         share_copy_suffix: "複製這段內容後開啟 PikPak App，暢享極速秒播",
         share_copy_pwd: "密碼",
@@ -1758,12 +1874,17 @@ const T = {
         cal_week_days:["日", "一", "二", "三", "四", "五", "六"],
         cal_months:["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
 
-        /* --- 結構扁平化、尋找重複與空間分析 (Flatten, Dup & Analyze) --- */
-        btn_scan: "檔案扁平化",
-        tip_scan: "取得子資料夾中的所有檔案以供後續尋找重複項目",
-        btn_dup: "尋找重複",
-        tip_dup: "尋找重複檔案",
-        modal_dup_title: "查重選項",
+        /* --- 文件分析与文件夹分析 --- */
+        title_file_analysis: "檔案分析",
+        btn_scan: "文件透視",
+        lbl_scan_selected: "對選取的 {n} 個項目執行文件透視",
+        lbl_keyword_filter: "排除關鍵字",
+        ph_keyword_filter: "排除包含的關鍵字，多個用逗號分隔",
+        lbl_scan_current: "對目前路徑下所有項目執行文件透視",
+        tip_dup: "檔案查重",
+        lbl_dup_selected: "對選取的 {n} 個項目執行文件查重",
+        lbl_dup_current: "對目前路徑下所有項目執行文件查重",
+        tip_scan_dup: "篩選或查重檔案",
         lbl_dup_tool: "選擇刪除對象：",
         lbl_dup_reset: "↺ 復原 (取消置頂 & 清空選取)",
         lbl_dup_select_folder: "📂 依資料夾選擇",
@@ -1775,52 +1896,61 @@ const T = {
         btn_start_scan: "開始掃描",
         tag_hash: "精準比對",
         tag_hash_short: "精準",
-        tag_name: "名稱比對",
+        tag_name: "名稱相似",
         tag_name_short: "名稱",
-        tag_sim: "相似比對",
-        tag_sim_short: "相似",
-        label_dup_video: "影片檔案 (精準比對 + 相似比對 + 名稱比對)",
-        label_dup_image: "圖片檔案 (僅精準比對)",
-        label_dup_other: "其他檔案 (僅精準比對)",
-        btn_toggle_size: "檔案大小",
-        tip_toggle_size: "根據檔案大小自動選擇重複檔案。",
-        btn_toggle_date: "上傳日期",
-        tip_toggle_date: "根據上傳日期自動選擇重複檔案。",
-        cond_small: "選擇最大",
-        cond_large: "選擇最小",
-        cond_small_short: "最小",
-        cond_large_short: "最大",
-        cond_old: "選擇最新",
-        cond_new: "選擇最舊",
-        cond_old_short: "最舊",
-        cond_new_short: "最新",
-        btn_analyze: "空間分析",
-        tip_analyze: "篩選目前目錄下的大型資料夾",
+        tag_sim: "時長相似",
+        tag_sim_short: "時長",
+        label_dup_video: "影片檔案 (精準比對 + 時長相似 + 名稱相似)",
+        label_dup_image: "圖片檔案 (精準比對 + 名稱相似)",
+        label_dup_other: "其他檔案 (精準比對 + 名稱相似)",
+        btn_analyze: "資料夾分析",
+        tip_analyze: "篩選或查重資料夾",
+        btn_export: "匯出目錄",
+        tip_export: "產生並下載目前路徑的檔案樹狀清單",
+        title_export_format: "匯出目錄樣式",
+        lbl_export_current: "對目前路徑下所有項目執行目錄匯出",
+        opt_tree_view: "目錄樹",
+        opt_list_view: "目錄列表",
+        msg_exporting: "正在產生目錄樹...",
         str_analyze_results: "比對結果",
-        lbl_analyze_title: "空間分析",
-        lbl_analyze_desc: "尋找目前路徑下所有大於指定大小的資料夾：",
         lbl_size_threshold: "偵測閾值",
-        title_analyze_result: "空間分析結果",
+        title_analyze_result: "資料夾分析結果",
+        opt_ana_large: "資料夾透視",
+        lbl_analyze_selected: "對選取的 {n} 個項目執行資料夾透視",
+        lbl_analyze_current: "對目前路徑下所有項目執行資料夾透視",
+        opt_ana_sim: "資料夾查重",
+        lbl_ana_sim_selected: "對選取的 {n} 個項目執行資料夾查重",
+        lbl_ana_sim_current: "對目前路徑下所有項目執行資料夾查重",
+        title_algo_help: "查重演算法說明",
+        algo_help_content: "名稱比對：查找名稱和體積相近的資料夾群組。\n相似度比對：查找內部檔案高度重合的資料夾群組。\n包含率比對：查找小資料夾的內容被大資料夾完全覆蓋的子集冗餘。\n\n精度：相似度比對 > 包含率比對 > 名稱比對\n範圍：包含率比對 > 相似度比對",
+        lbl_threshold: "閾值",
+        lbl_sim_score: "相似度",
+        lbl_containment: "包含率",
+        lbl_name_match: "名稱比對",
+        lbl_sim_match: "相似度比對",
+        lbl_contain_match: "包含率比對",
+        lbl_ana_min: "下限",
+        lbl_ana_max: "上限",
 
-        /* --- 重新命名、清理與黑名單 (Rename, Prune & Blacklist) --- */
+        /* --- 重命名、清理与资源管理器 --- */
         btn_prune: "清理空資料夾",
         tip_prune: "清理空資料夾 [Ctrl] + [Delete]",
         btn_rename: "重新命名",
         tip_rename: "重新命名 [F2]",
         btn_bulkrename: "批次重新命名",
         tip_bulkrename: "批次重新命名 [F2]",
-        title_blacklist: "檔案黑名單管理",
+        title_blacklist: "資源管理器",
         btn_blacklist_run: "立即執行清理",
         btn_clear_list: "清空清單",
         tip_bl_desc: "下列項目在【刪除】時會跳過，僅透過【立即執行清理】尋找並刪除",
-        tip_blacklist_input: "檔案黑名單管理 [Alt] +[Delete]",
-        label_bl_folder: "資料夾黑名單 (精準尋找)",
-        label_bl_file: "檔案黑名單 (精準尋找)",
+        tip_blacklist_input: "資源管理器 [Alt] +[Delete]",
+        label_bl_folder: "資料夾名單 (精準查找)",
+        label_bl_file: "檔案名單 (精準查找)",
         lbl_type_folder: "資料夾",
         lbl_type_file: "檔案",
-        ph_bl_folder: "請透過「貼上」或檔案右鍵選單「加入黑名單」匯入。",
-        ph_bl_file: "請透過「貼上」或檔案右鍵選單「加入黑名單」匯入。",
-        modal_bl_preview: "黑名單搜尋結果",
+        ph_bl_folder: "請透過「貼上」或檔案右鍵選單「添加到資源管理器」匯入。",
+        ph_bl_file: "請透過「貼上」或檔案右鍵選單「添加到資源管理器」匯入。",
+        modal_bl_preview: "搜尋結果",
         btn_bl_delete: "刪除選取項目",
         modal_rename_title: "重新命名",
         modal_rename_multi_title: "批次重新命名",
@@ -1854,7 +1984,7 @@ const T = {
         label_replace_find: "尋找內容",
         label_replace_to: "取代為",
 
-        /* --- 解壓縮相關 (Archive & Unzip) --- */
+        /* --- 解压相关 --- */
         btn_unzip: "批次解壓縮",
         tip_unzip: "批次解壓縮 [Alt] + [U]",
         btn_unzip_all: "全部解壓縮",
@@ -1862,7 +1992,7 @@ const T = {
         title_input_pwd: "需要解壓縮密碼",
         lbl_pwd_prompt: "請輸入密碼：",
 
-        /* --- 媒體播放器與以圖搜圖 (Media Player & Image Search) --- */
+        /* --- 媒体播放器与以图搜图 --- */
         btn_ext: "外部播放",
         tip_ext: "使用PotPlayer播放或獲取播放連結 [Alt] +[E]",
         btn_img_search: "以圖搜圖 [F]",
@@ -1910,6 +2040,7 @@ const T = {
         export_link_title: "匯出影片串流連結",
         btn_start_play: "開始播放",
         btn_copy_link: "複製連結",
+        tip_copy_link: "複製連結 [Alt] + [C]",
         opt_player_other: "其他 (匯出連結)",
         lbl_player: "播放器",
         btn_mark: "標記",
@@ -1922,7 +2053,15 @@ const T = {
         type_app: "應用程式",
         type_suffix: "檔案",
 
-        /* --- 選擇器、設定與搜尋 (Pickers, Settings & Search) --- */
+        /* --- 设置与搜索 --- */
+        label_turbo_mode: "極速模式",
+        desc_turbo_mode: "自動開啟並屏蔽網頁原生同步 (推薦)",
+        lbl_aria2_status: "連線狀態",
+        ph_aria2_secret: "密鑰 (選填)",
+        str_connected: "連線成功",
+        str_conn_fail: "連線失敗",
+        str_connecting: "正在測試...",
+        tip_mixed_content: "常用連接埠參考：\n• 6800 (Aria2 標準版)\n• 16800 (Motrix 預設)\n• 6881 (其他整合版)",
         picker_title: "選擇資料夾",
         picker_all: "全部檔案",
         picker_new: "新增資料夾",
@@ -1952,22 +2091,51 @@ const T = {
         opt_engine_saucenao: "SauceNAO (Pixiv/插畫)",
         opt_engine_tracemoe: "trace.moe (動漫截圖)",
         label_dup_strictness: "相似比對閾值",
-        opt_strict: "時長±1s，大小±5%",
-        opt_loose: "時長±2s，大小±10%",
+        opt_strict: "嚴格",
+        opt_loose: "寬鬆",
         label_comic_mode: "媒體模式",
         desc_comic_mode: "純圖片或純影片資料夾預設依 A-Z 排序",
         label_aria2_url: "Aria2 位址",
-        label_aria2_token: "Token",
+        label_aria2_token: "Aria2 密鑰",
         label_privacy_mode: "隱私模式",
         label_blur_cover: "模糊封面圖",
+        label_dl_filter_ext: "下載字尾過濾 (例: .txt, .jpg)",
+        label_dl_filter_name: "下載名稱過濾 (關鍵字或全名)",
+        lbl_dl_filter: "資料夾下載過濾",
+        desc_dl_filter: "資料夾下載/推送時自動排除匹配的檔案",
+        lbl_config_manage: "配置管理",
+        btn_export_data: "匯出備份",
+        btn_import_data: "匯入備份",
+        btn_clean_data: "清除本機資料",
+        title_clean_data: "選擇清理項目",
+        msg_clean_confirm: "確定要徹底刪除選取的本機資料嗎？此操作無法還原。",
+        msg_clean_success: "本機資料已清理，頁面即將重新整理...",
+        opt_cfg_index: "全盤索引 (已同步的目錄結構/檔案快照)",
+        opt_cfg_pref: "偏好設定 (UI 外觀/操作習慣/排序偏好)",
+        opt_cfg_rules: "管理規則 (資源管理器/分享次數限制/搜尋紀錄/下載規則)",
+        opt_cfg_vault: "密碼金庫 (解壓縮密碼記憶)",
+        opt_cfg_history: "影片快取 (影片播放進度/影片時長快取)",
+        opt_cfg_cache: "運行快取 (資料夾修改時間/最後瀏覽位置/指紋)",
+        msg_import_confirm: "匯入配置將覆蓋目前所有設定，是否繼續？",
+        msg_import_success: "配置匯入成功，頁面即將重新整理...",
+        err_invalid_config: "無效的設定檔：未偵測到指紋標識或格式錯誤",
+        err_json_format: "檔案解析失敗：JSON 語法錯誤或檔案已損壞",
         lbl_storage: "儲存空間",
         lbl_browse_exp: "瀏覽體驗",
-        lbl_skip_bl_on_del: "刪除時跳過黑名單檔案",
+        lbl_skip_bl_on_del: "刪除時跳過管理器中記錄資源",
+        lbl_pwd_manage: "解壓密碼管理",
+        title_pwd_vault: "密碼金庫",
+        lbl_pwd_try_count: "單個壓縮檔密碼匹配上限",
+        tip_pwd_manual: "每行記錄一個密碼，回車換行",
         str_root_dir_cn: "根目錄",
+        btn_ana_select: "一鍵勾選",
+        opt_keep_new: "保留最新的", opt_keep_old: "保留最舊的",
+        opt_keep_large: "保留最大的", opt_keep_small: "保留最小的",
+        opt_keep_short: "保留名稱最短的", opt_keep_long: "保留名稱最長的",
 
-        /* --- 狀態、進度與載入短語 (Status, Progress & Loading) --- */
+        /* --- 状态、进度与加载短语 --- */
         loading: "載入中...",
-        loading_detail: "正在取得檔案清單...",
+        loading_detail: "正在全速索引目錄結構...",
         loading_fetch: "取得中... ({n})",
         loading_dup: "分析重複項目... ({p}%)",
         str_loading_placeholder: "載入中...",
@@ -1990,8 +2158,8 @@ const T = {
         str_deleting: "刪除中...",
         str_saving: "儲存中...",
         str_saving_dots: "儲存中...",
-        str_checking_bl: "檢查黑名單中...",
-        str_processing: "處理中...",
+        str_checking_bl: "匹配名單記錄中...",
+        str_processing: "系統正在全速處理中...",
         str_cleanup_done: "清理完成。",
         str_waiting_preload: "等待預先載入...",
         str_copying: "複製到剪貼簿...",
@@ -2014,7 +2182,6 @@ const T = {
         str_upload_2: "節點1超時，切換節點 2...",
         str_upload_3: "節點2超時，嘗試最後節點...",
         str_upload_fail_copy: "上傳失敗，準備寫入剪貼簿...",
-        btn_scanning: "掃描中...",
         msg_transcoding: "雲端轉碼中...",
         msg_transcoding_wait: "伺服器正在處理此影片，請稍候",
         str_preparing: "準備解壓縮...",
@@ -2041,7 +2208,7 @@ const T = {
         lbl_done_check: "✔ 完成",
         msg_limit_updated: "提取次數已更新",
 
-        /* --- 提示、確認與互動訊息 (Messages, Alerts, Dialogs) --- */
+        /* --- 提示、确认与交互消息 --- */
         title_alert: "提示",
         title_confirm: "確認",
         title_prompt: "輸入",
@@ -2055,9 +2222,8 @@ const T = {
         msg_down_success: "已成功呼叫瀏覽器下載 {n} 個檔案。",
         msg_batch_txt: "已產生下載清單 (.txt)。",
         msg_clear_history_done: "已從歷史紀錄中移除",
-        msg_unzip_confirm_batch: "已偵測到 {n} 個壓縮檔，是否開始批次解壓縮到對應目錄？",
         msg_skip_unzipped: "已跳過 {n} 個已解壓縮的項目。",
-        msg_auto_cancel_done: "背景巡檢：已自動取消 {n} 個達到次數限制的分享。",
+        msg_unzip_skip_del_confirm: "偵測到 {n} 個已解壓縮的壓縮檔，是否將其移入資源回收筒？",
         msg_cancel_share_confirm: "確定要取消選取的 {n} 個分享嗎？\n連結將立即失效。",
         msg_pwd_updating: "正在更新密碼...",
         msg_pwd_updated: "密碼已更新",
@@ -2073,7 +2239,6 @@ const T = {
         msg_clear_sel_confirm: "已選取 {n} 個重複檔案，確認要取消目前的勾選嗎？",
         str_bl_stat: "比對：{n} 項 | 已選取：{m} 項",
         str_hits: "命中",
-        msg_exit_confirm: "確定要關閉檔案管理員嗎？",
         msg_settings_saved: "設定已儲存。頁面將重新整理。",
         msg_name_exists: "名稱已存在：{n}",
         str_name_conflict: "(可能同名)",
@@ -2088,7 +2253,6 @@ const T = {
         msg_del_select: "請先點擊選取要刪除的列！",
         msg_del_items_done: "已刪除 {n} 個項目。",
         msg_copy_success: "複製成功",
-        copy_failed: "複製失敗，請保持網頁在前景，重新點擊此處觸發",
         str_redirecting: "正在跳轉 Google Lens...",
         msg_manual_paste: "圖床上傳超時。已複製截圖，請在新視窗按 {cmd}",
         msg_starring: "正在加入星號...",
@@ -2108,7 +2272,6 @@ const T = {
         msg_sub_drop_load: "已透過拖曳載入字幕：{n}",
         msg_resume_hint: "已為您從 {t} 繼續播放，點擊這裡 ",
         msg_unzip_confirm_n: "確定要在目前目錄解壓縮這 {n} 個檔案嗎？",
-        log_upgrade_cache: "♻️ 偵測到舊版快取，正在升級資料結構以同步星號狀態...",
         msg_task_paused: "已暫停",
         msg_task_added: "已加入 {n} 個上傳任務",
         msg_task_fast_success: "秒傳成功",
@@ -2120,6 +2283,9 @@ const T = {
         msg_skip_conflict: "{n} 個子路徑忙碌",
         msg_skip_invalid: "已自動跳過無效項目：",
         msg_creating_cloud_task: "正在建立雲端下載任務...",
+        str_parsing_torrent: "正在解析種子檔案...",
+        err_torrent_no_info: "解析失敗：未發現有效資訊",
+        err_file_read: "檔案讀取失敗",
         msg_cloud_task_finish: "建立完成：{s} 成功，{f} 失敗",
         msg_cloud_task_success: "🎉 已成功建立 {n} 個任務",
         msg_prepare_restore: "準備還原...",
@@ -2130,17 +2296,16 @@ const T = {
         msg_retry_submitted: "已重試提交 {n} 個任務",
         msg_jav_fetching_net: "正在連線取得 MissAV 資料...",
         msg_op_blocked_moving: "⚠️ 操作攔截\n\n背景正在執行檔案搬移，請等待目前任務完成後再操作。",
-        msg_op_blocked_analyzing: "⚠️ 操作攔截\n\n背景正在執行檔案搬移。為確保空間統計資料準確，請等待目前任務完成後再操作。",
-        msg_analyze_only_normal_dir: "請在一般目錄下使用。",
-        msg_analyze_no_large_folders: "沒有發現大於 {s} 的資料夾。",
+        msg_op_blocked_analyzing: "⚠️ 操作攔截\n\n後台正在執行檔案搬移。為確保資料夾分析數據準確，請等待目前任務完成後再操作。",
+        msg_op_blocked_exporting: "⚠️ 操作攔截\n\n後台正在執行檔案搬移。為確保匯出目錄文本準確，請等待目前任務完成後再操作。",
+        msg_analyze_only_normal_dir: "請選擇資料夾。",
+        msg_analyze_no_large_folders: "沒有發現符合閾值範圍的資料夾 ({s})",
         msg_analyze_summary_fmt: "共發現 <b>{n}</b> 個大於 {s}GB 的資料夾 (已依大小降序排列)",
-        msg_rn_blocked_moving: "⚠️ 操作攔截\n\n背景正在執行檔案搬移，為確保空間統計資料準確，請等待目前任務完成後再操作。",
         msg_prune_blocked_moving: "⚠️ 操作攔截\n\n背景正在執行檔案搬移，暫時無法執行清理。",
-        msg_batch_download_blocked: "⚠️ 操作攔截\n\n背景正在執行檔案搬移。為確保下載清單完整性，請等待目前任務完成後再操作。",
         msg_global_index_blocked_moving: "⚠️ 操作攔截\n\n背景正在執行檔案搬移。全盤索引需要穩定的目錄結構，請等待目前任務完成後再開啟全盤搜尋。",
         msg_resource_locked_download: "⚠️ 操作攔截\n\n選取項目包含正在移動的檔案或資料夾。請等待搬移完成後再發起下載。",
         msg_resource_locked_aria2: "⚠️ 操作攔截\n\n選取項目包含正在移動的檔案或資料夾。請等待搬移完成後再推送至 Aria2。",
-        msg_flatten_blocked_moving: "⚠️ 操作攔截\n\n背景正在執行檔案搬移。此時執行扁平化會導致檔案清單遺失或重複，請稍後再試。",
+        msg_flatten_blocked_moving: "⚠️ 操作攔截\n\n後台正在執行檔案搬移。此時執行文件分析會導致檔案列表缺失或重複，請稍後再試。",
         err_task_conflict: "⚠️ 操作攔截\n\n背景正在執行檔案搬移。全域清理需要穩定的目錄結構，請等待搬移完成後再執行。",
         title_del_task_confirm_fmt: "確認刪除 {n} 條傳輸任務？",
         lbl_del_cloud_files_too: "同時刪除雲端硬碟內的檔案",
@@ -2150,14 +2315,11 @@ const T = {
         msg_task_clear_success_fmt: "已清空 {n} 個上傳任務",
         msg_unzip_virtual_view_warn: "您正在虛擬視圖中操作。解壓縮後的檔案將存放在<b>各壓縮檔所在的原始資料夾</b>中，而<b>不會</b>直接出現在目前清單中。<br><br>是否繼續？",
         msg_smart_matching_file: "智慧比對密碼中... ({n})",
-        msg_unzip_batch_submitted: "✅ 已提交 {n} 個解壓縮任務",
+        msg_unzip_batch_submitted: "✅ 已完成 {n} 個解壓縮任務",
         msg_unzip_batch_skipped: " ({n} 個跳過)",
         msg_unzip_check_source: "。請前往來源目錄檢視結果。",
         tip_jump_to_folder: "跳轉到此資料夾",
         msg_task_deleted: "任務已刪除",
-        msg_flatten_warn: "結構扁平化將搜尋目前路徑下所有檔案。\n是否繼續？",
-        msg_flatten_selected: "對選取的 {n} 個項目執行結構扁平化。\n\n僅遞迴掃描選取的資料夾。\n是否繼續？",
-        msg_flatten_done: " 選取項目扁平化完成。\n共發現 {n} 個檔案。",
         msg_scan_done: "掃描完成！\n共發現 {n} 個檔案，遍歷了 {f} 個資料夾。",
         msg_scan_fail: "\n\n❌ 有 {n} 個失敗。",
         msg_scan_fix: "\n\n✅ 自動修復了 {n} 次網路錯誤。",
@@ -2176,26 +2338,25 @@ const T = {
         msg_dup_warn: "是否開始搜尋重複檔案？",
         msg_dup_result: "發現 {n} 組重複項目。",
         msg_dup_none: "未發現重複檔案。",
-        msg_bl_add_done: "已將 {n} 個項目加入黑名單。",
-        msg_bl_remove_done: "已從黑名單移除 {n} 個項目。",
         msg_bl_stop: "操作已停止。",
-        msg_bl_empty: "黑名單清單為空，無法執行。",
-        msg_bl_clear_confirm: "確定要清空所有黑名單項目嗎？此操作無法復原。",
-        msg_blacklist_run_none: "網盤中未發現符合黑名單條件的項目。",
-        msg_blacklist_run_confirm: "在網盤中發現了 {n} 個黑名單項目。\n\n是否立即移入資源回收筒？",
-        msg_bl_run_limit: "⚠️ 模式限制\n\n黑名單清理涉及實體檔案遞迴操作。目前處於非標準目錄，無法準確定位實體掃描範圍。\n\n請返回首頁一般資料夾後再執行清理。",
-        msg_del_protected: "已保護 {n} 個黑名單檔案不被刪除。",
+        msg_bl_add_done: "已將 {n} 個項目添加到記錄。",
+        msg_bl_remove_done: "已從記錄中移除 {n} 個項目。",
+        msg_bl_empty: "名單列表為空，無法運行。",
+        msg_bl_clear_confirm: "確定要清空所有記錄條目嗎？此操作不可恢復。",
+        msg_blacklist_run_none: "網盤中未發現符合名單條件的項目。",
+        msg_blacklist_run_confirm: "在網盤中發現了 {n} 個已記錄項目。\n\n是否立即移入回收站？",
+        msg_bl_run_limit: "⚠️ 模式限制\n\n清理操作涉及物理文件遞歸操作。目前處於非標準目錄，無法準確定位物理掃描範圍。\n\n請返回主頁常規文件夾後再執行清理。",
+        msg_del_protected: "已保護 {n} 個已記錄文件不被刪除。",
         msg_del_none: "沒有可刪除的檔案。",
         msg_bl_scanning: "全盤搜尋中...\n已掃描目錄：{d} | 命中：{f}",
         rn_tip_wait: "請設定規則",
+        rn_tip_jav: "點擊上方按鈕開始智慧匹配",
         rn_tip_none: "沒有符合的項目或名稱",
         rn_stat: "比對：{n} 項 | 有效變更：{m} 項",
         rn_warn_confirm: "確定要重新命名 {n} 個檔案嗎？",
         msg_bulkrename_done: "已重新命名 {n} 個項目。",
         msg_rn_all_skipped: "❌ 所有項目均因同名被跳過，未執行任何操作。",
-        msg_rn_part_skipped: "\n⚠️ (另有 {n} 個檔案因同名將被跳過)",
-        msg_rn_fail_count: "\n({n} 個失敗)",
-        msg_rn_success_skip: "\n⚠️ 已跳過 {n} 個同名檔案",
+        msg_rn_fail_count: "跳過已重名 {n} 個項目",
         msg_prune_confirm: "是否開始搜尋目前清單中的空資料夾？",
         msg_prune_none: "未發現空資料夾。",
         msg_prune_found: "發現了 {n} 個空資料夾。\n是否立即刪除？",
@@ -2209,9 +2370,14 @@ const T = {
         msg_unzip_fail: "解壓縮請求失敗",
         msg_jszip_fail: "JSZip 載入失敗，請檢查網路。",
 
-        /* --- 錯誤提示 (Error Messages) --- */
+        /* --- 错误提示 --- */
         err_invalid_links: "請輸入正確的連結",
         err_pwd_format: "密碼必須為 4-10 位字母或數字",
+        err_invalid_torrent: "無效的種子檔案格式",
+        err_torrent_complex: "解析複雜度過高，可能是非法檔案",
+        err_torrent_format: "種子檔案結構損壞",
+        err_torrent_len: "欄位長度解析異常",
+        err_torrent_char: "解析遇到非法字符",
         err_share_code_exists: "該分享代碼已被佔用",
         err_folder_not_ready: "雲端資料夾正在建立中，請稍後再試",
         err_item_deleted: "該項目不存在",
@@ -2248,53 +2414,66 @@ const T = {
         str_action_failed: "操作失敗",
         str_scan_error: "掃描錯誤",
         err_limit_too_low: "修改失敗：新次數 ({n}) 必須大於目前已儲存次數 ({s})",
+        err_vault_max: "密碼金庫最多僅支援儲存 50 個常用密碼",
+        err_pwd_len: "單個密碼長度不能超過 127 個字元",
 
-        /* --- 說明文件 (Help Documentation) --- */
+        /* --- 帮助文档 --- */
         modal_help_title: "說明",
         help_desc: `
         <div class="pk-no-scrollbar pk-help-scroll" style="font-size:13px;line-height:1.6;color:var(--pk-fg);text-align:justify;text-justify:inter-ideograph;word-break:break-all;pointer-events:auto;display:block;">
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">✨ 體驗與導覽引擎</b><br>
-                • <b>互動重構</b>：在官方功能基礎上，介面仿 <b>Windows 檔案總管</b> 重構；在拖曳檔案時支援向路徑列（含下拉選單）精準投遞。<br>
-                • <b>進階路徑列</b>：支援滾輪滑動、下拉選單同級切換定位。全盤搜尋、查重、空間分析與檔案扁平化均整合於路徑列，支援路徑回顯與溯源跳轉。<br>
-                • <b>體驗增強</b>：支援星標、檔案類型優先級等多維度排序。支援淺色/深色佈景自由切換，及一鍵<b>模糊封面</b>隱私保護。<br>
-                • <b>視窗管理</b>：支援一鍵<b>最大化/最小化</b>，最大化模式下自動開啟大行高（60px）適配模式，獲得更清晰的圖示與縮圖展示。<br>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">✨ 體驗與導覽引擎</b><br>
+                • <b>互動重構</b>：在官方功能基礎上，介面仿 <b>Windows 檔案總管</b> 重構。<br>
+                • <b>極速模式</b>：開啟後支援腳本自動載入並物理屏蔽網頁原生同步邏輯。可顯著降低記憶體溢出風險，保障腳本極致的反應速度與運作穩定。<br>
+                • <b>進階路徑列</b>：支援滾輪滑動、下拉選單同級切換定位。全盤搜尋、檔案/資料夾分析均整合於路徑列，支援路徑回顯與溯源跳轉。<br>
+                • <b>體驗增強</b>：支援星號、檔案類型優先級等多維度排序。支援淺色/深色佈景自由切換，及一鍵<b>模糊封面</b>隱私保護。<br>
                 • <b>背景索引</b>：首頁圖示出現<b>藍色呼吸燈</b>表示背景正自動同步目錄樹。<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* 註：系統預設資料夾（My Pack）受絕對實體保護，嚴防誤刪、複製、移動及重新命名。</i>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 註：預設資料夾（My Pack）受官方保護，嚴防誤刪、複製、移動及重新命名。</div>
             </div>
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">📂 批次與空間管理</b><br>
-                • <b>批次重新命名</b>：支援<b>正規替換/刪除</b>、<b>劇集流水號</b>生成、文字<b>格式化</b>(大小寫/全半形)、<b>番號/FC2 ID</b> 智慧命名、<b>前綴去廣告</b>及基於 MIME 的<b>副檔名修復</b>。<br>
-                • <b>空間分析</b>：篩選列表符合大小的資料夾，支援顯示資料夾大小。<br>
-                • <b>智慧整理</b>：一鍵清理空資料夾；<b>檔案扁平化</b>擷取選擇目錄內所有層級檔案，並支援副檔名篩選。<b>智慧查重</b>在檔案扁平化後進入，提供<b>精準雜湊 (Hash)</b>、<b>相似特徵</b>(時長/大小容差設定) 及 <b>名稱匹配</b> 三模態聯動。<br>
-                • <b>批次解壓縮</b>：整合<b>密碼金庫</b>實現跨檔案、跨批次密碼自動記憶與智慧填入。<br>
-                • <b>精準清理</b>：自訂<b>檔案黑名單</b>，可實現全盤垃圾資源清理。同時可在設定裡將記錄檔儲存為白名單，執行批次刪除時自動跳過記錄檔。<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* 註：所有載入快取在關閉或重整網頁前持續記錄，處理期間請勿在其他用戶端修改檔案以免產生髒資料。</i>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 批次與空間管理</b><br>
+                • <b>批次重新命名</b>：支援<b>正規替換/刪除</b>、<b>劇集流水號</b>產生、文字<b>格式化</b>(大小寫/全半形)、<b>番號/FC2 ID</b> 智慧命名、<b>前綴去廣告</b>及基於 MIME 的<b>副檔名修復</b>。<br>
+                • <b>分析套件</b>：<b>檔案分析</b>整合了「檔案篩選」與「檔案查重」（雜湊/時長/名稱三模態）；<b>資料夾分析</b>整合了「資料夾篩選」與「資料夾查重」（名稱/相似度/包含率三模態）；並支援產生及下載目前路徑的<b>目錄樹</b>清單。<br>
+                • <b>智慧整理</b>：一鍵清理空資料夾；<b>批次解壓縮</b>整合解壓縮密碼自動記憶與智慧填入，支援自動跳過並刪除已解壓縮項目。<br>
+                • <b>資源管理器</b>：既可作為<b>檔案黑名單</b>，一鍵清理垃圾資源；也可作為<b>檔案白名單</b>，在執行批次刪除操作時自動跳過並予以保護。<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 註：為避免資料同步衝突，處理期間請勿在其他用戶端修改檔案。</div>
             </div>
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">🌐 傳輸與分享中心</b><br>
-                • <b>分享管理</b>：支援設定提取次數與有效期限。腳本運行時即時監測，提取次數達標即自動熔斷銷毀。<br>
-                • <b>離線與雲端</b>：支援磁力、eDonkey 及短影音連結批次雲端下載，整合網頁快照永久存檔。<br>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🌐 傳輸與分享中心</b><br>
+                • <b>分享管理</b>：支援設定提取次數，提取次數達標自動取消分享。<br>
+                • <b>離線下載</b>：支援連結批次離線下載與資源連結批次匯出。<br>
                 • <b>極速上傳</b>：支援本機超大檔案與巢狀資料夾拖曳直傳，突破官方網頁端上傳限制並<b>大幅降低小檔案傳輸中斷率</b>。
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 註：提取次數攔截僅在網頁保持開啟且電腦未休眠時生效。</div>
+            </div>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🎬 沉浸式媒體增強</b><br>
+                • <b>播放引擎</b>：支援 0.5x-3.0x 倍速、畫面多向旋轉/鏡像翻轉、強制比例調節。支援記憶播放、自動跳過片頭片尾，及多影片<b>連播/循環</b>模式。進度列支援即時產生<b>縮圖預覽</b>。<br>
+                • <b>字幕系統</b>：支援載入雲端同名字幕、本機檔案及跨站線上搜尋。支援字幕軸毫秒級偏移微調，及本機文字直接<b>拖曳解析</b>掛載。<br>
+                • <b>視覺輔助</b>：內嵌多引擎支援圖片或影片當前影格<b>以圖搜圖</b>；設定中可啟動「媒體模式」，使純劇集或漫畫資料夾自動按名稱 A-Z 順序排列。<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 註：播放歷史列表持續記錄在腳本環境內產生的播放進度。</div>
             </div>
             <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">🎬 沉浸式媒體增強</b><br>
-                • <b>播放引擎</b>：支援 0.5x-3.0x 倍速、畫面多向旋轉/鏡像翻轉、強制比例調節。支援記憶播放、自動跳過片頭片尾，及多影片<b>連播/循環</b>模式。進度列支援即時生成<b>縮圖預覽</b>。<br>
-                • <b>字幕系統</b>：支援載入雲端同名字幕、本機檔案及跨站線上搜尋。支援字幕軸毫秒級偏移微調，及本機文字直接<b>拖曳解析</b>掛載。<br>
-                • <b>視覺輔助</b>：內嵌多引擎 (Google/Yandex/SauceNAO/trace.moe) 支援圖片或影片當前影格<b>以圖搜圖</b>；設定中可啟動「媒體模式」，使純劇集或漫畫資料夾自動按名稱 A-Z 順序排列。<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* 註：播放歷史列表僅記錄在腳本環境內產生的播放進度。</i>
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ 配置與資料管理</b><br>
+                • <b>配置備份</b>：支援將偏好設定、管理規則、密碼金庫與歷史數據匯出為附帶數位指紋的 JSON 備份檔案，便於跨裝置平滑轉移。<br>
+                • <b>資料清理</b>：支援對全盤索引、偏好設定、管理規則、密碼金庫與歷史數據按需清除，以釋放本機儲存空間並保障隱私。<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 註：全盤索引在網頁關閉後清空，而偏好設定、管理規則、密碼金庫與歷史數據則持久化保存。</div>
             </div>
-            <div>
-                <b style="font-size:14px; color:var(--pk-pri);">⚡ 下載與分發</b><br>
-                • <b>外部直連</b>：支援將檔案透過 RPC 協定免下載一鍵推播至 <b>Aria2</b> 節點。
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚡ 下載與分發</b><br>
+                • <b>外部直連</b>：支援將檔案透過 RPC 協定免下載一鍵推播至 <b>Aria2</b> 節點。<br>
+                • <b>下載過濾</b>：支援設定<b>資料夾下載過濾</b>。可按副檔名或關鍵字自動排除特定檔案，實現精細化分發。
+            </div>
+            <div style="margin-top:16px; color:#d93025; font-weight:bold; text-align:center; font-size:11px; border-top:1px dashed rgba(217,48,37,0.2); padding-top:12px; letter-spacing:0.5px; opacity:0.9;">
+                本項目嚴格遵循 CC-BY-NC-SA-4.0 協議，嚴禁於任何形式的商業用途
             </div>
         </div>`
     },
     en: {
-        /* --- General & UI Basics --- */
+        /* --- 通用与基础UI --- */
         title: "PikPak Master Enhancer",
         str_original: "Original",
         str_original_fast: "Original (High Speed)",
+        str_folders: "Folders",
         str_files: "Files",
         unit_folders: "folders",
         unit_days: "days",
@@ -2333,10 +2512,11 @@ const T = {
         cat_document: "Documents",
         cat_software: "Software",
         cat_archive: "Archives",
+        cat_torrent: "Torrent",
         cat_other: "Others",
         btn_exit_filter: "Exit Filter",
 
-        /* --- Properties --- */
+        /* --- 属性面板 --- */
         ctx_property: "Properties",
         title_property: "File Properties",
         lbl_prop_name: "File Name",
@@ -2354,21 +2534,22 @@ const T = {
         fmt_prop_count: "Contains {f} files, {d} folders",
         str_prop_offline: "Offline Task",
 
-        /* --- Navigation & Context Menu --- */
+        /* --- 导航、视图模式与右键菜单 --- */
         btn_nav_home: "Home",
         btn_nav_share: "My Shares",
         btn_nav_offline: "Offline Transfers",
-        btn_nav_recent: "Recent",
-        btn_nav_history: "History",
-        btn_nav_starred: "Favorites",
+        btn_nav_recent: "Recent Added",
+        btn_nav_history: "Watch History",
+        btn_nav_starred: "Starred",
         btn_nav_trash: "Trash",
         btn_nav_upload: "My Uploads",
         title_offline: "My Transfers",
         trash_title: "Trash",
         trash_notice: "Files in Trash will be deleted after 15 days",
+        history_notice: "Only records progress generated within the script environment",
         ctx_open: "Open",
-        ctx_add_bl: "Add to Blacklist",
-        ctx_remove_bl: "Remove from Blacklist",
+        ctx_add_bl: "Add to Resource Manager",
+        ctx_remove_bl: "Remove from Resource Manager",
         ctx_rename: "Rename",
         ctx_copy: "Copy",
         ctx_copy_name: "Copy Name",
@@ -2381,7 +2562,7 @@ const T = {
         ctx_locate: "Open file location",
         ctx_share: "Share",
 
-        /* --- General Operations --- */
+        /* --- 通用文件操作按钮 --- */
         btn_down: "Download",
         tip_down: "Download [Alt] + [D]",
         btn_aria2: "Send to Aria2",
@@ -2415,6 +2596,7 @@ const T = {
         tip_theme: "Switch Theme [Alt] + [T]",
         tip_rotate: "Rotate [R]",
         tip_mirror: "Mirror [H]",
+        tip_flip_v: "Vertical Flip [V]",
         tip_maximize: "Maximize [M]",
         tip_minimize: "Minimize [M]",
         tip_full_screen: "Fullscreen [Enter]",
@@ -2426,11 +2608,13 @@ const T = {
         btn_stop: "Stop",
         tip_stop: "Stop current operation",
         btn_settings: "Settings",
-        tip_settings: "System Settings [Alt] + [S]",
+        btn_logout: "Logout PikPak",
+        msg_logout_confirm: "Are you sure you want to logout?",
+        tip_settings: "Settings and more [Alt] + [S]",
         lbl_upload_to: "Upload to: ",
         msg_move_done: "Move completed.",
 
-        /* --- Offline, Upload & Cloud Download --- */
+        /* --- 离线、上传与云下载 --- */
         btn_upload: "Local Upload",
         btn_up_file: "Upload File",
         btn_up_folder: "Upload Folder",
@@ -2462,6 +2646,7 @@ const T = {
         lbl_save_to: "Save to:",
         lbl_default_folder: "Default Folder",
         btn_via_torrent: "Upload Torrent",
+        tip_cloud_save_path: "Standard cloud downloads are saved in the My Pack folder. Downloads from other apps are saved to the My [XYZ] folder, where [XYZ] is the app name.",
         title_save_method: "Save Method",
         msg_save_snapshot_desc: "This link can only be saved as a Web Snapshot.",
         tip_snapshot_details: "PikPak cannot extract media from this link directly. It will save the complete web content as a snapshot file instead.",
@@ -2470,7 +2655,7 @@ const T = {
         btn_modify: "Modify",
         str_snap_link_count_suffix: " and {n} other links",
 
-        /* --- Share Management --- */
+        /* --- 分享管理 --- */
         btn_cancel_share: "Stop Sharing",
         share_copy_suffix: "Copy this content and open the PikPak app to watch instantly.",
         share_copy_pwd: "Password",
@@ -2525,12 +2710,17 @@ const T = {
         cal_week_days:["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
         cal_months:["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
 
-        /* --- Flatten, Dup & Analyze --- */
-        btn_scan: "Flatten Structure",
-        tip_scan: "Retrieve all files from subfolders for duplicate checking",
-        btn_dup: "Find Duplicates",
-        tip_dup: "Scan for duplicate files",
-        modal_dup_title: "Deduplication Options",
+        /* --- 文件分析与文件夹分析 --- */
+        title_file_analysis: "File Analysis",
+        btn_scan: "File Perspective",
+        lbl_scan_selected: "Execute File Perspective on {n} selected items",
+        lbl_keyword_filter: "Exclude Keywords",
+        ph_keyword_filter: "Exclude keywords, comma-separated",
+        lbl_scan_current: "Execute File Perspective on all items in the current path",
+        tip_dup: "Deduplicate Files",
+        lbl_dup_selected: "Execute File Deduplication on {n} selected items",
+        lbl_dup_current: "Execute File Deduplication on all items in the current path",
+        tip_scan_dup: "Filter or Deduplicate Files",
         lbl_dup_tool: "Selection Criteria:",
         lbl_dup_reset: "↺ Reset (Clear selection)",
         lbl_dup_select_folder: "📂 Select by Folder",
@@ -2542,52 +2732,61 @@ const T = {
         btn_start_scan: "Start Scan",
         tag_hash: "Exact Match",
         tag_hash_short: "Exact",
-        tag_name: "Name Match",
+        tag_name: "Name Sim",
         tag_name_short: "Name",
-        tag_sim: "Similar Match",
-        tag_sim_short: "Similar",
-        label_dup_video: "Videos (Exact + Similar + Name)",
-        label_dup_image: "Images (Exact Match only)",
-        label_dup_other: "Others (Exact Match only)",
-        btn_toggle_size: "File Size",
-        tip_toggle_size: "Auto-select duplicates based on size.",
-        btn_toggle_date: "Upload Date",
-        tip_toggle_date: "Auto-select duplicates based on date.",
-        cond_small: "Keep Largest",
-        cond_large: "Keep Smallest",
-        cond_small_short: "Smallest",
-        cond_large_short: "Largest",
-        cond_old: "Keep Newest",
-        cond_new: "Keep Oldest",
-        cond_old_short: "Oldest",
-        cond_new_short: "Newest",
-        btn_analyze: "Storage Analysis",
-        tip_analyze: "Find large folders in current directory",
+        tag_sim: "Duration Sim",
+        tag_sim_short: "Duration",
+        label_dup_video: "Videos (Exact Match + Duration Sim + Name Sim)",
+        label_dup_image: "Images (Exact Match + Name Sim)",
+        label_dup_other: "Others (Exact Match + Name Sim)",
+        btn_analyze: "Folder Analysis",
+        tip_analyze: "Filter or Deduplicate Folders",
+        btn_export: "Export Directory",
+        tip_export: "Generate and download the file tree of the current path",
+        title_export_format: "Export Format",
+        lbl_export_current: "Export directory structure for all items in the current path",
+        opt_tree_view: "Tree View",
+        opt_list_view: "List View",
+        msg_exporting: "Generating directory tree...",
         str_analyze_results: "Match Results",
-        lbl_analyze_title: "Storage Analysis",
-        lbl_analyze_desc: "Find folders in this path larger than:",
         lbl_size_threshold: "Size Threshold",
-        title_analyze_result: "Analysis Results",
+        title_analyze_result: "Folder Analysis Results",
+        opt_ana_large: "Folder Perspective",
+        lbl_analyze_selected: "Execute Folder Perspective on {n} selected items",
+        lbl_analyze_current: "Execute Folder Perspective on all items in the current path",
+        opt_ana_sim: "Folder Deduplication",
+        lbl_ana_sim_selected: "Execute Folder Deduplication on {n} selected items",
+        lbl_ana_sim_current: "Execute Folder Deduplication on all items in the current path",
+        title_algo_help: "Algorithm Guide",
+        algo_help_content: "Name Match: Finds folder groups with similar names and sizes.\nSimilarity Match: Finds folder groups with highly overlapping internal files.\nContainment Match: Finds subset redundancies where small folder content is fully covered by a large folder.\n\nAccuracy: Similarity > Containment > Name\nScope: Containment > Similarity",
+        lbl_threshold: "Threshold",
+        lbl_sim_score: "Similarity",
+        lbl_containment: "Containment",
+        lbl_name_match: "Name Match",
+        lbl_sim_match: "Similarity Match",
+        lbl_contain_match: "Containment Match",
+        lbl_ana_min: "Min",
+        lbl_ana_max: "Max",
 
-        /* --- Rename, Prune & Blacklist --- */
+        /* --- 重命名、清理与资源管理器 --- */
         btn_prune: "Prune Empty Folders",
         tip_prune: "Delete empty folders [Ctrl] + [Delete]",
         btn_rename: "Rename",
         tip_rename: "Rename [F2]",
         btn_bulkrename: "Bulk Rename",
         tip_bulkrename: "Bulk Rename [F2]",
-        title_blacklist: "Blacklist Management",
+        title_blacklist: "Resource Manager",
         btn_blacklist_run: "Run Cleanup Now",
         btn_clear_list: "Clear List",
         tip_bl_desc: "Blacklisted items only removed via 'Run Cleanup Now'.",
-        tip_blacklist_input: "Blacklist Settings [Alt] + [Delete]",
-        label_bl_folder: "Folder Blacklist (Exact)",
-        label_bl_file: "File Blacklist (Exact)",
+        tip_blacklist_input: "Resource Manager [Alt] + [Delete]",
+        label_bl_folder: "Folder List (Exact)",
+        label_bl_file: "File List (Exact)",
         lbl_type_folder: "Folder",
         lbl_type_file: "File",
         ph_bl_folder: "Paste or use right-click menu to add folders.",
         ph_bl_file: "Paste or use right-click menu to add files.",
-        modal_bl_preview: "Blacklist Scan Results",
+        modal_bl_preview: "Scan Results",
         btn_bl_delete: "Delete Selected",
         modal_rename_title: "Rename",
         modal_rename_multi_title: "Bulk Rename",
@@ -2600,7 +2799,7 @@ const T = {
         label_regex: "Regex",
         placeholder_find: "Search for...",
         placeholder_replace: "Replace with... (leave empty to delete)",
-        label_jav: "Smart JAV/FC2 ID Recognition",
+        label_jav: "JAV/FC2 Naming",
         lbl_rn_pattern: "Naming Template",
         lbl_rn_case_convert: "Case Conversion",
         opt_rn_keep_origin: "(No change)",
@@ -2621,7 +2820,7 @@ const T = {
         label_replace_find: "Find",
         label_replace_to: "Replace With",
 
-        /* --- Archive & Unzip --- */
+        /* --- 解压相关 --- */
         btn_unzip: "Bulk Extract",
         tip_unzip: "Bulk Extract [Alt] + [U]",
         btn_unzip_all: "Extract All",
@@ -2629,7 +2828,7 @@ const T = {
         title_input_pwd: "Password Required",
         lbl_pwd_prompt: "Enter password:",
 
-        /* --- Media Player & Image Search --- */
+        /* --- 媒体播放器与以图搜图 --- */
         btn_ext: "External Play",
         tip_ext: "Play with PotPlayer or get stream link [Alt] + [E]",
         btn_img_search: "Image Search [F]",
@@ -2677,6 +2876,7 @@ const T = {
         export_link_title: "Export Video Stream Link",
         btn_start_play: "Start Play",
         btn_copy_link: "Copy Link",
+        tip_copy_link: "Copy Link [Alt] + [C]",
         opt_player_other: "Others (Export Link)",
         lbl_player: "Player",
         btn_mark: "Mark",
@@ -2689,7 +2889,15 @@ const T = {
         type_app: "Application",
         type_suffix: "File",
 
-        /* --- Pickers, Settings & Search --- */
+        /* --- 设置与搜索 --- */
+        label_turbo_mode: "Turbo Mode",
+        desc_turbo_mode: "Auto-launch & block native sync (Recommended)",
+        lbl_aria2_status: "Connection",
+        ph_aria2_secret: "Secret (Optional)",
+        str_connected: "Connected",
+        str_conn_fail: "Failed",
+        str_connecting: "Testing...",
+        tip_mixed_content: "Common Ports:\n• 6800 (Aria2 Standard)\n• 16800 (Motrix Default)\n• 6881 (Others)",
         picker_title: "Select Folder",
         picker_all: "All Files",
         picker_new: "New Folder",
@@ -2719,22 +2927,51 @@ const T = {
         opt_engine_saucenao: "SauceNAO",
         opt_engine_tracemoe: "trace.moe",
         label_dup_strictness: "Similarity Threshold",
-        opt_strict: "Duration ±1s, Size ±5%",
-        opt_loose: "Duration ±2s, Size ±10%",
+        opt_strict: "Strict",
+        opt_loose: "Loose",
         label_comic_mode: "Media Mode",
         desc_comic_mode: "Default A-Z sorting for Image/Video only folders.",
         label_aria2_url: "Aria2 RPC URL",
-        label_aria2_token: "Aria2 Token",
+        label_aria2_token: "Aria2 RPC Token",
         label_privacy_mode: "Privacy Mode",
         label_blur_cover: "Blur Cover Images",
+        label_dl_filter_ext: "Download Extension Filter (e.g. .txt, .jpg)",
+        label_dl_filter_name: "Download Name Filter (Keyword or Full Name)",
+        lbl_dl_filter: "Folder Download Filter",
+        desc_dl_filter: "Auto-exclude matching files when downloading/pushing folders",
+        lbl_config_manage: "Config Management",
+        btn_export_data: "Export Backup",
+        btn_import_data: "Import Backup",
+        btn_clean_data: "Clear Local Data",
+        title_clean_data: "Select Items to Clear",
+        msg_clean_confirm: "Are you sure you want to permanently delete the selected local data? This cannot be undone.",
+        msg_clean_success: "Local data cleared. Page will refresh...",
+        opt_cfg_index: "Global Index (Synced Directory Structure/File Snapshots)",
+        opt_cfg_pref: "Preferences (UI Looks/Habits/Sort Order)",
+        opt_cfg_rules: "Rules (Resource Manager/Share Limits/Search/Download Rules)",
+        opt_cfg_vault: "Vault (Extract Password Memory)",
+        opt_cfg_history: "Video Cache (Play Progress / Duration Cache)",
+        opt_cfg_cache: "Cache (Folder Mod-Time/Last Position/Fingerprint)",
+        msg_import_confirm: "Importing config will overwrite all current settings. Continue?",
+        msg_import_success: "Config imported successfully. Page will refresh...",
+        err_invalid_config: "Invalid config file: Missing fingerprint or format error",
+        err_json_format: "Parse failed: JSON syntax error or file corrupted",
         lbl_storage: "Storage",
         lbl_browse_exp: "Browsing Experience",
-        lbl_skip_bl_on_del: "Skip blacklisted files on delete",
+        lbl_skip_bl_on_del: "Skip resources recorded in manager on delete",
+        lbl_pwd_manage: "Extraction Password Management",
+        title_pwd_vault: "Password Vault",
+        lbl_pwd_try_count: "Max password retries per archive",
+        tip_pwd_manual: "One password per line, Enter to wrap",
         str_root_dir_cn: "Root",
+        btn_ana_select: "Smart Select",
+        opt_keep_new: "Keep Newest", opt_keep_old: "Keep Oldest",
+        opt_keep_large: "Keep Largest", opt_keep_small: "Keep Smallest",
+        opt_keep_short: "Keep Shortest Name", opt_keep_long: "Keep Longest Name",
 
-        /* --- Status, Progress & Loading --- */
+        /* --- 状态、进度与加载短语 --- */
         loading: "Loading...",
-        loading_detail: "Fetching file list...",
+        loading_detail: "Full-speed indexing directory...",
         loading_fetch: "Fetching... ({n})",
         loading_dup: "Analyzing duplicates... ({p}%)",
         str_loading_placeholder: "Loading...",
@@ -2757,8 +2994,8 @@ const T = {
         str_deleting: "Deleting...",
         str_saving: "Saving...",
         str_saving_dots: "Saving...",
-        str_checking_bl: "Checking blacklist...",
-        str_processing: "Processing...",
+        str_checking_bl: "Matching records...",
+        str_processing: "System processing at full speed...",
         str_cleanup_done: "Cleanup completed.",
         str_waiting_preload: "Waiting for preload...",
         str_copying: "Copying to clipboard...",
@@ -2781,7 +3018,6 @@ const T = {
         str_upload_2: "Node 1 timeout, switching to Node 2...",
         str_upload_3: "Node 2 timeout, trying last node...",
         str_upload_fail_copy: "Upload failed, copying to clipboard...",
-        btn_scanning: "Scanning...",
         msg_transcoding: "Transcoding in cloud...",
         msg_transcoding_wait: "Server is processing this video, please wait.",
         str_preparing: "Preparing extraction...",
@@ -2808,7 +3044,7 @@ const T = {
         lbl_done_check: "✔ Done",
         msg_limit_updated: "Access limit updated",
 
-        /* --- Messages, Alerts, Dialogs --- */
+        /* --- 提示、确认与交互消息 --- */
         title_alert: "Notice",
         title_confirm: "Confirm",
         title_prompt: "Input",
@@ -2822,9 +3058,8 @@ const T = {
         msg_down_success: "Browser download called for {n} files.",
         msg_batch_txt: "Download list (.txt) generated.",
         msg_clear_history_done: "Removed from history.",
-        msg_unzip_confirm_batch: "Detected {n} archives. Extract all to their respective folders?",
         msg_skip_unzipped: "Skipped {n} already extracted items.",
-        msg_auto_cancel_done: "Background patrol: Auto-canceled {n} shares that reached limits.",
+        msg_unzip_skip_del_confirm: "Detected {n} already extracted archives. Move them to Trash?",
         msg_cancel_share_confirm: "Are you sure you want to stop {n} shares?\nLinks will expire immediately.",
         msg_pwd_updating: "Updating password...",
         msg_pwd_updated: "Password updated.",
@@ -2840,7 +3075,6 @@ const T = {
         msg_clear_sel_confirm: "You have {n} duplicates selected. Clear selection?",
         str_bl_stat: "Matches: {n} | Selected: {m}",
         str_hits: "Hits",
-        msg_exit_confirm: "Are you sure you want to close the file manager?",
         msg_settings_saved: "Settings saved. Page will refresh.",
         msg_name_exists: "Name already exists: {n}",
         str_name_conflict: "(Conflict)",
@@ -2855,7 +3089,6 @@ const T = {
         msg_del_select: "Select rows to delete first!",
         msg_del_items_done: "Deleted {n} items.",
         msg_copy_success: "Copied to clipboard",
-        copy_failed: "Copy failed. Please keep the window active and try again.",
         str_redirecting: "Redirecting to Google Lens...",
         msg_manual_paste: "Upload timeout. Screenshot copied to clipboard, press {cmd} in new window.",
         msg_starring: "Adding to favorites...",
@@ -2875,7 +3108,6 @@ const T = {
         msg_sub_drop_load: "Subtitle loaded via drag-and-drop: {n}",
         msg_resume_hint: "Resumed from {t}. Click here to ",
         msg_unzip_confirm_n: "Extract {n} files to current directory?",
-        log_upgrade_cache: "♻️ Legacy cache detected. Upgrading data structure to sync Favorites...",
         msg_task_paused: "Paused",
         msg_task_added: "Added {n} upload tasks",
         msg_task_fast_success: "Instant upload successful",
@@ -2887,6 +3119,9 @@ const T = {
         msg_skip_conflict: "{n} paths busy",
         msg_skip_invalid: "Auto-skipped invalid items: ",
         msg_creating_cloud_task: "Creating cloud download...",
+        str_parsing_torrent: "Parsing torrent file...",
+        err_torrent_no_info: "Parse failed: No valid info found",
+        err_file_read: "File read error",
         msg_cloud_task_finish: "Finished: {s} successful, {f} failed",
         msg_cloud_task_success: "🎉 Successfully created {n} tasks",
         msg_prepare_restore: "Preparing to restore...",
@@ -2897,17 +3132,16 @@ const T = {
         msg_retry_submitted: "Resubmitted {n} tasks.",
         msg_jav_fetching_net: "Fetching MissAV data...",
         msg_op_blocked_moving: "⚠️ Operation Blocked\n\nFile transfer in progress. Please wait.",
-        msg_op_blocked_analyzing: "⚠️ Operation Blocked\n\nFile transfer in progress. Analysis requires a stable directory.",
-        msg_analyze_only_normal_dir: "Please use this in a normal directory.",
-        msg_analyze_no_large_folders: "No folders larger than {s} found.",
+        msg_op_blocked_analyzing: "⚠️ Operation Blocked\n\nFile transfer in progress. For accurate Folder Analysis data, please wait for the current task to finish.",
+        msg_op_blocked_exporting: "⚠️ Operation Blocked\n\nFile transfer in progress. To ensure accurate export text, please wait for the current task to finish.",
+        msg_analyze_only_normal_dir: "Please select folder(s)",
+        msg_analyze_no_large_folders: "No folders found within the threshold range ({s})",
         msg_analyze_summary_fmt: "Found <b>{n}</b> folders larger than {s}GB (sorted by size)",
-        msg_rn_blocked_moving: "⚠️ Operation Blocked\n\nFile transfer in progress. Rename blocked to prevent data loss.",
         msg_prune_blocked_moving: "⚠️ Operation Blocked\n\nCannot prune folders during a transfer.",
-        msg_batch_download_blocked: "⚠️ Operation Blocked\n\nTransfer in progress. Please wait for list integrity.",
         msg_global_index_blocked_moving: "⚠️ Operation Blocked\n\nGlobal indexing requires a stable structure. Please wait for the transfer.",
         msg_resource_locked_download: "⚠️ Operation Blocked\n\nSelected items are being moved. Please wait.",
         msg_resource_locked_aria2: "⚠️ Operation Blocked\n\nCannot send to Aria2 while files are moving.",
-        msg_flatten_blocked_moving: "⚠️ Operation Blocked\n\nFlattening during a transfer may cause missing files. Try later.",
+        msg_flatten_blocked_moving: "⚠️ Operation Blocked\n\nFile transfer in progress. Performing File Analysis at this time may result in missing or duplicate file lists, please try again later.",
         err_task_conflict: "⚠️ Operation Blocked\n\nGlobal cleanup requires a stable structure. Please wait.",
         title_del_task_confirm_fmt: "Delete {n} transfer tasks?",
         lbl_del_cloud_files_too: "Also delete files in cloud drive",
@@ -2917,14 +3151,11 @@ const T = {
         msg_task_clear_success_fmt: "Cleared {n} upload tasks",
         msg_unzip_virtual_view_warn: "You are in a Virtual View. Extracted files will appear in the <b>original folders</b> of the archives, <b>not</b> in this list.<br><br>Continue?",
         msg_smart_matching_file: "Matching password... ({n})",
-        msg_unzip_batch_submitted: "✅ Submitted {n} extraction tasks",
+        msg_unzip_batch_submitted: "✅ Completed {n} extraction tasks",
         msg_unzip_batch_skipped: " ({n} skipped)",
         msg_unzip_check_source: ". Please check source directory for results.",
         tip_jump_to_folder: "Go to folder",
         msg_task_deleted: "Task deleted",
-        msg_flatten_warn: "Flattening will scan all files under this path.\nContinue?",
-        msg_flatten_selected: "Flatten {n} selected items?\n\nOnly selected folders will be scanned recursively.",
-        msg_flatten_done: "Flattening complete.\nFound {n} files.",
         msg_scan_done: "Scan complete!\nFound {n} files across {f} folders.",
         msg_scan_fail: "\n\n❌ {n} failures.",
         msg_scan_fix: "\n\n✅ Auto-fixed {n} network errors.",
@@ -2943,26 +3174,25 @@ const T = {
         msg_dup_warn: "Search for duplicate files?",
         msg_dup_result: "Found {n} duplicate groups.",
         msg_dup_none: "No duplicates found.",
-        msg_bl_add_done: "Added {n} items to blacklist.",
-        msg_bl_remove_done: "Removed {n} items from blacklist.",
         msg_bl_stop: "Operation stopped.",
-        msg_bl_empty: "Blacklist is empty.",
-        msg_bl_clear_confirm: "Clear all blacklist entries? This cannot be undone.",
-        msg_blacklist_run_none: "No blacklisted items found in cloud drive.",
-        msg_blacklist_run_confirm: "Found {n} blacklisted items.\n\nMove to trash now?",
-        msg_bl_run_limit: "⚠️ Mode Restriction\n\nBlacklist cleanup requires physical recursive scanning. Please run from Home or a standard folder.",
-        msg_del_protected: "Protected {n} blacklisted files from deletion.",
+        msg_bl_add_done: "Added {n} items to records.",
+        msg_bl_remove_done: "Removed {n} items from records.",
+        msg_bl_empty: "Record list is empty, cannot run.",
+        msg_bl_clear_confirm: "Clear all records? This cannot be undone.",
+        msg_blacklist_run_none: "No matching records found in cloud drive.",
+        msg_blacklist_run_confirm: "Found {n} recorded items.\n\nMove to trash now?",
+        msg_bl_run_limit: "⚠️ Mode Restriction\n\nCleanup requires physical recursive scanning. Please run from Home or a standard folder.",
+        msg_del_protected: "Protected {n} recorded files from deletion.",
         msg_del_none: "No files to delete.",
         msg_bl_scanning: "Global scanning... \nFolders: {d} | Hits: {f}",
         rn_tip_wait: "Please set rules",
+        rn_tip_jav: "Click the button above to start matching",
         rn_tip_none: "No matching items",
         rn_stat: "Matches: {n} | Valid changes: {m}",
         rn_warn_confirm: "Rename {n} files?",
         msg_bulkrename_done: "Renamed {n} items.",
         msg_rn_all_skipped: "❌ All items skipped due to name conflicts.",
-        msg_rn_part_skipped: "\n⚠️ ({n} files skipped due to name conflicts)",
-        msg_rn_fail_count: "\n({n} failed)",
-        msg_rn_success_skip: "\n⚠️ {n} name conflicts skipped",
+        msg_rn_fail_count: "Skipped {n} items (name conflict)",
         msg_prune_confirm: "Search for empty folders in the current list?",
         msg_prune_none: "No empty folders found.",
         msg_prune_found: "Found {n} empty folders.\nDelete them now?",
@@ -2976,9 +3206,14 @@ const T = {
         msg_unzip_fail: "Extraction request failed.",
         msg_jszip_fail: "JSZip failed to load. Check your network.",
 
-        /* --- Error Messages --- */
+        /* --- 错误提示 --- */
         err_invalid_links: "Please enter valid links.",
         err_pwd_format: "Password must be 4-10 alphanumeric characters.",
+        err_invalid_torrent: "Invalid torrent file format",
+        err_torrent_complex: "Parsing complexity too high (possibly invalid file)",
+        err_torrent_format: "Torrent structure corrupted",
+        err_torrent_len: "Field length parsing error",
+        err_torrent_char: "Unexpected character encountered",
         err_share_code_exists: "Share code already taken.",
         err_folder_not_ready: "Cloud folder is being created, please try again later.",
         err_item_deleted: "Item does not exist.",
@@ -3015,53 +3250,66 @@ const T = {
         str_action_failed: "Action Failed",
         str_scan_error: "Scan Error",
         err_limit_too_low: "Failed: New limit ({n}) must be higher than current ({s}).",
+        err_vault_max: "Password vault supports storing up to 50 common passwords",
+        err_pwd_len: "A single password length cannot exceed 127 characters",
 
-        /* --- Help Documentation --- */
+        /* --- 帮助文档 --- */
         modal_help_title: "Help",
         help_desc: `
         <div class="pk-no-scrollbar pk-help-scroll" style="font-size:13px;line-height:1.6;color:var(--pk-fg);text-align:justify;text-justify:inter-ideograph;word-break:break-all;pointer-events:auto;display:block;">
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">✨ Navigation & Experience Engine</b><br>
-                • <b>UI Refactoring</b>: Built upon official features, the interface is redesigned to resemble <b>Windows File Explorer</b>. Supports precise drag-and-drop into the path bar (including dropdown lists).<br>
-                • <b>Advanced Path Bar</b>: Supports scroll wheel navigation and dropdown peer-level switching. Global search, duplicate finding, space analysis, and file flattening are integrated into the path bar, supporting path echoing and source backtracking.<br>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">✨ Experience & Navigation Engine</b><br>
+                • <b>UI Refactoring</b>: Built upon official features, the interface is redesigned to resemble <b>Windows File Explorer</b>.<br>
+                • <b>Turbo Mode</b>: When enabled, auto-launches the script and physically blocks native web sync logic. Significantly reduces memory leak risks, ensuring ultimate response speed and stability.<br>
+                • <b>Advanced Path Bar</b>: Supports scroll wheel navigation and dropdown peer-level switching. Global search and file/folder analysis are integrated into the path bar, supporting path echoing and source backtracking.<br>
                 • <b>Enhanced UX</b>: Supports multi-dimensional sorting like favorites and file type priority. Features light/dark theme switching and one-click <b>cover blurring</b> for privacy protection.<br>
-                • <b>Window Management</b>: One-click <b>maximize/minimize</b>. Maximized mode automatically enables a large line-height (60px) responsive layout for clearer icons and thumbnails.<br>
                 • <b>Background Indexing</b>: A <b>blue breathing dot</b> on the home icon indicates the directory tree is automatically syncing in the background.<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* Note: The system default folder (My Pack) is under strict physical protection against accidental deletion, copying, moving, and renaming.</i>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* Note: The default folder (My Pack) is officially protected against accidental deletion, copying, moving, and renaming.</div>
             </div>
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">📂 Batch & Space Management</b><br>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 Batch & Space Management</b><br>
                 • <b>Batch Rename</b>: Supports <b>Regex replace/delete</b>, <b>episode serialization</b>, text <b>formatting</b> (case/full-half width), smart naming for <b>AV codes/FC2 IDs</b>, <b>ad prefix removal</b>, and MIME-based <b>extension fixing</b>.<br>
-                • <b>Space Analysis</b>: Filters folders by size and supports displaying folder sizes in lists.<br>
-                • <b>Smart Organizing</b>: One-click empty folder cleanup. <b>File Flattening</b> extracts all sub-level files within selected directories with extension filtering. <b>Smart Duplicate Finder</b> activates after flattening, offering a tri-modal linkage of <b>precise Hash</b>, <b>similar features</b> (duration/size tolerance settings), and <b>name matching</b>.<br>
-                • <b>Batch Unzip</b>: Integrated <b>Password Vault</b> for automatic cross-file and cross-batch password memory and auto-filling.<br>
-                • <b>Precise Cleanup</b>: Custom <b>file blacklist</b> for global junk resource cleanup. Logs can be saved as a whitelist in settings to automatically bypass recorded files during batch deletion.<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* Note: All loaded caches are recorded until the page is closed or refreshed. Please do not modify files via other clients during processing to avoid dirty data.</i>
+                • <b>Analysis Suite</b>: <b>File Analysis</b> integrates "File Filtering" and "File Deduplication" (hash/duration/name tri-modal); <b>Folder Analysis</b> integrates "Folder Filtering" and "Folder Deduplication" (name/similarity/containment tri-modal); and supports generating/downloading the <b>directory tree</b> list of the current path.<br>
+                • <b>Smart Organizing</b>: One-click empty folder cleanup; <b>Batch Unzip</b> integrates automatic password memory and smart auto-filling, supporting auto-skip and deletion of extracted items.<br>
+                • <b>Resource Manager</b>: Can be used as a <b>File Blacklist</b> to clean up junk resources with one click; or as a <b>File Whitelist</b> to auto-skip and protect items during batch deletion.<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* Note: To avoid data sync conflicts, please do not modify files via other clients during processing.</div>
             </div>
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">🌐 Transfer & Sharing Hub</b><br>
-                • <b>Share Management</b>: Set extraction limits and valid periods. Real-time monitoring during script execution auto-destroys links once limits are reached.<br>
-                • <b>Offline & Cloud</b>: Supports batch cloud downloading for Magnet, eDonkey, and short video links, integrating web snapshots for permanent archiving.<br>
-                • <b>Ultra-fast Upload</b>: Supports direct drag-and-drop for large local files and nested folders, bypassing official web limits and <b>significantly reducing the interruption rate of small file transfers</b>.
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🌐 Transfer & Sharing Hub</b><br>
+                • <b>Share Management</b>: Supports setting extraction limits. Shares are automatically canceled once the limit is reached.<br>
+                • <b>Offline Download</b>: Supports batch offline downloading via links and batch exporting of resource links.<br>
+                • <b>Ultra-fast Upload</b>: Supports direct drag-and-drop for local large files and nested folders, bypassing official web limits and <b>significantly reducing the interruption rate of small file transfers</b>.
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* Note: Extraction limit interception only works when the webpage is kept open and the computer is awake.</div>
             </div>
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">🎬 Immersive Media Enhancements</b><br>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🎬 Immersive Media Enhancements</b><br>
                 • <b>Playback Engine</b>: Supports 0.5x-3.0x speed, multi-directional rotation/mirroring, and forced aspect ratios. Features playback memory, auto-skip intro/outro, and multi-video <b>autoplay/loop</b> modes. The progress bar generates real-time <b>thumbnail previews</b>.<br>
-                • <b>Subtitle System</b>: Loads cloud subtitles with matching names, local files, and cross-site online search. Supports millisecond-level subtitle offset tweaking and direct <b>drag-and-drop parsing</b> of local text.<br>
-                • <b>Visual Aids</b>: Built-in multi-engine (Google/Yandex/SauceNAO/trace.moe) reverse image search for pictures or current video frames. "Media Mode" can be activated in settings to auto-sort pure series or manga folders alphabetically (A-Z).<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* Note: The playback history list only records progress generated within the script environment.</i>
+                • <b>Subtitle System</b>: Supports loading cloud subtitles with matching names, local files, and cross-site online search. Supports millisecond-level subtitle offset tweaking and direct <b>drag-and-drop parsing</b> of local text.<br>
+                • <b>Visual Aids</b>: Built-in multi-engine reverse image search for pictures or current video frames; "Media Mode" can be activated in settings to auto-sort pure series or manga folders alphabetically (A-Z).<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* Note: The playback history list continuously records progress generated within the script environment.</div>
             </div>
-            <div>
-                <b style="font-size:14px; color:var(--pk-pri);">⚡ Download & Distribution</b><br>
-                • <b>External Direct Connection</b>: Supports one-click, download-free file pushing to <b>Aria2</b> nodes via RPC protocol.
+            <div style="margin-bottom:12px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ Configuration & Data Management</b><br>
+                • <b>Config Backup</b>: Supports exporting preferences, rules, password vaults, and history data as JSON backup files with digital fingerprints for seamless cross-device migration.<br>
+                • <b>Data Cleanup</b>: Supports on-demand clearing of global index, preferences, rules, password vaults, and history data to free up local storage and protect privacy.<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* Note: The global index is cleared when the webpage is closed, while preferences, rules, password vaults, and history data are saved persistently.</div>
+            </div>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚡ Download & Distribution</b><br>
+                • <b>External Direct Connection</b>: Supports one-click, download-free file pushing to <b>Aria2</b> nodes via RPC protocol.<br>
+                • <b>Download Filtering</b>: Supports setting <b>folder download filters</b>. Can automatically exclude specific files by extension or keyword for precise distribution.
+            </div>
+            <div style="margin-top:16px; color:#d93025; font-weight:bold; text-align:center; font-size:11px; border-top:1px dashed rgba(217,48,37,0.2); padding-top:12px; letter-spacing:0.5px; opacity:0.9;">
+                This project strictly adheres to the CC-BY-NC-SA-4.0 license and is strictly prohibited for any commercial use.
             </div>
         </div>`
     },
     ko: {
-        /* --- 공통 및 기본 UI (General & UI Basics) --- */
+        /* --- 通用与基础UI --- */
         title: "PikPak 인핸서 마스터",
         str_original: "원본 화질",
         str_original_fast: "원본 (고속)",
+        str_folders: "폴더",
         str_files: "파일",
         unit_folders: "개 폴더",
         unit_days: "일",
@@ -3100,10 +3348,11 @@ const T = {
         cat_document: "문서",
         cat_software: "앱",
         cat_archive: "압축 파일",
+        cat_torrent: "BT 토렌트",
         cat_other: "기타",
         btn_exit_filter: "필터 종료",
 
-        /* --- 속성 패널 (Properties) --- */
+        /* --- 属性面板 --- */
         ctx_property: "속성",
         title_property: "파일 속성",
         lbl_prop_name: "파일 이름",
@@ -3121,7 +3370,7 @@ const T = {
         fmt_prop_count: "파일 {f}개, 폴더 {d}개 포함",
         str_prop_offline: "오프라인 작업",
 
-        /* --- 내비게이션, 뷰 모드 및 우클릭 메뉴 (Navigation & Context Menu) --- */
+        /* --- 导航、视图模式与右键菜单 --- */
         btn_nav_home: "홈",
         btn_nav_share: "내 공유",
         btn_nav_offline: "오프라인 전송",
@@ -3133,9 +3382,10 @@ const T = {
         title_offline: "내 오프라인",
         trash_title: "휴지통",
         trash_notice: "휴지통의 파일은 최대 15일 동안 보관됩니다",
+        history_notice: "스크립트 환경 내에서 발생한 재생 진행률만 기록됩니다",
         ctx_open: "열기",
-        ctx_add_bl: "블랙리스트에 추가",
-        ctx_remove_bl: "블랙리스트에서 제거",
+        ctx_add_bl: "리소스 관리자에 추가",
+        ctx_remove_bl: "리소스 관리자에서 제거",
         ctx_rename: "이름 바꾸기",
         ctx_copy: "복사",
         ctx_copy_name: "파일명 복사",
@@ -3148,7 +3398,7 @@ const T = {
         ctx_locate: "폴더 위치 열기",
         ctx_share: "공유",
 
-        /* --- 공통 파일 작업 버튼 (General Operations) --- */
+        /* --- 通用文件操作按钮 --- */
         btn_down: "다운로드",
         tip_down: "다운로드 [Alt] + [D]",
         btn_aria2: "Aria2 전송",
@@ -3182,6 +3432,7 @@ const T = {
         tip_theme: "테마 전환 [Alt] + [T]",
         tip_rotate: "회전 [R]",
         tip_mirror: "좌우 반전 [H]",
+        tip_flip_v: "상하 반전 [V]",
         tip_maximize: "최대화 [M]",
         tip_minimize: "최소화 [M]",
         tip_full_screen: "전체 화면 [Enter]",
@@ -3193,11 +3444,13 @@ const T = {
         btn_stop: "중지",
         tip_stop: "현재 작업 즉시 중지",
         btn_settings: "설정",
-        tip_settings: "시스템 설정 [Alt] + [S]",
+        btn_logout: "PikPak 로그아웃",
+        msg_logout_confirm: "로그아웃 하시겠습니까?",
+        tip_settings: "설정 및 기타 [Alt] + [S]",
         lbl_upload_to: "업로드 위치: ",
         msg_move_done: "이동 완료.",
 
-        /* --- 오프라인, 업로드 및 클라우드 다운로드 (Offline, Upload & Cloud Download) --- */
+        /* --- 离线、上传与云下载 --- */
         btn_upload: "로컬 업로드",
         btn_up_file: "파일 업로드",
         btn_up_folder: "폴더 업로드",
@@ -3229,6 +3482,7 @@ const T = {
         lbl_save_to: "파일 저장 위치:",
         lbl_default_folder: "기본 폴더",
         btn_via_torrent: "토렌트 파일로 생성",
+        tip_cloud_save_path: "일반 클라우드 다운로드 파일은 My Pack 디렉토리에 저장되며, 다른 앱의 클라우드 다운로드 파일은 My [XYZ] 디렉토리에 저장됩니다([XYZ]는 앱 이름).",
         title_save_method: "저장 방식",
         msg_save_snapshot_desc: "이 링크는 웹페이지 스냅샷으로만 저장할 수 있습니다.",
         tip_snapshot_details: "PikPak이 이 링크에서 미디어 파일을 직접 수집할 수 없습니다. 대신 웹페이지 스냅샷으로 저장하며, 최대한 전체 내용을 보존합니다.",
@@ -3237,7 +3491,7 @@ const T = {
         btn_modify: "수정",
         str_snap_link_count_suffix: " 외 {n}개 링크",
 
-        /* --- 공유 관리 (Share Management) --- */
+        /* --- 分享管理 --- */
         btn_cancel_share: "공유 취소",
         share_copy_suffix: "이 내용을 복사한 후 PikPak 앱을 열면 초고속 재생을 즐길 수 있습니다",
         share_copy_pwd: "비밀번호",
@@ -3292,12 +3546,17 @@ const T = {
         cal_week_days:["일", "월", "화", "수", "목", "금", "토"],
         cal_months:["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
 
-        /* --- 구조 평탄화, 중복 확인 및 공간 분석 (Flatten, Dup & Analyze) --- */
-        btn_scan: "구조 평탄화",
-        tip_scan: "중복 확인을 위해 하위 폴더의 모든 파일을 나열합니다",
-        btn_dup: "중복 파일 찾기",
-        tip_dup: "중복 파일 검사",
-        modal_dup_title: "중복 검사 옵션",
+        /* --- 文件分析与文件夹分析 --- */
+        title_file_analysis: "파일 분석",
+        btn_scan: "파일 투시",
+        lbl_scan_selected: "선택한 {n}개 항목에 대해 파일 투시를 실행합니다",
+        lbl_keyword_filter: "키워드 제외",
+        ph_keyword_filter: "제외할 키워드, 쉼표로 구분",
+        lbl_scan_current: "현재 경로의 모든 항목에 대해 파일 투시를 실행합니다",
+        tip_dup: "파일 중복 확인",
+        lbl_dup_selected: "선택한 {n}개 항목에 대해 파일 중복 확인을 실행합니다",
+        lbl_dup_current: "현재 경로의 모든 항목에 대해 파일 중복 확인을 실행합니다",
+        tip_scan_dup: "파일 필터링 또는 중복 확인",
         lbl_dup_tool: "삭제 대상 선택:",
         lbl_dup_reset: "↺ 초기화 (고정 해제 및 선택 취소)",
         lbl_dup_select_folder: "📂 폴더별 선택",
@@ -3309,52 +3568,61 @@ const T = {
         btn_start_scan: "스캔 시작",
         tag_hash: "정밀 일치",
         tag_hash_short: "정밀",
-        tag_name: "이름 일치",
+        tag_name: "이름 유사",
         tag_name_short: "이름",
-        tag_sim: "유사 일치",
-        tag_sim_short: "유사",
-        label_dup_video: "비디오 파일 (정밀 + 유사 + 이름 일치)",
-        label_dup_image: "이미지 파일 (정밀 일치만)",
-        label_dup_other: "기타 파일 (정밀 일치만)",
-        btn_toggle_size: "파일 크기",
-        tip_toggle_size: "파일 크기를 기준으로 중복 파일을 자동 선택합니다.",
-        btn_toggle_date: "업로드 날짜",
-        tip_toggle_date: "업로드 날짜를 기준으로 중복 파일을 자동 선택합니다.",
-        cond_small: "큰 파일 유지",
-        cond_large: "작은 파일 유지",
-        cond_small_short: "가장 작음",
-        cond_large_short: "가장 큼",
-        cond_old: "최신 유지",
-        cond_new: "오래된 항목 유지",
-        cond_old_short: "가장 오래됨",
-        cond_new_short: "가장 최신",
-        btn_analyze: "공간 분석",
-        tip_analyze: "현재 디렉토리 내 대용량 폴더 분석",
+        tag_sim: "재생시간 유사",
+        tag_sim_short: "재생시간",
+        label_dup_video: "비디오 파일 (정밀 일치 + 재생시간 유사 + 이름 유사)",
+        label_dup_image: "이미지 파일 (정밀 일치 + 이름 유사)",
+        label_dup_other: "기타 파일 (정밀 일치 + 이름 유사)",
+        btn_analyze: "폴더 분석",
+        tip_analyze: "폴더 필터링 또는 중복 확인",
+        btn_export: "디렉토리 내보내기",
+        tip_export: "현재 경로의 파일 트리 목록 생성 및 다운로드",
+        title_export_format: "내보내기 스타일",
+        lbl_export_current: "현재 경로의 모든 항목에 대해 디렉토리 내보내기를 실행합니다",
+        opt_tree_view: "트리 뷰",
+        opt_list_view: "리스트 뷰",
+        msg_exporting: "디렉토리 트리 생성 중...",
         str_analyze_results: "일치 결과",
-        lbl_analyze_title: "공간 분석",
-        lbl_analyze_desc: "지정한 크기보다 큰 모든 하위 폴더 찾기:",
         lbl_size_threshold: "감지 임계값",
-        title_analyze_result: "공간 분석 결과",
+        title_analyze_result: "폴더 분석 결과",
+        opt_ana_large: "폴더 투시",
+        lbl_analyze_selected: "선택한 {n}개 항목에 대해 폴더 투시를 실행합니다",
+        lbl_analyze_current: "현재 경로의 모든 항목에 대해 폴더 투시를 실행합니다",
+        opt_ana_sim: "폴더 중복 확인",
+        lbl_ana_sim_selected: "선택한 {n}개 항목에 대해 폴더 중복 확인을 실행합니다",
+        lbl_ana_sim_current: "현재 경로의 모든 항목에 대해 폴더 중복 확인을 실행합니다",
+        title_algo_help: "알고리즘 설명",
+        algo_help_content: "이름 일치: 이름과 크기가 유사한 폴더 그룹을 찾습니다.\n유사도 일치: 내부 파일이 고도로 중복되는 폴더 그룹을 찾습니다.\n포함율 일치: 작은 폴더의 내용이 큰 폴더에 완전히 포함된 부분 집합 중복을 찾습니다.\n\n정확도: 유사도 일치 > 포함율 일치 > 이름 일치\n범위: 포함율 일치 > 유사도 일치",
+        lbl_threshold: "임계값",
+        lbl_sim_score: "유사도",
+        lbl_containment: "포함율",
+        lbl_name_match: "이름 일치",
+        lbl_sim_match: "유사도 일치",
+        lbl_contain_match: "포함율 일치",
+        lbl_ana_min: "최소",
+        lbl_ana_max: "최대",
 
-        /* --- 이름 바꾸기, 정리 및 블랙리스트 (Rename, Prune & Blacklist) --- */
+        /* --- 重命名、清理与资源管理器 --- */
         btn_prune: "빈 폴더 정리",
         tip_prune: "빈 폴더 정리 [Ctrl] + [Delete]",
         btn_rename: "이름 바꾸기",
         tip_rename: "이름 바꾸기 [F2]",
         btn_bulkrename: "일괄 이름 바꾸기",
         tip_bulkrename: "일괄 이름 바꾸기 [F2]",
-        title_blacklist: "파일 블랙리스트 관리",
+        title_blacklist: "리소스 관리자",
         btn_blacklist_run: "정리 즉시 실행",
         btn_clear_list: "목록 비우기",
         tip_bl_desc: "아래 항목들은 일반 '삭제' 시 건너뛰며, '정리 즉시 실행'을 통해서만 삭제됩니다.",
-        tip_blacklist_input: "블랙리스트 관리 [Alt] + [Delete]",
-        label_bl_folder: "폴더 블랙리스트 (정밀 검색)",
-        label_bl_file: "파일 블랙리스트 (정밀 검색)",
+        tip_blacklist_input: "리소스 관리자 [Alt] + [Delete]",
+        label_bl_folder: "폴더 목록 (정밀 검색)",
+        label_bl_file: "파일 목록 (정밀 검색)",
         lbl_type_folder: "폴더",
         lbl_type_file: "파일",
-        ph_bl_folder: "'붙여넣기' 또는 우클릭 메뉴의 '블랙리스트에 추가'를 통해 가져오세요.",
-        ph_bl_file: "'붙여넣기' 또는 우클릭 메뉴의 '블랙리스트에 추가'를 통해 가져오세요.",
-        modal_bl_preview: "블랙리스트 검색 결과",
+        ph_bl_folder: "'붙여넣기' 또는 우클릭 메뉴의 '리소스 관리자에 추가'를 통해 가져오세요.",
+        ph_bl_file: "'붙여넣기' 또는 우클릭 메뉴의 '리소스 관리자에 추가'를 통해 가져오세요.",
+        modal_bl_preview: "검색 결과",
         btn_bl_delete: "선택 항목 삭제",
         modal_rename_title: "이름 바꾸기",
         modal_rename_multi_title: "일괄 이름 바꾸기",
@@ -3388,7 +3656,7 @@ const T = {
         label_replace_find: "찾을 내용",
         label_replace_to: "바꿀 내용",
 
-        /* --- 압축 해제 관련 (Archive & Unzip) --- */
+        /* --- 解压相关 --- */
         btn_unzip: "일괄 압축 해제",
         tip_unzip: "일괄 압축 해제 [Alt] + [U]",
         btn_unzip_all: "전체 압축 해제",
@@ -3396,7 +3664,7 @@ const T = {
         title_input_pwd: "압축 해제 비밀번호 필요",
         lbl_pwd_prompt: "비밀번호를 입력하세요:",
 
-        /* --- 미디어 플레이어 및 이미지 검색 (Media Player & Image Search) --- */
+        /* --- 媒体播放器与以图搜图 --- */
         btn_ext: "외부 재생",
         tip_ext: "PotPlayer 재생 / 링크 가져오기 [Alt] + [E]",
         btn_img_search: "이미지로 검색 [F]",
@@ -3444,6 +3712,7 @@ const T = {
         export_link_title: "비디오 스트리밍 링크 내보내기",
         btn_start_play: "재생 시작",
         btn_copy_link: "링크 복사",
+        tip_copy_link: "링크 복사 [Alt] + [C]",
         opt_player_other: "기타 (링크 내보내기)",
         lbl_player: "플레이어",
         btn_mark: "마크",
@@ -3456,7 +3725,15 @@ const T = {
         type_app: "앱",
         type_suffix: "파일",
 
-        /* --- 선택기, 설정 및 검색 (Pickers, Settings & Search) --- */
+        /* --- 设置与搜索 --- */
+        label_turbo_mode: "초고속 모드",
+        desc_turbo_mode: "자동 실행 및 기본 동기화 차단 (추천)",
+        lbl_aria2_status: "연결 상태",
+        ph_aria2_secret: "보안 비밀 (선택 사항)",
+        str_connected: "연결됨",
+        str_conn_fail: "실패",
+        str_connecting: "테스트 중...",
+        tip_mixed_content: "상용 포트 참고:\n• 6800 (Aria2 기본)\n• 16800 (Motrix 기본)\n• 6881 (기타 통합판)",
         picker_title: "폴더 선택",
         picker_all: "모든 파일",
         picker_new: "새 폴더",
@@ -3486,22 +3763,51 @@ const T = {
         opt_engine_saucenao: "SauceNAO (Pixiv/일러스트)",
         opt_engine_tracemoe: "trace.moe (애니메이션 스크린샷)",
         label_dup_strictness: "유사 일치 임계값",
-        opt_strict: "길이 ±1초, 크기 ±5%",
-        opt_loose: "길이 ±2초, 크기 ±10%",
+        opt_strict: "엄격",
+        opt_loose: "느슨하게",
         label_comic_mode: "미디어 모드",
         desc_comic_mode: "이미지/동영상 전용 폴더는 기본 A-Z 정렬",
         label_aria2_url: "Aria2 주소",
-        label_aria2_token: "토큰",
+        label_aria2_token: "Aria2 RPC Token",
         label_privacy_mode: "프라이버시 모드",
         label_blur_cover: "커버 이미지 흐리게",
+        label_dl_filter_ext: "다운로드 확장자 필터 (예: .txt, .jpg)",
+        label_dl_filter_name: "다운로드 이름 필터 (키워드 또는 전체 이름)",
+        lbl_dl_filter: "폴더 다운로드 필터링",
+        desc_dl_filter: "폴더 다운로드/전송 시 매칭되는 파일을 자동으로 제외합니다",
+        lbl_config_manage: "설정 관리",
+        btn_export_data: "백업 내보내기",
+        btn_import_data: "백업 가져오기",
+        btn_clean_data: "로컬 데이터 지우기",
+        title_clean_data: "정리할 항목 선택",
+        msg_clean_confirm: "선택한 로컬 데이터를 영구적으로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+        msg_clean_success: "로컬 데이터가 정리되었습니다. 페이지가 새로고침됩니다...",
+        opt_cfg_index: "전체 인덱스 (동기화된 디렉토리 구조/파일 스냅샷)",
+        opt_cfg_pref: "기본 설정 (UI 외형/작업 습관/정렬 방식)",
+        opt_cfg_rules: "관리 규칙 (리소스 관리자/공유 횟수 제한/검색 기록/다운로드 규칙)",
+        opt_cfg_vault: "비밀번호 금고 (압축 해제 비밀번호 기억)",
+        opt_cfg_history: "비디오 캐시 (비디오 재생 진행도/비디오 길이 캐시)",
+        opt_cfg_cache: "실행 캐시 (폴더 수정 시간/최근 탐색 위치/지문)",
+        msg_import_confirm: "설정을 가져오면 현재 설정이 모두 덮어쓰여집니다. 계속하시겠습니까?",
+        msg_import_success: "설정을 성공적으로 가져왔습니다. 페이지가 새로고침됩니다...",
+        err_invalid_config: "잘못된 설정 파일: 지문 식별이 없거나 형식 오류입니다",
+        err_json_format: "파일 분석 실패: JSON 구문 오류 또는 파일이 손상되었습니다",
         lbl_storage: "저장 공간",
         lbl_browse_exp: "탐색 경험",
-        lbl_skip_bl_on_del: "삭제 시 블랙리스트 파일 건너뛰기",
+        lbl_skip_bl_on_del: "삭제 시 관리 도구 기록 리소스 건너뛰기",
+        lbl_pwd_manage: "압축 해제 암호 관리",
+        title_pwd_vault: "비밀번호 금고",
+        lbl_pwd_try_count: "압축 파일당 암호 매칭 시도 제한",
+        tip_pwd_manual: "한 줄에 암호 하나씩, Enter로 줄바꿈",
         str_root_dir_cn: "루트 디렉토리",
+        btn_ana_select: "일괄 선택",
+        opt_keep_new: "최신 항목 유지", opt_keep_old: "오래된 항목 유지",
+        opt_keep_large: "가장 큰 항목 유지", opt_keep_small: "가장 작은 항목 유지",
+        opt_keep_short: "이름이 가장 짧은 항목 유지", opt_keep_long: "이름이 가장 긴 항목 유지",
 
-        /* --- 상태, 진행도 및 로딩 문구 (Status, Progress & Loading) --- */
+        /* --- 状态、进度与加载短语 --- */
         loading: "로딩 중...",
-        loading_detail: "파일 목록을 가져오는 중...",
+        loading_detail: "디렉토리 구조를 최고 속도로 인덱싱 중...",
         loading_fetch: "가져오는 중... ({n})",
         loading_dup: "중복 항목 분석 중... ({p}%)",
         str_loading_placeholder: "로딩 중...",
@@ -3524,8 +3830,8 @@ const T = {
         str_deleting: "삭제 중...",
         str_saving: "저장 중...",
         str_saving_dots: "저장 중...",
-        str_checking_bl: "블랙리스트 확인 중...",
-        str_processing: "처리 중...",
+        str_checking_bl: "명단 기록 매칭 중...",
+        str_processing: "시스템이 최고 속도로 처리 중입니다...",
         str_cleanup_done: "정리 완료.",
         str_waiting_preload: "프리로드 대기 중...",
         str_copying: "클립보드에 복사 중...",
@@ -3548,7 +3854,6 @@ const T = {
         str_upload_2: "노드 1 타임아웃, 노드 2로 전환...",
         str_upload_3: "노드 2 타임아웃, 마지막 노드 시도...",
         str_upload_fail_copy: "업로드 실패, 클립보드 작성을 준비합니다...",
-        btn_scanning: "스캔 중...",
         msg_transcoding: "클라우드 인코딩 중...",
         msg_transcoding_wait: "서버에서 비디오를 처리 중입니다. 잠시만 기다려 주세요.",
         str_preparing: "압축 해제 준비 중...",
@@ -3575,7 +3880,7 @@ const T = {
         lbl_done_check: "✔ 완료",
         msg_limit_updated: "추출 횟수가 업데이트되었습니다",
 
-        /* --- 메시지, 경고 및 대화 상자 (Messages, Alerts, Dialogs) --- */
+        /* --- 提示、确认与交互消息 --- */
         title_alert: "알림",
         title_confirm: "확인",
         title_prompt: "입력",
@@ -3589,9 +3894,8 @@ const T = {
         msg_down_success: "브라우저를 통해 {n}개의 파일 다운로드를 시작했습니다.",
         msg_batch_txt: "다운로드 목록(.txt)이 생성되었습니다.",
         msg_clear_history_done: "기록에서 제거되었습니다.",
-        msg_unzip_confirm_batch: "{n}개의 압축 파일이 감지되었습니다. 각 폴더에 일괄 압축 해제를 시작할까요?",
         msg_skip_unzipped: "이미 압축 해제된 항목 {n}개를 건너뛰었습니다.",
-        msg_auto_cancel_done: "백그라운드 점검: 횟수 제한에 도달한 공유 {n}개를 자동으로 취소했습니다.",
+        msg_unzip_skip_del_confirm: "이미 압축 해제된 {n}개의 압축 파일을 감지했습니다. 휴지통으로 이동하시겠습니까?",
         msg_cancel_share_confirm: "선택한 {n}개의 공유를 취소하시겠습니까?\n링크가 즉시 무효화됩니다.",
         msg_pwd_updating: "비밀번호 업데이트 중...",
         msg_pwd_updated: "비밀번호가 업데이트되었습니다",
@@ -3607,7 +3911,6 @@ const T = {
         msg_clear_sel_confirm: "{n}개의 중복 파일이 선택되었습니다. 선택을 취소하시겠습니까?",
         str_bl_stat: "일치: {n}개 | 선택됨: {m}개",
         str_hits: "적중",
-        msg_exit_confirm: "파일 관리자를 종료하시겠습니까?",
         msg_settings_saved: "설정이 저장되었습니다. 페이지가 새로고침됩니다.",
         msg_name_exists: "이미 존재하는 이름입니다: {n}",
         str_name_conflict: "(이름 중복 가능성)",
@@ -3622,7 +3925,6 @@ const T = {
         msg_del_select: "삭제할 행을 먼저 클릭하여 선택하세요!",
         msg_del_items_done: "{n}개 항목이 삭제되었습니다.",
         msg_copy_success: "복사 성공",
-        copy_failed: "복사 실패. 웹페이지를 활성화한 상태에서 다시 시도해 주세요.",
         str_redirecting: "Google 렌즈로 이동 중...",
         msg_manual_paste: "이미지 업로드 시간 초과. 스크린샷이 복사되었습니다. 새 창에서 {cmd}를 눌러주세요.",
         msg_starring: "즐겨찾기 추가 중...",
@@ -3642,7 +3944,6 @@ const T = {
         msg_sub_drop_load: "드래그를 통해 자막이 로드되었습니다: {n}",
         msg_resume_hint: "{t} 지점부터 이어서 재생합니다. 여기를 클릭하세요 ",
         msg_unzip_confirm_n: "현재 폴더에 {n}개의 파일을 압축 해제하시겠습니까?",
-        log_upgrade_cache: "♻️ 이전 버전 캐시 감지. 즐겨찾기 상태 동기화를 위해 데이터 구조를 업그레이드합니다...",
         msg_task_paused: "일시정지됨",
         msg_task_added: "{n}개의 업로드 작업이 추가되었습니다",
         msg_task_fast_success: "순식간에 전송 완료(초고속 업로드)",
@@ -3654,6 +3955,9 @@ const T = {
         msg_skip_conflict: "{n}개 하위 경로가 사용 중임",
         msg_skip_invalid: "유효하지 않은 항목을 건너뛰었습니다: ",
         msg_creating_cloud_task: "클라우드 다운로드 작업 생성 중...",
+        str_parsing_torrent: "토렌트 파일 분석 중...",
+        err_torrent_no_info: "분석 실패: 유효한 정보를 찾을 수 없음",
+        err_file_read: "파일 읽기 오류",
         msg_cloud_task_finish: "생성 완료: {s} 성공, {f} 실패",
         msg_cloud_task_success: "🎉 {n}개의 작업이 성공적으로 생성되었습니다",
         msg_prepare_restore: "복원 준비 중...",
@@ -3664,17 +3968,16 @@ const T = {
         msg_retry_submitted: "{n}개의 작업을 다시 제출했습니다",
         msg_jav_fetching_net: "MissAV 데이터를 가져오는 중...",
         msg_op_blocked_moving: "⚠️ 작업 차단\n\n백그라운드에서 파일 이동 작업이 진행 중입니다. 완료 후 시도해 주세요.",
-        msg_op_blocked_analyzing: "⚠️ 작업 차단\n\n백그라운드에서 파일 이동 작업이 진행 중입니다. 정확한 통계를 위해 완료 후 시도해 주세요.",
-        msg_analyze_only_normal_dir: "일반 폴더 내에서 사용해 주세요.",
-        msg_analyze_no_large_folders: "{s}보다 큰 폴더를 찾을 수 없습니다.",
+        msg_op_blocked_analyzing: "⚠️ 작업 차단\n\n백그라운드에서 파일 이동 작업이 진행 중입니다. 정확한 폴더 분석 데이터를 위해 현재 작업이 완료된 후 다시 시도해 주세요.",
+        msg_op_blocked_exporting: "⚠️ 작업 차단\n\n백그라운드에서 파일 이동 작업이 진행 중입니다. 정확한 디렉토리 내보내기를 위해 현재 작업이 완료된 후 다시 시도해 주세요.",
+        msg_analyze_only_normal_dir: "폴더를 선택해 주세요",
+        msg_analyze_no_large_folders: "설정된 임계값 범위 내의 폴더를 찾을 수 없습니다 ({s})",
         msg_analyze_summary_fmt: "용량이 <b>{n}</b>개인 {s}GB 이상의 폴더를 발견했습니다 (크기순 정렬)",
-        msg_rn_blocked_moving: "⚠️ 작업 차단\n\n백그라운드에서 파일 이동 중입니다. 데이터 무결성을 위해 완료 후 시도해 주세요.",
         msg_prune_blocked_moving: "⚠️ 작업 차단\n\n파일 이동 중에는 정리를 수행할 수 없습니다.",
-        msg_batch_download_blocked: "⚠️ 작업 차단\n\n파일 이동 중입니다. 다운로드 목록의 완전성을 위해 완료 후 시도해 주세요.",
         msg_global_index_blocked_moving: "⚠️ 작업 차단\n\n파일 이동 중에는 전체 검색 인덱스를 생성할 수 없습니다. 완료 후 검색해 주세요.",
         msg_resource_locked_download: "⚠️ 작업 차단\n\n선택 항목에 이동 중인 파일이 포함되어 있습니다. 이동 완료 후 다운로드해 주세요.",
         msg_resource_locked_aria2: "⚠️ 작업 차단\n\n선택 항목에 이동 중인 파일이 포함되어 있습니다. 완료 후 Aria2로 전송해 주세요.",
-        msg_flatten_blocked_moving: "⚠️ 작업 차단\n\n구조 평탄화 중 파일 목록이 누락될 수 있습니다. 잠시 후 다시 시도해 주세요.",
+        msg_flatten_blocked_moving: "⚠️ 작업 차단\n\n백그라운드에서 파일 이동 작업이 진행 중입니다. 현재 파일 분석을 실행하면 파일 목록이 누락되거나 중복될 수 있으니 잠시 후 다시 시도해 주세요.",
         err_task_conflict: "⚠️ 작업 차단\n\n백그라운드에서 파일 이동 중입니다. 완료 후 정리를 실행해 주세요.",
         title_del_task_confirm_fmt: "{n}개의 전송 작업을 삭제하시겠습니까?",
         lbl_del_cloud_files_too: "클라우드 내 실제 파일도 함께 삭제",
@@ -3684,14 +3987,11 @@ const T = {
         msg_task_clear_success_fmt: "{n}개의 업로드 작업이 삭제되었습니다",
         msg_unzip_virtual_view_warn: "현재 가상 뷰에서 작업 중입니다. 압축 해제된 파일은 <b>각 압축 파일이 위치한 실제 폴더</b>에 저장되며, 현재 목록에 즉시 나타나지 않을 수 있습니다.<br><br>계속하시겠습니까?",
         msg_smart_matching_file: "비밀번호 스마트 매칭 중... ({n})",
-        msg_unzip_batch_submitted: "✅ {n}개의 압축 해제 작업이 제출되었습니다",
+        msg_unzip_batch_submitted: "✅ {n}개의 압축 해제 완료",
         msg_unzip_batch_skipped: " ({n}개 건너뜀)",
         msg_unzip_check_source: ". 원본 폴더에서 결과를 확인하세요.",
         tip_jump_to_folder: "이 폴더로 이동",
         msg_task_deleted: "작업이 삭제되었습니다",
-        msg_flatten_warn: "구조 평탄화는 현재 경로의 모든 파일을 검색합니다.\n계속하시겠습니까?",
-        msg_flatten_selected: "선택한 {n}개 항목에 대해 구조 평탄화를 실행합니다.\n\n선택한 폴더 내부만 재귀적으로 스캔합니다.\n계속하시겠습니까?",
-        msg_flatten_done: " 선택 항목 평탄화 완료.\n총 {n}개의 파일을 발견했습니다.",
         msg_scan_done: "스캔 완료!\n총 {n}개의 파일 발견, {f}개의 폴더 탐색.",
         msg_scan_fail: "\n\n❌ {n}개 실패.",
         msg_scan_fix: "\n\n✅ {n}회의 네트워크 오류를 자동 복구했습니다.",
@@ -3710,26 +4010,25 @@ const T = {
         msg_dup_warn: "중복 파일 검색을 시작하시겠습니까?",
         msg_dup_result: "{n}그룹의 중복 항목을 발견했습니다.",
         msg_dup_none: "중복 파일을 찾지 못했습니다.",
-        msg_bl_add_done: "{n}개 항목이 블랙리스트에 추가되었습니다.",
-        msg_bl_remove_done: "{n}개 항목이 블랙리스트에서 제거되었습니다.",
         msg_bl_stop: "작업이 중지되었습니다.",
-        msg_bl_empty: "블랙리스트가 비어 있어 실행할 수 없습니다.",
-        msg_bl_clear_confirm: "모든 블랙리스트 항목을 지우시겠습니까? 이 작업은 복구할 수 없습니다.",
-        msg_blacklist_run_none: "클라우드 내에 블랙리스트 조건에 맞는 항목이 없습니다.",
-        msg_blacklist_run_confirm: "클라우드 내에서 {n}개의 블랙리스트 항목을 발견했습니다.\n\n지금 휴지통으로 이동하시겠습니까?",
-        msg_bl_run_limit: "⚠️ 모드 제한\n\n블랙리스트 정리는 실제 파일 재귀 작업이 필요합니다. 현재 표준 디렉토리가 아니므로 범위를 지정할 수 없습니다.\n\n홈 폴더의 일반 폴더로 돌아가서 실행해 주세요.",
-        msg_del_protected: "{n}개의 블랙리스트 파일이 삭제되지 않도록 보호되었습니다.",
+        msg_bl_add_done: "{n}개의 항목이 기록에 추가되었습니다.",
+        msg_bl_remove_done: "{n}개의 항목이 기록에서 제거되었습니다.",
+        msg_bl_empty: "명단 목록이 비어 있어 실행할 수 없습니다.",
+        msg_bl_clear_confirm: "모든 기록 항목을 지우시겠습니까? 이 작업은 복구할 수 없습니다.",
+        msg_blacklist_run_none: "클라우드 내에 명단 조건에 맞는 항목이 없습니다.",
+        msg_blacklist_run_confirm: "클라우드 내에서 {n}개의 기록된 항목을 발견했습니다.\n\n지금 휴지통으로 이동하시겠습니까?",
+        msg_bl_run_limit: "⚠️ 모드 제한\n\n정리 작업은 실제 파일 재귀 작업이 필요합니다. 홈 폴더의 일반 폴더로 돌아가서 실행해 주세요.",
+        msg_del_protected: "{n}개의 기록된 파일이 삭제되지 않도록 보호되었습니다.",
         msg_del_none: "삭제할 파일이 없습니다.",
         msg_bl_scanning: "전체 검색 중... \n스캔한 폴더: {d} | 일치: {f}",
         rn_tip_wait: "규칙을 설정해 주세요",
+        rn_tip_jav: "위 버튼을 클릭하여 매칭을 시작하세요",
         rn_tip_none: "일치하는 항목이나 이름이 없습니다",
         rn_stat: "일치: {n}개 | 유효 변경: {m}개",
         rn_warn_confirm: "{n}개 파일의 이름을 바꾸시겠습니까?",
         msg_bulkrename_done: "{n}개 항목의 이름을 바꿨습니다.",
         msg_rn_all_skipped: "❌ 이름이 중복되어 모든 작업을 건너뛰었습니다.",
-        msg_rn_part_skipped: "\n⚠️ (이름 중복으로 인해 {n}개 파일 건너뜀)",
-        msg_rn_fail_count: "\n({n}개 실패)",
-        msg_rn_success_skip: "\n⚠️ 이름 중복 파일 {n}개를 건너뛰었습니다",
+        msg_rn_fail_count: "이름 중복으로 {n}개 항목 건너뜀",
         msg_prune_confirm: "현재 목록에서 빈 폴더 검색을 시작하시겠습니까?",
         msg_prune_none: "빈 폴더가 없습니다.",
         msg_prune_found: "{n}개의 빈 폴더를 발견했습니다.\n지금 삭제하시겠습니까?",
@@ -3743,9 +4042,14 @@ const T = {
         msg_unzip_fail: "압축 해제 요청 실패",
         msg_jszip_fail: "JSZip 로드 실패. 네트워크 상태를 확인하세요.",
 
-        /* --- 오류 메시지 (Error Messages) --- */
+        /* --- 错误提示 --- */
         err_invalid_links: "올바른 링크를 입력해 주세요",
         err_pwd_format: "비밀번호는 4-10자의 영문 또는 숫자여부야 합니다",
+        err_invalid_torrent: "유효하지 않은 토렌트 파일 형식",
+        err_torrent_complex: "구문 분석 복잡도가 너무 높음 (잘못된 파일 가능성)",
+        err_torrent_format: "토렌트 구조가 손상됨",
+        err_torrent_len: "필드 길이 분석 오류",
+        err_torrent_char: "잘못된 문자 발견",
         err_share_code_exists: "이미 사용 중인 공유 코드입니다",
         err_folder_not_ready: "클라우드 폴더를 생성 중입니다. 잠시 후 다시 시도해 주세요",
         err_item_deleted: "항목이 존재하지 않습니다",
@@ -3782,53 +4086,66 @@ const T = {
         str_action_failed: "작업 실패",
         str_scan_error: "스캔 오류",
         err_limit_too_low: "수정 실패: 새 횟수({n})는 현재 저장된 횟수({s})보다 커야 합니다",
+        err_vault_max: "비밀번호 금고는 최대 50개의 자주 사용하는 비밀번호만 저장할 수 있습니다",
+        err_pwd_len: "단일 비밀번호의 길이는 127자를 초과할 수 없습니다",
 
-        /* --- 도움말 문서 (Help Documentation) --- */
+        /* --- 帮助文档 --- */
         modal_help_title: "도움말",
         help_desc: `
         <div class="pk-no-scrollbar pk-help-scroll" style="font-size:13px;line-height:1.6;color:var(--pk-fg);text-align:justify;text-justify:inter-ideograph;word-break:break-all;pointer-events:auto;display:block;">
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">✨ 경험 및 탐색 엔진</b><br>
-                • <b>UI 재구성</b>: 공식 기능을 바탕으로 인터페이스를 <b>Windows 파일 탐색기</b>와 유사하게 재구성했습니다. 파일을 드래그할 때 경로 표시줄(드롭다운 목록 포함)로 정밀하게 드롭할 수 있습니다.<br>
-                • <b>고급 경로 표시줄</b>: 마우스 휠 스크롤 및 드롭다운 메뉴를 통한 동일 계층 이동을 지원합니다. 전체 검색, 중복 검사, 공간 분석 및 파일 평면화 기능이 경로 표시줄에 통합되어 있으며, 경로 표시 및 상위 폴더로의 빠른 이동을 지원합니다.<br>
-                • <b>경험 향상</b>: 즐겨찾기(별표), 파일 유형 우선순위 등 다차원 정렬을 지원합니다. 라이트/다크 테마 전환 및 원클릭 <b>커버 블러 처리</b>를 통한 프라이버시 보호를 지원합니다.<br>
-                • <b>창 관리</b>: 원클릭 <b>최대화/최소화</b>를 지원하며, 최대화 모드에서는 넓은 줄 간격(60px) 모드가 자동 활성화되어 아이콘과 썸네일을 더 선명하게 볼 수 있습니다.<br>
-                • <b>백그라운드 인덱싱</b>: 홈 아이콘에 <b>숨쉬는 파란 점</b>이 나타나면 백그라운드에서 디렉토리 트리가 자동 동기화 중임을 의미합니다.<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* 참고: 시스템 기본 폴더(My Pack)는 절대적인 물리적 보호를 받아 실수로 인한 삭제, 복사, 이동 및 이름 변경이 엄격히 방지됩니다.</i>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">✨ 경험 및 탐색 엔진</b><br>
+                • <b>인터랙션 재구성</b>: 공식 기능을 기반으로 인터페이스를 <b>Windows 파일 탐색기</b> 스타일로 재구성했습니다.<br>
+                • <b>초고속 모드</b>: 활성화 시 스크립트를 자동 로드하고 웹페이지 고유의 동기화 로직을 물리적으로 차단합니다. 메모리 부족(OOM) 위험을 현저히 낮추어 최상의 반응 속도와 안정성을 보장합니다.<br>
+                • <b>고급 경로 표시줄</b>: 마우스 휠 스크롤 및 드롭다운 메뉴를 통한 동일 계층 이동을 지원합니다. 전체 검색, 파일/폴더 분석이 경로 표시줄에 통합되어 경로 표시 및 상위 폴더 이동이 간편합니다.<br>
+                • <b>사용자 경험 향상</b>: 즐겨찾기, 파일 유형 우선순위 등 다차원 정렬을 지원합니다. 라이트/다크 테마 전환 및 원클릭 <b>커버 블러 처리</b>를 통한 프라이버시 보호 기능을 제공합니다.<br>
+                • <b>백그라운드 인덱싱</b>: 홈 아이콘에 <b>파란색 숨쉬는 점</b>이 나타나면 백그라운드에서 디렉토리 트리가 자동 동기화 중임을 의미합니다.<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 기본 폴더(My Pack)는 시스템 보호를 받아 삭제, 복사, 이동 및 이름 변경이 제한됩니다.</div>
+            </div>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 일괄 처리 및 공간 관리</b><br>
+                • <b>일괄 이름 변경</b>: <b>정규식 치환/삭제</b>, <b>에피소드 번호</b> 생성, 텍스트 <b>포맷팅</b>(대소문자/전반각), <b>품번/FC2 ID</b> 스마트 인식, <b>광고 제거</b> 및 MIME 기반 <b>확장자 복구</b>를 지원합니다.<br>
+                • <b>분석 도구</b>: <b>파일 분석</b>(파일 필터링 및 해시/시간/이름 기반 중복 검사)과 <b>폴더 분석</b>(폴더 필터링 및 이름/유사도/포함율 기반 중복 검사)을 통합 제공하며, 현재 경로의 <b>디렉토리 트리</b> 생성을 지원합니다.<br>
+                • <b>스마트 정리</b>: 원클릭 빈 폴더 정리; <b>일괄 압축 해제</b> 기능은 비밀번호 자동 기억 및 스마트 입력을 지원하며, 이미 해제된 항목은 자동으로 건너뛰거나 삭제할 수 있습니다.<br>
+                • <b>리소스 관리자</b>: <b>파일 블랙리스트</b>로 사용하여 스팸 리소스를 한 번에 정리하거나, <b>화이트리스트</b>로 설정하여 일괄 삭제 시 해당 파일을 보호할 수 있습니다.<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 데이터 동기화 충돌을 방지하기 위해 처리 중에는 다른 클라이언트에서 파일을 수정하지 마십시오.</div>
+            </div>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🌐 전송 및 공유 센터</b><br>
+                • <b>공유 관리</b>: 추출 횟수 제한 설정 기능을 지원합니다. 횟수 도달 시 공유가 자동으로 취소됩니다.<br>
+                • <b>오프라인 다운로드</b>: 링크를 통한 일괄 오프라인 다운로드 및 리소스 링크의 일괄 내보내기를 지원합니다.<br>
+                • <b>초고속 업로드</b>: 로컬 대용량 파일 및 하위 폴더 드래그 앤 드롭 업로드를 지원하며, 웹 제한을 우회하여 <b>소용량 파일 전송 중단율을 대폭 낮췄습니다</b>.
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 추출 횟수 차단은 웹페이지가 열려 있고 컴퓨터가 절전 모드가 아닐 때만 작동합니다.</div>
+            </div>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🎬 몰입형 미디어 기능 향상</b><br>
+                • <b>재생 엔진</b>: 0.5x~3.0x 배속, 화면 회전/미러링, 강제 비율 조절을 지원합니다. 이어보기, 오프닝/엔딩 자동 건너뛰기, <b>연속 재생/반복</b> 모드 및 실시간 <b>썸네일 미리보기</b>를 지원합니다.<br>
+                • <b>자막 시스템</b>: 클라우드 내 동일 이름 자막, 로컬 파일 및 온라인 자막 검색을 지원합니다. 자막 싱크 미세 조정 및 로컬 텍스트 <b>드래그 앤 드롭 파싱</b> 마운트를 지원합니다.<br>
+                • <b>시각 보조</b>: 다중 엔진 기반 <b>이미지로 검색</b> 기능을 지원합니다. "미디어 모드" 활성화 시 이미지/비디오 전용 폴더가 이름순(A-Z)으로 자동 정렬됩니다.<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 재생 기록 목록은 스크립트 환경 내에서 발생한 재생 진행도만 기록합니다.</div>
             </div>
             <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">📂 일괄 처리 및 공간 관리</b><br>
-                • <b>일괄 이름 변경</b>: <b>정규식 치환/삭제</b>, <b>에피소드 일련번호</b> 생성, 텍스트 <b>포맷팅</b>(대소문자/전반자), <b>품번/FC2 ID</b> 스마트 네이밍, <b>광고 접두사 제거</b> 및 MIME 기반 <b>확장자 복구</b>를 지원합니다.<br>
-                • <b>공간 분석</b>: 크기 조건에 맞는 폴더를 필터링하고 폴더 크기 표시를 지원합니다.<br>
-                • <b>스마트 정리</b>: 원클릭 빈 폴더 정리; <b>파일 평면화</b>는 선택한 디렉토리 내 모든 하위 계층 파일을 추출하며 확장자 필터링을 지원합니다. 평면화 후 실행되는 <b>스마트 중복 검사</b>는 <b>정밀 해시(Hash)</b>, <b>유사 특징</b>(재생 시간/크기 오차 설정) 및 <b>이름 일치</b>의 3가지 모드 연동을 제공합니다.<br>
-                • <b>일괄 압축 해제</b>: <b>비밀번호 금고</b>가 통합되어 파일 및 일괄 작업 간에 비밀번호 자동 기억과 스마트 입력이 가능합니다.<br>
-                • <b>정밀 정리</b>: 사용자 지정 <b>파일 제외(블랙리스트)</b> 기능으로 전체 드라이브의 정크 리소스를 정리할 수 있습니다. 설정에서 기록 파일을 화이트리스트로 저장하여 일괄 삭제 시 해당 파일을 자동으로 건너뛸 수 있습니다.<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* 참고: 로드된 모든 캐시는 웹 페이지를 닫거나 새로 고침하기 전까지 기록됩니다. 더티 데이터가 발생하지 않도록 작업 중에는 다른 클라이언트에서 파일을 수정하지 마십시오.</i>
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ 설정 및 데이터 관리</b><br>
+                • <b>설정 백업</b>: 개인 설정, 관리 규칙, 비밀번호 금고 및 히스토리 데이터를 디지털 지문이 포함된 JSON 파일로 내보내어 기기 간 이동을 지원합니다.<br>
+                • <b>데이터 정리</b>: 전체 인덱스, 설정, 규칙, 비밀번호 및 히스토리 데이터를 필요에 따라 개별 삭제하여 로컬 공간을 확보하고 프라이버시를 보호합니다.<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 전체 인덱스는 웹페이지 종료 시 삭제되지만, 설정/규칙/비밀번호/기록 데이터는 영구 보관됩니다.</div>
             </div>
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">🌐 전송 및 공유 센터</b><br>
-                • <b>공유 관리</b>: 다운로드 횟수 및 유효기간 설정을 지원합니다. 스크립트 실행 중 실시간으로 모니터링하며, 횟수 도달 시 링크가 자동 파기(삭제)됩니다.<br>
-                • <b>오프라인 및 클라우드</b>: 마그넷, eDonkey 및 숏폼 영상 링크의 일괄 클라우드 다운로드를 지원하며, 웹페이지 스냅샷 영구 보관 기능을 통합했습니다.<br>
-                • <b>초고속 업로드</b>: 로컬 대용량 파일 및 하위 폴더 드래그 앤 드롭 직접 업로드를 지원하여, 공식 웹 버전의 업로드 제한을 우회하고 <b>소용량 파일 전송 중단율을 대폭 낮췄습니다</b>.
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚡ 다운로드 및 배포</b><br>
+                • <b>외부 직접 연결</b>: RPC 프로토콜을 통해 파일을 로컬 다운로드 없이 <b>Aria2</b> 노드로 즉시 전송할 수 있습니다.<br>
+                • <b>다운로드 필터링</b>: <b>폴더 다운로드 필터</b>를 설정하여 확장자나 키워드에 따라 특정 파일을 자동으로 제외할 수 있습니다.
             </div>
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">🎬 몰입형 미디어 기능 향상</b><br>
-                • <b>재생 엔진</b>: 0.5x~3.0x 배속, 화면 다방향 회전/좌우 반전, 강제 비율 조절을 지원합니다. 이어보기, 오프닝/엔딩 자동 건너뛰기, 다중 영상 <b>연속 재생/반복</b> 모드를 지원합니다. 진행률 표시줄에서 실시간 <b>썸네일 미리보기</b> 생성을 지원합니다.<br>
-                • <b>자막 시스템</b>: 클라우드 내 동일한 이름의 자막, 로컬 파일 로드 및 크로스 사이트 온라인 검색을 지원합니다. 밀리초(ms) 단위의 자막 싱크 미세 조정과 로컬 텍스트 파일의 직접 <b>드래그 앤 드롭 파싱</b> 마운트를 지원합니다.<br>
-                • <b>시각 보조</b>: 다중 엔진(Google/Yandex/SauceNAO/trace.moe)이 내장되어 이미지나 영상 현재 프레임의 <b>이미지 검색</b>을 지원합니다. 설정에서 "미디어 모드"를 활성화하면 에피소드 또는 만화 전용 폴더가 이름순(A-Z)으로 자동 정렬됩니다.<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* 참고: 시청 기록 목록은 스크립트 환경 내에서 발생한 재생 진행률만 기록합니다.</i>
-            </div>
-            <div>
-                <b style="font-size:14px; color:var(--pk-pri);">⚡ 다운로드 및 배포</b><br>
-                • <b>외부 직접 연결</b>: RPC 프로토콜을 통해 파일을 로컬 다운로드 없이 <b>Aria2</b> 노드로 원클릭 푸시하는 기능을 지원합니다.
+            <div style="margin-top:16px; color:#d93025; font-weight:bold; text-align:center; font-size:11px; border-top:1px dashed rgba(217,48,37,0.2); padding-top:12px; letter-spacing:0.5px; opacity:0.9;">
+                이 프로젝트는 CC-BY-NC-SA-4.0 라이선스를 엄격히 준수하며, 상업적 이용을 금지합니다.
             </div>
         </div>`
     },
     ja: {
-        /* --- 通用与基础UI (General & UI Basics) --- */
+        /* --- 通用与基础UI --- */
         title: "PikPak 拡張マスター",
         str_original: "原画",
         str_original_fast: "原画 (高速)",
+        str_folders: "フォルダ",
         str_files: "ファイル",
         unit_folders: "個のフォルダ",
         unit_days: "日",
@@ -3867,10 +4184,11 @@ const T = {
         cat_document: "文書",
         cat_software: "ソフト",
         cat_archive: "圧縮画庫",
+        cat_torrent: "BT種子",
         cat_other: "その他",
         btn_exit_filter: "フィルタ解除",
 
-        /* --- 属性面板 (Properties) --- */
+        /* --- 属性面板 --- */
         ctx_property: "プロパティ",
         title_property: "ファイルプロパティ",
         lbl_prop_name: "ファイル名",
@@ -3888,7 +4206,7 @@ const T = {
         fmt_prop_count: "{f} 個のファイル、{d} 個のフォルダ",
         str_prop_offline: "オフラインタスク",
 
-        /* --- 导航、视图模式与右键菜单 (Navigation & Context Menu) --- */
+        /* --- 导航、视图模式与右键菜单 --- */
         btn_nav_home: "ホーム",
         btn_nav_share: "マイ共有",
         btn_nav_offline: "リンク追加",
@@ -3900,9 +4218,10 @@ const T = {
         title_offline: "マイオフライン",
         trash_title: "ゴミ箱",
         trash_notice: "ゴミ箱のファイルは最大15日間保存されます",
+        history_notice: "スクリプト環境内で発生した再生進捗のみを記録します",
         ctx_open: "開く",
-        ctx_add_bl: "ブラックリストに追加",
-        ctx_remove_bl: "ブラックリストから削除",
+        ctx_add_bl: "リソース管理に追加",
+        ctx_remove_bl: "リソース管理から削除",
         ctx_rename: "名前の変更",
         ctx_copy: "コピー",
         ctx_copy_name: "名前をコピー",
@@ -3915,7 +4234,7 @@ const T = {
         ctx_locate: "ファイルの場所を開く",
         ctx_share: "共有",
 
-        /* --- 通用文件操作按钮 (General Operations) --- */
+        /* --- 通用文件操作按钮 --- */
         btn_down: "ダウンロード",
         tip_down: "ダウンロード [Alt] + [D]",
         btn_aria2: "Aria2 へ送信",
@@ -3949,6 +4268,7 @@ const T = {
         tip_theme: "テーマ切替 [Alt] + [T]",
         tip_rotate: "回転 [R]",
         tip_mirror: "左右反転 [H]",
+        tip_flip_v: "上下反転 [V]",
         tip_maximize: "最大化 [M]",
         tip_minimize: "最小化 [M]",
         tip_full_screen: "全画面 [Enter]",
@@ -3960,11 +4280,13 @@ const T = {
         btn_stop: "停止",
         tip_stop: "現在の操作を停止",
         btn_settings: "設定",
-        tip_settings: "システム設定 [Alt] + [S]",
+        btn_logout: "サインアウト",
+        msg_logout_confirm: "ログアウトしますか？",
+        tip_settings: "設定とその他 [Alt] + [S]",
         lbl_upload_to: "アップロード先: ",
         msg_move_done: "移動が完了しました。",
 
-        /* --- 离线、上传与云下载 (Offline, Upload & Cloud Download) --- */
+        /* --- 离线、上传与云下载 --- */
         btn_upload: "アップロード",
         btn_up_file: "ファイル選択",
         btn_up_folder: "フォルダ選択",
@@ -3996,6 +4318,7 @@ const T = {
         lbl_save_to: "保存先：",
         lbl_default_folder: "デフォルトフォルダ",
         btn_via_torrent: "Torrent経由",
+        tip_cloud_save_path: "通常のクラウドダウンロードファイルは My Pack ディレクトリに保存されます。他アプリからのクラウドダウンロードファイルは My [XYZ] ディレクトリ（[XYZ] はアプリ名）に保存されます。",
         title_save_method: "保存方法",
         msg_save_snapshot_desc: "このリンクはウェブスナップショットとしてのみ保存可能です。",
         tip_snapshot_details: "PikPakはこのリンクからメディアファイルを直接抽出できませんが、ウェブページの内容をスナップショットとして保存できます。",
@@ -4004,7 +4327,7 @@ const T = {
         btn_modify: "変更",
         str_snap_link_count_suffix: " 他 {n} 件のリンク",
 
-        /* --- 分享管理 (Share Management) --- */
+        /* --- 分享管理 --- */
         btn_cancel_share: "共有を解除",
         share_copy_suffix: "この内容をコピーして PikPak アプリを開くと、高速再生を楽しめます",
         share_copy_pwd: "パスワード",
@@ -4059,12 +4382,17 @@ const T = {
         cal_week_days: ["日", "月", "火", "水", "木", "金", "土"],
         cal_months: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
 
-        /* --- 结构扁平化、查重与空间分析 (Flatten, Dup & Analyze) --- */
-        btn_scan: "ファイル構造の平坦化",
-        tip_scan: "重複確認のため、サブフォルダ内の全ファイルを取得します",
-        btn_dup: "重複ファイルの検索",
-        tip_dup: "重複ファイルをチェックします",
-        modal_dup_title: "重複チェックのオプション",
+        /* --- 文件分析与文件夹分析 --- */
+        title_file_analysis: "ファイル分析",
+        btn_scan: "ファイル透視",
+        lbl_scan_selected: "選択した {n} 項目にファイル透視を実行します",
+        lbl_keyword_filter: "除外キーワード",
+        ph_keyword_filter: "除外するキーワード、カンマ区切り",
+        lbl_scan_current: "現在のパスのすべての項目にファイル透視を実行します",
+        tip_dup: "重複チェック",
+        lbl_dup_selected: "選択した {n} 項目にファイル重複チェックを実行します",
+        lbl_dup_current: "現在のパスのすべての項目にファイル重複チェックを実行します",
+        tip_scan_dup: "ファイルの絞り込みまたは重複チェック",
         lbl_dup_tool: "削除対象の選択:",
         lbl_dup_reset: "↺ リセット (固定解除 & 選択クリア)",
         lbl_dup_select_folder: "📂 フォルダごとに選択",
@@ -4076,52 +4404,61 @@ const T = {
         btn_start_scan: "スキャン開始",
         tag_hash: "完全一致",
         tag_hash_short: "完全",
-        tag_name: "名前一致",
+        tag_name: "名前類似",
         tag_name_short: "名前",
-        tag_sim: "類似一致",
-        tag_sim_short: "類似",
-        label_dup_video: "動画ファイル (完全 + 類似 + 名前一致)",
-        label_dup_image: "画像ファイル (完全一致のみ)",
-        label_dup_other: "その他のファイル (完全一致のみ)",
-        btn_toggle_size: "サイズ",
-        tip_toggle_size: "サイズに基づいて重複ファイルを自動選択します",
-        btn_toggle_date: "アップロード日",
-        tip_toggle_date: "アップロード日に基づいて重複ファイルを自動選択します",
-        cond_small: "最大を選択",
-        cond_large: "最小を選択",
-        cond_small_short: "最小",
-        cond_large_short: "最大",
-        cond_old: "最新を選択",
-        cond_new: "最古を選択",
-        cond_old_short: "最古",
-        cond_new_short: "最新",
-        btn_analyze: "ストレージ分析",
-        tip_analyze: "現在のディレクトリ内の巨大フォルダを検索",
+        tag_sim: "長さ類似",
+        tag_sim_short: "長さ",
+        label_dup_video: "動画ファイル (完全一致 + 長さ類似 + 名前類似)",
+        label_dup_image: "画像ファイル (完全一致 + 名前類似)",
+        label_dup_other: "その他のファイル (完全一致 + 名前類似)",
+        btn_analyze: "フォルダ分析",
+        tip_analyze: "フォルダのフィルタまたは重複チェック",
+        btn_export: "ディレクトリ出力",
+        tip_export: "現在のパスのファイルツリーを生成してダウンロード",
+        title_export_format: "エクスポート形式",
+        lbl_export_current: "現在のパスのすべての項目にディレクトリ出力を実行します",
+        opt_tree_view: "ツリービュー",
+        opt_list_view: "リストビュー",
+        msg_exporting: "ディレクトリツリーを作成中...",
         str_analyze_results: "分析結果",
-        lbl_analyze_title: "ストレージ分析",
-        lbl_analyze_desc: "指定サイズ以上のフォルダを検索：",
         lbl_size_threshold: "検出しきい値",
-        title_analyze_result: "分析結果一覧",
+        title_analyze_result: "フォルダ分析結果",
+        opt_ana_large: "フォルダ透視",
+        lbl_analyze_selected: "選択した {n} 項目にフォルダ透視を実行します",
+        lbl_analyze_current: "現在のパスのすべての項目にフォルダ透視を実行します",
+        opt_ana_sim: "フォルダ重複チェック",
+        lbl_ana_sim_selected: "選択した {n} 項目にフォルダ重複チェックを実行します",
+        lbl_ana_sim_current: "現在のパスのすべての項目にフォルダ重複チェックを実行します",
+        title_algo_help: "アルゴリズム解説",
+        algo_help_content: "名前一致：名称と容量が近いフォルダ群を検索します。\n類似度一致：内部ファイルが高度に重複するフォルダ群を検索します。\n包含率一致：小フォルダの内容が大フォルダに完全に含まれているサブセット冗余を検索します。\n\n精度：類似度一致 > 包含率一致 > 名前一致\n範囲：包含率一致 > 類似度一致",
+        lbl_threshold: "しきい値",
+        lbl_sim_score: "類似度",
+        lbl_containment: "包含率",
+        lbl_name_match: "名前一致",
+        lbl_sim_match: "類似度一致",
+        lbl_contain_match: "包含率一致",
+        lbl_ana_min: "下限",
+        lbl_ana_max: "上限",
 
-        /* --- 重命名、清理与黑名单 (Rename, Prune & Blacklist) --- */
+        /* --- 重命名、清理与资源管理器 --- */
         btn_prune: "空フォルダ削除",
         tip_prune: "空フォルダ削除 [Ctrl] + [Delete]",
         btn_rename: "名前の変更",
         tip_rename: "名前の変更 [F2]",
         btn_bulkrename: "一括リネーム",
         tip_bulkrename: "一括リネーム [F2]",
-        title_blacklist: "ブラックリスト管理",
+        title_blacklist: "リソース管理",
         btn_blacklist_run: "今すぐクリーンアップ",
         btn_clear_list: "リストをクリア",
         tip_bl_desc: "以下の項目は通常の削除ではスキップされ、「今すぐクリーンアップ」でのみ削除されます",
-        tip_blacklist_input: "ブラックリスト管理 [Alt] + [Delete]",
-        label_bl_folder: "フォルダ除外 (完全一致)",
-        label_bl_file: "ファイル除外 (完全一致)",
+        tip_blacklist_input: "リソース管理 [Alt] + [Delete]",
+        label_bl_folder: "フォルダリスト (完全一致)",
+        label_bl_file: "ファイルリスト (完全一致)",
         lbl_type_folder: "フォルダ",
         lbl_type_file: "ファイル",
         ph_bl_folder: "ペーストするか、右クリックで追加",
         ph_bl_file: "ペーストするか、右クリックで追加",
-        modal_bl_preview: "ブラックリスト検索結果",
+        modal_bl_preview: "検索結果",
         btn_bl_delete: "選択項目を削除",
         modal_rename_title: "リネーム",
         modal_rename_multi_title: "一括リネーム",
@@ -4155,7 +4492,7 @@ const T = {
         label_replace_find: "検索内容",
         label_replace_to: "置換先",
 
-        /* --- 解压相关 (Archive & Unzip) --- */
+        /* --- 解压相关 --- */
         btn_unzip: "一括解凍",
         tip_unzip: "一括解凍 [Alt] + [U]",
         btn_unzip_all: "すべて解凍",
@@ -4163,7 +4500,7 @@ const T = {
         title_input_pwd: "解凍パスワードが必要",
         lbl_pwd_prompt: "パスワードを入力してください：",
 
-        /* --- 媒体播放器与以图搜图 (Media Player & Image Search) --- */
+        /* --- 媒体播放器与以图搜图 --- */
         btn_ext: "外部プレーヤーで再生",
         tip_ext: "PotPlayerで再生 / リンク取得 [Alt] + [E]",
         btn_img_search: "画像で検索 [F]",
@@ -4211,6 +4548,7 @@ const T = {
         export_link_title: "ストリーミングリンクをエクスポート",
         btn_start_play: "再生開始",
         btn_copy_link: "リンクをコピー",
+        tip_copy_link: "リンクをコピー [Alt] + [C]",
         opt_player_other: "その他 (リンク出力)",
         lbl_player: "プレーヤー",
         btn_mark: "マーク",
@@ -4223,7 +4561,15 @@ const T = {
         type_app: "アプリ",
         type_suffix: "ファイル",
 
-        /* --- 选择器、设置与搜索 (Pickers, Settings & Search) --- */
+        /* --- 设置与搜索 --- */
+        label_turbo_mode: "極速モード",
+        desc_turbo_mode: "自動起動とネイティブ同期のブロック (推奨)",
+        lbl_aria2_status: "接続状態",
+        ph_aria2_secret: "シークレット (任意)",
+        str_connected: "接続完了",
+        str_conn_fail: "接続失敗",
+        str_connecting: "テスト中...",
+        tip_mixed_content: "一般的なポート:\n• 6800 (Aria2 標準)\n• 16800 (Motrix 既定)\n• 6881 (その他)",
         picker_title: "フォルダの選択",
         picker_all: "すべてのファイル",
         picker_new: "新規フォルダ",
@@ -4253,22 +4599,51 @@ const T = {
         opt_engine_saucenao: "SauceNAO (イラスト/Pixiv)",
         opt_engine_tracemoe: "trace.moe (アニメ)",
         label_dup_strictness: "類似一致のしきい値",
-        opt_strict: "長さ±1s, サイズ±5%",
-        opt_loose: "長さ±2s, サイズ±10%",
+        opt_strict: "厳密",
+        opt_loose: "緩め",
         label_comic_mode: "メディアモード",
         desc_comic_mode: "画像/動画のみのフォルダはデフォルトA-Z順",
-        label_aria2_url: "Aria2 URL",
-        label_aria2_token: "Token",
+        label_aria2_url: "Aria2 RPC URL",
+        label_aria2_token: "Aria2 RPC Token",
         label_privacy_mode: "プライバシーモード",
         label_blur_cover: "カバー画像をぼかす",
+        label_dl_filter_ext: "ダウンロード拡張子フィルタ (例: .txt, .jpg)",
+        label_dl_filter_name: "ダウンロード名前フィルタ (キーワードまたはフルネーム)",
+        lbl_dl_filter: "フォルダのダウンロードフィルタ",
+        desc_dl_filter: "転送時に一致するファイルを自動除外",
+        lbl_config_manage: "設定管理",
+        btn_export_data: "データ出力",
+        btn_import_data: "データ読込",
+        btn_clean_data: "ローカルデータをクリア",
+        title_clean_data: "クリアする項目を選択",
+        msg_clean_confirm: "選択したローカルデータを完全に削除しますか？この操作は元に戻せません。",
+        msg_clean_success: "ローカルデータをクリアしました。ページをリロードします...",
+        opt_cfg_index: "全検索インデックス (同期済みディレクトリ構成/ファイルスナップショット)",
+        opt_cfg_pref: "基本設定 (UI 外観/操作習慣/ソート順)",
+        opt_cfg_rules: "管理ルール (リソース管理/共有回数制限/検索履歴/ダウンロードルール)",
+        opt_cfg_vault: "パスワード庫 (解凍パスワード記憶)",
+        opt_cfg_history: "動画キャッシュ (再生進捗/動画の長さキャッシュ)",
+        opt_cfg_cache: "実行キャッシュ (フォルダ更新時刻/閲覧位置/指紋)",
+        msg_import_confirm: "設定をインポートすると、現在の設定がすべて上書きされます。続行しますか？",
+        msg_import_success: "設定のインポートに成功しました。ページをリロードします...",
+        err_invalid_config: "無効な設定ファイル：指紋識別がないか、フォーマットエラーです",
+        err_json_format: "ファイルの解析に失敗：JSON 構文エラーまたはファイルが破損しています",
         lbl_storage: "ストレージ",
         lbl_browse_exp: "閲覧体験",
-        lbl_skip_bl_on_del: "削除時にブラックリストをスキップ",
+        lbl_skip_bl_on_del: "削除時に記録済みリソースをスキップ",
+        lbl_pwd_manage: "解凍パスワード管理",
+        title_pwd_vault: "パスワード庫",
+        lbl_pwd_try_count: "パスワード試行上限",
+        tip_pwd_manual: "1行に1つのパスワード、Enterで改行",
         str_root_dir_cn: "ルート",
+        btn_ana_select: "一括選択",
+        opt_keep_new: "最新を保持", opt_keep_old: "最古を保持",
+        opt_keep_large: "最大を保持", opt_keep_small: "最小を保持",
+        opt_keep_short: "名前が最短のものを保持", opt_keep_long: "名前が最長のものを保持",
 
-        /* --- 状态、进度与加载短语 (Status, Progress & Loading) --- */
+        /* --- 状态、进度与加载短语 --- */
         loading: "読み込み中...",
-        loading_detail: "ファイルリストを取得中...",
+        loading_detail: "ディレクトリ構造を全速でインデックス中...",
         loading_fetch: "取得中... ({n})",
         loading_dup: "重複を分析中... ({p}%)",
         str_loading_placeholder: "読み込み中...",
@@ -4291,8 +4666,8 @@ const T = {
         str_deleting: "削除中...",
         str_saving: "保存中...",
         str_saving_dots: "保存中...",
-        str_checking_bl: "ブラックリストを確認中...",
-        str_processing: "処理中...",
+        str_checking_bl: "リスト照合中...",
+        str_processing: "システムが全速で処理しています...",
         str_cleanup_done: "クリーンアップ完了。",
         str_waiting_preload: "プリロード待機中...",
         str_copying: "クリップボードにコピー中...",
@@ -4315,7 +4690,6 @@ const T = {
         str_upload_2: "ノード1タイムアウト、ノード2へ切替...",
         str_upload_3: "ノード2タイムアウト、最終ノードを試行...",
         str_upload_fail_copy: "アップロード失敗、クリップボードへ書き込み中...",
-        btn_scanning: "スキャン中...",
         msg_transcoding: "クラウドでトランスコード中...",
         msg_transcoding_wait: "サーバーで処理中です。少々お待ちください",
         str_preparing: "解凍準備中...",
@@ -4342,7 +4716,7 @@ const T = {
         lbl_done_check: "✔ 完了",
         msg_limit_updated: "抽出回数が更新されました",
 
-        /* --- 提示、确认与交互消息 (Messages, Alerts, Dialogs) --- */
+        /* --- 提示、确认与交互消息 --- */
         title_alert: "ヒント",
         title_confirm: "確認",
         title_prompt: "入力",
@@ -4356,9 +4730,8 @@ const T = {
         msg_down_success: "ブラウザで {n} 個のファイルのダウンロードを開始しました。",
         msg_batch_txt: "ダウンロードリスト (.txt) を作成しました。",
         msg_clear_history_done: "履歴から削除しました",
-        msg_unzip_confirm_batch: "{n} 個の圧縮ファイルを検出しました。各フォルダへ一括解凍を開始しますか？",
         msg_skip_unzipped: "解凍済みの {n} 個の項目をスキップしました。",
-        msg_auto_cancel_done: "巡回中：制限回数に達した {n} 個の共有を自動解除しました。",
+        msg_unzip_skip_del_confirm: "解凍済みの {n} 個の圧縮ファイルを検出しました。ゴミ箱に移動しますか？",
         msg_cancel_share_confirm: "選択した {n} 個の共有を解除しますか？\nリンクは即座に無効になります。",
         msg_pwd_updating: "パスワードを更新中...",
         msg_pwd_updated: "パスワードを更新しました",
@@ -4374,7 +4747,6 @@ const T = {
         msg_clear_sel_confirm: "{n} 個の重複ファイルが選択されています。選択を解除しますか？",
         str_bl_stat: "一致: {n} | 選択中: {m}",
         str_hits: "ヒット",
-        msg_exit_confirm: "ファイルマネージャーを閉じますか？",
         msg_settings_saved: "設定を保存しました。ページをリロードします。",
         msg_name_exists: "名前が既に存在します: {n}",
         str_name_conflict: "(名前衝突の可能性)",
@@ -4389,7 +4761,6 @@ const T = {
         msg_del_select: "削除する行を選択してください。",
         msg_del_items_done: "{n} 個の項目を削除しました。",
         msg_copy_success: "コピー成功",
-        copy_failed: "コピー失敗。ページを前面に表示して再度お試しください",
         str_redirecting: "Google レンズへ転送中...",
         msg_manual_paste: "画像アップロードがタイムアウトしました。コピーした画像を新しいウィンドウで {cmd} を押して貼り付けてください",
         msg_starring: "スターを追加中...",
@@ -4409,7 +4780,6 @@ const T = {
         msg_sub_drop_load: "ドラッグ＆ドロップで字幕を読み込みました：{n}",
         msg_resume_hint: "{t} から再生を再開します。ここをクリック ",
         msg_unzip_confirm_n: "現在のディレクトリに {n} 個のファイルを解凍しますか？",
-        log_upgrade_cache: "♻️ 旧バージョンのキャッシュを検出。スター状態を同期するためにデータ構造をアップグレード中...",
         msg_task_paused: "停止中",
         msg_task_added: "{n} 個のアップロードタスクを追加しました",
         msg_task_fast_success: "高速アップロード成功",
@@ -4421,6 +4791,9 @@ const T = {
         msg_skip_conflict: "{n} 個のサブパスが使用中です",
         msg_skip_invalid: "無効な項目をスキップしました: ",
         msg_creating_cloud_task: "クラウドタスクを作成中...",
+        str_parsing_torrent: "種子ファイルを解析中...",
+        err_torrent_no_info: "解析失敗：有効な情報が見つかりません",
+        err_file_read: "ファイルの読み取りに失敗しました",
         msg_cloud_task_finish: "作成完了：成功 {s}、失敗 {f}",
         msg_cloud_task_success: "🎉 {n} 個のタスクを正常に作成しました",
         msg_prepare_restore: "復元準備中...",
@@ -4431,17 +4804,16 @@ const T = {
         msg_retry_submitted: "{n} 個のタスクを再送信しました",
         msg_jav_fetching_net: "MissAV データを取得中...",
         msg_op_blocked_moving: "⚠️ 操作ブロック\n\nファイル移動タスクが進行中です。完了までお待ちください。",
-        msg_op_blocked_analyzing: "⚠️ 操作ブロック\n\nファイル移動タスクが進行中です。統計精度を保つため、完了までお待ちください。",
-        msg_analyze_only_normal_dir: "通常のディレクトリで使用してください。",
-        msg_analyze_no_large_folders: "{s} 以上のフォルダは見つかりませんでした。",
+        msg_op_blocked_analyzing: "⚠️ 操作ブロック\n\nバックグラウンドでファイル移動が進行中です。フォルダ分析の精度を保つため、現在のタスクが完了してから操作してください。",
+        msg_op_blocked_exporting: "⚠️ 操作ブロック\n\nバックグラウンドでファイル移動が進行中です。正確なディレクトリ出力を確保するため、現在のタスクが完了してから操作してください。",
+        msg_analyze_only_normal_dir: "フォルダを選択してください",
+        msg_analyze_no_large_folders: "設定されたしきい値の範囲内にフォルダが見つかりませんでした ({s})",
         msg_analyze_summary_fmt: "<b>{n}</b> 個の {s}GB 以上のフォルダが見つかりました（サイズ順）",
-        msg_rn_blocked_moving: "⚠️ 操作ブロック\n\nファイル移動タスクが進行中です。完了までお待ちください。",
         msg_prune_blocked_moving: "⚠️ 操作ブロック\n\nファイル移動タスクが進行中です。クリーンアップを実行できません。",
-        msg_batch_download_blocked: "⚠️ 操作ブロック\n\nファイル移動タスクが進行中です。完了までお待ちください。",
         msg_global_index_blocked_moving: "⚠️ 操作ブロック\n\nファイル移動中です。構造が安定してから全検索を実行してください。",
         msg_resource_locked_download: "⚠️ 操作ブロック\n\n移動中のファイルが含まれています。完了までお待ちください。",
         msg_resource_locked_aria2: "⚠️ 操作ブロック\n\n移動中のファイルが含まれています。完了までお待ちください。",
-        msg_flatten_blocked_moving: "⚠️ 操作ブロック\n\nファイル移動中に平坦化を行うと欠損が生じる可能性があります。",
+        msg_flatten_blocked_moving: "⚠️ 操作ブロック\n\nバックグラウンドでファイル移動が進行中です。このタイミングでファイル分析を実行すると、ファイルリストの欠損や重複が発生する可能性があるため、後ほど再試行してください。",
         err_task_conflict: "⚠️ 操作ブロック\n\nファイル移動中です。完了までお待ちください。",
         title_del_task_confirm_fmt: "{n} 件の転送タスクを削除しますか？",
         lbl_del_cloud_files_too: "クラウド上のファイルも同時に削除する",
@@ -4451,14 +4823,11 @@ const T = {
         msg_task_clear_success_fmt: "{n} 個のアップロードタスクをクリアしました",
         msg_unzip_virtual_view_warn: "仮想ビューで操作しています。解凍されたファイルは<b>各圧縮ファイルの元のフォルダ</b>に保存され、現在のリストには表示されません。<br><br>続行しますか？",
         msg_smart_matching_file: "パスワードを照合中... ({n})",
-        msg_unzip_batch_submitted: "✅ {n} 個の解凍タスクを送信しました",
+        msg_unzip_batch_submitted: "✅ {n} 個の解凍が完了しました",
         msg_unzip_batch_skipped: " ({n} 個スキップ)",
         msg_unzip_check_source: "。元のディレクトリで結果を確認してください。",
         tip_jump_to_folder: "このフォルダにジャンプ",
         msg_task_deleted: "タスクを削除しました",
-        msg_flatten_warn: "平坦化により、現在のパス配下の全ファイルを検索します。続行しますか？",
-        msg_flatten_selected: "選択した {n} 項目に平坦化を実行します。続行しますか？",
-        msg_flatten_done: " 平坦化が完了しました。\n{n} 個のファイルが見つかりました。",
         msg_scan_done: "スキャン完了！\n{n} 個のファイル、{f} 個のフォルダを確認しました。",
         msg_scan_fail: "\n\n❌ {n} 件のエラーが発生しました。",
         msg_scan_fix: "\n\n✅ {n} 回のネットワークエラーを自動修復しました。",
@@ -4477,26 +4846,25 @@ const T = {
         msg_dup_warn: "重複ファイルの検索を開始しますか？",
         msg_dup_result: "{n} 組の重複が見つかりました。",
         msg_dup_none: "重複ファイルは見つかりませんでした。",
-        msg_bl_add_done: "{n} 個の項目をブラックリストに追加しました。",
-        msg_bl_remove_done: "{n} 個の項目をブラックリストから削除しました。",
         msg_bl_stop: "操作を停止しました。",
-        msg_bl_empty: "ブラックリストが空です。",
-        msg_bl_clear_confirm: "すべてのブラックリストを削除しますか？この操作は取り消せません。",
-        msg_blacklist_run_none: "ブラックリストに一致する項目は見つかりませんでした。",
-        msg_blacklist_run_confirm: "{n} 個のブラックリスト該当項目が見つかりました。\n\n今すぐゴミ箱へ移動しますか？",
-        msg_bl_run_limit: "⚠️ 制限事項\n\nブラックリストの削除は物理的な再帰操作を伴います。現在は標準的なディレクトリではないため、実行できません。ホーム画面に戻ってからお試しください。",
-        msg_del_protected: "{n} 個のブラックリスト登録ファイルが保護されました。",
+        msg_bl_add_done: "{n} 個の項目を記録しました。",
+        msg_bl_remove_done: "{n} 個の項目を記録から削除しました。",
+        msg_bl_empty: "リストが空です。",
+        msg_bl_clear_confirm: "すべての記録を削除しますか？この操作は取り消せません。",
+        msg_blacklist_run_none: "該当する記録は見つかりませんでした。",
+        msg_blacklist_run_confirm: "{n} 個の該当項目が見つかりました。\n\n今すぐゴミ箱へ移動しますか？",
+        msg_bl_run_limit: "⚠️ 制限事項\n\nクリーンアップは物理的な再帰操作を伴います。ホーム画面に戻ってから実行してください。",
+        msg_del_protected: "{n} 個の記録済みファイルを保護しました。",
         msg_del_none: "削除可能なファイルはありません。",
         msg_bl_scanning: "全検索中... \nスキャン済み: {d} | ヒット: {f}",
         rn_tip_wait: "ルールを設定してください",
+        rn_tip_jav: "上のボタンをクリックして照合を開始します",
         rn_tip_none: "一致する項目はありません",
         rn_stat: "一致: {n} | 有効な変更: {m}",
         rn_warn_confirm: "{n} 個のファイルをリネームしますか？",
         msg_bulkrename_done: "{n} 個の項目をリネームしました。",
         msg_rn_all_skipped: "❌ すべての名前が重複しているため、変更されませんでした。",
-        msg_rn_part_skipped: "\n⚠️ ({n} 個のファイルが名前重複のためスキップされました)",
-        msg_rn_fail_count: "\n({n} 個の失敗)",
-        msg_rn_success_skip: "\n⚠️ {n} 個の名前重複ファイルをスキップしました",
+        msg_rn_fail_count: "同名のため {n} 件スキップしました",
         msg_prune_confirm: "空フォルダの検索を開始しますか？",
         msg_prune_none: "空フォルダは見つかりませんでした。",
         msg_prune_found: "{n} 個の空フォルダが見つかりました。\n今すぐ削除しますか？",
@@ -4510,9 +4878,14 @@ const T = {
         msg_unzip_fail: "解凍リクエストが失敗しました",
         msg_jszip_fail: "JSZip の読み込みに失敗しました。ネットワークを確認してください。",
 
-        /* --- 错误提示 (Error Messages) --- */
+        /* --- 错误提示 --- */
         err_invalid_links: "有効なリンクを入力してください",
         err_pwd_format: "パスワードは4-10桁の英数字である必要があります",
+        err_invalid_torrent: "無効な種子ファイルの形式",
+        err_torrent_complex: "解析の複雑度が高すぎます（不正なファイルの可能性）",
+        err_torrent_format: "種子ファイルの構造が破損しています",
+        err_torrent_len: "フィールド長の解析エラー",
+        err_torrent_char: "不正な文字を検出しました",
         err_share_code_exists: "この共有コードは既に使用されています",
         err_folder_not_ready: "クラウドフォルダを作成中です。後で再試行してください",
         err_item_deleted: "項目が見つかりません",
@@ -4549,45 +4922,57 @@ const T = {
         str_action_failed: "操作に失敗しました",
         str_scan_error: "スキャンエラー",
         err_limit_too_low: "更新失敗：新しい回数 ({n}) は現在の保存数 ({s}) より大きい必要があります",
+        err_vault_max: "パスワード保管庫は最大50個のよく使うパスワードのみ保存できます",
+        err_pwd_len: "単一のパスワードの長さは127文字を超えることはできません",
 
-        /* --- 帮助文档 (Help Documentation) --- */
+        /* --- 帮助文档 --- */
         modal_help_title: "ヘルプ",
         help_desc: `
         <div class="pk-no-scrollbar pk-help-scroll" style="font-size:13px;line-height:1.6;color:var(--pk-fg);text-align:justify;text-justify:inter-ideograph;word-break:break-all;pointer-events:auto;display:block;">
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">✨ エクスペリエンス＆ナビゲーション</b><br>
-                • <b>UIの再構築</b>：公式機能をベースに、インターフェースを <b>Windows エクスプローラー</b> 風に再構築しました。ファイルをドラッグ＆ドロップする際、パスバー（ドロップダウンリストを含む）への正確な移動をサポートします。<br>
-                • <b>高度なパスバー</b>：マウスホイールでのスクロールや、ドロップダウンメニューからの同階層切り替えに対応。全体検索、重複チェック、容量分析、ファイルのフラット化はすべてパスバーに統合されており、パスの履歴表示や上位フォルダへのジャンプも可能です。<br>
-                • <b>ユーザー体験の向上</b>：お気に入り（スター）やファイルタイプの優先度など、多角的なソートに対応。ライト/ダークテーマの自由な切り替え、およびワンクリックでの<b>サムネイルのぼかし</b>によるプライバシー保護機能を搭載しています。<br>
-                • <b>ウィンドウ管理</b>：ワンクリックでの<b>最大化/最小化</b>に対応。最大化モード時は、アイコンとサムネイルをより鮮明に表示するため、自動的に広い行高（60px）のレイアウトに切り替わります。<br>
-                • <b>バックグラウンドインデックス</b>：ホームアイコンに<b>青い点滅インジケーター</b>が表示されている場合、バックグラウンドでディレクトリツリーを自動同期中です。<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* 注：システムのデフォルトフォルダ（My Pack）は物理的に完全に保護されており、誤操作による削除、コピー、移動、リネームを厳格に防止します。</i>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">✨ エクスペリエンス＆ナビゲーション</b><br>
+                • <b>インタラクションの再構築</b>：公式機能をベースに、インターフェースを <b>Windows エクスプローラー</b> 風に刷新しました。<br>
+                • <b>ターボモード</b>：有効にするとスクリプトを自動ロードし、ウェブ版固有の同期ロジックを物理的にブロックします。メモリ不足（OOM）のリスクを大幅に軽減し、究極のレスポンスと安定性を確保します。<br>
+                • <b>高機能パスバー</b>：マウスホイールによるスクロールや、ドロップダウンメニューによる同階層の切り替えに対応。全体検索、ファイル/フォルダ分析がパスバーに統合され、パスの履歴表示やディレクトリの遡及がスムーズに行えます。<br>
+                • <b>UXの強化</b>：お気に入り、ファイルタイプ優先度など、多角的なソートに対応。ライト/ダークテーマの切り替えや、ワンクリックでの<b>サムネイルのぼかし</b>によるプライバシー保護機能を搭載しています。<br>
+                • <b>バックグラウンド・インデックス</b>：ホームアイコンに<b>青い点滅インジケーター</b>が表示されている間、バックグラウンドでディレクトリツリーを自動同期しています。<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：デフォルトフォルダ（My Pack）はシステムにより保護されており、誤削除、コピー、移動、リネームが制限されています。</div>
+            </div>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 一括処理＆ストレージ管理</b><br>
+                • <b>一括リネーム</b>：<b>正規表現による置換/削除</b>、<b>エピソード番号</b>の生成、テキスト<b>整形</b>（大文字・小文字/全角・半角）、<b>品番/FC2 ID</b> のスマート認識、<b>広告プレフィックスの削除</b>、MIMEに基づく<b>拡張子の修復</b>に対応しています。<br>
+                • <b>分析スイート</b>：<b>ファイル分析</b>（ファイル抽出およびハッシュ/時間/名前による重複チェック）と<b>フォルダ分析</b>（フォルダ抽出および名前/類似度/包含率による重複チェック）を統合。現在のパスの<b>ディレクトリツリー</b>作成もサポートします。<br>
+                • <b>スマート整理</b>：ワンクリックで空フォルダを削除。<b>一括解凍</b>はパスワードの自動記憶とスマート入力を統合し、解凍済み項目の自動スキップや削除も可能です。<br>
+                • <b>リソースマネージャー</b>：不要なファイルを一括クリーンアップする<b>ブラックリスト</b>として、または一括削除時に特定のファイルを保護する<b>ホワイトリスト</b>として機能します。<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：データの同期競合を避けるため、処理中は他のクライアントでファイルを変更しないでください。</div>
+            </div>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🌐 転送＆共有センター</b><br>
+                • <b>共有管理</b>：抽出回数の制限設定に対応。制限に達すると自動的に共有が解除されます。<br>
+                • <b>オフラインダウンロード</b>：リンクによる一括オフライン保存、およびリソースリンクの一括書き出しをサポート。<br>
+                • <b>高速アップロード</b>：ローカルの大容量ファイルやネストされたフォルダのドラッグ＆ドロップによる直接アップロードに対応。公式の制限を回避し、<b>小容量ファイルの転送中断率を大幅に低減</b>しました。
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：抽出回数による自動解除は、ページを開いており、コンピュータがスリープ状態でない場合にのみ動作します。</div>
+            </div>
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🎬 没入型メディア拡張</b><br>
+                • <b>再生エンジン</b>：0.5x〜3.0xの倍速再生、画面の回転/反転、アスペクト比の強制調整をサポート。レジューム再生、OP/EDスキップ、<b>連続再生/ループ</b>、リアルタイムの<b>サムネイルプレビュー</b>に対応しています。<br>
+                • <b>字幕システム</b>：クラウド内の同名字幕、ローカルファイル、およびオンライン字幕検索の読み込みに対応。字幕のズレをミリ秒単位で調整でき、ローカルテキストの<b>ドラッグ＆ドロップ解析</b>も可能です。<br>
+                • <b>ビジュアルアシスト</b>：複数のエンジンによる<b>画像検索</b>（逆引き）を内蔵。「メディアモード」を有効にすると、マンガやアニメのフォルダが自動的に名前順（A-Z）でソートされます。<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：再生履歴リストは、スクリプト環境内で発生した再生進捗のみを記録します。</div>
             </div>
             <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">📂 一括処理＆ストレージ管理</b><br>
-                • <b>一括リネーム</b>：<b>正規表現による置換/削除</b>、<b>エピソード連番</b>の生成、テキストの<b>フォーマット化</b>（大/小文字、全/半角）、<b>品番/FC2 ID</b> のスマートリネーム、<b>広告プレフィックスの削除</b>、およびMIMEに基づく<b>拡張子の修復</b>をサポートします。<br>
-                • <b>容量分析</b>：指定サイズに一致するフォルダをフィルタリングし、フォルダのサイズ表示に対応しています。<br>
-                • <b>スマート整理</b>：ワンクリックで空フォルダをクリーンアップ。<b>ファイルのフラット化</b>では、選択したディレクトリ内の全階層のファイルを抽出し、拡張子による絞り込みが可能です。フラット化後に実行できる<b>スマート重複チェック</b>は、<b>高精度ハッシュ</b>、<b>類似特徴</b>（再生時間/サイズの許容誤差設定）、および<b>名前の一致</b>の3つのモードを連動させて提供します。<br>
-                • <b>一括解凍</b>：<b>パスワードボルト</b>を統合し、ファイルやバッチをまたいだパスワードの自動記憶とスマート入力を実現します。<br>
-                • <b>高精度なクリーンアップ</b>：カスタムの<b>ファイル除外リスト（ブラックリスト）</b>により、ドライブ全体の不要なリソースを整理できます。設定で履歴ファイルをホワイトリストとして保存し、一括削除の実行時にそれらを自動的にスキップすることも可能です。<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* 注：読み込まれたキャッシュは、ウェブページを閉じるか再読み込みするまで継続して記録されます。データの不整合を防ぐため、処理中は他のクライアントからファイルを変更しないでください。</i>
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ 設定＆データ管理</b><br>
+                • <b>設定のバックアップ</b>：個人設定、ルール、パスワード庫、履歴データをデジタル指紋付きのJSONファイルとしてエクスポートでき、デバイス間の移行が容易です。<br>
+                • <b>データの削除</b>：インデックス、設定、ルール、パスワード、履歴データを必要に応じて個別に削除し、ストレージの解放とプライバシー保護を行えます。<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：インデックスはページを閉じると消去されますが、設定や履歴データなどは永続的に保存されます。</div>
             </div>
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">🌐 転送＆共有センター</b><br>
-                • <b>共有管理</b>：ダウンロード回数と有効期限の設定をサポート。スクリプト実行中はリアルタイムで監視し、回数に達すると自動的にリンクを破棄（無効化）します。<br>
-                • <b>オフライン＆クラウド保存</b>：マグネットリンク、eDonkey、ショート動画リンクの一括クラウドダウンロードに対応し、ウェブページのスナップショット永久保存機能も統合しています。<br>
-                • <b>高速アップロード</b>：ローカルの大容量ファイルや入れ子になったフォルダのドラッグ＆ドロップによる直接アップロードに対応。公式ウェブ版のアップロード制限を突破し、<b>小容量ファイルの転送中断率を大幅に低減</b>します。
+            <div style="margin-bottom:24px;">
+                <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚡ ダウンロード＆配布</b><br>
+                • <b>外部ダイレクト接続</b>：RPCプロトコルを通じて、ファイルをダウンロードすることなく <b>Aria2</b> ノードへ即座に転送できます。<br>
+                • <b>ダウンロードフィルタ</b>：<b>フォルダ単位のフィルタ</b>を設定し、拡張子やキーワードに基づいて特定のファイルを自動的に除外できます。
             </div>
-            <div style="margin-bottom:12px;">
-                <b style="font-size:14px; color:var(--pk-pri);">🎬 没入型メディア拡張機能</b><br>
-                • <b>再生エンジン</b>：0.5倍〜3.0倍速、画面の多方向回転/左右反転、強制アスペクト比調整をサポート。レジューム再生（続きから再生）、OP/EDの自動スキップ、複数動画の<b>連続再生/ループ</b>モードに対応。シークバーでのリアルタイム<b>サムネイルプレビュー</b>生成も可能です。<br>
-                • <b>字幕システム</b>：クラウド上の同名字幕、ローカルファイルの読み込み、および外部サイトのオンライン検索をサポート。ミリ秒単位の字幕ズレ補正や、ローカルテキストを直接ドラッグ＆ドロップしての<b>解析・マウント</b>に対応しています。<br>
-                • <b>視覚アシスト</b>：複数の検索エンジン（Google/Yandex/SauceNAO/trace.moe）を内蔵し、画像や動画の現在のフレームから<b>類似画像検索</b>が可能です。設定から「メディアモード」を有効にすると、シリーズや漫画の専用フォルダが自動的にA-Z順にソートされます。<br>
-                <i style="color:#999; display: inline-block; padding-right: 5px;">* 注：再生履歴リストは、スクリプト環境内で発生した再生進捗のみを記録します。</i>
-            </div>
-            <div>
-                <b style="font-size:14px; color:var(--pk-pri);">⚡ ダウンロード＆外部連携</b><br>
-                • <b>外部ダイレクト接続</b>：RPCプロトコルを通じ、ファイルをダウンロードすることなく <b>Aria2</b> ノードへワンクリックで転送する機能をサポートします。
+            <div style="margin-top:16px; color:#d93025; font-weight:bold; text-align:center; font-size:11px; border-top:1px dashed rgba(217,48,37,0.2); padding-top:12px; letter-spacing:0.5px; opacity:0.9;">
+                このプロジェクトは CC-BY-NC-SA-4.0 ライセンスに厳格に従っており、あらゆる形式の商用利用を禁止します。
             </div>
         </div>`
     },
@@ -4774,7 +5159,10 @@ async function apiList(parentId, limit = 1000, onProgress, signal, trashed = fal
                         console.warn(`[API] ${res.status} Error. Flushing auth cache...`);
                         localStorage.removeItem('pk_captured_captcha');
                         resetHeaderCache();
-                        if (res.status === 400) { showToast(getStrings().err_captcha_simple, 'error'); throw new Error('CAPTCHA_INTERCEPT'); }
+                        if (res.status === 400) {
+                            try { if (typeof showToast !== 'undefined') showToast(getStrings().err_captcha_simple, 'error'); } catch(e){}
+                            throw new Error('CAPTCHA_INTERCEPT');
+                        }
                         throw new Error('AUTH_RETRY');
                     }
                     if (res.status === 429) {
@@ -4811,12 +5199,19 @@ async function apiList(parentId, limit = 1000, onProgress, signal, trashed = fal
                 pageRetries++;
                 safe--;
 
-                const isNetworkError = e.name === 'TypeError' || e.message.includes('fetch') || e.message.includes('PAGINATION');
-                const isTimeout = e.name === 'AbortError' && !signal?.aborted;
+                let isTimeout = false;
+                let errMsg = e.message;
+                if (e.name === 'AbortError' && !(signal && signal.aborted)) {
+                    isTimeout = true;
+                    e = new Error('FETCH_TIMEOUT');
+                    errMsg = 'Local Timeout';
+                }
 
-                if ((isNetworkError || isTimeout || e.message === 'AUTH_RETRY') && safe > 0) {
+                const isNetworkError = e.name === 'TypeError' || errMsg.includes('fetch') || errMsg.includes('PAGINATION') || isTimeout;
+
+                if ((isNetworkError || errMsg === 'AUTH_RETRY') && safe > 0) {
                     const backoff = pageRetries === 1 ? 500 : Math.min(pageRetries * 2000, 10000);
-                    console.warn(`[API] Retry ${pageRetries}/${MAX_PAGE_RETRIES} for ${parentId || 'Root'} due to ${e.message}. Wait ${backoff}ms`);
+                    console.warn(`[API] Retry ${pageRetries}/${MAX_PAGE_RETRIES} for ${parentId || 'Root'} due to ${errMsg}. Wait ${backoff}ms`);
                     await sleep(backoff);
                     continue;
                 }
@@ -5199,21 +5594,12 @@ async function coreRecursiveEngine(roots, options) {
             if (isFromNetwork) {
                 const rtt = performance.now() - start;
                 const DYNAMIC_MAX = Math.min(USER_LIMIT, ABSOLUTE_MAX);
-                const idealC = Math.floor(20000 / rtt);
 
-                if (rtt < 300) {
-                    const target = Math.max(MIN_CONCURRENCY, Math.min(idealC, 20));
-                    stats.currentConcurrency = Math.floor(stats.currentConcurrency * 0.7 + target * 0.3);
-                } else if (rtt > 1200) {
-                    const target = Math.min(DYNAMIC_MAX, idealC);
-                    if (stats.currentConcurrency < target) stats.currentConcurrency += 1;
-                } else {
-                    if (stats.folders % 10 === 0) {
-                        if (stats.currentConcurrency > idealC) stats.currentConcurrency--;
-                        else if (stats.currentConcurrency < idealC) stats.currentConcurrency++;
-                    }
+                if (rtt < 800) {
+                    if (stats.currentConcurrency < DYNAMIC_MAX) stats.currentConcurrency += 1;
+                } else if (rtt > 3000) {
+                    stats.currentConcurrency = Math.max(MIN_CONCURRENCY, Math.floor(stats.currentConcurrency * 0.8));
                 }
-                stats.currentConcurrency = Math.max(MIN_CONCURRENCY, Math.min(stats.currentConcurrency, DYNAMIC_MAX));
             }
 
         } catch (err) {
@@ -5270,7 +5656,12 @@ const package_namespaceObject = {"rE":"1.0.0"};;
 // ./src/main.js
 const { "rE": version } = package_namespaceObject;
 
-console.log("🚀 PikPak Script: LOADED from main.js");
+console.log("%c PikPak Enhancement Master %c v" + version + " %c digbug82 %c CC-BY-NC-SA-4.0 ",
+    "color:#fff; background:#1a5eff; padding:3px 0; border-radius:4px 0 0 4px; font-weight:bold;",
+    "color:#fff; background:#333; padding:3px 8px;",
+    "color:#fff; background:#ffc107; padding:3px 8px; font-weight:bold;",
+    "color:#fff; background:#d93025; padding:3px 8px; border-radius:0 4px 4px 0; font-weight:bold;");
+console.log("%cStrictly Non-Commercial: This project is strictly for personal study and communication only.%c", "color:#d93025; font-weight:bold;", "");
 
 function getIcon(item) {
     const isFolder = item.kind === 'drive#folder' ||
@@ -5315,11 +5706,6 @@ async function openManager(initialCache, preloadPromise) {
     const L = getStrings();
     const lang = getLang();
 
-    if (typeof globalCache !== 'undefined' && !globalCache.has('_star_fix_v1')) {
-        console.log(L.log_upgrade_cache);
-        globalCache.clear();
-        globalCache.set('_star_fix_v1', 'true');
-    }
     if (document.querySelector('.pk-ov')) return;
 
     document.body.style.overflow = 'hidden';
@@ -5339,8 +5725,6 @@ async function openManager(initialCache, preloadPromise) {
         dupRawGroups: [],
         offlineFilters: { running: true, failed: true, complete: true },
         uploadFilters: { running: true, paused: true, complete: true },
-        dupSizeStrategy: 'small',
-        dupDateStrategy: 'old',
         activeId: null,
         clipItems: [], clipType: '',
         clipSourceParentId: null,
@@ -5440,12 +5824,13 @@ async function openManager(initialCache, preloadPromise) {
                 opacity: 0; pointer-events: none; white-space: nowrap; backdrop-filter: blur(8px);
             `;
 
-            const isDark = !!document.querySelector('.pk-ov.pk-dark');
-            if (isDark) el.classList.add('pk-dark');
             el.innerHTML = `<div class="pk-spin-lg" style="width:16px; height:16px; border-width:2px;"></div><span class="pk-float-txt">${esc(initialText)}</span>`;
 
             if (UI.win) UI.win.appendChild(el);
-            else document.body.appendChild(el);
+            else {
+                const container = document.querySelector('.pk-ov') || document.body;
+                container.appendChild(el);
+            }
 
             const entry = { id, el };
             activeBars.push(entry);
@@ -5613,12 +5998,18 @@ async function openManager(initialCache, preloadPromise) {
 
     el.addEventListener('wheel', (e) => {
         e.stopPropagation();
-        const scrollTarget = e.target.closest('.pk-vp, .pk-modal, #pk-rn-vp, .pk-prev-list, textarea, .pk-scroll');
+        const scrollTarget = e.target.closest('.pk-vp, .pk-modal, #pk-rn-vp, .pk-prev-list, textarea, .pk-scroll, .pk-help-scroll');
         if (!scrollTarget) { e.preventDefault(); return; }
-        const { scrollTop, scrollHeight, clientHeight } = scrollTarget;
-        const isUp = e.deltaY < 0; const isDown = e.deltaY > 0;
-        const isAtTop = scrollTop <= 0; const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
-        if ((isUp && isAtTop) || (isDown && isAtBottom)) { e.preventDefault(); }
+        const st = scrollTarget.scrollTop;
+        const sh = scrollTarget.scrollHeight;
+        const ch = scrollTarget.clientHeight;
+        const isUp = e.deltaY < 0;
+        const isDown = e.deltaY > 0;
+        const isAtTop = st <= 0.5;
+        const isAtBottom = (st + ch) >= (sh - 1.5);
+        if ((isUp && isAtTop) || (isDown && isAtBottom)) {
+            if (e.cancelable) e.preventDefault();
+        }
     }, { passive: false });
 
     const mkLbl = (id, txt, shortTxt, tip) => {
@@ -5648,7 +6039,7 @@ async function openManager(initialCache, preloadPromise) {
         blAdd: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
         blRem: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>`,
         share: CONF.icons.share,
-        copyLink: `<svg width="16" height="16" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M232.675556 1023.81037c-61.231407 0-118.632296-23.665778-161.621333-66.635852l-4.228741-4.209778c-89.088-89.125926-89.088-234.116741 0-323.242667l181.096296-181.077333c3.470222 25.372444 9.557333 50.422519 18.090667 74.600296l-152.822519 152.841481c-63.525926 63.544889-63.525926 166.930963 0 230.494815l4.266667 4.266667c30.72 30.72 71.642074 47.634963 115.218963 47.634963s84.517926-16.933926 115.256889-47.672889l228.882963-228.882963c63.525926-63.544889 63.525926-166.949926 0-230.494815l-4.266667-4.247704c-2.066963-2.066963-4.190815-4.077037-6.409481-6.049185l46.40237-46.40237c2.180741 2.010074 4.304593 4.039111 6.371556 6.106074l4.266667 4.247704c89.088 89.088 89.069037 234.078815-0.018963 323.204741L394.296889 957.174519C351.326815 1000.144593 293.925926 1023.81037 232.675556 1023.81037zM411.45837 629.266963c-2.180741-2.029037-4.304593-4.058074-6.352593-6.106074l-4.247704-4.247704c-43.083852-43.102815-66.825481-100.484741-66.825481-161.60237 0-61.11763 23.74163-118.499556 66.825481-161.60237l228.864-228.882963C672.673185 23.855407 730.074074 0.18963 791.324444 0.18963c61.25037 0 118.651259 23.665778 161.621333 66.635852l4.171852 4.209778C1000.25837 114.138074 1024 171.557926 1024 232.675556c0 61.11763-23.722667 118.518519-66.825481 161.621333l-181.077333 181.096296c-3.489185-25.41037-9.557333-50.479407-18.090667-74.619259l152.822519-152.841481c63.544889-63.544889 63.544889-166.949926 0-230.494815l-4.28563-4.266667c-30.72-30.72-71.642074-47.634963-115.218963-47.634963-43.557926 0-84.498963 16.933926-115.237926 47.691852l-228.882963 228.864c-30.738963 30.738963-47.672889 71.68-47.672889 115.256889 0 43.576889 16.933926 84.517926 47.672889 115.237926l4.228741 4.247704c2.029037 2.048 4.171852 4.077037 6.428444 6.068148L411.45837 629.266963z" fill="currentColor"></path></svg>`,
+        copyLink: `<svg width="16" height="16" viewBox="0 0 1024 1024"><path d="M232.6 1023.8c-61.2 0-118.6-23.7-161.6-66.6l-4.2-4.2c-89.1-89.1-89.1-234.1 0-323.2l181.1-181.1c3.5 25.4 9.6 50.4 18.1 74.6l-152.8 152.8c-63.5 63.5-63.5 166.9 0 230.5l4.3 4.3c30.7 30.7 71.6 47.6 115.2 47.6s84.5-16.9 115.3-47.7l228.9-228.9c63.5-63.5 63.5-166.9 0-230.5l-4.3-4.2c-2.1-2.1-4.2-4.1-6.4-6l46.4-46.4c2.2 2 4.3 4 6.4 6.1l4.3 4.2c89.1 89.1 89.1 234.1 0 323.2l-228.9 228.9c-43 42.9-100.4 66.6-161.6 66.6zM411.5 629.3c-2.2-2-4.3-4.1-6.4-6.1l-4.2-4.2c-43.1-43.1-66.8-100.5-66.8-161.6 0-61.1 23.7-118.5 66.8-161.6l228.9-228.9c43.1-43.1 100.5-66.8 161.6-66.8 61.3 0 118.7 23.7 161.6 66.6l4.2 4.2c89 89.1 89 234.1 0 323.2l-181.1 181.1c-3.5-25.4-9.6-50.5-18.1-74.6l152.8-152.8c63.5-63.5 63.5-166.9 0-230.5l-4.3-4.3c-30.7-30.7-71.6-47.6-115.2-47.6s-84.5 16.9-115.2 47.7l-228.9 228.9c-30.7 30.7-47.7 71.7-47.7 115.3 0 43.6 16.9 84.5 47.7 115.2l4.2 4.2c2 2 4.2 4.1 6.4 6.1l-46.4 46.4z" fill="currentColor"></path></svg>`,
         copyName: `<svg width="16" height="16" viewBox="0 0 1024 1024" fill="currentColor" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform: scale(1.22); vertical-align: -3px;"><path d="M852.411679 250.1876a85.155752 85.155752 0 0 0-84.942863-78.811649h-340.623009v85.155753h340.623009v340.623009h85.155752v-340.623009l-0.212889-6.386682zM171.37855 767.466217v-340.623009a85.155752 85.155752 0 0 1 85.155752-85.155752h287.400664l138.378098 138.378097v287.400664a85.155752 85.155752 0 0 1-85.155752 85.155753h-340.62301a85.155752 85.155752 0 0 1-85.155752-85.155753z m425.778762-252.146182l-88.476827-88.476827H256.534302v340.623009h340.62301v-252.146182z"></path></svg>`,
         trash: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
         restore: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>`,
@@ -5767,31 +6158,13 @@ async function openManager(initialCache, preloadPromise) {
                         </label>
                     </div>
 
-                    <div class="pk-dup-toolbar" id="pk-dup-filters" style="margin-left:10px; border-right:1px solid var(--pk-bd); padding-right:10px; margin-right:10px;">
+                                        <div class="pk-dup-toolbar" id="pk-dup-filters" style="margin-left:10px; border-right:1px solid var(--pk-bd); padding-right:10px; margin-right:10px;">
                         ${mkLbl('pk-chk-hash', L.tag_hash, L.tag_hash_short, L.tag_hash)}
                         ${mkLbl('pk-chk-sim', L.tag_sim, L.tag_sim_short, L.tag_sim)}
                         ${mkLbl('pk-chk-name', L.tag_name, L.tag_name_short, L.tag_name)}
                     </div>
 
-                    <div style="flex:1"></div>
-                    <label class="pk-global-chk" id="pk-search-path-con" style="display:none; margin-right:8px;" data-pk-tip="${L.lbl_search_path}">
-                        <input type="checkbox" id="pk-chk-search-path">
-                        <span class="pk-txt-long">${L.lbl_search_path}</span>
-                        <span class="pk-txt-short">${L.lbl_search_path_short}</span>
-                    </label>
-                    <label class="pk-global-chk" id="pk-lbl-global">
-                        <input type="checkbox" id="pk-chk-global" ${S.wasGlobalChecked ? 'checked' : ''}>
-                        <span>${L.lbl_global_search}</span>
-                    </label>
-
-                    <div class="pk-search">
-                        <input type="text" id="pk-search-input" placeholder="${L.placeholder_search}" autocomplete="off">
-                        <div class="pk-search-clear" id="pk-search-clear">${CONF.icons.close}</div>
-                        <svg id="pk-search-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <div class="pk-hist-pop" id="pk-search-hist"></div>
-                    </div>
-
-                    <div class="pk-dup-toolbar" id="pk-dup-tools">
+                    <div class="pk-dup-toolbar" id="pk-dup-tools" style="display:none; align-items:center; gap:4px; padding:0 10px; height:100%; border-right:1px solid var(--pk-bd); margin-right:10px;">
                         <select id="pk-dup-folder-sel" style="height:28px; border:1px solid var(--pk-bd); border-radius:4px; font-size:12px; background:var(--pk-bg); color:var(--pk-fg); margin-right:5px;">
                             <option value="">${L.lbl_dup_select_folder}</option>
                         </select>
@@ -5802,32 +6175,45 @@ async function openManager(initialCache, preloadPromise) {
                             <span class="pk-txt-short" style="font-size:12px; color:var(--pk-fg);">${L.lbl_dup_invert_short}</span>
                         </label>
 
-                        <button class="pk-btn-toggle" id="pk-dup-size" data-pk-tip="${L.tip_toggle_size}">
-                            <span class="pk-txt-long">${L.btn_toggle_size} (<span id="pk-cond-size-long">${L.cond_small}</span>)</span>
-                            <span class="pk-txt-short" id="pk-cond-size-short">${L.cond_small_short}</span>
+                        <button class="pk-ana-select-btn" id="pk-dup-smart-btn" style="display:flex; margin-right:0;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                            <span>${L.btn_ana_select}</span>
                         </button>
-
-                        <button class="pk-btn-toggle" id="pk-dup-date" data-pk-tip="${L.tip_toggle_date}">
-                            <span class="pk-txt-long">${L.btn_toggle_date} (<span id="pk-cond-date-long">${L.cond_old}</span>)</span>
-                            <span class="pk-txt-short" id="pk-cond-date-short">${L.cond_old_short}</span>
-                        </button>
-                        <div class="pk-sep-sm"></div>
                     </div>
 
-                    <button class="pk-btn" id="pk-btn-exit" style="display:none; color:#d93025; border-color:transparent; margin-right:4px;">
-                        ${CONF.icons.close} <span>${L.btn_exit}</span>
+                    <div style="flex:1"></div>
+
+                    <label class="pk-global-chk" id="pk-lbl-global">
+                        <input type="checkbox" id="pk-chk-global" ${S.wasGlobalChecked ? 'checked' : ''}>
+                        <span>${L.lbl_global_search}</span>
+                    </label>
+                    <label class="pk-global-chk" id="pk-search-path-con" style="display:none; margin-right:8px;" data-pk-tip="${L.lbl_search_path}">
+                        <input type="checkbox" id="pk-chk-search-path">
+                        <span class="pk-txt-long">${L.lbl_search_path}</span>
+                        <span class="pk-txt-short">${L.lbl_search_path_short}</span>
+                    </label>
+
+                    <div class="pk-search">
+                        <input type="text" id="pk-search-input" placeholder="${L.placeholder_search}" autocomplete="off">
+                        <div class="pk-search-clear" id="pk-search-clear">${CONF.icons.close}</div>
+                        <svg id="pk-search-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <div class="pk-hist-pop" id="pk-search-hist"></div>
+                    </div>
+
+                    <button class="pk-btn" id="pk-export" data-pk-tip="${L.tip_export}">
+                        ${CONF.icons.export} <span>${L.btn_export}</span>
                     </button>
 
-                    <button class="pk-btn" id="pk-dup" style="display:none" data-pk-tip="${L.tip_dup}">
-                        ${CONF.icons.dup} <span>${L.btn_dup}</span>
+                    <button class="pk-btn" id="pk-scan-dup" data-pk-tip="${L.tip_scan_dup}">
+                        ${CONF.icons.scanDup} <span>${L.title_file_analysis}</span>
                     </button>
 
                     <button class="pk-btn" id="pk-analyze" data-pk-tip="${L.tip_analyze}">
                         ${CONF.icons.analyze} <span>${L.btn_analyze}</span>
                     </button>
 
-                    <button class="pk-btn" id="pk-scan" data-pk-tip="${L.tip_scan}">
-                        ${CONF.icons.scan} <span>${L.btn_scan}</span>
+                    <button class="pk-btn" id="pk-btn-exit" style="display:none; color:#d93025; border-color:transparent; margin-left:10px; flex-shrink:0;">
+                        ${CONF.icons.close} <span>${L.btn_exit}</span>
                     </button>
                 </div>
 
@@ -5852,6 +6238,7 @@ async function openManager(initialCache, preloadPromise) {
 
                 <div class="pk-tb" id="pk-actionbar">
                 <button class="pk-btn" id="pk-refresh" data-pk-tip="${L.tip_refresh}">${CONF.icons.refresh} <span>${L.btn_refresh_short}</span></button>
+                <button class="pk-btn" id="pk-off-copy-link" style="display:none;" data-pk-tip="${L.tip_copy_link}">${ctxIcons.copyLink} <span>${L.btn_copy_link}</span></button>
                 <button class="pk-btn" id="pk-retry-task" style="display:none;" data-pk-tip="${L.tip_retry_task}">${CONF.icons.retry} <span>${L.btn_retry_task}</span></button>
                 <button class="pk-btn" id="pk-up-pause" style="display:none;" data-pk-tip="${L.tip_up_pause}">${CONF.icons.taskPause} <span>${L.btn_up_pause}</span></button>
                 <button class="pk-btn" id="pk-up-start" style="display:none;" data-pk-tip="${L.tip_up_start}">${CONF.icons.taskStart} <span>${L.btn_up_start}</span></button>
@@ -5988,6 +6375,7 @@ async function openManager(initialCache, preloadPromise) {
         const style = document.createElement('style');
         style.textContent = `
         .pk-tooltip {
+            zoom: var(--pk-zoom, 1);
             width: max-content; max-width: 280px; min-width: auto;
             background: var(--pk-tip-bg); color: var(--pk-tip-fg);
             border: 1px solid var(--pk-tip-bd);
@@ -6074,11 +6462,17 @@ async function openManager(initialCache, preloadPromise) {
 
         const updatePos = (e) => {
             if (!tipEl || isMenuOpen || tipEl.style.display === 'none') return;
-            let left = e.clientX + 15;
-            let top = e.clientY + 15;
+            const scale = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
+            let left = (e.clientX / scale) + 15;
+            let top = (e.clientY / scale) + 15;
             const rect = tipEl.getBoundingClientRect();
-            if (left + rect.width > window.innerWidth - 10) left = e.clientX - rect.width - 15;
-            if (top + rect.height > window.innerHeight - 10) top = e.clientY - rect.height - 15;
+            const w = rect.width / scale;
+            const h = rect.height / scale;
+            const winW = window.innerWidth / scale;
+            const winH = window.innerHeight / scale;
+
+            if (left + w > winW - 10) left = (e.clientX / scale) - w - 15;
+            if (top + h > winH - 10) top = (e.clientY / scale) - h - 15;
             tipEl.style.left = `${left}px`;
             tipEl.style.top = `${top}px`;
         };
@@ -6156,7 +6550,7 @@ async function openManager(initialCache, preloadPromise) {
         win: el.querySelector('.pk-win'), vp: el.querySelector('#pk-vp'), in: el.querySelector('#pk-in'),
         loader: el.querySelector('#pk-loader'), loadTxt: el.querySelector('#pk-load-txt'), stopBtn: el.querySelector('#pk-stop-load'),
         crumb: el.querySelector('#pk-crumb'), stat: el.querySelector('#pk-stat'),
-        chkAll: el.querySelector('#pk-all'), scan: el.querySelector('#pk-scan'), dup: el.querySelector('#pk-dup'),
+        chkAll: el.querySelector('#pk-all'), scan: el.querySelector('#pk-scan-dup'),
         dupTools: el.querySelector('#pk-dup-tools'),
         dupFilters: el.querySelector('#pk-dup-filters'),
         chkName: el.querySelector('#pk-chk-name'),
@@ -6172,6 +6566,7 @@ async function openManager(initialCache, preloadPromise) {
         chkUpPause: el.querySelector('#pk-chk-up-pause'),
         chkUpDone: el.querySelector('#pk-chk-up-done'),
         btnAnalyze: el.querySelector('#pk-analyze'),
+        btnExport: el.querySelector('#pk-export'),
         btnFolderFirst: el.querySelector('#pk-btn-folder-first'),
         btnNavHome: el.querySelector('#pk-nav-home'),
         btnNavOffline: el.querySelector('#pk-nav-offline'),
@@ -6189,8 +6584,7 @@ async function openManager(initialCache, preloadPromise) {
         btnDelForever: el.querySelector('#pk-del-forever'),
         btnEmptyTrash: el.querySelector('#pk-empty-trash'),
         btnTrashBlacklistManager: el.querySelector('#pk-trash-blacklist-manager'),
-        btnDupSize: el.querySelector('#pk-dup-size'), condSize: el.querySelector('#pk-cond-size'),
-        btnDupDate: el.querySelector('#pk-dup-date'), condDate: el.querySelector('#pk-cond-date'),
+        btnDupSmart: el.querySelector('#pk-dup-smart-btn'),
         btnExit: el.querySelector('#pk-btn-exit'),
         btnCopy: el.querySelector('#pk-copy'), btnCut: el.querySelector('#pk-cut'),
         btnDel: el.querySelector('#pk-del'), btnDeselect: el.querySelector('#pk-deselect'),
@@ -6207,6 +6601,7 @@ async function openManager(initialCache, preloadPromise) {
         inpFolder: el.querySelector('#pk-folder-selector'),
         btnCancelShare: el.querySelector('#pk-cancel-share'),
         btnRetryTask: el.querySelector('#pk-retry-task'),
+        btnCopyLinkOffline: el.querySelector('#pk-off-copy-link'),
         btnUpPause: el.querySelector('#pk-up-pause'),
         btnUpStart: el.querySelector('#pk-up-start'),
         btnUpDel: el.querySelector('#pk-up-del'),
@@ -6225,6 +6620,13 @@ async function openManager(initialCache, preloadPromise) {
         lblGlobal: el.querySelector('#pk-lbl-global'),
         chkSearchPath: el.querySelector('#pk-chk-search-path'),
         lblSearchPath: el.querySelector('#pk-search-path-con'),
+        btnAnaSelect: (function() {
+            const b = document.createElement('button'); b.className = 'pk-ana-select-btn';
+            b.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> <span>${L.btn_ana_select}</span>`;
+            const parent = el.querySelector('#pk-search-path-con');
+            if (parent) parent.parentNode.insertBefore(b, parent);
+            return b;
+        })(),
         topBar: el.querySelector('#pk-top-bar'),
         searchClear: el.querySelector('#pk-search-clear'),
         searchBtn: el.querySelector('#pk-search-btn'),
@@ -6302,18 +6704,27 @@ async function openManager(initialCache, preloadPromise) {
     const checkGuiResponsiveness = () => {
         const width = window.innerWidth;
         const height = window.innerHeight;
+        const screenW = window.screen.width;
 
-        const MIN_WIDTH = 940;
-        const MIN_HEIGHT = 340;
+        let z = 1;
+        if (screenW <= 1600 || width <= 1600) z = 0.8;
+        if (screenW <= 1280 || width <= 1280) z = 0.7;
+
+        document.documentElement.style.setProperty('--pk-zoom', z);
+
+        const MIN_WIDTH = 940 * z;
+        const MIN_HEIGHT = 450;
         const isTooSmall = width < MIN_WIDTH || height < MIN_HEIGHT;
         const isGuiVisible = el.style.display !== 'none';
 
         if (isTooSmall) {
+            document.body.classList.add('pk-hide-all-ui');
             if (isGuiVisible) {
                 el.style.display = 'none';
                 isForcedHidden = true;
             }
         } else {
+            document.body.classList.remove('pk-hide-all-ui');
             if (isForcedHidden) {
                 el.style.display = 'flex';
                 if (el.focus) el.focus();
@@ -6337,6 +6748,8 @@ async function openManager(initialCache, preloadPromise) {
         checkGuiResponsiveness();
         if (typeof renderVisible === 'function') requestAnimationFrame(renderVisible);
     });
+
+    checkGuiResponsiveness();
 
     if (UI.btnClose) {
         UI.btnClose.addEventListener('click', () => {
@@ -6374,7 +6787,8 @@ async function openManager(initialCache, preloadPromise) {
     }
 
     const btnMax = el.querySelector('#pk-maximize');
-    let isWinMaximized = (globalSavedState && globalSavedState.isMaximized) || false;
+    const isTurbo = gmGet('pk_turbo_mode', false);
+    let isWinMaximized = (globalSavedState && typeof globalSavedState.isMaximized !== 'undefined') ? globalSavedState.isMaximized : isTurbo;
 
     if (isWinMaximized) {
         const win = el.querySelector('.pk-win');
@@ -6436,8 +6850,10 @@ async function openManager(initialCache, preloadPromise) {
         };
     }
 
-    let modalZIndexCounter = 2147483640;
+    let modalZIndexCounter = 100000;
     function showModal(html) {
+        let container = document.getElementById('pk-toast-container');
+        if (container) document.body.appendChild(container);
         const m = document.createElement('div'); m.className = 'pk-modal-ov';
         m.style.zIndex = (++modalZIndexCounter).toString();
 
@@ -6446,6 +6862,43 @@ async function openManager(initialCache, preloadPromise) {
         }
 
         m.innerHTML = `<div class="pk-modal" style="height:auto; min-height:auto; max-height:85vh; overflow:visible;"><div class="pk-modal-close" style="z-index:10;">${CONF.icons.close}</div>${html}</div>`;
+
+        const actBars = m.querySelectorAll('.pk-modal-act');
+        actBars.forEach(bar => {
+            const btns = Array.from(bar.children).filter(child => child.classList.contains('pk-btn'));
+            if (!bar.querySelector('.pk-bl-btn') && (btns.length === 1 || btns.length === 2)) {
+                bar.style.setProperty('display', 'grid', 'important');
+                bar.style.setProperty('grid-template-columns', btns.length === 1 ? '1fr' : '1fr 1fr', 'important');
+                bar.style.setProperty('gap', '15px', 'important');
+                bar.style.setProperty('width', '100%', 'important');
+                bar.style.setProperty('margin', '0', 'important');
+                bar.style.setProperty('margin-top', '20px', 'important');
+
+                btns.forEach(btn => {
+                    btn.style.setProperty('height', '46px', 'important');
+                    btn.style.setProperty('border-radius', '12px', 'important');
+                    btn.style.setProperty('font-size', '15px', 'important');
+                    btn.style.setProperty('font-weight', '600', 'important');
+                    btn.style.setProperty('justify-content', 'center', 'important');
+                    btn.style.setProperty('padding', '0', 'important');
+                    btn.style.setProperty('margin', '0', 'important');
+                    btn.style.setProperty('min-width', '0', 'important');
+
+                    if (btn.classList.contains('pri')) {
+                        btn.style.setProperty('background', 'var(--pk-pri)', 'important');
+                        btn.style.setProperty('color', '#fff', 'important');
+                        btn.style.setProperty('border', 'none', 'important');
+                        btn.style.setProperty('transition', 'filter 0.2s', 'important');
+                    } else {
+                        btn.style.setProperty('background', 'transparent', 'important');
+                        btn.style.setProperty('color', 'var(--pk-fg)', 'important');
+                        btn.style.setProperty('border', '1px solid transparent', 'important');
+                        btn.onmouseover = () => btn.style.setProperty('background', 'var(--pk-hl)', 'important');
+                        btn.onmouseout = () => btn.style.setProperty('background', 'transparent', 'important');
+                    }
+                });
+            }
+        });
 
         document.body.appendChild(m);
 
@@ -6457,7 +6910,7 @@ async function openManager(initialCache, preloadPromise) {
         return new Promise((resolve) => {
             const m = showModal(`
                 <h3 style="border:none; margin-bottom:16px; font-size:18px; font-weight:700; color:var(--pk-fg);">${title}</h3>
-                <div style="margin-bottom:32px; line-height:1.6; font-size:14px; color:var(--pk-fg); opacity:0.9; word-break:break-all;">${esc(msg).replace(/\n/g, '<br>')}</div>
+                <div style="margin-bottom:32px; line-height:1.6; font-size:14px; color:var(--pk-fg); opacity:0.9; word-break:break-all;">${msg.replace(/\n/g, '<br>')}</div>
                 <div class="pk-modal-act" style="justify-content: flex-end;">
                     <button class="pk-btn pri" id="alert_ok"
                             style="height:40px; min-width:86px; padding:0 30px; border-radius:8px; background:var(--pk-pri); color:#fff; font-weight:bold; font-size:14px; justify-content:center;">
@@ -6649,7 +7102,7 @@ async function openManager(initialCache, preloadPromise) {
         if (!container) {
             container = document.createElement('div');
             container.id = 'pk-toast-container';
-            container.style.cssText = 'position:fixed; top:80px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; gap:12px; z-index:2147483647; pointer-events:none; align-items:center;';
+            container.style.cssText = 'position:fixed; top:80px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; gap:12px; z-index:2147483647; pointer-events:none; align-items:center; zoom:var(--pk-zoom, 1);';
             document.body.appendChild(container);
         }
 
@@ -6711,7 +7164,7 @@ async function openManager(initialCache, preloadPromise) {
             padding: 15px; background: var(--pk-hl);
             color: var(--pk-fg); font-size: 13px;
             font-family: inherit;
-            cursor: text; outline: none; line-height: 1.6; letter-spacing: 0.3px;
+            cursor: auto; outline: none; line-height: 1.6; letter-spacing: 0.3px;
             transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
             width: 100%; box-sizing: border-box;
         `;
@@ -6857,9 +7310,14 @@ async function openManager(initialCache, preloadPromise) {
 
         const loadLargeText = async (el, storageKey, originalPlaceholder) => {
             el.placeholder = L.str_loading_placeholder;
-            await sleep(50);
-            const data = gmGet(storageKey, '');
-            el.value = data;
+            await sleep(350);
+            const data = await new Promise(r => setTimeout(() => r(gmGet(storageKey, '')), 0));
+            if (data) {
+                const prevDisplay = el.style.display;
+                el.style.display = 'none';
+                el.value = data;
+                el.style.display = prevDisplay;
+            }
             el.placeholder = originalPlaceholder;
             el.setSelectionRange(0, 0);
             el.blur();
@@ -6969,6 +7427,7 @@ async function openManager(initialCache, preloadPromise) {
                 gmSet('pk_blacklist_folders', "");
                 gmSet('pk_blacklist', "");
                 S.updateBlCache();
+                renderVisible();
                 showToast(L.str_cleanup_done);
             }
         };
@@ -7151,7 +7610,7 @@ async function openManager(initialCache, preloadPromise) {
                             <div>${L.col_name}</div>
                             <div>${L.col_path}</div>
                         </div>
-                        <div id="bl_prev_list"></div>
+                        <div id="bl_prev_list"><div id="bl_prev_in" style="position:relative; width:100%;"></div></div>
                     </div>
                 </div>
 
@@ -7172,26 +7631,16 @@ async function openManager(initialCache, preloadPromise) {
         if (closeBtn) Object.assign(closeBtn.style, { top: "24px", right: "24px" });
 
         const listDiv = m.querySelector('#bl_prev_list');
+        const listIn = m.querySelector('#bl_prev_in');
         const chkAll = m.querySelector('#bl_prev_all');
         const btnDel = m.querySelector('#bl_prev_del');
         const topStat = m.querySelector('#bl_top_stat');
-        const fragment = document.createDocumentFragment();
+
+        const ROW_HEIGHT = 44;
+        listIn.style.height = `${matches.length * ROW_HEIGHT}px`;
+
         const selectedIds = new Set(matches.map(m => m.item.id));
         let lastIdx = -1;
-
-        m.addEventListener('click', (e) => {
-            if (m._blockClick) return;
-
-            if (e.target.closest('[data-id]') || e.target.closest('button') || e.target.closest('input') || e.target.closest('label')) return;
-
-            if (selectedIds.size > 0) {
-                selectedIds.clear();
-                listDiv.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked = false);
-                chkAll.checked = false;
-                lastIdx = -1;
-                updateCount();
-            }
-        });
 
         const updateCount = () => {
             const c = selectedIds.size;
@@ -7209,152 +7658,189 @@ async function openManager(initialCache, preloadPromise) {
         };
         updateCount();
 
-        matches.forEach((m, i) => {
-            const row = document.createElement('div');
-            row.dataset.id = m.item.id;
-            row.style.cssText = "display:grid; grid-template-columns: 40px 50px 1fr 1fr; padding:0; border-bottom:1px dashed var(--pk-bd); font-size:13px; align-items:center; height:44px; transition:background 0.1s; cursor:pointer;";
+        let isRenderScheduled = false;
 
-            row.onmouseover = () => row.style.backgroundColor = 'var(--pk-hl)';
-            row.onmouseout = () => row.style.backgroundColor = 'transparent';
+        const renderPreviewList = () => {
+            const top = listDiv.scrollTop;
+            const h = listDiv.clientHeight || 500;
+            const buffer = 15;
+            const start = Math.max(0, Math.floor(top / ROW_HEIGHT) - buffer);
+            const end = Math.min(matches.length, Math.ceil((top + h) / ROW_HEIGHT) + buffer);
 
-            const isFolder = m.type === 'FOLDER';
+            listIn.innerHTML = '';
+            const fragment = document.createDocumentFragment();
 
-            const it = m.item;
-            const mime = (it.mime_type || '').toLowerCase();
-            const isMedia = mime.startsWith('video/') || mime.startsWith('image/');
+            for (let i = start; i < end; i++) {
+                const mMatch = matches[i];
+                const row = document.createElement('div');
+                row.dataset.id = mMatch.item.id;
+                row.style.cssText = `position:absolute; top:${i * ROW_HEIGHT}px; width:100%; display:grid; grid-template-columns: 40px 50px 1fr 1fr; padding:0; border-bottom:1px dashed var(--pk-bd); font-size:13px; align-items:center; height:${ROW_HEIGHT}px; transition:background 0.1s; cursor:pointer;`;
 
-            if (isFolder && (!it.thumbnail_link || it.thumbnail_link === it.icon_link) && typeof globalCache !== 'undefined') {
-                const scanDeepCover = (targetId, depth) => {
-                    if (depth > 5) return null;
-                    const raw = globalCache.get(targetId);
-                    if (!raw) return null;
-                    const files = (raw && !Array.isArray(raw) && raw.items) ? raw.items : raw;
-                    if (!files || files.length === 0) return null;
-                    const vid = files.find(f => f.mime_type?.startsWith('video/') && f.thumbnail_link);
-                    if (vid) return vid.thumbnail_link;
-                    const img = files.find(f => f.mime_type?.startsWith('image/') && f.thumbnail_link);
-                    if (img) return img.thumbnail_link;
-                    const subFolders = files.filter(f => f.kind === 'drive#folder');
-                    for (const sub of subFolders) {
-                        if (globalCache.has(sub.id)) {
+                row.onmouseover = () => row.style.backgroundColor = 'var(--pk-hl)';
+                row.onmouseout = () => row.style.backgroundColor = 'transparent';
+
+                const isFolder = mMatch.type === 'FOLDER';
+                const it = mMatch.item;
+                const mime = (it.mime_type || '').toLowerCase();
+                const isMedia = mime.startsWith('video/') || mime.startsWith('image/');
+
+                if (isFolder && (!it.thumbnail_link || it.thumbnail_link === it.icon_link) && typeof globalCache !== 'undefined') {
+                    const scanDeepCover = (targetId, depth) => {
+                        if (depth > 5) return null;
+                        const raw = globalCache.get(targetId);
+                        if (!raw) return null;
+                        const files = (raw && !Array.isArray(raw) && raw.items) ? raw.items : raw;
+                        if (!files || files.length === 0) return null;
+                        const vid = files.find(f => f.mime_type?.startsWith('video/') && f.thumbnail_link);
+                        if (vid) return vid.thumbnail_link;
+                        const img = files.find(f => f.mime_type?.startsWith('image/') && f.thumbnail_link);
+                        if (img) return img.thumbnail_link;
+                        const subFolders = files.filter(f => f.kind === 'drive#folder');
+                        for (const sub of subFolders) {
+                            if (globalCache.has(sub.id)) {
+                                const childThumb = scanDeepCover(sub.id, depth + 1);
+                                if (childThumb) return childThumb;
+                                continue;
+                            }
+                            if (sub.thumbnail_link && sub.thumbnail_link !== sub.icon_link && !sub._coverResolved) {
+                                return sub.thumbnail_link;
+                            }
                             const childThumb = scanDeepCover(sub.id, depth + 1);
                             if (childThumb) return childThumb;
-                            continue;
                         }
-                        if (sub.thumbnail_link && sub.thumbnail_link !== sub.icon_link && !sub._coverResolved) {
-                            return sub.thumbnail_link;
-                        }
-                        const childThumb = scanDeepCover(sub.id, depth + 1);
-                        if (childThumb) return childThumb;
+                        return null;
+                    };
+                    const foundThumb = scanDeepCover(it.id, 0);
+                    if (foundThumb) {
+                        it.thumbnail_link = foundThumb;
                     }
-                    return null;
-                };
-                const foundThumb = scanDeepCover(it.id, 0);
-                if (foundThumb) {
-                    it.thumbnail_link = foundThumb;
                 }
-            }
 
-            const hasCover = it.thumbnail_link && it.thumbnail_link !== it.icon_link;
+                const hasCover = it.thumbnail_link && it.thumbnail_link !== it.icon_link;
+                const fallbackSvg = getIcon(it).replace(/width="\d+"/, 'width="24"').replace(/height="\d+"/, 'height="24"');
+                let iconHtml = '';
 
-            const fallbackSvg = getIcon(it).replace(/width="\d+"/, 'width="24"').replace(/height="\d+"/, 'height="24"');
-            let iconHtml = '';
-
-            if (!isFolder && isMedia && hasCover) {
-                iconHtml = `<img src="${it.thumbnail_link}" style="width:24px;height:24px;object-fit:cover;border-radius:4px;flex-shrink:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';">`;
-
-                const secondFallback = it.icon_link
-                    ? `<img src="${it.icon_link}" style="width:24px;height:24px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"><span style="display:none;align-items:center;">${fallbackSvg}</span>`
-                    : fallbackSvg;
-
-                iconHtml += `<span style="display:none;align-items:center;justify-content:center;">${secondFallback}</span>`;
-            } else {
-                const iconSrc = it.icon_link;
-                iconHtml = iconSrc
-                    ? `<img src="${iconSrc}" style="width:24px;height:24px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='inline-flex';"><span style="display:none;align-items:center;flex-shrink:0;">${fallbackSvg}</span>`
-                    : fallbackSvg;
-            }
-
-            const lineage = m.item._lineage ||[];
-            const relativePath = lineage.map(x => x.name).join('/');
-
-            const homeIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;flex-shrink:0;vertical-align:-1px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
-
-            row.ondragstart = (e) => { e.preventDefault(); return false; };
-
-            let pathHtml = `<div style="display:flex;align-items:center;overflow:hidden;white-space:nowrap;">
-                <span style="display:flex;align-items:center;flex-shrink:0;">${homeIcon}${esc(L.btn_nav_home)}</span>`;
-            if (relativePath) {
-                pathHtml += `<span style="margin:0 4px;">/</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(relativePath)}</span>`;
-            }
-            pathHtml += `</div>`;
-
-            const homeGroupTip = `<span style="display:inline-flex;align-items:center;vertical-align:bottom;">${homeIcon}${esc(L.btn_nav_home)}</span>`;
-            const fullPathTip = `<div style="line-height:1.6;word-break:break-all;">${homeGroupTip}${relativePath ? '<span style="margin:0 4px;opacity:0.5;">/</span>' + esc(relativePath) : ''}</div>`;
-
-            const thumbAttr = (typeof hasCover !== 'undefined' && hasCover) ? `data-pk-thumb="${it.thumbnail_link}"` : '';
-
-            row.innerHTML = `
-                <div style="display:flex; align-items:center; justify-content:center;">
-                    <input type="checkbox" checked data-id="${m.item.id}" style="cursor:pointer; margin:0; display:block; width:16px; height:16px; accent-color:var(--pk-pri);">
-                </div>
-                <div style="display:flex; align-items:center; justify-content:center;" ${thumbAttr}>${iconHtml}</div>
-                <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-right:10px; font-weight:normal; color:var(--pk-fg);" ${thumbAttr} data-pk-tip="${esc(m.item.name)}">${esc(m.item.name)}</div>
-                <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--pk-fg);" data-pk-tip="${fullPathTip.replace(/"/g, '&quot;')}">${pathHtml}</div>
-            `;
-
-            const chk = row.querySelector('input');
-
-            row.onclick = (e) => {
-                const curIdx = i;
-                const id = m.item.id;
-
-                if (e.target === chk && !e.shiftKey && !e.ctrlKey && !e.metaKey) return;
-
-                if (e.shiftKey && lastIdx !== -1) {
-                    const start = Math.min(lastIdx, curIdx);
-                    const end = Math.max(lastIdx, curIdx);
-                    if (!e.ctrlKey && !e.metaKey) selectedIds.clear();
-                    for (let k = start; k <= end; k++) selectedIds.add(matches[k].item.id);
-                } else if (e.ctrlKey || e.metaKey) {
-                    if (selectedIds.has(id)) selectedIds.delete(id);
-                    else selectedIds.add(id);
+                if (!isFolder && isMedia && hasCover) {
+                    iconHtml = `<img src="${it.thumbnail_link}" style="width:24px;height:24px;object-fit:cover;border-radius:4px;flex-shrink:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';">`;
+                    const secondFallback = it.icon_link
+                        ? `<img src="${it.icon_link}" style="width:24px;height:24px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"><span style="display:none;align-items:center;">${fallbackSvg}</span>`
+                        : fallbackSvg;
+                    iconHtml += `<span style="display:none;align-items:center;justify-content:center;">${secondFallback}</span>`;
                 } else {
-                    selectedIds.clear();
-                    selectedIds.add(id);
+                    const iconSrc = it.icon_link;
+                    iconHtml = iconSrc
+                        ? `<img src="${iconSrc}" style="width:24px;height:24px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='inline-flex';"><span style="display:none;align-items:center;flex-shrink:0;">${fallbackSvg}</span>`
+                        : fallbackSvg;
                 }
 
-                lastIdx = curIdx;
-                listDiv.querySelectorAll('input[type="checkbox"]').forEach((input, idx) => {
-                    input.checked = selectedIds.has(matches[idx].item.id);
-                });
-                chkAll.checked = (selectedIds.size === matches.length);
-                updateCount();
-            };
+                const lineage = mMatch.item._lineage ||[];
+                const relativePath = lineage.map(x => x.name).join('/');
+                const homeIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;flex-shrink:0;vertical-align:-1px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
 
-            chk.onchange = (e) => {
-                if(e.target.checked) { selectedIds.add(m.item.id); lastIdx = i; }
-                else selectedIds.delete(m.item.id);
-                chkAll.checked = (selectedIds.size === matches.length);
-                updateCount();
-            };
+                row.ondragstart = (e) => { e.preventDefault(); return false; };
 
-            fragment.appendChild(row);
+                let pathHtml = `<div style="display:flex;align-items:center;overflow:hidden;white-space:nowrap;">
+                    <span style="display:flex;align-items:center;flex-shrink:0;">${homeIcon}${esc(L.btn_nav_home)}</span>`;
+                if (relativePath) {
+                    pathHtml += `<span style="margin:0 4px;">/</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(relativePath)}</span>`;
+                }
+                pathHtml += `</div>`;
+
+                const homeGroupTip = `<span style="display:inline-flex;align-items:center;vertical-align:bottom;">${homeIcon}${esc(L.btn_nav_home)}</span>`;
+                const fullPathTip = `<div style="line-height:1.6;word-break:break-all;">${homeGroupTip}${relativePath ? '<span style="margin:0 4px;opacity:0.5;">/</span>' + esc(relativePath) : ''}</div>`;
+                const thumbAttr = (typeof hasCover !== 'undefined' && hasCover) ? `data-pk-thumb="${it.thumbnail_link}"` : '';
+
+                const isChecked = selectedIds.has(mMatch.item.id);
+
+                row.innerHTML = `
+                    <div style="display:flex; align-items:center; justify-content:center;">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} data-id="${mMatch.item.id}" style="cursor:pointer; margin:0; display:block; width:16px; height:16px; accent-color:var(--pk-pri);">
+                    </div>
+                    <div style="display:flex; align-items:center; justify-content:center;" ${thumbAttr}>${iconHtml}</div>
+                    <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-right:10px; font-weight:normal; color:var(--pk-fg);" ${thumbAttr} data-pk-tip="${esc(mMatch.item.name)}">${esc(mMatch.item.name)}</div>
+                    <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--pk-fg);" data-pk-tip="${fullPathTip.replace(/"/g, '&quot;')}">${pathHtml}</div>
+                `;
+
+                const chk = row.querySelector('input');
+
+                row.onclick = (e) => {
+                    const curIdx = i;
+                    const id = mMatch.item.id;
+
+                    if (e.target === chk && !e.shiftKey && !e.ctrlKey && !e.metaKey) return;
+
+                    if (e.shiftKey && lastIdx !== -1) {
+                        const s = Math.min(lastIdx, curIdx);
+                        const eIdx = Math.max(lastIdx, curIdx);
+                        if (!e.ctrlKey && !e.metaKey) selectedIds.clear();
+                        for (let k = s; k <= eIdx; k++) selectedIds.add(matches[k].item.id);
+                    } else if (e.ctrlKey || e.metaKey) {
+                        if (selectedIds.has(id)) selectedIds.delete(id);
+                        else selectedIds.add(id);
+                    } else {
+                        selectedIds.clear();
+                        selectedIds.add(id);
+                    }
+
+                    lastIdx = curIdx;
+                    updateCount();
+                    renderPreviewList();
+                };
+
+                chk.onchange = (e) => {
+                    if(e.target.checked) { selectedIds.add(mMatch.item.id); lastIdx = i; }
+                    else selectedIds.delete(mMatch.item.id);
+                    updateCount();
+                    renderPreviewList();
+                };
+
+                fragment.appendChild(row);
+            }
+            listIn.appendChild(fragment);
+        };
+
+        listDiv.onscroll = () => {
+            if (!isRenderScheduled) {
+                requestAnimationFrame(() => { renderPreviewList(); isRenderScheduled = false; });
+                isRenderScheduled = true;
+            }
+        };
+
+        renderPreviewList();
+
+        m.addEventListener('click', (e) => {
+            if (m._blockClick) return;
+            if (e.target.closest('[data-id]') || e.target.closest('button') || e.target.closest('input') || e.target.closest('label')) return;
+
+            if (selectedIds.size > 0) {
+                selectedIds.clear();
+                lastIdx = -1;
+                updateCount();
+                renderPreviewList();
+            }
         });
 
-        listDiv.appendChild(fragment);
+        chkAll.onchange = (e) => {
+            const checked = e.target.checked;
+            if(checked) {
+                matches.forEach(m => selectedIds.add(m.item.id));
+            } else {
+                selectedIds.clear();
+            }
+            updateCount();
+            renderPreviewList();
+        };
 
         const mqBox = document.createElement('div');
         mqBox.className = 'pk-bl-mq';
         listDiv.appendChild(mqBox);
 
-        let isDragging = false, isMarquee = false, startX = 0, startY = 0, rowH = 0;
+        let isDragging = false, isMarquee = false, startX = 0, startY = 0;
         let blScrollSpeed = 0, blScrollRaf = null, blLastX = 0, blLastY = 0, blLastCtrl = false;
 
         listDiv.onmousedown = (e) => {
             if (e.button !== 0 || e.target.closest('input')) return;
             const rect = listDiv.getBoundingClientRect();
-            if (!rowH && listDiv.children.length > 0) rowH = listDiv.children[0].offsetHeight;
 
             isDragging = true;
             isMarquee = false;
@@ -7365,7 +7851,7 @@ async function openManager(initialCache, preloadPromise) {
             const updateMarqueeBox = () => {
                 const curRect = listDiv.getBoundingClientRect();
                 const curX = blLastX - curRect.left;
-                const maxScrollHeight = listDiv.scrollHeight;
+                const maxScrollHeight = listIn.offsetHeight;
                 const curY = Math.max(0, Math.min(maxScrollHeight, blLastY - curRect.top + listDiv.scrollTop));
 
                 const top = Math.min(startY, curY);
@@ -7379,25 +7865,22 @@ async function openManager(initialCache, preloadPromise) {
                 mqBox.style.width = width + 'px';
                 mqBox.style.height = height + 'px';
 
-                const sIdx = Math.floor(top / rowH);
-                const eIdx = Math.floor((top + height) / rowH);
+                const sIdx = Math.floor(top / ROW_HEIGHT);
+                const eIdx = Math.floor((top + height) / ROW_HEIGHT);
 
                 for (let i = 0; i < matches.length; i++) {
-                    const row = listDiv.children[i];
-                    if (!row || row === mqBox) continue;
-                    const chk = row.querySelector('input');
                     const isInside = i >= sIdx && i <= eIdx;
-
                     if (isInside) {
                         selectedIds.add(matches[i].item.id);
-                        chk.checked = true;
                     } else if (!blLastCtrl) {
                         selectedIds.delete(matches[i].item.id);
-                        chk.checked = false;
                     }
                 }
-                chkAll.checked = (selectedIds.size === matches.length);
                 updateCount();
+                if (!isRenderScheduled) {
+                    requestAnimationFrame(() => { renderPreviewList(); isRenderScheduled = false; });
+                    isRenderScheduled = true;
+                }
             };
 
             const runBlScroll = () => {
@@ -7415,10 +7898,9 @@ async function openManager(initialCache, preloadPromise) {
                         isMarquee = true;
                         if (!me.ctrlKey && !me.metaKey && !me.shiftKey) {
                             selectedIds.clear();
-                            listDiv.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked = false);
-                            chkAll.checked = false;
                             lastIdx = -1;
                             updateCount();
+                            renderPreviewList();
                         }
                     } else return;
                 }
@@ -7428,8 +7910,8 @@ async function openManager(initialCache, preloadPromise) {
                 blLastCtrl = me.ctrlKey || me.metaKey;
                 const curRect = listDiv.getBoundingClientRect();
 
-                if (blLastY > curRect.bottom - 5) blScrollSpeed = Math.min(35, 2 + Math.pow((blLastY - curRect.bottom + 5) / 5, 1.3));
-                else if (blLastY < curRect.top + 5) blScrollSpeed = -Math.min(35, 2 + Math.pow((curRect.top + 5 - blLastY) / 5, 1.3));
+                if (blLastY > curRect.bottom - 5) blScrollSpeed = Math.min(45, 2 + Math.pow((blLastY - curRect.bottom + 5) / 5, 1.3));
+                else if (blLastY < curRect.top + 5) blScrollSpeed = -Math.min(45, 2 + Math.pow((curRect.top + 5 - blLastY) / 5, 1.3));
                 else blScrollSpeed = 0;
 
                 if (blScrollSpeed !== 0 && !blScrollRaf) blScrollRaf = requestAnimationFrame(runBlScroll);
@@ -7456,17 +7938,6 @@ async function openManager(initialCache, preloadPromise) {
             window.addEventListener('mouseup', onMouseUp);
         };
 
-        chkAll.onchange = (e) => {
-            const checked = e.target.checked;
-            const inputs = listDiv.querySelectorAll('input[type="checkbox"]');
-            inputs.forEach(inp => {
-                inp.checked = checked;
-                const id = inp.getAttribute('data-id');
-                if(checked) selectedIds.add(id); else selectedIds.delete(id);
-            });
-            updateCount();
-        };
-
         m.querySelector('#bl_prev_cancel').onclick = () => m.remove();
 
         m.tabIndex = 0;
@@ -7478,17 +7949,8 @@ async function openManager(initialCache, preloadPromise) {
                 e.stopPropagation();
 
                 matches.forEach(m => selectedIds.add(m.item.id));
-
-                listDiv.querySelectorAll('input[type="checkbox"]').forEach(inp => {
-                    inp.checked = true;
-                });
-
-                if (chkAll) {
-                    chkAll.checked = true;
-                    chkAll.indeterminate = false;
-                }
-
                 updateCount();
+                renderPreviewList();
             }
         }, true);
 
@@ -7496,7 +7958,6 @@ async function openManager(initialCache, preloadPromise) {
             if (selectedIds.size === 0) return;
 
             const confirmed = await showConfirm(L.warn_del.replace('{n}', selectedIds.size));
-
             if (!confirmed) return;
 
             m.remove();
@@ -7522,10 +7983,220 @@ async function openManager(initialCache, preloadPromise) {
         };
     }
 
-    function setLoad(b) { S.loading = b; UI.loader.style.display = b ? 'flex' : 'none'; if (b) UI.loadTxt.textContent = L.loading_detail; }
+    function setLoad(b, isInline = false) {
+        S.loading = b;
+        if (b) {
+            if (isInline) {
+                UI.loader.style.display = 'none';
+            } else {
+                UI.loader.style.display = 'flex';
+                if (UI.loadTxt) UI.loadTxt.textContent = L.loading_detail;
+            }
+        } else {
+            UI.loader.style.display = 'none';
+        }
+    }
     function updateLoadTxt(txt) { if (UI.loadTxt) UI.loadTxt.innerText = txt; }
 
     let activeLoadId = 0;
+
+    const computeDuplicateGroups = async (candidates, cfg, isRunningFn) => {
+        const groups =[];
+        const assigned = new Set();
+        const strictness = gmGet('pk_dup_strictness', 'strict');
+        const sizeRatioLimit = (strictness === 'loose') ? 0.10 : 0.05;
+
+        if (isRunningFn()) {
+            updateLoadTxt(L.str_analyzing);
+            const hashMap = new Map();
+            for (const item of candidates) {
+                const hash = item.gcid || item.md5_checksum || item.hash;
+                const key = hash ? `${hash}|${item.size}` : null;
+                if (key) {
+                    if (!hashMap.has(key)) hashMap.set(key,[]);
+                    hashMap.get(key).push(item);
+                }
+            }
+            for (const[key, items] of hashMap) {
+                if (items.length > 1) {
+                    const ids = items.map(i => i.id);
+                    ids.forEach(id => { assigned.add(id); S.dupReasons.set(id, L.tag_hash); });
+                    groups.push({ ids: ids, type: L.tag_hash });
+                }
+            }
+        }
+
+        if (isRunningFn() && cfg.video) {
+            updateLoadTxt(L.str_analyzing);
+            const simCandidates = candidates.filter(i => i.mime_type.startsWith('video') && !assigned.has(i.id));
+            const validVideos = simCandidates.filter(item => (parseFloat(item.params?.duration || 0) > 0));
+            validVideos.sort((a, b) => parseFloat(a.params?.duration || 0) - parseFloat(b.params?.duration || 0));
+
+            let processedCount = 0;
+            const totalCount = validVideos.length;
+
+            for (let i = 0; i < totalCount; i++) {
+                processedCount++;
+                if (processedCount % 500 === 0) {
+                     if (!isRunningFn()) break;
+                     const pct = Math.round(processedCount / totalCount * 100);
+                     updateLoadTxt(`${L.str_analyzing} (${pct}%)`);
+                     await sleep(0);
+                }
+
+                if (assigned.has(validVideos[i].id)) continue;
+
+                const root = validVideos[i];
+                const rootDur = parseFloat(root.params?.duration || 0);
+                const rootSize = parseInt(root.size || 0);
+                const groupItems = [root];
+
+                for (let j = i + 1; j < totalCount; j++) {
+                    const target = validVideos[j];
+                    if (assigned.has(target.id)) continue;
+
+                    const durThreshold = (strictness === 'loose') ? 2.0 : 1.0;
+                    const targetDur = parseFloat(target.params?.duration || 0);
+                    const durDiff = Math.abs(targetDur - rootDur);
+
+                    if (durDiff > durThreshold) break;
+
+                    const targetSize = parseInt(target.size || 0);
+                    if (rootSize > 0 && targetSize > 0) {
+                         const sizeDiff = Math.abs(targetSize - rootSize);
+                         const maxBase = Math.max(targetSize, rootSize);
+                         const ratio = sizeDiff / maxBase;
+
+                         if (ratio <= sizeRatioLimit) {
+                             groupItems.push(target);
+                         }
+                    }
+                }
+
+                if (groupItems.length > 1) {
+                    const ids = groupItems.map(x => x.id);
+                    ids.forEach(id => { assigned.add(id); S.dupReasons.set(id, L.tag_sim); });
+                    groups.push({ ids: ids, type: L.tag_sim });
+                }
+            }
+        }
+
+        if (isRunningFn()) {
+            updateLoadTxt(L.str_analyzing);
+
+            const cleanNameAd = (oldName) => {
+                let cleanName = oldName;
+                cleanName = cleanName.replace(/^【[^】]+】 *[-_.]? */, '');
+                cleanName = cleanName.replace(/^[a-z0-9-]+[.](?:com|net|org|cc|xyz|vip|top|la) +/i, '');
+                const adKw = "(?:[.]com|[.]net|[.]org|[.]cc|[.]xyz|[.]vip|[.]top|[.]la|2048|www[.])";
+                const atRegex = new RegExp('^.*?' + adKw + '.*?(?:@|--+|_\\\\s)', 'i');
+                cleanName = cleanName.replace(atRegex, '');
+                const hyphenRegex = new RegExp('^[a-z0-9.-]+' + adKw + '-', 'i');
+                cleanName = cleanName.replace(hyphenRegex, '');
+                cleanName = cleanName.replace(/^(?:精品加群|福利合集)[0-9]+[-_]+ */, '');
+                cleanName = cleanName.replace(/^[-_. ,，:：;；\\p{Extended_Pictographic}]+/u, '');
+
+                const pairs = [['【','】'], ['[',']'], ['《','》'],['<','>'], ['（','）'],['(',')'], ['{','}']];
+                pairs.forEach(([L_char, R_char]) => {
+                    const idxR_Fix = cleanName.indexOf(R_char);
+                    const idxL_Check = cleanName.indexOf(L_char);
+                    if (idxR_Fix > 0 && idxR_Fix <= 10 && (idxL_Check === -1 || idxL_Check > idxR_Fix)) {
+                        cleanName = L_char + cleanName;
+                    }
+                    const chars = cleanName.split('');
+                    const stack =[];
+                    const toRemove = new Set();
+                    for (let i = 0; i < chars.length; i++) {
+                        const c = chars[i];
+                        if (c === L_char) {
+                            stack.push(i);
+                        } else if (c === R_char) {
+                            if (stack.length > 0) stack.pop();
+                            else toRemove.add(i);
+                        }
+                    }
+                    stack.forEach(i => toRemove.add(i));
+                    if (toRemove.size > 0) {
+                        cleanName = chars.filter((_, i) => !toRemove.has(i)).join('');
+                    }
+                });
+
+                const quote2 = (cleanName.match(/'/g) ||[]).length;
+                if (quote2 % 2 !== 0) cleanName = cleanName.replace(/"/, '');
+
+                let result = cleanName.trim();
+                const lastDot = result.lastIndexOf('.');
+                if (lastDot > 0) result = result.substring(0, lastDot);
+
+                let finalResult = result ? result.toLowerCase() : oldName.replace(/\.[^/.]+$/, "").toLowerCase().trim();
+
+                if (strictness === 'loose') {
+                    finalResult = finalResult.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
+                }
+
+                return finalResult;
+            };
+
+            const remainingItems = candidates.filter(i => !assigned.has(i.id));
+            const getTypeGroup = (mime) => {
+                if (!mime) return 'other';
+                if (mime.startsWith('video')) return 'video';
+                if (mime.startsWith('image')) return 'image';
+                return 'other';
+            };
+
+            const typeNameMap = new Map();
+            for (const item of remainingItems) {
+                const tGroup = getTypeGroup(item.mime_type);
+                const cleaned = cleanNameAd(item.name);
+                if (!cleaned) continue;
+                const key = tGroup + '|' + cleaned;
+                if (!typeNameMap.has(key)) typeNameMap.set(key,[]);
+                typeNameMap.get(key).push(item);
+            }
+
+            for (const [key, items] of typeNameMap) {
+                if (items.length > 1) {
+                    const sortedForAlgo = [...items].sort((a, b) => parseInt(a.size || 0) - parseInt(b.size || 0));
+                    let currentGroup = [sortedForAlgo[0]];
+                    const tempGroups =[];
+
+                    for (let i = 1; i < sortedForAlgo.length; i++) {
+                        const target = sortedForAlgo[i];
+                        const root = currentGroup[0];
+                        const rootSize = parseInt(root.size || 0);
+                        const targetSize = parseInt(target.size || 0);
+
+                        let isMatch = false;
+                        if (rootSize === 0 && targetSize === 0) {
+                            isMatch = true;
+                        } else if (rootSize > 0 && targetSize > 0) {
+                            const sizeDiff = Math.abs(targetSize - rootSize);
+                            const maxBase = Math.max(targetSize, rootSize);
+                            if ((sizeDiff / maxBase) <= sizeRatioLimit) {
+                                isMatch = true;
+                            }
+                        }
+
+                        if (isMatch) currentGroup.push(target);
+                        else {
+                            if (currentGroup.length > 1) tempGroups.push(currentGroup);
+                            currentGroup = [target];
+                        }
+                    }
+                    if (currentGroup.length > 1) tempGroups.push(currentGroup);
+
+                    tempGroups.forEach(grp => {
+                        const ids = grp.map(i => i.id);
+                        ids.forEach(id => { assigned.add(id); S.dupReasons.set(id, L.tag_name); });
+                        groups.push({ ids: ids, type: L.tag_name });
+                    });
+                }
+            }
+        }
+
+        return groups;
+    };
 
     async function deepPreload(currentItems) {
         if (S.scanning) return;
@@ -7658,7 +8329,6 @@ async function openManager(initialCache, preloadPromise) {
 
         UI.scan.style.display = (S.trashMode || S.shareMode || S.offlineMode) ? 'none' : 'flex';
         UI.btnExit.style.display = 'none';
-        UI.dup.style.display = 'none';
         if (UI.dupTools) UI.dupTools.style.display = 'none';
         if (UI.dupFilters) UI.dupFilters.style.display = 'none';
         if (UI.offTools) UI.offTools.style.display = S.offlineMode ? 'flex' : 'none';
@@ -7704,12 +8374,13 @@ async function openManager(initialCache, preloadPromise) {
             else if (S.preLoadPromise) {
                 let preLoadSuccess = false;
                 try {
+                    const TIMEOUT_LIMIT = isTurbo ? 1000 : 200;
                     const raceResult = await Promise.race([
                         S.preLoadPromise,
-                        new Promise(r => setTimeout(() => r('TIMEOUT'), 200))
+                        new Promise(r => setTimeout(() => r('TIMEOUT'), TIMEOUT_LIMIT))
                     ]);
 
-                    if (globalCache.has('root')) {
+                    if (globalCache.has('root') || raceResult !== 'TIMEOUT') {
                         S.cache.set('root', globalCache.get('root'));
                         S.preloaded = true;
                         preLoadSuccess = true;
@@ -7781,6 +8452,8 @@ async function openManager(initialCache, preloadPromise) {
                     const session = globalCache.get('offline_session');
                     if (session && session.nextToken && !session.completed) {
                         console.log(`[Resuming] Cache snapshot rendered. Continuing pagination from ${S.items.length}...`);
+                        isResuming = true;
+                        S.items.forEach(it => fetchedIds.add(it.id));
                     } else {
                         setLoad(false);
                         return;
@@ -7801,22 +8474,22 @@ async function openManager(initialCache, preloadPromise) {
                     }
                     runBackgroundCrawler();
                     return;
+                } else {
+                    console.log(`[Resuming] Cache snapshot rendered. Continuing pagination from ${S.items.length}...`);
                 }
-
-                console.log(`[Load] Partial cache hit. Resuming from breakpoint at item ${S.items.length}`);
             }
         }
 
-        if (!nextToken) {
-            if (S.items.length === 0) {
-                S.display = [];
-                refresh();
-            }
-            setLoad(true);
+        if (!nextToken && !isResuming) {
+            S.items = [];
+            S.display = [];
+            S.itemMap.clear();
+            refresh();
+            setLoad(true, true);
             updateLoadTxt(L.loading_detail);
         }
 
-        isGUISensitive = true;
+        isGUISensitive = false;
 
         const currentHeaders = getHeaders();
         if (!currentHeaders.Authorization || currentHeaders.Authorization.length < 10) {
@@ -8006,11 +8679,16 @@ async function openManager(initialCache, preloadPromise) {
                 }
                 else if (S.recentMode && S.path.length === 1) {
                     const filters = encodeURIComponent('{"phase":{"in":"PHASE_TYPE_COMPLETE"}}');
-                    const url = `https://api-drive.mypikpak.com/drive/v1/tasks?type=offline&limit=${limit}&filters=${filters}&thumbnail_size=SIZE_MEDIUM&with_reference_resource=true&_t=${Date.now()}${nextToken ? `&page_token=${nextToken}` : ''}`;
+                    const url = `https://api-drive.mypikpak.com/drive/v1/tasks?limit=${limit}&filters=${filters}&thumbnail_size=SIZE_MEDIUM&with_reference_resource=true&_t=${Date.now()}${nextToken ? `&page_token=${nextToken}` : ''}`;
                     const res = await fetch(url, { headers: getHeaders(), signal: signal });
                     if (!res.ok) throw new Error("Recent API " + res.status);
                     const json = await res.json();
-                    const validTasks = (json.tasks || []).filter(t => t.phase === 'PHASE_TYPE_COMPLETE');
+
+                    const validTasks = (json.tasks || []).filter(t =>
+                        t.phase === 'PHASE_TYPE_COMPLETE' &&
+                        (t.type === 'offline' || t.type === 'upload') &&
+                        t.file_id !== ""
+                    );
 
                     data = {
                         files: validTasks.map(t => {
@@ -8023,13 +8701,13 @@ async function openManager(initialCache, preloadPromise) {
                             return {
                                 id: t.file_id || t.id,
                                 kind: isFolder ? 'drive#folder' : 'drive#file',
-                                name: ref.name || t.name || t.file_name,
+                                name: ref.name || t.file_name || t.name,
                                 size: t.file_size,
                                 thumbnail_link: ref.thumbnail_link || t.icon_link || '',
                                 icon_link: t.icon_link || '',
                                 web_content_link: t.file_id ? null : null,
                                 created_time: t.created_time,
-                                modified_time: t.updated_time || ref.modified_time,
+                                modified_time: t.updated_time || ref.modified_time || t.created_time,
                                 mime_type: mime,
                                 parent_id: '',
                                 starred: !!(ref.starred || (ref.tags && ref.tags.some(tg => tg.name === 'STAR'))),
@@ -8127,7 +8805,6 @@ async function openManager(initialCache, preloadPromise) {
 
                         if (S.recentMode && S.path.length === 1) {
                             S.recentResultItems = [...S.items];
-                            if (typeof globalCache !== 'undefined') globalCache.set('recent_root', S.recentResultItems);
                         }
 
                         if (S.offlineMode) {
@@ -8215,7 +8892,7 @@ async function openManager(initialCache, preloadPromise) {
                     console.error("API Error encountered:", e);
                     if (typeof resetHeaderCache === 'function') resetHeaderCache();
 
-                    const isAuthError = e.message.includes('401') || e.message.includes('403');
+                    const isAuthError = e.message.includes('401') || e.message.includes('403') || e.message.includes('400') || e.message.includes('CAPTCHA');
                     const isNotFoundError = e.message.includes('404');
                     const isNetworkError = e.name === 'TypeError' || e.message.includes('Failed to fetch') || e.message.includes('NetworkError');
 
@@ -8225,18 +8902,24 @@ async function openManager(initialCache, preloadPromise) {
 
                         if (isAuthError) {
                             resetHeaderCache();
+                            updateLoadTxt(L.str_waiting_token);
+                            await sleep(2000);
 
-                            for (let i = 0; i < 20; i++) {
-                                updateLoadTxt(`Token expired, waiting for refresh... (${i+1}/20)`);
-                                await sleep(500);
-
+                            try {
                                 const h = getHeaders();
-                                if (h.Authorization && h.Authorization.length > 20) {
-                                    console.log("[Auth] Fresh token detected, resuming...");
-                                    break;
+                                if (!h.Authorization || h.Authorization.length < 10) {
+                                    location.reload();
+                                    return;
                                 }
-                            }
+                                const testRes = await fetch('https://api-drive.mypikpak.com/drive/v1/about', { headers: h });
+                                if (!testRes.ok) {
+                                    console.warn("[Auth] Token still rejected by server, forcing page reload to recover...");
+                                    location.reload();
+                                    return;
+                                }
+                            } catch(testErr) {}
 
+                            console.log("[Auth] Auth state recovered, resuming load...");
                             load(false, true).finally(() => { S._isRetrying = false; });
                             return;
                         }
@@ -8297,6 +8980,10 @@ async function openManager(initialCache, preloadPromise) {
             UI.btnAnalyze.style.display = (shouldHideHeavyOps || S.trashMode || S.shareMode || S.starredMode || S.recentMode || S.historyMode) ? 'none' : 'flex';
         }
 
+        if (UI.btnExport) {
+            UI.btnExport.style.display = (shouldHideHeavyOps || S.trashMode || S.shareMode || S.starredMode || S.recentMode || S.historyMode) ? 'none' : 'flex';
+        }
+
         if (UI.scan) {
             UI.scan.style.display = (shouldHideHeavyOps || S.trashMode || S.shareMode || S.starredMode || S.recentMode || S.historyMode) ? 'none' : 'flex';
         }
@@ -8308,6 +8995,7 @@ async function openManager(initialCache, preloadPromise) {
         if (UI.lblSearchPath) {
             const isAnalyzeRoot = S.analyzeMode && cur.id === 'analyze_root';
             UI.lblSearchPath.style.display = (S.dupMode || S.isFlattened || isAnalyzeRoot) ? 'flex' : 'none';
+            if (UI.btnAnaSelect) UI.btnAnaSelect.style.display = (isAnalyzeRoot && !S.search && S.analyzeSimGroups) ? 'flex' : 'none';
         }
 
         if (UI.filterBar) {
@@ -8348,7 +9036,55 @@ async function openManager(initialCache, preloadPromise) {
 
         if (S.search && !S.dupMode && !isInsideSearchResult) {
             const q = S.search.toLowerCase();
-            if (UI.chkGlobal && UI.chkGlobal.checked && cur.id === 'virtual_search_root') {
+            const includePath = UI.chkSearchPath && UI.chkSearchPath.checked;
+
+            if (S.analyzeMode && cur.id === 'analyze_root' && S.analyzeSimGroups) {
+                const newDisplay = [];
+                S.analyzeSimGroups.forEach((g, gIdx) => {
+                    const groupItems = g.ids.map(id => S.itemMap.get(id)).filter(Boolean);
+
+                    const isGroupHit = g.type.toLowerCase().includes(q) || groupItems.some(it => {
+                        const nameMatch = it.name.toLowerCase().includes(q);
+                        let pathMatch = false;
+                        if (includePath && it._pathStr) {
+                            const homeText = L.btn_nav_home;
+                            const parentPath = (it._pathStr === homeText || it._pathStr.startsWith(homeText + '/')) ? it._pathStr : (homeText + '/' + it._pathStr);
+                            const fullItemPath = parentPath.endsWith('/') ? (parentPath + it.name) : (parentPath + '/' + it.name);
+                            pathMatch = fullItemPath.toLowerCase().includes(q);
+                        }
+                        return nameMatch || pathMatch;
+                    });
+
+                    if (isGroupHit) {
+                        newDisplay.push({
+                            id: `grp_${gIdx}`,
+                            isHeader: true,
+                            name: g.type,
+                            count: g.ids.length,
+                            type: g.type || L.str_group
+                        });
+
+                        groupItems.sort((a, b) => parseInt(b.size || 0) - parseInt(a.size || 0));
+                        groupItems.forEach(it => {
+                            if (it.name.toLowerCase().includes(q)) {
+                                const name = it.name;
+                                const idx = name.toLowerCase().indexOf(q);
+                                const len = q.length;
+                                const start = Math.max(0, idx - 15);
+                                const end = Math.min(name.length, idx + len + 30);
+                                let pre = start > 0 ? "..." : "";
+                                let suf = end < name.length ? "..." : "";
+                                it._hlNameHTML = `${pre}${esc(name.substring(start, idx))}<b style="color:var(--pk-match-fg); background:var(--pk-match-bg); border-radius:2px; padding:0 2px;">${esc(name.substring(idx, idx + len))}</b>${esc(name.substring(idx + len, end))}${suf}`;
+                            } else {
+                                delete it._hlNameHTML;
+                            }
+                            newDisplay.push(it);
+                        });
+                    }
+                });
+                S.display = newDisplay;
+            }
+            else if (UI.chkGlobal && UI.chkGlobal.checked && cur.id === 'virtual_search_root') {
                 let results = [];
                 const seenIds = new Set();
 
@@ -8362,6 +9098,7 @@ async function openManager(initialCache, preloadPromise) {
                 }
 
                 if (CONF.SYSTEM_FOLDER_NAME.toLowerCase().includes(q)) {
+                    const realObj = (globalCache.get('') || globalCache.get('root'))?.find(f => f.name === CONF.SYSTEM_FOLDER_NAME);
                     const sysRoot = {
                         id: realMyPackId,
                         kind: 'drive#folder',
@@ -8372,7 +9109,9 @@ async function openManager(initialCache, preloadPromise) {
                         starred: false,
                         tags: [],
                         _lineage: [],
-                        _isSystemRoot: true
+                        _isSystemRoot: true,
+                        icon_link: realObj ? realObj.icon_link : '',
+                        thumbnail_link: realObj ? realObj.icon_link : ''
                     };
                     results.push(sysRoot);
 
@@ -8437,15 +9176,22 @@ async function openManager(initialCache, preloadPromise) {
                 const query = S.search.toLowerCase();
                 const includePath = UI.chkSearchPath && UI.chkSearchPath.checked;
                 const isPathMode = S.isFlattened || (S.analyzeMode && cur.id === 'analyze_root');
+                const rootPathStr = S.path.map(p => p.name).join('/');
 
                 let filtered = S.items.filter(i => {
                     if (!i) return false;
                     if (i.name && i.name.toLowerCase().includes(query)) return true;
                     if (includePath && isPathMode) {
                         let pStr = "";
-                        if (S.analyzeMode) pStr = i._pathStr || "";
-                        else if (i._lineage) pStr = i._lineage.map(x => x.name).join('/');
-                        if (pStr && pStr.toLowerCase().includes(query)) return true;
+                        if (S.analyzeMode) {
+                            pStr = i._pathStr || L.btn_nav_home;
+                        } else if (i._lineage) {
+                            let cleanLineage = i._lineage.map(x => x.name).filter(n => n && n !== 'Root' && n !== L.str_root_dir_cn);
+                            if (cleanLineage[0] !== L.btn_nav_home) cleanLineage.unshift(L.btn_nav_home);
+                            pStr = cleanLineage.join('/');
+                        }
+                        const fullItemPath = pStr.endsWith('/') ? (pStr + i.name) : (pStr + '/' + i.name);
+                        if (fullItemPath.toLowerCase().includes(query)) return true;
                     }
                     return false;
                 });
@@ -8492,12 +9238,13 @@ async function openManager(initialCache, preloadPromise) {
                     image: ['jpg','jpeg','png','gif','bmp','webp','svg','tif','tiff','ico','heic','heif','raw','cr2','nef','arw','dng','orf','avif','psd','ai','eps','jfif','jpe'],
                     document: ['txt','html','pdf','pptx','chm','docx','xlsx','htm','doc','dwg','mdb','ppt','xls','rtf','odt','ods','odp','epub','mobi','azw3','djvu','cbz','cbr','md','log','csv','xml','json'],
                     software: ['apk','exe','ipa','dmg','rpm','deb','msi','pkg','xapk','apks','aab','jar','bin','sh','bat','cmd'],
-                    archive: ['zip','rar','7z','tar','gz','iso','cab','bz2','xz','tgz','wim','esd','img','zst','lzh']
+                    archive: ['zip','rar','7z','tar','gz','iso','cab','bz2','xz','tgz','wim','esd','img','zst','lzh'],
+                    torrent: ['torrent']
                 };
 
                 let matchExts =[];
                 if (cat === 'other') {
-                    const definedExts = new Set([...fExts.video, ...fExts.audio, ...fExts.image, ...fExts.document, ...fExts.software, ...fExts.archive]);
+                    const definedExts = new Set([...fExts.video, ...fExts.audio, ...fExts.image, ...fExts.document, ...fExts.software, ...fExts.archive, ...fExts.torrent]);
                     S.display = S.items.filter(i => {
                         if (i.kind === 'drive#folder') return false;
                         const n = (i.name || '').toLowerCase();
@@ -8535,6 +9282,38 @@ async function openManager(initialCache, preloadPromise) {
                     if (s === 'PAUSED' || s === 'ERROR') return cfg.paused;
                     return cfg.running;
                 });
+            }
+            else if (S.analyzeMode && cur.id === 'analyze_root' && S.analyzeSimGroups) {
+                const newDisplay =[];
+                S.analyzeSimGroups.forEach((g, gIdx) => {
+                    newDisplay.push({
+                        id: `grp_${gIdx}`,
+                        isHeader: true,
+                        name: g.type,
+                        count: g.ids.length,
+                        type: g.type || L.str_group
+                    });
+                    const groupItems = g.ids.map(id => S.itemMap.get(id)).filter(Boolean);
+                    groupItems.sort((a, b) => {
+                        const pA = a._pathStr || "";
+                        const pB = b._pathStr || "";
+                        if (pA.length !== pB.length) return pA.length - pB.length;
+                        return pA.localeCompare(pB);
+                    });
+
+                    let lastPathInGroup = null;
+                    groupItems.forEach(it => {
+                        const currentPath = it._pathStr || "";
+                        if (currentPath === lastPathInGroup && currentPath !== "") {
+                            it._isSameFolder = true;
+                        } else {
+                            it._isSameFolder = false;
+                            lastPathInGroup = currentPath;
+                        }
+                        newDisplay.push(it);
+                    });
+                });
+                S.display = newDisplay;
             }
             else {
                 S.display = [...S.items];
@@ -8630,116 +9409,7 @@ async function openManager(initialCache, preloadPromise) {
                 return false;
             });
 
-            const groups = [];
-            const assigned = new Set();
-            const clean = (name) => name.replace(/\.[^/.]+$/, "").toLowerCase().trim();
-
-            if (S.dupRunning) {
-                updateLoadTxt(L.str_analyzing);
-                const hashMap = new Map();
-                for (const item of candidates) {
-                    const hash = item.gcid || item.md5_checksum || item.hash;
-                    const key = hash ? `${hash}|${item.size}` : null;
-                    if (key) {
-                        if (!hashMap.has(key)) hashMap.set(key, []);
-                        hashMap.get(key).push(item);
-                    }
-                }
-                for (const [key, items] of hashMap) {
-                    if (items.length > 1) {
-                        const ids = items.map(i => i.id);
-                        ids.forEach(id => { assigned.add(id); S.dupReasons.set(id, L.tag_hash); });
-                        groups.push({ ids: ids, type: L.tag_hash });
-                    }
-                }
-            }
-
-            if (S.dupRunning && cfg.video) {
-                updateLoadTxt(L.str_analyzing);
-                const nameMap = new Map();
-                const remainingVideos = candidates.filter(i => i.mime_type.startsWith('video') && !assigned.has(i.id));
-                for (const item of remainingVideos) {
-                    const nameKey = clean(item.name);
-                    if (!nameKey) continue;
-                    if (!nameMap.has(nameKey)) nameMap.set(nameKey, []);
-                    nameMap.get(nameKey).push(item);
-                }
-                for (const [key, items] of nameMap) {
-                    if (items.length > 1) {
-                        const ids = items.map(i => i.id);
-                        ids.forEach(id => { assigned.add(id); S.dupReasons.set(id, L.tag_name); });
-                        groups.push({ ids: ids, type: L.tag_name });
-                    }
-                }
-            }
-
-            if (S.dupRunning && cfg.video) {
-                updateLoadTxt(L.str_analyzing);
-                const simCandidates = candidates.filter(i => i.mime_type.startsWith('video') && !assigned.has(i.id));
-
-                const validVideos = simCandidates.filter(item => (parseFloat(item.params?.duration || 0) > 0));
-
-                validVideos.sort((a, b) => {
-                    const durA = parseFloat(a.params?.duration || 0);
-                    const durB = parseFloat(b.params?.duration || 0);
-                    return durA - durB;
-                });
-
-                let processedCount = 0;
-                const totalCount = validVideos.length;
-
-                for (let i = 0; i < totalCount; i++) {
-                    processedCount++;
-                    if (processedCount % 500 === 0) {
-                         if (!S.dupRunning) break;
-                         const pct = Math.round(processedCount / totalCount * 100);
-                         updateLoadTxt(`${L.str_analyzing} (${pct}%)`);
-                         await sleep(0);
-                    }
-
-                    if (assigned.has(validVideos[i].id)) continue;
-
-                    const root = validVideos[i];
-                    const rootDur = parseFloat(root.params?.duration || 0);
-                    const rootSize = parseInt(root.size || 0);
-
-                    const groupItems = [root];
-
-                    for (let j = i + 1; j < totalCount; j++) {
-                        const target = validVideos[j];
-                        if (assigned.has(target.id)) continue;
-
-                        const strictness = gmGet('pk_dup_strictness', 'strict');
-                        const durThreshold = (strictness === 'loose') ? 2.0 : 1.0;
-                        const sizeRatioLimit = (strictness === 'loose') ? 0.10 : 0.05;
-
-                        const targetDur = parseFloat(target.params?.duration || 0);
-                        const durDiff = Math.abs(targetDur - rootDur);
-
-                        if (durDiff > durThreshold) break;
-
-                        const targetSize = parseInt(target.size || 0);
-                        if (rootSize > 0 && targetSize > 0) {
-                             const sizeDiff = Math.abs(targetSize - rootSize);
-                             const maxBase = Math.max(targetSize, rootSize);
-                             const ratio = sizeDiff / maxBase;
-
-                             if (ratio <= sizeRatioLimit) {
-                                 groupItems.push(target);
-                             }
-                        }
-                    }
-
-                    if (groupItems.length > 1) {
-                        const ids = groupItems.map(x => x.id);
-                        ids.forEach(id => {
-                            assigned.add(id);
-                            S.dupReasons.set(id, L.tag_sim);
-                        });
-                        groups.push({ ids: ids, type: L.tag_sim });
-                    }
-                }
-            }
+            const groups = await computeDuplicateGroups(candidates, cfg, () => S.dupRunning);
 
             groups.sort((a, b) => {
                 const getPriority = (t) => { if (t === L.tag_hash) return 3; if (t === L.tag_sim) return 2; if (t === L.tag_name) return 1; return 0; };
@@ -8751,21 +9421,8 @@ async function openManager(initialCache, preloadPromise) {
             if (groups.length === 0) {
                 S.dupRunning = false;
                 setLoad(false);
-                S.dupMode = false;
-
-                if (UI.dupTools) UI.dupTools.style.display = 'none';
-                if (UI.dupFilters) UI.dupFilters.style.display = 'none';
-                if (UI.dup) UI.dup.style.display = 'flex';
-
-                if (UI.crumb) {
-                    if (S.isFlattened) UI.crumb.style.setProperty('display', 'none', 'important');
-                    else UI.crumb.style.display = '';
-                }
-                if (UI.lblSearchPath) UI.lblSearchPath.style.display = 'none';
-
-                showAlert(L.msg_dup_none);
-
-                refresh();
+                showToast(L.msg_dup_none);
+                if (UI.btnExit) UI.btnExit.click();
                 return;
             }
 
@@ -8858,39 +9515,50 @@ async function openManager(initialCache, preloadPromise) {
                     };
                 }
 
-                const btnIds = ['pk-dup-size', 'pk-dup-date'];
-                btnIds.forEach(bid => {
-                    const btn = document.getElementById(bid);
-                    if (btn) {
-                        btn.addEventListener('click', () => {
-                            if (S.pinnedDupPath) {
-                                S.pinnedDupPath = null;
-                                UI.selDupFolder.value = "";
+                const smartBtn = document.getElementById('pk-dup-smart-btn');
+                if (smartBtn) {
+                    smartBtn.addEventListener('click', () => {
+                        if (S.pinnedDupPath) {
+                            S.pinnedDupPath = null;
+                            UI.selDupFolder.value = "";
 
-                                if (invertChk) {
-                                    invertChk.checked = false;
-                                    invertChk.disabled = true;
-                                    invertChk.parentNode.style.opacity = '0.5';
-                                }
-
-                                renderDupView();
+                            if (invertChk) {
+                                invertChk.checked = false;
+                                invertChk.disabled = true;
+                                invertChk.parentNode.style.opacity = '0.5';
                             }
-                        }, { capture: true });
-                    }
-                });
+
+                            renderDupView();
+                        }
+                    }, { capture: true });
+                }
             }, 0);
 
             S.dupRunning = false;
             setLoad(false);
             if (UI.dupTools) UI.dupTools.style.display = 'flex';
-            if (UI.dupFilters) UI.dupFilters.style.display = 'flex';
+            if (UI.dupFilters) {
+                UI.dupFilters.style.display = 'flex';
+                const simChkWrapper = UI.dupFilters.querySelector('#pk-chk-sim')?.closest('.pk-dup-chk');
+                if (simChkWrapper) {
+                    simChkWrapper.style.display = S.dupConfig.video ? 'flex' : 'none';
+                }
+            }
             renderDupView();
 
         } else {
             if (UI.dupTools) UI.dupTools.style.display = 'none';
             if (UI.dupFilters) UI.dupFilters.style.display = 'none';
-            if (S.uploadMode) {
+            if (S.uploadMode || (S.analyzeMode && S.analyzeSimGroups && cur.id === 'analyze_root')) {
                 renderList();
+                if (gmGet('pk_keep_pos', false) && S.latestChildId) {
+                    const targetIdx = S.display.findIndex(x => x.id === S.latestChildId);
+                    if (targetIdx !== -1) {
+                        UI.vp.scrollTop = Math.max(0, (targetIdx * CONF.rowHeight) - (UI.vp.clientHeight / 2) + (CONF.rowHeight / 2));
+                        S.activeId = S.latestChildId; S.sel.clear(); renderVisible();
+                    }
+                    S.latestChildId = null;
+                }
                 updateStat();
                 return;
             }
@@ -9205,22 +9873,13 @@ async function openManager(initialCache, preloadPromise) {
         }
 
         if (S.dupRawGroups.length === 0 && !S.dupRunning) {
-            S.dupMode = false;
-            S.pinnedDupPath = null;
-            if (UI.selDupFolder) UI.selDupFolder.value = "";
-            const invertChk = document.getElementById('pk-dup-invert');
-            if (invertChk) { invertChk.checked = false; invertChk.disabled = true; invertChk.parentNode.style.opacity = '0.5'; }
-
-            if (UI.dupTools) UI.dupTools.style.display = 'none';
-            if (UI.dupFilters) UI.dupFilters.style.display = 'none';
-            if (UI.dup) UI.dup.style.display = 'flex';
-            if (UI.crumb) {
-                if (S.isFlattened) UI.crumb.style.setProperty('display', 'none', 'important');
-                else UI.crumb.style.display = '';
+            if (UI.btnExit) {
+                UI.btnExit.click();
+            } else {
+                S.dupMode = false;
+                S.isFlattened = false;
+                refresh();
             }
-            if (UI.lblSearchPath) UI.lblSearchPath.style.display = 'none';
-
-            refresh();
             return;
         }
 
@@ -9284,10 +9943,11 @@ async function openManager(initialCache, preloadPromise) {
                     const nameHit = item.name.toLowerCase().includes(searchKey);
                     let pathHit = false;
                     if (includePath) {
-                        const pathStr = groupPaths[idx];
-                        if (pathStr) {
-                            pathHit = pathStr.toLowerCase().includes(searchKey);
-                        }
+                        const rawPath = groupPaths[idx] || "";
+                        const homeText = L.btn_nav_home;
+                        const parentPath = (rawPath === homeText || rawPath.startsWith(homeText + '/')) ? rawPath : (homeText + '/' + rawPath);
+                        const fullItemPath = parentPath.endsWith('/') ? (parentPath + (item.name || "")) : (parentPath + '/' + (item.name || ""));
+                        pathHit = fullItemPath.toLowerCase().includes(searchKey);
                     }
                     return nameHit || pathHit;
                 });
@@ -9301,19 +9961,44 @@ async function openManager(initialCache, preloadPromise) {
             }
 
             const firstItem = itemMap.get(ids[0]);
+            let featureStr = "";
+
+            if (firstItem) {
+                if (g.type === L.tag_hash) {
+                    featureStr = `[ ${fmtSize(firstItem.size)} ] `;
+                } else if (g.type === L.tag_sim) {
+                    const dur = firstItem.params?.duration || 0;
+                    featureStr = `[ ${dur > 0 ? fmtDur(dur) : '--:--'} ] `;
+                } else if (g.type === L.tag_name) {
+                    featureStr = `[ ${L.tag_name_short} ] `;
+                }
+            }
+
+            const baseName = firstItem ? (g.type === L.tag_name ? firstItem.name.replace(/\.[^/.]+$/, "") : firstItem.name) : `${L.str_group} ${gIdx}`;
+
+            const countStr = `${idsLen} ${L.str_items}`;
+            const smartTitle = `${countStr} | ${featureStr}${baseName}`;
+
             newDisplay.push({
                 id: `grp_${gIdx}`,
                 isHeader: true,
-                name: firstItem ? firstItem.name : `${L.str_group} ${gIdx}`,
+                name: smartTitle,
                 count: idsLen,
                 type: g.type || L.str_group
             });
 
+            const sortedGroupData = groupItems.map((it, idx) => ({
+                it,
+                path: groupPaths[idx]
+            })).sort((a, b) => {
+                if (a.path.length !== b.path.length) return a.path.length - b.path.length;
+                return a.path.localeCompare(b.path);
+            });
+
             let lastFullPath = null;
 
-            for (let idx = 0; idx < groupItems.length; idx++) {
-                const item = groupItems[idx];
-                const fullPath = groupPaths[idx];
+            for (let idx = 0; idx < sortedGroupData.length; idx++) {
+                const { it: item, path: fullPath } = sortedGroupData[idx];
 
                 if (idx > 0 && fullPath === lastFullPath) {
                     item._isSameFolder = true;
@@ -9490,8 +10175,9 @@ async function openManager(initialCache, preloadPromise) {
                         <div><input type="checkbox" id="pk-all"></div>
                         <div class="pk-col" data-k="name" style="justify-content:flex-start;">
                             <div id="pk-name-text-wrap" style="display:flex;align-items:center;">${L.col_name}<span style="display:inline-block; min-width:18px; text-align:center;"></span></div>
-                            <div id="pk-btn-invert" data-pk-tip="${L.btn_invert}" style="margin-left:12px; cursor:pointer; display:none; align-items:center; color:var(--pk-fg);">
+                            <div id="pk-btn-invert" class="pk-btn" data-pk-tip="${L.btn_invert}" style="margin-left:12px; cursor:pointer; display:none; align-items:center; color:var(--pk-fg); padding:0;">
                                 ${CONF.icons.invert}
+                                <span style="margin-left:2px;">${L.btn_invert}</span>
                             </div>
                         </div>
                         <div class="pk-col" data-k="view_count" style="justify-content:flex-start;">${L.col_view}<span></span></div>
@@ -9536,12 +10222,13 @@ async function openManager(initialCache, preloadPromise) {
                         <div class="pk-col" data-k="name" style="justify-content:flex-start;">
                              <div id="pk-name-text-wrap" style="display:flex;align-items:center;">${L.col_name}<span></span></div>
                              ${!isAnalyzeRoot ? `
-                             <div id="pk-btn-folder-first" data-pk-tip="${L.lbl_folder_first}" style="margin-left:8px; cursor:pointer; display:flex; align-items:center; color:#666; font-size:12px; flex-shrink:0;">
+                             <div id="pk-btn-folder-first" class="pk-btn" data-pk-tip="${L.lbl_folder_first}" style="margin-left:8px; cursor:pointer; display:flex; align-items:center; color:#666; font-size:12px; flex-shrink:0; padding:0;">
                                 ${CONF.icons.folderFirst}
                                 <span style="margin-left:2px; white-space:nowrap;">${L.lbl_folder_first}</span>
                              </div>` : ''}
-                             <div id="pk-btn-invert" data-pk-tip="${L.btn_invert}" style="margin-left:12px; cursor:pointer; display:none; align-items:center; color:var(--pk-fg);">
+                             <div id="pk-btn-invert" class="pk-btn" data-pk-tip="${L.btn_invert}" style="margin-left:12px; cursor:pointer; display:none; align-items:center; color:var(--pk-fg); padding:0;">
                                 ${CONF.icons.invert}
+                                <span style="margin-left:2px; white-space:nowrap;">${L.btn_invert}</span>
                              </div>
                         </div>
                         <div class="pk-col" data-k="path" style="display:none;color:#888;">${L.col_path} <span></span></div>
@@ -9615,8 +10302,9 @@ async function openManager(initialCache, preloadPromise) {
 
         currentCols.forEach(c => {
             const span = c.querySelector('span');
+            const isSimFolderView = (isAnalyzeRoot && S.analyzeSimGroups);
 
-            if (S.dupMode || S.offlineMode || S.uploadMode) {
+            if (S.dupMode || S.offlineMode || S.uploadMode || isSimFolderView) {
                 c.style.cursor = 'default';
                 c.style.pointerEvents = 'none';
                 c.style.color = 'var(--pk-fg)';
@@ -9687,13 +10375,24 @@ async function openManager(initialCache, preloadPromise) {
         const listIn = el.querySelector('#pk-in');
         if (winEl && listIn) {
             const isMax = winEl.classList.contains('pk-maximized');
-            const gap = S.dupMode ? (isMax ? 10 : 4) : 0;
-            listIn.style.transform = S.dupMode ? `translateY(-${gap}px)` : 'none';
+            const cur = S.path[S.path.length - 1];
+            const isGroupedView = S.dupMode || (S.analyzeMode && cur.id === 'analyze_root' && S.analyzeSimGroups);
+            const gap = isGroupedView ? (isMax ? 10 : 4) : 0;
+            listIn.style.transform = gap > 0 ? `translateY(-${gap}px)` : 'none';
         }
 
         if (S.display.length === 0) {
             if (S.loading) {
-                if (UI.in.innerHTML === '') UI.in.innerHTML = '';
+                UI.in.style.height = '100%';
+                UI.in.innerHTML = `
+                    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: var(--pk-fg); opacity: 0.7; z-index: 10; pointer-events: none;">
+                        <div class="pk-spin-lg" style="width: 36px; height: 36px; border-width: 3px; border-color: rgba(136, 136, 136, 0.2); border-top-color: var(--pk-pri);"></div>
+                        <div style="font-size: 13px; font-weight: 500; letter-spacing: 0.5px;">${L.loading_detail}</div>
+                    </div>
+                `;
+                UI.pop.style.display = 'none';
+                UI.pop.innerHTML = '';
+                if (UI.ctx) UI.ctx.style.display = 'none';
                 return;
             }
 
@@ -9786,30 +10485,31 @@ async function openManager(initialCache, preloadPromise) {
             }
         }
 
-        const getSearchHlHTML = (name, query, capacity) => {
-            const lowName = name.toLowerCase();
+        const getTooltipHlHTML = (text, query) => {
+            if (!query || !shouldShowHl) return esc(text);
+            const lowText = text.toLowerCase();
             const q = query.toLowerCase();
-            const idx = lowName.indexOf(q);
+            const idx = lowText.indexOf(q);
+            if (idx === -1) return esc(text);
+            return esc(text.substring(0, idx)) + `<b style="color:var(--pk-match-fg); background:var(--pk-match-bg); border-radius:2px; padding:0 2px;">${esc(text.substring(idx, idx + q.length))}</b>` + getTooltipHlHTML(text.substring(idx + q.length), query);
+        };
+
+        const getSearchHlHTML = (name, query, capacity) => {
+            const q = query.toLowerCase();
+            const idx = name.toLowerCase().indexOf(q);
             if (idx === -1) return esc(name);
 
-            if (name.length <= capacity) {
-                return esc(name.substring(0, idx)) + `<b style="color:var(--pk-match-fg); background:var(--pk-match-bg); border-radius:2px; padding:0 2px;">${esc(name.substring(idx, idx + q.length))}</b>` + esc(name.substring(idx + q.length));
+            let start = 0, end = name.length, prefix = "", suffix = "";
+            if (name.length > capacity) {
+                const preLimit = Math.floor(capacity * 0.3);
+                start = Math.max(0, idx - preLimit);
+                end = Math.min(name.length, start + capacity);
+                if (start > 0) prefix = "...";
+                if (end < name.length) suffix = "...";
             }
 
-            const preLimit = Math.floor(capacity * 0.3);
-            const start = Math.max(0, idx - preLimit);
-            const end = Math.min(name.length, start + capacity);
-
-            let res = "";
-            if (start > 0) res += "...";
-
-            const partBefore = name.substring(start, idx);
-            const partMatch = name.substring(idx, idx + q.length);
-            const partAfter = name.substring(idx + q.length, end);
-
-            res += esc(partBefore) + `<b style="color:var(--pk-match-fg); background:var(--pk-match-bg); border-radius:2px; padding:0 2px;">${esc(partMatch)}</b>` + esc(partAfter);
-            if (end < name.length) res += "...";
-            return res;
+            const targetSlice = name.substring(start, end);
+            return prefix + getTooltipHlHTML(targetSlice, query) + suffix;
         };
 
         const _internalGetStarIcon = (isStarred) => {
@@ -9843,15 +10543,22 @@ async function openManager(initialCache, preloadPromise) {
             if (d.isHeader) {
                 row.className = 'pk-group-hd';
 
-                row.style.removeProperty('border-top');
+                if (i === 0) {
+                    row.style.setProperty('border-top', 'none', 'important');
+                    const borderW = isMax ? 10 : 4;
+                    row.style.setProperty('padding-top', borderW + 'px', 'important');
+                } else {
+                    row.style.removeProperty('border-top');
+                    row.style.removeProperty('padding-top');
+                }
 
                 if (S.trashMode) row.style.gridColumn = "1 / 7";
                 else if (S.dupMode || S.analyzeMode) row.style.gridColumn = "1 / 8";
                 else row.style.gridColumn = "1 / 7";
 
                 const gIdx = parseInt(d.id.replace('grp_', ''));
-                const groupData = S.dupRawGroups[gIdx];
-                const groupItemIds = groupData ? groupData.ids : [];
+                const groupData = S.dupMode ? S.dupRawGroups[gIdx] : (S.analyzeMode ? S.analyzeSimGroups[gIdx] : null);
+                const groupItemIds = groupData ? groupData.ids :[];
 
                 let selectedInGroup = 0;
                 groupItemIds.forEach(id => { if (S.sel.has(id)) selectedInGroup++; });
@@ -9860,32 +10567,37 @@ async function openManager(initialCache, preloadPromise) {
                 const isIndeterminate = selectedInGroup > 0 && selectedInGroup < groupItemIds.length;
 
                 let groupIcon = CONF.dupHashSVG;
-                if (d.type === L.tag_sim) groupIcon = CONF.dupSimSVG;
-                else if (d.type === L.tag_name) groupIcon = CONF.dupNameSVG;
+                const isContain = d.name.includes(L.lbl_containment);
+                const isSimLike = d.type === L.tag_sim || d.name.includes(L.lbl_sim_score);
+                const isNameLike = d.type === L.tag_name || (S.analyzeMode && d.name.includes(' | ') && !isSimLike && !isContain);
+
+                if (isContain) {
+                    groupIcon = CONF.dupContainSVG;
+                } else if (isSimLike) {
+                    groupIcon = CONF.dupSimSVG;
+                } else if (isNameLike) {
+                    groupIcon = CONF.dupNameSVG;
+                }
+
                 groupIcon = groupIcon.replace(/width:\s*\d+px;?/, 'width:18px;').replace(/height:\s*\d+px;?/, 'height:18px;').replace(/margin-right:\s*\d+px;?/, 'margin:0;');
 
-                const MAX_HEAD_LEN = 80;
                 let headerName = d.name;
-                if (headerName.length > MAX_HEAD_LEN) {
-                    headerName = '...' + headerName.slice(-MAX_HEAD_LEN);
-                }
+                const headerTip = getTooltipHlHTML(d.name, S.search).replace(/"/g, '&quot;');
 
                 row.style.display = 'flex';
                 row.innerHTML = `
-        <div style="width:36px; flex-shrink:0; display:flex; justify-content:center; align-items:center; margin-right:10px;">
-            <input type="checkbox" class="pk-grp-chk" ${isAllSelected ? 'checked' : ''} style="width:18px; height:18px; cursor:pointer; margin:0;">
-        </div>
-        <div style="width:30px; flex-shrink:0; display:flex; justify-content:flex-start; align-items:center; margin-right:10px;">
-            <div style="display:flex; color:var(--pk-pri); opacity:0.8; margin-left:-1px;">${groupIcon}</div>
-        </div>
-        <div class="pk-name" style="display:flex; align-items:center; overflow:hidden; white-space:nowrap; flex:1; min-width:0;" data-pk-tip="${esc(d.name)}">
-            <span style="font-weight:600; color:var(--pk-fg); opacity:0.9; overflow:hidden; text-overflow:ellipsis;">${esc(headerName)}</span>
-        </div>
-        <div style="margin-left:auto; display:flex; align-items:center; flex-shrink:0; gap:8px;">
-            <span class="pk-tag" style="background:var(--pk-sel-bg); color:var(--pk-pri); border:1px solid var(--pk-sel-bd); padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600;">${d.type}</span>
-            <span class="pk-cnt" style="background:var(--pk-hl); color:var(--pk-fg); padding:2px 6px; border-radius:4px; font-size:12px; font-family:monospace; min-width:14px; text-align:center;">${d.count}</span>
-        </div>
-`;
+                <div style="width:36px; flex-shrink:0; display:flex; justify-content:center; align-items:center; margin-right:10px;">
+                            <input type="checkbox" class="pk-grp-chk" ${isAllSelected ? 'checked' : ''} style="width:18px; height:18px; cursor:pointer; margin:0;">
+                        </div>
+                        <div style="width:30px; flex-shrink:0; display:flex; justify-content:flex-start; align-items:center; margin-right:10px;">
+                            <div style="display:flex; color:var(--pk-pri); opacity:0.8; margin-left:-1px;">${groupIcon}</div>
+                        </div>
+                        <div class="pk-name" style="display:flex; align-items:center; overflow:hidden; white-space:nowrap; flex:1; min-width:0;" data-pk-tip="${headerTip}">
+                    <span style="font-weight:600; color:var(--pk-fg); opacity:0.9; overflow:hidden; text-overflow:ellipsis;">${esc(headerName)}</span>
+                </div>
+                <div style="margin-left:auto; display:flex; align-items:center; flex-shrink:0; gap:8px;"></div>
+                </div>
+                `;
 
                 const grpChk = row.querySelector('.pk-grp-chk');
                 if (grpChk) {
@@ -9908,6 +10620,7 @@ async function openManager(initialCache, preloadPromise) {
                 const isMoving = S.movingIds && S.movingIds.has(d.id);
 
                 row.className = `pk-row ${isSel ? 'sel' : ''} ${isFocused ? 'pk-focused' : ''} ${isMoving ? 'pk-moving' : ''}`;
+                row.ondragstart = (e) => e.preventDefault();
 
                 if (isFocused && !isSel) {
                     row.style.backgroundColor = 'var(--pk-sel-bg)';
@@ -9932,8 +10645,18 @@ async function openManager(initialCache, preloadPromise) {
 
                 const isProtected = !S.trashMode && isSystemItem(d);
                 const isMax = UI.win.classList.contains('pk-maximized');
+                const nameTip = getTooltipHlHTML(d.name, S.search).replace(/"/g, '&quot;');
 
                 const getDynamicIcon = (item) => {
+                    let isBlacklisted = false;
+                    const cleanName = (item.name || "").replace(/[\r\n\v\f\u2028\u2029]+/g, ' ').trim().toLowerCase();
+                    if (item.kind === 'drive#folder') {
+                        isBlacklisted = S.blFolderSet && S.blFolderSet.has(cleanName);
+                    } else {
+                        isBlacklisted = S.blSet && S.blSet.has(cleanName);
+                    }
+                    const blHtml = isBlacklisted ? `<div class="pk-bl-marker" data-bl="active">${CONF.icons.blMarker}</div>` : '';
+
                     if (S.uploadMode) {
                         if (item.status === 'DONE' && item.file && item.mime_type && item.mime_type.startsWith('image/')) {
                             if (!item._localThumbUrl) {
@@ -9947,10 +10670,11 @@ async function openManager(initialCache, preloadPromise) {
                             const scriptIcon = getIcon(item);
                             if (isMax) {
                                 const boxStyle = "width:54px; min-width:54px; height:100%; display:flex; align-items:center; justify-content:flex-start !important; margin-right:12px; position:relative;";
-                                return `<div class="pk-max-icon-box" style="${boxStyle}"><div style="transform: translateX(-6px); display:flex;">${scriptIcon}</div></div>`;
+                                return `<div class="pk-max-icon-box" style="${boxStyle}"><div style="transform: translateX(-6px); display:flex;">${scriptIcon}</div>${blHtml}</div>`;
                             }
-                            return `<div class="pk-min-icon" style="width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; margin-right:12px; flex-shrink:0;">
+                            return `<div class="pk-min-icon" style="width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; margin-right:12px; flex-shrink:0; position:relative;">
                                 <div style="display:flex; transform: translateX(4px) scale(0.96);">${scriptIcon}</div>
+                                ${blHtml}
                             </div>`;
                         }
                     }
@@ -9961,6 +10685,40 @@ async function openManager(initialCache, preloadPromise) {
                     const isUploadTask = item.kind === 'pk#upload';
                     const lookupId = (isTask || isUploadTask) ? item.file_id : item.id;
                     let hasValidCover = !!(item.thumbnail_link && item.thumbnail_link !== item.icon_link);
+
+                    if (!window.pkRecentMetaCache) window.pkRecentMetaCache = new Map();
+                    if (S.recentMode && !isFolder) {
+                        if (window.pkRecentMetaCache.has(item.id)) {
+                            const meta = window.pkRecentMetaCache.get(item.id);
+                            item.thumbnail_link = meta.thumbnail_link || item.thumbnail_link;
+                            item.icon_link = meta.icon_link || item.icon_link;
+                            item.mime_type = meta.mime_type || item.mime_type;
+                            if (meta.medias) item.medias = meta.medias;
+                            item.params = Object.assign(item.params || {}, meta.params || {});
+                            hasValidCover = !!(item.thumbnail_link && item.thumbnail_link !== item.icon_link);
+                        } else if (!hasValidCover && !item._metaFetching) {
+                            item._metaFetching = true;
+                            const ext = (item.name || '').split('.').pop().toLowerCase();
+                            const mime = (item.mime_type || '').toLowerCase();
+                            const isLikelyMedia = mime.startsWith('video/') || mime.startsWith('image/') ||['mp4','mkv','avi','mov','wmv','flv','webm','ts','m4v','3gp','jpg','jpeg','png','gif','bmp','webp','heic','svg','tif','tiff','ico'].includes(ext);
+
+                            if (isLikelyMedia) {
+                                apiGet(item.id).then(meta => {
+                                    if (meta) {
+                                        window.pkRecentMetaCache.set(item.id, meta);
+                                        item.thumbnail_link = meta.thumbnail_link || item.thumbnail_link;
+                                        item.icon_link = meta.icon_link || item.icon_link;
+                                        item.mime_type = meta.mime_type || item.mime_type;
+                                        if (meta.medias) item.medias = meta.medias;
+                                        item.params = Object.assign(item.params || {}, meta.params || {});
+                                        requestAnimationFrame(() => {
+                                            if (typeof renderVisible === 'function') renderVisible();
+                                        });
+                                    }
+                                }).catch(()=>{});
+                            }
+                        }
+                    }
 
                     let forceDeepScan = false;
                     if (item._coverResolved) {
@@ -10040,6 +10798,7 @@ async function openManager(initialCache, preloadPromise) {
                         return `<div class="pk-max-icon-box" style="${boxStyle}">
                             <img src="${item.icon_link}" style="${imgStyle} opacity:1; object-fit:contain;" draggable="false"
                                  onerror="this.outerHTML='<div class=&quot;pk-placeholder-layer&quot; style=&quot;${placeholderStyle} opacity:1;&quot;>${fallbackSvg}</div>'">
+                            ${blHtml}
                         </div>`;
                     }
 
@@ -10080,6 +10839,7 @@ async function openManager(initialCache, preloadPromise) {
                                          draggable="false">
                                     ${badgeHtml}
                                     ${videoOvHtml}
+                                    ${blHtml}
                                 </div>
                             `;
                     }
@@ -10098,14 +10858,15 @@ async function openManager(initialCache, preloadPromise) {
                                     <div class="pk-placeholder-layer" style="${placeholderStyle} opacity:0;"><img src="${item.icon_link}" style="width:50px;height:50px;object-fit:contain;"></div>
                                     <img src="${item.thumbnail_link}" class="pk-max-thumb" style="${imgStyle} opacity:1;" draggable="false">
                                     ${badgeHtml}
+                                    ${blHtml}
                                 </div>
                             `;
                         }
                         const finalIconSrc = item.icon_link || item.thumbnail_link;
                         if (finalIconSrc) {
-                            return `<div class="pk-max-icon-box" style="${boxStyle}"><img src="${finalIconSrc}" style="width:50px; height:50px; object-fit:contain;" onerror="this.outerHTML='<div style=&quot;transform:translateX(-6px);display:flex;&quot;>${iconHtml.replace(/"/g, "&quot;").replace(/\n/g, "")}</div>'"></div>`;
+                            return `<div class="pk-max-icon-box" style="${boxStyle}"><img src="${finalIconSrc}" style="width:50px; height:50px; object-fit:contain;" onerror="this.outerHTML='<div style=&quot;transform:translateX(-6px);display:flex;&quot;>${iconHtml.replace(/"/g, "&quot;").replace(/\n/g, "")}</div>'">${blHtml}</div>`;
                         }
-                        return `<div class="pk-max-icon-box" style="${boxStyle}"><div style="transform: translateX(-6px); display:flex;">${iconHtml}</div></div>`;
+                        return `<div class="pk-max-icon-box" style="${boxStyle}"><div style="transform: translateX(-6px); display:flex;">${iconHtml}</div>${blHtml}</div>`;
                     }
 
                     const mime = (item.mime_type || '').toLowerCase();
@@ -10119,18 +10880,21 @@ async function openManager(initialCache, preloadPromise) {
                         const imgOp = isCached ? '1' : '0';
 
                         const placeholder = item.icon_link ? `<img src="${item.icon_link}" style="width:100%;height:100%;object-fit:contain;border-radius:4px;pointer-events:none;">` : iconHtml;
-                        return `<div class="pk-min-media-box" style="width:24px;height:24px;margin-right:12px;position:relative;flex-shrink:0;display:inline-flex;vertical-align:middle;overflow:hidden;border-radius:4px;">
-                            <div class="pk-min-ph" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;transition:opacity 0.2s;opacity:${phOp};">${placeholder}</div>
-                            <img src="${item.thumbnail_link}" class="pk-min-thumb" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:${imgOp};z-index:2;transition:opacity 0.2s;"
-                                 onload="if(window.pkGlobalThumbCache){window.pkGlobalThumbCache.add('${item.id}');}this.style.opacity='1';this.previousElementSibling.style.opacity='0';"
-                                 onerror="this.previousElementSibling.style.opacity='1';this.remove();">
+                        return `<div class="pk-min-media-box" style="width:24px;height:24px;margin-right:12px;position:relative;flex-shrink:0;display:inline-flex;vertical-align:middle;overflow:visible !important;border-radius:4px;">
+                            <div style="position:absolute;inset:0;overflow:hidden;border-radius:4px;z-index:1;">
+                                <div class="pk-min-ph" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;transition:opacity 0.2s;opacity:${phOp};">${placeholder}</div>
+                                <img src="${item.thumbnail_link}" class="pk-min-thumb" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:${imgOp};z-index:2;transition:opacity 0.2s;"
+                                     onload="if(window.pkGlobalThumbCache){window.pkGlobalThumbCache.add('${item.id}');}this.style.opacity='1';this.previousElementSibling.style.opacity='0';"
+                                     onerror="this.previousElementSibling.style.opacity='1';this.remove();">
+                            </div>
+                            ${blHtml}
                         </div>`;
                     }
 
                     if (item.icon_link) {
-                        return `<img draggable="false" src="${item.icon_link}" style="width:24px; height:24px; object-fit:contain; margin-right:12px; flex-shrink:0; border-radius:4px;" onerror="this.outerHTML='<div class=&quot;pk-min-icon&quot; style=&quot;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-right:12px;&quot;>${iconHtml.replace(/"/g, "&quot;").replace(/\n/g, "")}</div>'">`;
+                        return `<div class="pk-min-icon" style="position:relative; display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; margin-right:12px; flex-shrink:0; overflow:visible;"><img draggable="false" src="${item.icon_link}" style="width:24px; height:24px; object-fit:contain; border-radius:4px;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';"><span style="display:none; align-items:center; justify-content:center;">${iconHtml}</span>${blHtml}</div>`;
                     }
-                    return `<div class="pk-min-icon" style="display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; margin-right:12px;">${iconHtml}</div>`;
+                    return `<div class="pk-min-icon" style="position:relative; display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; margin-right:12px; flex-shrink:0; overflow:visible;">${iconHtml}${blHtml}</div>`;
 
                 };
 
@@ -10138,7 +10902,7 @@ async function openManager(initialCache, preloadPromise) {
                 let html = `<div>${checkboxHtml}</div>`;
 
                 if (S.historyMode) {
-                    const isStarred = !!(d.starred || (d.tags && d.tags.some(t => t.name === 'STAR')));
+                    const isStarred = S.starredSet.has(d.id) || !!(d.starred || (d.tags && d.tags.some(t => t.name === 'STAR')));
                     const starColor = isStarred ? '#FFC107' : '#ccc';
                     const starFill = isStarred ? '#FFC107' : 'none';
                     html += `<div style="display:flex; align-items:center; justify-content:center;"><svg class="pk-star-icon" width="16" height="16" viewBox="0 0 24 24" fill="${starFill}" stroke="${starColor}" stroke-width="2" style="cursor:default; opacity:0.8;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg></div>`;
@@ -10148,7 +10912,7 @@ async function openManager(initialCache, preloadPromise) {
                         else if (!iconImg.includes('margin-right')) iconImg = iconImg.replace(/style=['"]/, '$&margin-right:20px; ');
                     }
                     const nameDisplay = (S.search && shouldShowHl) ? getSearchHlHTML(d.name, S.search, charCapacity) : esc(d.name);
-                    html += `<div class="pk-name" ${d.thumbnail_link ? `data-pk-thumb="${d.thumbnail_link}"` : ''} data-pk-tip="${esc(d.name)}">
+                    html += `<div class="pk-name" ${d.thumbnail_link ? `data-pk-thumb="${d.thumbnail_link}"` : ''} data-pk-tip="${nameTip}">
                         ${iconImg}
                         <span class="pk-name-txt">${nameDisplay}</span>
                     </div>`;
@@ -10202,7 +10966,7 @@ async function openManager(initialCache, preloadPromise) {
                     const hasResolvedCover = d._coverResolved && d.thumbnail_link;
                     const thumbAttr = (isTaskDone && (isMedia || hasResolvedCover)) ? `data-pk-thumb="${d.thumbnail_link}"` : '';
                     const nameDisplay = S.search ? getSearchHlHTML(d.name, S.search, charCapacity) : esc(d.name);
-                    html += `<div class="pk-name" ${thumbAttr} data-pk-tip="${esc(d.name)}">
+                    html += `<div class="pk-name" ${thumbAttr} data-pk-tip="${nameTip}">
                         ${iconImg}
                         <span class="pk-name-txt" style="${nameStyle}">${nameDisplay}</span>
                     </div>`;
@@ -10268,7 +11032,7 @@ async function openManager(initialCache, preloadPromise) {
                     const hasResolvedCover = isDone && d.thumbnail_link && d.thumbnail_link !== d.icon_link;
                     const thumbAttr = hasResolvedCover ? `data-pk-thumb="${d.thumbnail_link}"` : '';
 
-                    html += `<div class="pk-name" ${thumbAttr} data-pk-tip="${esc(d.name)}" style="display:flex; align-items:center; height:100%; overflow:visible;">
+                    html += `<div class="pk-name" ${thumbAttr} data-pk-tip="${nameTip}" style="display:flex; align-items:center; height:100%; overflow:visible;">
                         ${getDynamicIcon(d)}
                         <span class="pk-name-txt" style="margin:0!important; padding:0!important; line-height:1.5; ${nameStyle}">${nameDisplay}</span>
                     </div>`;
@@ -10319,7 +11083,7 @@ async function openManager(initialCache, preloadPromise) {
                     }
 
                     const nameDisplay = shouldShowHl ? getSearchHlHTML(d.name, S.search, charCapacity) : esc(d.name);
-                    html += `<div class="pk-name" data-pk-tip="${esc(d.name)}">
+                    html += `<div class="pk-name" data-pk-tip="${nameTip}">
                         ${iconImg}
                         <span class="pk-name-txt" style="${isShareDisabled ? 'cursor:default; pointer-events:none;' : ''}">${nameDisplay}</span>
                     </div>`;
@@ -10352,7 +11116,7 @@ async function openManager(initialCache, preloadPromise) {
 
                 } else {
                     const isRoot = S.path.length === 1 && S.path[0].id === '';
-                    const isStarred = !!(d.starred || (d.tags && d.tags.some(t => t.name === 'STAR')));
+                    const isStarred = S.starredSet.has(d.id) || !!(d.starred || (d.tags && d.tags.some(t => t.name === 'STAR')));
                     const starColor = isStarred ? '#FFC107' : '#ccc';
                     const starFill = isStarred ? '#FFC107' : 'none';
 
@@ -10393,22 +11157,26 @@ async function openManager(initialCache, preloadPromise) {
                     const thumbAttr = isRealThumb ? `data-pk-thumb="${d.thumbnail_link}"` : '';
                     const nameDisplay = (S.search && shouldShowHl) ? getSearchHlHTML(d.name, S.search, charCapacity) : esc(d.name);
 
-                    html += `<div class="pk-name" ${thumbAttr} data-pk-tip="${esc(d.name)}" style="${isProtected ? 'opacity:1;' : ''}">${getDynamicIcon(d)}<span class="pk-name-txt">${nameDisplay}</span>${isProtected ? `<span class="pk-tag-default">${L.tag_default}</span>` : ''}</div>`;
+                    html += `<div class="pk-name" ${thumbAttr} data-pk-tip="${nameTip}" style="${isProtected ? 'opacity:1;' : ''}">${getDynamicIcon(d)}<span class="pk-name-txt">${nameDisplay}</span>${isProtected ? `<span class="pk-tag-default">${L.tag_default}</span>` : ''}</div>`;
 
                     if (showPathCol) {
                         let pathHtml = '';
-                        const homeIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;flex-shrink:0;vertical-align:-1px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
+                        const homeIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;flex-shrink:0;vertical-align:-4px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
                         const homeText = L.btn_nav_home;
+                        const isHomeMatched = shouldShowHl && (S.search.toLowerCase().includes(homeText.toLowerCase()) || homeText.toLowerCase().includes(S.search.toLowerCase()));
+                        const homeDisplay = isHomeMatched ? getSearchHlHTML(homeText, S.search.split('/')[0], 20) : esc(homeText);
+                        const restQuery = S.search.includes('/') ? S.search.split('/').slice(1).join('/') : S.search;
                         const prefix = homeText + '/';
-                        const rootStyle = isMax? "display:inline-flex;align-items:center;flex-shrink:0;vertical-align:text-bottom;margin-right:2px;": "display:flex;align-items:center;flex-shrink:0;line-height:1.5;padding-bottom:2px;";
+                        const rootStyle = isMax? "display:inline-flex;align-items:baseline;flex-shrink:0;margin-right:2px;": "display:inline-flex;align-items:baseline;flex-shrink:0;line-height:1.2;padding-bottom:0;";
                         const contentStyle = isMax ? '' : 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.5;padding-bottom:2px;';
                         const containerStyle = isMax? "display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-all;line-height:1.4;white-space:normal;color:var(--pk-fg);": "display:flex;align-items:center;overflow:hidden;white-space:nowrap;color:var(--pk-fg);line-height:1.5;padding-bottom:2px;";
                         const slashHtml = `<span style="margin:0 1px;line-height:1.5;padding-bottom:2px;">/</span>`;
 
                         if (isAnalyzeRoot) {
                             const pStr = d._pathStr || d.path || "";
-                            let isSameAsPrev = false;
-                            if (S.sort === 'path' && i > 0) {
+                            displayPath = pStr;
+                            let isSameAsPrev = d._isSameFolder || false;
+                            if (!isSameAsPrev && S.sort === 'path' && i > 0) {
                                 const prevItem = S.display[i - 1];
                                 const prevPStr = prevItem._pathStr || prevItem.path || "";
                                 if (prevPStr === pStr) isSameAsPrev = true;
@@ -10417,14 +11185,15 @@ async function openManager(initialCache, preloadPromise) {
                                 pathHtml = `<span style="color:var(--pk-fg);">${L.str_same_folder}</span>`;
                             } else {
                                 let content = pStr;
-                                if (pStr.startsWith(prefix)) content = pStr.substring(prefix.length);
+                                if (pStr === homeText) content = "";
+                                else if (pStr.startsWith(prefix)) content = pStr.substring(prefix.length);
 
                                 const includePath = UI.chkSearchPath && UI.chkSearchPath.checked;
                                 const pathDisplay = (shouldShowHl && includePath && content)
-                                    ? getSearchHlHTML(content, S.search, pathCharCapacity)
+                                    ? getSearchHlHTML(content, restQuery, pathCharCapacity)
                                     : esc(content);
 
-                                let innerHtml = `<span style="${rootStyle}">${homeIcon}${esc(homeText)}</span>`;
+                                let innerHtml = `<span style="${rootStyle}">${homeIcon}<span style="${isMax ? '' : 'transform:translateY(-2px);'}">${homeDisplay}</span></span>`;
                                 if (content) {
                                     innerHtml += `${slashHtml}<span style="${contentStyle}">${pathDisplay}</span>`;
                                 }
@@ -10455,10 +11224,10 @@ async function openManager(initialCache, preloadPromise) {
 
                                 const includePath = UI.chkSearchPath && UI.chkSearchPath.checked;
                                 const pathDisplay = (shouldShowHl && includePath && contentStr)
-                                    ? getSearchHlHTML(contentStr, S.search, pathCharCapacity)
+                                    ? getSearchHlHTML(contentStr, restQuery, pathCharCapacity)
                                     : esc(contentStr);
 
-                                let innerHtml = `<span style="${rootStyle}">${homeIcon}${esc(homeText)}</span>`;
+                                let innerHtml = `<span style="${rootStyle}">${homeIcon}<span style="${isMax ? '' : 'transform:translateY(-2px);'}">${homeDisplay}</span></span>`;
                                 if (contentStr) {
                                     innerHtml += `${slashHtml}<span style="${contentStyle}">${pathDisplay}</span>`;
                                 }
@@ -10497,10 +11266,10 @@ async function openManager(initialCache, preloadPromise) {
                                 } else {
                                     const includePath = UI.chkSearchPath && UI.chkSearchPath.checked;
                                     const pathDisplay = (shouldShowHl && includePath && fullPathStr)
-                                        ? getSearchHlHTML(fullPathStr, S.search, pathCharCapacity)
+                                        ? getSearchHlHTML(fullPathStr, restQuery, pathCharCapacity)
                                         : esc(fullPathStr);
 
-                                    let innerHtml = `<span style="${rootStyle}">${homeIcon}${esc(homeText)}</span>`;
+                                    let innerHtml = `<span style="${rootStyle}">${homeIcon}<span style="${isMax ? '' : 'transform:translateY(-2px);'}">${homeDisplay}</span></span>`;
                                     if (fullPathStr) {
                                         innerHtml += `${slashHtml}<span style="${contentStyle}">${pathDisplay}</span>`;
                                     }
@@ -10509,11 +11278,17 @@ async function openManager(initialCache, preloadPromise) {
                             }
                         }
 
-                        let pathTipHtml = esc(displayPath || "");
+                        let pathTipHtml = getTooltipHlHTML(displayPath || "", S.search);
                         if (displayPath && displayPath.startsWith(homeText)) {
                             const rest = displayPath.substring(homeText.length);
-                            const homeGroup = `<span style="display:inline-flex;align-items:center;vertical-align:bottom;">${homeIcon}${esc(homeText)}</span>`;
-                            pathTipHtml = `<div style="line-height:1.6;word-break:break-all;">${homeGroup}${esc(rest)}</div>`;
+                            const sParts = S.search.split('/');
+                            const homeQuery = sParts[0];
+                            const restQuery = sParts.length > 1 ? sParts.slice(1).join('/') : S.search;
+
+                            const homeDisplayTip = getTooltipHlHTML(homeText, homeQuery);
+                            const restDisplayTip = getTooltipHlHTML(rest, restQuery);
+                            const homeGroup = `<span style="display:inline-flex;align-items:center;vertical-align:bottom;">${homeIcon}${homeDisplayTip}</span>`;
+                            pathTipHtml = `<div style="line-height:1.6;word-break:break-all;">${homeGroup}${restDisplayTip}</div>`;
                         }
 
                         html += `<div class="pk-path" style="font-size:12px; overflow:hidden; text-overflow:ellipsis; ${isMax ? '' : 'white-space:nowrap;'} padding-right:10px; padding-bottom:2px;" data-pk-tip="${pathTipHtml.replace(/"/g, '&quot;')}">${pathHtml}</div>`;
@@ -10664,6 +11439,7 @@ async function openManager(initialCache, preloadPromise) {
                         return {
                             isVideo: m.startsWith('video/') || dur > 0 || vExts.some(e => n.endsWith('.' + e)),
                             isImage: m.startsWith('image/'),
+                            isTorrent: n.endsWith('.torrent'),
                             isArchive: m.includes('zip') || m.includes('rar') || m.includes('archive') || aExts.some(e => n.endsWith('.' + e))
                         };
                     };
@@ -10671,7 +11447,8 @@ async function openManager(initialCache, preloadPromise) {
                     if (S.uploadMode) {
                         if (d.status !== 'DONE') return;
                         const t = checkType(d);
-                        if (t.isVideo || t.isImage) {
+                        if (t.isTorrent) handleTorrentFile(d);
+                        else if (t.isVideo || t.isImage) {
                             if (t.isVideo) playVideo(d); else showImage(d);
                         } else if (d.file_id) {
                             S.sel.clear(); S.sel.add(d.id); S.activeId = d.id;
@@ -10686,7 +11463,8 @@ async function openManager(initialCache, preloadPromise) {
 
                         const t = checkType(d);
 
-                        if (t.isVideo || t.isImage) {
+                        if (t.isTorrent) handleTorrentFile(d);
+                        else if (t.isVideo || t.isImage) {
                             if (t.isVideo) playVideo(d);
                             else showImage(d);
                         } else {
@@ -10714,7 +11492,7 @@ async function openManager(initialCache, preloadPromise) {
                             const isExitMode = S.isFlattened || S.dupMode;
                             if (isExitMode) {
                                 S.isFlattened = false; S.dupMode = false;
-                                UI.scan.style.display = 'flex'; UI.btnExit.style.display = 'none'; UI.dup.style.display = 'none';
+                                UI.scan.style.display = 'flex'; UI.btnExit.style.display = 'none';
                                 if(UI.dupTools) UI.dupTools.style.display = 'none';
                                 if(UI.btnFolderFirst) UI.btnFolderFirst.style.display = 'flex';
                                 if(UI.btnNewFolder) UI.btnNewFolder.style.display = 'flex';
@@ -10737,22 +11515,24 @@ async function openManager(initialCache, preloadPromise) {
                         }
                     } else {
                         const t = checkType(d);
-                        if (t.isArchive) handleOpenArchive(d);
+                        if (t.isTorrent) handleTorrentFile(d);
+                        else if (t.isArchive) handleOpenArchive(d);
                         else if (t.isVideo) playVideo(d);
                         else if (t.isImage) showImage(d);
                     }
                 };
 
                 row.onclick = async (e) => {
-                    if (S.loading) return;
-
                     if (UI.ctx && UI.ctx.style.display !== 'none') {
                         UI.ctx.style.display = 'none';
                     }
 
                     const nameText = e.target.closest('.pk-name .pk-name-txt');
+                    const isAnalyzeRoot = S.analyzeMode && S.path[S.path.length - 1].id === 'analyze_root';
+                    const isProtectedView = S.dupMode || (isAnalyzeRoot && S.analyzeSimGroups);
+
                     if (!S.trashMode && nameText) {
-                        if (S.dupMode && S.sel.size > 5) {
+                        if (isProtectedView && S.sel.size > 5) {
                             if (S.sel.size > 1 || !S.sel.has(d.id)) {
                                 if (!await confirmSelectionClear()) return;
                             }
@@ -10796,7 +11576,7 @@ async function openManager(initialCache, preloadPromise) {
                         } else if (e.ctrlKey || e.metaKey) {
                             if (S.sel.has(d.id)) S.sel.delete(d.id); else S.sel.add(d.id);
                         } else {
-                            if (S.dupMode && S.sel.size > 5) {
+                            if (isProtectedView && S.sel.size > 5) {
                                 if (S.sel.size > 1 || !S.sel.has(d.id)) {
                                     if (!await confirmSelectionClear()) {
                                         renderVisible();
@@ -10847,7 +11627,7 @@ async function openManager(initialCache, preloadPromise) {
                                 const gNode = S.display[start + k];
                                 if (gNode && gNode.isHeader) {
                                     const gIdx = parseInt(gNode.id.replace('grp_', ''));
-                                    const gIds = S.dupRawGroups[gIdx]?.ids || [];
+                                    const gIds = S.dupMode ? (S.dupRawGroups[gIdx]?.ids || []) : (S.analyzeMode ? (S.analyzeSimGroups[gIdx]?.ids || []) : []);
                                     let selCount = 0;
                                     gIds.forEach(id => { if(S.sel.has(id)) selCount++; });
 
@@ -10865,11 +11645,10 @@ async function openManager(initialCache, preloadPromise) {
 
                 row.ondblclick = (e) => {
                     e.preventDefault();
-
-                    if (S.loading || S.trashMode) return;
+                    if (S.trashMode) return;
 
                     if (S.uploadMode) {
-                        if (d.status !== 'DONE' || !e.target.closest('.pk-name-txt')) return;
+                        if (d.status !== 'DONE') return;
                         triggerOpen();
                         return;
                     }
@@ -10901,7 +11680,6 @@ async function openManager(initialCache, preloadPromise) {
 
                             UI.scan.style.display = 'flex';
                             UI.btnExit.style.display = 'none';
-                            UI.dup.style.display = 'none';
                             if(UI.dupTools) UI.dupTools.style.display = 'none';
                             if(UI.dupFilters) UI.dupFilters.style.display = 'none';
 
@@ -10932,11 +11710,14 @@ async function openManager(initialCache, preloadPromise) {
                             S.path.push(d);
                             load();
                         }
-                    } else if (d.mime_type) {
-                        const mime = d.mime_type.toLowerCase();
-                        const name = d.name.toLowerCase();
+                    } else {
+                        const mime = (d.mime_type || "").toLowerCase();
+                        const name = (d.name || "").toLowerCase();
 
-                        if (mime.includes('zip') || mime.includes('rar') || mime.includes('7z') ||
+                        if (name.endsWith('.torrent')) {
+                            handleTorrentFile(d);
+                        }
+                        else if (mime.includes('zip') || mime.includes('rar') || mime.includes('7z') ||
                             mime.includes('compressed') || mime.includes('archive') ||
                             name.endsWith('.zip') || name.endsWith('.rar') || name.endsWith('.7z') || name.endsWith('.tar') || name.endsWith('.gz')) {
                             handleOpenArchive(d);
@@ -11423,9 +12204,11 @@ async function openManager(initialCache, preloadPromise) {
                     UI.ctx.style.display = useFlexOrder ? 'flex' : 'block';
                     if (useFlexOrder) UI.ctx.style.flexDirection = 'column';
 
-                    let x = e.clientX, y = e.clientY, w = 160, h = UI.ctx.offsetHeight || 280;
-                    if (x + w > window.innerWidth) x = window.innerWidth - w - 10;
-                    if (y + h > window.innerHeight) y = window.innerHeight - h - 10;
+                    const scale = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
+                    let x = e.clientX / scale, y = e.clientY / scale, w = 160, h = UI.ctx.offsetHeight || 280;
+                    let winW = window.innerWidth / scale, winH = window.innerHeight / scale;
+                    if (x + w > winW) x = winW - w - 10;
+                    if (y + h > winH) y = winH - h - 10;
                     UI.ctx.style.left = x + 'px';
                     UI.ctx.style.top = y + 'px';
                 };
@@ -11451,24 +12234,34 @@ async function openManager(initialCache, preloadPromise) {
 
     const updateMarqueeUIAndSelection = (targetX, targetY) => {
         if (!cachedVpRect) return;
+        const scale = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
+        const cssTargetX = targetX / scale;
+        const cssTargetY = targetY / scale;
+        const cssRectTop = cachedVpRect.top / scale;
+        const cssRectBottom = cachedVpRect.bottom / scale;
+        const cssRectLeft = cachedVpRect.left / scale;
+        const cssMqStartX = mqStartX / scale;
+        const cssMqStartY = mqStartY / scale;
+
         const curScroll = UI.vp.scrollTop;
-        const clampedY = Math.max(cachedVpRect.top, Math.min(cachedVpRect.bottom, targetY));
-        const logicA = mqStartY - cachedVpRect.top + startScroll;
-        const logicB = clampedY - cachedVpRect.top + curScroll;
+        const clampedY = Math.max(cssRectTop, Math.min(cssRectBottom, cssTargetY));
+        const logicA = cssMqStartY - cssRectTop + startScroll;
+        const logicB = clampedY - cssRectTop + curScroll;
         const logTop = Math.max(0, Math.min(logicA, logicB));
         const logBot = Math.max(logicA, logicB);
-        const visTop = logTop - curScroll + cachedVpRect.top, visBot = logBot - curScroll + cachedVpRect.top;
-        const clipT = Math.max(cachedVpRect.top, visTop), clipB = Math.min(cachedVpRect.bottom, visBot);
+        const visTop = logTop - curScroll + cssRectTop;
+        const visBot = logBot - curScroll + cssRectTop;
+        const clipT = Math.max(cssRectTop, visTop), clipB = Math.min(cssRectBottom, visBot);
         const drawH = Math.max(0, clipB - clipT);
-        const safeRight = cachedVpRect.left + UI.vp.clientWidth;
-        const clampedX = Math.max(cachedVpRect.left, Math.min(safeRight, targetX));
-        const drawL = Math.min(mqStartX, clampedX);
-        const drawW = Math.abs(clampedX - mqStartX);
+        const safeRight = cssRectLeft + UI.vp.clientWidth;
+        const clampedX = Math.max(cssRectLeft, Math.min(safeRight, cssTargetX));
+        const drawL = Math.min(cssMqStartX, clampedX);
+        const drawW = Math.abs(clampedX - cssMqStartX);
 
-        mqBox.style.borderTopWidth = (visTop < cachedVpRect.top) ? '0' : '1px';
-        mqBox.style.borderBottomWidth = (visBot > cachedVpRect.bottom) ? '0' : '1px';
-        mqBox.style.borderLeftWidth = (targetX < cachedVpRect.left) ? '0' : '1px';
-        mqBox.style.borderRightWidth = (targetX > safeRight) ? '0' : '1px';
+        mqBox.style.borderTopWidth = (visTop < cssRectTop) ? '0' : '1px';
+        mqBox.style.borderBottomWidth = (visBot > cssRectBottom) ? '0' : '1px';
+        mqBox.style.borderLeftWidth = (cssTargetX < cssRectLeft) ? '0' : '1px';
+        mqBox.style.borderRightWidth = (cssTargetX > safeRight) ? '0' : '1px';
 
         Object.assign(mqBox.style, { display: drawH > 0 ? 'block' : 'none', width: drawW + 'px', height: drawH + 'px', transform: `translate3d(${drawL}px, ${clipT}px, 0)` });
 
@@ -11574,8 +12367,10 @@ async function openManager(initialCache, preloadPromise) {
         }
 
         if (fileDragGhost) {
-            fileDragGhost.style.left = e.clientX + 'px';
-            fileDragGhost.style.top = e.clientY + 'px';
+            const scale = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
+            fileDragGhost.style.zoom = 'var(--pk-zoom, 1)';
+            fileDragGhost.style.left = (e.clientX / scale) + 'px';
+            fileDragGhost.style.top = (e.clientY / scale) + 'px';
         }
 
         const prevTargets = document.querySelectorAll('.pk-drop-target');
@@ -11772,7 +12567,33 @@ async function openManager(initialCache, preloadPromise) {
 
             if (targetPid) gmSet('pk_fmod_' + targetPid, new Date(getServerNow()).toISOString());
 
-            const keysToClear =[sourcePid || 'root', targetPid || 'root'];
+            if (S.analyzeMap) {
+                const deltaSize = items.reduce((acc, it) => acc + parseInt(it.size || 0), 0);
+                if (deltaSize > 0) {
+                    const updateAnalyzeChain = (startId, isAdd) => {
+                        let currId = startId;
+                        let safety = 50;
+                        while (currId && S.analyzeMap.has(currId) && safety > 0) {
+                            const node = S.analyzeMap.get(currId);
+                            const oldSize = parseInt(node.size || 0);
+                            node.size = isAdd ? (oldSize + deltaSize) : Math.max(0, oldSize - deltaSize);
+                            currId = node.parentId;
+                            safety--;
+                        }
+                    };
+                    if (S.analyzeMap.has(targetPid)) updateAnalyzeChain(targetPid, true);
+                    if (opType === 'move' && S.analyzeMap.has(sourcePid)) updateAnalyzeChain(sourcePid, false);
+                    if (S.analyzeResultItems) {
+                        S.analyzeResultItems.forEach(resItem => {
+                            if (S.analyzeMap.has(resItem.id)) {
+                                resItem.size = S.analyzeMap.get(resItem.id).size.toString();
+                            }
+                        });
+                    }
+                }
+            }
+
+            const keysToClear = [sourcePid || 'root', targetPid || 'root'];
             keysToClear.forEach(k => {
                 S.cache.delete(k);
                 if (typeof globalCache !== 'undefined') globalCache.delete(k);
@@ -11781,6 +12602,28 @@ async function openManager(initialCache, preloadPromise) {
                     if (k === 'root') globalDirtyFolders.add('');
                 }
             });
+
+            if (opType === 'move') {
+                const purgeMovedDescendants = (fid) => {
+                    if (typeof globalLineageMap !== 'undefined') globalLineageMap.delete(fid);
+                    if (typeof scannedFolderIds !== 'undefined') scannedFolderIds.delete(fid);
+                    const data = (typeof globalCache !== 'undefined' ? globalCache.get(fid) : null) || (S.cache ? S.cache.get(fid) : null);
+                    if (data) {
+                        const list = Array.isArray(data) ? data : (data.items || []);
+                        list.forEach(child => {
+                            if (child.kind === 'drive#folder') {
+                                purgeMovedDescendants(child.id);
+                            }
+                        });
+                        if (typeof globalCache !== 'undefined') globalCache.delete(fid);
+                        if (S.cache) S.cache.delete(fid);
+                    }
+                };
+                items.forEach(it => {
+                    if (it.kind === 'drive#folder') purgeMovedDescendants(it.id);
+                });
+            }
+
             if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
 
             if (typeof runBackgroundCrawler === 'function') runBackgroundCrawler();
@@ -11958,7 +12801,8 @@ async function openManager(initialCache, preloadPromise) {
         mqStartX = Math.max(cachedVpRect.left, Math.min(safeRight, e.clientX));
         mqStartY = e.clientY;
 
-        const startOffsetY = e.clientY - cachedVpRect.top + UI.vp.scrollTop;
+        const scale = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
+        const startOffsetY = (e.clientY - cachedVpRect.top) / scale + UI.vp.scrollTop;
         const startIdx = Math.floor(startOffsetY / CONF.rowHeight);
         if (startIdx >= 0 && startIdx < S.display.length) {
             const startItem = S.display[startIdx];
@@ -12006,7 +12850,8 @@ async function openManager(initialCache, preloadPromise) {
            ) return;
 
         if (S.sel.size > 0 || S.activeId) {
-            if (S.dupMode && S.sel.size > 5) {
+            const isAnalyzeRoot = S.analyzeMode && S.path[S.path.length - 1].id === 'analyze_root';
+            if ((S.dupMode || (isAnalyzeRoot && S.analyzeSimGroups)) && S.sel.size > 5) {
                 if (!await confirmSelectionClear()) return;
             }
             S.clearSelection();
@@ -12043,7 +12888,7 @@ async function openManager(initialCache, preloadPromise) {
 
     const showCrumbDropdown = async (e, parentId, triggerEl) => {
         if (triggerEl.classList.contains('pk-active')) {
-            const oldPop = el.querySelector('.pk-crumb-pop');
+            const oldPop = document.getElementById('pk-main-crumb-pop');
             if (oldPop) oldPop.remove();
             triggerEl.classList.remove('pk-active');
             triggerEl.innerHTML = CONF.crumbIcons.right;
@@ -12140,12 +12985,14 @@ async function openManager(initialCache, preloadPromise) {
                 return collator.compare(a.name, b.name) * d;
             });
 
-            let pop = el.querySelector('.pk-crumb-pop');
+            let pop = document.getElementById('pk-main-crumb-pop');
             if (!pop) {
                 pop = document.createElement('div');
+                pop.id = 'pk-main-crumb-pop';
                 pop.className = 'pk-crumb-pop pk-scroll';
+                if (document.querySelector('.pk-ov')?.classList.contains('pk-dark')) pop.classList.add('pk-dark');
                 pop.style.top = '-9999px';
-                el.appendChild(pop);
+                document.body.appendChild(pop);
             }
             pop.dataset.targetId = targetId;
             pop.innerHTML = '';
@@ -12200,10 +13047,15 @@ async function openManager(initialCache, preloadPromise) {
             requestAnimationFrame(() => {
                 const rect = triggerEl.getBoundingClientRect();
                 const popRect = pop.getBoundingClientRect();
+
                 let left = rect.left - 4;
-                if (left + popRect.width > window.innerWidth) left = window.innerWidth - popRect.width - 15;
+                const popW = popRect.width;
+                const winW = window.innerWidth;
+
+                if (left + popW > winW) left = winW - popW - 15;
                 pop.style.left = Math.max(10, left) + 'px';
                 pop.style.top = (rect.bottom + 6) + 'px';
+
                 pop.classList.add('pk-show');
                 triggerEl.classList.add('pk-active');
                 triggerEl.innerHTML = CONF.crumbIcons.down;
@@ -12275,8 +13127,9 @@ async function openManager(initialCache, preloadPromise) {
         if (S.historyMode) {
             UI.crumb.style.pointerEvents = 'none';
             UI.crumb.innerHTML = `
-                <div style="display:flex; align-items:center; color:var(--pk-fg); margin-left: -6px;">
+                <div style="display:flex; align-items:baseline; color:var(--pk-fg); margin-left: -6px;">
                     <span style="font-weight:bold; font-size:15px; cursor:default;">${L.btn_nav_history}</span>
+                    <span style="color:#888; font-size:11px; margin-left:10px; cursor:default; font-weight:normal; opacity:0.8;">${L.history_notice}</span>
                 </div>
             `;
             return;
@@ -12294,8 +13147,7 @@ async function openManager(initialCache, preloadPromise) {
         }
         UI.crumb.style.pointerEvents = 'auto';
 
-        const svgStyle = 'width:14px;height:14px;vertical-align:-2px;margin-right:4px;display:inline-block;';
-
+        const svgStyle = 'width:14px;height:14px;vertical-align:-4px;margin-right:4px;display:inline-block;';
         const ICON_HOME = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="${svgStyle}"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
         const ICON_SEARCH = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="${svgStyle}"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
         const ICON_TRASH = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="${svgStyle}"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
@@ -12328,11 +13180,13 @@ async function openManager(initialCache, preloadPromise) {
             }
 
             s.dataset.id = (p.id === '' || !p.id) ? 'root' : p.id;
-
             s.className = i === S.path.length - 1 ? 'act' : '';
 
-            s.onclick = () => {
-                if (i !== S.path.length - 1 && !S.loading) {
+            s.style.cssText = "display:inline-flex; align-items:center; padding:2px 6px; border-radius:4px; flex-shrink:0; transition:background 0.2s; white-space:nowrap; margin: auto 2px;";
+
+            s.onclick = (e) => {
+                e.stopPropagation();
+                if (i !== S.path.length - 1) {
                     if (i < S.path.length - 1) {
                         S.latestChildId = S.path[i + 1].id;
                     }
@@ -12364,7 +13218,7 @@ async function openManager(initialCache, preloadPromise) {
         UI.crumb.onwheel = (e) => {
             e.preventDefault();
 
-            const existingPop = el.querySelector('.pk-crumb-pop');
+            const existingPop = document.getElementById('pk-main-crumb-pop');
             if (existingPop) {
                 existingPop.remove();
                 UI.crumb.querySelectorAll('.pk-crumb-sep').forEach(sep => {
@@ -12416,12 +13270,18 @@ async function openManager(initialCache, preloadPromise) {
             if (player) { player.remove(); return; }
             const openModal = document.querySelector('.pk-modal-ov');
             if (openModal) { openModal.remove(); return; }
-            if (UI.ctx.style.display === 'block') UI.ctx.style.display = 'none';
-            else if (UI.win.classList.contains('pk-maximized')) {
+            if (UI.ctx.style.display === 'block') { UI.ctx.style.display = 'none'; return; }
+
+            const isAtRoot = S.path.length === 1 || (S.path.length === 2 && S.path[1].id === 'virtual_search_root');
+
+            if (S.sel.size > 0) {
+                S.sel.clear();
+                refresh();
+            } else if (UI.win.classList.contains('pk-maximized')) {
                 if (btnMax) btnMax.click();
+            } else if (isAtRoot) {
+                UI.btnClose.click();
             }
-            else if (S.sel.size > 0) { S.sel.clear(); refresh(); }
-            else if (S.path.length === 1) el.style.display = 'none';
             return;
         }
 
@@ -12587,9 +13447,14 @@ async function openManager(initialCache, preloadPromise) {
         }
 
         if (e.altKey) {
+            if (S.offlineMode && (e.key === 'c' || e.key === 'C')) {
+                e.preventDefault();
+                if (UI.btnCopyLinkOffline && !UI.btnCopyLinkOffline.disabled) UI.btnCopyLinkOffline.click();
+                return;
+            }
             if (e.key === 's' || e.key === 'S') {
                 e.preventDefault();
-                UI.btnSettings.click();
+                openSettingsModal();
             }
             if (e.key === 'g' || e.key === 'G') {
                 e.preventDefault();
@@ -12605,7 +13470,10 @@ async function openManager(initialCache, preloadPromise) {
             }
             if (e.key === 'u' || e.key === 'U') {
                 e.preventDefault();
-                if (!S.trashMode && !S.shareMode && !S.offlineMode && !S.uploadMode && !S.historyMode && !UI.btnUnzip.disabled) UI.btnUnzip.click();
+                const cur = S.path[S.path.length - 1];
+                const isRoot = S.path.length === 1;
+                const isUnzipBlocked = S.trashMode || S.shareMode || S.offlineMode || S.uploadMode || S.historyMode || S.isFlattened || S.dupMode || (S.analyzeMode && cur.id === 'analyze_root') || (cur.id === 'virtual_search_root') || (S.recentMode && isRoot) || (S.starredMode && isRoot);
+                if (!isUnzipBlocked && !UI.btnUnzip.disabled) UI.btnUnzip.click();
             }
 
             if (e.key === 'd' || e.key === 'D') {
@@ -12770,10 +13638,9 @@ async function openManager(initialCache, preloadPromise) {
                 const sz = parseInt(item.size || 0);
 
                 if (item.kind === 'drive#folder') {
+                    hasSelFolder = true;
                     if (S.analyzeMode) {
                         selSize += sz;
-                    } else {
-                        hasSelFolder = true;
                     }
                 } else {
                     selSize += sz;
@@ -12857,12 +13724,18 @@ async function openManager(initialCache, preloadPromise) {
                 if (UI.btnUpStart) UI.btnUpStart.disabled = true;
                 if (UI.btnUpDel) UI.btnUpDel.disabled = true;
             }
+            if (UI.btnUpClearAll) UI.btnUpClearAll.disabled = (S.uploadTasks.length === 0);
         }
 
         if (UI.btnRetryTask) {
             UI.btnRetryTask.style.display = isOffline ? 'inline-flex' : 'none';
             const hasFailedTask = Array.from(S.sel).some(id => S.itemMap.get(id)?.phase === 'PHASE_TYPE_ERROR');
             UI.btnRetryTask.disabled = !hasFailedTask;
+        }
+
+        if (UI.btnCopyLinkOffline) {
+            UI.btnCopyLinkOffline.style.display = isOffline ? 'inline-flex' : 'none';
+            UI.btnCopyLinkOffline.disabled = !hasSel;
         }
 
         UI.btnCopy.style.display = (isShare || isOffline || isHistory || isUpload) ? 'none' : 'inline-flex';
@@ -12905,20 +13778,34 @@ async function openManager(initialCache, preloadPromise) {
             else UI.btnNewFolder.style.cursor = '';
         }
         UI.btnDel.disabled = !hasSel || (n === 1 && hasProtectedItem);
-        UI.btnRename.disabled = n !== 1 || hasProtectedItem;
+
+        const isStandardRenameView = !(isShare || isOffline || isHistory || isUpload);
+        if (isStandardRenameView) {
+            if (n <= 1) {
+                UI.btnRename.style.display = 'inline-flex';
+                UI.btnBulkRename.style.display = 'none';
+                UI.btnRename.disabled = (n === 0) || hasProtectedItem;
+            } else {
+                UI.btnRename.style.display = 'none';
+                UI.btnBulkRename.style.display = 'inline-flex';
+                UI.btnBulkRename.disabled = false;
+            }
+        }
 
         if (UI.btnRestore) UI.btnRestore.disabled = !hasSel;
         if (UI.btnDelForever) UI.btnDelForever.disabled = !hasSel;
-        UI.btnBulkRename.disabled = n < 2;
 
         if (UI.btnPrune) {
             const isHiddenMode = S.isFlattened || S.dupMode || S.shareMode || S.offlineMode || S.uploadMode || S.historyMode;
             UI.btnPrune.style.display = isHiddenMode ? 'none' : 'inline-flex';
-            UI.btnPrune.disabled = !hasSelFolder;
+            UI.btnPrune.disabled = isHiddenMode || !hasSelFolder;
         }
 
         if (UI.btnUnzip) {
-            UI.btnUnzip.style.display = (S.shareMode || S.offlineMode || S.uploadMode || S.historyMode) ? 'none' : 'inline-flex';
+            const cur = S.path[S.path.length - 1];
+            const isRoot = S.path.length === 1;
+            const isUnzipHidden = S.shareMode || S.offlineMode || S.uploadMode || S.historyMode || S.isFlattened || S.dupMode || (S.analyzeMode && cur.id === 'analyze_root') || (cur.id === 'virtual_search_root') || (S.recentMode && isRoot) || (S.starredMode && isRoot);
+            UI.btnUnzip.style.display = isUnzipHidden ? 'none' : 'inline-flex';
             const isArchive = (it) => {
                 if (!it || it.kind === 'drive#folder') return false;
                 const n = (it.name || '').toLowerCase();
@@ -13144,7 +14031,7 @@ async function openManager(initialCache, preloadPromise) {
 
                 const ov = document.createElement('div');
                 ov.className = 'pk-link-export-ov';
-                ov.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.9);backdrop-filter:blur(5px);z-index:2147483647;display:flex;align-items:center;justify-content:center;";
+                ov.style.cssText = "position:absolute; inset:0; background:rgba(0,0,0,0.9); backdrop-filter:blur(5px); z-index:2147483647; display:flex; align-items:center; justify-content:center; border-radius:inherit;";
 
                 const m = document.createElement('div');
                 m.className = 'pk-modal';
@@ -13456,8 +14343,9 @@ async function openManager(initialCache, preloadPromise) {
                     };
                     el.onmousemove = (e) => {
                         if (pTip.style.display === 'block') {
-                            pTip.style.left = (e.clientX + 15) + 'px';
-                            pTip.style.top = (e.clientY - 40) + 'px';
+                            const tW = pTip.offsetWidth || 150;
+                            pTip.style.left = (e.clientX - (tW / 2)) + 'px';
+                            pTip.style.top = (e.clientY - 60) + 'px';
                         }
                     };
                     el.onmouseleave = () => { if (pTip) pTip.style.display = 'none'; };
@@ -13828,8 +14716,6 @@ async function openManager(initialCache, preloadPromise) {
         .pk-p-side-nav svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 5px rgba(0,0,0,0.2)); }
         .pk-p-side-nav.L svg { margin-left: -2px; }
         .pk-p-side-nav.R svg { margin-left: 2px; }
-
-
         .pk-p-sub-pop { position: absolute; bottom: 48px; right: 0; background: #222; border-radius: 8px; padding: 16px; width: 340px; height: 380px; color: #eee; font-size: 12px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); border: 1px solid #333; display: none; flex-direction: column; cursor: default; z-index: 30; font-family: sans-serif; box-sizing: border-box; }
         .pk-p-sub-pop::after { content: ""; position: absolute; top: 100%; left: 0; right: 0; height: 12px; background: transparent; }
         .pk-p-menu-con:hover .pk-p-sub-pop, .pk-p-sub-pop:hover { display: flex; }
@@ -13861,8 +14747,6 @@ async function openManager(initialCache, preloadPromise) {
         .pk-sub-label { color: #aaa; white-space: nowrap; flex-shrink: 0; margin-right: 10px; }
         .pk-sub-btn-group { display: flex; gap: 8px; margin-top: 4px; }
         .pk-sub-btn { flex: 1; background: #333; border: 1px solid #444; color: #ddd; padding: 6px 4px; border-radius: 4px; cursor: pointer; text-align: center; transition: background 0.2s; font-size: 11.5px; line-height: 1.2; display: flex; align-items: center; justify-content: center; }
-
-
         .pk-sub-btn:hover { background: #444; }
         .pk-sub-btn:active { background: #555; }
         .pk-sub-ctrl { display: flex; align-items: center; background: #333; border-radius: 4px; border: 1px solid #444; }
@@ -13873,36 +14757,39 @@ async function openManager(initialCache, preloadPromise) {
         .pk-sub-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; cursor: pointer; }
         .pk-sub-check { width: 14px; height: 14px; accent-color: #4aa1ff; cursor: pointer; }
         video::cue { background: rgba(0,0,0,0.5); color: white; font-family: sans-serif; }
-        #pk_p_box { position: absolute !important; top: 10vh !important; left: 50% !important; transform: translateX(-50%) !important; width: 90vw !important; height: 80vh !important; background: #000; border-radius: 0 !important; overflow: visible !important; transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
-        #pk_p_box.plist-active { height: calc(80vh - 84px) !important; }
-        #pk_video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 10; transition: none; }
-        .pk-player-controls { position: absolute; bottom: 0; left: 0; right: 0; z-index: 80 !important; transition: none; }
-        .pk-p-prog-wrap { position: absolute; bottom: 64px; left: 20px; right: 20px; z-index: 60 !important; display: flex; align-items: center; gap: 16px; transition: none; pointer-events: none; }
-        .pk-p-prog-wrap > * { pointer-events: auto; }
-        #pk_p_box.pk-tab-hover:not(.pk-is-seeking) .pk-player-controls, #pk_p_box.pk-tab-hover:not(.pk-is-seeking) .pk-p-prog-wrap { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.2s ease; }
-        .pk-player-progress-container { position: relative !important; bottom: auto !important; left: auto !important; right: auto !important; width: auto !important; flex: 1; z-index: auto !important; }
-        .pk-p-side-nav, .pk-p-center-play, .pk-p-seek-indicator { top: 50%; transition: top 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, transform 0.2s ease !important; }
-        #pk_p_plist { position: absolute; top: 100%; left: 0; right: 0; z-index: 95 !important; height: 84px; opacity: 1; pointer-events: none; }
-        .pk-p-plist-tab { pointer-events: auto !important; margin-bottom: -1px !important; z-index: 90 !important; }
-        .pk-p-plist-strip { opacity: 0; pointer-events: none !important; transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        #pk_p_box.plist-active .pk-p-plist-strip { opacity: 1; pointer-events: auto !important; }
-        .pk-p-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 22; pointer-events: none; }
-        #pk_p_poster { z-index: 21 !important; transition: opacity 0.4s ease; }
-        .pk-transcode-mask { position: absolute; inset: 0; z-index: 20; background: #0c0c0c; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ddd; font-size: 14px; }
-        .pk-tc-icon { width: 50px; height: 50px; margin-bottom: 20px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--pk-pri); border-radius: 50%; animation: spin 1s linear infinite; }
-        .pk-tc-btn { margin-top: 20px; padding: 6px 16px; border: 1px solid #444; border-radius: 20px; cursor: pointer; font-size: 12px; transition: all 0.2s; }
-        .pk-tc-btn:hover { background: #333; border-color: #666; color: #fff; }
-        #pk_p_preview { position: absolute; bottom: 85px; left: 0; display: flex; flex-direction: column; align-items: center; z-index: 100; pointer-events: none; opacity: 0; transform: translateX(-50%) scale(0.95); transform-origin: bottom center; transition: opacity 0.15s ease, transform 0.15s ease; will-change: transform, opacity, left; }
-        #pk_p_preview.show { opacity: 1; transform: translateX(-50%) scale(1); }
-        .pk-prev-img-box { position: relative; background: #000; border: 2px solid #fff; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; display: none; min-width: 120px; min-height: 68px; transition: width 0.1s, height 0.1s; }
-        .pk-prev-img-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.1s ease-out; }
-        .pk-prev-img-box img.active { opacity: 1; }
-        .pk-prev-time { margin-top: 6px; background: rgba(0,0,0,0.85); color: #fff; font-size: 12px; font-weight: 600; text-align: center; padding: 4px 8px; border-radius: 4px; font-family: "Segoe UI", Roboto, monospace; box-shadow: 0 2px 8px rgba(0,0,0,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-        `;
-        document.head.appendChild(styleEl);
+    #pk_p_box { position: absolute !important; top: 10% !important; left: 50% !important; transform: translateX(-50%) !important; width: 90% !important; height: 80% !important; background: #000; border-radius: 0 !important; overflow: visible !important; transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+    #pk_p_box.plist-active { height: calc(80% - 84px) !important; }
+    #pk_p_box:fullscreen, #pk_p_box:-webkit-full-screen, #pk_p_box:-moz-full-screen { width: 100% !important; height: 100% !important; top: 0 !important; left: 0 !important; transform: none !important; margin: 0 !important; border-radius: 0 !important; overflow: hidden !important; }
+    #pk_video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 10; transition: none; }
+    .pk-player-controls { position: absolute; bottom: 0; left: 0; right: 0; z-index: 80 !important; transition: none; }
+    .pk-p-prog-wrap { position: absolute; bottom: 64px; left: 20px; right: 20px; z-index: 60 !important; display: flex; align-items: center; gap: 16px; transition: none; pointer-events: none; }
+    .pk-p-prog-wrap > * { pointer-events: auto; }
+    #pk_p_box.pk-tab-hover:not(.pk-is-seeking) .pk-player-controls, #pk_p_box.pk-tab-hover:not(.pk-is-seeking) .pk-p-prog-wrap { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.2s ease; }
+    .pk-player-progress-container { position: relative !important; bottom: auto !important; left: auto !important; right: auto !important; width: auto !important; flex: 1; z-index: auto !important; }
+    .pk-p-side-nav, .pk-p-center-play, .pk-p-seek-indicator { top: 50%; transition: top 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, transform 0.2s ease !important; }
+    #pk_p_plist { position: absolute; top: 100%; left: 0; right: 0; z-index: 95 !important; height: 84px; opacity: 1; pointer-events: none; }
+    .pk-p-plist-tab { pointer-events: auto !important; margin-bottom: -1px !important; z-index: 90 !important; }
+    .pk-p-plist-strip { opacity: 0; pointer-events: none !important; transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+    #pk_p_box.plist-active .pk-p-plist-strip { opacity: 1; pointer-events: auto !important; }
+    .pk-p-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 35; pointer-events: none; }
+    #pk_p_poster { z-index: 25 !important; transition: opacity 0.4s ease; width: 100% !important; height: 100% !important; background: #000; }
+    .pk-player-box.pk-v-started #pk_p_poster { pointer-events: none; }
+    .pk-transcode-mask { position: absolute; inset: 0; z-index: 30; background: #0c0c0c; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ddd; font-size: 14px; }
+    .pk-tc-icon { width: 50px; height: 50px; margin-bottom: 20px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--pk-pri); border-radius: 50%; animation: spin 1s linear infinite; }
+    .pk-tc-btn { margin-top: 20px; padding: 6px 16px; border: 1px solid #444; border-radius: 20px; cursor: pointer; font-size: 12px; transition: all 0.2s; }
+    .pk-tc-btn:hover { background: #333; border-color: #666; color: #fff; }
+    #pk_p_preview { position: absolute; bottom: 85px; left: 0; display: flex; flex-direction: column; align-items: center; z-index: 100; pointer-events: none; opacity: 0; transform: translateX(-50%) scale(0.95); transform-origin: bottom center; transition: opacity 0.15s ease, transform 0.15s ease; will-change: transform, opacity, left; }
+    #pk_p_preview.show { opacity: 1; transform: translateX(-50%) scale(1); }
+    .pk-prev-img-box { position: relative; background: #000; border: 2px solid #fff; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; display: none; min-width: 120px; min-height: 68px; transition: width 0.1s, height 0.1s; }
+    .pk-prev-img-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.1s ease-out; }
+    .pk-prev-img-box img.active { opacity: 1; }
+    .pk-prev-time { margin-top: 6px; background: rgba(0,0,0,0.85); color: #fff; font-size: 12px; font-weight: 600; text-align: center; padding: 4px 8px; border-radius: 4px; font-family: "Segoe UI", Roboto, monospace; box-shadow: 0 2px 8px rgba(0,0,0,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    `;
 
-        d.innerHTML = `
-            <div class="pk-player-box" id="pk_p_box" style="width: 90vw; max-width: 1600px; min-width: 480px; height: 80vh; border-radius: 0; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
+    document.head.appendChild(styleEl);
+
+    d.innerHTML = `
+        <div class="pk-player-box" id="pk_p_box" style="width: 90%; max-width: calc(1600px / var(--pk-zoom, 1)); min-width: 480px; height: 80%; border-radius: 0; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
                 <div id="pk_p_preview">
                     <div class="pk-prev-img-box" id="pk_p_img_box"></div>
                     <div class="pk-prev-time">00:00</div>
@@ -14151,7 +15038,6 @@ async function openManager(initialCache, preloadPromise) {
                     <div class="pk-p-btn" id="pk_p_full" data-pk-tip="${L.tip_full_screen}">${mkSvg(icons.full)}</div>
                 </div>
             </div>
-            <div class="pk-p-plist-tip" id="pk_p_plist_tip" style="z-index: 2147483647;"></div>
         `;
         const v = d.querySelector('#pk_video');
         const box = d.querySelector('#pk_p_box');
@@ -14175,7 +15061,13 @@ async function openManager(initialCache, preloadPromise) {
             e.preventDefault();
             pScroll.scrollBy({ left: e.deltaY > 0 ? 300 : -300, behavior: 'smooth' });
         };
-        const pTip = d.querySelector('#pk_p_plist_tip');
+        let pTip = document.getElementById('pk_p_plist_tip_global');
+        if (!pTip) {
+            pTip = document.createElement('div');
+            pTip.id = 'pk_p_plist_tip_global';
+            pTip.className = 'pk-p-plist-tip';
+            document.body.appendChild(pTip);
+        }
 
         d.querySelector('#pk_p_side_L').onclick = (e) => {
             e.stopPropagation();
@@ -14218,8 +15110,9 @@ async function openManager(initialCache, preloadPromise) {
             };
             el.onmousemove = (e) => {
                 if (pTip.style.display === 'block') {
-                    pTip.style.left = (e.clientX + 15) + 'px';
-                    pTip.style.top = (e.clientY - 40) + 'px';
+                    const tW = pTip.offsetWidth || 150;
+                    pTip.style.left = (e.clientX - (tW / 2)) + 'px';
+                    pTip.style.top = (e.clientY - 60) + 'px';
                 }
             };
             el.onmouseleave = () => pTip.style.display = 'none';
@@ -14501,10 +15394,13 @@ async function openManager(initialCache, preloadPromise) {
                 const pos = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
                 const targetTime = pos * v.duration;
                 if (!isFinite(targetTime)) return;
-                let left = clientX - boxRect.left;
+
+                const scale = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
+                let left = (clientX - boxRect.left) / scale;
                 const halfWidth = (imgBox.offsetWidth / 2) || 80;
                 const minX = halfWidth + 10;
-                const maxX = boxRect.width - halfWidth - 10;
+                const maxX = (boxRect.width / scale) - halfWidth - 10;
+
                 left = Math.max(minX, Math.min(maxX, left));
                 previewBox.style.left = `${left}px`;
                 previewTime.textContent = fmtT(targetTime);
@@ -14648,6 +15544,7 @@ async function openManager(initialCache, preloadPromise) {
         v.addEventListener('pause', updateState);
 
         const markStarted = () => {
+            if (isPlayerDestroyed) return;
             if (box) {
                 box.classList.add('pk-v-started');
                 stopSpinner();
@@ -15957,6 +16854,11 @@ async function openManager(initialCache, preloadPromise) {
         let transformState = { rotate: 0, flipH: 1, flipV: 1, ratio: 'default' };
 
         const applyTransform = () => {
+            if (document.pictureInPictureElement === v) {
+                v.style.transform = 'none';
+                return;
+            }
+
             if (transformState.ratio === 'default') {
                 v.style.objectFit = 'contain';
                 v.style.width = '100%';
@@ -16064,10 +16966,12 @@ async function openManager(initialCache, preloadPromise) {
         v.addEventListener('play', () => hasTriggeredEnd = false);
         v.addEventListener('seeking', () => hasTriggeredEnd = false);
 
+        v.addEventListener('enterpictureinpicture', applyTransform);
         v.addEventListener('leavepictureinpicture', () => {
             if (typeof isSwitching !== 'undefined' && !isSwitching) {
                 isPiPDesired = false;
             }
+            applyTransform();
         });
 
         v.onended = () => {
@@ -16336,6 +17240,7 @@ async function openManager(initialCache, preloadPromise) {
             next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
             rotate: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>',
             flipH: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7l5 5-5 5M7 17l-5-5 5-5M2 12h20"/></svg>',
+            flipV: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l5-5 5 5M17 17l-5 5-5-5M12 2v20"/></svg>',
             searchlens: `<svg viewBox="0 0 24 24" fill="currentColor"><g transform="scale(0.0234375)"><path d="M107.739429 580.388571a365.860571 365.860571 0 0 0 648.630857 85.504L635.611429 532.48a36.571429 36.571429 0 0 0-56.612572 2.852571l-39.131428 53.101715a109.714286 109.714286 0 0 1-167.716572 10.605714L235.008 455.387429a36.571429 36.571429 0 0 0-58.002286 6.729142l-69.266285 118.272z m-19.894858-110.738285l26.038858-44.470857a109.714286 109.714286 0 0 1 174.08-20.333715l137.216 143.798857a36.571429 36.571429 0 0 0 55.881142-3.584l39.131429-53.101714a109.714286 109.714286 0 0 1 169.691429-8.484571l102.985142 113.810285A365.714286 365.714286 0 1 0 87.844571 469.577143z m658.139429 318.317714a438.857143 438.857143 0 1 1 50.029714-52.736c1.316571 1.024 2.56 2.194286 3.803429 3.437714l206.921143 206.848a36.571429 36.571429 0 0 1-51.712 51.712l-206.921143-206.848a37.083429 37.083429 0 0 1-2.194286-2.413714zM526.628571 314.514286a73.142857 73.142857 0 1 1 0-146.285715 73.142857 73.142857 0 0 1 0 146.285715z" fill="currentColor"></path></g></svg>`,
             leftArr: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6 L9 12 L15 18"/></svg>`,
             rightArr: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6 L15 12 L9 18"/></svg>`,
@@ -16362,9 +17267,10 @@ async function openManager(initialCache, preloadPromise) {
 
         const listFixStyle = `<style>
         #pk_img_box { border-radius: 0 !important; }
-        #pk_img_plist { pointer-events: none !important; left: 0 !important; right: 0 !important; width: 100% !important; }
-        #pk_img_plist .pk-p-plist-strip { display: none !important; opacity: 0 !important; position: relative !important; background: rgba(20, 20, 20, 0.98) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; border-top: 1px solid rgba(255,255,255,0.1); border-radius: 0 !important; }
+        #pk_img_plist { pointer-events: none !important; left: 0 !important; right: 0 !important; width: 100% !important; margin: 0 !important; }
+        #pk_img_plist .pk-p-plist-strip { display: none !important; opacity: 0 !important; position: relative !important; background: rgba(20, 20, 20, 0.98) !important; backdrop-filter: blur(15px) !important; -webkit-backdrop-filter: blur(15px) !important; border-top: 1px solid rgba(255,255,255,0.1); border-radius: 0 !important; width: 100% !important; }
         .pk-img-box.full #pk_img_plist .pk-p-plist-strip { border-radius: 0 !important; }
+        .pk-img-box.full.plist-active { height: calc(100% - 84px) !important; }
         .pk-img-box.plist-active #pk_img_plist .pk-p-plist-strip { pointer-events: auto !important; }
         .pk-img-nav { position: absolute !important; top: 50% !important; transform: translateY(-50%) translateZ(0) !important; width: 60px !important; height: 60px !important; background: rgba(0, 0, 0, 0.3) !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #fff !important; cursor: pointer !important; z-index: 40 !important; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important; opacity: 0 !important; border-radius: 50% !important; border: 1px solid rgba(255, 255, 255, 0.18) !important; pointer-events: auto !important; box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important; }
         .pk-img-box:hover .pk-img-nav { opacity: 1 !important; }
@@ -16389,7 +17295,7 @@ async function openManager(initialCache, preloadPromise) {
         .pk-img-view-port.pk-long-image-mode::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
         .pk-img-view-port.pk-long-image-mode::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
         .pk-img-view-port.pk-long-image-mode::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
-        .pk-long-image-mode img.pk-img-obj { width: 100% !important; max-width: 1200px !important; height: auto !important; object-fit: cover !important; margin: 0 auto !important; cursor: default !important; transform: none !important; }
+        .pk-long-image-mode img.pk-img-obj { width: 100% !important; max-width: 1200px !important; height: auto !important; object-fit: cover !important; margin: 0 auto !important; cursor: zoom-out !important; transform: none !important; } .pk-img-view-port.pk-fit-mode { overflow-y: hidden !important; align-items: center; } .pk-fit-mode img.pk-img-obj { height: 100% !important; object-fit: contain !important; cursor: zoom-in !important; }
         </style>`;
 
         d.innerHTML = listFixStyle + `
@@ -16398,6 +17304,7 @@ async function openManager(initialCache, preloadPromise) {
                     <div class="pk-img-title" id="pk_img_title"></div>
                     <div class="pk-img-actions">
                         <div class="pk-img-btn" id="pk_img_search" data-pk-tip="${L.btn_img_search}" style="display:none;">${icons.searchlens}</div>
+                        <div class="pk-img-btn" id="pk_img_flip_v" data-pk-tip="${L.tip_flip_v}">${icons.flipV}</div>
                         <div class="pk-img-btn" id="pk_img_mirror" data-pk-tip="${L.tip_mirror}">${icons.flipH}</div>
                         <div class="pk-img-btn" id="pk_img_rot" data-pk-tip="${L.tip_rotate}">${icons.rotate}</div>
                         <div class="pk-img-btn" id="pk_img_full" data-pk-tip="${L.tip_maximize}">${icons.full}</div>
@@ -16420,7 +17327,6 @@ async function openManager(initialCache, preloadPromise) {
             </div>
         </div>
     </div>
-    <div class="pk-p-plist-tip" id="pk_img_plist_tip" style="z-index: 2147483647;"></div>
 `;
         document.body.appendChild(d);
 
@@ -16432,22 +17338,24 @@ async function openManager(initialCache, preloadPromise) {
         const btnFull = d.querySelector('#pk_img_full');
         const btnRot = d.querySelector('#pk_img_rot');
         const btnMirror = d.querySelector('#pk_img_mirror');
+        const btnFlipV = d.querySelector('#pk_img_flip_v');
         const btnSearch = d.querySelector('#pk_img_search');
 
-        let scale = 1, transX = 0, transY = 0, rotation = 0, flipH = 1, isDrag = false, startX, startY;
+        let scale = 1, transX = 0, transY = 0, rotation = 0, flipH = 1, flipV = 1, isDrag = false, startX, startY;
         let isLongImageMode = false;
 
         const updateTransform = () => {
             if (isLongImageMode) return;
-            img.style.transform = `translate(${transX}px, ${transY}px) scale(${scale}) rotate(${rotation}deg) scaleX(${flipH})`;
+            img.style.transform = `translate(${transX}px, ${transY}px) scale(${scale}) rotate(${rotation}deg) scaleX(${flipH}) scaleY(${flipV})`;
         };
         const resetView = (keepOrientation = false) => {
             scale = 1; transX = 0; transY = 0;
             if (!keepOrientation) {
-                rotation = 0; flipH = 1;
+                rotation = 0; flipH = 1; flipV = 1;
             }
             isLongImageMode = false;
             viewport.classList.remove('pk-long-image-mode');
+            viewport.classList.remove('pk-fit-mode');
             if(viewport.scrollTop) viewport.scrollTop = 0;
 
             img.style.transition = 'none';
@@ -16458,6 +17366,7 @@ async function openManager(initialCache, preloadPromise) {
             img.style.cursor = 'grab';
             if (btnRot) btnRot.style.display = 'flex';
             if (btnMirror) btnMirror.style.display = 'flex';
+            if (btnFlipV) btnFlipV.style.display = 'flex';
             updateTransform();
 
             requestAnimationFrame(() => {
@@ -16506,6 +17415,7 @@ async function openManager(initialCache, preloadPromise) {
                         img.style.transform = 'none';
                         if (btnRot) btnRot.style.display = 'none';
                         if (btnMirror) btnMirror.style.display = 'none';
+                        if (btnFlipV) btnFlipV.style.display = 'none';
                     }
                 }
                 img.style.opacity = '1';
@@ -16606,19 +17516,26 @@ async function openManager(initialCache, preloadPromise) {
             updateTransform();
         });
 
+        img.onclick = () => {
+            if (isLongImageMode) {
+                viewport.classList.toggle('pk-fit-mode');
+            }
+        };
         img.addEventListener('mousedown', (e) => {
-            if (e.button !== 0 || isLongImageMode) return;
+            if (e.button !== 0 || (isLongImageMode && !viewport.classList.contains('pk-fit-mode'))) return;
             e.preventDefault();
+            const z = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
             isDrag = true;
             img.style.cursor = 'grabbing';
-            startX = e.clientX - transX;
-            startY = e.clientY - transY;
+            startX = e.clientX - transX * scale * z;
+            startY = e.clientY - transY * scale * z;
         });
 
         document.addEventListener('mousemove', (e) => {
             if (!isDrag || isLongImageMode) return;
-            let tx = e.clientX - startX;
-            let ty = e.clientY - startY;
+            const z = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
+            let tx = (e.clientX - startX) / (scale * z);
+            let ty = (e.clientY - startY) / (scale * z);
 
             if (img.naturalWidth && viewport) {
                 const vw = viewport.clientWidth;
@@ -16626,19 +17543,14 @@ async function openManager(initialCache, preloadPromise) {
                 const iw = img.naturalWidth;
                 const ih = img.naturalHeight;
 
-                const ratio = Math.min(vw / iw, vh / ih);
-                const baseW = iw * ratio;
-                const baseH = ih * ratio;
+                const baseRatio = Math.min(vw / iw, vh / ih);
+                let curW = iw * baseRatio * scale;
+                let curH = ih * baseRatio * scale;
 
-                let curW = baseW * scale;
-                let curH = baseH * scale;
+                if (Math.abs(rotation % 180) === 90) [curW, curH] = [curH, curW];
 
-                if (Math.abs(rotation % 180) === 90) {
-                    [curW, curH] = [curH, curW];
-                }
-
-                const limitX = curW > vw ? (curW - vw) / 2 : 0;
-                const limitY = curH > vh ? (curH - vh) / 2 : 0;
+                const limitX = curW > vw ? (curW - vw) / (2 * scale) : 0;
+                const limitY = curH > vh ? (curH - vh) / (2 * scale) : 0;
 
                 tx = Math.max(-limitX, Math.min(limitX, tx));
                 ty = Math.max(-limitY, Math.min(limitY, ty));
@@ -16717,11 +17629,31 @@ async function openManager(initialCache, preloadPromise) {
                 });
             };
         }
+        if (btnFlipV) {
+            btnFlipV.onclick = (e) => {
+                e.stopPropagation();
+                if (isLongImageMode) return;
+                flipV *= -1;
+                img.style.transition = 'none';
+                updateTransform();
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        img.style.transition = '';
+                    });
+                });
+            };
+        }
 
         const plist = d.querySelector('#pk_img_plist');
         const pTab = d.querySelector('#pk_img_plist_tab');
         const pScroll = d.querySelector('#pk_img_plist_scroll');
-        const pTip = d.querySelector('#pk_img_plist_tip');
+        let pTip = document.getElementById('pk_p_plist_tip_global');
+        if (!pTip) {
+            pTip = document.createElement('div');
+            pTip.id = 'pk_p_plist_tip_global';
+            pTip.className = 'pk-p-plist-tip';
+            document.body.appendChild(pTip);
+        }
         const pTxt = d.querySelector('#pk_img_idx_txt');
 
         const updateImgPlistUI = (scrollType = 'smooth') => {
@@ -16749,8 +17681,9 @@ async function openManager(initialCache, preloadPromise) {
 
                 el.onmousemove = (e) => {
                     if (pTip.style.display === 'block') {
-                        pTip.style.left = (e.clientX + 15) + 'px';
-                        pTip.style.top = (e.clientY - 40) + 'px';
+                        const tW = pTip.offsetWidth || 150;
+                        pTip.style.left = (e.clientX - (tW / 2)) + 'px';
+                        pTip.style.top = (e.clientY - 60) + 'px';
                     }
                 };
 
@@ -16907,6 +17840,10 @@ async function openManager(initialCache, preloadPromise) {
                 e.preventDefault();
                 if (!isLongImageMode && btnMirror) btnMirror.click();
             }
+            else if (e.key === 'v' || e.key === 'V') {
+                e.preventDefault();
+                if (!isLongImageMode && btnFlipV) btnFlipV.click();
+            }
         });
 
         try { await loadCurrent(); } catch (e) { console.error(e); } finally { isImageOpening = false; }
@@ -16943,7 +17880,7 @@ async function openManager(initialCache, preloadPromise) {
 
         const ov = document.createElement('div');
         ov.className = 'pk-search-running-mask';
-        ov.style.cssText = 'position:fixed; inset:0; z-index:2147483647; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:20px;';
+        ov.style.cssText = 'position:absolute; inset:0; z-index:2147483647; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:20px; border-radius:inherit;';
         ov.innerHTML = `
         <div class="pk-spin-lg" style="border-color:rgba(255,255,255,0.3); border-top-color:#fff;"></div>
         <div style="color:#fff; font-size:14px; font-weight:bold; text-shadow:0 2px 4px rgba(0,0,0,0.5);">${L.str_processing}</div>
@@ -17303,7 +18240,8 @@ async function openManager(initialCache, preloadPromise) {
         image: ['jpg','jpeg','png','gif','bmp','webp','svg','tif','tiff','ico','heic','heif','raw','cr2','nef','arw','dng','orf','avif','psd','ai','eps','jfif','jpe'],
         document: ['txt','html','pdf','pptx','chm','docx','xlsx','htm','doc','dwg','mdb','ppt','xls','rtf','odt','ods','odp','epub','mobi','azw3','djvu','cbz','cbr','md','log','csv','xml','json'],
         software: ['apk','exe','ipa','dmg','rpm','deb','msi','pkg','xapk','apks','aab','jar','bin','sh','bat','cmd'],
-        archive: ['zip','rar','7z','tar','gz','iso','cab','bz2','xz','tgz','wim','esd','img','zst','lzh']
+        archive: ['zip','rar','7z','tar','gz','iso','cab','bz2','xz','tgz','wim','esd','img','zst','lzh'],
+        torrent: ['torrent']
     };
 
     const FILTER_NAMES = {
@@ -17313,6 +18251,7 @@ async function openManager(initialCache, preloadPromise) {
         document: L.cat_document,
         software: L.cat_software,
         archive: L.cat_archive,
+        torrent: L.cat_torrent,
         other: L.cat_other
     };
 
@@ -17324,6 +18263,7 @@ async function openManager(initialCache, preloadPromise) {
         document: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
         software: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
         archive: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4v4h-4z"/></svg>`,
+        torrent: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/><path d="M9 14v4"/><path d="M12 12v6"/><path d="M15 15v3"/></svg>`,
         other: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`
     };
 
@@ -17384,7 +18324,8 @@ async function openManager(initialCache, preloadPromise) {
         pop.style.cssText = `
             position: absolute; background: var(--pk-bg); border: 1px solid var(--pk-bd);
             border-radius: 8px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            z-index: 2147483647; width: 340px; display: flex; flex-direction: column;
+            z-index: 2147483647; width: 420px; display: flex; flex-direction: column;
+            zoom: var(--pk-zoom, 1);
         `;
         if (document.querySelector('.pk-ov')?.classList.contains('pk-dark')) pop.classList.add('pk-dark');
 
@@ -17398,6 +18339,7 @@ async function openManager(initialCache, preloadPromise) {
                 <div class="pk-fc-btn ${S.filterState.cat === 'document' ? 'act' : ''}" data-cat="document">${fIcons.document} <span>${L.cat_document}</span></div>
                 <div class="pk-fc-btn ${S.filterState.cat === 'software' ? 'act' : ''}" data-cat="software">${fIcons.software} <span>${L.cat_software}</span></div>
                 <div class="pk-fc-btn ${S.filterState.cat === 'archive' ? 'act' : ''}" data-cat="archive">${fIcons.archive} <span>${L.cat_archive}</span></div>
+                <div class="pk-fc-btn ${S.filterState.cat === 'torrent' ? 'act' : ''}" data-cat="torrent">${fIcons.torrent} <span>${L.cat_torrent}</span></div>
                 <div class="pk-fc-btn ${S.filterState.cat === 'other' ? 'act' : ''}" data-cat="other">${fIcons.other} <span>${L.cat_other}</span></div>
             </div>
         `;
@@ -17405,10 +18347,11 @@ async function openManager(initialCache, preloadPromise) {
 
         const updatePosition = () => {
             if (!pop.isConnected) return;
+            const scale = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
             const rect = triggerEl.getBoundingClientRect();
-            let popLeft = rect.left;
-            if (popLeft + 340 > window.innerWidth) popLeft = window.innerWidth - 350;
-            pop.style.top = (rect.bottom + 5) + 'px';
+            let popLeft = rect.left / scale;
+            if (popLeft + 420 > window.innerWidth / scale) popLeft = (window.innerWidth / scale) - 430;
+            pop.style.top = ((rect.bottom / scale) + 5) + 'px';
             pop.style.left = popLeft + 'px';
         };
         updatePosition();
@@ -17460,6 +18403,7 @@ async function openManager(initialCache, preloadPromise) {
                 position: absolute; background: var(--pk-bg); border: 1px solid var(--pk-bd);
                 border-radius: 8px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
                 z-index: 2147483647; max-width: 340px; display: flex; flex-wrap: wrap; gap: 8px;
+                zoom: var(--pk-zoom, 1);
             `;
             if (document.querySelector('.pk-ov')?.classList.contains('pk-dark')) pop.classList.add('pk-dark');
             const exts = FILTER_EXTS[S.filterState.cat] ||[];
@@ -17479,10 +18423,11 @@ async function openManager(initialCache, preloadPromise) {
 
             const updatePosition = () => {
                 if (!pop.isConnected) return;
+                const scale = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
                 const rect = UI.filterExtsWrap.getBoundingClientRect();
-                let popLeft = rect.left;
-                if (popLeft + 340 > window.innerWidth) popLeft = window.innerWidth - 350;
-                pop.style.top = (rect.bottom + 5) + 'px';
+                let popLeft = rect.left / scale;
+                if (popLeft + 340 > window.innerWidth / scale) popLeft = (window.innerWidth / scale) - 350;
+                pop.style.top = ((rect.bottom / scale) + 5) + 'px';
                 pop.style.left = popLeft + 'px';
             };
             updatePosition();
@@ -17572,6 +18517,10 @@ async function openManager(initialCache, preloadPromise) {
     };
     const performSearch = (val) => {
         const txt = val.trim();
+        if (!txt) {
+            if (S.search && UI.searchClear) UI.searchClear.click();
+            return;
+        }
         const isGlobal = UI.chkGlobal && UI.chkGlobal.checked && !S.uploadMode;
 
         if (txt) {
@@ -17649,7 +18598,11 @@ async function openManager(initialCache, preloadPromise) {
     if (UI.searchInput) {
 
         UI.searchInput.oninput = (e) => {
-            UI.searchClear.style.display = e.target.value.trim() ? 'flex' : 'none';
+            const val = e.target.value.trim();
+            UI.searchClear.style.display = val ? 'flex' : 'none';
+            if (!val && S.search && UI.searchClear) {
+                UI.searchClear.click();
+            }
         };
 
         UI.searchInput.onfocus = () => {
@@ -17878,7 +18831,7 @@ async function openManager(initialCache, preloadPromise) {
 
             const isSuppressed = gmGet('pk_suppress_global_warn', false);
 
-            if (!isSuppressed) {
+            if (!isSuppressed && !hasShownGlobalWarnSession) {
                 const userChoice = await new Promise((resolve) => {
                     const m = showModal(`
                         <h3 style="border:none; margin-bottom:16px; font-size:18px; font-weight:700; color:var(--pk-fg);">${L.title_confirm}</h3>
@@ -17928,20 +18881,23 @@ async function openManager(initialCache, preloadPromise) {
                     return;
                 }
 
+                hasShownGlobalWarnSession = true;
                 if (userChoice.suppress) {
                     gmSet('pk_suppress_global_warn', true);
                 }
             }
 
-            S.scanning = true;
+            if (!isGlobalIndexReady || globalNeedsSync) {
+                S.scanning = true;
 
-            UI.stopBtn.onclick = () => {
-                S.scanning = false;
-                updateLoadTxt(L.str_stopping);
-                UI.chkGlobal.checked = false;
-            };
+                UI.stopBtn.onclick = () => {
+                    S.scanning = false;
+                    updateLoadTxt(L.str_stopping);
+                    UI.chkGlobal.checked = false;
+                };
 
-            await runFlattenScanOperation(true);
+                await runFlattenScanOperation(true);
+            }
             refresh();
 
         } else {
@@ -17953,81 +18909,7 @@ async function openManager(initialCache, preloadPromise) {
         }
     };
 
-    UI.scan.onclick = async () => {
-        if (S.scanning) { S.scanning = false; return; }
-
-        const curFolderId = S.path[S.path.length - 1].id || '';
-        if (isPathBusy(curFolderId)) {
-            showAlert(L.msg_flatten_blocked_moving);
-            return;
-        }
-
-        S.wasGlobalChecked = UI.chkGlobal ? UI.chkGlobal.checked : false;
-
-        const selectedTargets = [];
-        if (S.sel.size > 0) {
-            S.sel.forEach(id => {
-                const item = S.itemMap.get(id);
-                if (item) selectedTargets.push(item);
-            });
-        }
-
-        let confirmMsg = L.msg_flatten_warn;
-        if (selectedTargets.length > 0) {
-            confirmMsg = L.msg_flatten_selected.replace('{n}', selectedTargets.length);
-        }
-
-        if (!await showConfirm(confirmMsg)) {
-            resumeBackgroundDiscovery();
-            return;
-        }
-
-        S.search = '';
-        if (UI.searchInput) UI.searchInput.value = '';
-        if (UI.searchClear) UI.searchClear.style.display = 'none';
-        if (UI.chkSearchPath) UI.chkSearchPath.checked = false;
-
-        S.scanning = true;
-
-        UI.scan.style.display = 'none';
-        UI.btnExit.style.display = 'flex';
-        UI.dup.style.display = 'none';
-
-        if(UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'none';
-        if (UI.lblGlobal) UI.lblGlobal.style.display = 'none';
-        if (UI.chkGlobal) UI.chkGlobal.checked = false;
-
-        UI.stopBtn.onclick = () => {
-            S.scanning = false;
-            if (S.scanAbortController) S.scanAbortController.abort();
-            updateLoadTxt(L.str_stopping);
-
-            if (S.isFlattened) {
-                UI.scan.style.display = 'none';
-                UI.btnExit.style.display = 'flex';
-                UI.dup.style.display = 'flex';
-            } else {
-                UI.scan.style.display = 'flex';
-                UI.btnExit.style.display = 'none';
-                UI.dup.style.display = 'none';
-                if(UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'flex';
-                if (UI.lblGlobal) UI.lblGlobal.style.display = 'flex';
-
-                S.isFlattened = false;
-
-                setTimeout(() => {
-                    console.log("♻️ Scan stopped: Attempting to wake up background discovery.");
-                    resumeBackgroundDiscovery();
-                }, 1000);
-            }
-        };
-
-        S.lastScanTargets = selectedTargets;
-        await runFlattenScanOperation(false, selectedTargets, false);
-    };
-
-
-    const runFlattenScanOperation = async (isSyncOnly = false, specificTargets = [], isSilent = false) => {
+    const runFlattenScanOperation = async (isSyncOnly = false, specificTargets =[], isSilent = false) => {
         S.scanId = (S.scanId || 0) + 1;
         const myScanId = S.scanId;
 
@@ -18041,7 +18923,7 @@ async function openManager(initialCache, preloadPromise) {
 
         const isPartialScan = specificTargets && specificTargets.length > 0;
 
-        let rootNodes = [];
+        let rootNodes =[];
         if (isPartialScan) {
             updateLoadTxt(L.msg_init_scan_sel);
             specificTargets.forEach(item => {
@@ -18049,18 +18931,18 @@ async function openManager(initialCache, preloadPromise) {
                     rootNodes.push({
                         id: item.id,
                         name: item.name,
-                        lineage: [{ id: item.id, name: item.name }],
+                        lineage:[{ id: item.id, name: item.name }],
                         retryCount: 0
                     });
                 } else if (!isSyncOnly) {
-                    item._lineage = [];
+                    item._lineage =[];
                     fileMap.set(item.id, item);
                 }
             });
         } else {
             updateLoadTxt(`${L.str_scanning} 0`);
             const startNode = isSyncOnly ? { id: '', name: 'Root' } : S.path[S.path.length - 1];
-            rootNodes = [{ id: startNode.id || '', name: startNode.name || 'Root', lineage: [], retryCount: 0 }];
+            rootNodes =[{ id: startNode.id || '', name: startNode.name || 'Root', lineage: [], retryCount: 0 }];
         }
 
         UI.stopBtn.onclick = () => {
@@ -18071,11 +18953,13 @@ async function openManager(initialCache, preloadPromise) {
             if (S.isFlattened) {
                 UI.scan.style.display = 'none';
                 UI.btnExit.style.display = 'flex';
-                UI.dup.style.display = 'flex';
+                if (UI.btnAnalyze) UI.btnAnalyze.style.display = 'none';
+                if (UI.btnExport) UI.btnExport.style.display = 'none';
             } else {
                 UI.scan.style.display = 'flex';
                 UI.btnExit.style.display = 'none';
-                UI.dup.style.display = 'none';
+                if (UI.btnAnalyze) UI.btnAnalyze.style.display = 'flex';
+                if (UI.btnExport) UI.btnExport.style.display = 'flex';
 
                 if(UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'flex';
                 if(UI.lblGlobal) UI.lblGlobal.style.display = 'flex';
@@ -18099,7 +18983,7 @@ async function openManager(initialCache, preloadPromise) {
                 signal: signal,
                 onFile: (f, parent) => {
                     if (!isSyncOnly) {
-                        f._lineage = parent.lineage || [];
+                        f._lineage = parent.lineage ||[];
                         fileMap.set(f.id, f);
                     }
                 },
@@ -18124,10 +19008,34 @@ async function openManager(initialCache, preloadPromise) {
             });
 
             if (S.scanning && !signal.aborted && myScanId === S.scanId) {
+                globalNeedsSync = false;
+                isGlobalIndexReady = true;
                 if (!isSyncOnly) {
                     updateLoadTxt(L.str_merging);
 
-                    const tempItems = Array.from(fileMap.values());
+                    let tempItems = Array.from(fileMap.values());
+
+                    if (S.scanFilter && !isSyncOnly) {
+                        const { minBytes, maxBytes, keyword } = S.scanFilter;
+                        const kwList = keyword ? keyword.toLowerCase().split(/[,，]/).map(k => k.trim()).filter(k => k) : [];
+
+                        tempItems = tempItems.filter(item => {
+                            if (kwList.length > 0) {
+                                const fullLowerName = (item.name || "").toLowerCase();
+                                const lastDot = fullLowerName.lastIndexOf('.');
+                                const nameWithoutExt = (item.kind !== 'drive#folder' && lastDot > 0)
+                                    ? fullLowerName.substring(0, lastDot)
+                                    : fullLowerName;
+
+                                if (kwList.some(k => nameWithoutExt.includes(k))) return false;
+                            }
+                            const sz = parseInt(item.size || 0);
+                            if (sz < minBytes) return false;
+                            if (maxBytes > 0 && sz > maxBytes) return false;
+                            return true;
+                        });
+                    }
+
                     const total = tempItems.length;
 
                     S.items = new Array(total);
@@ -18157,7 +19065,6 @@ async function openManager(initialCache, preloadPromise) {
 
                     UI.scan.style.display = 'none';
                     UI.btnExit.style.display = 'flex';
-                    UI.dup.style.display = 'flex';
                     if (UI.btnNewFolder) UI.btnNewFolder.style.display = 'none';
                     if (UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'none';
                     if (UI.lblGlobal) UI.lblGlobal.style.display = 'none';
@@ -18166,8 +19073,7 @@ async function openManager(initialCache, preloadPromise) {
                     updateLoadTxt(L.str_rendering);
                     await refresh();
 
-                    let msg = L.msg_scan_done.replace('{n}', total).replace('{f}', processedFolders);
-                    if (isPartialScan) msg = L.msg_flatten_done.replace('{n}', total);
+                    const msg = L.msg_scan_done.replace('{n}', total).replace('{f}', processedFolders);
                     if (!isSilent) showAlert(msg);
                 }
             }
@@ -18179,7 +19085,8 @@ async function openManager(initialCache, preloadPromise) {
             if (!isSyncOnly && myScanId === S.scanId) {
                 UI.scan.style.display = 'flex';
                 UI.btnExit.style.display = 'none';
-                UI.dup.style.display = 'none';
+                if (UI.btnAnalyze) UI.btnAnalyze.style.display = 'flex';
+                if (UI.btnExport) UI.btnExport.style.display = 'flex';
                 UI.lblGlobal.style.display = 'flex';
             }
             if (myScanId === S.scanId) UI.chkGlobal.checked = false;
@@ -18193,16 +19100,96 @@ async function openManager(initialCache, preloadPromise) {
         }
     };
 
-    UI.dup.onclick = () => {
-        if (S.loading) return;
+    const openScanDupModal = async (initialTab) => {
+        if (S.loading || S.scanning) return;
+
+        const curFolderId = S.path[S.path.length - 1].id || '';
+        if (isPathBusy(curFolderId)) {
+            showAlert(L.msg_flatten_blocked_moving);
+            return;
+        }
+
+        S.wasGlobalChecked = UI.chkGlobal ? UI.chkGlobal.checked : false;
+
+        const selectedTargets =[];
+        if (S.sel.size > 0) {
+            S.sel.forEach(id => {
+                const item = S.itemMap.get(id);
+                if (item) selectedTargets.push(item);
+            });
+        }
+
+        const lastMin = gmGet('pk_scan_last_min', 0);
+        const lastMax = gmGet('pk_scan_last_max', '');
+        const lastUnit = gmGet('pk_scan_last_unit', 'MB');
+        const lastKeyword = gmGet('pk_scan_last_keyword', '');
+        let currentStrict = gmGet('pk_dup_strictness', 'strict');
+
+        const scanTxt = L.btn_scan;
+        const dupTxt = L.tip_dup;
+        const L_min = L.lbl_ana_min;
+        const L_max = L.lbl_ana_max;
+
+        let scanTargetDesc = selectedTargets.length > 0 ? L.lbl_scan_selected.replace('{n}', selectedTargets.length) : L.lbl_scan_current;
+        let dupTargetDesc = selectedTargets.length > 0 ? L.lbl_dup_selected.replace('{n}', selectedTargets.length) : L.lbl_dup_current;
 
         const m = showModal(`
             <div class="pk-share-modal-root" style="width:480px; max-width:90vw; display:flex; flex-direction:column; overflow:visible;">
-                <div style="padding: 30px 50px 15px 30px; flex-shrink:0;">
-                    <h3 style="margin: 0; font-size: 18px; font-weight: 700; border: none; line-height: 1.2; color: var(--pk-fg);">${L.modal_dup_title}</h3>
+                <div style="padding: 30px 30px 15px 30px; flex-shrink:0;">
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 700; border: none; line-height: 1.2; color: var(--pk-fg);">${L.title_file_analysis}</h3>
                 </div>
 
-                <div class="pk-scroll" style="padding: 0 30px 10px 30px; display:flex; flex-direction:column; gap:16px;">
+                <div class="pk-s-tabs" style="margin: 0 30px 20px 30px; display:flex;">
+                    <div class="pk-s-tab ${initialTab === 'scan' ? 'act' : ''}" data-val="scan">${scanTxt}</div>
+                    <div class="pk-s-tab ${initialTab === 'dup' ? 'act' : ''}" data-val="dup">${dupTxt}</div>
+                </div>
+
+                <div id="pane_scan" style="display:${initialTab === 'scan' ? 'block' : 'none'}; padding: 0 30px;">
+                    <div style="font-size:13px; color:#888; margin-bottom:20px; line-height:1.5;">${scanTargetDesc}</div>
+
+                    <div style="margin-bottom:20px; position:relative;">
+                        <input type="text" id="sc_keyword" value="${esc(lastKeyword)}" placeholder="${L.ph_keyword_filter}"
+                               oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
+                               style="width:100%; height:42px; padding:0 12px; border:2px solid ${lastKeyword ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; outline:none; transition:border-color 0.2s; box-sizing:border-box;">
+                        <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L.lbl_keyword_filter}</div>
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:25px;">
+                        <div style="flex:1; position:relative;">
+                            <input type="number" id="sc_val_min" value="${lastMin === 0 ? '' : lastMin}" placeholder="0" min="0" step="1"
+                                   style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
+                            <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L_min}</div>
+                            <div class="pk-num-ctrl">
+                                <div class="pk-num-btn" id="sc_inc_min">${CONF.crumbIcons.down.replace('points="6 9 12 15 18 9"', 'points="18 15 12 9 6 15"')}</div>
+                                <div class="pk-num-btn" id="sc_dec_min">${CONF.crumbIcons.down}</div>
+                            </div>
+                        </div>
+                        <div style="color:#888; font-weight:bold; flex-shrink:0;">-</div>
+                        <div style="flex:1; position:relative;">
+                            <input type="number" id="sc_val_max" value="${lastMax}" min="0" step="1" placeholder="∞"
+                                   style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
+                            <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L_max}</div>
+                            <div class="pk-num-ctrl">
+                                <div class="pk-num-btn" id="sc_inc_max">${CONF.crumbIcons.down.replace('points="6 9 12 15 18 9"', 'points="18 15 12 9 6 15"')}</div>
+                                <div class="pk-num-btn" id="sc_dec_max">${CONF.crumbIcons.down}</div>
+                            </div>
+                        </div>
+                        <div class="pk-ana-select">
+                            <div class="pk-ana-trigger" id="sc_unit_btn">
+                                <span id="sc_unit_txt">${lastUnit}</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                            </div>
+                            <div class="pk-ana-menu" id="sc_unit_menu">
+                                <div class="pk-ana-item ${lastUnit === 'MB' ? 'act' : ''}" data-v="MB">MB</div>
+                                <div class="pk-ana-item ${lastUnit === 'GB' ? 'act' : ''}" data-v="GB">GB</div>
+                                <div class="pk-ana-item ${lastUnit === 'TB' ? 'act' : ''}" data-v="TB">TB</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pane_dup" class="pk-scroll" style="display:${initialTab === 'dup' ? 'flex' : 'none'}; flex-direction:column; gap:16px; padding: 0 30px 25px 30px;">
+                    <div style="font-size:13px; color:#888; margin-bottom:4px; line-height:1.5;">${dupTargetDesc}</div>
                     <div style="position:relative;">
                         <label for="scan_video"
                                onmouseover="this.style.borderColor='var(--pk-pri)'"
@@ -18222,7 +19209,6 @@ async function openManager(initialCache, preloadPromise) {
                             <span style="font-size:14px; color:var(--pk-fg); font-weight:600; user-select:none;">${L.label_dup_image}</span>
                         </label>
                     </div>
-
                     <div style="position:relative;">
                         <label for="scan_other"
                                onmouseover="this.style.borderColor='var(--pk-pri)'"
@@ -18232,12 +19218,20 @@ async function openManager(initialCache, preloadPromise) {
                             <span style="font-size:14px; color:var(--pk-fg); font-weight:600; user-select:none;">${L.label_dup_other}</span>
                         </label>
                     </div>
+                    <div class="pk-custom-select" id="cs_sc_strict" style="margin-top:5px;">
+                        <div class="pk-select-label">${L.label_dup_strictness}</div>
+                        <div class="pk-select-trigger"><span id="txt_sc_strict">${currentStrict === 'loose' ? L.opt_loose : L.opt_strict}</span>${CONF.crumbIcons.down}</div>
+                        <div class="pk-select-menu pk-scroll">
+                            <div class="pk-select-item ${currentStrict === 'strict' ? 'act' : ''}" data-val="strict">${L.opt_strict}</div>
+                            <div class="pk-select-item ${currentStrict === 'loose' ? 'act' : ''}" data-val="loose">${L.opt_loose}</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="padding: 20px 30px 30px 30px; flex-shrink:0;">
                     <div class="pk-modal-act" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 0;">
-                        <button class="pk-btn" id="scan_cancel" style="height:46px; border-radius:12px; justify-content:center; background:transparent; font-weight:600; font-size:15px;">${L.btn_cancel}</button>
-                        <button class="pk-btn pri" id="scan_start" style="height:46px; border-radius:12px; background:var(--pk-pri); color:#fff; font-weight:bold; justify-content:center; border:none; font-size:15px; transition: filter 0.2s;">${L.btn_start_scan}</button>
+                        <button class="pk-btn" id="sc_cancel" style="height:46px; border-radius:12px; justify-content:center; background:transparent; font-weight:600; font-size:15px;">${L.btn_cancel}</button>
+                        <button class="pk-btn pri" id="sc_start" style="height:46px; border-radius:12px; background:var(--pk-pri); color:#fff; font-weight:bold; justify-content:center; border:none; font-size:15px; transition: filter 0.2s;">${L.btn_ok}</button>
                     </div>
                 </div>
             </div>
@@ -18250,55 +19244,346 @@ async function openManager(initialCache, preloadPromise) {
             if (closeBtn) Object.assign(closeBtn.style, { top: '26px', right: '26px' });
         }
 
+        m.querySelectorAll('.pk-s-tab').forEach(tab => {
+            tab.onclick = () => {
+                m.querySelectorAll('.pk-s-tab').forEach(t => t.classList.remove('act'));
+                tab.classList.add('act');
+                const curMode = tab.dataset.val;
+                m.querySelector('#pane_scan').style.display = curMode === 'scan' ? 'block' : 'none';
+                m.querySelector('#pane_dup').style.display = curMode === 'dup' ? 'flex' : 'none';
+            };
+        });
+
+        const inpMin = m.querySelector('#sc_val_min');
+        const inpMax = m.querySelector('#sc_val_max');
+        const unitBtn = m.querySelector('#sc_unit_btn');
+        const unitMenu = m.querySelector('#sc_unit_menu');
+        const unitTxt = m.querySelector('#sc_unit_txt');
+        let currentUnit = lastUnit;
+
+        m.querySelector('#sc_inc_min').onclick = (e) => { e.stopPropagation(); inpMin.value = (parseInt(inpMin.value) || 0) + 1; };
+        m.querySelector('#sc_dec_min').onclick = (e) => { e.stopPropagation(); inpMin.value = Math.max(0, (parseInt(inpMin.value) || 1) - 1); };
+        m.querySelector('#sc_inc_max').onclick = (e) => { e.stopPropagation(); inpMax.value = (parseInt(inpMax.value) || 0) + 1; };
+        m.querySelector('#sc_dec_max').onclick = (e) => { e.stopPropagation(); inpMax.value = Math.max(0, (parseInt(inpMax.value) || 1) - 1); };
+
+        unitBtn.onclick = (e) => { e.stopPropagation(); unitMenu.style.display = unitMenu.style.display === 'block' ? 'none' : 'block'; };
+        m.querySelectorAll('.pk-ana-item').forEach(item => {
+            item.onclick = () => {
+                m.querySelectorAll('.pk-ana-item').forEach(i => i.classList.remove('act'));
+                item.classList.add('act');
+                currentUnit = item.dataset.v;
+                unitTxt.textContent = currentUnit;
+                unitMenu.style.display = 'none';
+            };
+        });
+        const closeMenu = () => { if (unitMenu) unitMenu.style.display = 'none'; };
+        setTimeout(() => document.addEventListener('click', closeMenu), 0);
+
+        const _orgRemove = m.remove.bind(m);
+        m.remove = () => {
+            document.removeEventListener('click', closeMenu);
+            _orgRemove();
+        };
+
         if (S.dupConfig) {
             m.querySelector('#scan_video').checked = S.dupConfig.video;
             m.querySelector('#scan_image').checked = S.dupConfig.image;
             m.querySelector('#scan_other').checked = S.dupConfig.other;
         }
 
-        m.querySelector('#scan_cancel').onclick = () => m.remove();
-        m.querySelector('.pk-modal-close').onclick = () => m.remove();
+        const scStrictTrigger = m.querySelector('#cs_sc_strict .pk-select-trigger');
+        const scStrictMenu = m.querySelector('#cs_sc_strict .pk-select-menu');
+        const scStrictTxt = m.querySelector('#txt_sc_strict');
+
+        scStrictTrigger.onclick = (e) => {
+            e.stopPropagation();
+            scStrictMenu.style.display = scStrictMenu.style.display === 'block' ? 'none' : 'block';
+        };
+
+        m.querySelectorAll('#cs_sc_strict .pk-select-item').forEach(item => {
+            item.onclick = (e) => {
+                e.stopPropagation();
+                m.querySelectorAll('#cs_sc_strict .pk-select-item').forEach(i => i.classList.remove('act'));
+                item.classList.add('act');
+                currentStrict = item.dataset.val;
+                scStrictTxt.textContent = item.textContent;
+                scStrictMenu.style.display = 'none';
+            };
+        });
+
+        const saveScanInputs = () => {
+            gmSet('pk_scan_last_min', parseInt(inpMin.value) || 0);
+            gmSet('pk_scan_last_max', inpMax.value.trim());
+            gmSet('pk_scan_last_unit', currentUnit);
+            gmSet('pk_scan_last_keyword', m.querySelector('#sc_keyword').value.trim());
+            gmSet('pk_dup_strictness', currentStrict);
+        };
+
+        m.querySelector('#sc_cancel').onclick = () => { saveScanInputs(); m.remove(); };
+        m.querySelector('.pk-modal-close').onclick = () => { saveScanInputs(); m.remove(); };
 
         m.tabIndex = 0;
         setTimeout(() => m.focus(), 10);
         m.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault(); e.stopPropagation();
-                m.querySelector('#scan_start').click();
+                m.querySelector('#sc_start').click();
             }
         });
 
-        m.querySelector('#scan_start').onclick = () => {
-            S.dupConfig = {
-                video: m.querySelector('#scan_video').checked,
-                image: m.querySelector('#scan_image').checked,
-                other: m.querySelector('#scan_other').checked
-            };
+        m.querySelector('#sc_start').onclick = async () => {
+            const mode = m.querySelector('.pk-s-tab.act').dataset.val;
 
-            if (!S.dupConfig.video && !S.dupConfig.image && !S.dupConfig.other) return;
+            saveScanInputs();
 
-            m.remove();
+            if (mode === 'scan') {
+                const vMin = parseInt(inpMin.value) || 0;
+                const vMax = parseInt(inpMax.value) || 0;
+                const kw = m.querySelector('#sc_keyword').value.trim();
 
-            if (!S.isFlattened) {
-                S.wasGlobalChecked = UI.chkGlobal ? UI.chkGlobal.checked : false;
+                if (vMin < 0 || (vMax > 0 && vMin > vMax)) {
+                    inpMin.style.borderColor = '#d93025';
+                    if (vMax > 0 && vMin > vMax) inpMax.style.borderColor = '#d93025';
+                    return;
+                }
+                gmSet('pk_scan_last_min', vMin);
+                gmSet('pk_scan_last_max', vMax > 0 ? vMax : '');
+                gmSet('pk_scan_last_unit', currentUnit);
+                gmSet('pk_scan_last_keyword', kw);
+
+                let mult = 1;
+                if (currentUnit === 'MB') mult = 1024 * 1024;
+                else if (currentUnit === 'GB') mult = 1024 * 1024 * 1024;
+                else if (currentUnit === 'TB') mult = 1024 * 1024 * 1024 * 1024;
+                S.scanFilter = {
+                    minBytes: Math.floor(vMin * mult),
+                    maxBytes: vMax > 0 ? Math.floor(vMax * mult) : 0,
+                    keyword: kw
+                };
+
+                m.remove();
+
+                S.search = '';
+                if (UI.searchInput) UI.searchInput.value = '';
+                if (UI.searchClear) UI.searchClear.style.display = 'none';
+                if (UI.chkSearchPath) UI.chkSearchPath.checked = false;
+
+                S.scanning = true;
+
+                UI.scan.style.display = 'none';
+                UI.btnExit.style.display = 'flex';
+
+                if(UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'none';
+                if (UI.lblGlobal) UI.lblGlobal.style.display = 'none';
+                if (UI.chkGlobal) UI.chkGlobal.checked = false;
+
+                UI.stopBtn.onclick = () => {
+                    S.scanning = false;
+                    if (S.scanAbortController) S.scanAbortController.abort();
+                    updateLoadTxt(L.str_stopping);
+
+                    if (S.isFlattened) {
+                        UI.scan.style.display = 'none';
+                        UI.btnExit.style.display = 'flex';
+                        if (UI.btnAnalyze) UI.btnAnalyze.style.display = 'none';
+                        if (UI.btnExport) UI.btnExport.style.display = 'none';
+                    } else {
+                        UI.scan.style.display = 'flex';
+                        UI.btnExit.style.display = 'none';
+                        if (UI.btnAnalyze) UI.btnAnalyze.style.display = 'flex';
+                        if (UI.btnExport) UI.btnExport.style.display = 'flex';
+
+                        if(UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'flex';
+                        if (UI.lblGlobal) UI.lblGlobal.style.display = 'flex';
+                        if (UI.chkGlobal) UI.chkGlobal.checked = false;
+
+                        S.isFlattened = false;
+
+                        setTimeout(() => {
+                            if (typeof resumeBackgroundDiscovery === 'function') {
+                                resumeBackgroundDiscovery();
+                            }
+                        }, 1000);
+                    }
+                };
+
+                S.lastScanTargets = selectedTargets;
+                await runFlattenScanOperation(false, selectedTargets, false);
+
+            } else {
+                S.dupConfig = {
+                    video: m.querySelector('#scan_video').checked,
+                    image: m.querySelector('#scan_image').checked,
+                    other: m.querySelector('#scan_other').checked
+                };
+
+                if (!S.dupConfig.video && !S.dupConfig.image && !S.dupConfig.other) return;
+
+                m.remove();
+
+                S.scanning = true;
+                S.scanId = (S.scanId || 0) + 1;
+                const myScanId = S.scanId;
+
+                let fileMap = new Map();
+                let processedFolders = 0;
+
+                if (S.scanAbortController) S.scanAbortController.abort();
+                S.scanAbortController = new AbortController();
+                const signal = S.scanAbortController.signal;
+                setLoad(true);
+
+                const isPartialScan = selectedTargets.length > 0;
+                let rootNodes =[];
+                if (isPartialScan) {
+                    updateLoadTxt(L.msg_init_scan_sel);
+                    selectedTargets.forEach(item => {
+                        if (item.kind === 'drive#folder') {
+                            rootNodes.push({
+                                id: item.id,
+                                name: item.name,
+                                lineage:[{ id: item.id, name: item.name }],
+                                retryCount: 0
+                            });
+                        } else {
+                            item._lineage =[];
+                            fileMap.set(item.id, item);
+                        }
+                    });
+                } else {
+                    updateLoadTxt(`${L.str_scanning} 0`);
+                    const startNode = S.path[S.path.length - 1];
+                    rootNodes =[{ id: startNode.id || '', name: startNode.name || 'Root', lineage: [], retryCount: 0 }];
+                }
+
+                UI.stopBtn.onclick = () => {
+                    S.scanning = false;
+                    if (S.scanAbortController) S.scanAbortController.abort();
+                    updateLoadTxt(L.str_stopping);
+                    setLoad(false);
+                };
+
+                try {
+                    await coreRecursiveEngine(rootNodes, {
+                        signal: signal,
+                        onFile: (f, parent) => {
+                            f._lineage = parent.lineage ||[];
+                            fileMap.set(f.id, f);
+                        },
+                        onFolder: (folder, filesInFolder) => {
+                            processedFolders++;
+                            if (typeof globalCache !== 'undefined' && !globalCache.has(folder.id)) {
+                                globalCache.set(folder.id, [...filesInFolder]);
+                            }
+                            indexParents(folder.id, folder.name, filesInFolder);
+                            if (typeof globalLineageMap !== 'undefined') {
+                                globalLineageMap.set(folder.id, folder.lineage);
+                            }
+                        },
+                        onProgress: (st) => {
+                            const folderText = isPartialScan
+                                ? L.status_scanning_selection.replace('{n}', st.folders + " " + L.unit_folders)
+                                : `${L.str_scanning} ${st.folders} ${L.unit_folders}`;
+                            const retryTag = st.isRetrying ? `\n[ ${L.str_retries} ]` : "";
+                            const statusInfo = ` | ${L.str_files}: ${st.files} | ${L.str_speed}: ${st.currentConcurrency} | ${L.str_cached} ${st.cacheHits} ${L.unit_folders}`;
+                            updateLoadTxt(folderText + statusInfo + retryTag);
+                        }
+                    });
+
+                    if (S.scanning && !signal.aborted && myScanId === S.scanId) {
+                        updateLoadTxt(L.str_merging);
+
+                        const tempItems = Array.from(fileMap.values());
+
+                        const cfg = S.dupConfig || { video: true, image: false, other: false };
+                        let candidates = tempItems.filter(i => {
+                            if (!i.mime_type) return false;
+                            const isVideo = i.mime_type.startsWith('video');
+                            const isImage = i.mime_type.startsWith('image');
+                            const isOther = !isVideo && !isImage;
+                            if (isVideo && cfg.video) return true;
+                            if (isImage && cfg.image) return true;
+                            if (isOther && cfg.other) return true;
+                            return false;
+                        });
+
+                        const preGroups = await computeDuplicateGroups(candidates, cfg, () => S.scanning && !signal.aborted && myScanId === S.scanId);
+
+                        if (preGroups.length === 0) {
+                            setLoad(false);
+                            showToast(L.msg_dup_none);
+                            S.dupRunning = false;
+                            S.scanning = false;
+                            return;
+                        }
+
+                        const total = tempItems.length;
+
+                        S.items = new Array(total);
+                        S.itemMap.clear();
+
+                        let lastYield = performance.now();
+                        for (let i = 0; i < total; i++) {
+                            const item = tempItems[i];
+                            S.items[i] = item;
+                            S.itemMap.set(item.id, item);
+
+                            if (item.starred || (item.tags && item.tags.some(t => t.name === 'STAR'))) {
+                                S.starredSet.add(item.id);
+                            }
+
+                            if (i % 5000 === 0 && performance.now() - lastYield > 16) {
+                                updateLoadTxt(`${L.str_merging} ${Math.round((i / total) * 100)}%`);
+                                await sleep(0);
+                                lastYield = performance.now();
+                            }
+                        }
+
+                        S.dupMode = true;
+                        S.isFlattened = false;
+                        S.sort = 'modified_time'; S.dir = 1;
+                        UI.chkAll.checked = false;
+                        S.sel.clear();
+
+                        UI.scan.style.display = 'none';
+                        UI.btnExit.style.display = 'flex';
+                        if (UI.btnAnalyze) UI.btnAnalyze.style.display = 'none';
+                        UI.lblGlobal.style.display = 'none';
+                        UI.chkGlobal.checked = false;
+                        if (UI.btnNewFolder) UI.btnNewFolder.style.display = 'none';
+                        if (UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'none';
+                        if (UI.crumb) UI.crumb.style.setProperty('display', 'none', 'important');
+                        if (UI.lblSearchPath) UI.lblSearchPath.style.display = 'flex';
+
+                        updateLoadTxt(L.str_rendering);
+                        S.display =[...S.items];
+                        await refresh();
+                    }
+
+                } catch (e) {
+                    if (e.name !== 'AbortError' && myScanId === S.scanId) {
+                        showAlert(`${L.str_error_crit}: ${e.message}`);
+                    }
+                    if (myScanId === S.scanId) {
+                        UI.scan.style.display = 'flex';
+                        UI.btnExit.style.display = 'none';
+                        if (UI.btnAnalyze) UI.btnAnalyze.style.display = 'flex';
+                        if (UI.btnExport) UI.btnExport.style.display = 'flex';
+                        UI.lblGlobal.style.display = 'flex';
+                    }
+                } finally {
+                    if (myScanId === S.scanId) {
+                        setLoad(false);
+                        S.scanning = false;
+                        S.scanAbortController = null;
+                        if (typeof DurationProber !== 'undefined') DurationProber.checkAndRun();
+                    }
+                }
             }
-
-            S.dupMode = true;
-            UI.scan.style.display = 'none';
-            UI.btnExit.style.display = 'flex';
-            UI.dup.style.display = 'none';
-            UI.lblGlobal.style.display = 'none';
-            UI.chkGlobal.checked = false;
-            if (UI.btnNewFolder) UI.btnNewFolder.style.display = 'none';
-
-            if (UI.crumb) UI.crumb.style.setProperty('display', 'none', 'important');
-            if (UI.lblSearchPath) {
-                UI.lblSearchPath.style.display = 'flex';
-            }
-
-            refresh();
         };
     };
+
+    UI.scan.onclick = () => openScanDupModal('scan');
 
     const onOfflineFilterChange = () => {
         if (S.offlineMode) {
@@ -18365,6 +19650,7 @@ async function openManager(initialCache, preloadPromise) {
         S.dupMode = false;
         S.suppressClearConfirm = false;
         S.isFlattened = false;
+        S.scanFilter = null;
         if (S.filterState) S.filterState = { active: false, cat: 'all', ext: 'all' };
 
         S._sortAppliedForId = null;
@@ -18373,6 +19659,7 @@ async function openManager(initialCache, preloadPromise) {
         if (S.analyzeMode) {
             S.analyzeMode = false;
             S.analyzeResultItems = null;
+            S.analyzeSimGroups = null;
             S.analyzeMap = null;
             S.path = [{ id: '', name: L.btn_nav_home }];
         }
@@ -18416,8 +19703,8 @@ async function openManager(initialCache, preloadPromise) {
             S.itemMap.clear();
         }
 
+        setLoad(true, true);
         refresh();
-        setLoad(true);
         updateQuotaUI();
 
         await load(false, true);
@@ -18434,71 +19721,6 @@ async function openManager(initialCache, preloadPromise) {
         }, 1500);
     };
 
-    UI.btnDupSize.onclick = (e) => {
-        if (e) e.stopPropagation();
-        S.dupSizeStrategy = S.dupSizeStrategy === 'small' ? 'large' : 'small';
-
-        const longSpan = document.getElementById('pk-cond-size-long');
-        const shortSpan = document.getElementById('pk-cond-size-short');
-
-        if (longSpan) longSpan.textContent = S.dupSizeStrategy === 'small' ? L.cond_small : L.cond_large;
-        if (shortSpan) shortSpan.textContent = S.dupSizeStrategy === 'small' ? L.cond_small_short : L.cond_large_short;
-
-        S.sel.clear();
-        const itemMap = new Map();
-        S.display.forEach(d => {
-            if (d.isHeader) return;
-            const gIdx = S.dupGroups.get(d.id);
-            if (gIdx !== undefined) {
-                if (!itemMap.has(gIdx)) itemMap.set(gIdx, []);
-                itemMap.get(gIdx).push(d);
-            }
-        });
-        itemMap.forEach(items => {
-            if (items.length < 2) return;
-            let keep = (S.dupSizeStrategy === 'small')
-                ? items.reduce((a, b) => parseInt(a.size) > parseInt(b.size) ? a : b)
-                : items.reduce((a, b) => parseInt(a.size) < parseInt(b.size) ? a : b);
-            items.forEach(i => {
-                if (i.id !== keep.id) S.sel.add(i.id);
-            });
-        });
-        renderList();
-        updateStat();
-    };
-
-    UI.btnDupDate.onclick = (e) => {
-        if (e) e.stopPropagation();
-        S.dupDateStrategy = S.dupDateStrategy === 'old' ? 'new' : 'old';
-
-        const longSpan = document.getElementById('pk-cond-date-long');
-        const shortSpan = document.getElementById('pk-cond-date-short');
-
-        if (longSpan) longSpan.textContent = S.dupDateStrategy === 'old' ? L.cond_old : L.cond_new;
-        if (shortSpan) shortSpan.textContent = S.dupDateStrategy === 'old' ? L.cond_old_short : L.cond_new_short;
-
-        S.sel.clear();
-        const itemMap = new Map();
-        S.display.forEach(d => {
-            if (d.isHeader) return;
-            const gIdx = S.dupGroups.get(d.id);
-            if (gIdx !== undefined) {
-                if (!itemMap.has(gIdx)) itemMap.set(gIdx, []);
-                itemMap.get(gIdx).push(d);
-            }
-        });
-        itemMap.forEach(items => {
-            if (items.length < 2) return;
-            let keep = (S.dupDateStrategy === 'old')
-                ? items.reduce((a, b) => new Date(a.modified_time) > new Date(b.modified_time) ? a : b)
-                : items.reduce((a, b) => new Date(a.modified_time) < new Date(b.modified_time) ? a : b);
-            items.forEach(i => {
-                if (i.id !== keep.id) S.sel.add(i.id);
-            });
-        });
-        renderList();
-        updateStat();
-    };
     UI.cols.forEach(c => c.onclick = () => {
         if (S.dupMode) return;
 
@@ -18641,6 +19863,113 @@ async function openManager(initialCache, preloadPromise) {
             UI.chkAll.checked = isSelectAllAction;
         });
     };
+
+    if (UI.btnAnaSelect || UI.btnDupSmart) {
+        const pop = document.createElement('div');
+        pop.className = 'pk-ana-pop';
+        pop.innerHTML = `
+            <div class="pk-ana-pop-row"><div class="pk-ana-opt" data-op="new">${L.opt_keep_new}</div><div class="pk-ana-opt" data-op="old">${L.opt_keep_old}</div></div>
+            <div class="pk-ana-pop-row"><div class="pk-ana-opt" data-op="large">${L.opt_keep_large}</div><div class="pk-ana-opt" data-op="small">${L.opt_keep_small}</div></div>
+            <div class="pk-ana-pop-row"><div class="pk-ana-opt" data-op="short">${L.opt_keep_short}</div><div class="pk-ana-opt" data-op="long">${L.opt_keep_long}</div></div>`;
+
+        UI.win.appendChild(pop);
+        let activeTargetBtn = null;
+
+        const updatePopPos = () => {
+            if (pop.style.display !== 'flex' || !activeTargetBtn) return;
+            const scale = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
+            const winRect = UI.win.getBoundingClientRect();
+            const btnRect = activeTargetBtn.getBoundingClientRect();
+
+            let left = (btnRect.left - winRect.left) / scale;
+            const top = (btnRect.bottom - winRect.top) / scale;
+            const winWidth = winRect.width / scale;
+            const popWidth = 340;
+
+            if (left + popWidth > winWidth - 10) {
+                left = (btnRect.right - winRect.left) / scale - popWidth;
+            }
+
+            pop.style.left = Math.max(10, left) + 'px';
+            pop.style.top = (top + 5) + 'px';
+        };
+
+        const togglePop = (e, btn) => {
+            e.stopPropagation();
+            const isVisible = (pop.style.display === 'flex' && activeTargetBtn === btn);
+            if (isVisible) {
+                pop.style.display = 'none';
+                activeTargetBtn = null;
+            } else {
+                pop.style.display = 'flex';
+                activeTargetBtn = btn;
+                updatePopPos();
+            }
+        };
+
+        if (UI.btnAnaSelect) UI.btnAnaSelect.onclick = (e) => togglePop(e, UI.btnAnaSelect);
+        if (UI.btnDupSmart) UI.btnDupSmart.onclick = (e) => togglePop(e, UI.btnDupSmart);
+
+        window.addEventListener('resize', updatePopPos);
+
+        pop.querySelectorAll('.pk-ana-opt').forEach(opt => {
+            opt.onclick = () => {
+                const op = opt.dataset.op;
+                S.sel.clear();
+
+                const isBetter = (type, curW, curM) => {
+                    if (type === 'new') return new Date(curM.modified_time) > new Date(curW.modified_time);
+                    if (type === 'old') return new Date(curM.modified_time) < new Date(curW.modified_time);
+                    if (type === 'large') return BigInt(curM.size || 0) > BigInt(curW.size || 0);
+                    if (type === 'small') return BigInt(curM.size || 0) < BigInt(curW.size || 0);
+                    if (type === 'short') return curM.name.length < curW.name.length;
+                    if (type === 'long') return curM.name.length > curW.name.length;
+                    return false;
+                };
+
+                if (S.analyzeMode && S.analyzeSimGroups) {
+                    S.analyzeSimGroups.forEach(g => {
+                        const members = g.ids.map(id => S.itemMap.get(id)).filter(Boolean);
+                        if (members.length < 2) return;
+                        let winner = members[0];
+                        members.forEach(m => { if (isBetter(op, winner, m)) winner = m; });
+                        members.forEach(m => { if (m.id !== winner.id) S.sel.add(m.id); });
+                    });
+                } else if (S.dupMode && S.dupGroups) {
+                    const itemMap = new Map();
+                    S.display.forEach(d => {
+                        if (d.isHeader) return;
+                        const gIdx = S.dupGroups.get(d.id);
+                        if (gIdx !== undefined) {
+                            if (!itemMap.has(gIdx)) itemMap.set(gIdx,[]);
+                            itemMap.get(gIdx).push(d);
+                        }
+                    });
+                    itemMap.forEach(members => {
+                        if (members.length < 2) return;
+                        let winner = members[0];
+                        members.forEach(m => { if (isBetter(op, winner, m)) winner = m; });
+                        members.forEach(m => { if (m.id !== winner.id) S.sel.add(m.id); });
+                    });
+                }
+
+                pop.style.display = 'none';
+                activeTargetBtn = null;
+                renderVisible();
+                updateStat();
+            };
+        });
+        document.addEventListener('mousedown', (e) => {
+            const isClickInsideBtn = (UI.btnAnaSelect && UI.btnAnaSelect.contains(e.target)) ||
+                                     (UI.btnDupSmart && UI.btnDupSmart.contains(e.target));
+
+            if (!pop.contains(e.target) && !isClickInsideBtn) {
+                pop.style.display = 'none';
+                activeTargetBtn = null;
+            }
+        });
+    }
+
     UI.btnRefresh.onclick = async () => {
         updateQuotaUI();
         if (S.isFlattened) {
@@ -18648,16 +19977,16 @@ async function openManager(initialCache, preloadPromise) {
                 S.scanning = true;
                 UI.scan.style.display = 'none';
                 UI.btnExit.style.display = 'flex';
-                UI.dup.style.display = 'none';
 
                 UI.stopBtn.onclick = () => {
                     S.scanning = false;
                     updateLoadTxt(L.str_stopping);
-                    UI.scan.style.display = 'flex';
-                    UI.btnExit.style.display = 'none';
-                    UI.dup.style.display = 'none';
-                    if(UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'flex';
-                    if (UI.lblGlobal) UI.lblGlobal.style.display = 'flex';
+                    UI.scan.style.display = 'none';
+                    UI.btnExit.style.display = 'flex';
+                    if (UI.btnAnalyze) UI.btnAnalyze.style.display = 'none';
+                    if (UI.btnExport) UI.btnExport.style.display = 'none';
+                    if(UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'none';
+                    if (UI.lblGlobal) UI.lblGlobal.style.display = 'none';
                 };
 
                 runFlattenScanOperation(false, S.lastScanTargets, true).catch(e => {
@@ -18703,33 +20032,95 @@ async function openManager(initialCache, preloadPromise) {
 
             S.wasGlobalChecked = UI.chkGlobal ? UI.chkGlobal.checked : false;
 
-            const lastVal = gmGet('pk_analyze_last_val', 1);
+            const lastMin = gmGet('pk_analyze_last_min', 0);
+            const lastMax = gmGet('pk_analyze_last_max', '');
             const lastUnit = gmGet('pk_analyze_last_unit', 'GB');
+            const lastKeyword = gmGet('pk_analyze_last_keyword', '');
+            const lastSim = gmGet('pk_analyze_last_sim', 1.0);
+            const lastAlgo = gmGet('pk_analyze_last_algo', 'sim');
 
             const result = await new Promise((resolve) => {
+                const L_min = L.lbl_ana_min;
+                const L_max = L.lbl_ana_max;
+                const analyzeTargetDesc = S.sel.size > 0 ? L.lbl_analyze_selected.replace('{n}', S.sel.size) : L.lbl_analyze_current;
+                const anaSimTargetDesc = S.sel.size > 0 ? L.lbl_ana_sim_selected.replace('{n}', S.sel.size) : L.lbl_ana_sim_current;
                 const m = showModal(`
-                    <h3 style="border:none; margin-bottom:12px; font-size:18px; font-weight:700;">${L.lbl_analyze_title}</h3>
-                    <div style="font-size:13px; color:#888; margin-bottom:20px; line-height:1.5;">${L.lbl_analyze_desc}</div>
+                    <h3 style="border:none; margin-bottom:15px; font-size:18px; font-weight:700;">${L.btn_analyze}</h3>
 
-                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:25px;">
-                        <div style="flex:1; position:relative;">
-                        <input type="number" id="an_val" value="${lastVal}" min="1" step="1"
-                               style="width:100%; height:42px; padding:0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
-                        <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1;">${L.lbl_size_threshold}</div>
-                        <div class="pk-num-ctrl">
-                            <div class="pk-num-btn" id="an_inc">${CONF.crumbIcons.down.replace('points="6 9 12 15 18 9"', 'points="18 15 12 9 6 15"')}</div>
-                            <div class="pk-num-btn" id="an_dec">${CONF.crumbIcons.down}</div>
+                    <div class="pk-s-tabs" id="ana_tabs" style="margin-bottom:20px; display:flex;">
+                        <div class="pk-s-tab act" data-val="large">${L.opt_ana_large}</div>
+                        <div class="pk-s-tab" data-val="similar">${L.opt_ana_sim}</div>
+                    </div>
+
+                    <div id="ana_pane_large">
+                        <div style="font-size:13px; color:#888; margin-bottom:20px; line-height:1.5;">${analyzeTargetDesc}</div>
+
+                        <div style="margin-bottom:20px; position:relative;">
+                            <input type="text" id="an_keyword" value="${esc(lastKeyword)}" placeholder="${L.ph_keyword_filter}"
+                                   oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
+                                   style="width:100%; height:42px; padding:0 12px; border:2px solid ${lastKeyword ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; outline:none; transition:border-color 0.2s; box-sizing:border-box;">
+                            <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L.lbl_keyword_filter}</div>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:25px;">
+                            <div style="flex:1; position:relative;">
+                                <input type="number" id="an_val_min" value="${lastMin === 0 ? '' : lastMin}" placeholder="0" min="0" step="1"
+                                       style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
+                                <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L_min}</div>
+                                <div class="pk-num-ctrl">
+                                    <div class="pk-num-btn" id="an_inc_min">${CONF.crumbIcons.down.replace('points="6 9 12 15 18 9"', 'points="18 15 12 9 6 15"')}</div>
+                                    <div class="pk-num-btn" id="an_dec_min">${CONF.crumbIcons.down}</div>
+                                </div>
+                            </div>
+                            <div style="color:#888; font-weight:bold; flex-shrink:0;">-</div>
+                            <div style="flex:1; position:relative;">
+                                <input type="number" id="an_val_max" value="${lastMax}" min="0" step="1" placeholder="∞"
+                                       style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
+                                <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L_max}</div>
+                                <div class="pk-num-ctrl">
+                                    <div class="pk-num-btn" id="an_inc_max">${CONF.crumbIcons.down.replace('points="6 9 12 15 18 9"', 'points="18 15 12 9 6 15"')}</div>
+                                    <div class="pk-num-btn" id="an_dec_max">${CONF.crumbIcons.down}</div>
+                                </div>
+                            </div>
+                            <div class="pk-ana-select">
+                                <div class="pk-ana-trigger" id="an_unit_btn">
+                                    <span id="an_unit_txt">${lastUnit}</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                </div>
+                                <div class="pk-ana-menu" id="an_unit_menu">
+                                    <div class="pk-ana-item ${lastUnit === 'MB' ? 'act' : ''}" data-v="MB">MB</div>
+                                    <div class="pk-ana-item ${lastUnit === 'GB' ? 'act' : ''}" data-v="GB">GB</div>
+                                    <div class="pk-ana-item ${lastUnit === 'TB' ? 'act' : ''}" data-v="TB">TB</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                        <div class="pk-ana-select">
-                            <div class="pk-ana-trigger" id="an_unit_btn">
-                                <span id="an_unit_txt">${lastUnit}</span>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+
+                    <div id="ana_pane_similar" style="display:none;">
+                        <div style="font-size:13px; color:#888; margin-bottom:15px; line-height:1.5;">${anaSimTargetDesc}</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:20px; align-items:center; width:100%;">
+                            <label style="display:flex; align-items:center; cursor:pointer; flex-shrink:0;">
+                                <input type="radio" name="ana_sim_algo" value="name" ${lastAlgo === 'name' ? 'checked' : ''} style="accent-color:var(--pk-pri); margin-right:6px;">
+                                <span style="font-size:13px; color:var(--pk-fg); font-weight:500;">${L.lbl_name_match}</span>
+                            </label>
+                            <label style="display:flex; align-items:center; cursor:pointer; flex-shrink:0;">
+                                <input type="radio" name="ana_sim_algo" value="sim" ${lastAlgo === 'sim' || !lastAlgo ? 'checked' : ''} style="accent-color:var(--pk-pri); margin-right:6px;">
+                                <span style="font-size:13px; color:var(--pk-fg); font-weight:500;">${L.lbl_sim_match}</span>
+                            </label>
+                            <label style="display:flex; align-items:center; cursor:pointer; flex-shrink:0;">
+                                <input type="radio" name="ana_sim_algo" value="contain" ${lastAlgo === 'contain' ? 'checked' : ''} style="accent-color:var(--pk-pri); margin-right:6px;">
+                                <span style="font-size:13px; color:var(--pk-fg); font-weight:500;">${L.lbl_contain_match}</span>
+                            </label>
+                            <div id="pk_algo_help" style="display:flex; align-items:center; cursor:pointer; color:#888; transition:color 0.2s; flex-shrink:0; width:20px; height:20px; justify-content:center;" data-pk-tip="${L.title_algo_help}" onmouseover="this.style.color=document.querySelector('.pk-ov').classList.contains('pk-dark')?'#ddd':'#666'" onmouseout="this.style.color='#888'">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; pointer-events:none;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                             </div>
-                            <div class="pk-ana-menu" id="an_unit_menu">
-                                <div class="pk-ana-item ${lastUnit === 'MB' ? 'act' : ''}" data-v="MB">MB</div>
-                                <div class="pk-ana-item ${lastUnit === 'GB' ? 'act' : ''}" data-v="GB">GB</div>
-                                <div class="pk-ana-item ${lastUnit === 'TB' ? 'act' : ''}" data-v="TB">TB</div>
+                        </div>
+                        <div class="pk-custom-select" id="cs_ana_sim" style="margin-bottom:25px;">
+                            <div class="pk-select-label">${L.lbl_threshold}</div>
+                            <div class="pk-select-trigger"><span id="txt_ana_sim">${(lastSim === 0.01) ? L.opt_loose : L.opt_strict}</span>${CONF.crumbIcons.down}</div>
+                            <div class="pk-select-menu pk-scroll">
+                                <div class="pk-select-item ${lastSim === 0.01 ? 'act' : ''}" data-val="0.01">${L.opt_loose}</div>
+                                <div class="pk-select-item ${lastSim !== 0.01 ? 'act' : ''}" data-val="1.0">${L.opt_strict}</div>
                             </div>
                         </div>
                     </div>
@@ -18740,11 +20131,55 @@ async function openManager(initialCache, preloadPromise) {
                     </div>
                 `);
 
-                const inp = m.querySelector('#an_val');
+                let currentMode = 'large';
+                let currentSim = lastSim;
+
+                const updateAlgoLabel = () => {
+                    const lblEl = m.querySelector('#cs_ana_sim .pk-select-label');
+                    if (lblEl) lblEl.textContent = L.lbl_threshold;
+                };
+                m.querySelectorAll('input[name="ana_sim_algo"]').forEach(r => r.addEventListener('change', updateAlgoLabel));
+                updateAlgoLabel();
+
+                m.querySelector('#pk_algo_help').onclick = (e) => {
+                    e.stopPropagation();
+                    showAlert(L.algo_help_content, L.title_algo_help);
+                };
+
+                m.querySelectorAll('.pk-s-tab').forEach(tab => {
+                    tab.onclick = () => {
+                        m.querySelectorAll('.pk-s-tab').forEach(t => t.classList.remove('act'));
+                        tab.classList.add('act');
+                        currentMode = tab.dataset.val;
+                        m.querySelector('#ana_pane_large').style.display = currentMode === 'large' ? 'block' : 'none';
+                        m.querySelector('#ana_pane_similar').style.display = currentMode === 'similar' ? 'block' : 'none';
+                    };
+                });
+
+                const simTrigger = m.querySelector('#cs_ana_sim .pk-select-trigger');
+                const simMenu = m.querySelector('#cs_ana_sim .pk-select-menu');
+                const simTxt = m.querySelector('#txt_ana_sim');
+                simTrigger.onclick = (e) => { e.stopPropagation(); simMenu.style.display = simMenu.style.display === 'block' ? 'none' : 'block'; };
+                m.querySelectorAll('#cs_ana_sim .pk-select-item').forEach(item => {
+                    item.onclick = (e) => {
+                        e.stopPropagation();
+                        m.querySelectorAll('#cs_ana_sim .pk-select-item').forEach(i => i.classList.remove('act'));
+                        item.classList.add('act');
+                        currentSim = parseFloat(item.dataset.val);
+                        gmSet('pk_analyze_last_sim', currentSim);
+                        simTxt.textContent = (currentSim <= 0.5) ? L.opt_loose : L.opt_strict;
+                        simMenu.style.display = 'none';
+                    };
+                });
+
+                const inpMin = m.querySelector('#an_val_min');
+                const inpMax = m.querySelector('#an_val_max');
                 const btn = m.querySelector('#an_unit_btn');
 
-                m.querySelector('#an_inc').onclick = (e) => { e.stopPropagation(); inp.value = (parseInt(inp.value) || 0) + 1; inp.dispatchEvent(new Event('input')); };
-                m.querySelector('#an_dec').onclick = (e) => { e.stopPropagation(); inp.value = Math.max(1, (parseInt(inp.value) || 2) - 1); inp.dispatchEvent(new Event('input')); };
+                m.querySelector('#an_inc_min').onclick = (e) => { e.stopPropagation(); inpMin.value = (parseInt(inpMin.value) || 0) + 1; inpMin.dispatchEvent(new Event('input')); };
+                m.querySelector('#an_dec_min').onclick = (e) => { e.stopPropagation(); inpMin.value = Math.max(0, (parseInt(inpMin.value) || 1) - 1); inpMin.dispatchEvent(new Event('input')); };
+                m.querySelector('#an_inc_max').onclick = (e) => { e.stopPropagation(); inpMax.value = (parseInt(inpMax.value) || 0) + 1; inpMax.dispatchEvent(new Event('input')); };
+                m.querySelector('#an_dec_max').onclick = (e) => { e.stopPropagation(); inpMax.value = Math.max(0, (parseInt(inpMax.value) || 1) - 1); inpMax.dispatchEvent(new Event('input')); };
                 const menu = m.querySelector('#an_unit_menu');
                 const txt = m.querySelector('#an_unit_txt');
                 let currentUnit = lastUnit;
@@ -18760,7 +20195,7 @@ async function openManager(initialCache, preloadPromise) {
                     };
                 });
 
-                const closeMenu = () => { if(menu) menu.style.display = 'none'; };
+                const closeMenu = () => { if(menu) menu.style.display = 'none'; if(simMenu) simMenu.style.display = 'none'; };
                 setTimeout(() => document.addEventListener('click', closeMenu), 0);
 
                 const _orgRemove = m.remove.bind(m);
@@ -18769,46 +20204,77 @@ async function openManager(initialCache, preloadPromise) {
                     _orgRemove();
                 };
 
-                setTimeout(() => { inp.focus(); inp.select(); }, 50);
+                setTimeout(() => { inpMin.focus(); inpMin.select(); }, 50);
 
-                inp.onkeydown = (e) => {
+                const kHandler = (e) => {
                     if (e.key === 'Enter') m.querySelector('#an_confirm').click();
                     if (e.key === 'Escape') m.querySelector('#an_cancel').click();
                 };
+                inpMin.onkeydown = kHandler;
+                inpMax.onkeydown = kHandler;
 
-                m.querySelector('#an_cancel').onclick = () => { m.remove(); resolve(null); };
-                m.querySelector('#an_confirm').onclick = () => {
-                    const v = parseInt(inp.value);
-                    if (isNaN(v) || v <= 0) { inp.style.borderColor = '#d93025'; return; }
-                    gmSet('pk_analyze_last_val', v);
+                const saveAnalyzeInputs = () => {
+                    gmSet('pk_analyze_last_min', parseInt(inpMin.value) || 0);
+                    gmSet('pk_analyze_last_max', inpMax.value.trim());
                     gmSet('pk_analyze_last_unit', currentUnit);
-                    let bytes = 0;
-                    if (currentUnit === 'MB') bytes = v * 1024 * 1024;
-                    else if (currentUnit === 'GB') bytes = v * 1024 * 1024 * 1024;
-                    else if (currentUnit === 'TB') bytes = v * 1024 * 1024 * 1024 * 1024;
-                    m.remove();
-                    resolve(Math.floor(bytes));
+                    gmSet('pk_analyze_last_keyword', m.querySelector('#an_keyword').value.trim());
+                    const algo = m.querySelector('input[name="ana_sim_algo"]:checked')?.value;
+                    if (algo) gmSet('pk_analyze_last_algo', algo);
+                };
+
+                m.querySelector('#an_cancel').onclick = () => { saveAnalyzeInputs(); m.remove(); resolve(null); };
+                m.querySelector('.pk-modal-close').onclick = () => { saveAnalyzeInputs(); m.remove(); resolve(null); };
+                m.querySelector('#an_confirm').onclick = () => {
+                    if (currentMode === 'large') {
+                        const vMin = parseInt(inpMin.value) || 0;
+                        const vMax = parseInt(inpMax.value) || 0;
+                        const kw = m.querySelector('#an_keyword').value.trim();
+                        if (vMin < 0 || (vMax > 0 && vMin > vMax)) {
+                            inpMin.style.borderColor = '#d93025';
+                            if (vMax > 0 && vMin > vMax) inpMax.style.borderColor = '#d93025';
+                            return;
+                        }
+                        saveAnalyzeInputs();
+                        let mult = 1;
+                        if (currentUnit === 'MB') mult = 1024 * 1024;
+                        else if (currentUnit === 'GB') mult = 1024 * 1024 * 1024;
+                        else if (currentUnit === 'TB') mult = 1024 * 1024 * 1024 * 1024;
+                        m.remove();
+                        resolve({ mode: 'large', minBytes: Math.floor(vMin * mult), maxBytes: vMax > 0 ? Math.floor(vMax * mult) : 0, keyword: kw });
+                    } else {
+                        const algo = m.querySelector('input[name="ana_sim_algo"]:checked').value;
+                        gmSet('pk_analyze_last_algo', algo);
+                        m.remove();
+                        resolve({ mode: 'similar', threshold: currentSim, algo: algo });
+                    }
                 };
 
                 const modalBox = m.querySelector('.pk-modal');
                 if (modalBox) {
                     Object.assign(modalBox.style, {
-                        width: '480px',
+                        width: '540px',
                         height: 'auto',
                         minHeight: 'auto',
                         overflow: 'visible',
                         paddingBottom: '30px'
                     });
+
+                    const closeBtn = m.querySelector('.pk-modal-close');
+                    if (closeBtn) Object.assign(closeBtn.style, { top: '22px', right: '22px' });
                 }
             });
 
             if (result === null) return;
-            const limitBytes = Number(result);
+            const isSimMode = result.mode === 'similar';
+            const minBytes = result.minBytes || 0;
+            const maxBytes = result.maxBytes || 0;
+            const simThreshold = result.threshold || 0.9;
+            const simAlgo = result.algo || 'sim';
 
             setLoad(true);
             isGUISensitive = true;
 
-            const nodeMap = new Map();
+            let nodeMap = new Map();
             const largeFolders = [];
 
             const startNodes = [];
@@ -18830,6 +20296,8 @@ async function openManager(initialCache, preloadPromise) {
                             id: item.id,
                             name: item.name,
                             icon_link: item.icon_link,
+                            starred: item.starred,
+                            tags: item.tags,
                             lineage: fullLineage,
                             retryCount: 0,
                             _pathStr: fullLineage.map(x => x.name).join('/')
@@ -18837,24 +20305,44 @@ async function openManager(initialCache, preloadPromise) {
                     }
                 });
             } else {
-                const cur = S.path[S.path.length - 1];
-                const cleanPath = S.path.filter(p => p.id !== 'analyze_root' && p.id !== 'virtual_search_root');
-                if (cleanPath.length === 0) cleanPath.push({ id: '', name: L.btn_nav_home });
-                const rootName = cur.name || 'Root';
+                const subFolders = S.items.filter(it => it.kind === 'drive#folder');
+                if (subFolders.length > 0) {
+                    subFolders.forEach(item => {
+                        const fullLineage = getRealLineage(item);
+                        startNodes.push({
+                            id: item.id,
+                            name: item.name,
+                            icon_link: item.icon_link,
+                            starred: item.starred,
+                            tags: item.tags,
+                            lineage: fullLineage,
+                            retryCount: 0,
+                            _pathStr: fullLineage.map(x => x.name).join('/')
+                        });
+                    });
+                } else {
+                    const cur = S.path[S.path.length - 1];
+                    const cleanPath = S.path.filter(p => p.id !== 'analyze_root' && p.id !== 'virtual_search_root');
+                    if (cleanPath.length === 0) cleanPath.push({ id: '', name: L.btn_nav_home });
+                    const rootName = cur.name || 'Root';
+                    const actualCur = S.itemMap.get(cur.id);
 
-                startNodes.push({
-                    id: cur.id || '',
-                    name: rootName,
-                    icon_link: cur.icon_link,
-                    lineage: cleanPath,
-                    retryCount: 0,
-                    _pathStr: cleanPath.map(x => x.name).join('/')
-                });
+                    startNodes.push({
+                        id: cur.id || '',
+                        name: rootName,
+                        icon_link: cur.icon_link,
+                        starred: actualCur ? actualCur.starred : false,
+                        tags: actualCur ? actualCur.tags :[],
+                        lineage: cleanPath,
+                        retryCount: 0,
+                        _pathStr: cleanPath.map(x => x.name).join('/')
+                    });
+                }
             }
 
             if (startNodes.length === 0) {
                 setLoad(false); isGUISensitive = false;
-                showAlert(L.msg_analyze_only_normal_dir);
+                showToast(L.msg_analyze_only_normal_dir);
                 return;
             }
 
@@ -18863,14 +20351,27 @@ async function openManager(initialCache, preloadPromise) {
                     id: n.id,
                     name: n.name,
                     icon_link: n.icon_link,
+                    starred: n.starred,
+                    tags: n.tags,
                     size: 0,
                     parentId: null,
                     marked: false,
                     _pathStr: n._pathStr,
                     lineage: n.lineage,
-                    isRoot: true
+                    isRoot: true,
+                    files:[]
                 });
             });
+
+            const cacheKey = '__analyze_nodeMap_' + startNodes.map(n => n.id).join('_');
+            let useCache = false;
+
+            if (typeof globalCache !== 'undefined' && globalCache.has(cacheKey) && globalDirtyFolders.size === 0) {
+                const cachedArr = globalCache.get(cacheKey);
+                nodeMap = new Map(cachedArr);
+                useCache = true;
+                console.log("[Analyze] Using cached global nodeMap.");
+            }
 
             const propagateSize = (parentId, addSize) => {
                 let curId = parentId;
@@ -18878,7 +20379,7 @@ async function openManager(initialCache, preloadPromise) {
                     const node = nodeMap.get(curId);
                     node.size += addSize;
 
-                    if (!node.isRoot && node.size >= limitBytes && !node.marked) {
+                    if (!node.isRoot && node.size >= minBytes && !node.marked) {
                         node.marked = true;
                         largeFolders.push(node);
                     }
@@ -18906,7 +20407,8 @@ async function openManager(initialCache, preloadPromise) {
             let totalDirsScanned = 0;
 
             try {
-                await coreRecursiveEngine(startNodes, {
+                if (!useCache) {
+                    await coreRecursiveEngine(startNodes, {
                     signal: signal,
 
                     onFolder: (folder, filesInFolder, nextSubFolders) => {
@@ -18920,12 +20422,15 @@ async function openManager(initialCache, preloadPromise) {
                                     id: sub.id,
                                     name: sub.name,
                                     icon_link: sub.icon_link,
+                                    starred: sub.starred,
+                                    tags: sub.tags,
                                     size: 0,
                                     parentId: folder.id,
                                     marked: false,
                                     _pathStr: fullPathStr,
                                     lineage: sub.lineage,
-                                    isRoot: false
+                                    isRoot: false,
+                                    files:[]
                                 });
                             }
                         });
@@ -18936,6 +20441,14 @@ async function openManager(initialCache, preloadPromise) {
                         const sz = Number(file.size || 0);
                         if (sz > 0) {
                             propagateSize(parent.id, sz);
+                        }
+                        if (nodeMap.has(parent.id)) {
+                            const fingerprint = file.hash ? `${file.hash}_${sz}` : `${file.name}_${sz}`;
+                            let curId = parent.id;
+                            while (curId !== null && nodeMap.has(curId)) {
+                                nodeMap.get(curId).files.push(fingerprint);
+                                curId = nodeMap.get(curId).parentId;
+                            }
                         }
                     },
 
@@ -18948,37 +20461,618 @@ async function openManager(initialCache, preloadPromise) {
                     throw new Error('StoppedByUser');
                 }
 
+                if (typeof globalCache !== 'undefined') {
+                    globalCache.set(cacheKey, Array.from(nodeMap.entries()));
+                }
+            } else {
+                Array.from(nodeMap.values()).forEach(node => {
+                    if (!node.isRoot && node.size >= minBytes) {
+                        largeFolders.push(node);
+                    }
+                });
+            }
+
             } catch (e) {
                 if (isRunning && e.message !== 'StoppedByUser' && e.name !== 'AbortError') {
                     showAlert(`${L.str_error}: ${e.message}`);
+                    setLoad(false);
                 }
             } finally {
-                setLoad(false);
                 isGUISensitive = false;
                 S.scanning = false;
                 S.scanAbortController = null;
 
-                if (!isRunning) return;
-
-                const uniqueResults = Array.from(new Set(largeFolders));
-                uniqueResults.sort((a, b) => b.size - a.size);
-
-                if (uniqueResults.length === 0) {
-                    showAlert(L.msg_analyze_no_large_folders.replace('{s}', fmtSize(limitBytes)));
+                if (!isRunning) {
+                    setLoad(false);
                     return;
                 }
 
-                const viewItems = uniqueResults.map(node => ({
-                    id: node.id,
-                    kind: 'drive#folder',
-                    name: node.name,
-                    icon_link: node.icon_link,
-                    size: node.size.toString(),
-                    _pathStr: node._pathStr || "/",
-                    _lineage: node.lineage,
-                    modified_time: new Date(getServerNow()).toISOString(),
-                    parent_id: node.parentId
-                }));
+                let viewItems = [];
+
+                if (isSimMode) {
+                    updateLoadTxt(`${L.str_analyzing}...`);
+
+                    Array.from(nodeMap.values()).forEach(node => {
+                        node._ancestorSet = new Set(node.lineage ? node.lineage.map(p => p.id) : []);
+                        if (node.parentId && nodeMap.has(node.parentId)) {
+                            const parent = nodeMap.get(node.parentId);
+                            if (parent.files.length === node.files.length) {
+                                parent.isShell = true;
+                            }
+                        }
+                    });
+
+                    const isDescendant = (childId, parentId) => {
+                        const childNode = nodeMap.get(childId);
+                        return childNode ? childNode._ancestorSet.has(parentId) : false;
+                    };
+
+                    const folderArr = Array.from(nodeMap.values())
+                    .filter(f => !f.isShell && (f.files.length >= 2 || f.size > 1024 * 1024))
+                    .map(f => {
+                        const counts = new Map();
+                        f.files.forEach(h => counts.set(h, (counts.get(h) || 0) + 1));
+                        return { ...f, fileCounts: counts, _keys: Array.from(counts.keys()), totalFiles: f.files.length };
+                    })
+                    .sort((a, b) => b.totalFiles - a.totalFiles);
+
+                    const invertedIndex = new Map();
+                    folderArr.forEach((f, i) => {
+                        f.fileCounts.forEach((_, hash) => {
+                            let arr = invertedIndex.get(hash);
+                            if (!arr) { arr = []; invertedIndex.set(hash, arr); }
+                            arr.push(i);
+                        });
+                    });
+
+                    const totalDocs = folderArr.length;
+                    const weightMap = new Map();
+                    invertedIndex.forEach((arr, hash) => {
+                        const df = arr.length;
+                        let w = 1.0;
+                        if (totalDocs >= 20 && (df / totalDocs) > 0.05) {
+                            w = 0.05;
+                        }
+                        weightMap.set(hash, w);
+                    });
+
+                    folderArr.forEach(f => {
+                        let wt = 0;
+                        f.fileCounts.forEach((count, hash) => {
+                            wt += count * weightMap.get(hash);
+                        });
+                        f.weightedTotal = wt;
+                    });
+
+                    let groups =[];
+                    const assigned = new Set();
+                    const total = folderArr.length;
+                    const candidateSeen = new Uint32Array(total);
+                    let lastYieldTime = performance.now();
+
+                    updateLoadTxt(`${L.str_analyzing}... 0%`);
+
+                    try {
+                        if (simAlgo === 'name') {
+                            const nameGroups = new Map();
+                            const cleanFolderName = (oldName) => {
+                                let cleanName = oldName.replace(/[\r\n\v\f\u2028\u2029]+/g, ' ').trim();
+                                cleanName = cleanName.replace(/^【[^】]+】 *[-_.]? */, '');
+                                cleanName = cleanName.replace(/^[a-z0-9-]+[.](?:com|net|org|cc|xyz|vip|top|la) +/i, '');
+                                const adKw = "(?:[.]com|[.]net|[.]org|[.]cc|[.]xyz|[.]vip|[.]top|[.]la|2048|www[.])";
+                                const atRegex = new RegExp('^.*?' + adKw + '.*?(?:@|--+|_\\s)', 'i');
+                                cleanName = cleanName.replace(atRegex, '');
+                                const hyphenRegex = new RegExp('^[a-z0-9.-]+' + adKw + '-', 'i');
+                                cleanName = cleanName.replace(hyphenRegex, '');
+                                cleanName = cleanName.replace(/^(?:精品加群|福利合集)[0-9]+[-_]+ */, '');
+                                cleanName = cleanName.replace(/^[-_. ,，:：;；\p{Extended_Pictographic}]+/u, '');
+                                const pairs = [['【','】'], ['[',']'], ['《','》'],['<','>'], ['（','）'],['(',')'], ['{','}']];
+                                pairs.forEach(([L_char, R_char]) => {
+                                    const idxR_Fix = cleanName.indexOf(R_char);
+                                    const idxL_Check = cleanName.indexOf(L_char);
+                                    if (idxR_Fix > 0 && idxR_Fix <= 10 && (idxL_Check === -1 || idxL_Check > idxR_Fix)) {
+                                        cleanName = L_char + cleanName;
+                                    }
+                                    const chars = cleanName.split('');
+                                    const stack = [];
+                                    const toRemove = new Set();
+                                    for (let i = 0; i < chars.length; i++) {
+                                        const c = chars[i];
+                                        if (c === L_char) stack.push(i);
+                                        else if (c === R_char) {
+                                            if (stack.length > 0) stack.pop();
+                                            else toRemove.add(i);
+                                        }
+                                    }
+                                    stack.forEach(i => toRemove.add(i));
+                                    if (toRemove.size > 0) cleanName = chars.filter((_, i) => !toRemove.has(i)).join('');
+                                });
+                                const quoteCount = (cleanName.match(/'/g) || []).length;
+                                if (quoteCount % 2 !== 0) cleanName = cleanName.replace(/'/, '');
+                                let finalResult = cleanName.toLowerCase().trim();
+                                if (simThreshold <= 0.5) {
+                                    finalResult = finalResult.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
+                                }
+                                return finalResult || oldName.toLowerCase().trim();
+                            };
+                            folderArr.forEach(f => {
+                                const k = cleanFolderName(f.name);
+                                if (!nameGroups.has(k)) nameGroups.set(k,[]);
+                                nameGroups.get(k).push(f);
+                            });
+
+                            const sizeRatioLimit = simThreshold >= 0.5 ? 0.05 : 0.10;
+
+                            for (const[k, items] of nameGroups) {
+                                if (items.length > 1) {
+                                    const sorted = [...items].sort((a,b) => Number(a.size) - Number(b.size));
+                                    let currentGroup = [sorted[0]];
+
+                                    for (let i = 1; i < sorted.length; i++) {
+                                        const target = sorted[i];
+                                        const root = currentGroup[0];
+                                        const rootSize = Number(root.size || 0);
+                                        const targetSize = Number(target.size || 0);
+
+                                        let isMatch = false;
+                                        if (rootSize === 0 && targetSize === 0) isMatch = true;
+                                        else {
+                                            const sizeDiff = Math.abs(targetSize - rootSize);
+                                            const maxBase = Math.max(targetSize, rootSize);
+                                            if (maxBase > 0 && (sizeDiff / maxBase) <= sizeRatioLimit) isMatch = true;
+                                        }
+
+                                        if (isMatch) currentGroup.push(target);
+                                        else {
+                                            if (currentGroup.length > 1) {
+                                                const gNodes = currentGroup;
+                                                let minS = Number.MAX_SAFE_INTEGER, maxS = 0;
+                                                gNodes.forEach(n => { const sz = Number(n.size||0); if(sz<minS) minS=sz; if(sz>maxS) maxS=sz; });
+                                                if (minS === Number.MAX_SAFE_INTEGER) minS = 0;
+                                                const range = (minS === maxS) ? fmtSize(minS) : `${fmtSize(minS)} ~ ${fmtSize(maxS)}`;
+                                                groups.push({ ids: gNodes.map(f => f.id), type: `${gNodes.length} ${L.str_items} | ${range}`, _sim: 1 });
+                                                gNodes.forEach(f => assigned.add(f.id));
+                                            }
+                                            currentGroup = [target];
+                                        }
+                                    }
+                                    if (currentGroup.length > 1) {
+                                        const gNodes = currentGroup;
+                                        let minS = Number.MAX_SAFE_INTEGER, maxS = 0;
+                                        gNodes.forEach(n => { const sz = Number(n.size||0); if(sz<minS) minS=sz; if(sz>maxS) maxS=sz; });
+                                        if (minS === Number.MAX_SAFE_INTEGER) minS = 0;
+                                        const range = (minS === maxS) ? fmtSize(minS) : `${fmtSize(minS)} ~ ${fmtSize(maxS)}`;
+                                        groups.push({ ids: gNodes.map(f => f.id), type: `${gNodes.length} ${L.str_items} | ${range}`, _sim: 1 });
+                                        gNodes.forEach(f => assigned.add(f.id));
+                                    }
+                                }
+                            }
+                        } else {
+                        for (let i = 0; i < total; i++) {
+                            if (i % 50 === 0 || performance.now() - lastYieldTime > 16) {
+                                if (!isRunning) break;
+                                updateLoadTxt(`${L.str_analyzing}\n${Math.round((i / total) * 100)}%`);
+                                await sleep(0);
+                                lastYieldTime = performance.now();
+                            }
+
+                            if (assigned.has(folderArr[i].id)) continue;
+
+                            const f1 = folderArr[i];
+                            const group = [f1];
+                            let groupMinSim = 1.0;
+
+                            const candidateIndices = [];
+                            const marker = i + 1;
+                            f1.fileCounts.forEach((_, hash) => {
+                                const foldersWithHash = invertedIndex.get(hash);
+                                if (foldersWithHash) {
+                                    for (let k = 0, len = foldersWithHash.length; k < len; k++) {
+                                        const idx = foldersWithHash[k];
+                                        if (idx > i && candidateSeen[idx] !== marker && !assigned.has(folderArr[idx].id)) {
+                                            candidateSeen[idx] = marker;
+                                            candidateIndices.push(idx);
+                                        }
+                                    }
+                                }
+                            });
+
+                            for (let m = 0, cLen = candidateIndices.length; m < cLen; m++) {
+                                const j = candidateIndices[m];
+                                const f2 = folderArr[j];
+
+                                if (simAlgo === 'sim' && (isDescendant(f2.id, f1.id) || isDescendant(f1.id, f2.id))) continue;
+
+                                let total1 = f1.weightedTotal;
+                                let total2 = f2.weightedTotal;
+                                let intersect = 0;
+
+                                if (isDescendant(f2.id, f1.id)) {
+                                    total1 -= total2;
+                                    if (total1 <= 0 || total2 <= 0) continue;
+                                    const maxS = total1 > total2 ? total1 : total2;
+                                    const minS = total1 < total2 ? total1 : total2;
+                                    if (simAlgo === 'sim' && minS / maxS < simThreshold) continue;
+
+                                    for (let k = 0, len = f2._keys.length; k < len; k++) {
+                                        const hash = f2._keys[k];
+                                        const c2 = f2.fileCounts.get(hash);
+                                        const c1 = f1.fileCounts.get(hash) || 0;
+                                        const diff = c1 - c2;
+                                        if (diff > 0) intersect += (diff < c2 ? diff : c2) * weightMap.get(hash);
+                                    }
+                                } else if (isDescendant(f1.id, f2.id)) {
+                                    total2 -= total1;
+                                    if (total1 <= 0 || total2 <= 0) continue;
+                                    const maxS = total1 > total2 ? total1 : total2;
+                                    const minS = total1 < total2 ? total1 : total2;
+                                    if (simAlgo === 'sim' && minS / maxS < simThreshold) continue;
+
+                                    for (let k = 0, len = f1._keys.length; k < len; k++) {
+                                        const hash = f1._keys[k];
+                                        const c1 = f1.fileCounts.get(hash);
+                                        const c2 = f2.fileCounts.get(hash) || 0;
+                                        const diff = c2 - c1;
+                                        if (diff > 0) intersect += (diff < c1 ? diff : c1) * weightMap.get(hash);
+                                    }
+                                } else {
+                                    if (total1 <= 0 || total2 <= 0) continue;
+                                    const maxS = total1 > total2 ? total1 : total2;
+                                    const minS = total1 < total2 ? total1 : total2;
+                                    if (simAlgo === 'sim' && minS / maxS < simThreshold) continue;
+
+                                    const fSmall = f1._keys.length < f2._keys.length ? f1 : f2;
+                                    const fLarge = f1._keys.length < f2._keys.length ? f2 : f1;
+                                    for (let k = 0, len = fSmall._keys.length; k < len; k++) {
+                                        const hash = fSmall._keys[k];
+                                        const cLarge = fLarge.fileCounts.get(hash);
+                                        if (cLarge !== undefined) {
+                                            const cSmall = fSmall.fileCounts.get(hash);
+                                            intersect += (cSmall < cLarge ? cSmall : cLarge) * weightMap.get(hash);
+                                        }
+                                    }
+                                }
+
+                                const minTotal = total1 < total2 ? total1 : total2;
+                                const union = total1 + total2 - intersect;
+                                const sim = simAlgo === 'contain' ? (minTotal > 0 ? (intersect / minTotal) : 0) : (union > 0 ? (intersect / union) : 0);
+
+                                if (sim >= simThreshold) {
+                                    let isGroupQualified = true;
+                                    let currentMinSim = sim;
+
+                                    for (let gIdx = 1; gIdx < group.length; gIdx++) {
+                                        const gMember = group[gIdx];
+
+                                        if (simAlgo === 'sim' && (isDescendant(f2.id, gMember.id) || isDescendant(gMember.id, f2.id))) {
+                                            isGroupQualified = false;
+                                            break;
+                                        }
+
+                                        let tA = gMember.weightedTotal;
+                                        let tB = f2.weightedTotal;
+                                        let intS = 0;
+
+                                        if (isDescendant(f2.id, gMember.id)) {
+                                            tA -= tB;
+                                        } else if (isDescendant(gMember.id, f2.id)) {
+                                            tB -= tA;
+                                        }
+
+                                        if (tA <= 0 || tB <= 0) {
+                                            isGroupQualified = false;
+                                            break;
+                                        }
+
+                                        const maxS = tA > tB ? tA : tB;
+                                        const minS = tA < tB ? tA : tB;
+                                        if (simAlgo === 'sim' && minS / maxS < simThreshold) {
+                                            isGroupQualified = false;
+                                            break;
+                                        }
+
+                                        if (isDescendant(f2.id, gMember.id)) {
+                                            for (let k = 0, len = f2._keys.length; k < len; k++) {
+                                                const h = f2._keys[k];
+                                                const cB = f2.fileCounts.get(h);
+                                                const cA = gMember.fileCounts.get(h) || 0;
+                                                const diff = cA - cB;
+                                                if (diff > 0) intS += (diff < cB ? diff : cB) * weightMap.get(h);
+                                            }
+                                        } else if (isDescendant(gMember.id, f2.id)) {
+                                            for (let k = 0, len = gMember._keys.length; k < len; k++) {
+                                                const h = gMember._keys[k];
+                                                const cA = gMember.fileCounts.get(h);
+                                                const cB = f2.fileCounts.get(h) || 0;
+                                                const diff = cB - cA;
+                                                if (diff > 0) intS += (diff < cA ? diff : cA) * weightMap.get(h);
+                                            }
+                                        } else {
+                                            const fSmall = gMember._keys.length < f2._keys.length ? gMember : f2;
+                                            const fLarge = gMember._keys.length < f2._keys.length ? f2 : gMember;
+                                            for (let k = 0, len = fSmall._keys.length; k < len; k++) {
+                                                const h = fSmall._keys[k];
+                                                const cLarge = fLarge.fileCounts.get(h);
+                                                if (cLarge !== undefined) {
+                                                    const cSmall = fSmall.fileCounts.get(h);
+                                                    intS += (cSmall < cLarge ? cSmall : cLarge) * weightMap.get(h);
+                                                }
+                                            }
+                                        }
+
+                                        const minT = tA < tB ? tA : tB;
+                                        const un = tA + tB - intS;
+                                        const pairwiseSim = simAlgo === 'contain' ? (minT > 0 ? (intS / minT) : 0) : (un > 0 ? (intS / un) : 0);
+
+                                        if (pairwiseSim < simThreshold) {
+                                            isGroupQualified = false;
+                                            break;
+                                        }
+                                        if (pairwiseSim < currentMinSim) {
+                                            currentMinSim = pairwiseSim;
+                                        }
+                                    }
+
+                                    if (isGroupQualified) {
+                                        group.push(f2);
+                                        if (currentMinSim < groupMinSim) groupMinSim = currentMinSim;
+                                    }
+                                }
+                            }
+
+                            if (group.length > 1) {
+                                group.forEach(f => assigned.add(f.id));
+                                groups.push({
+                                    ids: group.map(f => f.id),
+                                    type: `${group.length} ${L.str_items} | ${simAlgo === 'contain' ? L.lbl_containment : L.lbl_sim_score}: ${Math.round(groupMinSim * 100)}%`,
+                                    _sim: groupMinSim
+                                });
+                            }
+                        }
+                        }
+
+                        if (simAlgo !== 'name') {
+                        const folderObjMap = new Map();
+                        folderArr.forEach(f => folderObjMap.set(f.id, f));
+
+                        const finalGroups =[];
+                        groups.forEach(g => {
+                            const nodes = g.ids.map(id => folderObjMap.get(id)).filter(Boolean);
+                            const toRemove = new Set();
+
+                            nodes.forEach(node => {
+                                const descendants = nodes.filter(n => n.id !== node.id && isDescendant(n.id, node.id));
+                                if (descendants.length === 0) return;
+
+                                const hasExternal = nodes.some(n => n.id !== node.id && !isDescendant(n.id, node.id) && !isDescendant(node.id, n.id));
+                                if (hasExternal) return;
+
+                                const topDescendants = descendants.filter(d1 =>
+                                    !descendants.some(d2 => d1.id !== d2.id && isDescendant(d1.id, d2.id))
+                                );
+
+                                let isCovered = true;
+                                let sumTotal = 0;
+                                const sumCounts = new Map();
+
+                                topDescendants.forEach(td => {
+                                    sumTotal += td.totalFiles;
+                                    td.fileCounts.forEach((count, hash) => {
+                                        sumCounts.set(hash, (sumCounts.get(hash) || 0) + count);
+                                    });
+                                });
+
+                                if (sumTotal !== node.totalFiles) {
+                                    isCovered = false;
+                                } else {
+                                    for (const [hash, count] of node.fileCounts) {
+                                        if (sumCounts.get(hash) !== count) {
+                                            isCovered = false;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (isCovered) {
+                                    toRemove.add(node.id);
+                                }
+                            });
+
+                            const finalIds = g.ids.filter(id => !toRemove.has(id));
+                            if (finalIds.length >= 2) {
+                                finalGroups.push({
+                                    ids: finalIds,
+                                    type: g.type,
+                                    _sim: g._sim
+                                });
+                            }
+                        });
+
+                        groups = finalGroups;
+
+                        const partitionedGroups = [];
+                        const varianceTolerance = 0.15;
+
+                        groups.forEach(g => {
+                            const nodes = g.ids.map(id => folderObjMap.get(id)).filter(Boolean);
+                            if (nodes.length <= 2) {
+                                const pct = Math.round(g._sim * 100);
+                                g.type = `${nodes.length} ${L.str_items} | ${simAlgo === 'contain' ? L.lbl_containment : L.lbl_sim_score}: ${pct}%`;
+                                partitionedGroups.push(g);
+                                return;
+                            }
+
+                            const simMatrix = [];
+                            let maxSim = 0, minSim = 1;
+
+                            for (let i = 0; i < nodes.length; i++) {
+                                simMatrix[i] = [];
+                                for (let j = 0; j < nodes.length; j++) {
+                                    if (i === j) { simMatrix[i][j] = 1; continue; }
+                                    if (j < i) { simMatrix[i][j] = simMatrix[j][i]; continue; }
+
+                                    const n1 = nodes[i], n2 = nodes[j];
+
+                                    if (simAlgo === 'sim' && (isDescendant(n2.id, n1.id) || isDescendant(n1.id, n2.id))) {
+                                        simMatrix[i][j] = 0;
+                                        minSim = 0;
+                                        continue;
+                                    }
+
+                                    let tA = n1.weightedTotal, tB = n2.weightedTotal, intS = 0;
+                                    if (isDescendant(n2.id, n1.id)) tA -= tB; else if (isDescendant(n1.id, n2.id)) tB -= tA;
+
+                                    if (tA > 0 && tB > 0) {
+                                        if (isDescendant(n2.id, n1.id)) {
+                                            for (let k = 0; k < n2._keys.length; k++) {
+                                                const h = n2._keys[k], cB = n2.fileCounts.get(h), cA = n1.fileCounts.get(h) || 0, diff = cA - cB;
+                                                if (diff > 0) intS += (diff < cB ? diff : cB) * weightMap.get(h);
+                                            }
+                                        } else if (isDescendant(n1.id, n2.id)) {
+                                            for (let k = 0; k < n1._keys.length; k++) {
+                                                const h = n1._keys[k], cA = n1.fileCounts.get(h), cB = n2.fileCounts.get(h) || 0, diff = cB - cA;
+                                                if (diff > 0) intS += (diff < cA ? diff : cA) * weightMap.get(h);
+                                            }
+                                        } else {
+                                            const fSmall = n1._keys.length < n2._keys.length ? n1 : n2, fLarge = n1._keys.length < n2._keys.length ? n2 : n1;
+                                            for (let k = 0; k < fSmall._keys.length; k++) {
+                                                const h = fSmall._keys[k], cLarge = fLarge.fileCounts.get(h);
+                                                if (cLarge !== undefined) intS += (fSmall.fileCounts.get(h) < cLarge ? fSmall.fileCounts.get(h) : cLarge) * weightMap.get(h);
+                                            }
+                                        }
+                                        const minT = tA < tB ? tA : tB;
+                                        const un = tA + tB - intS;
+                                        const s = simAlgo === 'contain' ? (minT > 0 ? (intS / minT) : 0) : (un > 0 ? (intS / un) : 0);
+                                        simMatrix[i][j] = s;
+                                        if (s > maxSim) maxSim = s;
+                                        if (s < minSim) minSim = s;
+                                    } else {
+                                        simMatrix[i][j] = 0;
+                                        minSim = 0;
+                                    }
+                                }
+                            }
+
+                            if (maxSim - minSim <= varianceTolerance) {
+                                const minPct = Math.round(minSim * 100);
+                                const maxPct = Math.round(maxSim * 100);
+                                const range = (minPct === maxPct) ? `${minPct}%` : `${minPct}% ~ ${maxPct}%`;
+                                g.type = `${nodes.length} ${L.str_items} | ${simAlgo === 'contain' ? L.lbl_containment : L.lbl_sim_score}: ${range}`;
+                                partitionedGroups.push(g);
+                            } else {
+                                const unassigned = new Set(nodes.map((_, idx) => idx));
+                                const pairs =[];
+                                for (let i = 0; i < nodes.length; i++) {
+                                    for (let j = i + 1; j < nodes.length; j++) pairs.push({i, j, s: simMatrix[i][j]});
+                                }
+                                pairs.sort((a, b) => b.s - a.s);
+
+                                pairs.forEach(pair => {
+                                    if (unassigned.has(pair.i) && unassigned.has(pair.j) && pair.s >= simThreshold) {
+                                        const sg = [pair.i, pair.j];
+                                        let sgMinSim = pair.s;
+                                        unassigned.delete(pair.i); unassigned.delete(pair.j);
+
+                                        for (const u of Array.from(unassigned)) {
+                                            let canAdd = true, localMin = 1;
+                                            for (const mem of sg) {
+                                                const s = simMatrix[u < mem ? u : mem][u > mem ? u : mem];
+                                                if (pair.s - s > varianceTolerance || s < simThreshold) { canAdd = false; break; }
+                                                if (s < localMin) localMin = s;
+                                            }
+                                            if (canAdd) { sg.push(u); unassigned.delete(u); if (localMin < sgMinSim) sgMinSim = localMin; }
+                                        }
+                                        if (sg.length >= 2) {
+                                            let subMin = 1, subMax = 0;
+                                            for(let x=0; x<sg.length; x++){
+                                                for(let y=x+1; y<sg.length; y++){
+                                                    const idx1 = sg[x] < sg[y] ? sg[x] : sg[y];
+                                                    const idx2 = sg[x] > sg[y] ? sg[x] : sg[y];
+                                                    const sVal = simMatrix[idx1][idx2];
+                                                    if (sVal < subMin) subMin = sVal;
+                                                    if (sVal > subMax) subMax = sVal;
+                                                }
+                                            }
+                                            const minPct = Math.round(subMin * 100);
+                                            const maxPct = Math.round(subMax * 100);
+                                            const range = (minPct === maxPct) ? `${minPct}%` : `${minPct}% ~ ${maxPct}%`;
+                                            partitionedGroups.push({
+                                                ids: sg.map(idx => nodes[idx].id),
+                                                type: `${sg.length} ${L.str_items} | ${simAlgo === 'contain' ? L.lbl_containment : L.lbl_sim_score}: ${range}`,
+                                                _sim: subMin
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+
+                        groups = partitionedGroups;
+                        }
+                    } catch (e) {
+                        console.error("[SimMode] Error:", e);
+                    }
+
+                    if (groups.length === 0) {
+                        setLoad(false);
+                        showToast(L.msg_dup_none);
+                        return;
+                    }
+                    groups.sort((a, b) => (b._sim - a._sim) || (b.ids.length - a.ids.length));
+
+                    S.analyzeSimGroups = groups;
+
+                    viewItems = Array.from(assigned).map(id => {
+                        const node = nodeMap.get(id);
+                        return {
+                            id: node.id,
+                            kind: 'drive#folder',
+                            name: node.name,
+                            icon_link: node.icon_link,
+                            starred: node.starred,
+                            tags: node.tags,
+                            size: node.size.toString(),
+                            _pathStr: (node._pathStr && node._pathStr.includes('/')) ? node._pathStr.substring(0, node._pathStr.lastIndexOf('/')) : L.btn_nav_home,
+                            _lineage: node.lineage,
+                            modified_time: new Date(getServerNow()).toISOString(),
+                            parent_id: node.parentId
+                        };
+                    });
+                } else {
+                    updateLoadTxt(L.str_rendering);
+                    const uniqueResults = Array.from(new Set(largeFolders));
+                    const kw = gmGet('pk_analyze_last_keyword', '');
+                    const kwList = kw ? kw.toLowerCase().split(/[,，]/).map(k => k.trim()).filter(k => k) : [];
+
+                    let filteredResults = uniqueResults.filter(n => n.size >= minBytes && (maxBytes === 0 || n.size <= maxBytes));
+
+                    if (kwList.length > 0) {
+                        filteredResults = filteredResults.filter(node => !kwList.some(k => (node.name || "").toLowerCase().includes(k)));
+                    }
+
+                    filteredResults.sort((a, b) => b.size - a.size);
+
+                    if (filteredResults.length === 0) {
+                        setLoad(false);
+                        let rangeStr = maxBytes > 0 ? `${fmtSize(minBytes)} - ${fmtSize(maxBytes)}` : `≥ ${fmtSize(minBytes)}`;
+                        showAlert(L.msg_analyze_no_large_folders.replace('{s}', rangeStr));
+                        return;
+                    }
+
+                    viewItems = filteredResults.map(node => ({
+                        id: node.id,
+                        kind: 'drive#folder',
+                        name: node.name,
+                        icon_link: node.icon_link,
+                        starred: node.starred,
+                        tags: node.tags,
+                        size: node.size.toString(),
+                        _pathStr: (node._pathStr && node._pathStr.includes('/')) ? node._pathStr.substring(0, node._pathStr.lastIndexOf('/')) : L.btn_nav_home,
+                        _lineage: node.lineage,
+                        modified_time: new Date(getServerNow()).toISOString(),
+                        parent_id: node.parentId
+                    }));
+                }
 
                 S.analyzeMode = true;
                 S.sort = 'size'; S.dir = 1;
@@ -18992,19 +21086,24 @@ async function openManager(initialCache, preloadPromise) {
                 S.itemMap.clear();
                 S.items.forEach(i => S.itemMap.set(i.id, i));
                 S.sel.clear();
+
                 UI.scan.style.display = 'none';
                 if (UI.btnAnalyze) UI.btnAnalyze.style.display = 'none';
                 UI.btnExit.style.display = 'flex';
 
-                UI.dup.style.display = 'none';
-                if(UI.dupTools) UI.dupTools.style.display = 'none';
-                if(UI.dupFilters) UI.dupFilters.style.display = 'none';
+                if (UI.dupTools) UI.dupTools.style.display = 'none';
+                if (UI.dupFilters) UI.dupFilters.style.display = 'none';
 
-                if(UI.lblGlobal) UI.lblGlobal.style.display = 'none';
-                if(UI.chkGlobal) UI.chkGlobal.checked = false;
+                if (UI.lblGlobal) UI.lblGlobal.style.display = 'none';
+                if (UI.chkGlobal) UI.chkGlobal.checked = false;
 
                 refresh();
                 updateStat();
+
+                setTimeout(() => {
+                    setLoad(false);
+                    isGUISensitive = false;
+                }, 200);
             }
         };
     }
@@ -19093,6 +21192,214 @@ async function openManager(initialCache, preloadPromise) {
         container.appendChild(fragment);
 
         m.querySelector('#pk_analyze_close').onclick = () => m.remove();
+    }
+
+    if (UI.btnExport) {
+        UI.btnExport.onclick = async () => {
+            if (S.trashMode) return;
+            const curFolderId = S.path[S.path.length - 1].id || '';
+            if (isPathBusy(curFolderId)) {
+                showAlert(L.msg_op_blocked_exporting);
+                return;
+            }
+
+            const format = await new Promise((resolve) => {
+                const m = showModal(`
+                    <h3 style="border:none; margin-bottom:0px; font-size:18px; font-weight:700; color:var(--pk-fg);">${L.title_export_format}</h3>
+                    <div style="font-size:13px; color:#888; margin-bottom:20px; line-height:1.5;">${L.lbl_export_current}</div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:25px;">
+                        <div class="pk-exp-card act" data-fmt="tree" style="border:2px solid var(--pk-pri); border-radius:8px; padding:15px; cursor:pointer; position:relative; background:var(--pk-bg); transition:all 0.2s;">
+                            <div class="pk-exp-check" style="position:absolute; top:0; right:0; width:24px; height:24px; background:var(--pk-pri); border-bottom-left-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <div class="pk-exp-title" style="font-weight:bold; margin-bottom:10px; color:var(--pk-pri); font-size:15px;">${L.opt_tree_view}</div>
+                            <div style="font-size:12px; color:var(--pk-fg); line-height:1.5; font-family:Consolas, 'Courier New', monospace; opacity:0.8; white-space:pre; letter-spacing:0px;">Root\n├─ Folder 1\n│  ├─ Folder 1-1\n│  └─ Folder 1-2\n└─ Folder 2\n   └─ Folder 2-1</div>
+                        </div>
+                        <div class="pk-exp-card" data-fmt="list" style="border:2px solid var(--pk-bd); border-radius:8px; padding:15px; cursor:pointer; position:relative; background:var(--pk-bg); transition:all 0.2s;">
+                            <div class="pk-exp-check" style="position:absolute; top:0; right:0; width:24px; height:24px; background:var(--pk-pri); border-bottom-left-radius:8px; display:none; align-items:center; justify-content:center; color:#fff;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <div class="pk-exp-title" style="font-weight:bold; margin-bottom:10px; color:var(--pk-fg); font-size:15px;">${L.opt_list_view}</div>
+                            <div style="font-size:12px; color:var(--pk-fg); line-height:1.5; font-family:Consolas, 'Courier New', monospace; opacity:0.8; white-space:pre;">Root/Folder 1\nRoot/Folder 1/Folder 1-1\nRoot/Folder 1/Folder 1-2\nRoot/Folder 2\nRoot/Folder 2/Folder 2-1</div>
+                        </div>
+                    </div>
+                    <div class="pk-modal-act">
+                        <button class="pk-btn" id="exp_cancel" style="height:40px; padding:0 20px;">${L.btn_cancel}</button>
+                        <button class="pk-btn pri" id="exp_confirm" style="height:40px; padding:0 30px; border-radius:8px; background:var(--pk-pri); color:#fff; font-weight:bold;">${L.btn_ok}</button>
+                    </div>
+                `);
+
+                const modalBox = m.querySelector('.pk-modal');
+                if (modalBox) {
+                    modalBox.style.width = '520px';
+                    modalBox.style.height = 'auto';
+                    modalBox.style.minHeight = 'auto';
+
+                    const closeBtn = m.querySelector('.pk-modal-close');
+                    if (closeBtn) Object.assign(closeBtn.style, { top: '22px', right: '22px' });
+                }
+
+                let selectedFormat = 'tree';
+
+                m.querySelectorAll('.pk-exp-card').forEach(card => {
+                    card.onclick = () => {
+                        m.querySelectorAll('.pk-exp-card').forEach(c => {
+                            c.style.borderColor = 'var(--pk-bd)';
+                            c.querySelector('.pk-exp-title').style.color = 'var(--pk-fg)';
+                            c.querySelector('.pk-exp-check').style.display = 'none';
+                            c.classList.remove('act');
+                        });
+                        card.style.borderColor = 'var(--pk-pri)';
+                        card.querySelector('.pk-exp-title').style.color = 'var(--pk-pri)';
+                        card.querySelector('.pk-exp-check').style.display = 'flex';
+                        card.classList.add('act');
+                        selectedFormat = card.dataset.fmt;
+                    };
+                });
+
+                m.querySelector('#exp_cancel').onclick = () => { m.remove(); resolve(null); };
+                m.querySelector('.pk-modal-close').onclick = () => { m.remove(); resolve(null); };
+                m.querySelector('#exp_confirm').onclick = () => { m.remove(); resolve(selectedFormat); };
+
+                m.tabIndex = 0;
+                setTimeout(() => m.focus(), 10);
+                m.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); e.stopPropagation();
+                        m.querySelector('#exp_confirm').click();
+                    }
+                });
+            });
+
+            if (!format) return;
+
+            setLoad(true);
+            S.scanning = true;
+            S.scanId = (S.scanId || 0) + 1;
+            const myScanId = S.scanId;
+
+            if (S.scanAbortController) S.scanAbortController.abort();
+            S.scanAbortController = new AbortController();
+            const signal = S.scanAbortController.signal;
+
+            let isRunning = true;
+            UI.stopBtn.onclick = () => {
+                isRunning = false;
+                S.scanning = false;
+                if (S.scanAbortController) S.scanAbortController.abort();
+                updateLoadTxt(L.str_stopping);
+            };
+
+            const rootNode = S.path[S.path.length - 1];
+            const startNodes =[{
+                id: rootNode.id || '',
+                name: rootNode.name || L.btn_nav_home,
+                lineage: [],
+                retryCount: 0
+            }];
+
+            const itemTree = new Map();
+
+            try {
+                await coreRecursiveEngine(startNodes, {
+                    signal: signal,
+                    onFolder: (folder, filesInFolder) => {
+                        itemTree.set(folder.id, [...filesInFolder]);
+
+                        if (typeof globalCache !== 'undefined' && !globalCache.has(folder.id)) {
+                            globalCache.set(folder.id, [...filesInFolder]);
+                        }
+
+                        indexParents(folder.id, folder.name, filesInFolder);
+                    },
+                    onProgress: (st) => {
+                        updateLoadTxt(`${L.msg_exporting}\n${L.str_folders}: ${st.folders} | ${L.str_files}: ${st.files}`);
+                    }
+                });
+
+                if (!isRunning || signal.aborted || myScanId !== S.scanId) return;
+
+                updateLoadTxt(L.str_processing);
+                await sleep(50);
+
+                const rootName = startNodes[0].name;
+                let outputLines =[];
+                const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+
+                const sortItems = (items) => {
+                    return items.sort((a, b) => {
+                        if (a.kind !== b.kind) return a.kind === 'drive#folder' ? -1 : 1;
+                        return collator.compare(a.name, b.name);
+                    });
+                };
+
+                if (format === 'tree') {
+                    outputLines.push(rootName);
+
+                    const buildTree = (parentId, prefix) => {
+                        const children = itemTree.get(parentId);
+                        if (!children || children.length === 0) return;
+
+                        const sorted = sortItems(children);
+                        for (let i = 0; i < sorted.length; i++) {
+                            const child = sorted[i];
+                            const isLast = (i === sorted.length - 1);
+                            const connector = isLast ? '└─ ' : '├─ ';
+                            outputLines.push(prefix + connector + child.name);
+
+                            if (child.kind === 'drive#folder') {
+                                const childPrefix = prefix + (isLast ? '   ' : '│  ');
+                                buildTree(child.id, childPrefix);
+                            }
+                        }
+                    };
+
+                    buildTree(startNodes[0].id, '');
+                } else {
+                    const buildList = (parentId, currentPath) => {
+                        const children = itemTree.get(parentId);
+                        if (!children || children.length === 0) return;
+
+                        const sorted = sortItems(children);
+                        for (let i = 0; i < sorted.length; i++) {
+                            const child = sorted[i];
+                            const fullPath = currentPath ? currentPath + '/' + child.name : child.name;
+                            outputLines.push(fullPath);
+
+                            if (child.kind === 'drive#folder') {
+                                buildList(child.id, fullPath);
+                            }
+                        }
+                    };
+
+                    buildList(startNodes[0].id, rootName);
+                }
+
+                const outputText = outputLines.join('\r\n');
+                const blob = new Blob([outputText], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+
+                const safeRootName = rootName.replace(/[\\/:*?"<>|]/g, '_');
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${safeRootName}_${format}.txt`;
+                a.click();
+
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+            } catch (e) {
+                if (e.name !== 'AbortError' && myScanId === S.scanId) {
+                    showAlert(`${L.str_error}: ${e.message}`);
+                }
+            } finally {
+                if (myScanId === S.scanId) {
+                    setLoad(false);
+                    S.scanning = false;
+                    S.scanAbortController = null;
+                    isGUISensitive = false;
+                }
+            }
+        };
     }
 
     UI.btnNewFolder.onclick = async () => {
@@ -19235,9 +21542,9 @@ async function openManager(initialCache, preloadPromise) {
 
         if (!newName || newName === item.name) return;
 
+        let progressTask = null;
         try {
-            setLoad(true);
-            updateLoadTxt(L.str_renaming);
+            progressTask = FloatBarManager.create(L.str_renaming);
 
             await apiAction(`/${id}`, { name: newName });
 
@@ -19246,6 +21553,8 @@ async function openManager(initialCache, preloadPromise) {
             item.modified_time = nowIso;
 
             if (item.kind === 'drive#folder') gmSet('pk_fmod_' + item.id, nowIso);
+            const parentIdForFmod = item.parent_id || 'root';
+            gmSet('pk_fmod_' + parentIdForFmod, nowIso);
 
             const row = UI.in.querySelector(`.pk-row[data-id="${id}"]`);
             if (row && row.lastElementChild) {
@@ -19271,12 +21580,20 @@ async function openManager(initialCache, preloadPromise) {
                 if (globalTarget) globalTarget.name = newName;
             }
 
+            if (S.analyzeResultItems) {
+                const anaItem = S.analyzeResultItems.find(x => x.id === id);
+                if (anaItem) anaItem.name = newName;
+            }
+            if (S.analyzeMap && S.analyzeMap.has(id)) {
+                S.analyzeMap.get(id).name = newName;
+            }
+
             if (S.dupMode) renderDupView(); else refresh();
 
         } catch (e) {
             showAlert(`${L.str_error}: ${e.message}`);
         } finally {
-            setLoad(false);
+            if (progressTask) progressTask.destroy();
         }
     };
 
@@ -19286,7 +21603,7 @@ async function openManager(initialCache, preloadPromise) {
         if (S.movingIds && S.movingIds.size > 0) {
             const hasConflict = Array.from(S.sel).some(id => S.movingIds.has(id));
             if (hasConflict) {
-                showAlert(L.msg_rn_blocked_moving);
+                showAlert(L.msg_op_blocked_analyzing);
                 return;
             }
         }
@@ -19633,7 +21950,8 @@ async function openManager(initialCache, preloadPromise) {
             plannedChanges = [];
             rnDisplay = [];
             previewSelectedIds.clear();
-            rnIn.innerHTML = `<div style="padding:40px; text-align:center; color:#888;">${L.rn_tip_wait}</div>`;
+            const initialTip = (mode === 'jav') ? L.rn_tip_jav : L.rn_tip_wait;
+            rnIn.innerHTML = `<div style="padding:40px; text-align:center; color:#888;">${initialTip}</div>`;
             txtStatNum.innerText = "0";
             btnApply.disabled = true;
 
@@ -19937,6 +22255,23 @@ async function openManager(initialCache, preloadPromise) {
             const caseMode = selectedCase;
             const widthMode = selectedWidth;
             const useCaseSense = m.querySelector('#rn_case_sense').checked;
+
+            let isRuleActive = true;
+            if (mode === 'replace') isRuleActive = !!findStr;
+            else if (mode === 'format') isRuleActive = !!(caseMode || widthMode);
+            else if (mode === 'pattern') isRuleActive = !!pattern;
+
+            if (!isRuleActive && mode !== 'jav' && mode !== 'ad_remove' && mode !== 'ext_fix') {
+                plannedChanges = [];
+                rnDisplay = [];
+                previewSelectedIds.clear();
+                rnIn.innerHTML = `<div style="padding:40px; text-align:center; color:#888;">${L.rn_tip_wait}</div>`;
+                txtStatNum.innerText = "0";
+                btnApply.disabled = true;
+                const cbWrapper = m.querySelector('#rn_cb_wrapper');
+                if (cbWrapper) cbWrapper.style.visibility = 'hidden';
+                return;
+            }
 
             if (mode === 'replace') {
                 if (findStr) findHist.save(findStr);
@@ -20779,7 +23114,7 @@ async function openManager(initialCache, preloadPromise) {
             let confirmMsg = L.rn_warn_confirm.replace('{n}', validChanges.length);
             if (!await showConfirm(confirmMsg)) return;
 
-            setLoad(true);
+            const progressTask = FloatBarManager.create(L.str_renaming);
             m.remove();
             let isRunning = true;
             UI.stopBtn.onclick = () => { isRunning = false; updateLoadTxt(L.str_stopping); };
@@ -20801,8 +23136,23 @@ async function openManager(initialCache, preloadPromise) {
                         const nowIso = new Date(getServerNow()).toISOString();
                         item.modified_time = nowIso;
                         if (item.kind === 'drive#folder') gmSet('pk_fmod_' + item.id, nowIso);
+                        const parentIdForFmod = item.parent_id || 'root';
+                        gmSet('pk_fmod_' + parentIdForFmod, nowIso);
+
                         const row = UI.in.querySelector(`.pk-row[data-id="${task.id}"]`);
                         if (row && row.lastElementChild) row.lastElementChild.textContent = fmtDate(nowIso);
+
+                        if (S.analyzeResultItems) {
+                            const anaItem = S.analyzeResultItems.find(x => x.id === task.id);
+                            if (anaItem) anaItem.name = task.new;
+                        }
+                        if (S.analyzeMap && S.analyzeMap.has(task.id)) {
+                            S.analyzeMap.get(task.id).name = task.new;
+                        }
+                        if (S.lastGlobalResults && S.lastGlobalResults.length > 0) {
+                            const gItem = S.lastGlobalResults.find(x => x.id === task.id);
+                            if (gItem) gItem.name = task.new;
+                        }
 
                         if (typeof globalDirtyFolders !== 'undefined') {
                             const pid = item.parent_id || '';
@@ -20834,7 +23184,7 @@ async function openManager(initialCache, preloadPromise) {
                     if (activeTasks.size > 0) await Promise.race(activeTasks);
                     const now = Date.now();
                     if (now - stats.lastUiTime > 150) {
-                        updateLoadTxt(`${L.str_renaming} ${stats.success + stats.fail}/${total}\n${L.str_speed}: ${activeTasks.size} | ${L.str_success}: ${stats.success}`);
+                        progressTask.update(`${L.str_renaming} ${stats.success + stats.fail}/${total} | ${L.str_speed}: ${activeTasks.size} | ${L.str_success}: ${stats.success}`);
                         stats.lastUiTime = now;
                     }
                 }
@@ -20844,12 +23194,15 @@ async function openManager(initialCache, preloadPromise) {
                 if (typeof runBackgroundCrawler === 'function') runBackgroundCrawler();
 
                 if (S.dupMode) renderDupView(); else refresh();
-                let msg = L.msg_bulkrename_done.replace('{n}', stats.success);
-                if (stats.fail > 0) msg += L.msg_rn_fail_count.replace('{n}', stats.fail);
-                await sleep(300); showAlert(msg);
+                let msgParts = [];
+                if (stats.success > 0) msgParts.push(L.msg_bulkrename_done.replace('{n}', stats.success));
+                if (stats.fail > 0) msgParts.push(L.msg_rn_fail_count.replace('{n}', stats.fail));
+                const finalMsg = msgParts.join('\n');
+                await sleep(300); showAlert(finalMsg);
             } catch (e) {
                 if (e.message !== 'StoppedByUser') showAlert(`${L.str_error_crit}: ${e.message}`);
             } finally {
+                if (progressTask) progressTask.destroy();
                 setLoad(false);
             }
         };
@@ -21175,79 +23528,6 @@ async function openManager(initialCache, preloadPromise) {
         });
     };
 
-    UI.btnUnzip.onclick = async () => {
-        ensureItemMap();
-        const isArchive = (it) => {
-            if (!it || it.kind === 'drive#folder') return false;
-            const n = (it.name || '').toLowerCase();
-            return n.endsWith('.zip') || n.endsWith('.rar') || n.endsWith('.7z');
-        };
-        const targets = Array.from(S.sel).map(id => S.itemMap.get(id)).filter(i => isArchive(i));
-        if (targets.length === 0) return;
-        if (!await showConfirm(L.msg_unzip_confirm_batch.replace('{n}', targets.length))) return;
-
-        setLoad(true);
-        const currentFolderId = S.path[S.path.length - 1].id || '';
-        let lastSuccessPwd = "";
-        let successCount = 0;
-        let failCount = 0;
-
-        try {
-            for (const file of targets) {
-                let isDone = false, triedLastSuccess = false;
-                let detail = file;
-                if (!detail.gcid && !detail.hash) detail = await apiGet(file.id).catch(() => file);
-                const gcid = detail.gcid || detail.hash || detail.md5_checksum || "";
-                let savedPwd = gcid ? gmGet('pk_archive_pwd_' + gcid, "") : "";
-
-                while (!isDone) {
-                    let pwdToTry = "";
-                    if (savedPwd) {
-                        pwdToTry = savedPwd;
-                        savedPwd = "";
-                    } else if (lastSuccessPwd && !triedLastSuccess) {
-                        pwdToTry = lastSuccessPwd;
-                        triedLastSuccess = true;
-                    }
-
-                    try {
-                        updateLoadTxt(L.str_unzipping.replace('{n}', file.name));
-                        const resp = await sendUnzipRequest(file, pwdToTry);
-                        if (resp?.task_id) observeUnzipTask(resp.task_id, currentFolderId);
-
-                        if (pwdToTry) {
-                            if (gcid) gmSet('pk_archive_pwd_' + gcid, pwdToTry);
-                            lastSuccessPwd = pwdToTry;
-                        }
-                        successCount++; isDone = true;
-                    } catch (err) {
-                        if (err.code === 10023 || (err.msg && err.msg.toLowerCase().includes('password'))) {
-                            if (lastSuccessPwd && pwdToTry === lastSuccessPwd) {
-                                lastSuccessPwd = "";
-                                continue;
-                            }
-
-                            setLoad(false);
-                            const userPwd = await askForPassword(file.name, pwdToTry ? L.err_pwd_simple : "");
-                            setLoad(true);
-
-                            if (userPwd !== null) {
-                                lastSuccessPwd = userPwd;
-                                triedLastSuccess = false;
-                            } else {
-                                failCount++; isDone = true;
-                            }
-                        } else {
-                            console.error(err);
-                            failCount++; isDone = true;
-                        }
-                    }
-                }
-            }
-            if (failCount > 0) showAlert(L.msg_unzip_fail);
-        } catch(e) { showAlert(`${L.str_error}: ${e.message}`); } finally { setLoad(false); }
-    };
-
     UI.btnExt.onclick = async () => {
         const id = Array.from(S.sel)[0];
         const item = S.itemMap.get(id);
@@ -21425,29 +23705,41 @@ async function openManager(initialCache, preloadPromise) {
         S.sel.forEach(id => {
             const item = S.itemMap.get(id);
             if (item) {
-                if (item.kind === 'drive#folder') rootNodes.push({...item, lineage: [], retryCount: 0});
+                if (item.kind === 'drive#folder') rootNodes.push({...item, lineage:[], retryCount: 0});
                 else allFiles.push(item);
             }
         });
 
+        let progressTask = null;
+        const fExtStr = gmGet('pk_dl_filter_ext', '').toLowerCase();
+        const fNameStr = gmGet('pk_dl_filter_name', '').toLowerCase();
+        const fExts = fExtStr.split(/[,，]/).map(s => s.trim().replace(/^\./, '')).filter(Boolean);
+        const fNames = fNameStr.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+
         try {
             await coreRecursiveEngine(rootNodes, {
                 signal,
-                onFile: (f) => allFiles.push(f),
+                onFile: (f) => {
+                    const lowName = f.name.toLowerCase();
+                    const ext = lowName.split('.').pop();
+                    const isBlocked = fExts.some(e => ext === e) || fNames.some(n => lowName.includes(n));
+                    if (!isBlocked) allFiles.push(f);
+                },
                 onProgress: (st) => {
                     updateLoadTxt(`${L.msg_batch_scanning}\n${L.str_files}: ${allFiles.length} | ${L.str_speed}: ${st.currentConcurrency}`);
                 }
             });
 
             if (!isRunning) throw new Error('StoppedByUser');
-            if (allFiles.length === 0) { setLoad(false); showAlert(L.msg_batch_no_files); return; }
+            if (allFiles.length === 0) { setLoad(false); showToast(L.msg_batch_no_files); return; }
 
             setLoad(false);
             if (allFiles.length > 10) {
                 if (!await showConfirm(L.msg_down_confirm_total.replace('{n}', allFiles.length))) return;
             }
 
-            setLoad(true);
+            progressTask = FloatBarManager.create(L.msg_batch_hydrating);
+
             const readyFiles = [];
             const hydrateQueue = [...allFiles];
             const activeTasks = new Set();
@@ -21463,17 +23755,18 @@ async function openManager(initialCache, preloadPromise) {
                     activeTasks.add(p);
                 }
                 if (activeTasks.size > 0) await Promise.race(activeTasks);
-                updateLoadTxt(`${L.msg_batch_hydrating}\n${readyFiles.length} / ${allFiles.length}`);
+                if (progressTask) progressTask.update(`${L.msg_batch_hydrating} ${readyFiles.length} / ${allFiles.length}`);
             }
 
             for (let i = 0; i < readyFiles.length; i++) {
                 if (!isRunning) break;
-                updateLoadTxt(`${L.msg_down_progress}\n${i + 1} / ${readyFiles.length}`);
-                const a = document.createElement('a');
-                a.href = readyFiles[i].web_content_link;
-                a.download = readyFiles[i].name;
-                document.body.appendChild(a); a.click(); a.remove();
-                if (i < readyFiles.length - 1) await sleep(1000);
+                if (progressTask) progressTask.update(`${L.msg_down_progress} ${i + 1} / ${readyFiles.length}`);
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = readyFiles[i].web_content_link;
+                document.body.appendChild(iframe);
+                setTimeout(() => { if (iframe.parentNode) iframe.remove(); }, 60000);
+                if (i < readyFiles.length - 1) await sleep(1500);
             }
 
             if (isRunning && readyFiles.length > 0) {
@@ -21481,7 +23774,11 @@ async function openManager(initialCache, preloadPromise) {
             }
         } catch (e) {
             if (e.message !== 'StoppedByUser' && e.name !== 'AbortError') showAlert(`${L.str_error}: ${e.message}`);
-        } finally { setLoad(false); isGUISensitive = false; }
+        } finally {
+            setLoad(false);
+            isGUISensitive = false;
+            if (progressTask) progressTask.destroy();
+        }
     };
 
     UI.win.querySelector('#pk-aria2').onclick = async () => {
@@ -21509,21 +23806,27 @@ async function openManager(initialCache, preloadPromise) {
                     <div style="font-size:13px; color:#888; margin-bottom:28px; line-height:1.5;">${L.msg_aria2_not_set}</div>
 
                     <div style="display:flex; flex-direction:column; gap:25px;">
-                        <div style="position:relative;">
-                            <input type="text" id="pop_aria_url" value="${ariaUrl || 'http://127.0.0.1:6800/jsonrpc'}"
-                                   placeholder="http://127.0.0.1:6800/jsonrpc" autocomplete="off"
-                                   oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                                   style="width:100%; height:44px; padding:0 12px; border:2px solid ${ariaUrl ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box;">
-                            <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; pointer-events:none; line-height:1;">${L.label_aria2_url}</div>
+                        <div style="position:relative; transform: translateZ(0);">
+                            <div style="position:relative;">
+                                <input type="text" id="pop_aria_url" value="${ariaUrl || 'http://localhost:6800/jsonrpc'}"
+                                       placeholder="http://localhost:6800/jsonrpc" autocomplete="off"
+                                       oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
+                                       style="width:100%; height:44px; padding:0 70px 0 12px; border:2px solid ${ (ariaUrl || 'http://localhost:6800/jsonrpc') ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+                                <div class="pk-select-label">${L.label_aria2_url}</div>
+                                <div id="btn_pop_aria_default" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:4px 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2);" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">Default</div>
+                            </div>
+                            <div class="pk-aria-status-box" id="pop_aria_test_res" style="cursor:help; margin-top: 8px;">
+                                <div class="pk-aria-dot" id="pop_aria_test_dot"></div>
+                                <span id="pop_aria_test_txt" style="color:#888; font-size: 11px;">${L.lbl_aria2_status}</span>
+                            </div>
                         </div>
 
-                        <div style="position:relative;">
-                            <input type="text" id="pop_aria_token" value="${ariaToken || ''}" placeholder="Token (Optional)"
+                        <div style="position:relative; transform: translateZ(0);">
+                            <input type="text" id="pop_aria_token" value="${ariaToken || ''}" placeholder="${L.ph_aria2_secret}"
                                    autocomplete="one-time-code" spellcheck="false" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly');"
-                                   name="pk_aria_token_${Math.random()}"
                                    oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                                   style="width:100%; height:44px; padding:0 12px; border:2px solid ${ariaToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box;">
-                            <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; pointer-events:none; line-height:1;">${L.label_aria2_token}</div>
+                                   style="width:100%; height:44px; padding:0 12px; border:2px solid ${ariaToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; -webkit-text-security: disc; transform: translateZ(0);">
+                            <div class="pk-select-label">${L.label_aria2_token}</div>
                         </div>
                     </div>
 
@@ -21541,6 +23844,70 @@ async function openManager(initialCache, preloadPromise) {
 
                 const inpU = m.querySelector('#pop_aria_url');
                 const inpT = m.querySelector('#pop_aria_token');
+                const dot = m.querySelector('#pop_aria_test_dot');
+                const txt = m.querySelector('#pop_aria_test_txt');
+                const boxRes = m.querySelector('#pop_aria_test_res');
+                let testTimer = null;
+
+                const runLiveTest = async () => {
+                    const url = inpU.value.trim();
+                    const token = inpT.value.trim();
+                    const showTip = () => showAlert(L.tip_mixed_content, L.lbl_aria2_status);
+
+                    if (!url) {
+                        dot.className = 'pk-aria-dot';
+                        txt.textContent = L.lbl_aria2_status;
+                        boxRes.onclick = showTip;
+                        boxRes.style.cursor = 'pointer';
+                        return;
+                    }
+                    dot.className = 'pk-aria-dot wait';
+                    txt.textContent = L.str_connecting;
+                    boxRes.onclick = showTip;
+                    boxRes.style.cursor = 'pointer';
+                    const payload = { jsonrpc: '2.0', method: 'aria2.getVersion', id: 'pk_quick_test', params: [`token:${token}`] };
+                    let testUrl = url.replace(/^ws/i, 'http');
+                    if (!testUrl.includes('/jsonrpc') && !testUrl.includes('?')) {
+                        testUrl = testUrl.endsWith('/') ? testUrl + 'jsonrpc' : testUrl + '/jsonrpc';
+                    }
+                    try {
+                        await new Promise((resolveReq, rejectReq) => {
+                            GM_xmlhttpRequest({
+                                method: 'POST', url: testUrl, data: JSON.stringify(payload),
+                                headers: { 'Content-Type': 'application/json' }, timeout: 3000,
+                                onload: (r) => { if (r.status === 200) resolveReq(); else rejectReq(new Error(r.status)); },
+                                onerror: (e) => rejectReq(e)
+                            });
+                        });
+                        dot.className = 'pk-aria-dot ok';
+                        txt.textContent = L.str_connected;
+                        boxRes.onclick = null;
+                        boxRes.style.cursor = 'default';
+                    } catch (e) {
+                        dot.className = 'pk-aria-dot err';
+                        txt.textContent = L.str_conn_fail;
+                        boxRes.onclick = showTip;
+                        boxRes.style.cursor = 'pointer';
+                    }
+                };
+
+                const triggerTest = () => { clearTimeout(testTimer); testTimer = setTimeout(runLiveTest, 600); };
+                inpU.oninput = (e) => {
+                    e.target.style.borderColor = e.target.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
+                    triggerTest();
+                };
+                inpT.oninput = (e) => {
+                    e.target.style.borderColor = e.target.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
+                    triggerTest();
+                };
+
+                m.querySelector('#btn_pop_aria_default').onclick = () => {
+                    inpU.value = 'http://localhost:6800/jsonrpc';
+                    inpU.style.borderColor = 'var(--pk-pri)';
+                    triggerTest();
+                };
+
+                setTimeout(runLiveTest, 200);
 
                 m.querySelector('#pop_aria_cancel').onclick = () => { m.remove(); resolve(null); };
                 m.querySelector('.pk-modal-close').onclick = () => { m.remove(); resolve(null); };
@@ -21560,14 +23927,18 @@ async function openManager(initialCache, preloadPromise) {
                     try {
                         const testUrl = u.replace(/^ws/i, 'http');
                         const payload = { jsonrpc: '2.0', method: 'aria2.getVersion', id: 'pk_quick_test', params: [`token:${t}`] };
-                        const res = await fetch(testUrl, {
-                            method: 'POST',
-                            body: JSON.stringify(payload),
-                            headers: { 'Content-Type': 'application/json' },
-                            signal: AbortSignal.timeout(5000)
+                        await new Promise((resolveReq, rejectReq) => {
+                            GM_xmlhttpRequest({
+                                method: 'POST',
+                                url: testUrl,
+                                data: JSON.stringify(payload),
+                                headers: { 'Content-Type': 'application/json' },
+                                timeout: 5000,
+                                onload: (r) => { if (r.status === 200) resolveReq(); else rejectReq(new Error('HTTP ' + r.status)); },
+                                onerror: () => rejectReq(new Error('Network Error')),
+                                ontimeout: () => rejectReq(new Error('Timeout'))
+                            });
                         });
-
-                        if (!res.ok) throw new Error();
 
                         gmSet('pk_aria2_url', u); gmSet('pk_aria2_token', t);
                         m.remove();
@@ -21614,24 +23985,37 @@ async function openManager(initialCache, preloadPromise) {
         UI.stopBtn.onclick = () => { isRunning = false; abortCtrl.abort(); updateLoadTxt(L.str_stopping); };
 
         if (ariaUrl.startsWith('ws')) ariaUrl = ariaUrl.replace(/^ws/, 'http');
+        if (!ariaUrl.includes('/jsonrpc') && !ariaUrl.includes('?')) {
+            ariaUrl = ariaUrl.endsWith('/') ? ariaUrl + 'jsonrpc' : ariaUrl + '/jsonrpc';
+        }
 
         const allFiles = [];
         const rootNodes = [];
         const HYDRATE_LIMIT = 40;
+        const fExtStr = gmGet('pk_dl_filter_ext', '').toLowerCase();
+        const fNameStr = gmGet('pk_dl_filter_name', '').toLowerCase();
+        const fExts = fExtStr.split(/[,，]/).map(s => s.trim().replace(/^\./, '')).filter(Boolean);
+        const fNames = fNameStr.split(/[,，]/).map(s => s.trim()).filter(Boolean);
         const stats = { hydratedCount: 0, lastUiTime: 0 };
 
         S.sel.forEach(id => {
             const item = S.itemMap.get(id);
             if (item) {
-                if (item.kind === 'drive#folder') rootNodes.push({...item, lineage: [], retryCount: 0});
+                if (item.kind === 'drive#folder') rootNodes.push({...item, lineage:[], retryCount: 0});
                 else allFiles.push(item);
             }
         });
 
+        let progressTask = null;
         try {
             await coreRecursiveEngine(rootNodes, {
                 signal,
-                onFile: (f) => allFiles.push(f),
+                onFile: (f) => {
+                    const lowName = f.name.toLowerCase();
+                    const ext = lowName.split('.').pop();
+                    const isBlocked = fExts.some(e => ext === e) || fNames.some(n => lowName.includes(n));
+                    if (!isBlocked) allFiles.push(f);
+                },
                 onProgress: (st) => {
                     const now = Date.now();
                     if (now - stats.lastUiTime > 150) {
@@ -21644,8 +24028,10 @@ async function openManager(initialCache, preloadPromise) {
             if (!isRunning) throw new Error('StoppedByUser');
             if (allFiles.length === 0) { setLoad(false); showAlert(L.msg_batch_no_files); return; }
 
-            updateLoadTxt(L.msg_batch_hydrating);
-            const readyFiles = [];
+            setLoad(false);
+            progressTask = FloatBarManager.create(L.msg_batch_hydrating);
+
+            const readyFiles =[];
             const hydrateQueue = [...allFiles];
             const activeTasks = new Set();
             while ((hydrateQueue.length > 0 || activeTasks.size > 0) && isRunning) {
@@ -21661,7 +24047,7 @@ async function openManager(initialCache, preloadPromise) {
                     activeTasks.add(p);
                 }
                 if (activeTasks.size > 0) await Promise.race(activeTasks);
-                updateLoadTxt(`${L.msg_batch_hydrating}\n${stats.hydratedCount} / ${allFiles.length}`);
+                if (progressTask) progressTask.update(`${L.msg_batch_hydrating} ${stats.hydratedCount} / ${allFiles.length}`);
             }
 
             if (readyFiles.length > 0 && isRunning) {
@@ -21673,17 +24059,29 @@ async function openManager(initialCache, preloadPromise) {
                     const payload = chunk.map(f => ({
                         jsonrpc: '2.0', method: 'aria2.addUri',
                         id: `pk_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-                        params:[`token:${ariaToken}`, [f.web_content_link], { out: f.name, header:[`User-Agent: ${navigator.userAgent}`] }]
+                        params:[`token:${ariaToken}`,[f.web_content_link], { out: f.name, header:[`User-Agent: ${navigator.userAgent}`] }]
                     }));
-                    await fetch(ariaUrl, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json' }, mode: 'cors' });
+                    await new Promise((resolveReq, rejectReq) => {
+                        GM_xmlhttpRequest({
+                            method: 'POST', url: ariaUrl, data: JSON.stringify(payload),
+                            headers: { 'Content-Type': 'application/json' },
+                            onload: (r) => { if(r.status === 200) resolveReq(); else rejectReq(new Error('HTTP ' + r.status)); },
+                            onerror: () => rejectReq(new Error('Network Error')),
+                            ontimeout: () => rejectReq(new Error('Timeout'))
+                        });
+                    });
                     successCount += chunk.length;
-                    updateLoadTxt(`${L.msg_aria2_sending_batch}\n${successCount}/${readyFiles.length}`);
+                    if (progressTask) progressTask.update(`${L.msg_aria2_sending_batch} ${successCount}/${readyFiles.length}`);
                 }
                 showToast(L.msg_aria2_sent.replace('{n}', successCount));
             }
         } catch (e) {
             if (e.message !== 'StoppedByUser' && e.name !== 'AbortError') showAlert(`${L.msg_aria2_check_fail}\n(${e.message})`);
-        } finally { setLoad(false); isGUISensitive = false; }
+        } finally {
+            setLoad(false);
+            isGUISensitive = false;
+            if (progressTask) progressTask.destroy();
+        }
     };
 
     const ensureItemMap = () => {
@@ -21804,7 +24202,7 @@ async function openManager(initialCache, preloadPromise) {
                         } catch (e) {
                             break;
                         }
-                        updateFloat(`${L.str_deleting} ${deletedCount}/${totalToDelete} (Syncing...)`);
+                        updateFloat(`${L.str_deleting} ${deletedCount}/${totalToDelete}`);
                         verifyRetries++;
                         await sleep(500);
                     }
@@ -21871,7 +24269,23 @@ async function openManager(initialCache, preloadPromise) {
 
                     if (it && S.analyzeMap) {
                         const analyzeTargetId = physicalFolderId || id;
-                        if (S.analyzeMap.has(analyzeTargetId)) S.analyzeMap.delete(analyzeTargetId);
+
+                        const analyzeIdsToRemove = new Set([analyzeTargetId, id]);
+                        const queue = [analyzeTargetId, id];
+                        while (queue.length > 0) {
+                            const currId = queue.shift();
+                            S.analyzeMap.forEach((node, nId) => {
+                                if (node.parentId === currId && !analyzeIdsToRemove.has(nId)) {
+                                    analyzeIdsToRemove.add(nId);
+                                    queue.push(nId);
+                                }
+                            });
+                        }
+
+                        analyzeIdsToRemove.forEach(remId => {
+                            if (S.analyzeMap.has(remId)) S.analyzeMap.delete(remId);
+                        });
+
                         const lostSize = parseInt(it.size || 0);
                         if (lostSize > 0) {
                             let currPid = it.parent_id;
@@ -21879,7 +24293,6 @@ async function openManager(initialCache, preloadPromise) {
                                 const pInfo = globalParentIndex.get(it.file_id);
                                 if (pInfo) currPid = pInfo.id;
                             }
-
                             let safety = 50;
                             while (currPid && S.analyzeMap.has(currPid) && safety > 0) {
                                 const pNode = S.analyzeMap.get(currPid);
@@ -21889,8 +24302,19 @@ async function openManager(initialCache, preloadPromise) {
                             }
                         }
 
+                        if (S.analyzeSimGroups) {
+                            S.analyzeSimGroups.forEach(group => {
+                                group.ids = group.ids.filter(gid => !analyzeIdsToRemove.has(gid));
+                            });
+                            S.analyzeSimGroups = S.analyzeSimGroups.filter(group => group.ids.length >= 2);
+
+                            if (S.analyzeSimGroups.length === 0) {
+                                setTimeout(() => { if (UI.btnExit) UI.btnExit.click(); }, 500);
+                            }
+                        }
+
                         if (S.analyzeResultItems) {
-                            S.analyzeResultItems = S.analyzeResultItems.filter(x => x.id !== analyzeTargetId && x.id !== id);
+                            S.analyzeResultItems = S.analyzeResultItems.filter(x => !analyzeIdsToRemove.has(x.id));
                             S.analyzeResultItems.forEach(resItem => {
                                 if (S.analyzeMap.has(resItem.id)) {
                                     resItem.size = S.analyzeMap.get(resItem.id).size.toString();
@@ -22152,12 +24576,12 @@ async function openManager(initialCache, preloadPromise) {
         if (totalSelected === 0) return;
 
         const isRemove = action === 'remove';
-
-        setLoad(true);
-        updateLoadTxt(L.str_init_op);
+        const progressTask = FloatBarManager.create(L.str_init_op);
+        const updateFloat = progressTask.update;
 
         let isRunning = true;
-        UI.stopBtn.onclick = () => { isRunning = false; updateLoadTxt(L.str_stopping); };
+        UI.stopBtn.onclick = () => { isRunning = false; updateFloat(L.str_stopping); };
+
         await sleep(16);
 
         const getCleanKey = (str) => str ? str.toLowerCase().trim() : "";
@@ -22195,16 +24619,16 @@ async function openManager(initialCache, preloadPromise) {
                 if ((processedCount & 63) === 0) {
                     const now = performance.now();
                     if (now - lastYieldTime > 12) {
-                        updateLoadTxt(`${L.str_analyzing}\n${processedCount} / ${totalSelected}`);
+                        updateFloat(`${L.str_analyzing} ${processedCount} / ${totalSelected}`);
                         await sleep(0); lastYieldTime = performance.now();
                     }
                 }
             }
         }
 
-        if (!isRunning) { setLoad(false); showAlert(L.msg_bl_stop); return; }
+        if (!isRunning) { progressTask.destroy(); showAlert(L.msg_bl_stop); return; }
 
-        updateLoadTxt(L.str_processing);
+        updateFloat(L.str_processing);
         await sleep(10);
 
         let finalCount = 0;
@@ -22235,17 +24659,15 @@ async function openManager(initialCache, preloadPromise) {
         }
 
         if (dataChanged) {
-            updateLoadTxt(L.str_saving);
+            updateFloat(L.str_saving);
             await sleep(10);
             gmSet('pk_blacklist', currentFiles.join('\n'));
             gmSet('pk_blacklist_folders', currentFolders.join('\n'));
-
             S.updateBlCache();
-
             renderVisible();
         }
 
-        setLoad(false);
+        progressTask.destroy();
         const msgTemplate = isRemove ? L.msg_bl_remove_done : L.msg_bl_add_done;
         showToast(msgTemplate.replace('{n}', finalCount));
     };
@@ -22582,14 +25004,17 @@ async function openManager(initialCache, preloadPromise) {
                             task.file_id = data.file.id;
                             newlyCreatedFileId = data.file.id;
                         }
+                        if (data.file.name) task.name = data.file.name;
                         if (data.file.thumbnail_link) task.thumbnail_link = data.file.thumbnail_link;
                         if (data.file.icon_link) task.icon_link = data.file.icon_link;
                     } else if (data.task && data.task.file_id) {
                         task.file_id = data.task.file_id;
                         newlyCreatedFileId = data.task.file_id;
+                        if (data.task.name) task.name = data.task.name;
                     } else if (data.id) {
                         task.file_id = data.id;
                         newlyCreatedFileId = data.id;
+                        if (data.name) task.name = data.name;
                     }
 
                     if (task._deleted) {
@@ -23151,6 +25576,7 @@ async function openManager(initialCache, preloadPromise) {
         S.historyMode = (mode === 'history');
         S.offlineMode = (mode === 'offline');
         S.uploadMode = (mode === 'upload');
+        S.scanFilter = null;
         if (UI.chkSearchPath) UI.chkSearchPath.checked = false;
 
         let rootName = L.btn_nav_home;
@@ -23218,7 +25644,6 @@ async function openManager(initialCache, preloadPromise) {
             if (UI.lblGlobal) UI.lblGlobal.style.display = 'none';
             if (UI.btnAnalyze) UI.btnAnalyze.style.display = 'none';
             if (UI.scan) UI.scan.style.display = 'none';
-            if (UI.dup) UI.dup.style.display = 'none';
             if (UI.chkGlobal) UI.chkGlobal.checked = false;
 
             if (UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'none';
@@ -23255,7 +25680,6 @@ async function openManager(initialCache, preloadPromise) {
             if(UI.lblGlobal) UI.lblGlobal.style.display = 'none';
             if(UI.btnAnalyze) UI.btnAnalyze.style.display = 'none';
             if(UI.scan) UI.scan.style.display = 'none';
-            if(UI.dup) UI.dup.style.display = 'none';
             if(UI.bottomGrp) UI.bottomGrp.style.display = 'none';
         }
         else if (S.offlineMode) {
@@ -23270,7 +25694,6 @@ async function openManager(initialCache, preloadPromise) {
             if(UI.lblGlobal) UI.lblGlobal.style.display = 'none';
             if(UI.btnAnalyze) UI.btnAnalyze.style.display = 'none';
             if(UI.scan) UI.scan.style.display = 'none';
-            if(UI.dup) UI.dup.style.display = 'none';
             if(UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'none';
 
             if(UI.bottomGrp) UI.bottomGrp.style.display = 'flex';
@@ -23290,7 +25713,6 @@ async function openManager(initialCache, preloadPromise) {
             if(UI.lblGlobal) UI.lblGlobal.style.display = 'none';
             if(UI.btnAnalyze) UI.btnAnalyze.style.display = 'none';
             if(UI.scan) UI.scan.style.display = 'none';
-            if(UI.dup) UI.dup.style.display = 'none';
             if(UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'none';
             if(UI.uploadWrap) UI.uploadWrap.style.display = 'none';
 
@@ -23332,20 +25754,25 @@ async function openManager(initialCache, preloadPromise) {
         S.clearSelection();
 
         const isOffline = mode === 'offline';
-        const realKey = S.getRealCacheKey(isOffline ? 'offline_root' : '');
+        const isRecent = mode === 'recent';
+
+        const realKey = S.getRealCacheKey(isOffline ? 'offline_root' : (isRecent ? 'recent_root' : ''));
         const hasCache = typeof globalCache !== 'undefined' && globalCache.has(realKey);
 
         const session = typeof globalCache !== 'undefined' ? globalCache.get('offline_session') : null;
-        const isResuming = isOffline && session && !session.completed;
+        const isResumingOffline = isOffline && session && !session.completed;
 
-        if (!(isOffline && (hasCache || isResuming))) {
-            setLoad(true);
+        const recentCache = isRecent && hasCache ? globalCache.get(realKey) : null;
+        const isResumingRecent = isRecent && recentCache && !Array.isArray(recentCache) && recentCache.nextToken;
+
+        if (!((isOffline && (hasCache || isResumingOffline)) || (isRecent && (hasCache || isResumingRecent)))) {
+            setLoad(true, true);
         }
 
-        load(false, !isOffline);
+        load(false, !(isOffline || isRecent));
 
         if (window.pkSmartRefreshTrigger) {
-            setTimeout(() => window.pkSmartRefreshTrigger(isOffline), 100);
+            setTimeout(() => window.pkSmartRefreshTrigger(isOffline || isRecent), 100);
         }
     };
 
@@ -23517,9 +25944,12 @@ async function openManager(initialCache, preloadPromise) {
             pop._sourceEl = triggerEl;
             document.body.appendChild(pop);
 
+            const scale = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
+            pop.style.zoom = scale;
+
             const rect = triggerEl.getBoundingClientRect();
-            pop.style.top = (rect.bottom + 5) + 'px';
-            pop.style.left = rect.left + 'px';
+            pop.style.top = ((rect.bottom / scale) + 5) + 'px';
+            pop.style.left = (rect.left / scale) + 'px';
 
             const cleanup = () => {
                 if (pop.parentNode) pop.remove();
@@ -23527,10 +25957,12 @@ async function openManager(initialCache, preloadPromise) {
                 const svgR = triggerEl.querySelector('svg');
                 if (svgR) { svgR.style.width = '14px'; svgR.style.height = '14px'; svgR.style.display = 'block'; svgR.style.opacity = '0.6'; }
                 document.removeEventListener('mousedown', closer);
+                window.removeEventListener('resize', cleanup);
             };
             pop._cleanup = cleanup;
             const closer = (ev) => { if (!pop.contains(ev.target) && ev.target !== triggerEl) cleanup(); };
             document.addEventListener('mousedown', closer);
+            window.addEventListener('resize', cleanup);
 
             const cacheKey = parentId || 'root';
             let folders = null;
@@ -23639,8 +26071,9 @@ async function openManager(initialCache, preloadPromise) {
 
         const handlePickerWheel = (e) => {
             e.preventDefault();
-            const oldPop = document.querySelector('.pk-crumb-pop');
-            if (oldPop && typeof oldPop._cleanup === 'function') oldPop._cleanup();
+            document.querySelectorAll('.pk-crumb-pop').forEach(p => {
+                if (typeof p._cleanup === 'function') p._cleanup();
+            });
             const now = Date.now();
             if (now - _lastPickerScroll < 120) return;
             _lastPickerScroll = now;
@@ -23785,25 +26218,28 @@ async function openManager(initialCache, preloadPromise) {
 
                     <div id="pk_cloud_error" style="display:none; color:#d93025; font-size:13px; font-weight:600; padding:4px 0;">${L.err_invalid_links}</div>
 
-                    <div id="pk_cloud_dest_row" style="display:flex; align-items:baseline; gap:10px; font-size:14px; color:var(--pk-fg);">
-                        <span style="opacity:0.9;">${L.lbl_save_to}</span>
-                        <div style="display:flex; align-items:baseline; gap:6px;">
-                            <span style="display:inline-flex; align-items:center; transform:translateY(5px);">
+                    <div id="pk_cloud_dest_row" style="display:flex; align-items:flex-end; gap:8px; font-size:14px; color:var(--pk-fg); line-height:1;">
+                        <span style="opacity:0.9; margin-bottom:1px;">${L.lbl_save_to}</span>
+                        <div style="display:flex; align-items:flex-end; gap:5px;">
+                            <div style="line-height:0; transform:translateY(2px);">
                                 ${CONF.typeIcons.folder.replace('width="30"', 'width="20"').replace('height="30"', 'height="20"')}
-                            </span>
-                            <span id="pk_cloud_dir_name" style="font-weight:600; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${saveToName}</span>
-                            <span id="pk_cloud_change_dir" style="color:var(--pk-pri); cursor:pointer; font-size:14px; margin-left:4px; display:inline-block;">${L.btn_modify}</span>
+                            </div>
+                            <span id="pk_cloud_dir_name" style="font-weight:600; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-bottom:1px;">${saveToName}</span>
+                            <div style="display:flex; color:#aaa; transition:color 0.2s; margin-bottom:1px;" data-pk-tip="${L.tip_cloud_save_path}" onmouseover="this.style.color=document.querySelector('.pk-ov').classList.contains('pk-dark')?'#ddd':'#666'" onmouseout="this.style.color='#aaa'">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            </div>
+                            <span id="pk_cloud_change_dir" style="color:var(--pk-pri); cursor:pointer; font-size:14px; margin-left:2px; margin-bottom:1px; display:inline-block;">${L.btn_modify}</span>
                         </div>
                     </div>
 
-                    <div class="pk-modal-act" style="margin-top:10px; display:flex; align-items:center; justify-content:space-between;">
-                        <div style="position:relative;">
+                    <div class="pk-modal-act" style="margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:20px;">
+                        <div style="position:relative; flex-shrink:0;">
                             <span id="pk_cloud_torrent_trigger" style="color:var(--pk-pri); cursor:pointer; font-size:14px; font-weight:500; display:inline-block;">${L.btn_via_torrent}</span>
                             <input type="file" id="pk_cloud_torrent_file" accept=".torrent" style="display:none;">
                         </div>
-                        <div style="display:flex; gap:12px; align-items:center;">
-                            <button class="pk-btn" id="cloud_cancel" style="height:40px; padding:0 24px; border-radius:10px; background:rgba(0,0,0,0.04); color:var(--pk-fg); font-weight:600; border:none; font-size:14px;">${L.btn_cancel}</button>
-                            <button class="pk-btn pri" id="cloud_submit" style="height:40px; min-width:120px; padding:0 20px; border-radius:10px; background:#acc2ff; border:none; color:#fff; font-weight:bold; font-size:14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; cursor:not-allowed; transition:all 0.2s; white-space:nowrap;">
+                        <div style="display:flex; gap:12px; align-items:center; flex-shrink:0;">
+                            <button class="pk-btn" id="cloud_cancel" style="height:40px; width:110px; border-radius:8px; background:transparent; color:var(--pk-fg); font-weight:600; border:none; font-size:14px; flex-shrink:0; justify-content:center;">${L.btn_cancel}</button>
+                            <button class="pk-btn pri" id="cloud_submit" disabled style="height:40px; width:110px; border-radius:8px; background:var(--pk-pri); border:none; color:#fff; font-weight:bold; font-size:14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; transition:all 0.2s; white-space:nowrap; flex-shrink:0;">
                                 <span style="display:block !important; line-height:1;">${L.btn_create_now}</span>
                             </button>
                         </div>
@@ -23848,8 +26284,6 @@ async function openManager(initialCache, preloadPromise) {
                 m.querySelector('#pk_cloud_error').style.display = isError ? 'block' : 'none';
                 m.querySelector('#pk_cloud_dest_row').style.display = isError ? 'none' : 'flex';
 
-                submit.style.backgroundColor = allValid ? 'var(--pk-pri)' : '#acc2ff';
-                submit.style.cursor = allValid ? 'pointer' : 'not-allowed';
                 submit.disabled = !allValid;
             };
 
@@ -23958,7 +26392,7 @@ async function openManager(initialCache, preloadPromise) {
                 if (file) {
                     m.remove();
                     setLoad(true);
-                    updateLoadTxt("Parsing Torrent...");
+                    updateLoadTxt(L.str_parsing_torrent);
 
                     try {
                         const magnetLink = await new Promise((resolve, reject) => {
@@ -23989,7 +26423,7 @@ async function openManager(initialCache, preloadPromise) {
                                         }
                                     };
 
-                                    if (buf[0] !== 100) throw new Error("Invalid Torrent Format");
+                                    if (buf[0] !== 100) throw new Error(L.err_invalid_torrent);
                                     pos = 1;
                                     let infoHash = null;
                                     let dn = "";
@@ -24029,13 +26463,13 @@ async function openManager(initialCache, preloadPromise) {
                                         if (dn) mag += `&dn=${encodeURIComponent(dn)}`;
                                         resolve(mag);
                                     } else {
-                                        reject(new Error("Parse Failed: No info dictionary"));
+                                        reject(new Error(L.err_torrent_no_info));
                                     }
                                 } catch (e) {
                                     reject(e);
                                 }
                             };
-                            reader.onerror = () => reject(new Error("File Read Error"));
+                            reader.onerror = () => reject(new Error(L.err_file_read));
                             reader.readAsArrayBuffer(file);
                         });
 
@@ -24378,22 +26812,41 @@ async function openManager(initialCache, preloadPromise) {
         if (!await showConfirm(L.msg_empty_trash_confirm)) return;
         if (S.items.length === 0) return;
 
-        const ids = S.items.map(i => i.id);
-
         S._isEmptyingTrash = true;
+        setLoad(true);
+        updateLoadTxt(L.str_deleting);
+
         try {
-            await executeBatchDelete(ids, {
-                hardDelete: true,
-                silent: false,
-                forceRefresh: true
+            const res = await fetch('https://api-drive.mypikpak.com/drive/v1/files/trash:empty', {
+                method: 'PATCH',
+                headers: getHeaders()
             });
+
+            if (!res.ok) throw new Error(`API Error ${res.status}`);
+
+            S.items = [];
+            S.display = [];
+            S.itemMap.clear();
+            S.clearSelection();
+
+            if (typeof globalCache !== 'undefined') globalCache.delete('root_trashed');
+            if (S.cache) S.cache.delete('root_trashed');
+
+            refresh();
+            updateStat();
             showToast(L.msg_trash_emptied);
+
+        } catch (e) {
+            showAlert(`${L.str_error}: ${e.message}`);
         } finally {
+            setLoad(false);
             S._isEmptyingTrash = false;
         }
     };
 
-    UI.btnSettings.onclick = () => {
+    const openSettingsModal = () => {
+        const inputStyle = `width:100%; height:44px; padding:0 15px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box;`;
+        const areaStyle = `width:100%; min-height:60px; max-height:120px; padding:12px 15px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:13px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; resize:vertical; line-height:1.5; font-family:inherit; cursor:auto;`;        const labelStyle = `position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; line-height:1; font-size:11px; color:var(--pk-pri); font-weight:bold; pointer-events:none; z-index:1;`;
         const curLang = gmGet('pk_lang', lang);
         const curEngine = gmGet('pk_search_engine', 'google');
         const curAriaUrl = gmGet('pk_aria2_url', '');
@@ -24403,13 +26856,30 @@ async function openManager(initialCache, preloadPromise) {
         let selectedLang = curLang;
         let selectedEngine = curEngine;
 
+        let totalStorageBytes = 0;
+        const keys = typeof GM_listValues !== 'undefined' ? GM_listValues() : Object.keys(localStorage);
+        keys.forEach(k => {
+            if (k.startsWith('pk_')) {
+                const val = typeof GM_getValue !== 'undefined' ? GM_getValue(k) : localStorage.getItem(k);
+                totalStorageBytes += (k.length + JSON.stringify(val || '').length);
+            }
+        });
+
+        if (typeof globalCache !== 'undefined') {
+            for (const [k, v] of globalCache.entries()) {
+                try { totalStorageBytes += k.toString().length + JSON.stringify(v).length; } catch(e){}
+            }
+        }
+
+        const storageDisplay = fmtSize(totalStorageBytes);
+
         const m = showModal(`
-            <div class="pk-share-modal-root" style="width:420px; max-width:90vw; display:flex; flex-direction:column; overflow:visible;">
-                <div style="padding: 30px 50px 15px 30px; flex-shrink:0;">
+            <div style="display:flex; flex-direction:column; height:580px; max-height:75vh; width:420px; max-width:95vw; overflow:hidden; overscroll-behavior:none; position:relative;">
+                <div style="padding: 30px 30px 15px 30px; flex-shrink:0; transform:translateZ(0);">
                     <h3 style="margin: 0; font-size: 18px; font-weight: 700; border: none; line-height: 1.2; color: var(--pk-fg);">${L.modal_settings_title}</h3>
                 </div>
 
-                <div class="pk-scroll pk-no-scrollbar" style="max-height: 480px; overflow-y:auto; overflow-x:visible; padding: 10px 30px 30px 30px;">
+                <div class="pk-scroll pk-no-scrollbar" style="flex:1; overflow-y:auto; padding: 10px 30px 20px 30px; overscroll-behavior:contain; transform:translateZ(0);">
                     <div style="display:flex; flex-direction:column; gap:25px; padding-top:10px;">
 
                         <div class="pk-custom-select" id="cs_set_lang">
@@ -24425,14 +26895,25 @@ async function openManager(initialCache, preloadPromise) {
                         </div>
 
                         <div style="position:relative;">
+                            <label for="set_turbo"
+                                onmouseover="this.style.borderColor='var(--pk-pri)'"
+                                onmouseout="this.style.borderColor='var(--pk-bd)'"
+                                style="display:flex; align-items:center; justify-content:space-between; height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:0 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+                                <span style="font-size:14px; color:var(--pk-fg);user-select:none;">${L.desc_turbo_mode}</span>
+                                <input type="checkbox" id="set_turbo" ${gmGet('pk_turbo_mode', false)?'checked':''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer;">
+                            </label>
+                            <div class="pk-select-label">${L.label_turbo_mode}</div>
+                        </div>
+
+                        <div style="position:relative;">
                             <label for="set_thumb"
-                                   onmouseover="this.style.borderColor='var(--pk-pri)'"
-                                   onmouseout="this.style.borderColor='var(--pk-bd)'"
-                                   style="display:flex; align-items:center; justify-content:space-between; height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:0 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box;">
+                                onmouseover="this.style.borderColor='var(--pk-pri)'"
+                                onmouseout="this.style.borderColor='var(--pk-bd)'"
+                                style="display:flex; align-items:center; justify-content:space-between; height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:0 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
                                 <span style="font-size:14px; color:var(--pk-fg);user-select:none;">${L.label_blur_cover}</span>
                                 <input type="checkbox" id="set_thumb" ${curBlur?'checked':''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer;">
                             </label>
-                            <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; pointer-events:none; line-height:1;">${L.label_privacy_mode}</div>
+                            <div class="pk-select-label">${L.label_privacy_mode}</div>
                         </div>
 
                         <div style="position:relative;">
@@ -24459,21 +26940,21 @@ async function openManager(initialCache, preloadPromise) {
 
                         <div onmouseover="this.style.borderColor='var(--pk-pri)'"
                              onmouseout="this.style.borderColor='var(--pk-bd)'"
-                             style="position:relative; padding:15px; border:2px solid var(--pk-bd); border-radius:8px; transition:border-color 0.2s; cursor:default;">
-                            <div style="position:absolute; top:-6px; left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; pointer-events:none; line-height:1; z-index:1;">${L.label_sort_pref}</div>
+                             style="position:relative; padding:15px; border:2px solid var(--pk-bd); border-radius:8px; transition:border-color 0.2s; cursor:default; transform: translateZ(0);">
+                            <div class="pk-select-label">${L.label_sort_pref}</div>
 
                             <div style="display:flex; flex-direction:column; gap:15px;">
                                 <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
-                                    <input type="radio" name="set_sort_pref" value="indep" ${gmGet('pk_sort_independent', false)?'checked':''} style="margin-top:2px; accent-color:var(--pk-pri);">
+                                    <input type="radio" name="set_sort_pref" value="indep" ${gmGet('pk_sort_independent', false)?'checked':''} style="margin-top:4px; accent-color:var(--pk-pri);">
                                     <div>
-                                        <div style="font-size:14px; color:var(--pk-fg); font-weight:500;">${L.opt_sort_indep}</div>
+                                        <div style="font-size:14px; color:var(--pk-fg); font-weight:500; line-height:1.4;">${L.opt_sort_indep}</div>
                                         <div style="font-size:12px; color:#888; margin-top:2px;">${L.desc_sort_indep}</div>
                                     </div>
                                 </label>
                                 <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
-                                    <input type="radio" name="set_sort_pref" value="global" ${!gmGet('pk_sort_independent', false)?'checked':''} style="margin-top:2px; accent-color:var(--pk-pri);">
+                                    <input type="radio" name="set_sort_pref" value="global" ${!gmGet('pk_sort_independent', false)?'checked':''} style="margin-top:4px; accent-color:var(--pk-pri);">
                                     <div>
-                                        <div style="font-size:14px; color:var(--pk-fg); font-weight:500;">${L.opt_sort_global}</div>
+                                        <div style="font-size:14px; color:var(--pk-fg); font-weight:500; line-height:1.4;">${L.opt_sort_global}</div>
                                         <div style="font-size:12px; color:#888; margin-top:2px;">${L.desc_sort_global}</div>
                                     </div>
                                 </label>
@@ -24491,15 +26972,6 @@ async function openManager(initialCache, preloadPromise) {
                             <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; pointer-events:none; line-height:1;">${L.label_comic_mode}</div>
                         </div>
 
-                        <div class="pk-custom-select" id="cs_set_dup_strict">
-                            <div class="pk-select-label">${L.label_dup_strictness}</div>
-                            <div class="pk-select-trigger"><span id="txt_set_dup_strict"></span>${CONF.crumbIcons.down}</div>
-                            <div class="pk-select-menu pk-scroll">
-                                <div class="pk-select-item" data-val="strict">${L.opt_strict}</div>
-                                <div class="pk-select-item" data-val="loose">${L.opt_loose}</div>
-                            </div>
-                        </div>
-
                         <div class="pk-custom-select" id="cs_set_engine">
                             <div class="pk-select-label">${L.label_search_engine}</div>
                             <div class="pk-select-trigger"><span id="txt_set_engine"></span>${CONF.crumbIcons.down}</div>
@@ -24511,28 +26983,83 @@ async function openManager(initialCache, preloadPromise) {
                             </div>
                         </div>
 
-                        <div style="position:relative;">
-                            <input type="text" id="set_aria_url" value="${esc(curAriaUrl)}" placeholder="http://localhost:6800/jsonrpc"
-                                   autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
-                                   oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                                   style="width:100%; height:44px; padding:0 12px; border:2px solid ${curAriaUrl ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box;">
-                            <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; pointer-events:none; line-height:1;">Aria2 RPC</div>
-                        </div>
-
-                        <div style="position:relative;">
-                            <input type="text" id="set_aria_token" value="${esc(curAriaToken)}" placeholder="Empty"
-                                   autocomplete="off" spellcheck="false" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly');"
-                                   oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                                   style="width:100%; height:44px; padding:0 12px; border:2px solid ${curAriaToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; -webkit-text-security: disc;">
-                            <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; pointer-events:none; line-height:1;">Aria2 Token</div>
-                        </div>
-
-                        <div style="margin-top:10px; padding-top:10px;">
-                            <div class="pk-modal-act" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 5px;">
-                                <button class="pk-btn" id="set_cancel" style="height:40px; border-radius:8px; justify-content:center; background:transparent; font-weight:600; font-size:15px;">${L.btn_cancel}</button>
-                                <button class="pk-btn pri" id="set_save" style="height:40px; border-radius:8px; background:var(--pk-pri); color:#fff; font-weight:bold; justify-content:center; border:none; font-size:15px;">${L.btn_save}</button>
+                        <div id="pk_dl_group" style="position:relative; padding:25px 15px 15px 15px; border:2px solid var(--pk-bd); border-radius:8px; transition:border-color 0.2s;">
+                            <div class="pk-select-label">${L.lbl_dl_filter}</div>
+                            <div style="display:flex; flex-direction:column; gap:15px;">
+                                <div style="position:relative;">
+                                    <textarea id="set_dl_filter_ext" placeholder=".txt, .nfo" style="${areaStyle}">${esc(gmGet('pk_dl_filter_ext', ''))}</textarea>
+                                    <div style="${labelStyle}">${L.label_dl_filter_ext}</div>
+                                </div>
+                                <div style="position:relative;">
+                                    <textarea id="set_dl_filter_name" placeholder="ReadMe1, ReadMe2" style="${areaStyle}">${esc(gmGet('pk_dl_filter_name', ''))}</textarea>
+                                    <div style="${labelStyle}">${L.label_dl_filter_name}</div>
+                                </div>
+                                <div style="font-size:11px; color:#888;">${L.desc_dl_filter}</div>
                             </div>
                         </div>
+
+                        <div style="position:relative; transform: translateZ(0);">
+                            <div style="position:relative;">
+                                <input type="text" id="set_aria_url" value="${esc(curAriaUrl)}" placeholder="http://localhost:6800/jsonrpc"
+                                       autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
+                                       oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
+                                       style="width:100%; height:44px; padding:0 70px 0 12px; border:2px solid ${curAriaUrl ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+                                <div class="pk-select-label">${L.label_aria2_url}</div>
+                                <div id="btn_aria_default" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:4px 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2);" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">Default</div>
+                            </div>
+                            <div class="pk-aria-status-box" id="aria_test_res" style="margin-top: 8px;">
+                                <div class="pk-aria-dot" id="aria_test_dot"></div>
+                                <span id="aria_test_txt" style="color:#888; font-size: 11px;">${L.lbl_aria2_status}</span>
+                            </div>
+                        </div>
+
+                        <div style="position:relative; transform: translateZ(0); -webkit-transform: translateZ(0);">
+                            <input type="text" id="set_aria_token" value="${esc(curAriaToken)}" placeholder="${L.ph_aria2_secret}"
+                                   autocomplete="off" spellcheck="false" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly');"
+                                   oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
+                                   style="width:100%; height:44px; padding:0 12px; border:2px solid ${curAriaToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; -webkit-text-security: disc; transform: translateZ(0);">
+                            <div class="pk-select-label">${L.label_aria2_token}</div>
+                        </div>
+
+                        <div style="position:relative; padding:20px 15px 15px 15px; border:2px solid var(--pk-bd); border-radius:8px; transition:border-color 0.2s; transform:translateZ(0); backface-visibility:hidden;" onmouseover="this.style.borderColor='var(--pk-pri)'" onmouseout="this.style.borderColor='var(--pk-bd)'">
+                            <div class="pk-select-label" style="transform:translateY(-50.5%);">${L.lbl_pwd_manage}</div>
+                            <div id="btn_open_vault" style="display:flex; align-items:center; justify-content:center; gap:10px; height:44px; background:var(--pk-hl); border-radius:8px; cursor:pointer; transition:all 0.2s; color:var(--pk-fg); transform:translateZ(0);" onmouseover="this.style.background='var(--pk-sel-bg)'; this.style.color='var(--pk-pri)'" onmouseout="this.style.background='var(--pk-hl)'; this.style.color='var(--pk-fg)'">
+                                <span style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--pk-pri);">${CONF.icons.vault.replace('width="16"','width="20"').replace('height="16"','width="20"')}</span>
+                                <span style="font-size:14px; font-weight:700;">${L.title_pwd_vault}</span>
+                            </div>
+                        </div>
+
+                        <div style="position:relative; padding:20px 15px 15px 15px; border:2px solid var(--pk-bd); border-radius:8px; display:flex; flex-direction:column; gap:12px; transition:border-color 0.2s; transform:translateZ(0);" onmouseover="this.style.borderColor='var(--pk-pri)'" onmouseout="this.style.borderColor='var(--pk-bd)'">
+                            <div class="pk-select-label" style="transform:translateY(-50.5%);">${L.lbl_config_manage}</div>
+
+                            <button class="pk-btn" id="btn_cfg_clean" style="background:transparent; border:1px solid #d93025; color:#d93025; height:36px; border-radius:6px; font-weight:600; width:100%; display:flex; align-items:center; justify-content:center;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px; flex-shrink:0;"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                                <div style="display:flex; align-items:baseline;">
+                                    <span style="display:inline !important; font-size:13px; font-weight:600;">${L.btn_clean_data}</span>
+                                    <span style="display:inline !important; font-size:13px; font-weight:600; margin-left:6px; opacity:0.8;">( ${storageDisplay} )</span>
+                                </div>
+                            </button>
+
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                                <button class="pk-btn" id="btn_cfg_export" style="background:var(--pk-hl); border:1px solid var(--pk-bd); height:36px; border-radius:6px; font-weight:600;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    ${L.btn_export_data}
+                                </button>
+                                <button class="pk-btn" id="btn_cfg_import" style="background:var(--pk-hl); border:1px solid var(--pk-bd); height:36px; border-radius:6px; font-weight:600;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    ${L.btn_import_data}
+                                </button>
+                            </div>
+                            <input type="file" id="cfg_import_input" accept=".json" style="display:none;">
+                        </div>
+
+                        </div>
+                </div>
+
+                <div style="padding: 20px 30px 30px 30px; flex-shrink:0; background:var(--pk-bg); border-top:1px solid var(--pk-bd);">
+                    <div class="pk-modal-act" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 0;">
+                        <button class="pk-btn" id="set_cancel" style="height:44px; border-radius:10px; justify-content:center; background:transparent; font-weight:600; font-size:15px;">${L.btn_cancel}</button>
+                        <button class="pk-btn pri" id="set_save" style="height:44px; border-radius:10px; background:var(--pk-pri); color:#fff; font-weight:bold; justify-content:center; border:none; font-size:15px;">${L.btn_save}</button>
                     </div>
                 </div>
             </div>
@@ -24540,7 +27067,7 @@ async function openManager(initialCache, preloadPromise) {
 
         const modalBox = m.querySelector('.pk-modal');
         if (modalBox) {
-            Object.assign(modalBox.style, { width: 'auto', padding: '0', overflow: 'visible', height: 'auto', minHeight: 'auto' });
+            Object.assign(modalBox.style, { width: 'auto', padding: '0', overflow: 'hidden', height: 'auto', minHeight: 'auto' });
             const closeBtn = m.querySelector('.pk-modal-close');
             if (closeBtn) Object.assign(closeBtn.style, { top: '26px', right: '26px' });
         }
@@ -24574,10 +27101,81 @@ async function openManager(initialCache, preloadPromise) {
             };
         };
 
-        let selectedStrict = gmGet('pk_dup_strictness', 'strict');
         bindSelect('cs_set_lang', curLang, (val) => { selectedLang = val; });
         bindSelect('cs_set_engine', curEngine, (val) => { selectedEngine = val; });
-        bindSelect('cs_set_dup_strict', selectedStrict, (val) => { selectedStrict = val; });
+
+        const ariaInp = m.querySelector('#set_aria_url');
+        const ariaTok = m.querySelector('#set_aria_token');
+        const ariaDot = m.querySelector('#aria_test_dot');
+        const ariaTxt = m.querySelector('#aria_test_txt');
+        const ariaBox = m.querySelector('#aria_test_res');
+        let ariaTimer = null;
+
+        const runAriaTest = async () => {
+            const url = ariaInp.value.trim();
+            const token = ariaTok.value.trim();
+            const showTip = () => showAlert(L.tip_mixed_content, L.lbl_aria2_status);
+
+            if (!url) {
+                ariaDot.className = 'pk-aria-dot';
+                ariaTxt.textContent = L.lbl_aria2_status;
+                ariaBox.onclick = showTip;
+                ariaBox.style.cursor = 'pointer';
+                return;
+            }
+
+            ariaDot.className = 'pk-aria-dot wait';
+            ariaTxt.textContent = L.str_connecting;
+            ariaBox.onclick = showTip;
+            ariaBox.style.cursor = 'pointer';
+
+            const payload = { jsonrpc: '2.0', method: 'aria2.getVersion', id: 'pk_live_test', params: [`token:${token}`] };
+            let testUrl = url.replace(/^ws/i, 'http');
+            if (!testUrl.includes('/jsonrpc') && !testUrl.includes('?')) {
+                testUrl = testUrl.endsWith('/') ? testUrl + 'jsonrpc' : testUrl + '/jsonrpc';
+            }
+
+            try {
+                await new Promise((resolve, reject) => {
+                    GM_xmlhttpRequest({
+                        method: 'POST', url: testUrl, data: JSON.stringify(payload),
+                        headers: { 'Content-Type': 'application/json' }, timeout: 3000,
+                        onload: (r) => { if (r.status === 200) resolve(); else reject(new Error(r.status)); },
+                        onerror: (e) => reject(e)
+                    });
+                });
+                ariaDot.className = 'pk-aria-dot ok';
+                ariaTxt.textContent = L.str_connected;
+                ariaBox.onclick = null;
+                ariaBox.style.cursor = 'default';
+            } catch (e) {
+                ariaDot.className = 'pk-aria-dot err';
+                ariaTxt.textContent = L.str_conn_fail;
+                ariaBox.onclick = showTip;
+                ariaBox.style.cursor = 'pointer';
+            }
+        };
+
+        const debouncedTest = () => {
+            clearTimeout(ariaTimer);
+            ariaTimer = setTimeout(runAriaTest, 600);
+        };
+
+        ariaInp.oninput = (e) => {
+            if (e.target.oninput) e.target.style.borderColor = e.target.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
+            debouncedTest();
+        };
+        ariaTok.oninput = (e) => {
+            if (e.target.oninput) e.target.style.borderColor = e.target.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
+            debouncedTest();
+        };
+        m.querySelector('#btn_aria_default').onclick = () => {
+            ariaInp.value = 'http://localhost:6800/jsonrpc';
+            ariaInp.style.borderColor = 'var(--pk-pri)';
+            debouncedTest();
+        };
+
+        setTimeout(runAriaTest, 200);
 
         const clickAway = () => m.querySelectorAll('.pk-select-menu').forEach(menu => menu.style.display = 'none');
         setTimeout(() => document.addEventListener('click', clickAway), 0);
@@ -24586,6 +27184,346 @@ async function openManager(initialCache, preloadPromise) {
         m.remove = () => {
             document.removeEventListener('click', clickAway);
             _orgRemove();
+        };
+
+        const extInp = m.querySelector('#set_dl_filter_ext');
+        const nameInp = m.querySelector('#set_dl_filter_name');
+        const groupEl = m.querySelector('#pk_dl_group');
+        const updateDlBorders = () => {
+            const hasE = extInp.value.trim() !== '';
+            const hasN = nameInp.value.trim() !== '';
+            extInp.classList.toggle('pk-active-border', hasE);
+            nameInp.classList.toggle('pk-active-border', hasN);
+            groupEl.classList.toggle('pk-typing-active', hasE || hasN);
+        };
+        extInp.oninput = nameInp.oninput = updateDlBorders;
+        updateDlBorders();
+
+        m.querySelector('#btn_open_vault').onclick = (e) => {
+            e.stopPropagation();
+            const subM = document.createElement('div');
+            subM.className = 'pk-modal-ov';
+            subM.style.zIndex = (++modalZIndexCounter).toString();
+            if (document.querySelector('.pk-ov').classList.contains('pk-dark')) subM.classList.add('pk-dark');
+
+            const savedCount = gmGet('pk_pwd_try_count', 10);
+            const savedPwds = (() => { try { return JSON.parse(gmGet('pk_pwd_vault', '[]')).map(x => typeof x === 'object' ? x.p : x).join('\n'); } catch { return ''; } })();
+
+            subM.innerHTML = `
+                <style>#vault_cnt_val::-webkit-outer-spin-button, #vault_cnt_val::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; } .pk-dark .pk-sub-ctrl-btn:hover { background: #444 !important; }</style>
+                <div class="pk-modal" style="width:380px; padding:24px; border-radius:12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); background:var(--pk-bg); border:1px solid var(--pk-bd);">
+                    <div class="pk-modal-close" style="top:26px; right:24px; color:var(--pk-icon-c); opacity:0.7;">${CONF.icons.close}</div>
+                    <h3 style="border:none; margin:0 0 10px 0; font-size:17px; font-weight:700; color:var(--pk-fg); display:flex; align-items:center; gap:10px;">
+                        <span style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--pk-pri);">${CONF.icons.vault.replace('width="16"','width="22"').replace('height="16"','width="22"')}</span>
+                        ${L.title_pwd_vault}
+                    </h3>
+
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                        <span style="font-size:14px; color:var(--pk-fg); font-weight:600; opacity:0.9;">${L.lbl_pwd_try_count}</span>
+                        <div class="pk-sub-ctrl" style="width:110px; height:34px; display:flex; align-items:center; border:1.5px solid var(--pk-bd); border-radius:6px; overflow:hidden; background:var(--pk-hl);">
+                            <div class="pk-sub-ctrl-btn" id="vault_cnt_dec" style="width:32px; height:100%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--pk-fg); font-weight:bold; border-right:1px solid var(--pk-bd); transition:background 0.2s;">－</div>
+                            <input type="number" id="vault_cnt_val" value="${savedCount}" min="10" max="50" style="flex:1; width:30px; height:100%; text-align:center; border:none; background:transparent; color:var(--pk-fg); outline:none; font-size:15px; font-weight:700; font-family:monospace; -moz-appearance:textfield;">
+                            <div class="pk-sub-ctrl-btn" id="vault_cnt_inc" style="width:32px; height:100%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--pk-fg); font-weight:bold; border-left:1px solid var(--pk-bd); transition:background 0.2s;">＋</div>
+                        </div>
+                    </div>
+                    <div style="font-size:12px; color:#888; margin-bottom:8px; padding-left:2px;">${L.tip_pwd_manual}</div>
+
+                    <div style="display:flex; flex-direction:column; gap:8px; position:relative;">
+                        <textarea id="vault_pwd_area" placeholder="" spellcheck="false" wrap="off"
+                              style="width:100%; height:242px; padding:0 15px; border:2px solid var(--pk-bd); border-radius:8px; background-color:var(--pk-hl); background-image:linear-gradient(to right, var(--pk-hl) 4px, transparent 4px), linear-gradient(to bottom, transparent 31px, var(--pk-v-line) 31px); background-size:8px 32px, 100% 32px; background-attachment:local; color:var(--pk-fg); font-size:13px; font-family:'Fira Code', 'Consolas', monospace; line-height:32px; resize:none; outline:none; box-sizing:border-box; white-space:pre; transition:border-color 0.2s, box-shadow 0.2s; overflow-y:auto; cursor:auto;"></textarea>
+                    </div>
+
+                    <div class="pk-modal-act" style="display:flex; justify-content:flex-end; align-items:center; margin-top:28px; gap:20px; border-top:1px solid var(--pk-bd); padding-top:20px;">
+                        <span id="vault_cancel" style="cursor:pointer; color:var(--pk-icon-c); font-size:14px; font-weight:600; transition:color 0.2s;" onmouseover="this.style.color='var(--pk-fg)'" onmouseout="this.style.color='var(--pk-icon-c)'">${L.btn_cancel}</span>
+                        <button class="pk-btn pri" id="vault_save"
+                                style="height:40px; padding:0 30px; border-radius:8px; background:var(--pk-pri); border:none; color:#fff; font-weight:bold; font-size:14px; box-shadow:0 4px 12px rgba(0,0,0,0.2); transition:transform 0.1s, filter 0.2s;">${L.btn_save}</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(subM);
+
+            const cntInp = subM.querySelector('#vault_cnt_val');
+            subM.querySelector('#vault_cnt_dec').onclick = (ev) => {
+                ev.preventDefault(); ev.stopPropagation();
+                let v = Math.floor(Number(cntInp.value)) || 10;
+                cntInp.value = Math.max(10, v - 1);
+            };
+            subM.querySelector('#vault_cnt_inc').onclick = (ev) => {
+                ev.preventDefault(); ev.stopPropagation();
+                let v = Math.floor(Number(cntInp.value)) || 0;
+                cntInp.value = Math.min(50, v + 1);
+            };
+
+            cntInp.oninput = () => {
+                let raw = cntInp.value;
+                if (raw === "") return;
+                let v = parseInt(raw);
+                if (isNaN(v)) { cntInp.value = 10; return; }
+                if (v > 50) cntInp.value = 50;
+            };
+            cntInp.onblur = () => {
+                let v = parseInt(cntInp.value);
+                if (isNaN(v) || v < 10) cntInp.value = 10;
+            };
+            const area = subM.querySelector('#vault_pwd_area');
+            area.onfocus = () => area.style.borderColor = 'var(--pk-pri)';
+            area.onblur = () => area.style.borderColor = 'var(--pk-bd)';
+            area.value = savedPwds;
+            area.oninput = () => {
+                let lines = area.value.split('\n');
+                let changed = false;
+                let msg = "";
+                if (lines.length > 50) {
+                    lines = lines.slice(0, 50);
+                    changed = true;
+                    msg = L.err_vault_max;
+                }
+                for (let i = 0; i < lines.length; i++) {
+                    if (lines[i].length > 127) {
+                        lines[i] = lines[i].substring(0, 127);
+                        changed = true;
+                        msg = L.err_pwd_len;
+                    }
+                }
+                if (changed) {
+                    const cursor = area.selectionStart;
+                    area.value = lines.join('\n');
+                    area.setSelectionRange(cursor, cursor);
+                    showToast(msg, 'error');
+                    area.style.borderColor = '#d93025';
+                    setTimeout(() => { if(area) area.style.borderColor = 'var(--pk-pri)'; }, 1000);
+                }
+            };
+
+            const doSave = () => {
+                let cnt = Math.floor(Number(cntInp.value));
+                if (isNaN(cnt) || cnt < 10) cnt = 10;
+                if (cnt > 50) cnt = 50;
+
+                const inputPwds = area.value.split('\n').map(s => s.trim()).filter(s => s);
+                if (inputPwds.length > 50) {
+                    showToast(L.err_vault_max, 'error');
+                    area.style.borderColor = '#d93025';
+                    return;
+                }
+
+                try {
+                    const oldList = JSON.parse(gmGet('pk_pwd_vault', '[]')).map(x => typeof x === 'object' ? x : {p: x, h: 0});
+                    const hitMap = new Map(oldList.map(x => [x.p, x.h]));
+                    const newList = [...new Set(inputPwds)].map(p => ({ p: p, h: hitMap.get(p) || 0 }));
+                    newList.sort((a, b) => b.h - a.h);
+
+                    gmSet('pk_pwd_try_count', cnt);
+                    gmSet('pk_pwd_vault', JSON.stringify(newList));
+                } catch(e) {
+                    gmSet('pk_pwd_vault', JSON.stringify([...new Set(inputPwds)]));
+                }
+
+                subM.remove();
+                showToast(L.msg_settings_saved);
+            };
+
+            subM.querySelector('#vault_save').onclick = doSave;
+            subM.querySelector('#vault_cancel').onclick = () => subM.remove();
+            subM.querySelector('.pk-modal-close').onclick = () => subM.remove();
+        };
+
+        m.querySelector('#btn_cfg_clean').onclick = async () => {
+            const keys = typeof GM_listValues !== 'undefined' ? GM_listValues() : Object.keys(localStorage);
+
+            const sizes = { index: 0, pref: 0, rules: 0, vault: 0, history: 0, cache: 0 };
+
+            if (typeof globalCache !== 'undefined') {
+                for (const [k, v] of globalCache.entries()) {
+                    try { sizes.index += k.toString().length + JSON.stringify(v).length; } catch(e){}
+                }
+            }
+
+            const getCat = (k) => {
+                if (!k.startsWith('pk_')) return null;
+                if (k.startsWith('pk_archive_pwd_') || k === 'pk_pwd_vault') return 'vault';
+                if (k.startsWith('pk_progress_') || k.startsWith('pk_duration_')) return 'history';
+                if (k.startsWith('pk_fmod_') || k === 'pk_captured_captcha') return 'cache';
+
+                const ruleKeys =['pk_blacklist', 'pk_blacklist_folders', 'pk_aria2_url', 'pk_aria2_token', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_bn_find_hist', 'pk_bn_rep_hist'];
+                if (ruleKeys.includes(k) || k.startsWith('pk_scan_last_') || k.startsWith('pk_analyze_last_') || k === 'pk_dup_strictness') return 'rules';
+
+                return 'pref';
+            };
+
+            keys.forEach(k => {
+                const cat = getCat(k);
+                if (cat) {
+                    const val = typeof GM_getValue !== 'undefined' ? GM_getValue(k) : localStorage.getItem(k);
+                    sizes[cat] += (k.length + (val ? JSON.stringify(val).length : 0));
+                }
+            });
+
+            const renderLbl = (cat, txt, isChecked = false, isMandatory = false) => {
+                const sz = sizes[cat];
+                if (sz === 0 && cat !== 'index') return '';
+                const szStr = fmtSize(sz);
+                const checkAttr = (isChecked || isMandatory) ? 'checked' : '';
+                const disAttr = isMandatory ? 'disabled' : '';
+                const cursor = isMandatory ? 'not-allowed' : 'pointer';
+                const opacity = isMandatory ? '0.7' : '1';
+                return `<label style="display:flex; align-items:flex-start; gap:12px; cursor:${cursor}; color:var(--pk-fg); font-size:14px; opacity:${opacity};">
+                            <input type="checkbox" class="clean-opt" value="${cat}" ${checkAttr} ${disAttr} style="width:18px; height:18px; accent-color:#d93025; cursor:inherit; margin-top:2px;">
+                            <div style="display:flex; flex-direction:column;">
+                                <span>${txt}</span>
+                                <span style="font-size:12px; color:#888; font-family:monospace; margin-top:2px;">${szStr}</span>
+                            </div>
+                        </label>`;
+            };
+
+            const htmlOptions =[
+                renderLbl('index', L.opt_cfg_index, true, true),
+                renderLbl('pref', L.opt_cfg_pref),
+                renderLbl('rules', L.opt_cfg_rules),
+                renderLbl('vault', L.opt_cfg_vault),
+                renderLbl('history', L.opt_cfg_history),
+                renderLbl('cache', L.opt_cfg_cache)
+            ].filter(Boolean).join('');
+
+            if (!htmlOptions) return;
+
+            const cleanM = showModal(`
+                <h3 style="border:none; margin-bottom:20px; font-size:18px; font-weight:700; color:var(--pk-fg);">${L.title_clean_data}</h3>
+                <div style="display:flex; flex-direction:column; gap:16px; margin-bottom:25px;">
+                    ${htmlOptions}
+                </div>
+                <div class="pk-modal-act">
+                    <button class="pk-btn" id="clean_cancel">${L.btn_cancel}</button>
+                    <button class="pk-btn pri pk-btn-danger" id="clean_confirm">${L.btn_del}</button>
+                </div>
+            `);
+            cleanM.querySelector('#clean_cancel').onclick = () => cleanM.remove();
+            cleanM.querySelector('#clean_confirm').onclick = async () => {
+                const selected = Array.from(cleanM.querySelectorAll('.clean-opt:checked')).map(el => el.value);
+                if (selected.length === 0) { cleanM.remove(); return; }
+                if (!await showConfirm(L.msg_clean_confirm)) return;
+
+                if (selected.includes('index')) {
+                    if (typeof globalCache !== 'undefined') globalCache.clear();
+                    if (typeof S !== 'undefined' && S.cache) S.cache.clear();
+                    if (typeof globalLineageMap !== 'undefined') globalLineageMap.clear();
+                    if (typeof globalParentIndex !== 'undefined') globalParentIndex.clear();
+                    if (typeof scannedFolderIds !== 'undefined') scannedFolderIds.clear();
+                }
+
+                keys.forEach(k => {
+                    const cat = getCat(k);
+                    if (cat && selected.includes(cat)) {
+                        try {
+                            if (typeof GM_deleteValue !== 'undefined') {
+                                GM_deleteValue(k);
+                            } else if (typeof GM_setValue !== 'undefined') {
+                                GM_setValue(k, '');
+                            }
+                            localStorage.removeItem(k);
+                        } catch (e) {
+                            console.warn("Delete config error:", e);
+                        }
+                    }
+                });
+
+                showToast(L.msg_clean_success);
+                setTimeout(() => location.reload(), 1500);
+            };
+        };
+
+        m.querySelector('#btn_cfg_export').onclick = () => {
+            const keys = typeof GM_listValues !== 'undefined' ? GM_listValues() : Object.keys(localStorage);
+            const config = {
+                "_pk_metadata": {
+                    "signature": "PIKPAK_ENHANCEMENT_MASTER",
+                    "version": version,
+                    "export_at": new Date().toISOString(),
+                    "author": "digbug82"
+                }
+            };
+
+            const pkKeys = keys.filter(k => k.startsWith('pk_') && k !== 'pk_captured_captcha');
+
+            const getCatWeight = (k) => {
+                if (k.startsWith('pk_archive_pwd_') || k === 'pk_pwd_vault' || k === 'pk_share_limits') return 3;
+                if (k.startsWith('pk_progress_') || k.startsWith('pk_duration_')) return 4;
+                if (k.startsWith('pk_fmod_')) return 5;
+
+                const ruleKeys =['pk_blacklist', 'pk_blacklist_folders', 'pk_aria2_url', 'pk_aria2_token', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_bn_find_hist', 'pk_bn_rep_hist'];
+                if (ruleKeys.includes(k) || k.startsWith('pk_scan_last_') || k.startsWith('pk_analyze_last_') || k === 'pk_dup_strictness') return 2;
+
+                return 1;
+            };
+
+            pkKeys.sort((a, b) => {
+                const wA = getCatWeight(a);
+                const wB = getCatWeight(b);
+                if (wA !== wB) return wA - wB;
+                return a.localeCompare(b);
+            });
+
+            pkKeys.forEach(k => {
+                config[k] = typeof GM_getValue !== 'undefined' ? GM_getValue(k) : localStorage.getItem(k);
+            });
+
+            const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const domEl = document.querySelector('.name.ellipsis');
+            let rawUserName = domEl ? (domEl.title || domEl.innerText) : 'Default';
+            const userName = rawUserName.trim().replace(/[\\/:*?"<>|]/g, '_');
+
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+            const timeStr = now.getHours().toString().padStart(2,'0') + now.getMinutes().toString().padStart(2,'0');
+
+            const fileName = `PKM_Backup_${userName}_${dateStr}_${timeStr}.json`;
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        const fileInput = m.querySelector('#cfg_import_input');
+        m.querySelector('#btn_cfg_import').onclick = () => fileInput.click();
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!await showConfirm(L.msg_import_confirm)) { fileInput.value = ''; return; }
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const config = JSON.parse(ev.target.result);
+
+                    if (!config._pk_metadata || config._pk_metadata.signature !== "PIKPAK_ENHANCEMENT_MASTER") {
+                        throw new Error("INVALID_SIGNATURE");
+                    }
+
+                    Object.keys(config).forEach(k => {
+                        if (k.startsWith('pk_')) {
+                            GM_setValue(k, config[k]);
+                        }
+                    });
+                    showToast(L.msg_import_success);
+                    setTimeout(() => location.reload(), 1500);
+                } catch (err) {
+                    let errorTip = "";
+                    if (err.message === "INVALID_SIGNATURE") {
+                        errorTip = L.err_invalid_config;
+                    } else {
+                        errorTip = L.err_json_format;
+                        console.error("[Config Import]", err);
+                    }
+
+                    showAlert(errorTip, L.str_error);
+                    fileInput.value = '';
+                }
+            };
+            reader.readAsText(file);
         };
 
         m.querySelector('#set_cancel').onclick = () => m.remove();
@@ -24599,6 +27537,10 @@ async function openManager(initialCache, preloadPromise) {
         });
 
          m.querySelector('#set_save').onclick = async () => {
+            const newTurbo = m.querySelector('#set_turbo').checked;
+            const oldTurbo = gmGet('pk_turbo_mode', false);
+            gmSet('pk_turbo_mode', newTurbo);
+            if (newTurbo !== oldTurbo) { location.reload(); return; }
             const newUrl = m.querySelector('#set_aria_url').value.trim();
             const newToken = m.querySelector('#set_aria_token').value.trim();
             const newBlur = m.querySelector('#set_thumb').checked;
@@ -24625,7 +27567,8 @@ async function openManager(initialCache, preloadPromise) {
 
             gmSet('pk_lang', selectedLang);
             gmSet('pk_search_engine', selectedEngine);
-            gmSet('pk_dup_strictness', selectedStrict);
+            gmSet('pk_dl_filter_ext', m.querySelector('#set_dl_filter_ext').value.trim());
+            gmSet('pk_dl_filter_name', m.querySelector('#set_dl_filter_name').value.trim());
 
             const applyChangesAndClose = () => {
                 m.remove();
@@ -24635,7 +27578,7 @@ async function openManager(initialCache, preloadPromise) {
 
                 if (curLang !== selectedLang) {
                     let safePath = [...S.path];
-                    if (safePath.some(n => n.id === 'virtual_search_root')) {
+                    if (safePath.some(n => n.id === 'virtual_search_root' || n.id === 'analyze_root')) {
                         safePath = S.preSearchPath || [{ id: '', name: L.btn_nav_home }];
                     }
 
@@ -24679,8 +27622,15 @@ async function openManager(initialCache, preloadPromise) {
             try {
                 const payload = { jsonrpc: '2.0', method: 'aria2.getVersion', id: 'pk_test', params: [`token:${newToken}`] };
                 let fetchUrl = (newUrl || "http://localhost:6800/jsonrpc").replace('ws', 'http');
-                const res = await fetch(fetchUrl, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json' } });
-                if (!res.ok) throw new Error();
+                await new Promise((resolveReq, rejectReq) => {
+                    GM_xmlhttpRequest({
+                        method: 'POST', url: fetchUrl, data: JSON.stringify(payload),
+                        headers: { 'Content-Type': 'application/json' }, timeout: 5000,
+                        onload: (r) => { if(r.status === 200) resolveReq(); else rejectReq(new Error('HTTP ' + r.status)); },
+                        onerror: () => rejectReq(new Error('Network Error')),
+                        ontimeout: () => rejectReq(new Error('Timeout'))
+                    });
+                });
                 gmSet('pk_aria2_url', newUrl);
                 gmSet('pk_aria2_token', newToken);
                 applyChangesAndClose();
@@ -24693,6 +27643,87 @@ async function openManager(initialCache, preloadPromise) {
                     saveBtn.disabled = false;
                     saveBtn.textContent = L.btn_save;
                 }
+            }
+        };
+    };
+
+    UI.btnSettings.onclick = (e) => {
+        if (e) e.stopPropagation();
+        const existing = document.getElementById('pk-settings-pop');
+        if (existing) { existing.remove(); return; }
+
+        const isMax = UI.win.classList.contains('pk-maximized');
+        const pop = document.createElement('div');
+        pop.id = 'pk-settings-pop';
+        if (isMax) pop.className = 'pk-pop-max';
+        pop.style.cssText = `
+            position: absolute; background: var(--pk-bg); border: 1px solid var(--pk-bd);
+            border-radius: 8px; padding: 4px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            z-index: 2147483647; min-width: 140px; display: flex; flex-direction: column;
+            zoom: var(--pk-zoom, 1);
+        `;
+        if (document.querySelector('.pk-ov')?.classList.contains('pk-dark')) pop.classList.add('pk-dark');
+
+        pop.innerHTML = `
+            <div class="pk-dropdown-item" id="pk-set-menu-settings" style="padding:10px 16px;">${CONF.icons.settings} <span>${L.btn_settings}</span></div>
+            <div style="height:1px; background:var(--pk-bd); margin:4px 0;"></div>
+            <div class="pk-dropdown-item" id="pk-set-menu-logout" style="padding:10px 16px; color:#d93025;">${CONF.icons.logout} <span>${L.btn_logout}</span></div>
+        `;
+        document.body.appendChild(pop);
+
+        const updatePosition = () => {
+            if (!pop.isConnected) return;
+            const scale = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
+            const rect = UI.btnSettings.getBoundingClientRect();
+            const winEl = document.querySelector('.pk-win');
+            const isMax = winEl && winEl.classList.contains('pk-maximized');
+
+            let popLeft, popBottom;
+            if (isMax) {
+                popLeft = (rect.left / scale);
+                popBottom = (window.innerHeight - rect.top + 8) / scale;
+            } else {
+                popLeft = (rect.right / scale) + 10;
+                popBottom = (window.innerHeight - rect.bottom) / scale;
+            }
+
+            pop.style.bottom = popBottom + 'px';
+            pop.style.left = popLeft + 'px';
+        };
+        updatePosition();
+        window.addEventListener('resize', updatePosition);
+
+        const cleanup = () => {
+            window.removeEventListener('resize', updatePosition);
+            document.removeEventListener('mousedown', closer);
+            pop.remove();
+        };
+
+        const closer = (ev) => {
+            if (!pop.contains(ev.target) && !UI.btnSettings.contains(ev.target)) cleanup();
+        };
+        setTimeout(() => document.addEventListener('mousedown', closer), 10);
+
+        pop.querySelector('#pk-set-menu-settings').onclick = (ev) => {
+            ev.stopPropagation();
+            cleanup();
+            openSettingsModal();
+        };
+
+        pop.querySelector('#pk-set-menu-logout').onclick = async (ev) => {
+            ev.stopPropagation();
+            cleanup();
+            if (await showConfirm(L.msg_logout_confirm)) {
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && (k.startsWith('credentials') || k.startsWith('captcha') || k === 'pk_captured_captcha')) {
+                        keysToRemove.push(k);
+                    }
+                }
+                keysToRemove.forEach(k => localStorage.removeItem(k));
+                if (typeof purgeAllCachesOnLogout === 'function') purgeAllCachesOnLogout();
+                window.location.href = 'https://mypikpak.com/drive/login';
             }
         };
     };
@@ -24751,45 +27782,15 @@ async function openManager(initialCache, preloadPromise) {
 
         const countStr = isFolder ? L.fmt_prop_count.replace('{f}', fileCount).replace('{d}', folderCount) : "-";
 
-        const formatFullTime = (iso) => {
-            if (!iso) return '-';
-            const d = new Date(iso);
-            if (isNaN(d.getTime())) return iso;
-            const pad = n => String(n).padStart(2,'0');
-            return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-        };
+        const formatTime = (iso) => fmtDate ? fmtDate(iso) : iso;
 
         let sourceStr = L.str_prop_unknown;
-        let magnetLink = item.params?.url || "";
-
-        if (!magnetLink && item.audit?.source_url) magnetLink = item.audit.source_url;
+        let magnetLink = item.params?.url || item.audit?.source_url || "";
 
         if (magnetLink) {
             sourceStr = L.str_prop_cloud;
         } else {
             sourceStr = L.str_prop_user;
-        }
-
-        let pathStr = "";
-        if (item._lineage && item._lineage.length > 0) {
-            pathStr = item._lineage.map(p => p.name).join('/');
-        } else {
-            pathStr = S.path.map(p => p.name).join('/');
-        }
-
-        if (pathStr.startsWith('Root')) pathStr = pathStr.replace('Root', L.btn_nav_home);
-        else if (pathStr.startsWith(L.str_root_dir_cn)) pathStr = pathStr.replace(L.str_root_dir_cn, L.btn_nav_home);
-
-        let pathDisplayHtml = esc(pathStr);
-        if (pathStr.startsWith(L.btn_nav_home)) {
-            const homeSvg = CONF.icons.home
-                .replace('width="24"', 'width="15"')
-                .replace('height="24"', 'height="15"')
-                .replace('viewBox="0 0 24 24"', 'viewBox="0 0 24 24" style="margin-right:4px; flex-shrink:0;"');
-
-            const restPath = pathStr.substring(L.btn_nav_home.length);
-            const homeGroup = `<span style="display:inline-flex;align-items:center;vertical-align:bottom;margin-right:2px;">${homeSvg}${esc(L.btn_nav_home)}</span>`;
-            pathDisplayHtml = `<div style="line-height:1.6;word-break:break-all;">${homeGroup}${esc(restPath)}</div>`;
         }
 
         const btnStyle = "margin-left:10px; padding:2px 8px; font-size:12px; background:var(--pk-pri); color:#fff; border:none; border-radius:4px; cursor:pointer; height:24px; white-space:nowrap;";
@@ -24799,32 +27800,48 @@ async function openManager(initialCache, preloadPromise) {
 
         const mkRow = (lbl, val, copyVal = null, isHtml = false, valId = null) => {
             if (!val && val !== 0 && val !== "-") return "";
-            let btnHtml = "";
-            if (copyVal) {
-                const safeVal = esc(copyVal);
-                btnHtml = `<button class="pk-btn-copy-prop" data-val="${safeVal}" style="${btnStyle}">${L.btn_copy_text}</button>`;
-            }
-            return `
-                <div style="${rowStyle}">
-                    <div style="${labelStyle}">${lbl}:</div>
-                    <div style="${valStyle}" ${valId ? `id="${valId}"` : ''}>${isHtml ? val : esc(val)}</div>
-                    ${btnHtml}
-                </div>
-            `;
+            let btnHtml = copyVal ? `<button class="pk-btn-copy-prop" data-val="${esc(copyVal)}" style="${btnStyle}">${L.btn_copy_text}</button>` : "";
+            return `<div style="${rowStyle}"><div style="${labelStyle}">${lbl}:</div><div style="${valStyle}" ${valId ? `id="${valId}"` : ''}>${isHtml ? val : esc(val)}</div>${btnHtml}</div>`;
         };
 
+        let pathRowHtml = "";
+        const isSpecialView = S.shareMode || S.offlineMode || S.recentMode || S.historyMode || S.trashMode || S.starredMode;
+        const curPathNode = S.path[S.path.length - 1];
+        const shouldHidePath = isSpecialView || (S.analyzeMode && curPathNode && curPathNode.id !== 'analyze_root');
+
+        if (!shouldHidePath) {
+            const homeText = L.btn_nav_home;
+            let parts = (item._lineage && Array.isArray(item._lineage))
+            ? item._lineage.filter(p => p.id !== item.id).map(p => p.name)
+            : S.path.map(p => p.name);
+
+            parts = parts.filter(n => n && n !== 'Root' && n !== L.str_root_dir_cn);
+            if (parts[0] !== homeText) parts.unshift(homeText);
+
+            const pathStr = parts.join('/');
+            let pathDisplayHtml = esc(pathStr);
+
+            if (pathStr.startsWith(homeText)) {
+                const homeSvg = CONF.icons.home.replace('width="24"','width="15"').replace('height="24"','height="15"').replace('viewBox="0 0 24 24"','viewBox="0 0 24 24" style="margin-right:4px;flex-shrink:0;vertical-align:-2.5px;"');
+                const restPath = pathStr.substring(homeText.length);
+                const homeGroup = `<span style="display:inline-flex;align-items:center;vertical-align:bottom;margin-right:2px;">${homeSvg}${esc(homeText)}</span>`;
+                pathDisplayHtml = `<div style="line-height:1.6;word-break:break-all;">${homeGroup}${esc(restPath)}</div>`;
+            }
+            pathRowHtml = mkRow(L.lbl_prop_path, pathDisplayHtml, pathStr, true);
+        }
+
         const html = `
-            <div style="padding:10px 0;">
-                ${mkRow(L.lbl_prop_name, item.name)}
-                ${mkRow(L.lbl_prop_size, fmtSize(realSize.toString()) || "0 B", null, false, 'pk_prop_size_val')}
-                ${isFolder ? mkRow(L.lbl_prop_count, countStr, null, false, 'pk_prop_count_val') : ''}
-                ${mkRow(L.lbl_prop_ctime, formatFullTime(item.created_time))}
-                ${mkRow(L.lbl_prop_mtime, formatFullTime(item.modified_time))}
-                ${mkRow(L.lbl_prop_source, sourceStr)}
-                ${magnetLink ? mkRow(L.lbl_prop_link, magnetLink, magnetLink) : ''}
-                ${mkRow(L.lbl_prop_path, pathDisplayHtml, pathStr, true)}
-            </div>
-        `;
+    <div style="padding:10px 0;">
+        ${mkRow(L.lbl_prop_name, item.name)}
+        ${mkRow(L.lbl_prop_size, fmtSize(realSize.toString()) || "0 B", null, false, 'pk_prop_size_val')}
+        ${isFolder ? mkRow(L.lbl_prop_count, countStr, null, false, 'pk_prop_count_val') : ''}
+        ${mkRow(L.lbl_prop_ctime, formatTime(item.created_time))}
+        ${mkRow(L.lbl_prop_mtime, formatTime(item.modified_time))}
+        ${mkRow(L.lbl_prop_source, sourceStr)}
+        ${magnetLink ? mkRow(L.lbl_prop_link, magnetLink, magnetLink) : ''}
+        ${pathRowHtml}
+    </div>
+`;
 
         const m = showModal(`
             <h3 style="border-bottom:1px solid var(--pk-bd); padding-bottom:10px; margin-bottom:15px;">${L.title_property}</h3>
@@ -24940,22 +27957,45 @@ async function openManager(initialCache, preloadPromise) {
                     }
                 }
 
-                const pathChain = [];
-                let currParentId = item.parent_id;
+                let pathChain = [];
+                if (item._lineage && Array.isArray(item._lineage)) {
+                    pathChain = item._lineage.filter(p =>
+                        p.id !== item.id &&
+                        p.id !== 'virtual_search_root' &&
+                        p.id !== 'analyze_root' &&
+                        p.id !== 'recent_root'
+                    );
+                } else if (item.parent_id && typeof globalLineageMap !== 'undefined' && globalLineageMap.has(item.parent_id)) {
+                    pathChain = [...globalLineageMap.get(item.parent_id)];
+                } else {
+                    let currParentId = item.parent_id;
+                    for (let i = 0; i < 15; i++) {
+                        if (!currParentId || currParentId === 'root' || currParentId === '') break;
 
-                for (let i = 0; i < 15; i++) {
-                    if (!currParentId || currParentId === 'root' || currParentId === '') break;
-                    try {
-                        const res = await apiGet(currParentId);
-                        pathChain.unshift({ id: res.id, name: res.name });
-                        currParentId = res.parent_id;
-                    } catch (e) {
-                        console.warn("Trace broken:", e);
-                        break;
+                        if (typeof globalLineageMap !== 'undefined' && globalLineageMap.has(currParentId)) {
+                            const cachedLineage = globalLineageMap.get(currParentId);
+                            pathChain.unshift(...cachedLineage);
+                            break;
+                        }
+
+                        try {
+                            const res = await apiGet(currParentId);
+                            pathChain.unshift({ id: res.id, name: res.name });
+                            currParentId = res.parent_id;
+                        } catch (e) {
+                            console.warn("Trace broken:", e);
+                            break;
+                        }
                     }
                 }
 
-                pathChain.unshift({ id: '', name: L.btn_nav_home });
+                if (pathChain.length > 0 && (pathChain[0].id === '' || pathChain[0].id === 'root')) {
+                    pathChain[0].id = '';
+                    pathChain[0].name = L.btn_nav_home;
+                } else {
+                    pathChain.unshift({ id: '', name: L.btn_nav_home });
+                }
+
                 const targetContextId = (item.parent_id === 'root' || !item.parent_id) ? '' : item.parent_id;
 
                 const needsRestoreGlobalCheck = S.starredMode || S.recentMode || S.historyMode || S.offlineMode || S.uploadMode || S.shareMode || S.isFlattened || S.dupMode || S.analyzeMode;
@@ -25108,23 +28148,27 @@ async function openManager(initialCache, preloadPromise) {
             if (S.loading) return;
             S.path.push({ id: item.id, name: item.name });
             load();
-        } else if (item.mime_type) {
-            const mime = item.mime_type.toLowerCase();
-            const name = item.name.toLowerCase();
-            if (mime.includes('zip') || mime.includes('rar') || mime.includes('7z') ||
+        } else {
+            const mime = (item.mime_type || "").toLowerCase();
+            const name = (item.name || "").toLowerCase();
+
+            if (name.endsWith('.torrent')) {
+                handleTorrentFile(item);
+            }
+            else if (mime.includes('zip') || mime.includes('rar') || mime.includes('7z') ||
                 mime.includes('compressed') || mime.includes('archive') ||
                 name.endsWith('.zip') || name.endsWith('.rar') || name.endsWith('.7z') || name.endsWith('.tar') || name.endsWith('.gz')) {
                 handleOpenArchive(item);
             }
             else if (mime.startsWith('video')) {
                 playVideo(item);
-            } else if (mime.startsWith('image')) {
+            }
+            else if (mime.startsWith('image')) {
                 showImage(item);
-            } else {
+            }
+            else {
                 UI.btnExt.click();
             }
-        } else {
-            UI.btnExt.click();
         }
     };
 
@@ -25251,7 +28295,7 @@ async function openManager(initialCache, preloadPromise) {
         };
     }
 
-    const observeUnzipTask = (taskId, folderId, fileId) => {
+    const observeUnzipTask = (taskId, folderId, fileId, skipUiRefresh = false) => {
         const checkStatus = async () => {
             try {
                 const res = await fetch(`https://api-drive.mypikpak.com/decompress/v1/progress?task_id=${taskId}`, { headers: getHeaders() });
@@ -25278,6 +28322,8 @@ async function openManager(initialCache, preloadPromise) {
                             it.params.global_file_kind = '1';
                         }
                     });
+
+                    if (skipUiRefresh) return;
 
                     if (S && S.sel && S.sel.size > 0) S.clearSelection();
 
@@ -25427,15 +28473,21 @@ async function openManager(initialCache, preloadPromise) {
 
         const Vault = {
             get: () => {
-                try { return JSON.parse(gmGet('pk_pwd_vault', '[]')); } catch { return []; }
+                try {
+                    const raw = JSON.parse(gmGet('pk_pwd_vault', '[]'));
+                    return raw.map(x => typeof x === 'object' ? x.p : x);
+                } catch { return []; }
             },
             save: (p) => {
                 if (!p) return;
-                let list = Vault.get();
-                list = list.filter(x => x !== p);
-                list.unshift(p);
-                if (list.length > 50) list = list.slice(0, 50);
-                gmSet('pk_pwd_vault', JSON.stringify(list));
+                try {
+                    let list = JSON.parse(gmGet('pk_pwd_vault', '[]')).map(x => typeof x === 'object' ? x : {p: x, h: 0});
+                    let item = list.find(x => x.p === p);
+                    if (item) item.h = (item.h || 0) + 1; else list.push({p: p, h: 1});
+                    list.sort((a, b) => b.h - a.h);
+                    if (list.length > 50) list = list.slice(0, 50);
+                    gmSet('pk_pwd_vault', JSON.stringify(list));
+                } catch(e) {}
             }
         };
 
@@ -25468,33 +28520,30 @@ async function openManager(initialCache, preloadPromise) {
 
                     if (!currentPwd && !hasTriedAuto) {
                         hasTriedAuto = true;
-                        const candidates = Vault.get().slice(0, 10);
+                        const tryLimit = gmGet('pk_pwd_try_count', 10);
+                        const candidates = Vault.get().slice(0, tryLimit);
 
                         if (candidates.length > 0) {
                             console.log(`[Archive] Parallel-Bruteforce starting: ${candidates.length} candidates`);
-                            updateLoadTxt(L.msg_smart_matching_n.replace('{n}', candidates.length));
+                            setLoad(false);
+                            const matchingTask = FloatBarManager.create(L.msg_smart_matching_n.replace('{n}', candidates.length));
 
                             const checkTask = async (pwd, idx) => {
-                                await sleep(idx * 150);
-
+                                const tieredDelay = Math.floor(idx / 5) * 1200;
+                                await sleep((idx * 150) + tieredDelay);
                                 if (isVerified) return Promise.reject("Aborted");
-
                                 try {
                                     const autoRes = await fetch(`https://api-drive.mypikpak.com/decompress/v1/list`, {
                                         method: 'POST', headers: getHeaders(), body: JSON.stringify({ gcid, file_id: file.id, password: pwd, path: "" })
                                     });
                                     const autoData = await autoRes.json();
-
-                                    if (autoData.status === 'OK') {
-                                        return pwd;
-                                    }
+                                    if (autoData.status === 'OK') return pwd;
                                 } catch(e) {}
                                 throw new Error("Wrong Pwd");
                             };
 
                             try {
                                 const correctPwd = await Promise.any(candidates.map((p, i) => checkTask(p, i)));
-
                                 if (correctPwd) {
                                     currentPwd = correctPwd;
                                     isVerified = true;
@@ -25502,6 +28551,9 @@ async function openManager(initialCache, preloadPromise) {
                                 }
                             } catch (e) {
                                 console.log("[Archive] All cached passwords failed.");
+                            } finally {
+                                matchingTask.destroy();
+                                if (!isVerified) setLoad(true);
                             }
 
                             if (isVerified) break;
@@ -25544,6 +28596,97 @@ async function openManager(initialCache, preloadPromise) {
         } catch (e) {
             setLoad(false);
             showAlert(`${L.str_error}: ${e.message}`);
+        }
+    };
+
+    const handleTorrentFile = async (file) => {
+        if (parseInt(file.size) > 10 * 1024 * 1024) {
+            showAlert(`${L.str_error_crit}: ${L.err_invalid_links}`);
+            return;
+        }
+
+        const fb = FloatBarManager.create(L.str_processing);
+        try {
+            const physicalId = (file.file_id || (file.params && file.params.file_id)) || file.id;
+
+            let detail = file;
+            if (!detail.web_content_link) detail = await apiGet(physicalId);
+
+            const res = await fetch(detail.web_content_link);
+            const buffer = await res.arrayBuffer();
+            const buf = new Uint8Array(buffer);
+
+            if (buf[0] !== 100) throw new Error(L.err_invalid_torrent);
+
+            let pos = 0;
+            let safetyCounter = 0;
+            const MAX_ITERATIONS = 100000;
+
+            const decodeSkip = () => {
+                if (++safetyCounter > MAX_ITERATIONS) throw new Error(L.err_torrent_complex);
+                if (pos >= buf.length) return;
+                const c = buf[pos];
+                if (c === 100 || c === 108) {
+                    pos++;
+                    while (pos < buf.length && buf[pos] !== 101) {
+                        decodeSkip();
+                        if (pos > buf.length) break;
+                    }
+                    pos++;
+                } else if (c === 105) {
+                    pos++;
+                    while (pos < buf.length && buf[pos] !== 101) pos++;
+                    pos++;
+                } else if (c >= 48 && c <= 57) {
+                    let colon = pos;
+                    while (colon < buf.length && buf[colon] !== 58) colon++;
+                    if (colon >= buf.length) throw new Error(L.err_torrent_format);
+                    const len = parseInt(new TextDecoder().decode(buf.slice(pos, colon)));
+                    if (isNaN(len)) throw new Error(L.err_torrent_len);
+                    pos = colon + 1 + len;
+                } else {
+                    throw new Error(L.err_torrent_char);
+                }
+            };
+
+            let infoHash = null;
+            pos = 1;
+            while (pos < buf.length && buf[pos] !== 101) {
+                if (++safetyCounter > MAX_ITERATIONS) break;
+                const keyStart = pos;
+                decodeSkip();
+                let colon = keyStart;
+                while (buf[colon] !== 58 && colon < buf.length) colon++;
+                const kLen = parseInt(new TextDecoder().decode(buf.slice(keyStart, colon)));
+                const keyStr = new TextDecoder().decode(buf.slice(colon + 1, colon + 1 + kLen));
+
+                if (keyStr === "info") {
+                    const infoStart = pos;
+                    decodeSkip();
+                    const infoEnd = pos;
+                    const infoBuf = buf.slice(infoStart, infoEnd);
+                    const hashBuf = await crypto.subtle.digest("SHA-1", infoBuf);
+                    infoHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+                    break;
+                }
+            }
+
+            if (!infoHash) throw new Error("Invalid Torrent File");
+
+            const magnet = `magnet:?xt=urn:btih:${infoHash}&dn=${encodeURIComponent(file.name)}`;
+            fb.update(L.msg_creating_cloud_task);
+
+            await apiAddOfflineTask(magnet, file.parent_id || "");
+
+            showToast(L.msg_cloud_task_success.replace('{n}', 1));
+            if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
+
+            if (S.offlineMode) load(false, true);
+
+        } catch (e) {
+            showAlert(`${L.str_error}: ${e.message}`);
+        } finally {
+            fb.destroy();
         }
     };
 
@@ -25695,6 +28838,28 @@ async function openManager(initialCache, preloadPromise) {
             const crumbContainer = m.querySelector('#arc_crumb');
             const loading = m.querySelector('#arc_loading');
 
+            let arcCrumbIdx = 0;
+            let lastArcScroll = 0;
+
+            crumbContainer.onwheel = (e) => {
+                e.preventDefault();
+                const now = Date.now();
+                if (now - lastArcScroll < 120) return;
+                lastArcScroll = now;
+
+                const nodes = [...crumbContainer.children].filter(c => c.textContent.trim() !== "");
+                if (!nodes.length) return;
+
+                if (e.deltaY < 0) arcCrumbIdx = Math.max(0, arcCrumbIdx - 1);
+                else arcCrumbIdx = Math.min(nodes.length - 1, arcCrumbIdx + 1);
+
+                const target = nodes[arcCrumbIdx];
+                const containerWidth = crumbContainer.offsetWidth;
+                const centerOffset = target.offsetLeft + (target.offsetWidth / 2) - (containerWidth / 2);
+
+                crumbContainer.scrollTo({ left: centerOffset, behavior: 'smooth' });
+            };
+
             const renderData = (data, path) => {
                 crumbContainer.innerHTML = '';
                 pathNodes.forEach((node, idx) => {
@@ -25722,7 +28887,11 @@ async function openManager(initialCache, preloadPromise) {
                         crumbContainer.appendChild(sep);
                     }
                 });
-                crumbContainer.scrollLeft = crumbContainer.scrollWidth;
+
+                arcCrumbIdx = pathNodes.length - 1;
+                requestAnimationFrame(() => {
+                    crumbContainer.scrollTo({ left: crumbContainer.scrollWidth, behavior: 'smooth' });
+                });
 
                 listContainer.innerHTML = '';
                 listContainer.appendChild(loading);
@@ -25863,12 +29032,17 @@ async function openManager(initialCache, preloadPromise) {
                     if (resp && resp.task_id) {
                         const taskId = resp.task_id;
                         let isPolling = true;
+                        let progressTask = null;
 
                         const currentFolderId = S.path[S.path.length - 1].id || '';
                         observeUnzipTask(taskId, currentFolderId, file.id);
 
                         const pollProgress = async () => {
-                            if (!isPolling || !document.contains(m)) return;
+                            if (!isPolling) return;
+
+                            if (!document.contains(m) && !progressTask) {
+                                progressTask = FloatBarManager.create(L.str_unzipping.replace('{n}', file.name));
+                            }
 
                             try {
                                 const tRes = await fetch(`https://api-drive.mypikpak.com/decompress/v1/progress?task_id=${taskId}`, { headers: getHeaders() });
@@ -25881,13 +29055,15 @@ async function openManager(initialCache, preloadPromise) {
                                 }
 
                                 if (tData.progress !== undefined) {
-                                    progTxt.textContent = L.str_unzipping_prog_fmt.replace('{n}', tData.progress);
+                                    const text = L.str_unzipping_prog_fmt.replace('{n}', tData.progress);
+                                    if (progressTask) progressTask.update(`${L.str_unzipping_state} ${tData.progress}%`);
+                                    else progTxt.textContent = text;
+
                                     if (tData.progress >= 100) { finishUnzip(); return; }
                                 }
                             } catch(e) {
-                                console.warn("[Unzip] Polling exception, falling back to background.");
+                                if (progressTask) progressTask.destroy();
                                 isPolling = false;
-                                m.remove();
                                 resolve({ confirm: true, password: currentPwd, taskId: taskId, alreadyStarted: true });
                                 return;
                             }
@@ -25897,9 +29073,12 @@ async function openManager(initialCache, preloadPromise) {
 
                         const finishUnzip = async () => {
                             isPolling = false;
-                            progTxt.textContent = L.str_unzipping_prog_100;
-                            await sleep(500);
-                            if (document.contains(m)) m.remove();
+                            if (progressTask) progressTask.destroy();
+                            if (document.contains(m)) {
+                                progTxt.textContent = L.str_unzipping_prog_100;
+                                await sleep(500);
+                                m.remove();
+                            }
                         };
 
                         resolve({ confirm: true, password: currentPwd, taskId: taskId, alreadyStarted: true, alreadyObserved: true });
@@ -25930,15 +29109,21 @@ async function openManager(initialCache, preloadPromise) {
 
         const Vault = {
             get: () => {
-                try { return JSON.parse(gmGet('pk_pwd_vault', '[]')); } catch { return []; }
+                try {
+                    const raw = JSON.parse(gmGet('pk_pwd_vault', '[]'));
+                    return raw.map(x => typeof x === 'object' ? x.p : x);
+                } catch { return []; }
             },
             save: (p) => {
                 if (!p) return;
-                let list = Vault.get();
-                list = list.filter(x => x !== p);
-                list.unshift(p);
-                if (list.length > 50) list = list.slice(0, 50);
-                gmSet('pk_pwd_vault', JSON.stringify(list));
+                try {
+                    let list = JSON.parse(gmGet('pk_pwd_vault', '[]')).map(x => typeof x === 'object' ? x : {p: x, h: 0});
+                    let item = list.find(x => x.p === p);
+                    if (item) item.h = (item.h || 0) + 1; else list.push({p: p, h: 1});
+                    list.sort((a, b) => b.h - a.h);
+                    if (list.length > 50) list = list.slice(0, 50);
+                    gmSet('pk_pwd_vault', JSON.stringify(list));
+                } catch(e) {}
             }
         };
 
@@ -25987,10 +29172,10 @@ async function openManager(initialCache, preloadPromise) {
         }
 
         const isSilentMode = (items.length === 1 && !!startFromPreviewTaskId);
+        let progressTask = null;
 
         if (!isSilentMode) {
-            setLoad(true);
-            updateLoadTxt(L.str_preparing);
+            progressTask = FloatBarManager.create(L.str_preparing);
         }
 
         let successCount = 0;
@@ -26053,13 +29238,15 @@ async function openManager(initialCache, preloadPromise) {
                         pwdToTry = ""; currentSource = "EMPTY";
                     } else if (!hasTriedVault) {
                         hasTriedVault = true;
-                        const candidates = Vault.get().slice(0, 10);
+                        const tryLimit = gmGet('pk_pwd_try_count', 10);
+                        const candidates = Vault.get().slice(0, tryLimit);
 
                         if (candidates.length > 0) {
-                            if (!isSilentMode) updateLoadTxt(L.msg_smart_matching_file.replace('{n}', file.name));
+                            if (progressTask) progressTask.update(L.msg_smart_matching_file.replace('{n}', file.name));
 
                             const checkTask = async (pwd, idx) => {
-                                await sleep(idx * 150);
+                                const tieredDelay = Math.floor(idx / 5) * 1200;
+                                await sleep((idx * 150) + tieredDelay);
                                 try {
                                     const autoRes = await fetch(`https://api-drive.mypikpak.com/decompress/v1/list`, {
                                         method: 'POST',
@@ -26121,9 +29308,9 @@ async function openManager(initialCache, preloadPromise) {
                     }
 
                     try {
-                        if (!isSilentMode) {
+                        if (progressTask) {
                             const doneCount = successCount + failCount;
-                            updateLoadTxt(`${L.str_unzipping.replace('{n}', file.name)}\n(${doneCount + 1} / ${items.length})`);
+                            progressTask.update(`${L.str_unzipping.replace('{n}', file.name)} (${doneCount + 1} / ${items.length})`);
                         }
 
                         let taskId = null;
@@ -26154,7 +29341,7 @@ async function openManager(initialCache, preloadPromise) {
                         }
 
                         if (taskId) {
-                            if (needsObserve) observeUnzipTask(taskId, currentFolderId, file.id);
+                            if (needsObserve) observeUnzipTask(taskId, currentFolderId, file.id, true);
                             await waitForTaskDone(taskId);
                         }
 
@@ -26164,6 +29351,11 @@ async function openManager(initialCache, preloadPromise) {
                         }
                         successCount++;
                         isDone = true;
+
+                        if (!isSilentMode) {
+                            const doneCount = successCount + failCount;
+                            updateLoadTxt(`${L.str_unzipping.replace('{n}', file.name)}\n(${doneCount} / ${items.length})`);
+                        }
 
                     } catch (err) {
                         const errText = (err.msg || "").toLowerCase();
@@ -26189,6 +29381,7 @@ async function openManager(initialCache, preloadPromise) {
                                 continue;
                             }
                             failCount++; isDone = true;
+                            if (progressTask) progressTask.update(`${L.str_unzipping.replace('{n}', file.name)} (${successCount + failCount} / ${items.length})`);
                         }
                         else if (isDefinitePwdErr) {
                             if (currentSource === "VERIFIED") { triedVerified = true; verifiedPwd = ""; }
@@ -26197,6 +29390,7 @@ async function openManager(initialCache, preloadPromise) {
                         } else {
                             console.error(err);
                             failCount++; isDone = true;
+                            if (progressTask) progressTask.update(`${L.str_unzipping.replace('{n}', file.name)} (${successCount + failCount} / ${items.length})`);
                         }
                     }
                 }
@@ -26220,11 +29414,20 @@ async function openManager(initialCache, preloadPromise) {
 
         await Promise.all(activePromises);
 
+        if (successCount > 0 && !isSilentMode) {
+            S.clearSelection();
+            refresh();
+            updateStat();
+            if (window.pkSmartRefreshTrigger) window.pkSmartRefreshTrigger(true);
+        }
+
+        if (progressTask) progressTask.destroy();
+
         if (!isSilentMode) {
             setLoad(false);
             if (successCount > 0) {
                 let msg = L.msg_unzip_batch_submitted.replace('{n}', successCount);
-                if (failCount > 0) msg += L.msg_unzip_batch_skipped.replace('{n}', failCount);
+                if (failCount > 0) msg += " " + L.msg_unzip_batch_skipped.replace('{n}', failCount);
                 if (isVirtual) msg += L.msg_unzip_check_source;
                 showToast(msg);
             }
@@ -26245,7 +29448,7 @@ async function openManager(initialCache, preloadPromise) {
             pop.classList.add('pk-dark');
         }
 
-        pop.style.cssText = "opacity: 0; animation: none; visibility: hidden; transition: opacity 0.15s ease; z-index: 2147483647 !important;";
+        pop.style.cssText = "opacity: 0; animation: none; visibility: hidden; transition: opacity 0.15s ease; z-index: 2147483647 !important; zoom: var(--pk-zoom, 1);";
 
         const now = new Date(getServerNow());
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -26355,12 +29558,13 @@ async function openManager(initialCache, preloadPromise) {
                 return;
             }
 
+            const scale = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
             const rect = anchorEl.getBoundingClientRect();
-            let top = rect.bottom + 5;
-            let left = rect.left;
+            let top = (rect.bottom / scale) + 5;
+            let left = rect.left / scale;
 
-            if (top + 320 > window.innerHeight) top = rect.top - 320 - 5;
-            if (left + 400 > window.innerWidth) left = window.innerWidth - 400 - 10;
+            if (top + 320 > window.innerHeight / scale) top = (rect.top / scale) - 320 - 5;
+            if (left + 400 > window.innerWidth / scale) left = (window.innerWidth / scale) - 400 - 10;
             if (left < 10) left = 10;
 
             pop.style.top = top + 'px';
@@ -26532,7 +29736,8 @@ async function openManager(initialCache, preloadPromise) {
         pwdField.onclick = () => {
             const subM = document.createElement('div');
             subM.className = 'pk-modal-ov';
-            subM.style.zIndex = '10005';
+            subM.style.zIndex = (++modalZIndexCounter).toString();
+            if (document.querySelector('.pk-ov').classList.contains('pk-dark')) subM.classList.add('pk-dark');
             subM.innerHTML = `
                 <div class="pk-modal" style="width:340px; padding:24px; border-radius:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
                     <div class="pk-modal-close">${CONF.icons.close}</div>
@@ -26548,12 +29753,12 @@ async function openManager(initialCache, preloadPromise) {
                     </div>
                     <div style="display:flex; justify-content:flex-end; align-items:center; margin-top:24px; gap:20px;">
                         <span id="pk_edit_pwd_cancel" style="cursor:pointer; color:#888; font-size:14px; font-weight:500;">${L.btn_cancel}</span>
-                        <button class="pk-btn pri" id="pk_edit_pwd_save"
-                                style="height:36px; padding:0 24px; border-radius:6px; background:#acc2ff; border:none; color:#fff; font-weight:600; transition:all 0.2s;">${L.btn_save}</button>
+                        <button class="pk-btn pri" id="pk_edit_pwd_save" disabled
+                                style="height:36px; padding:0 24px; border-radius:6px; background:var(--pk-pri); border:none; color:#fff; font-weight:600; transition:all 0.2s; opacity: 0.4; cursor: not-allowed;">${L.btn_save}</button>
                     </div>
                 </div>
             `;
-            m.appendChild(subM);
+            document.body.appendChild(subM);
 
             const input = subM.querySelector('#pk_new_pwd_input');
             const saveBtn = subM.querySelector('#pk_edit_pwd_save');
@@ -26562,7 +29767,8 @@ async function openManager(initialCache, preloadPromise) {
             const validate = () => {
                 const val = input.value.trim();
                 const isValid = /^[a-zA-Z0-9]{4,10}$/.test(val);
-                saveBtn.style.background = isValid ? 'var(--pk-pri)' : '#acc2ff';
+                saveBtn.disabled = !isValid;
+                saveBtn.style.opacity = isValid ? '1' : '0.4';
                 saveBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
                 return isValid;
             };
@@ -26594,7 +29800,7 @@ async function openManager(initialCache, preloadPromise) {
                     subM.remove();
 
                     const toast = document.createElement('div');
-                    toast.style.cssText = "position:absolute; top:180px; left:50%; transform:translateX(-50%); width:max-content; background:rgba(20,20,20,0.9); color:#fff; padding:10px 24px; border-radius:8px; font-size:14px; font-weight:600; z-index:10007; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1);";
+                    toast.style.cssText = "position:absolute; top:180px; left:50%; transform:translateX(-50%); width:max-content; background:var(--pk-toast-bg); color:var(--pk-toast-fg); padding:10px 24px; border-radius:8px; font-size:14px; font-weight:600; z-index:10007; pointer-events:none; box-shadow:0 8px 24px var(--pk-tip-sd); border:1px solid var(--pk-toast-bd);";
                     toast.textContent = L.msg_pwd_updated;
                     m.querySelector('.pk-modal').appendChild(toast);
                     setTimeout(() => toast.remove(), 1200);
@@ -26634,7 +29840,7 @@ async function openManager(initialCache, preloadPromise) {
                     subM.remove();
 
                     const toast = document.createElement('div');
-                    toast.style.cssText = "position:absolute; top:180px; left:50%; transform:translateX(-50%); width:max-content; background:rgba(20,20,20,0.9); color:#fff; padding:10px 24px; border-radius:8px; font-size:14px; font-weight:600; z-index:10007; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1);";
+                    toast.style.cssText = "position:absolute; top:180px; left:50%; transform:translateX(-50%); width:max-content; background:var(--pk-toast-bg); color:var(--pk-toast-fg); padding:10px 24px; border-radius:8px; font-size:14px; font-weight:600; z-index:10007; pointer-events:none; box-shadow:0 8px 24px var(--pk-tip-sd); border:1px solid var(--pk-toast-bd);";
                     toast.textContent = L.msg_pwd_updated;
                     m.querySelector('.pk-modal').appendChild(toast);
                     setTimeout(() => toast.remove(), 1200);
@@ -26695,7 +29901,8 @@ async function openManager(initialCache, preloadPromise) {
         const openPhraseEditModal = (oldVal = "") => {
             const subM = document.createElement('div');
             subM.className = 'pk-modal-ov';
-            subM.style.zIndex = '10005';
+            subM.style.zIndex = (++modalZIndexCounter).toString();
+            if (document.querySelector('.pk-ov').classList.contains('pk-dark')) subM.classList.add('pk-dark');
             subM.innerHTML = `
                 <div class="pk-modal" style="width:340px; padding:24px; border-radius:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
                     <div class="pk-modal-close">${CONF.icons.close}</div>
@@ -26711,12 +29918,12 @@ async function openManager(initialCache, preloadPromise) {
                     </div>
                     <div style="display:flex; justify-content:flex-end; align-items:center; margin-top:24px; gap:20px;">
                         <span id="pk_edit_phrase_cancel" style="cursor:pointer; color:#888; font-size:14px; font-weight:500;">${L.btn_cancel}</span>
-                        <button class="pk-btn pri" id="pk_edit_phrase_save"
-                                style="height:36px; padding:0 24px; border-radius:6px; background:#acc2ff; border:none; color:#fff; font-weight:600; transition:all 0.2s;">${L.btn_save}</button>
+                        <button class="pk-btn pri" id="pk_edit_phrase_save" disabled
+                                style="height:36px; padding:0 24px; border-radius:6px; background:var(--pk-pri); border:none; color:#fff; font-weight:600; transition:all 0.2s; opacity: 0.4; cursor: not-allowed;">${L.btn_save}</button>
                     </div>
                 </div>
             `;
-            m.appendChild(subM);
+            document.body.appendChild(subM);
 
             const input = subM.querySelector('#pk_new_phrase_input');
             const saveBtn = subM.querySelector('#pk_edit_phrase_save');
@@ -26725,7 +29932,8 @@ async function openManager(initialCache, preloadPromise) {
             const validate = () => {
                 const val = input.value.trim();
                 const isValid = val.length >= 5 && val.length <= 18;
-                saveBtn.style.background = isValid ? 'var(--pk-pri)' : '#acc2ff';
+                saveBtn.disabled = !isValid;
+                saveBtn.style.opacity = isValid ? '1' : '0.4';
                 saveBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
                 return isValid;
             };
@@ -26754,7 +29962,7 @@ async function openManager(initialCache, preloadPromise) {
                     renderVisible();
 
                     const toast = document.createElement('div');
-                    toast.style.cssText = "position:absolute; top:180px; left:50%; transform:translateX(-50%); width:max-content; background:rgba(20,20,20,0.9); color:#fff; padding:10px 24px; border-radius:8px; font-size:14px; font-weight:600; z-index:10007; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1);";
+                    toast.style.cssText = "position:absolute; top:180px; left:50%; transform:translateX(-50%); width:max-content; background:var(--pk-toast-bg); color:var(--pk-toast-fg); padding:10px 24px; border-radius:8px; font-size:14px; font-weight:600; z-index:10007; pointer-events:none; box-shadow:0 8px 24px var(--pk-tip-sd); border:1px solid var(--pk-toast-bd);";
                     toast.textContent = L.msg_share_code_updated;
                     m.querySelector('.pk-modal').appendChild(toast);
                     setTimeout(() => toast.remove(), 1200);
@@ -26795,7 +30003,8 @@ async function openManager(initialCache, preloadPromise) {
             const currentLimit = parseInt(item.limit_count || 0);
             const subM = document.createElement('div');
             subM.className = 'pk-modal-ov';
-            subM.style.zIndex = '10005';
+            subM.style.zIndex = (++modalZIndexCounter).toString();
+            if (document.querySelector('.pk-ov').classList.contains('pk-dark')) subM.classList.add('pk-dark');
             subM.innerHTML = `
                 <div class="pk-modal" style="width:340px; padding:24px; border-radius:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
                     <div class="pk-modal-close">${CONF.icons.close}</div>
@@ -26828,7 +30037,7 @@ async function openManager(initialCache, preloadPromise) {
                     </div>
                 </div>
             `;
-            m.appendChild(subM);
+            document.body.appendChild(subM);
 
             const radios = subM.querySelectorAll('input[name="sh_mod_cnt"]');
             const input = subM.querySelector('#sh_mod_cnt_val');
@@ -26971,7 +30180,7 @@ async function openManager(initialCache, preloadPromise) {
                     renderVisible();
 
                     const toast = document.createElement('div');
-                    toast.style.cssText = "position:absolute; top:180px; left:50%; transform:translateX(-50%); width:max-content; background:rgba(20,20,20,0.9); color:#fff; padding:10px 24px; border-radius:8px; font-size:14px; font-weight:600; z-index:10007; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1);";
+                    toast.style.cssText = "position:absolute; top:180px; left:50%; transform:translateX(-50%); width:max-content; background:var(--pk-toast-bg); color:var(--pk-toast-fg); padding:10px 24px; border-radius:8px; font-size:14px; font-weight:600; z-index:10007; pointer-events:none; box-shadow:0 8px 24px var(--pk-tip-sd); border:1px solid var(--pk-toast-bd);";
                     toast.textContent = L.msg_exp_updated;
                     m.querySelector('.pk-modal').appendChild(toast);
                     setTimeout(() => toast.remove(), 1200);
@@ -27060,6 +30269,18 @@ async function openManager(initialCache, preloadPromise) {
         }
     };
 
+    if (UI.btnCopyLinkOffline) {
+        UI.btnCopyLinkOffline.onclick = () => {
+            const ids = Array.from(S.sel);
+            if (ids.length === 0) return;
+            const tasks = ids.map(id => S.itemMap.get(id)).filter(t => t && (t.source_url || (t.params && t.params.url)));
+            if (tasks.length === 0) return;
+            const urls = tasks.map(t => t.source_url || t.params.url).join('\n');
+            GM_setClipboard(urls);
+            showToast(L.msg_copy_success);
+        };
+    }
+
     if (UI.btnRetryTask) {
         UI.btnRetryTask.onclick = async () => {
             const ids = Array.from(S.sel);
@@ -27127,6 +30348,8 @@ async function openManager(initialCache, preloadPromise) {
         );
 
         const targets = rawTargets.filter(item => {
+            if (rawTargets.length === 1) return true;
+
             const isMarkedUnzipped = item.params && (item.params.global_file_kind === '1' || item.params.global_file_root);
             if (!isMarkedUnzipped) return true;
             let targetFolderName = item.name;
@@ -27135,12 +30358,22 @@ async function openManager(initialCache, preloadPromise) {
             return !existingFolderNames.has(targetFolderName);
         });
 
-        const skippedCount = rawTargets.length - targets.length;
+        const skippedItems = rawTargets.filter(item => !targets.includes(item));
+        const skippedCount = skippedItems.length;
+
         if (skippedCount > 0) {
-            showToast(L.msg_skip_unzipped.replace('{n}', skippedCount));
+            if (await showConfirm(L.msg_unzip_skip_del_confirm.replace('{n}', skippedCount))) {
+                const idsToDelete = skippedItems.map(i => i.id);
+                await executeBatchDelete(idsToDelete, { silent: true, forceRefresh: false });
+                showToast(L.msg_del_items_done.replace('{n}', skippedCount));
+            } else {
+                showToast(L.msg_skip_unzipped.replace('{n}', skippedCount));
+            }
         }
 
-        if (targets.length > 0) {
+        if (targets.length === 1) {
+            handleOpenArchive(targets[0]);
+        } else if (targets.length > 1) {
             handleUnzip(targets);
         }
     };
@@ -27779,7 +31012,7 @@ async function openManager(initialCache, preloadPromise) {
                     await runWatchdogAudit(allFetchedItems);
                 }
                 else if (S.offlineMode) {
-                    const rawTasks = [];
+                    const rawTasks =[];
                     await apiTaskList(1000, (batch) => {
                         if (batch && batch.length) rawTasks.push(...batch);
                     });
@@ -27804,6 +31037,60 @@ async function openManager(initialCache, preloadPromise) {
                             mime_type: ref.mime_type || '',
                             starred: !!(ref.starred || (ref.tags && ref.tags.some(tg => tg.name === 'STAR')))
                         };
+                    });
+                }
+                else if (S.recentMode) {
+                    let nextToken = null;
+                    const limit = 500;
+                    do {
+                        if (document.hidden || signal.aborted || S.loading || S.scanning || S.dupMode || S.isFlattened || S.sel.size > 0) return;
+                        const filters = encodeURIComponent('{"phase":{"in":"PHASE_TYPE_COMPLETE"}}');
+                        const url = `https://api-drive.mypikpak.com/drive/v1/tasks?limit=${limit}&filters=${filters}&thumbnail_size=SIZE_MEDIUM&with_reference_resource=true&_t=${Date.now()}${nextToken ? `&page_token=${nextToken}` : ''}`;
+
+                        const netPriority = bypassLock ? 'high' : 'low';
+                        const res = await fetch(url, { headers: getHeaders(), signal: signal, priority: netPriority });
+                        if (!res.ok) throw new Error("Recent SWR fetch error");
+
+                        const json = await res.json();
+                        const validTasks = (json.tasks ||[]).filter(t =>
+                            t.phase === 'PHASE_TYPE_COMPLETE' &&
+                            (t.type === 'offline' || t.type === 'upload') &&
+                            t.file_id !== ""
+                        );
+
+                        const mapped = validTasks.map(t => {
+                            const ref = t.reference_resource || {};
+                            const mime = ref.mime_type || '';
+                            const isFolder = (ref.kind === 'drive#folder') || (mime === 'application/x-directory') || (t.icon_link && t.icon_link.includes('folder'));
+                            return {
+                                id: t.file_id || t.id,
+                                kind: isFolder ? 'drive#folder' : 'drive#file',
+                                name: ref.name || t.file_name || t.name,
+                                size: t.file_size,
+                                thumbnail_link: ref.thumbnail_link || t.icon_link || '',
+                                icon_link: t.icon_link || '',
+                                web_content_link: t.file_id ? null : null,
+                                created_time: t.created_time,
+                                modified_time: t.updated_time || ref.modified_time || t.created_time,
+                                mime_type: mime,
+                                parent_id: '',
+                                starred: !!(ref.starred || (ref.tags && ref.tags.some(tg => tg.name === 'STAR'))),
+                                trashed: false,
+                                params: Object.assign({}, t.params || {}, ref.params || {}),
+                                _sourceTaskId: t.id
+                            };
+                        });
+
+                        allFetchedItems.push(...mapped);
+                        nextToken = json.next_page_token;
+                        if (allFetchedItems.length >= 2000) break;
+                    } while (nextToken);
+
+                    const seen = new Set();
+                    allFetchedItems = allFetchedItems.filter(f => {
+                        if (seen.has(f.id)) return false;
+                        seen.add(f.id);
+                        return true;
                     });
                 }
                 else {
@@ -27959,6 +31246,13 @@ async function openManager(initialCache, preloadPromise) {
                 console.log(`[SmartRefresh] Pagination in progress (${S.items.length} items loaded). SWR standby...`);
                 return;
             }
+            if (S.recentMode) {
+                const cached = globalCache.get('recent_root');
+                if (cached && !Array.isArray(cached) && cached.nextToken && !isForce) {
+                    console.log(`[SmartRefresh] Pagination in progress (${S.items.length} items loaded). SWR standby...`);
+                    return;
+                }
+            }
             checkAndRefresh(false, isForce);
         };
 
@@ -27993,9 +31287,14 @@ async function openManager(initialCache, preloadPromise) {
     const visibilityListener = startSmartRefresh();
 
     const handleClose = () => {
+        let safePath = [...S.path];
+        if (safePath.some(n => n.id === 'virtual_search_root' || n.id === 'analyze_root')) {
+            safePath = S.preSearchPath || [{ id: '', name: L.btn_nav_home }];
+        }
         globalSavedState = {
-            path: [...S.path],
-            trashMode: S.trashMode
+            path: safePath,
+            trashMode: S.trashMode,
+            isMaximized: UI.win.classList.contains('pk-maximized')
         };
         if (S.offlineMode && S.items.length > 0) {
             const cacheKey = 'offline_root';
@@ -28023,9 +31322,7 @@ async function openManager(initialCache, preloadPromise) {
     };
 
     UI.btnClose.addEventListener('click', () => {
-        if (document.body.classList.contains('pk-body-max') && typeof btnMax !== 'undefined' && btnMax) {
-            btnMax.click();
-        }
+        document.body.classList.remove('pk-body-max');
         el.style.display = 'none';
     });
 
@@ -28162,6 +31459,8 @@ let globalParentIndex = new Map();
 let globalTombstoneCache = new Map();
 let globalDirtyFolders = new Set();
 let globalNeedsSync = false;
+let isGlobalIndexReady = false;
+let hasShownGlobalWarnSession = false;
 let serverClockOffset = 0;
 let hasSyncedTime = false;
 let globalSavedState = null;
@@ -28448,7 +31747,7 @@ async function runBackgroundCrawler() {
         }
     };
 
-    while (backgroundQueue.length > 0 || activeRequests > 0 || pendingRetries > 0) {
+    while (backgroundQueue.length > 0 || activeRequests > 0 || pendingRetries > 0 || (typeof globalDirtyFolders !== 'undefined' && globalDirtyFolders.size > 0)) {
         const isUserBusy = pkState && (pkState.scanning || pkState.loading || document.getElementById('pk-player-ov'));
 
         if (isUserBusy) {
@@ -28472,6 +31771,14 @@ async function runBackgroundCrawler() {
         else if (typeof globalDirtyFolders !== 'undefined' && globalDirtyFolders.size > 0) {
             const dirtyId = Array.from(globalDirtyFolders)[0];
             globalDirtyFolders.delete(dirtyId);
+
+            if (typeof globalCache !== 'undefined') {
+                for (const k of globalCache.keys()) {
+                    if (k && k.startsWith('__analyze_nodeMap_')) {
+                        globalCache.delete(k);
+                    }
+                }
+            }
 
             const normalizedId = dirtyId === 'root' ? '' : dirtyId;
             backgroundQueue.unshift({ id: normalizedId, name: "Dirty_Reval", retryCount: 0 });
@@ -28537,7 +31844,7 @@ async function preLoadRootFiles(onProgress) {
     return globalPreloadPromise;
 }
 
-function tryInject() {
+async function tryInject() {
     if (location.href.includes('/login') || location.pathname.includes('login')) return;
 
     console.log("🚀 PikPak Script: Attempting inject...");
@@ -28554,9 +31861,22 @@ function tryInject() {
 
     inject();
 
-    setTimeout(() => {
-        preLoadRootFiles();
-    }, 1500);
+    const isTurbo = typeof GM_getValue !== 'undefined' ? GM_getValue('pk_turbo_mode', false) : false;
+    if (isTurbo) {
+        console.log("🚀[Turbo Mode] Fast-track rendering...");
+        const startTurbo = async () => {
+            const currentHeaders = getHeaders();
+            if (!currentHeaders.Authorization || currentHeaders.Authorization.length < 10) return;
+
+            const preload = preLoadRootFiles();
+            if (!document.querySelector('.pk-ov')) {
+                await openManager(globalCache, preload);
+            }
+        };
+        setTimeout(startTurbo, 100);
+    } else {
+        setTimeout(() => { preLoadRootFiles(); }, 1500);
+    }
 
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
@@ -28585,6 +31905,11 @@ function inject() {
         b.style.right = 'auto';
         b.style.left = savedLeft;
         b.style.top = savedTop;
+    } else {
+        b.style.bottom = 'auto';
+        b.style.right = 'auto';
+        b.style.left = '10px';
+        b.style.top = '430px';
     }
 
     let isDragging = false;
@@ -28655,12 +31980,21 @@ function inject() {
                 const existingWin = document.querySelector('.pk-ov');
                 if (existingWin) {
                     if (existingWin.style.display === 'none') {
+                        const currentHeaders = getHeaders();
+                        if (!currentHeaders.Authorization || currentHeaders.Authorization.length < 10) return;
+
+                        if (existingWin.querySelector('.pk-win.pk-maximized')) {
+                            document.body.classList.add('pk-body-max');
+                        }
                         existingWin.style.display = 'flex';
                         existingWin.focus();
                     } else {
                         existingWin.style.display = 'none';
                     }
                 } else {
+                    const currentHeaders = getHeaders();
+                    if (!currentHeaders.Authorization || currentHeaders.Authorization.length < 10) return;
+
                     openManager(globalCache, globalPreloadPromise);
                 }
             } else {
