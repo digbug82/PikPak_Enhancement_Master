@@ -1,8 +1,8 @@
-![封面](https://github.com/digbug82/PikPak_Enhancement_Master/blob/496a620ba7266c63e6bcb1477010b2127f06ded6/img/cover_tc.png)
+![封面](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/496a620ba7266c63e6bcb1477010b2127f06ded6/img/cover_tc.png)
 
 # 📦 PikPak 增強大師
 
-> 🚀 適用於 PikPak 網頁端的雲盤管理器，讓 Web 端也擁有媲美本地檔案系統的操作能力
+> 整合批次解壓縮、智慧查重、多模態批次重命名、Aria2 推送、垃圾檔案清理、匯出目錄、媒體播放引擎增強等功能的桌面級檔案管理器。
 
 ---
 
