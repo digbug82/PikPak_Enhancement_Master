@@ -1,8 +1,8 @@
-![カバー](https://github.com/digbug82/PikPak_Enhancement_Master/blob/cc93155fbfb1f6b64a01d0628167dcd78d15bcda/img/cover_ja.png)
+![カバー](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/cc93155fbfb1f6b64a01d0628167dcd78d15bcda/img/cover_ja.png)
 
 # 📦 PikPak 強化マスター
 
-> 🚀 PikPak Web版用のクラウドドライブ管理ツール。Web上でもローカルファイルシステムに匹敵する操作体験を提供。
+> 一括解凍、スマート重複チェック、マルチモーダル一括リネーム、Aria2転送、ジャンクファイルクリーンアップ、ディレクトリエクスポート、メディア再生エンジン強化などの機能を統合したデスクトップ級ファイルマネージャー。
 
 ---
 
