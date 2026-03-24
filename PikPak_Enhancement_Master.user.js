@@ -21,6 +21,8 @@
 // @supportURL         https://github.com/digbug82/PikPak_Enhancement_Master/issues
 // @downloadURL        https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js
 // @updateURL          https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js
+// @compatible         chrome
+// @compatible         edge
 // @grant              GM_setClipboard
 // @grant              GM_setValue
 // @grant              GM_getValue
