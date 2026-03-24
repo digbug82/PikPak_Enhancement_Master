@@ -1,7 +1,8 @@
-![Cover](https://github.com/digbug82/PikPak_Enhancement_Master/blob/0f8971203e5a269a3acff04dfd68b966b4faa866/img/cover.png)
+![Cover](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/0f8971203e5a269a3acff04dfd68b966b4faa866/img/cover.png)
+
 # 📦 PikPak Enhancement Master
 
-> 🚀 A cloud drive manager for PikPak web, giving the web version operations comparable to a local file system.
+> A desktop-grade file manager featuring batch extraction, smart deduplication, multi-modal bulk renaming, Aria2 pushing, junk file cleanup, directory export, and an enhanced media playback engine.
 
 ---
 
