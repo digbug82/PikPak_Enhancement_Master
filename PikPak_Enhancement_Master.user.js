@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name               PikPak 增强大师
+// @name               PikPak Enhancement Master
 // @name:zh-CN         PikPak 增强大师
 // @name:zh-TW         PikPak 增強大師
 // @name:en            PikPak Enhancement Master
@@ -9,7 +9,7 @@
 // @version            1.0.0
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
-// @description        集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的网盘管理器。
+// @description        A desktop-grade file manager featuring batch extraction, smart deduplication, multi-modal bulk renaming, Aria2 pushing, junk file cleanup, directory export, and an enhanced media playback engine.
 // @description:zh-CN  集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的网盘管理器。
 // @description:zh-TW  整合批量解壓縮、智慧重複檢查、多模態批量重新命名、Aria2 推送、垃圾檔案清理、匯出目錄、媒體播放引擎增強等功能的網盤管理器。
 // @description:en     A desktop-grade file manager featuring batch extraction, smart deduplication, multi-modal bulk renaming, Aria2 pushing, junk file cleanup, directory export, and an enhanced media playback engine.
