@@ -51,9 +51,9 @@
 * **分析套件**：包含文件分析（类型筛选及哈希/时长/名称查重）、文件夹分析（大小筛选及名称/相似度/包含率查重）与导出目录树功能
 
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/tree/tree_zh.png" width="300" alt="导出目录">
-  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/file/file_zh.gif" width="250" alt="文件分析">
-  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/folder/folder_zh.gif" width="300" alt="文件夹分析">
+  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/tree/tree_zh.png" width="260" alt="导出目录">
+  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/file/file_zh.gif" width="220" alt="文件分析">
+  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/folder/folder_zh.gif" width="260" alt="文件夹分析">
 </p>
 
 * **智能整理**：一键清理空文件夹、支持批量解压（记忆解压成功密码、带密码的压缩包智能填充密码并删除已解压项）
