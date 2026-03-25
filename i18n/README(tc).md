@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_tc.gif" width="750" alt="封面">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_tc.gif" alt="封面">
 </p>
 
 # 📦 PikPak 增強大師
@@ -35,7 +35,7 @@
 * **體驗增強**：支援深色模式、影片時長顯示、一鍵模糊封面（隱私保護）、加入星號與檔案類型排序
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_tc.gif" width="750" alt="路徑">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_tc.gif" alt="路徑">
 </p>
 
 ---
@@ -51,9 +51,9 @@
 * **分析套件**：包含檔案分析（類型篩選及雜湊/時長/名稱查重）、資料夾分析（大小篩選及名稱/相似度/包含率查重）與匯出目錄樹功能
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_tc.png" width="300" alt="匯出目錄">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file/file_tc.gif" width="280" alt="檔案分析">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder/folder_tc.gif" width="300" alt="資料夾分析">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_tc.png" width="350" alt="匯出目錄">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file/file_tc.gif" width="300" alt="檔案分析">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder/folder_tc.gif" width="350" alt="資料夾分析">
 </p>
 
 * **智慧整理**：一鍵清理空資料夾、支援批次解壓縮（記憶解壓縮成功密碼、帶密碼的壓縮檔智慧填入密碼並刪除已解壓縮項）
@@ -91,7 +91,7 @@
 * **視覺輔助**：支援以圖搜圖（圖片/影片影格）與媒體模式（影集/漫畫自動 A-Z 排序）
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_tc.gif" width="350" alt="分享">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/video/video_tc.gif" alt="影片播放">
 </p>
 
 ---
@@ -181,3 +181,17 @@
 * **資料本機化**：本腳本所有核心功能（如批次重新命名、檔案分析、解壓縮等）均透過您的瀏覽器直接與 PikPak 官方 API 進行互動。您的帳號 Token、密碼金庫及檔案資料均**僅儲存在本機瀏覽器中**。
 * **零收集**：腳本**不會**收集任何使用者隱私資料，也**絕不會**將您的檔案資訊或帳號憑據上傳至任何第三方伺服器。
 * **第三方介面**：僅在使用「線上字幕搜尋」或「以圖搜圖」等擴充功能時，腳本會向相關公共服務介面傳送必要的搜尋關鍵字或圖片特徵參數，不涉及您的任何個人身份資訊。
+
+---
+
+## 🤝 致謝 (Acknowledgements)
+
+本項目在 UI 設計語言及部分網頁端 API 調用邏輯上，深受[PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager)(by 브랜뉴)的啟發，特此致敬。
+
+---
+
+## ⚖️ License 聲明
+
+本項目遵循 **CC-BY-NC-SA-4.0 協議**
+* 🚫 禁止用於任何商業用途
+* 📢 二次分發必須署名並保持相同協議
