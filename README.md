@@ -115,7 +115,7 @@
 * **下载过滤**：文件夹下载支持按后缀 / 关键词过滤其中文件
 
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/aria2/aria2_zh.gif" width="400" alt="aria2">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_zh.gif" width="400" alt="aria2">
 </p>
 
 ---
