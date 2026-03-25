@@ -35,7 +35,7 @@
 * **体验增强**：支持夜间模式、视频时长显示、一键模糊封面（隐私保护）、星标与文件类型排序
 
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/table/table_zh.gif" width="750" alt="路径">
+  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/table/table_zh.gif" alt="路径">
 </p>
 
 ---
@@ -51,9 +51,9 @@
 * **分析套件**：包含文件分析（类型筛选及哈希/时长/名称查重）、文件夹分析（大小筛选及名称/相似度/包含率查重）与导出目录树功能
 
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/tree/tree_zh.png" width="300" alt="导出目录">
-  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/file/file_zh.gif" width="280" alt="文件分析">
-  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/folder/folder_zh.gif" width="300" alt="文件夹分析">
+  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/tree/tree_zh.png" width="350" alt="导出目录">
+  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/file/file_zh.gif" width="300" alt="文件分析">
+  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/folder/folder_zh.gif" width="350" alt="文件夹分析">
 </p>
 
 * **智能整理**：一键清理空文件夹、支持批量解压（记忆解压成功密码、带密码的压缩包智能填充密码并删除已解压项）
@@ -91,7 +91,7 @@
 * **视觉辅助**：支持以图搜图（图片/视频帧）与媒体模式（剧集/漫画自动 A-Z 排序）
 
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/video/video_zh.gif" width="750" alt="视频播放">
+  <img src="https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/img/video/video_zh.gif" alt="视频播放">
 </p>
 
 ---
