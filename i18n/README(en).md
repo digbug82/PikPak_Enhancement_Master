@@ -35,7 +35,7 @@
 * **Enhanced UX**: Supports Dark Mode, video duration display, one-click Blur Cover Images (Privacy Mode), Starred items, and file type sorting.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_en.gif" width="750" alt="Path Bar">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_en.gif" alt="Path Bar">
 </p>
 
 ---
@@ -51,9 +51,9 @@
 * **Analysis Suite**: Includes File Analysis (type filtering and hash/duration/name deduplication), Folder Analysis (size filtering and name/similarity/containment deduplication), and Export Directory tree functionality.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_en.png" width="300" alt="Export Directory">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file/file_en.gif" width="280" alt="File Analysis">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder/folder_en.gif" width="300" alt="Folder Analysis">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_en.png" width="350" alt="Export Directory">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file/file_en.gif" width="300" alt="File Analysis">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder/folder_en.gif" width="350" alt="Folder Analysis">
 </p>
 
 * **Smart Organizing**: One-click Prune Empty Folders, Bulk Extract (memorizes successful passwords, smart auto-fill for Password Vault, and deletes extracted archives).
@@ -195,3 +195,4 @@ This project is deeply inspired by [PikPak File Manager v1.2.0](https://github.c
 This project is licensed under **CC-BY-NC-SA-4.0**
 * 🚫 Commercial use is prohibited.
 * 📢 Redistribution must include attribution and remain under the same license.
+
