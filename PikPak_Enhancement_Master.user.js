@@ -6,7 +6,7 @@
 // @name:ko            PikPak 인핸서 마스터
 // @name:ja            PikPak 拡張マスター
 // @namespace          https://github.com/digbug82/
-// @version            1.0.0
+// @version            1.1.0
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的网盘管理器。
@@ -34,8 +34,6 @@
 // @connect            catbox.moe
 // @connect            litterbox.catbox.moe
 // @connect            uguu.se
-// @connect            missav123.com
-// @connect            njavtv.com
 // @connect            mypikpak.com
 // @connect            localhost
 // @run-at             document-start
@@ -571,7 +569,7 @@ const CSS = `
     .pk-ana-item { padding: 10px 12px; cursor: pointer; font-size: 13px; color: var(--pk-fg); transition: background 0.1s; }
     .pk-ana-item:hover { background: var(--pk-hl); color: var(--pk-pri); }
     .pk-ana-item.act { color: var(--pk-pri); font-weight: 700; background: rgba(0, 103, 192, 0.05); }
-    .pk-msg-toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--pk-toast-bg); color: var(--pk-toast-fg); padding: 12px 28px; border-radius: 12px; z-index: 20000; font-size: 14px; font-weight: 600; pointer-events: none; opacity: 0; transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1); text-align: center; backdrop-filter: blur(8px); border: 1px solid var(--pk-toast-bd); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .pk-msg-toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--pk-toast-bg); color: var(--pk-toast-fg); padding: 12px 28px; border-radius: 12px; z-index: 20000; font-size: 14px; font-weight: 600; pointer-events: none; opacity: 0; transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1); text-align: left; display: flex; align-items: center; justify-content: center; gap: 12px; backdrop-filter: blur(8px); border: 1px solid var(--pk-toast-bd); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
     .pk-msg-toast.show { opacity: 1; transform: translate(-50%, -60%); }
     .pk-crumb-sep { width: 22px; height: 22px; margin: 0 2px; cursor: pointer; border-radius: 4px; color: #aaa; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .pk-crumb-sep:hover, .pk-crumb-sep.pk-active { background: var(--pk-hl); color: currentColor; }
@@ -981,6 +979,7 @@ const T = {
         lbl_default_folder: "默认文件夹",
         btn_via_torrent: "通过 Torrent 创建",
         tip_cloud_save_path: "常规云下载文件会保存在 My Pack 目录，来自其他 App 的云下载文件会保存至 My [XYZ] 目录，[XYZ] 为 App 名称。",
+        lbl_smart_fix: "自动修复防屏蔽磁链 (提取特征码/剔除文字干扰)",
         title_save_method: "保存方式",
         msg_save_snapshot_desc: "此链接只能被存储为网页快照。",
         tip_snapshot_details: "PikPak 不能从此链接中直接采集媒体文件，您可以保存网页快照。PikPak 将尽可能保存完整的网页内容到快照文件中。",
@@ -1133,7 +1132,7 @@ const T = {
         label_regex: "正则 (Regex)",
         placeholder_find: "查找内容",
         placeholder_replace: "替换为 (留空删除)",
-        label_jav: "番号/FC2 智能识别",
+        label_jav: "FC2 纯净命名",
         lbl_rn_pattern: "命名模板",
         lbl_rn_case_convert: "大小写转换",
         opt_rn_keep_origin: "(保持原样)",
@@ -1148,7 +1147,7 @@ const T = {
         opt_rn_width_half: "全角转半角 (Ａ->A)",
         opt_rn_width_full: "半角转全角 (A->Ａ)",
         lbl_rn_preview_title: "变更预览",
-        tip_jav_mode_desc: "✨ 智能模式：根据当前语言命名",
+        tip_jav_mode_desc: "✨ 智能提取FC2并去除无关字符",
         tip_ad_remove_desc: "🧹 智能滤除头部广告、网址及垃圾符号，自动清洗Emoji并修复括号格式",
         tip_ext_fix_desc: "🧩 根据文件真实类型 (MIME) 智能修正后缀",
         label_replace_find: "查找内容",
@@ -1225,7 +1224,7 @@ const T = {
 
         /* --- 设置与搜索 --- */
         label_turbo_mode: "极速模式",
-        desc_turbo_mode: "自动开启并屏蔽网页原生同步 (推荐)",
+        desc_turbo_mode: "自动开启并替代网页界面 (推荐)",
         lbl_aria2_status: "连接状态",
         ph_aria2_secret: "密钥 (选填)",
         str_connected: "连接成功",
@@ -1286,7 +1285,7 @@ const T = {
         opt_cfg_vault: "密码金库 (解压密码记忆)",
         opt_cfg_history: "视频缓存 (视频播放进度/视频时长缓存)",
         opt_cfg_cache: "运行缓存 (文件夹修改时间/最后浏览位置/指纹)",
-        msg_import_confirm: "导入配置将覆盖当前所有设置，是否继续？",
+        msg_import_confirm: "导入的配置将与当前设置合并（合并名单/记录，覆盖冲突的基础设置），是否继续？",
         msg_import_success: "配置导入成功，页面即将刷新...",
         err_invalid_config: "无效的配置文件：未检测到指纹标识或格式错误",
         err_json_format: "文件解析失败：JSON 语法错误或文件已损坏",
@@ -1464,7 +1463,11 @@ const T = {
         msg_unzip_running_bg: "[{n}] 已在云端解压中，请稍后刷新查看",
         msg_share_code_updated: "分享代码已更新",
         msg_retry_submitted: "已重试提交 {n} 个任务",
-        msg_jav_fetching_net: "正在联网获取 MissAV 数据...",
+        msg_aria2_batch_fail_log: "\n\n检测到失败项较多，已为您自动导出完整错误清单 (.txt)",
+        str_aria2_fetch_err: "(获取链接失败)",
+        str_aria2_rpc_err: "(投递失败)",
+        str_aria2_aborted: "(已取消)",
+        str_aria2_fail_file_name: "Aria2_失败清单",
         msg_op_blocked_moving: "⚠️ 操作拦截\n\n后台正在执行文件搬运，请等待当前任务完成后再操作。",
         msg_op_blocked_analyzing: "⚠️ 操作拦截\n\n后台正在执行文件搬运。为确保文件夹分析数据准确，请等待当前任务完成后再操作。",
         msg_op_blocked_exporting: "⚠️ 操作拦截\n\n后台正在执行文件搬运。为确保导出目录文本准确，请等待当前任务完成后再操作。",
@@ -1539,6 +1542,9 @@ const T = {
         str_jav_no_match: "(未匹配到番号)",
         msg_unzip_fail: "解压请求失败",
         msg_jszip_fail: "JSZip 加载失败，请检查网络。",
+        msg_turbo_activated: "极速模式已激活：脚本已深度接管网页逻辑，确保稳定流畅。",
+        msg_console_legal: "严禁商业用途：本项目仅供个人学习与交流使用。",
+        msg_ana_warn: "文件夹查重提示：判定基于算法推测，删除前请务必人工核对，以防误删。",
 
         /* --- 错误提示 --- */
         err_invalid_links: "请输入正确的链接",
@@ -1817,6 +1823,7 @@ const T = {
         lbl_default_folder: "預設資料夾",
         btn_via_torrent: "透過 Torrent 建立",
         tip_cloud_save_path: "正規雲端下載檔案會儲存在 My Pack 目錄，來自其他 App 的雲端下載檔案會儲存至 My [XYZ] 目錄，[XYZ] 為 App 名稱。",
+        lbl_smart_fix: "自動修復防屏蔽磁鏈 (提取特徵碼/剔除文字干擾)",
         title_save_method: "儲存方式",
         msg_save_snapshot_desc: "此連結只能被儲存為網頁快照。",
         tip_snapshot_details: "PikPak 無法從此連結中直接擷取媒體檔案，您可以儲存網頁快照。PikPak 將盡可能儲存完整的網頁內容到快照檔案中。",
@@ -1969,7 +1976,7 @@ const T = {
         label_regex: "正規表示式 (Regex)",
         placeholder_find: "尋找內容",
         placeholder_replace: "取代為 (留空則刪除)",
-        label_jav: "番號/FC2 智慧辨識",
+        label_jav: "FC2 純淨命名",
         lbl_rn_pattern: "命名範本",
         lbl_rn_case_convert: "大小寫轉換",
         opt_rn_keep_origin: "(保持原樣)",
@@ -1984,7 +1991,7 @@ const T = {
         opt_rn_width_half: "全形轉半形 (Ａ->A)",
         opt_rn_width_full: "半形轉全形 (A->Ａ)",
         lbl_rn_preview_title: "變更預覽",
-        tip_jav_mode_desc: "✨ 智慧模式：根據目前語言命名",
+        tip_jav_mode_desc: "✨ 智慧提取 FC2 並去除無關字元",
         tip_ad_remove_desc: "🧹 智慧過濾頭部廣告、網址及垃圾符號，自動清除 Emoji 並修復括號格式",
         tip_ext_fix_desc: "🧩 根據檔案真實類型 (MIME) 智慧修正副檔名",
         label_replace_find: "尋找內容",
@@ -2061,7 +2068,7 @@ const T = {
 
         /* --- 设置与搜索 --- */
         label_turbo_mode: "極速模式",
-        desc_turbo_mode: "自動開啟並屏蔽網頁原生同步 (推薦)",
+        desc_turbo_mode: "自動開啟並替代網頁介面 (推薦)",
         lbl_aria2_status: "連線狀態",
         ph_aria2_secret: "密鑰 (選填)",
         str_connected: "連線成功",
@@ -2122,7 +2129,7 @@ const T = {
         opt_cfg_vault: "密碼金庫 (解壓縮密碼記憶)",
         opt_cfg_history: "影片快取 (影片播放進度/影片時長快取)",
         opt_cfg_cache: "運行快取 (資料夾修改時間/最後瀏覽位置/指紋)",
-        msg_import_confirm: "匯入配置將覆蓋目前所有設定，是否繼續？",
+        msg_import_confirm: "匯入的配置將與目前設定合併（合併名單/紀錄，覆蓋衝突的基礎設定），是否繼續？",
         msg_import_success: "配置匯入成功，頁面即將重新整理...",
         err_invalid_config: "無效的設定檔：未偵測到指紋標識或格式錯誤",
         err_json_format: "檔案解析失敗：JSON 語法錯誤或檔案已損壞",
@@ -2300,7 +2307,11 @@ const T = {
         msg_unzip_running_bg: "[{n}] 已在雲端解壓縮中，請稍後重新整理檢視",
         msg_share_code_updated: "分享代碼已更新",
         msg_retry_submitted: "已重試提交 {n} 個任務",
-        msg_jav_fetching_net: "正在連線取得 MissAV 資料...",
+        msg_aria2_batch_fail_log: "\n\n檢測到失敗項較多，已為您自動匯出完整錯誤清單 (.txt)",
+        str_aria2_fetch_err: "(獲取連結失敗)",
+        str_aria2_rpc_err: "(投遞失敗)",
+        str_aria2_aborted: "(已取消)",
+        str_aria2_fail_file_name: "Aria2_失敗清單",
         msg_op_blocked_moving: "⚠️ 操作攔截\n\n背景正在執行檔案搬移，請等待目前任務完成後再操作。",
         msg_op_blocked_analyzing: "⚠️ 操作攔截\n\n後台正在執行檔案搬移。為確保資料夾分析數據準確，請等待目前任務完成後再操作。",
         msg_op_blocked_exporting: "⚠️ 操作攔截\n\n後台正在執行檔案搬移。為確保匯出目錄文本準確，請等待目前任務完成後再操作。",
@@ -2375,6 +2386,9 @@ const T = {
         str_jav_no_match: "(未比對到番號)",
         msg_unzip_fail: "解壓縮請求失敗",
         msg_jszip_fail: "JSZip 載入失敗，請檢查網路。",
+        msg_turbo_activated: "極速模式已激活：腳本已深度接管網頁邏輯，確保穩定流暢。",
+        msg_console_legal: "嚴禁商業用途：本項目僅供個人學習與交流使用。",
+        msg_ana_warn: "資料夾查重提示：判定基於演算法推測，刪除前請務必人工核對，以防誤刪。",
 
         /* --- 错误提示 --- */
         err_invalid_links: "請輸入正確的連結",
@@ -2653,6 +2667,7 @@ const T = {
         lbl_default_folder: "Default Folder",
         btn_via_torrent: "Upload Torrent",
         tip_cloud_save_path: "Standard cloud downloads are saved in the My Pack folder. Downloads from other apps are saved to the My [XYZ] folder, where [XYZ] is the app name.",
+        lbl_smart_fix: "Auto-fix masked magnets (Extract hash / Remove text noise)",
         title_save_method: "Save Method",
         msg_save_snapshot_desc: "This link can only be saved as a Web Snapshot.",
         tip_snapshot_details: "PikPak cannot extract media from this link directly. It will save the complete web content as a snapshot file instead.",
@@ -2805,7 +2820,7 @@ const T = {
         label_regex: "Regex",
         placeholder_find: "Search for...",
         placeholder_replace: "Replace with... (leave empty to delete)",
-        label_jav: "JAV/FC2 Naming",
+        label_jav: "FC2 Clean Naming",
         lbl_rn_pattern: "Naming Template",
         lbl_rn_case_convert: "Case Conversion",
         opt_rn_keep_origin: "(No change)",
@@ -2820,7 +2835,7 @@ const T = {
         opt_rn_width_half: "Full-width to Half (Ａ->A)",
         opt_rn_width_full: "Half-width to Full (A->Ａ)",
         lbl_rn_preview_title: "Change Preview",
-        tip_jav_mode_desc: "✨ Smart Mode: Naming based on current language",
+        tip_jav_mode_desc: "✨ Smartly extract FC2 and remove irrelevant characters",
         tip_ad_remove_desc: "🧹 Removes ads, URLs, junk symbols, cleans Emojis, and fixes bracket formats.",
         tip_ext_fix_desc: "🧩 Corrects extensions based on actual file type (MIME).",
         label_replace_find: "Find",
@@ -2897,7 +2912,7 @@ const T = {
 
         /* --- 设置与搜索 --- */
         label_turbo_mode: "Turbo Mode",
-        desc_turbo_mode: "Auto-launch & block native sync (Recommended)",
+        desc_turbo_mode: "Auto-replace native UI (Recommended)",
         lbl_aria2_status: "Connection",
         ph_aria2_secret: "Secret (Optional)",
         str_connected: "Connected",
@@ -2958,7 +2973,7 @@ const T = {
         opt_cfg_vault: "Vault (Extract Password Memory)",
         opt_cfg_history: "Video Cache (Play Progress / Duration Cache)",
         opt_cfg_cache: "Cache (Folder Mod-Time/Last Position/Fingerprint)",
-        msg_import_confirm: "Importing config will overwrite all current settings. Continue?",
+        msg_import_confirm: "The imported config will be merged with current settings (lists/records combined, conflicting basic settings overwritten). Continue?",
         msg_import_success: "Config imported successfully. Page will refresh...",
         err_invalid_config: "Invalid config file: Missing fingerprint or format error",
         err_json_format: "Parse failed: JSON syntax error or file corrupted",
@@ -3136,7 +3151,11 @@ const T = {
         msg_unzip_running_bg: "[{n}] is being extracted in the cloud. Refresh later.",
         msg_share_code_updated: "Share code updated.",
         msg_retry_submitted: "Resubmitted {n} tasks.",
-        msg_jav_fetching_net: "Fetching MissAV data...",
+        msg_aria2_batch_fail_log: "\n\nToo many failures. A complete log (.txt) has been exported.",
+        str_aria2_fetch_err: "(Fetch Error)",
+        str_aria2_rpc_err: "(RPC Error)",
+        str_aria2_aborted: "(Aborted)",
+        str_aria2_fail_file_name: "Aria2_Failed_List",
         msg_op_blocked_moving: "⚠️ Operation Blocked\n\nFile transfer in progress. Please wait.",
         msg_op_blocked_analyzing: "⚠️ Operation Blocked\n\nFile transfer in progress. For accurate Folder Analysis data, please wait for the current task to finish.",
         msg_op_blocked_exporting: "⚠️ Operation Blocked\n\nFile transfer in progress. To ensure accurate export text, please wait for the current task to finish.",
@@ -3211,6 +3230,9 @@ const T = {
         str_jav_no_match: "(No match found)",
         msg_unzip_fail: "Extraction request failed.",
         msg_jszip_fail: "JSZip failed to load. Check your network.",
+        msg_turbo_activated: "Turbo Mode Active: Script has taken over web logic for peak performance.",
+        msg_console_legal: "Strictly Non-Commercial: This project is strictly for personal study and communication only.",
+        msg_ana_warn: "Folder Deduplication Hint: Based on algorithmic inference. Please double-check manually before deleting.",
 
         /* --- 错误提示 --- */
         err_invalid_links: "Please enter valid links.",
@@ -3489,6 +3511,7 @@ const T = {
         lbl_default_folder: "기본 폴더",
         btn_via_torrent: "토렌트 파일로 생성",
         tip_cloud_save_path: "일반 클라우드 다운로드 파일은 My Pack 디렉토리에 저장되며, 다른 앱의 클라우드 다운로드 파일은 My [XYZ] 디렉토리에 저장됩니다([XYZ]는 앱 이름).",
+        lbl_smart_fix: "차단 방지 마그넷 자동 복구 (해시 추출 / 텍스트 노이즈 제거)",
         title_save_method: "저장 방식",
         msg_save_snapshot_desc: "이 링크는 웹페이지 스냅샷으로만 저장할 수 있습니다.",
         tip_snapshot_details: "PikPak이 이 링크에서 미디어 파일을 직접 수집할 수 없습니다. 대신 웹페이지 스냅샷으로 저장하며, 최대한 전체 내용을 보존합니다.",
@@ -3641,7 +3664,7 @@ const T = {
         label_regex: "정규식 (Regex)",
         placeholder_find: "찾을 내용",
         placeholder_replace: "바꿀 내용 (비워두면 삭제)",
-        label_jav: "품번/FC2 지능형 인식",
+        label_jav: "FC2 클린 네이밍",
         lbl_rn_pattern: "이름 템플릿",
         lbl_rn_case_convert: "대소문자 변환",
         opt_rn_keep_origin: "(변경 없음)",
@@ -3656,7 +3679,7 @@ const T = {
         opt_rn_width_half: "전각을 반각으로 (Ａ->A)",
         opt_rn_width_full: "반각을 전각으로 (A->Ａ)",
         lbl_rn_preview_title: "변경 미리보기",
-        tip_jav_mode_desc: "✨ 스마트 모드: 설정된 언어에 맞춰 이름 변경",
+        tip_jav_mode_desc: "✨ FC2 스마트 추출 및 불필요한 문자 제거",
         tip_ad_remove_desc: "🧹 제목 앞부분의 광고, URL, 불필요한 기호를 제거하고 이모지 정리 및 괄호 형식 수정",
         tip_ext_fix_desc: "🧩 실제 파일 유형(MIME)에 기반하여 확장자를 지능적으로 수정",
         label_replace_find: "찾을 내용",
@@ -3733,7 +3756,7 @@ const T = {
 
         /* --- 设置与搜索 --- */
         label_turbo_mode: "초고속 모드",
-        desc_turbo_mode: "자동 실행 및 기본 동기화 차단 (추천)",
+        desc_turbo_mode: "순정 UI 자동 대체 (권장)",
         lbl_aria2_status: "연결 상태",
         ph_aria2_secret: "보안 비밀 (선택 사항)",
         str_connected: "연결됨",
@@ -3794,7 +3817,7 @@ const T = {
         opt_cfg_vault: "비밀번호 금고 (압축 해제 비밀번호 기억)",
         opt_cfg_history: "비디오 캐시 (비디오 재생 진행도/비디오 길이 캐시)",
         opt_cfg_cache: "실행 캐시 (폴더 수정 시간/최근 탐색 위치/지문)",
-        msg_import_confirm: "설정을 가져오면 현재 설정이 모두 덮어쓰여집니다. 계속하시겠습니까?",
+        msg_import_confirm: "가져온 설정이 현재 설정과 병합됩니다(목록/기록 병합, 충돌하는 기본 설정 덮어쓰기). 계속하시겠습니까?",
         msg_import_success: "설정을 성공적으로 가져왔습니다. 페이지가 새로고침됩니다...",
         err_invalid_config: "잘못된 설정 파일: 지문 식별이 없거나 형식 오류입니다",
         err_json_format: "파일 분석 실패: JSON 구문 오류 또는 파일이 손상되었습니다",
@@ -3972,7 +3995,11 @@ const T = {
         msg_unzip_running_bg: "[{n}] 클라우드에서 압축 해제 중입니다. 잠시 후 새로고침하여 확인하세요.",
         msg_share_code_updated: "공유 코드가 업데이트되었습니다",
         msg_retry_submitted: "{n}개의 작업을 다시 제출했습니다",
-        msg_jav_fetching_net: "MissAV 데이터를 가져오는 중...",
+        msg_aria2_batch_fail_log: "\n\n실패 항목이 많아 전체 오류 목록(.txt)을 자동으로 내보냈습니다.",
+        str_aria2_fetch_err: "(링크 가져오기 실패)",
+        str_aria2_rpc_err: "(전송 실패)",
+        str_aria2_aborted: "(취소됨)",
+        str_aria2_fail_file_name: "Aria2_실패_목록",
         msg_op_blocked_moving: "⚠️ 작업 차단\n\n백그라운드에서 파일 이동 작업이 진행 중입니다. 완료 후 시도해 주세요.",
         msg_op_blocked_analyzing: "⚠️ 작업 차단\n\n백그라운드에서 파일 이동 작업이 진행 중입니다. 정확한 폴더 분석 데이터를 위해 현재 작업이 완료된 후 다시 시도해 주세요.",
         msg_op_blocked_exporting: "⚠️ 작업 차단\n\n백그라운드에서 파일 이동 작업이 진행 중입니다. 정확한 디렉토리 내보내기를 위해 현재 작업이 완료된 후 다시 시도해 주세요.",
@@ -4047,6 +4074,9 @@ const T = {
         str_jav_no_match: "(품번 매칭 실패)",
         msg_unzip_fail: "압축 해제 요청 실패",
         msg_jszip_fail: "JSZip 로드 실패. 네트워크 상태를 확인하세요.",
+        msg_turbo_activated: "터보 모드 활성화: 스크립트가 웹 로직을 제어하여 최상의 성능을 유지합니다.",
+        msg_console_legal: "상업적 이용 엄격 금지: 이 프로젝트는 개인 학습 및 교류 목적으로만 사용됩니다.",
+        msg_ana_warn: "폴더 중복 확인 팁: 알고리즘 추측을 바탕으로 합니다. 삭제 전 반드시 직접 확인하여 오삭제를 방지하세요。",
 
         /* --- 错误提示 --- */
         err_invalid_links: "올바른 링크를 입력해 주세요",
@@ -4325,6 +4355,7 @@ const T = {
         lbl_default_folder: "デフォルトフォルダ",
         btn_via_torrent: "Torrent経由",
         tip_cloud_save_path: "通常のクラウドダウンロードファイルは My Pack ディレクトリに保存されます。他アプリからのクラウドダウンロードファイルは My [XYZ] ディレクトリ（[XYZ] はアプリ名）に保存されます。",
+        lbl_smart_fix: "規制回避磁気リンクの自動修復 (ハッシュ抽出 / 文字ノイズ削除)",
         title_save_method: "保存方法",
         msg_save_snapshot_desc: "このリンクはウェブスナップショットとしてのみ保存可能です。",
         tip_snapshot_details: "PikPakはこのリンクからメディアファイルを直接抽出できませんが、ウェブページの内容をスナップショットとして保存できます。",
@@ -4477,7 +4508,7 @@ const T = {
         label_regex: "正規表現 (Regex)",
         placeholder_find: "検索する文字列",
         placeholder_replace: "置換後の文字列 (空で削除)",
-        label_jav: "品番/FC2 ID 抽出",
+        label_jav: "FC2 クリーン命名",
         lbl_rn_pattern: "命名テンプレート",
         lbl_rn_case_convert: "大文字・小文字変換",
         opt_rn_keep_origin: "(そのまま)",
@@ -4492,7 +4523,7 @@ const T = {
         opt_rn_width_half: "全角から半角 (Ａ->A)",
         opt_rn_width_full: "半角から全角 (A->Ａ)",
         lbl_rn_preview_title: "変更プレビュー",
-        tip_jav_mode_desc: "✨ スマートモード：現在の言語設定に基づいて命名",
+        tip_jav_mode_desc: "✨ FC2をスマートに抽出し、無関係な文字を削除",
         tip_ad_remove_desc: "🧹 プレフィックス広告、URL、ゴミ記号を自動除去し、絵文字や括弧の書式を修正",
         tip_ext_fix_desc: "🧩 ファイルの真のタイプ (MIME) に基づいて拡張子を自動修正",
         label_replace_find: "検索内容",
@@ -4569,7 +4600,7 @@ const T = {
 
         /* --- 设置与搜索 --- */
         label_turbo_mode: "極速モード",
-        desc_turbo_mode: "自動起動とネイティブ同期のブロック (推奨)",
+        desc_turbo_mode: "標準UIを自動代替 (推奨)",
         lbl_aria2_status: "接続状態",
         ph_aria2_secret: "シークレット (任意)",
         str_connected: "接続完了",
@@ -4630,7 +4661,7 @@ const T = {
         opt_cfg_vault: "パスワード庫 (解凍パスワード記憶)",
         opt_cfg_history: "動画キャッシュ (再生進捗/動画の長さキャッシュ)",
         opt_cfg_cache: "実行キャッシュ (フォルダ更新時刻/閲覧位置/指紋)",
-        msg_import_confirm: "設定をインポートすると、現在の設定がすべて上書きされます。続行しますか？",
+        msg_import_confirm: "インポートされた設定は現在の設定とマージされます（リスト/記録は統合され、競合する基本設定は上書きされます）。続行しますか？",
         msg_import_success: "設定のインポートに成功しました。ページをリロードします...",
         err_invalid_config: "無効な設定ファイル：指紋識別がないか、フォーマットエラーです",
         err_json_format: "ファイルの解析に失敗：JSON 構文エラーまたはファイルが破損しています",
@@ -4808,7 +4839,11 @@ const T = {
         msg_unzip_running_bg: "[{n}] クラウドで解凍中です。後で更新して確認してください",
         msg_share_code_updated: "共有コードが更新されました",
         msg_retry_submitted: "{n} 個のタスクを再送信しました",
-        msg_jav_fetching_net: "MissAV データを取得中...",
+        msg_aria2_batch_fail_log: "\n\n失敗項目が多いため、詳細なエラーリスト(.txt)を自動的に書き出しました。",
+        str_aria2_fetch_err: "(リンク取得失敗)",
+        str_aria2_rpc_err: "(送信失敗)",
+        str_aria2_aborted: "(取り消し済み)",
+        str_aria2_fail_file_name: "Aria2_失敗リスト",
         msg_op_blocked_moving: "⚠️ 操作ブロック\n\nファイル移動タスクが進行中です。完了までお待ちください。",
         msg_op_blocked_analyzing: "⚠️ 操作ブロック\n\nバックグラウンドでファイル移動が進行中です。フォルダ分析の精度を保つため、現在のタスクが完了してから操作してください。",
         msg_op_blocked_exporting: "⚠️ 操作ブロック\n\nバックグラウンドでファイル移動が進行中です。正確なディレクトリ出力を確保するため、現在のタスクが完了してから操作してください。",
@@ -4883,6 +4918,9 @@ const T = {
         str_jav_no_match: "(品番が見つかりません)",
         msg_unzip_fail: "解凍リクエストが失敗しました",
         msg_jszip_fail: "JSZip の読み込みに失敗しました。ネットワークを確認してください。",
+        msg_turbo_activated: "ターボモード起動：スクリプトがウェブ論理を完全制御し、最高の快適さを提供。",
+        msg_console_legal: "商用利用厳禁：このプロジェクトは個人の学習および交流目的のみに使用されます。",
+        msg_ana_warn: "フォルダ重複チェックのヒント：判定はアルゴリズムに基づいています。誤削除を防ぐため、削除前に必ず目視で確認してください。",
 
         /* --- 错误提示 --- */
         err_invalid_links: "有効なリンクを入力してください",
@@ -5656,18 +5694,14 @@ async function coreRecursiveEngine(roots, options) {
     }
 }
 
-// ./package.json
-const package_namespaceObject = {"rE":"1.0.0"};;
-
-// ./src/main.js
-const { "rE": version } = package_namespaceObject;
+const version = (typeof GM_info !== 'undefined' && GM_info.script) ? GM_info.script.version : "1.0.0";
 
 console.log("%c PikPak Enhancement Master %c v" + version + " %c digbug82 %c CC-BY-NC-SA-4.0 ",
     "color:#fff; background:#1a5eff; padding:3px 0; border-radius:4px 0 0 4px; font-weight:bold;",
     "color:#fff; background:#333; padding:3px 8px;",
-    "color:#fff; background:#ffc107; padding:3px 8px; font-weight:bold;",
+    "color:#fff; background:#f57c00; padding:3px 8px; font-weight:bold;",
     "color:#fff; background:#d93025; padding:3px 8px; border-radius:0 4px 4px 0; font-weight:bold;");
-console.log("%cStrictly Non-Commercial: This project is strictly for personal study and communication only.%c", "color:#d93025; font-weight:bold;", "");
+console.log("%c" + getStrings().msg_console_legal + "%c", "color:#d93025; font-weight:bold;", "");
 
 function getIcon(item) {
     const isFolder = item.kind === 'drive#folder' ||
@@ -6796,14 +6830,27 @@ async function openManager(initialCache, preloadPromise) {
     const isTurbo = gmGet('pk_turbo_mode', false);
     let isWinMaximized = (globalSavedState && typeof globalSavedState.isMaximized !== 'undefined') ? globalSavedState.isMaximized : isTurbo;
 
+    if (isTurbo) {
+        if (btnMax) btnMax.style.display = 'none';
+        if (UI.btnClose) UI.btnClose.style.display = 'none';
+    }
+
+    const win = el.querySelector('.pk-win');
     if (isWinMaximized) {
-        const win = el.querySelector('.pk-win');
         if (win) win.classList.add('pk-maximized');
         document.body.classList.add('pk-body-max');
         CONF.rowHeight = 60;
         if (btnMax) {
             btnMax.innerHTML = CONF.icons.minimize;
             btnMax.setAttribute('data-pk-tip', L.tip_minimize);
+        }
+    } else {
+        if (win) win.classList.remove('pk-maximized');
+        document.body.classList.remove('pk-body-max');
+        CONF.rowHeight = 40;
+        if (btnMax) {
+            btnMax.innerHTML = CONF.icons.maximize;
+            btnMax.setAttribute('data-pk-tip', L.tip_maximize);
         }
     }
 
@@ -7120,8 +7167,8 @@ async function openManager(initialCache, preloadPromise) {
         t.style.cssText = 'position:relative; top:auto; left:auto; transform:translateY(-15px) scale(0.95); opacity:0; transition:all 0.3s cubic-bezier(0.23, 1, 0.32, 1); max-width:80vw;';
 
         if (type === 'error' || type === 'warning') {
-            const icon = CONF.icons.warning.replace('style="', 'style="vertical-align: -4px; flex-shrink: 0; ');
-            t.innerHTML = `${icon}<span style="margin-left:8px; line-height:1.4; text-align:left; display:inline-block;">${msg}</span>`;
+            const icon = CONF.icons.warning.replace('style="', 'style="flex-shrink: 0; ');
+            t.innerHTML = `${icon}<span style="flex: 1; line-height: 1.4;">${msg}</span>`;
             t.style.backgroundColor = type === 'warning' ? 'rgba(250, 173, 20, 0.95)' : 'rgba(217, 48, 37, 0.95)';
             t.style.color = '#ffffff';
             if (type === 'warning') t.style.border = '1px solid rgba(250, 173, 20, 0.2)';
@@ -7360,7 +7407,7 @@ async function openManager(initialCache, preloadPromise) {
                     const text = await navigator.clipboard.readText();
                     if (!text || !text.trim()) return showToast(L.msg_copy_empty);
 
-                    const cleanText = text.trim();
+                    const cleanText = text.split(/\r?\n/).map(line => line.trim()).filter(line => line).join('\n');
                     const oldVal = el.value;
                     const prefix = (oldVal && !oldVal.endsWith('\n')) ? '\n' : '';
 
@@ -8638,7 +8685,7 @@ async function openManager(initialCache, preloadPromise) {
 
                     historyItems.sort((a, b) => b.ts - a.ts);
 
-                    const topItems = historyItems.slice(0, 100);
+                    const topItems = historyItems.slice(0, 1000);
                     const targetIds = topItems.map(x => x.id);
 
                     if (targetIds.length > 0) {
@@ -13284,9 +13331,9 @@ async function openManager(initialCache, preloadPromise) {
                 S.sel.clear();
                 refresh();
             } else if (UI.win.classList.contains('pk-maximized')) {
-                if (btnMax) btnMax.click();
+                if (!isTurbo && btnMax) btnMax.click();
             } else if (isAtRoot) {
-                UI.btnClose.click();
+                if (!isTurbo) UI.btnClose.click();
             }
             return;
         }
@@ -13375,7 +13422,7 @@ async function openManager(initialCache, preloadPromise) {
             const vidPlayer = document.getElementById('pk-player-ov');
             if (!imgPlayer && !vidPlayer) {
                 const btnMax = document.querySelector('#pk-maximize');
-                if (btnMax) btnMax.click();
+                if (!isTurbo && btnMax) btnMax.click();
             }
         }
 
@@ -17401,7 +17448,11 @@ async function openManager(initialCache, preloadPromise) {
             btnSearch.style.display = 'none';
             btnSearch.onclick = (e) => {
                 e.stopPropagation();
-                startImageSearch(img, currentItem.name, d, currentItem.web_content_link || currentItem.thumbnail_link);
+                const thumbUrl = currentItem.thumbnail_link ? currentItem.thumbnail_link.replace('SIZE_MEDIUM', 'SIZE_LARGE') : (currentItem.icon_link || '');
+                const thumbImg = new Image();
+                thumbImg.crossOrigin = 'anonymous';
+                thumbImg.src = thumbUrl;
+                startImageSearch(thumbImg, currentItem.name, d, thumbUrl);
             };
 
             loader.style.display = 'block';
@@ -17484,7 +17535,11 @@ async function openManager(initialCache, preloadPromise) {
 
                 btnSearch.onclick = (e) => {
                     e.stopPropagation();
-                    startImageSearch(img, currentItem.name, d, targetUrl || currentItem.thumbnail_link);
+                    const thumbUrl = currentItem.thumbnail_link ? currentItem.thumbnail_link.replace('SIZE_MEDIUM', 'SIZE_LARGE') : (currentItem.icon_link || '');
+                    const thumbImg = new Image();
+                    thumbImg.crossOrigin = 'anonymous';
+                    thumbImg.src = thumbUrl;
+                    startImageSearch(thumbImg, currentItem.name, d, thumbUrl);
                 };
 
                 const mainDir = lastDirection, sideDir = -lastDirection, DEPTH = 5;
@@ -19907,6 +19962,10 @@ async function openManager(initialCache, preloadPromise) {
                 pop.style.display = 'none';
                 activeTargetBtn = null;
             } else {
+                if (S.analyzeMode && !S.hasShownAnaWarn) {
+                    showToast(L.msg_ana_warn, 'warning', 6000);
+                    S.hasShownAnaWarn = true;
+                }
                 pop.style.display = 'flex';
                 activeTargetBtn = btn;
                 updatePopPos();
@@ -21081,6 +21140,7 @@ async function openManager(initialCache, preloadPromise) {
                 }
 
                 S.analyzeMode = true;
+                S.hasShownAnaWarn = false;
                 S.sort = 'size'; S.dir = 1;
                 S.isFlattened = false;
                 S.dupMode = false;
@@ -21654,106 +21714,14 @@ async function openManager(initialCache, preloadPromise) {
         };
 
         const extractKeyword = (fileName) => {
-            let cleanName = fileName.replace(/\.[^.]+$/, '');
-            cleanName = cleanName.replace(/\.com|\.net|\.xyz|\.org/gi, ' ');
-
-            const fc2Regex = /(?:FC2|FC)(?:[-_. ]*PPV)?[-_. @]*(\d+)/i;
-            const fc2Match = cleanName.match(fc2Regex);
+            const fc2Regex = /(?:FC2|FC)(?:[-_. ]*PPV)?[-_. @]*(\d{5,8})(?:[-_. ]*(?:part|pt|cd)?[-_. ]?(\d{1,2}|[a-e]))?(?![a-z\d])/i;
+            const fc2Match = fileName.match(fc2Regex);
 
             if (fc2Match) {
-                const rawNum = fc2Match[1];
-                if (rawNum.length > 8) {
-                    return [
-                        `FC2-PPV-${rawNum.slice(0, 6)}`,
-                        `FC2-PPV-${rawNum.slice(0, 7)}`,
-                        `FC2-PPV-${rawNum.slice(0, 8)}`
-                    ];
-                }
-                return `FC2-PPV-${rawNum}`;
+                const id = fc2Match[1];
+                const part = fc2Match[2];
+                return (part && part.trim()) ? `FC2-PPV-${id}-${part.toUpperCase()}` : `FC2-PPV-${id}`;
             }
-
-            const cleanLeadingZeros = (str) => {
-                const noZero = str.replace(/^0+/, '') || '0';
-                return noZero.length >= 3 ? noZero : noZero.padStart(3, '0');
-            };
-
-            const BLOCK_NUMS = new Set(['2048', '1080', '0720', '720', '4096']);
-            const BLOCK_WORDS = new Set(['mp4', 'full', 'hd', 'sd', 'fhd', 'jav']);
-
-            let allMatches = [];
-
-            const isValidMatch = (p1, p2) => {
-                const s = p1.toLowerCase();
-                const n = p2;
-                if (BLOCK_WORDS.has(s)) return false;
-                if (BLOCK_NUMS.has(n)) return false;
-                return true;
-            };
-
-            [...cleanName.matchAll(/([a-zA-Z]+)-(\d+)/g)].forEach(m => {
-                if (m[2].length < 3) return;
-                if (!isValidMatch(m[1], m[2])) return;
-
-                const num = cleanLeadingZeros(m[2]);
-                allMatches.push({ k: `${m[1]}-${num}`, s: m[1], n: num, i: m.index, p: 1 });
-            });
-
-            if (allMatches.length === 0) {
-                 [...cleanName.matchAll(/([a-zA-Z]+)(\d+)/g)].forEach(m => {
-                    if (m[2].length < 3) return;
-                    if (!isValidMatch(m[1], m[2])) return;
-
-                    const num = cleanLeadingZeros(m[2]);
-                    allMatches.push({ k: `${m[1]}-${num}`, s: m[1], n: num, i: m.index, p: 2 });
-                });
-            }
-
-            if (allMatches.length === 0) return null;
-
-            allMatches.sort((a, b) => a.p !== b.p ? a.p - b.p : b.i - a.i);
-            return allMatches[0].k.toUpperCase();
-        };
-
-        const fetchMissAV = async (code) => {
-            const curLang = gmGet('pk_lang', 'zh');
-
-            const sources = [
-                { host: 'https://missav123.com', langMap: { 'zh': '/cn', 'tc': '', 'ko': '/ko', 'ja': '/ja', 'en': '/en' } },
-                { host: 'https://njavtv.com',    langMap: { 'zh': '/cn', 'tc': '', 'ko': '/ko', 'ja': '/ja', 'en': '/en' } }
-            ];
-
-            const tryFetch = (url) => new Promise((resolve) => {
-                GM_xmlhttpRequest({
-                    method: "GET",
-                    url: url,
-                    timeout: 8000,
-                    onload: (res) => {
-                        if (res.status === 200) {
-                            try {
-                                const doc = new DOMParser().parseFromString(res.responseText, "text/html");
-                                const h1 = doc.querySelector('h1.text-base.lg\\:text-lg.text-nord6');
-                                if (h1 && h1.textContent.trim()) {
-                                    resolve(h1.textContent.trim());
-                                    return;
-                                }
-                            } catch (e) { }
-                        }
-                        resolve(null);
-                    },
-                    onerror: () => resolve(null),
-                    ontimeout: () => resolve(null)
-                });
-            });
-
-            for (const src of sources) {
-                const prefix = src.langMap[curLang] || src.langMap['zh'];
-                const baseUrl = src.host.replace(/\/$/, '');
-                const url = `${baseUrl}${prefix}/${code}`;
-
-                const result = await tryFetch(url);
-                if (result) return result;
-            }
-
             return null;
         };
 
@@ -21860,9 +21828,7 @@ async function openManager(initialCache, preloadPromise) {
                     </div>
 
                     <div id="group_jav"
-                         onmouseover="this.style.borderColor='var(--pk-pri)'; this.style.background='var(--pk-bg)'"
-                         onmouseout="this.style.borderColor='var(--pk-pri)'; this.style.background='var(--pk-hl)'"
-                         style="display:none; padding:15px; background:var(--pk-hl); border:2px dashed var(--pk-pri); border-radius:8px; color:var(--pk-pri); font-size:13px; font-weight:600; text-align:center; cursor:pointer; transition:all 0.2s; user-select:none;">
+                         style="display:none; padding:15px; background:var(--pk-hl); border:2px dashed var(--pk-bd); border-radius:8px; color:var(--pk-fg); font-size:13px; text-align:center; user-select:none;">
                         ${L.tip_jav_mode_desc}
                     </div>
 
@@ -21884,6 +21850,7 @@ async function openManager(initialCache, preloadPromise) {
                             <div id="rn_cb_wrapper" style="width:50px; display:flex; justify-content:center; visibility: hidden;">
                                 <input type="checkbox" id="rn_cb_all" checked style="accent-color:var(--pk-pri); cursor:pointer;">
                             </div>
+                            <div style="width:36px; display:flex; align-items:center; justify-content:flex-start;">${L.col_type}</div>
                             <div style="flex:1;">${L.col_old}</div>
                             <div style="width:30px;"></div>
                             <div style="flex:1;">${L.col_new}</div>
@@ -21966,17 +21933,9 @@ async function openManager(initialCache, preloadPromise) {
             if (cbWrapper) cbWrapper.style.visibility = 'hidden';
             if (cbAll) { cbAll.checked = false; cbAll.indeterminate = false; }
 
-            if (mode !== 'jav') generatePreview();
+            generatePreview();
         };
         radios.forEach(r => r.onchange = updateInputs);
-
-        if (groupsRaw.jav) {
-            groupsRaw.jav.onclick = () => {
-                groupsRaw.jav.style.transform = 'scale(0.98)';
-                setTimeout(() => groupsRaw.jav.style.transform = 'scale(1)', 100);
-                generatePreview();
-            };
-        }
 
         const setupInputHistory = (inputEl, storageKey) => {
             const pop = document.createElement('div');
@@ -22054,6 +22013,7 @@ async function openManager(initialCache, preloadPromise) {
         let plannedChanges = [];
         let previewSelectedIds = new Set();
         let isRnScrollScheduled = false;
+        let currentPreviewId = 0;
 
         const VALID_EXTS_LIST = [
             'mp4', 'mkv', 'avi', 'mov', 'wmv', 'm4v', 'flv', '3gp', 'webm', 'ts', 'm2ts', 'mts', 'vob', 'mpg', 'mpeg', 'rm', 'rmvb', 'asf', 'divx', 'f4v', 'ogv', 'm2v', 'mpe',
@@ -22111,13 +22071,8 @@ async function openManager(initialCache, preloadPromise) {
             const validCount = rnDisplay.filter(c => c.new !== c.old && previewSelectedIds.has(c.id)).length;
             btnApply.disabled = validCount === 0;
 
-            const currentMode = m.querySelector('input[name="rn_mode"]:checked').value;
-            if (currentMode === 'jav') {
-                if (typeof javState.ui?.updateProgress === 'function') javState.ui.updateProgress();
-            } else {
-                txtStatNum.style.display = 'inline';
-                txtStatNum.innerHTML = `<span style="color:var(--pk-pri); font-weight:600;">${validCount}</span><span style="margin:0 2px;">/</span>${total}`;
-            }
+            txtStatNum.style.display = 'inline';
+            txtStatNum.innerHTML = `<span style="color:var(--pk-pri); font-weight:600;">${validCount}</span><span style="margin:0 2px;">/</span>${total}`;
         };
 
         const renderRNVisible = () => {
@@ -22152,11 +22107,41 @@ async function openManager(initialCache, preloadPromise) {
                 }
 
                 const isChecked = previewSelectedIds.has(c.id);
+
+                const it = S.itemMap.get(c.id);
+                let iconHtml = '';
+                let thumbAttr = '';
+                if (it) {
+                    const isFolder = it.kind === 'drive#folder';
+                    const mime = (it.mime_type || '').toLowerCase();
+                    const isMedia = mime.startsWith('video/') || mime.startsWith('image/');
+                    const hasCover = it.thumbnail_link && it.thumbnail_link !== it.icon_link;
+                    const fallbackSvg = getIcon(it).replace(/width="\d+"/, 'width="24"').replace(/height="\d+"/, 'height="24"');
+
+                    if (hasCover) {
+                        thumbAttr = `data-pk-thumb="${it.thumbnail_link}"`;
+                    }
+
+                    if (!isFolder && isMedia && hasCover) {
+                        iconHtml = `<img src="${it.thumbnail_link}" style="width:24px;height:24px;object-fit:cover;border-radius:4px;flex-shrink:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';">`;
+                        const secondFallback = it.icon_link
+                            ? `<img src="${it.icon_link}" style="width:24px;height:24px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"><span style="display:none;align-items:center;">${fallbackSvg}</span>`
+                            : fallbackSvg;
+                        iconHtml += `<span style="display:none;align-items:center;justify-content:center;">${secondFallback}</span>`;
+                    } else {
+                        const iconSrc = it.icon_link;
+                        iconHtml = iconSrc
+                            ? `<img src="${iconSrc}" style="width:24px;height:24px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='inline-flex';"><span style="display:none;align-items:center;flex-shrink:0;">${fallbackSvg}</span>`
+                            : fallbackSvg;
+                    }
+                }
+
                 row.innerHTML = `
                     <div style="width:50px; display:flex; justify-content:center; align-items:center; cursor:pointer;" class="rn-row-cb-area">
                         <input type="checkbox" class="rn-item-cb" ${isChecked ? 'checked' : ''} style="accent-color:var(--pk-pri); cursor:pointer;">
                     </div>
-                    <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${esc(c.old)}">${finalDisplayHTML}</div>
+                    <div style="width:36px; display:flex; align-items:center; justify-content:flex-start;" ${thumbAttr}>${iconHtml}</div>
+                    <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${esc(c.old)}" ${thumbAttr}>${finalDisplayHTML}</div>
                     <div style="width:30px; text-align:center; color:#ccc;">➜</div>
 
                     <div style="flex:1; display:flex; align-items:center; overflow:hidden;">
@@ -22252,7 +22237,13 @@ async function openManager(initialCache, preloadPromise) {
         };
 
         const generatePreview = async () => {
+            const myPreviewId = ++currentPreviewId;
             const mode = m.querySelector('input[name="rn_mode"]:checked').value;
+
+            rnDisplay = [];
+            plannedChanges = [];
+            rnIn.innerHTML = '';
+
             const pattern = inpPattern.value;
             const findStr = inpFind.value;
             const repStr = inpRep.value || '';
@@ -22289,7 +22280,7 @@ async function openManager(initialCache, preloadPromise) {
 
             rnIn.innerHTML = `<div style="padding:40px; text-align:center; color:var(--pk-pri); display:flex; flex-direction:column; align-items:center; gap:10px;">
                 <div class="pk-spinner"></div>
-                <div>${mode === 'jav' ? L.msg_jav_fetching_net : L.str_calc_changes}</div>
+                <div>${L.str_calc_changes}</div>
             </div>`;
             btnApply.disabled = true;
             txtStatNum.innerText = "...";
@@ -22300,8 +22291,8 @@ async function openManager(initialCache, preloadPromise) {
             const selectedIds = Array.from(S.sel);
             const items = S.display.filter(i => !i.isHeader);
 
-            if (mode === 'jav') {
-                const targetIds = [];
+            if (false) {
+                const targetIds =[];
                 for (let i = 0; i < items.length; i++) {
                     const item = items[i];
                     const id = item.id;
@@ -22457,8 +22448,17 @@ async function openManager(initialCache, preloadPromise) {
                     if (!item) { javState.completed++; updateProgress(); return; }
 
                     const oldName = item.name;
-                    const extIndex = oldName.lastIndexOf('.');
-                    const ext = extIndex > 0 ? oldName.substring(extIndex) : '';
+                    let ext = '';
+
+                    if (item.kind !== 'drive#folder') {
+                        const extIndex = oldName.lastIndexOf('.');
+                        if (extIndex > 0) {
+                            const potentialExt = oldName.substring(extIndex + 1).toLowerCase();
+                            if (VALID_EXTS.has(potentialExt)) {
+                                ext = oldName.substring(extIndex);
+                            }
+                        }
+                    }
 
                     const code = extractKeyword(oldName);
 
@@ -22467,11 +22467,8 @@ async function openManager(initialCache, preloadPromise) {
                     let displayHTML = `<span style="color:#aaa;">${L.str_jav_no_match}</span>`;
 
                     if (code) {
-                        const searchQueue = Array.isArray(code) ? code : [code];
-                        const codeForHighlight = Array.isArray(code) ? code[code.length - 1] : code;
-
                         try {
-                            const parts = codeForHighlight.split(/[^a-zA-Z0-9]+/).filter(p => p.length > 0);
+                            const parts = code.split(/[^a-zA-Z0-9]+/).filter(p => p.length > 0);
                             if (parts.length > 0) {
                                 const escapedParts = parts.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
                                 const pattern = `(${escapedParts.join('|')})`;
@@ -22480,33 +22477,8 @@ async function openManager(initialCache, preloadPromise) {
                             }
                         } catch(e) {}
 
-                        try {
-                            const jitter = 100 + Math.random() * 200;
-                            await new Promise(r => setTimeout(r, jitter));
-                            if (currentRunId !== javState.runId) return;
-
-                            let metaTitle = null;
-
-                            for (const searchCode of searchQueue) {
-                                metaTitle = await fetchMissAV(searchCode);
-                                if (metaTitle) {
-                                    break;
-                                }
-                                if (searchQueue.length > 1) await new Promise(r => setTimeout(r, 100));
-                            }
-
-                            if (metaTitle) {
-                                const safeTitle = metaTitle.replace(/[\\/:*?"<>|]/g, '_');
-                                newName = safeTitle + ext;
-                                displayHTML = `<span style="color:var(--pk-pri);font-weight:bold;">${esc(newName)}</span>`;
-                            } else {
-                                displayHTML = `<span style="color:#aaa;">${L.str_jav_no_match}</span>`;
-                                newName = oldName;
-                            }
-                        } catch(e) {
-                             displayHTML = `<span style="color:#aaa;">${L.err_network}</span>`;
-                             newName = oldName;
-                        }
+                        newName = code + ext;
+                        displayHTML = `<span style="color:var(--pk-pri);font-weight:bold;">${esc(newName)}</span>`;
                     }
 
                     let isConflict = false;
@@ -22575,7 +22547,7 @@ async function openManager(initialCache, preloadPromise) {
             const workerFunction = function(e) {
                 try {
                     const { selectedIds, items, mode, pattern, findStr, repStr, useRegex, validExtsList, caseMode, widthMode, useCaseSense, useIncludeExt } = e.data;
-                    const changes = [];
+                    const changes =[];
                     const idSet = new Set(selectedIds);
                     const allNames = new Set();
                     items.forEach(i => allNames.add(i.name));
@@ -22583,6 +22555,17 @@ async function openManager(initialCache, preloadPromise) {
                     const VALID_EXTS = new Set(validExtsList);
 
                     const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+                    const extractKeyword = (fileName) => {
+                        const fc2Regex = /(?:FC2|FC)(?:[-_. ]*PPV)?[-_. @]*(\d{5,8})(?:[-_. ]*(?:part|pt|cd)?[-_. ]?(\d{1,2}|[a-e]))?(?![a-z\d])/i;
+                        const fc2Match = fileName.match(fc2Regex);
+                        if (fc2Match) {
+                            const id = fc2Match[1];
+                            const part = fc2Match[2];
+                            return (part && part.trim()) ? `FC2-PPV-${id}-${part.toUpperCase()}` : `FC2-PPV-${id}`;
+                        }
+                        return null;
+                    };
 
                     const toHalf = (str) => str.replace(/[！-～]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/　/g, ' ');
                     const toFull = (str) => str.replace(/[!-~]/g, c => String.fromCharCode(c.charCodeAt(0) + 0xFEE0)).replace(/ /g, '　');
@@ -22655,6 +22638,33 @@ async function openManager(initialCache, preloadPromise) {
                             else if (caseMode === 'lower') base = base.toLowerCase();
                             else if (caseMode === 'title') base = toTitle(base);
                             newName = base + ext;
+                        }
+                        else if (mode === 'jav') {
+                            const code = extractKeyword(oldName);
+                            if (code) {
+                                let ext = '', ext_old = '', base_old = oldName;
+                                if (item.kind !== 'drive#folder') {
+                                    const lastDotIndex = oldName.lastIndexOf('.');
+                                    if (lastDotIndex > 0) {
+                                        const potentialExt = oldName.substring(lastDotIndex + 1).toLowerCase();
+                                        if (VALID_EXTS.has(potentialExt)) {
+                                            ext = oldName.substring(lastDotIndex);
+                                            ext_old = ext;
+                                            base_old = oldName.substring(0, lastDotIndex);
+                                        }
+                                    }
+                                }
+                                newName = code + ext;
+                                try {
+                                    const parts = code.split(/[^a-zA-Z0-9]+/).filter(p => p.length > 0);
+                                    if (parts.length > 0) {
+                                        const escapedParts = parts.map(p => escapeRegExp(p));
+                                        const pat = `(${escapedParts.join('|')})`;
+                                        const re = new RegExp(pat, 'gi');
+                                        hlOld = base_old.replace(re, (m) => '§§§MATCH_START§§§' + m + '§§§MATCH_END§§§') + ext_old;
+                                    }
+                                } catch(e) {}
+                            }
                         }
                         else if (mode === 'ad_remove') {
                             let cleanName = oldName;
@@ -23024,6 +23034,9 @@ async function openManager(initialCache, preloadPromise) {
                 const { changes, error } = e.data;
                 previewWorker.terminate();
                 URL.revokeObjectURL(workerUrl);
+
+                if (myPreviewId !== currentPreviewId) return;
+
                 handlePreviewResults(changes, error);
             };
             previewWorker.onerror = (e) => {
@@ -23767,12 +23780,17 @@ async function openManager(initialCache, preloadPromise) {
             for (let i = 0; i < readyFiles.length; i++) {
                 if (!isRunning) break;
                 if (progressTask) progressTask.update(`${L.msg_down_progress} ${i + 1} / ${readyFiles.length}`);
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = readyFiles[i].web_content_link;
-                document.body.appendChild(iframe);
-                setTimeout(() => { if (iframe.parentNode) iframe.remove(); }, 60000);
-                if (i < readyFiles.length - 1) await sleep(1500);
+
+                const link = document.createElement('a');
+                link.href = readyFiles[i].web_content_link;
+                link.setAttribute('download', readyFiles[i].name);
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+
+                setTimeout(() => { if (link.parentNode) link.remove(); }, 10000);
+
+                if (i < readyFiles.length - 1) await sleep(2000);
             }
 
             if (isRunning && readyFiles.length > 0) {
@@ -24007,8 +24025,11 @@ async function openManager(initialCache, preloadPromise) {
         S.sel.forEach(id => {
             const item = S.itemMap.get(id);
             if (item) {
-                if (item.kind === 'drive#folder') rootNodes.push({...item, lineage:[], retryCount: 0});
-                else allFiles.push(item);
+                if (item.kind === 'drive#folder') {
+                    rootNodes.push({...item, lineage: [{ id: item.id, name: item.name }], retryCount: 0});
+                } else {
+                    allFiles.push({ ...item, _lineage: [] });
+                }
             }
         });
 
@@ -24016,11 +24037,14 @@ async function openManager(initialCache, preloadPromise) {
         try {
             await coreRecursiveEngine(rootNodes, {
                 signal,
-                onFile: (f) => {
+                onFile: (f, parent) => {
                     const lowName = f.name.toLowerCase();
                     const ext = lowName.split('.').pop();
                     const isBlocked = fExts.some(e => ext === e) || fNames.some(n => lowName.includes(n));
-                    if (!isBlocked) allFiles.push(f);
+                    if (!isBlocked) {
+                        f._lineage = parent.lineage || [];
+                        allFiles.push(f);
+                    }
                 },
                 onProgress: (st) => {
                     const now = Date.now();
@@ -24038,51 +24062,147 @@ async function openManager(initialCache, preloadPromise) {
             progressTask = FloatBarManager.create(L.msg_batch_hydrating);
 
             const readyFiles =[];
+            const failedFiles = [];
             const hydrateQueue = [...allFiles];
             const activeTasks = new Set();
+
+            const hydrateWithRetry = async (file, maxRetries = 3) => {
+                if (file.web_content_link) return file;
+                let lastErr = null;
+                for (let i = 0; i < maxRetries; i++) {
+                    if (!isRunning) return null;
+                    try {
+                        const detail = await apiGet(file.id);
+                        if (detail && detail.web_content_link) return detail;
+                        throw new Error("Link Empty");
+                    } catch (e) {
+                        lastErr = e;
+                        if (i < maxRetries - 1) await sleep(1000 * (i + 1));
+                    }
+                }
+                throw lastErr;
+            };
+
             while ((hydrateQueue.length > 0 || activeTasks.size > 0) && isRunning) {
                 while (hydrateQueue.length > 0 && activeTasks.size < HYDRATE_LIMIT && isRunning) {
                     const file = hydrateQueue.pop();
                     const p = (async () => {
-                        if (file.web_content_link) { readyFiles.push(file); return; }
                         try {
-                            const detail = await apiGet(file.id);
-                            if (detail?.web_content_link) readyFiles.push(detail);
-                        } catch (e) {}
-                    })().finally(() => { activeTasks.delete(p); stats.hydratedCount++; });
+                            const detail = await hydrateWithRetry(file);
+                            if (detail) {
+                                detail._lineage = file._lineage;
+                                readyFiles.push(detail);
+                            }
+                        } catch (e) {
+                            console.error(`[Hydrate Failed] ${file.name}:`, e);
+                            failedFiles.push(file.name + " " + L.str_aria2_fetch_err);
+                        }
+                    })().finally(() => {
+                        activeTasks.delete(p);
+                        stats.hydratedCount++;
+                        if (progressTask) progressTask.update(`${L.msg_batch_hydrating} ${stats.hydratedCount} / ${allFiles.length}`);
+                    });
                     activeTasks.add(p);
                 }
                 if (activeTasks.size > 0) await Promise.race(activeTasks);
-                if (progressTask) progressTask.update(`${L.msg_batch_hydrating} ${stats.hydratedCount} / ${allFiles.length}`);
             }
+
+            if (!isRunning) throw new Error('StoppedByUser');
 
             if (readyFiles.length > 0 && isRunning) {
                 const BATCH_SIZE = 50;
                 let successCount = 0;
+                let rpcFatalError = false;
+
                 for (let i = 0; i < readyFiles.length; i += BATCH_SIZE) {
-                    if (!isRunning) break;
+                    if (!isRunning || rpcFatalError) break;
                     const chunk = readyFiles.slice(i, i + BATCH_SIZE);
-                    const payload = chunk.map(f => ({
-                        jsonrpc: '2.0', method: 'aria2.addUri',
-                        id: `pk_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-                        params:[`token:${ariaToken}`,[f.web_content_link], { out: f.name, header:[`User-Agent: ${navigator.userAgent}`] }]
-                    }));
-                    await new Promise((resolveReq, rejectReq) => {
-                        GM_xmlhttpRequest({
-                            method: 'POST', url: ariaUrl, data: JSON.stringify(payload),
-                            headers: { 'Content-Type': 'application/json' },
-                            onload: (r) => { if(r.status === 200) resolveReq(); else rejectReq(new Error('HTTP ' + r.status)); },
-                            onerror: () => rejectReq(new Error('Network Error')),
-                            ontimeout: () => rejectReq(new Error('Timeout'))
-                        });
+
+                    const sanitize = (s) => s.replace(/[\\/:*?"<>|]/g, '_').trim();
+                    const payload = chunk.map(f => {
+                        let relativePrefix = '';
+                        if (f._lineage && f._lineage.length > 0) {
+                            relativePrefix = f._lineage.map(n => sanitize(n.name)).join('/') + '/';
+                        }
+                        const outPath = relativePrefix + sanitize(f.name);
+
+                        return {
+                            jsonrpc: '2.0', method: 'aria2.addUri',
+                            id: `pk_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                            params:[`token:${ariaToken}`, [f.web_content_link], {
+                                out: outPath,
+                                header:[`User-Agent: ${navigator.userAgent}`, `Referer: https://mypikpak.com/`]
+                            }]
+                        };
                     });
-                    successCount += chunk.length;
-                    if (progressTask) progressTask.update(`${L.msg_aria2_sending_batch} ${successCount}/${readyFiles.length}`);
+
+                    try {
+                        await new Promise((resolveReq, rejectReq) => {
+                            GM_xmlhttpRequest({
+                                method: 'POST', url: ariaUrl, data: JSON.stringify(payload),
+                                headers: { 'Content-Type': 'application/json' },
+                                onload: (r) => {
+                                    if (r.status === 200) resolveReq();
+                                    else rejectReq(new Error(`RPC ${r.status}`));
+                                },
+                                onerror: () => rejectReq(new Error("Network Error")),
+                                ontimeout: () => rejectReq(new Error("Timeout"))
+                            });
+                        });
+                        successCount += chunk.length;
+                    } catch (rpcErr) {
+                        console.error("[RPC Batch Error]", rpcErr);
+                        chunk.forEach(f => failedFiles.push(f.name + " " + L.str_aria2_rpc_err));
+
+                        if (rpcErr.message === "Network Error" || rpcErr.message === "Timeout") {
+                            console.warn("[RPC Circuit Breaker] Aria2 disconnected. Aborting remaining batches.");
+                            rpcFatalError = true;
+                            const remainingFiles = readyFiles.slice(i + BATCH_SIZE);
+                            remainingFiles.forEach(f => failedFiles.push(f.name + " " + L.str_aria2_aborted));
+                        }
+                    }
+
+                    if (progressTask) progressTask.update(`${L.msg_aria2_sending_batch} ${successCount} / ${readyFiles.length}`);
                 }
-                showToast(L.msg_aria2_sent.replace('{n}', successCount));
+
+                if (failedFiles.length > 0) {
+                    let failListText = failedFiles.slice(0, 10).join('\n');
+                    if (failedFiles.length > 10) {
+                        failListText += '\n...';
+                        failListText += L.msg_aria2_batch_fail_log;
+                    }
+
+                    await showAlert(`${L.str_failed}: ${failedFiles.length}\n\n${failListText}`, L.title_alert);
+
+                    if (failedFiles.length > 10) {
+                        try {
+                            const blob = new Blob([failedFiles.join('\r\n')], { type: 'text/plain;charset=utf-8' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            const now = new Date();
+                            const dateStr = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+
+                            a.href = url;
+                            a.download = `${L.str_aria2_fail_file_name}_${dateStr}.txt`;
+                            document.body.appendChild(a);
+                            a.click();
+
+                            setTimeout(() => {
+                                if (a.parentNode) document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                            }, 1000);
+                        } catch (exportErr) {
+                            console.error("[Export Error] Failed to generate failure log:", exportErr);
+                        }
+                    }
+                } else {
+                    showToast(L.msg_aria2_sent.replace('{n}', successCount));
+                }
             }
         } catch (e) {
-            if (e.message !== 'StoppedByUser' && e.name !== 'AbortError') showAlert(`${L.msg_aria2_check_fail}\n(${e.message})`);
+            if (e.message !== 'StoppedByUser' && e.name !== 'AbortError') {
+                showAlert(`${L.msg_aria2_check_fail}\n(${e.message})`);
+            }
         } finally {
             setLoad(false);
             isGUISensitive = false;
@@ -26222,7 +26342,13 @@ async function openManager(initialCache, preloadPromise) {
 
                     <textarea class="pk-cloud-area pk-scroll" id="pk_cloud_input" placeholder="${L.ph_cloud_links}"></textarea>
 
-                    <div id="pk_cloud_error" style="display:none; color:#d93025; font-size:13px; font-weight:600; padding:4px 0;">${L.err_invalid_links}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:-8px; margin-bottom:-4px;">
+                        <label style="display:flex; align-items:center; cursor:pointer; font-size:12px; color:var(--pk-fg); user-select:none; opacity:0.8; transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">
+                            <input type="checkbox" id="pk_cloud_smart_fix" checked style="accent-color:var(--pk-pri); margin-right:6px; width:14px; height:14px; cursor:pointer;">
+                            ${L.lbl_smart_fix}
+                        </label>
+                        <div id="pk_cloud_error" style="display:none; color:#d93025; font-size:13px; font-weight:600;">${L.err_invalid_links}</div>
+                    </div>
 
                     <div id="pk_cloud_dest_row" style="display:flex; align-items:flex-end; gap:8px; font-size:14px; color:var(--pk-fg); line-height:1;">
                         <span style="opacity:0.9; margin-bottom:1px;">${L.lbl_save_to}</span>
@@ -26241,7 +26367,7 @@ async function openManager(initialCache, preloadPromise) {
                     <div class="pk-modal-act" style="margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:20px;">
                         <div style="position:relative; flex-shrink:0;">
                             <span id="pk_cloud_torrent_trigger" style="color:var(--pk-pri); cursor:pointer; font-size:14px; font-weight:500; display:inline-block;">${L.btn_via_torrent}</span>
-                            <input type="file" id="pk_cloud_torrent_file" accept=".torrent" style="display:none;">
+                            <input type="file" id="pk_cloud_torrent_file" accept=".torrent" multiple style="display:none;">
                         </div>
                         <div style="display:flex; gap:12px; align-items:center; flex-shrink:0;">
                             <button class="pk-btn" id="cloud_cancel" style="height:40px; width:110px; border-radius:8px; background:transparent; color:var(--pk-fg); font-weight:600; border:none; font-size:14px; flex-shrink:0; justify-content:center;">${L.btn_cancel}</button>
@@ -26277,18 +26403,97 @@ async function openManager(initialCache, preloadPromise) {
                 }, currentSavePath);
             };
 
+            const smartFixCheckbox = m.querySelector('#pk_cloud_smart_fix');
+            if (smartFixCheckbox) smartFixCheckbox.onchange = () => input.dispatchEvent(new Event('input'));
+
+            const parseAndCleanLinks = (rawString, isSmartFix) => {
+                const formattedVal = rawString.replace(/(https?:\/\/|ftp:\/\/|sftp:\/\/|magnet:\?|ed2k:\/\/|thunder:\/\/)/gi, '\n$1');
+                const lines = formattedVal.split('\n').map(l => l.trim()).filter(l => l);
+
+                const uniqueTasks = new Map();
+                const linkRegex = /^(https?:\/\/|ftp:\/\/|sftp:\/\/|magnet:\?|ed2k:\/\/|thunder:\/\/)/i;
+
+                const base32ToHex = (b32) => {
+                    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+                    let bits = "";
+                    const input = b32.toUpperCase();
+                    for (let i = 0; i < input.length; i++) {
+                        const val = alphabet.indexOf(input[i]);
+                        if (val === -1) return null;
+                        bits += val.toString(2).padStart(5, '0');
+                    }
+                    let hex = "";
+                    for (let i = 0; i + 4 <= bits.length; i += 4) {
+                        const chunk = bits.substring(i, i + 4);
+                        const num = parseInt(chunk, 2);
+                        if (!isNaN(num)) hex += num.toString(16);
+                    }
+                    return hex.toUpperCase();
+                };
+
+                const extractHexHash = (url) => {
+                    const match = url.match(/urn:btih:([^&]+)/i);
+                    if (!match) return null;
+                    const hash = match[1].toUpperCase();
+                    if (hash.length === 40) return hash;
+                    if (hash.length === 32) return base32ToHex(hash);
+                    return null;
+                };
+
+                const addResult = (url) => {
+                    const hash = extractHexHash(url);
+                    if (hash) {
+                        if (!uniqueTasks.has(hash)) {
+                            uniqueTasks.set(hash, url);
+                        }
+                    } else {
+                        uniqueTasks.set(url, url);
+                    }
+                };
+
+                for (let i = 0; i < lines.length; i++) {
+                    let line = lines[i];
+
+                    if (linkRegex.test(line)) {
+                        addResult(line);
+                        continue;
+                    }
+
+                    if (isSmartFix) {
+                        let cleanedStr = line.replace(/[^a-zA-Z0-9]/g, '');
+
+                        const hexMatches = cleanedStr.matchAll(/([a-fA-F0-9]{40})/g);
+                        for (const match of hexMatches) {
+                            addResult(`magnet:?xt=urn:btih:${match[1].toUpperCase()}`);
+                            cleanedStr = cleanedStr.replace(match[1], ' '.repeat(40));
+                        }
+
+                        const b32Matches = cleanedStr.matchAll(/([a-zA-Z2-7]{32})/g);
+                        for (const match of b32Matches) {
+                            const hex = base32ToHex(match[1].toUpperCase());
+                            if (hex) {
+                                addResult(`magnet:?xt=urn:btih:${hex}`);
+                            }
+                        }
+                    }
+                }
+
+                return Array.from(uniqueTasks.values());
+            };
+
             input.oninput = () => {
                 const rawVal = input.value.trim();
-                const lines = rawVal.split('\n').map(l => l.trim()).filter(l => l);
+                const isSmartFix = smartFixCheckbox ? smartFixCheckbox.checked : false;
 
-                const linkRegex = /^(https?:\/\/|magnet:\?|ed2k:\/\/|thunder:\/\/)/i;
+                const linesRaw = rawVal.split('\n').map(l => l.trim()).filter(l => l);
+                const hasInput = linesRaw.length > 0;
 
-                const hasInput = lines.length > 0;
-                const allValid = hasInput && lines.every(line => linkRegex.test(line));
+                const finalLinks = parseAndCleanLinks(rawVal, isSmartFix);
+
+                const allValid = hasInput && (finalLinks.length === linesRaw.length || finalLinks.length > 0);
 
                 const isError = hasInput && !allValid;
                 m.querySelector('#pk_cloud_error').style.display = isError ? 'block' : 'none';
-                m.querySelector('#pk_cloud_dest_row').style.display = isError ? 'none' : 'flex';
 
                 submit.disabled = !allValid;
             };
@@ -26394,11 +26599,17 @@ async function openManager(initialCache, preloadPromise) {
             };
 
             torrentFile.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    m.remove();
-                    setLoad(true);
-                    updateLoadTxt(L.str_parsing_torrent);
+                const files = e.target.files;
+                if (!files || files.length === 0) return;
+                m.remove();
+
+                const fb = FloatBarManager.create(L.str_parsing_torrent);
+                let successCount = 0;
+                let failCount = 0;
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    fb.update(`${L.str_parsing_torrent} (${i + 1}/${files.length})`);
 
                     try {
                         const magnetLink = await new Promise((resolve, reject) => {
@@ -26412,9 +26623,7 @@ async function openManager(initialCache, preloadPromise) {
                                         const c = buf[pos];
                                         if (c === 100 || c === 108) {
                                             pos++;
-                                            while (pos < buf.length && buf[pos] !== 101) {
-                                                decodeSkip();
-                                            }
+                                            while (pos < buf.length && buf[pos] !== 101) decodeSkip();
                                             pos++;
                                         } else if (c === 105) {
                                             pos++;
@@ -26432,7 +26641,6 @@ async function openManager(initialCache, preloadPromise) {
                                     if (buf[0] !== 100) throw new Error(L.err_invalid_torrent);
                                     pos = 1;
                                     let infoHash = null;
-                                    let dn = "";
 
                                     while (pos < buf.length && buf[pos] !== 101) {
                                         const keyStart = pos;
@@ -26451,53 +26659,59 @@ async function openManager(initialCache, preloadPromise) {
 
                                             const hashBuf = await crypto.subtle.digest("SHA-1", infoBuf);
                                             infoHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-                                        } else if (keyStr === "name" || keyStr === "name.utf-8") {
-                                            const valStart = pos;
-                                            decodeSkip();
-                                            let vColon = valStart;
-                                            while (buf[vColon] !== 58) vColon++;
-                                            const vLen = parseInt(new TextDecoder().decode(buf.slice(valStart, vColon)));
-                                            const nameBuf = buf.slice(vColon + 1, vColon + 1 + vLen);
-                                            dn = new TextDecoder().decode(nameBuf);
+                                            break;
                                         } else {
                                             decodeSkip();
                                         }
                                     }
 
-                                    if (infoHash) {
-                                        let mag = `magnet:?xt=urn:btih:${infoHash}`;
-                                        if (dn) mag += `&dn=${encodeURIComponent(dn)}`;
-                                        resolve(mag);
-                                    } else {
-                                        reject(new Error(L.err_torrent_no_info));
-                                    }
-                                } catch (e) {
-                                    reject(e);
-                                }
+                                    if (infoHash) resolve(`magnet:?xt=urn:btih:${infoHash}&dn=${encodeURIComponent(file.name)}`);
+                                    else reject(new Error(L.err_torrent_no_info));
+                                } catch (err) { reject(err); }
                             };
                             reader.onerror = () => reject(new Error(L.err_file_read));
                             reader.readAsArrayBuffer(file);
                         });
 
-                        updateLoadTxt(L.msg_creating_cloud_task);
+                        fb.update(`${L.msg_creating_cloud_task} (${i + 1}/${files.length})`);
 
-                        await apiAddOfflineTask(magnetLink, saveToId);
-
-                        setLoad(false);
-                        showToast(L.msg_cloud_task_success.replace('{n}', 1));
-                        if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
-
-                        setTimeout(() => updateQuotaUI(), 1000);
-                        const curPathId = S.path[S.path.length - 1].id || '';
-                        if (S.offlineMode || (saveToId && curPathId === saveToId)) {
-                            load(false, true);
-                        } else if (!saveToId && S.path.length === 1 && window.pkSmartRefreshTrigger) {
-                             window.pkSmartRefreshTrigger(true);
+                        let retry = 0;
+                        while (retry < 3) {
+                            try {
+                                await apiAddOfflineTask(magnetLink, saveToId);
+                                successCount++;
+                                break;
+                            } catch (reqErr) {
+                                if (reqErr.message && reqErr.message.includes('429')) {
+                                    retry++;
+                                    await sleep(2000 * retry);
+                                } else {
+                                    throw reqErr;
+                                }
+                            }
                         }
+                    } catch (e) {
+                        console.error(`Torrent parse/upload failed for ${file.name}:`, e);
+                        failCount++;
+                    }
+                }
 
-                    } catch(err) {
-                        setLoad(false);
-                        showAlert(`${L.str_error}: ${err.message}`);
+                fb.destroy();
+
+                if (failCount > 0) {
+                    showToast(L.msg_cloud_task_finish.replace('{s}', successCount).replace('{f}', failCount), 'warning');
+                } else if (successCount > 0) {
+                    showToast(L.msg_cloud_task_success.replace('{n}', successCount));
+                }
+
+                if (successCount > 0) {
+                    if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
+                    setTimeout(() => updateQuotaUI(), 1000);
+                    const curPathId = S.path[S.path.length - 1].id || '';
+                    if (S.offlineMode || (saveToId && curPathId === saveToId)) {
+                        load(false, true);
+                    } else if (!saveToId && S.path.length === 1 && window.pkSmartRefreshTrigger) {
+                         window.pkSmartRefreshTrigger(true);
                     }
                 }
             };
@@ -26508,67 +26722,74 @@ async function openManager(initialCache, preloadPromise) {
                 const rawVal = input.value.trim();
                 if (!rawVal) return;
 
-                m.remove();
-                setLoad(true);
-                updateLoadTxt(L.msg_creating_cloud_task);
+                const isSmartFix = smartFixCheckbox ? smartFixCheckbox.checked : false;
 
-                const lines = rawVal.split('\n').map(x => x.trim()).filter(x => x);
+                m.style.display = 'none';
+
+                const finalLinks = parseAndCleanLinks(rawVal, isSmartFix);
 
                 const videoPlatformRegex = /(?:youtube\.com|youtu\.be|twitter\.com|x\.com|tiktok\.com|douyin\.com|facebook\.com|fb\.watch|instagram\.com|t\.me|bilibili\.com)/i;
-
-                const snapshotLinks = lines.filter(l => /^https?:\/\//i.test(l) && !videoPlatformRegex.test(l));
-
-                const directLinks = lines.filter(l => !/^https?:\/\//i.test(l) || videoPlatformRegex.test(l));
+                const snapshotLinks = finalLinks.filter(l => /^https?:\/\//i.test(l) && !videoPlatformRegex.test(l));
+                const directLinks = finalLinks.filter(l => !/^https?:\/\//i.test(l) || videoPlatformRegex.test(l));
 
                 let snapshotParams = null;
-
-                const isSingleSnapshotTask = (lines.length === 1 && snapshotLinks.length === 1);
+                const isSingleSnapshotTask = (finalLinks.length === 1 && snapshotLinks.length === 1);
 
                 if (isSingleSnapshotTask) {
-                    UI.loader.style.display = 'none';
-
                     const result = await showSnapshotModal(snapshotLinks, saveToId, saveToName);
-
                     if (!result.confirm) {
-                        setLoad(false);
+                        m.style.display = 'flex';
                         return;
                     }
-
                     snapshotParams = {
                         save_as: 'snapshot',
                         targetId: result.targetId
                     };
-
-                    UI.loader.style.display = 'flex';
                 }
+
+                m.remove();
+                const progressTask = FloatBarManager.create(L.msg_creating_cloud_task);
 
                 let successCount = 0;
                 let failCount = 0;
 
-                const processQueue = [
+                const processQueue =[
                     ...directLinks.map(u => ({ url: u, isSnap: false })),
                     ...snapshotLinks.map(u => ({ url: u, isSnap: true }))
                 ];
 
                 for (let i = 0; i < processQueue.length; i++) {
                     const item = processQueue[i];
-                    updateLoadTxt(L.str_creating_task_n.replace('{n}', i + 1).replace('{t}', processQueue.length));
+                    progressTask.update(L.str_creating_task_n.replace('{n}', i + 1).replace('{t}', processQueue.length));
 
                     try {
                         const pid = (item.isSnap && snapshotParams) ? snapshotParams.targetId : saveToId;
                         const extras = item.isSnap ? { save_as: 'snapshot' } : {};
 
-                        await apiAddOfflineTask(item.url, pid, extras);
-                        successCount++;
-                        if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
+                        let retry = 0;
+                        while (retry < 3) {
+                            try {
+                                await apiAddOfflineTask(item.url, pid, extras);
+                                successCount++;
+                                if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
+                                break;
+                            } catch (reqErr) {
+                                if (reqErr.message && reqErr.message.includes('429')) {
+                                    retry++;
+                                    await sleep(2000 * retry);
+                                } else {
+                                    throw reqErr;
+                                }
+                            }
+                        }
                     } catch(e) {
-                        console.error(`Task Create Failed [${item.url}]:`, e);
+                        console.error(`Task Create Failed[${item.url}]:`, e);
                         failCount++;
                     }
-                    await sleep(200);
+                    await sleep(300);
                 }
 
-                setLoad(false);
+                progressTask.destroy();
 
                 if (failCount > 0) {
                     showToast(L.msg_cloud_task_finish.replace('{s}', successCount).replace('{f}', failCount), 'warning');
@@ -27510,8 +27731,70 @@ async function openManager(initialCache, preloadPromise) {
                     }
 
                     Object.keys(config).forEach(k => {
-                        if (k.startsWith('pk_')) {
-                            GM_setValue(k, config[k]);
+                        if (!k.startsWith('pk_')) return;
+
+                        let importedVal = config[k];
+                        let localVal = typeof GM_getValue !== 'undefined' ? GM_getValue(k, null) : localStorage.getItem(k);
+
+                        if (localVal === null || localVal === undefined || localVal === '') {
+                            GM_setValue(k, importedVal);
+                            return;
+                        }
+
+                        try {
+                            if (k === 'pk_blacklist' || k === 'pk_blacklist_folders') {
+                                const localSet = new Set(localVal.split('\n').map(s => s.trim()).filter(s => s));
+                                const importedSet = new Set(importedVal.split('\n').map(s => s.trim()).filter(s => s));
+                                importedSet.forEach(v => localSet.add(v));
+                                GM_setValue(k, Array.from(localSet).join('\n'));
+                            }
+                            else if (k === 'pk_dl_filter_ext' || k === 'pk_dl_filter_name') {
+                                const localSet = new Set(localVal.split(/[,，\n]/).map(s => s.trim()).filter(s => s));
+                                const importedSet = new Set(importedVal.split(/[,，\n]/).map(s => s.trim()).filter(s => s));
+                                importedSet.forEach(v => localSet.add(v));
+                                GM_setValue(k, Array.from(localSet).join(', '));
+                            }
+                            else if (typeof importedVal === 'string' && (importedVal.startsWith('[') || importedVal.startsWith('{'))) {
+                                const localObj = JSON.parse(localVal);
+                                const importedObj = JSON.parse(importedVal);
+
+                                if (Array.isArray(localObj) && Array.isArray(importedObj)) {
+                                    if (k === 'pk_pwd_vault') {
+                                        const map = new Map();
+                                        localObj.forEach(x => {
+                                            if (typeof x === 'object') map.set(x.p, x);
+                                            else map.set(x, {p: x, h: 0});
+                                        });
+                                        importedObj.forEach(x => {
+                                            let p = typeof x === 'object' ? x.p : x;
+                                            let h = typeof x === 'object' ? x.h : 0;
+                                            if (map.has(p)) map.get(p).h += h;
+                                            else map.set(p, {p, h});
+                                        });
+                                        let merged = Array.from(map.values()).sort((a,b) => b.h - a.h).slice(0, 50);
+                                        GM_setValue(k, JSON.stringify(merged));
+                                    }
+                                    else if (k === 'pk_expired_shares') {
+                                        const map = new Map();
+                                        localObj.forEach(x => map.set(x.id, x));
+                                        importedObj.forEach(x => map.set(x.id, x));
+                                        GM_setValue(k, JSON.stringify(Array.from(map.values())));
+                                    }
+                                    else {
+                                        const mergedSet = new Set([...importedObj, ...localObj]);
+                                        GM_setValue(k, JSON.stringify(Array.from(mergedSet).slice(0, 100)));
+                                    }
+                                } else if (typeof localObj === 'object' && typeof importedObj === 'object') {
+                                    const mergedObj = Object.assign({}, localObj, importedObj);
+                                    GM_setValue(k, JSON.stringify(mergedObj));
+                                } else {
+                                    GM_setValue(k, importedVal);
+                                }
+                            } else {
+                                GM_setValue(k, importedVal);
+                            }
+                        } catch (e) {
+                            GM_setValue(k, importedVal);
                         }
                     });
                     showToast(L.msg_import_success);
@@ -31453,6 +31736,14 @@ async function openManager(initialCache, preloadPromise) {
     }
 
     syncGlobalStarredStatus();
+
+    if (gmGet('pk_turbo_mode', false)) {
+        setTimeout(() => {
+            if (typeof showToast === 'function') {
+                showToast(getStrings().msg_turbo_activated, 'success', 5000);
+            }
+        }, 800);
+    }
 }
 
 let backgroundQueue = [];
@@ -31897,7 +32188,11 @@ async function tryInject() {
 function inject() {
     if (document.getElementById('pk-launch')) return;
     const b = document.createElement('button'); b.id = 'pk-launch';
-    b.style.cssText = `position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:#1a5eff;border:none;cursor:pointer;z-index:2147483647;box-shadow:0 4px 12px rgba(0,0,0,0.3);padding:0;overflow:hidden;transition:transform 0.1s;display:flex!important;align-items:center!important;justify-content:center!important;`;
+
+    const isTurbo = typeof GM_getValue !== 'undefined' ? GM_getValue('pk_turbo_mode', false) : false;
+    const displayStyle = isTurbo ? 'none!important' : 'flex!important';
+
+    b.style.cssText = `position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:#1a5eff;border:none;cursor:pointer;z-index:2147483647;box-shadow:0 4px 12px rgba(0,0,0,0.3);padding:0;overflow:hidden;transition:transform 0.1s;display:${displayStyle};align-items:center!important;justify-content:center!important;`;
 
     b.innerHTML = `<svg width="60%" height="60%" viewBox="0 0 238 200" version="1.1" xmlns="http://www.w3.org/2000/svg">
         <path d="M0 0 C1.82724609 0.01353516 1.82724609 0.01353516 3.69140625 0.02734375 C4.59761719 0.03894531 5.50382812 0.05054688 6.4375 0.0625 C5.95097979 7.11704304 4.33696858 12.90149479 1.6875 19.4375 C1.35234375 20.32566406 1.0171875 21.21382812 0.671875 22.12890625 C0.3315625 22.98097656 -0.00875 23.83304688 -0.359375 24.7109375 C-0.66198242 25.47583496 -0.96458984 26.24073242 -1.27636719 27.02880859 C-3.01571023 29.77913653 -4.60880008 30.70366989 -7.5625 32.0625 C-10.93383789 32.72265625 -10.93383789 32.72265625 -14.78515625 33.125 C-15.47874237 33.20142731 -16.17232849 33.27785461 -16.88693237 33.3565979 C-18.36660067 33.51855298 -19.84685768 33.67520381 -21.3276062 33.82696533 C-25.19232303 34.22318595 -29.05286739 34.65697538 -32.9140625 35.0859375 C-33.67180466 35.16903168 -34.42954681 35.25212585 -35.21025085 35.33773804 C-40.99791882 35.97875931 -46.74864414 36.77615252 -52.5 37.6875 C-61.81496788 39.10080547 -71.19269316 40.07620454 -80.5625 41.0625 C-19.8425 41.0625 40.8775 41.0625 103.4375 41.0625 C91.8875 39.7425 80.3375 38.4225 68.4375 37.0625 C63.8175 36.4025 59.1975 35.7425 54.4375 35.0625 C49.17221542 34.42736314 43.90722683 33.79696512 38.63671875 33.20703125 C37.62996094 33.08714844 36.62320313 32.96726563 35.5859375 32.84375 C34.69052246 32.74126953 33.79510742 32.63878906 32.87255859 32.53320312 C30.35601376 32.0467485 28.59527547 31.44037784 26.4375 30.0625 C23.38532266 24.97553776 21.3341425 19.45473677 19.1875 13.9375 C18.91695801 13.25671387 18.64641602 12.57592773 18.36767578 11.87451172 C16.82394482 7.78804812 16.13851057 4.42502757 16.4375 0.0625 C33.20320897 -0.76054389 50.04132 2.04640823 66.578125 4.53515625 C70.96365446 5.13439358 75.35589707 5.627565 79.75488281 6.11669922 C97.85972043 8.13836316 97.85972043 8.13836316 106.6875 9.4375 C107.39487305 9.52700928 108.10224609 9.61651855 108.83105469 9.70874023 C113.96714941 10.51808328 116.87598017 12.31623275 120.4375 16.0625 C121.69830294 18.53927732 122.67025259 20.7202309 123.5625 23.3125 C124.02136126 24.56846882 124.48232815 25.8236702 124.9453125 27.078125 C125.27250149 28.00288179 125.27250149 28.00288179 125.60630035 28.94632053 C126.38750394 31.05750635 126.38750394 31.05750635 127.44002533 32.93062496 C131.07482517 39.83448151 131.00351579 46.31795394 130.95507812 53.99243164 C130.96050802 55.37978344 130.96763552 56.76712947 130.97631836 58.15446472 C130.99445028 61.89829685 130.98752708 65.6416848 130.97480202 69.38552403 C130.96462344 73.31622656 130.97408092 77.24689291 130.98034668 81.17759705 C130.98760817 87.77544941 130.97807403 94.37312221 130.95898438 100.97094727 C130.93720936 108.58452515 130.94427739 116.19767461 130.96629 123.81124216 C130.98447611 130.36524706 130.98698696 136.91912344 130.97653532 143.47314543 C130.97031913 147.38014362 130.96941296 151.2869408 130.98268127 155.19392586 C130.99428653 158.8672447 130.9861299 162.54001414 130.96310425 166.213274 C130.95534421 168.19404482 130.96713242 170.17486244 130.97961426 172.15560913 C130.90049754 180.52230774 129.95755225 186.09535704 124.25390625 192.5234375 C123.51011719 193.15507812 122.76632813 193.78671875 122 194.4375 C121.25878906 195.08460938 120.51757812 195.73171875 119.75390625 196.3984375 C114.7661098 199.98157627 110.22842399 200.35421576 104.22135925 200.32992554 C103.39785408 200.33445665 102.5743489 200.33898776 101.72588903 200.34365618 C98.968488 200.35630894 96.21128426 200.35467924 93.45385742 200.35302734 C91.475975 200.35901206 89.49809491 200.36581748 87.5202179 200.37338257 C82.14823484 200.39105594 76.77631549 200.39573853 71.40430617 200.39701414 C66.91878502 200.39891354 62.4332787 200.40627158 57.94776326 200.41335833 C47.36384951 200.42964512 36.77996977 200.43452703 26.19604492 200.43310547 C15.28118177 200.43190408 4.36651636 200.45300486 -6.54829675 200.4845928 C-15.92170288 200.51075235 -25.29504442 200.52147289 -34.66848677 200.52019465 C-40.26569836 200.51968491 -45.86273424 200.52537507 -51.45990944 200.54655075 C-56.725388 200.56592749 -61.99052314 200.5660613 -67.25601387 200.55151749 C-69.1861191 200.54942757 -71.11624579 200.55414114 -73.04631424 200.5662384 C-75.68641426 200.58171127 -78.32533312 200.57236959 -80.96540833 200.55697632 C-81.72466655 200.56726344 -82.48392478 200.57755057 -83.26619083 200.58814943 C-90.327556 200.49750269 -96.39704041 197.82485418 -101.375 192.75 C-102.18904297 191.95142578 -102.18904297 191.95142578 -103.01953125 191.13671875 C-108.29053612 184.05088689 -108.01804154 177.09915158 -108.0300293 168.55004883 C-108.04229625 167.18245883 -108.05575106 165.81487905 -108.07029724 164.4473114 C-108.10523797 160.74401042 -108.12059214 157.04088761 -108.13013434 153.33744264 C-108.13673436 151.01403475 -108.14708893 148.69067299 -108.15863991 146.36728477 C-108.19836069 138.23287671 -108.22038571 130.09860956 -108.22827148 121.96411133 C-108.23610728 114.43116961 -108.28516577 106.89925647 -108.35333699 99.36664182 C-108.41007964 92.86514961 -108.43519788 86.36399446 -108.43721896 79.86225718 C-108.43904166 75.9947118 -108.45309089 72.1282487 -108.50003624 68.26096535 C-108.72797687 48.29049317 -107.52961567 30.83210742 -95.5625 14.0625 C-92.23797604 10.732487 -88.44904231 10.20048941 -83.953125 9.5 C-83.20613342 9.37633057 -82.45914185 9.25266113 -81.68951416 9.12524414 C-74.04584045 7.901492 -66.3645662 7.06662299 -58.66394043 6.29776001 C-54.62860447 5.8940274 -50.59547976 5.46951727 -46.5625 5.04296875 C-45.77776306 4.96008102 -44.99302612 4.8771933 -44.18450928 4.79179382 C-36.33754684 3.9513441 -28.53467892 2.87051571 -20.734375 1.67578125 C-13.79617508 0.63078847 -7.03103815 -0.06826251 0 0 Z M-47 131 L-15 106 L-47 81 L-47 91 L-27 106 L-47 121 Z M45.4375 89.0625 C43.16309531 93.61130937 44.11732026 99.81887268 44.0625 104.8125 C44.02511719 106.08867188 43.98773438 107.36484375 43.94921875 108.6796875 C43.6563417 116.25277258 43.6563417 116.25277258 46.7109375 122.91015625 C50.0632924 125.55649945 51.41007501 125.90713502 55.50390625 125.58984375 C58.83921214 124.68021487 60.4149221 122.75927054 62.4375 120.0625 C64.03299443 115.26404894 63.62174204 110.1852134 63.625 105.1875 C63.64336914 103.71603516 63.64336914 103.71603516 63.66210938 102.21484375 C63.77173933 93.57358621 63.77173933 93.57358621 59.75 86.1875 C54.01325068 83.39664894 49.78182352 84.71817648 45.4375 89.0625 Z M-18.5625 155.0625 C-20.89546251 157.88967213 -20.89546251 157.88967213 -20.3125 161.125 C-19.8031756 164.161959 -19.8031756 164.161959 -17.5625 166.0625 C-15.5023267 166.81656896 -13.41368556 167.49416461 -11.3125 168.125 C-10.19359375 168.46660156 -9.0746875 168.80820313 -7.921875 169.16015625 C-1.62436639 170.85169635 4.26860909 171.24487637 10.75 171.25 C11.9555957 171.26836914 11.9555957 171.26836914 13.18554688 171.28710938 C21.14907742 171.30632948 28.31945463 169.57146397 35.875 167.125 C36.88433594 166.80660156 37.89367187 166.48820313 38.93359375 166.16015625 C41.73511224 165.200361 41.73511224 165.200361 43.4375 162.0625 C43.1133631 158.74009676 42.82973697 157.45473697 40.4375 155.0625 C35.63637087 154.61062902 31.50016124 155.74460874 26.9375 157.0625 C14.69655136 160.31686985 0.092469 160.8899845 -11.5625 155.0625 C-15.0625 154.72916667 -15.0625 154.72916667 -18.5625 155.0625 Z " fill="#FDFDFD" transform="translate(107.5625,-0.0625)"/>
