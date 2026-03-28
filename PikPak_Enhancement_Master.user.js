@@ -6,7 +6,7 @@
 // @name:ko            PikPak 인핸서 마스터
 // @name:ja            PikPak 拡張マスター
 // @namespace          https://github.com/digbug82/
-// @version            1.2.0
+// @version            1.2.1
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的网盘管理器。
@@ -37,8 +37,8 @@
 // @run-at             document-start
 // @require            https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js
 // @require            https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js
-// @downloadURL https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.user.js
-// @updateURL https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.meta.js
+// @downloadURL        https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.user.js
+// @updateURL          https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.meta.js
 // ==/UserScript==
 
 /*
