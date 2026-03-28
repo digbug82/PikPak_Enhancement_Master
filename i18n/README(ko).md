@@ -4,15 +4,7 @@
 
 # 📦 PikPak 인핸서 마스터
 
-<a href="https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js" target="_blank">
-  <img src="https://img.shields.io/badge/Version-1.2.0-0067C0?style=flat-square" alt="Version">
-</a>
-<a href="https://spdx.org/licenses/CC-BY-NC-SA-4.0.html" target="_blank">
-  <img src="https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square" alt="License">
-</a>
-<a href="https://mypikpak.com/drive/all" target="_blank">
-  <img src="https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square" alt="Platform">
-</a>
+[![Version](https://img.shields.io/badge/Version-1.2.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js) [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html) [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
 > 일괄 압축 해제, 스마트 중복 확인, 다중 모드 일괄 이름 바꾸기, Aria2 전송, 정크 파일 정리, 디렉토리 내보내기 및 미디어 재생 엔진 향상 등의 기능을 통합한 데스크톱 수준의 파일 관리자입니다.
 
