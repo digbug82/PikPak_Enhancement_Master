@@ -6,7 +6,7 @@
 // @name:ko            PikPak 인핸서 마스터
 // @name:ja            PikPak 拡張マスター
 // @namespace          https://github.com/digbug82/
-// @version            1.1.0
+// @version            1.2.0
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的网盘管理器。
@@ -21,8 +21,6 @@
 // @icon               https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/logo.svg
 // @homepage           https://github.com/digbug82/PikPak_Enhancement_Master
 // @supportURL         https://github.com/digbug82/PikPak_Enhancement_Master/issues
-// @downloadURL        https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js
-// @updateURL          https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js
 // @compatible         chrome
 // @compatible         edge
 // @grant              GM_setClipboard
@@ -39,6 +37,8 @@
 // @run-at             document-start
 // @require            https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js
 // @require            https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js
+// @downloadURL https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.user.js
+// @updateURL https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.meta.js
 // ==/UserScript==
 
 /*
@@ -164,7 +164,7 @@ window.addEventListener('beforeunload', (e) => {
     }
 });
 
-;// ./src/config.js
+;
 const CONF = {
     rowHeight: 40,
     buffer: 20,
@@ -256,7 +256,7 @@ const CONF = {
         file: `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="20" height="20" rx="6" fill="#B2B2B2"/><g transform="translate(4,4) scale(0.015625)"><path d="M939.303655 84.62284a289.780202 289.780202 0 0 1 0 409.290765l-446.080124 446.080124a289.487642 289.487642 0 0 1-408.486226-0.731399 289.487642 289.487642 0 0 1-0.731399-408.486226l236.24181-236.24181a178.315026 178.315026 0 0 1 251.820605 0c69.482885 69.482885 69.482885 182.118299 0 251.966884l-223.076632 223.003492a48.27232 48.27232 0 1 1-68.312647-68.239507L503.828814 478.334811a81.843525 81.843525 0 0 0 0-115.48787 81.916665 81.916665 0 0 0-115.41473 0L152.172274 598.869332a193.308701 193.308701 0 0 0 0 272.884889 193.235561 193.235561 0 0 0 272.88489 0l446.080123-446.080123a193.016141 193.016141 0 0 0-272.884889-272.81175l-13.165179 13.165178a48.27232 48.27232 0 1 1-68.166367-68.312647l13.092038-13.165179a289.926482 289.926482 0 0 1 397.368965-11.263541l11.9218 11.263541z" fill="white"/></g></svg>`
     }
 };
-;// ./src/style.js
+;
 const CSS = `
     :root { --pk-zoom: 1; --pk-bg: #ffffff; --pk-bg-rgb: 255, 255, 255; --pk-fg: #1a1a1a; --pk-bd: #e5e5e5; --pk-hl: #f0f0f0; --pk-sel-bg: #e6f3ff; --pk-sel-bd: #cce8ff; --pk-pri: #0067c0; --pk-btn-hov: #e0e0e0; --pk-gh: #f5f5f5; --pk-gh-fg: #333; --pk-sb-bg: transparent; --pk-sb-th: #ccc; --pk-sb-hov: #aaa; --pk-icon-c: #888; --pk-tip-bg: rgba(255, 255, 255, 0.95); --pk-tip-fg: #1a1a1a; --pk-tip-bd: rgba(0, 0, 0, 0.06); --pk-tip-sd: rgba(0, 0, 0, 0.12); --pk-toast-bg: rgba(255, 255, 255, 0.95); --pk-toast-fg: #1a1a1a; --pk-toast-bd: rgba(0, 0, 0, 0.08); --pk-match-bg: #fff2cc; --pk-match-fg: #d93025; --pk-v-line: #d1d1d1; }
     .pk-no-transition, .pk-no-transition * { transition: none !important; }
@@ -757,7 +757,7 @@ const CSS = `
     .pk-ana-opt:hover { background: var(--pk-sel-bg); color: var(--pk-pri); border-color: var(--pk-sel-bd); }
 `;
 
-;// ./src/utils.js
+;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const esc = s => (s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 const fmtSize = n => { n = parseInt(n || 0, 10); if (isNaN(n)) return ''; if (n === 0) return '0 KB'; const u = ['B', 'KB', 'MB', 'GB', 'TB']; let i = 0; while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; } return (n < 10 ? n.toFixed(2) : n.toFixed(1)) + ' ' + u[i]; };
@@ -797,7 +797,6 @@ const calcSha1 = async (file) => {
     return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
 };
 
-// ./src/languages.js
     function getLang(){const u=gmGet('pk_lang','');if(u)return u;const n=navigator.language.toLowerCase();return (n==='zh'||n.startsWith('zh-cn')||n.startsWith('zh-sg'))?'zh':(n.startsWith('zh-tw')||n.startsWith('zh-hk')||n.startsWith('zh-mo'))?'tc':n.startsWith('ko')?'ko':n.startsWith('ja')?'ja':'en';}
 const T = {
     zh: {
@@ -1600,47 +1599,47 @@ const T = {
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">✨ 体验与导航引擎</b><br>
                 • <b>交互重构</b>：在官方功能基础上，界面仿 <b>Windows 文件资源管理器</b> 重构。<br>
-                • <b>极速模式</b>：开启后支持脚本自动加载并物理屏蔽网页原生同步逻辑。可显著降低内存溢出风险，保障脚本极致的响应速度与运行稳定。<br>
-                • <b>高级路径栏</b>：支持滚轮滑动、下拉菜单同级切换定位。全盘搜索、文件/文件夹分析均集成路径栏，支持路径回显与溯源跳转。<br>
-                • <b>体验增强</b>：支持星标、文件类型优先级等多维度排序。支持浅色/暗黑皮肤自由切换，及一键<b>模糊封面</b>隐私保护。<br>
-                • <b>后台索引</b>：主页图标出现<b>蓝色呼吸点</b>表示后台正自动同步目录树。<br>
+                • <b>极速模式</b>：开启后接管原生逻辑，彻底解决海量文件下的卡顿与崩溃问题。<br>
+                • <b>高级路径栏</b>：支持滚轮滑动、下拉菜单同级切换定位。全盘搜索、分析套件均集成路径栏，支持路径回显与溯源跳转。<br>
+                • <b>体验增强</b>：支持星标等多维度排序，及一键<b>模糊封面</b>与暗黑皮肤切换。后台采用 <b>SWR 策略</b>静默无感刷新视图。<br>
+                • <b>后台索引与保护</b>：主页蓝点闪烁表示正同步目录树。系统自带并发操作物理锁，拦截冲突操作，严防脏数据产生。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：默认文件夹（My Pack）受官方保护，严防误删、复制、移动及重命名。</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 批量与空间管理</b><br>
-                • <b>批量重命名</b>：支持<b>正则替换/删除</b>、<b>剧集流水号</b>生成、文本<b>格式化</b>(大小写/全半角)、<b>番号/FC2 ID</b> 智能命名、<b>前缀去广告</b>及基于 MIME 的<b>后缀修复</b>。<br>
-                • <b>分析套件</b>：<b>文件分析</b>整合了“文件筛选”与“文件查重”（哈希/时长/名称三模态）；<b>文件夹分析</b>整合了“文件夹筛选”与“文件夹查重”（名称/相似度/包含率三模态）；并支持生成及下载当前路径的<b>目录树</b>列表。<br>
-                • <b>智能整理</b>：一键清理空文件夹；<b>批量解压</b>集成解压密码自动记忆与智能填充，支持自动跳过并删除已解压项目。<br>
-                • <b>资源管理器</b>：既可作为<b>文件黑名单</b>，一键清理垃圾资源；也可作为<b>文件白名单</b>，在执行批量删除操作时自动跳过并予以保护。<br>
+                • <b>批量重命名</b>：支持<b>正则替换/删除</b>、<b>剧集流水号</b>、文本<b>格式化</b>、<b>FC2 规范命名</b>、<b>前缀去广告</b>及基于 MIME 的<b>后缀修复</b>。<br>
+                • <b>分析套件</b>：<b>文件分析</b>整合了筛选与查重（哈希/时长/名称三模态）；<b>文件夹分析</b>整合了筛选与查重（名称/相似度/包含率三模态）；并支持导出当前<b>目录树</b>列表。<br>
+                • <b>智能整理</b>：一键清理空文件夹；<b>批量解压</b>集成密码自动记忆与智能填充，支持跳过并删除已解压项。<br>
+                • <b>资源管理器</b>：自定义<b>文件黑名单</b>一键清理垃圾资源；或作为<b>文件白名单</b>，在批量删除时自动保护。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：为避免数据同步冲突，处理期间请勿在其他客户端修改文件。</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🌐 传输与分享中心</b><br>
-                • <b>分享管理</b>：支持设定提取次数，提取次数达标自动取消分享。<br>
-                • <b>离线下载</b>：支持链接批量离线下载与资源链接批量导出。<br>
-                • <b>极速上传</b>：支持本地超大文件与嵌套文件夹拖拽直传，突破官方网页端上传限制并<b>大幅降低小文件传输中断率</b>。
+                • <b>分享管理</b>：支持设定提取次数上限，次数达标后链接自动失效取消分享。<br>
+                • <b>极速上传</b>：支持全局将本地文件/文件夹拖拽至网页直传，突破官方限制并<b>大幅降低小文件传输中断率</b>。<br>
+                • <b>云下载增强</b>：批量离线链接<b>自动去重</b>。内置<b>磁链智能清洗引擎</b>（自动提取 Base32/Hex 哈希去干扰）；支持解析 <b>.torrent</b> 种子文件；针对受限链接提供<b>保存网页快照</b>兜底方案。
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：提取次数拦截仅在网页保持开启且电脑未休眠时生效。</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🎬 沉浸式媒体增强</b><br>
-                • <b>播放引擎</b>：支持 0.5x-3.0x 倍速、画面多向旋转/镜像翻转、强制比例调节。支持记忆播放、自动跳过片头片尾，及多视频<b>连播/循环</b>模式。进度条支持实时生成<b>缩略图预览</b>。<br>
+                • <b>播放引擎</b>：支持 0.5x-3.0x 倍速、旋转翻转、强制比例、自动跳过片头片尾及<b>连播/循环</b>模式，进度条支持缩略图预览。内置<b>看门狗</b>，遇黑屏或不支持编码自动回退兼容画质。<br>
                 • <b>字幕系统</b>：支持加载云端同名字幕、本地文件及跨站在线搜索。支持字幕轴毫秒级偏移微调，及本地文本直接<b>拖拽解析</b>挂载。<br>
-                • <b>视觉辅助</b>：内嵌多引擎支持图片或视频当前帧<b>以图搜图</b>；设置中可激活“媒体模式”，使纯剧集或漫画文件夹自动按名称 A-Z 顺序排列。<br>
+                • <b>视觉辅助</b>：内嵌多引擎支持图片或视频当前帧<b>以图搜图</b>；设置中可激活“媒体模式”，使剧集/漫画文件夹自动按名称 A-Z 顺序排列。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：播放历史列表持续记录在脚本环境内产生的播放进度。</div>
             </div>
             <div style="margin-bottom:12px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ 配置与数据管理</b><br>
-                • <b>配置备份</b>：支持将偏好设置、管理规则、密码金库与历史数据导出为附带数字指纹的 JSON 备份文件，便于跨设备平滑迁移。<br>
-                • <b>数据清理</b>：支持对全盘索引、偏好设置、管理规则、密码金库与历史数据按需清除，以释放本地存储空间并保障隐私。<br>
-                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：全盘索引在网页关闭后清空，而偏好设置、管理规则、密码金库与历史数据则持久化保存。</div>
+                • <b>配置备份</b>：支持将偏好设置、管理规则、密码金库等导出为带数字指纹的 JSON 备份文件，导入时支持<b>智能合并去重</b>。<br>
+                • <b>数据清理</b>：支持对全盘索引、偏好设置、管理规则、密码金库与缓存按需清除，释放本地空间并保障隐私。<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：全盘索引在网页关闭后清空，而偏好设置、密码金库等则持久化保存。</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚡ 下载与分发</b><br>
-                • <b>外部直连</b>：支持将文件通过 RPC 协议免下载一键并推送到 <b>Aria2</b> 节点。<br>
-                • <b>下载过滤</b>：支持设置<b>文件夹下载过滤</b>。可按后缀或关键词自动排除特定文件，实现精细化分发。
+                • <b>外部直连</b>：支持一键获取视频流直链，或唤起 PotPlayer 播放。支持将文件通过 RPC 协议一键推送到 <b>Aria2</b> 节点。<br>
+                • <b>分发增强</b>：推送文件夹至 Aria2 时<b>自动还原云盘树状目录结构</b>。支持长连接监控，遇错自动导出错误清单。支持设置<b>文件夹下载过滤</b>。
             </div>
             <div style="margin-top:16px; color:#d93025; font-weight:bold; text-align:center; font-size:11px; border-top:1px dashed rgba(217,48,37,0.2); padding-top:12px; letter-spacing:0.5px; opacity:0.9;">
-                本项目严格遵循 CC-BY-NC-SA-4.0 协议，严禁用于任何形式的商业用途
+                本项目严格遵循 CC-BY-NC-SA-4.0 协议，严禁用于任何商业用途
             </div>
         </div>`
     },
@@ -2444,44 +2443,44 @@ const T = {
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">✨ 體驗與導覽引擎</b><br>
                 • <b>互動重構</b>：在官方功能基礎上，介面仿 <b>Windows 檔案總管</b> 重構。<br>
-                • <b>極速模式</b>：開啟後支援腳本自動載入並物理屏蔽網頁原生同步邏輯。可顯著降低記憶體溢出風險，保障腳本極致的反應速度與運作穩定。<br>
-                • <b>進階路徑列</b>：支援滾輪滑動、下拉選單同級切換定位。全盤搜尋、檔案/資料夾分析均整合於路徑列，支援路徑回顯與溯源跳轉。<br>
-                • <b>體驗增強</b>：支援星號、檔案類型優先級等多維度排序。支援淺色/深色佈景自由切換，及一鍵<b>模糊封面</b>隱私保護。<br>
-                • <b>背景索引</b>：首頁圖示出現<b>藍色呼吸燈</b>表示背景正自動同步目錄樹。<br>
+                • <b>極速模式</b>：開啟後接管原生邏輯，徹底解決海量檔案下的卡頓與崩潰問題。<br>
+                • <b>進階路徑列</b>：支援滾輪滑動、下拉選單同級切換定位。全盤搜尋、分析套件均整合於路徑列，支援路徑回顯與溯源跳轉。<br>
+                • <b>體驗增強</b>：支援星號等多維度排序，及一鍵<b>模糊封面</b>與深色佈景切換。後台採用 <b>SWR 策略</b>靜默無感重新整理視圖。<br>
+                • <b>後台索引與保護</b>：首頁藍點閃爍表示正同步目錄樹。系統自帶併發操作物理鎖，攔截衝突操作，嚴防髒資料產生。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 註：預設資料夾（My Pack）受官方保護，嚴防誤刪、複製、移動及重新命名。</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 批次與空間管理</b><br>
-                • <b>批次重新命名</b>：支援<b>正規替換/刪除</b>、<b>劇集流水號</b>產生、文字<b>格式化</b>(大小寫/全半形)、<b>番號/FC2 ID</b> 智慧命名、<b>前綴去廣告</b>及基於 MIME 的<b>副檔名修復</b>。<br>
-                • <b>分析套件</b>：<b>檔案分析</b>整合了「檔案篩選」與「檔案查重」（雜湊/時長/名稱三模態）；<b>資料夾分析</b>整合了「資料夾篩選」與「資料夾查重」（名稱/相似度/包含率三模態）；並支援產生及下載目前路徑的<b>目錄樹</b>清單。<br>
-                • <b>智慧整理</b>：一鍵清理空資料夾；<b>批次解壓縮</b>整合解壓縮密碼自動記憶與智慧填入，支援自動跳過並刪除已解壓縮項目。<br>
-                • <b>資源管理器</b>：既可作為<b>檔案黑名單</b>，一鍵清理垃圾資源；也可作為<b>檔案白名單</b>，在執行批次刪除操作時自動跳過並予以保護。<br>
+                • <b>批次重新命名</b>：支援<b>正規替換/刪除</b>、<b>劇集流水號</b>、文字<b>格式化</b>、<b>FC2 規範命名</b>、<b>前綴去廣告</b>及基於 MIME 的<b>副檔名修復</b>。<br>
+                • <b>分析套件</b>：<b>檔案分析</b>整合了篩選與查重（雜湊/時長/名稱三模態）；<b>資料夾分析</b>整合了篩選與查重（名稱/相似度/包含率三模態）；並支援匯出目前<b>目錄樹</b>清單。<br>
+                • <b>智慧整理</b>：一鍵清理空資料夾；<b>批次解壓縮</b>整合密碼自動記憶與智慧填入，支援跳過並刪除已解壓縮項目。<br>
+                • <b>資源管理器</b>：自訂<b>檔案黑名單</b>一鍵清理垃圾資源；或作為<b>檔案白名單</b>，在批次刪除時自動保護。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 註：為避免資料同步衝突，處理期間請勿在其他用戶端修改檔案。</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🌐 傳輸與分享中心</b><br>
-                • <b>分享管理</b>：支援設定提取次數，提取次數達標自動取消分享。<br>
-                • <b>離線下載</b>：支援連結批次離線下載與資源連結批次匯出。<br>
-                • <b>極速上傳</b>：支援本機超大檔案與巢狀資料夾拖曳直傳，突破官方網頁端上傳限制並<b>大幅降低小檔案傳輸中斷率</b>。
+                • <b>分享管理</b>：支援設定提取次數上限，次數達標後連結自動失效取消分享。<br>
+                • <b>極速上傳</b>：支援全域將本機檔案/資料夾拖曳至網頁直傳，突破官方限制並<b>大幅降低小檔案傳輸中斷率</b>。<br>
+                • <b>雲下載增強</b>：批次離線連結<b>自動去重</b>。內建<b>磁鏈智慧清洗引擎</b>（自動提取 Base32/Hex 雜湊去干擾）；支援解析 <b>.torrent</b> 種子檔案；針對受限連結提供<b>儲存網頁快照</b>兜底方案。
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 註：提取次數攔截僅在網頁保持開啟且電腦未休眠時生效。</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🎬 沉浸式媒體增強</b><br>
-                • <b>播放引擎</b>：支援 0.5x-3.0x 倍速、畫面多向旋轉/鏡像翻轉、強制比例調節。支援記憶播放、自動跳過片頭片尾，及多影片<b>連播/循環</b>模式。進度列支援即時產生<b>縮圖預覽</b>。<br>
+                • <b>播放引擎</b>：支援 0.5x-3.0x 倍速、旋轉翻轉、強制比例、自動跳過片頭片尾及<b>連播/循環</b>模式，進度列支援縮圖預覽。內建<b>看門狗</b>，遇黑螢幕或不支援編碼自動回退相容畫質。<br>
                 • <b>字幕系統</b>：支援載入雲端同名字幕、本機檔案及跨站線上搜尋。支援字幕軸毫秒級偏移微調，及本機文字直接<b>拖曳解析</b>掛載。<br>
-                • <b>視覺輔助</b>：內嵌多引擎支援圖片或影片當前影格<b>以圖搜圖</b>；設定中可啟動「媒體模式」，使純劇集或漫畫資料夾自動按名稱 A-Z 順序排列。<br>
+                • <b>視覺輔助</b>：內嵌多引擎支援圖片或影片當前影格<b>以圖搜圖</b>；設定中可啟動「媒體模式」，使劇集/漫畫資料夾自動按名稱 A-Z 順序排列。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 註：播放歷史列表持續記錄在腳本環境內產生的播放進度。</div>
             </div>
             <div style="margin-bottom:12px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ 配置與資料管理</b><br>
-                • <b>配置備份</b>：支援將偏好設定、管理規則、密碼金庫與歷史數據匯出為附帶數位指紋的 JSON 備份檔案，便於跨裝置平滑轉移。<br>
-                • <b>資料清理</b>：支援對全盤索引、偏好設定、管理規則、密碼金庫與歷史數據按需清除，以釋放本機儲存空間並保障隱私。<br>
-                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 註：全盤索引在網頁關閉後清空，而偏好設定、管理規則、密碼金庫與歷史數據則持久化保存。</div>
+                • <b>配置備份</b>：支援將偏好設定、管理規則、密碼金庫等匯出為帶數位指紋的 JSON 備份檔案，匯入時支援<b>智慧合併去重</b>。<br>
+                • <b>資料清理</b>：支援對全盤索引、偏好設定、管理規則、密碼金庫與快取按需清除，釋放本機空間並保障隱私。<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 註：全盤索引在網頁關閉後清空，而偏好設定、密碼金庫等則持久化保存。</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚡ 下載與分發</b><br>
-                • <b>外部直連</b>：支援將檔案透過 RPC 協定免下載一鍵推播至 <b>Aria2</b> 節點。<br>
-                • <b>下載過濾</b>：支援設定<b>資料夾下載過濾</b>。可按副檔名或關鍵字自動排除特定檔案，實現精細化分發。
+                • <b>外部直連</b>：支援一鍵獲取影片流直鏈，或喚起 PotPlayer 播放。支援將檔案透過 RPC 協定一鍵推播到 <b>Aria2</b> 節點。<br>
+                • <b>分發增強</b>：推播資料夾至 Aria2 時<b>自動還原雲端樹狀目錄結構</b>。支援長連線監控，遇錯自動匯出錯誤清單。支援設定<b>資料夾下載過濾</b>。
             </div>
             <div style="margin-top:16px; color:#d93025; font-weight:bold; text-align:center; font-size:11px; border-top:1px dashed rgba(217,48,37,0.2); padding-top:12px; letter-spacing:0.5px; opacity:0.9;">
                 本項目嚴格遵循 CC-BY-NC-SA-4.0 協議，嚴禁於任何形式的商業用途
@@ -3287,45 +3286,45 @@ const T = {
         <div class="pk-no-scrollbar pk-help-scroll" style="font-size:13px;line-height:1.6;color:var(--pk-fg);text-align:justify;text-justify:inter-ideograph;word-break:break-all;pointer-events:auto;display:block;">
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">✨ Experience & Navigation Engine</b><br>
-                • <b>UI Refactoring</b>: Built upon official features, the interface is redesigned to resemble <b>Windows File Explorer</b>.<br>
-                • <b>Turbo Mode</b>: When enabled, auto-launches the script and physically blocks native web sync logic. Significantly reduces memory leak risks, ensuring ultimate response speed and stability.<br>
-                • <b>Advanced Path Bar</b>: Supports scroll wheel navigation and dropdown peer-level switching. Global search and file/folder analysis are integrated into the path bar, supporting path echoing and source backtracking.<br>
-                • <b>Enhanced UX</b>: Supports multi-dimensional sorting like favorites and file type priority. Features light/dark theme switching and one-click <b>cover blurring</b> for privacy protection.<br>
-                • <b>Background Indexing</b>: A <b>blue breathing dot</b> on the home icon indicates the directory tree is automatically syncing in the background.<br>
+                • <b>UI Refactoring</b>: Interface redesigned to resemble <b>Windows File Explorer</b>.<br>
+                • <b>Turbo Mode</b>: Takes over native logic completely to resolve lag and crashes with massive files.<br>
+                • <b>Advanced Path Bar</b>: Supports scroll wheel navigation and dropdown peer-level switching. Global search and analysis suites are integrated, supporting path echoing and source backtracking.<br>
+                • <b>Enhanced UX</b>: Supports multi-dimensional sorting, one-click <b>cover blurring</b>, and dark theme switching. Background uses <b>SWR strategy</b> for silent view updates.<br>
+                • <b>Background Indexing & Protection</b>: A blinking blue dot on the home icon indicates directory tree syncing. Features a physical concurrency lock to intercept conflicting operations and prevent dirty data.<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* Note: The default folder (My Pack) is officially protected against accidental deletion, copying, moving, and renaming.</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 Batch & Space Management</b><br>
-                • <b>Batch Rename</b>: Supports <b>Regex replace/delete</b>, <b>episode serialization</b>, text <b>formatting</b> (case/full-half width), smart naming for <b>AV codes/FC2 IDs</b>, <b>ad prefix removal</b>, and MIME-based <b>extension fixing</b>.<br>
-                • <b>Analysis Suite</b>: <b>File Analysis</b> integrates "File Filtering" and "File Deduplication" (hash/duration/name tri-modal); <b>Folder Analysis</b> integrates "Folder Filtering" and "Folder Deduplication" (name/similarity/containment tri-modal); and supports generating/downloading the <b>directory tree</b> list of the current path.<br>
+                • <b>Batch Rename</b>: Supports <b>Regex replace/delete</b>, <b>episode serialization</b>, text <b>formatting</b>, <b>AV/FC2 standard naming</b>, <b>ad prefix removal</b>, and MIME-based <b>extension fixing</b>.<br>
+                • <b>Analysis Suite</b>: <b>File Analysis</b> integrates filtering and deduplication (hash/duration/name tri-modal); <b>Folder Analysis</b> integrates filtering and deduplication (name/similarity/containment tri-modal); and supports exporting the <b>directory tree</b>.<br>
                 • <b>Smart Organizing</b>: One-click empty folder cleanup; <b>Batch Unzip</b> integrates automatic password memory and smart auto-filling, supporting auto-skip and deletion of extracted items.<br>
-                • <b>Resource Manager</b>: Can be used as a <b>File Blacklist</b> to clean up junk resources with one click; or as a <b>File Whitelist</b> to auto-skip and protect items during batch deletion.<br>
+                • <b>Resource Manager</b>: Can be used as a <b>File Blacklist</b> to clean up junk resources; or as a <b>File Whitelist</b> to auto-skip and protect items during batch deletion.<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* Note: To avoid data sync conflicts, please do not modify files via other clients during processing.</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🌐 Transfer & Sharing Hub</b><br>
                 • <b>Share Management</b>: Supports setting extraction limits. Shares are automatically canceled once the limit is reached.<br>
-                • <b>Offline Download</b>: Supports batch offline downloading via links and batch exporting of resource links.<br>
-                • <b>Ultra-fast Upload</b>: Supports direct drag-and-drop for local large files and nested folders, bypassing official web limits and <b>significantly reducing the interruption rate of small file transfers</b>.
+                • <b>Ultra-fast Upload</b>: Supports global drag-and-drop direct upload, bypassing official limits and <b>significantly reducing the interruption rate of small file transfers</b>.<br>
+                • <b>Cloud Download Enhancements</b>: <b>Auto-deduplicates</b> batch offline links. Built-in <b>magnet smart cleaning engine</b> (extracts Base32/Hex hash to remove noise); supports parsing <b>.torrent</b> files; provides <b>web snapshot saving</b> as a fallback for restricted links.
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* Note: Extraction limit interception only works when the webpage is kept open and the computer is awake.</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🎬 Immersive Media Enhancements</b><br>
-                • <b>Playback Engine</b>: Supports 0.5x-3.0x speed, multi-directional rotation/mirroring, and forced aspect ratios. Features playback memory, auto-skip intro/outro, and multi-video <b>autoplay/loop</b> modes. The progress bar generates real-time <b>thumbnail previews</b>.<br>
-                • <b>Subtitle System</b>: Supports loading cloud subtitles with matching names, local files, and cross-site online search. Supports millisecond-level subtitle offset tweaking and direct <b>drag-and-drop parsing</b> of local text.<br>
-                • <b>Visual Aids</b>: Built-in multi-engine reverse image search for pictures or current video frames; "Media Mode" can be activated in settings to auto-sort pure series or manga folders alphabetically (A-Z).<br>
+                • <b>Playback Engine</b>: Supports 0.5x-3.0x speed, rotation/mirroring, forced aspect ratios, auto-skip intro/outro, and <b>autoplay/loop</b> modes. The progress bar supports thumbnail previews. Built-in <b>Watchdog</b> automatically falls back to compatible quality upon black screens or unsupported codecs.<br>
+                • <b>Subtitle System</b>: Supports loading cloud subtitles, local files, and cross-site online search. Supports millisecond-level subtitle offset tweaking and direct <b>drag-and-drop parsing</b> of local text.<br>
+                • <b>Visual Aids</b>: Built-in multi-engine reverse image search; "Media Mode" can be activated to auto-sort series or manga folders alphabetically (A-Z).<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* Note: The playback history list continuously records progress generated within the script environment.</div>
             </div>
             <div style="margin-bottom:12px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ Configuration & Data Management</b><br>
-                • <b>Config Backup</b>: Supports exporting preferences, rules, password vaults, and history data as JSON backup files with digital fingerprints for seamless cross-device migration.<br>
-                • <b>Data Cleanup</b>: Supports on-demand clearing of global index, preferences, rules, password vaults, and history data to free up local storage and protect privacy.<br>
-                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* Note: The global index is cleared when the webpage is closed, while preferences, rules, password vaults, and history data are saved persistently.</div>
+                • <b>Config Backup</b>: Supports exporting preferences, rules, password vaults as JSON backup files with digital fingerprints. Supports <b>smart merge & deduplication</b> upon importing.<br>
+                • <b>Data Cleanup</b>: Supports on-demand clearing of global index, preferences, rules, password vaults, and caches to free up local storage and protect privacy.<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* Note: The global index is cleared when the webpage is closed, while preferences, password vaults, etc., are saved persistently.</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚡ Download & Distribution</b><br>
-                • <b>External Direct Connection</b>: Supports one-click, download-free file pushing to <b>Aria2</b> nodes via RPC protocol.<br>
-                • <b>Download Filtering</b>: Supports setting <b>folder download filters</b>. Can automatically exclude specific files by extension or keyword for precise distribution.
+                • <b>External Direct Connection</b>: Supports one-click video stream link extraction, or launching PotPlayer. Supports pushing files to <b>Aria2</b> nodes via RPC protocol.<br>
+                • <b>Distribution Enhancements</b>: <b>Auto-reconstructs cloud tree directory structures</b> when pushing folders to Aria2. Supports persistent connection monitoring and auto-exports error lists upon failure. Supports setting <b>folder download filters</b>.
             </div>
             <div style="margin-top:16px; color:#d93025; font-weight:bold; text-align:center; font-size:11px; border-top:1px dashed rgba(217,48,37,0.2); padding-top:12px; letter-spacing:0.5px; opacity:0.9;">
                 This project strictly adheres to the CC-BY-NC-SA-4.0 license and is strictly prohibited for any commercial use.
@@ -3702,9 +3701,9 @@ const T = {
         str_no_sub: "자막 없음",
         lbl_sub_sel: "자막 선택",
         lbl_show_sub: "자막 표시",
-        btn_sub_search: "온라인 자막 검색",
+        btn_sub_search: "자막 검색",
         btn_sub_cloud: "클라우드",
-        btn_sub_local: "로컬 자막 열기",
+        btn_sub_local: "로컬 자막",
         lbl_sub_pos: "자막 위치",
         lbl_sub_bottom: "하단",
         lbl_sub_top: "상단",
@@ -4131,45 +4130,45 @@ const T = {
         <div class="pk-no-scrollbar pk-help-scroll" style="font-size:13px;line-height:1.6;color:var(--pk-fg);text-align:justify;text-justify:inter-ideograph;word-break:break-all;pointer-events:auto;display:block;">
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">✨ 경험 및 탐색 엔진</b><br>
-                • <b>인터랙션 재구성</b>: 공식 기능을 기반으로 인터페이스를 <b>Windows 파일 탐색기</b> 스타일로 재구성했습니다.<br>
-                • <b>초고속 모드</b>: 활성화 시 스크립트를 자동 로드하고 웹페이지 고유의 동기화 로직을 물리적으로 차단합니다. 메모리 부족(OOM) 위험을 현저히 낮추어 최상의 반응 속도와 안정성을 보장합니다.<br>
-                • <b>고급 경로 표시줄</b>: 마우스 휠 스크롤 및 드롭다운 메뉴를 통한 동일 계층 이동을 지원합니다. 전체 검색, 파일/폴더 분석이 경로 표시줄에 통합되어 경로 표시 및 상위 폴더 이동이 간편합니다.<br>
-                • <b>사용자 경험 향상</b>: 즐겨찾기, 파일 유형 우선순위 등 다차원 정렬을 지원합니다. 라이트/다크 테마 전환 및 원클릭 <b>커버 블러 처리</b>를 통한 프라이버시 보호 기능을 제공합니다.<br>
-                • <b>백그라운드 인덱싱</b>: 홈 아이콘에 <b>파란색 숨쉬는 점</b>이 나타나면 백그라운드에서 디렉토리 트리가 자동 동기화 중임을 의미합니다.<br>
+                • <b>인터랙션 재구성</b>: 인터페이스를 <b>Windows 파일 탐색기</b> 스타일로 재구성했습니다.<br>
+                • <b>초고속 모드</b>: 활성화 시 기본 웹 로직을 완전히 제어하여 대량 파일 환경에서의 렉과 충돌을 해결합니다.<br>
+                • <b>고급 경로 표시줄</b>: 마우스 휠 스크롤 및 드롭다운 메뉴 동급 전환을 지원합니다. 전체 검색 및 분석 도구가 통합되어 경로 복원 및 상위 이동을 지원합니다.<br>
+                • <b>사용자 경험 향상</b>: 즐겨찾기 등 다차원 정렬, 원클릭 <b>커버 블러 처리</b> 및 다크 테마 전환을 지원합니다. 백그라운드에서는 <b>SWR 전략</b>을 사용하여 무감각하게 뷰를 새로 고칩니다.<br>
+                • <b>백그라운드 인덱싱 및 보호</b>: 홈 아이콘의 파란색 점멸은 디렉토리 트리 동기화를 나타냅니다. 충돌하는 작업을 차단하고 데이터 손상을 방지하는 동시성 물리적 잠금을 제공합니다.<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 기본 폴더(My Pack)는 시스템 보호를 받아 삭제, 복사, 이동 및 이름 변경이 제한됩니다.</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 일괄 처리 및 공간 관리</b><br>
-                • <b>일괄 이름 변경</b>: <b>정규식 치환/삭제</b>, <b>에피소드 번호</b> 생성, 텍스트 <b>포맷팅</b>(대소문자/전반각), <b>품번/FC2 ID</b> 스마트 인식, <b>광고 제거</b> 및 MIME 기반 <b>확장자 복구</b>를 지원합니다.<br>
-                • <b>분석 도구</b>: <b>파일 분석</b>(파일 필터링 및 해시/시간/이름 기반 중복 검사)과 <b>폴더 분석</b>(폴더 필터링 및 이름/유사도/포함율 기반 중복 검사)을 통합 제공하며, 현재 경로의 <b>디렉토리 트리</b> 생성을 지원합니다.<br>
-                • <b>스마트 정리</b>: 원클릭 빈 폴더 정리; <b>일괄 압축 해제</b> 기능은 비밀번호 자동 기억 및 스마트 입력을 지원하며, 이미 해제된 항목은 자동으로 건너뛰거나 삭제할 수 있습니다.<br>
-                • <b>리소스 관리자</b>: <b>파일 블랙리스트</b>로 사용하여 스팸 리소스를 한 번에 정리하거나, <b>화이트리스트</b>로 설정하여 일괄 삭제 시 해당 파일을 보호할 수 있습니다.<br>
+                • <b>일괄 이름 변경</b>: <b>정규식 치환/삭제</b>, <b>에피소드 번호</b> 생성, 텍스트 <b>포맷팅</b>, <b>FC2 표준 네이밍</b>, <b>광고 제거</b> 및 MIME 기반 <b>확장자 복구</b>를 지원합니다.<br>
+                • <b>분석 도구</b>: <b>파일 분석</b>(필터링 및 해시/시간/이름 3가지 모드 중복 검사)과 <b>폴더 분석</b>(필터링 및 이름/유사도/포함율 3가지 모드 중복 검사)을 통합 제공하며, 현재 경로의 <b>디렉토리 트리</b> 내보내기를 지원합니다.<br>
+                • <b>스마트 정리</b>: 원클릭 빈 폴더 정리; <b>일괄 압축 해제</b> 기능은 암호 자동 기억 및 스마트 입력을 지원하며, 해제된 항목 건너뛰기 및 삭제를 지원합니다.<br>
+                • <b>리소스 관리자</b>: <b>파일 블랙리스트</b>를 설정하여 스팸 리소스를 한 번에 정리하거나, <b>화이트리스트</b>로 설정하여 일괄 삭제 시 해당 파일을 보호할 수 있습니다.<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 데이터 동기화 충돌을 방지하기 위해 처리 중에는 다른 클라이언트에서 파일을 수정하지 마십시오.</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🌐 전송 및 공유 센터</b><br>
-                • <b>공유 관리</b>: 추출 횟수 제한 설정 기능을 지원합니다. 횟수 도달 시 공유가 자동으로 취소됩니다.<br>
-                • <b>오프라인 다운로드</b>: 링크를 통한 일괄 오프라인 다운로드 및 리소스 링크의 일괄 내보내기를 지원합니다.<br>
-                • <b>초고속 업로드</b>: 로컬 대용량 파일 및 하위 폴더 드래그 앤 드롭 업로드를 지원하며, 웹 제한을 우회하여 <b>소용량 파일 전송 중단율을 대폭 낮췄습니다</b>.
+                • <b>공유 관리</b>: 추출 횟수 상한 설정을 지원하며, 횟수 도달 시 링크가 자동으로 무효화됩니다.<br>
+                • <b>초고속 업로드</b>: 로컬 대용량 파일 및 폴더를 웹으로 드래그 앤 드롭하여 바로 업로드할 수 있으며, 공식 제한을 돌파하고 <b>소용량 파일 전송 중단율을 대폭 낮췄습니다</b>.<br>
+                • <b>클라우드 다운로드 향상</b>: 일괄 오프라인 링크 <b>자동 중복 제거</b>. 내장형 <b>마그넷 스마트 정리 엔진</b>(Base32/Hex 해시를 자동 추출하여 간섭 제거); <b>.torrent</b> 시드 파일 파싱 지원; 제한된 링크에 대한 <b>웹 스냅샷 저장</b> 기능 제공.
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 추출 횟수 차단은 웹페이지가 열려 있고 컴퓨터가 절전 모드가 아닐 때만 작동합니다.</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🎬 몰입형 미디어 기능 향상</b><br>
-                • <b>재생 엔진</b>: 0.5x~3.0x 배속, 화면 회전/미러링, 강제 비율 조절을 지원합니다. 이어보기, 오프닝/엔딩 자동 건너뛰기, <b>연속 재생/반복</b> 모드 및 실시간 <b>썸네일 미리보기</b>를 지원합니다.<br>
+                • <b>재생 엔진</b>: 0.5x~3.0x 배속, 화면 회전/미러링, 강제 비율 조절, 오프닝/엔딩 건너뛰기 및 <b>연속 재생/루프</b> 모드를 지원하며 진행률 바 썸네일 미리보기를 지원합니다. 내장된 <b>감시견(Watchdog)</b>을 통해 블랙 스크린이나 지원되지 않는 코덱 발생 시 호환 화질로 자동 폴백합니다.<br>
                 • <b>자막 시스템</b>: 클라우드 내 동일 이름 자막, 로컬 파일 및 온라인 자막 검색을 지원합니다. 자막 싱크 미세 조정 및 로컬 텍스트 <b>드래그 앤 드롭 파싱</b> 마운트를 지원합니다.<br>
-                • <b>시각 보조</b>: 다중 엔진 기반 <b>이미지로 검색</b> 기능을 지원합니다. "미디어 모드" 활성화 시 이미지/비디오 전용 폴더가 이름순(A-Z)으로 자동 정렬됩니다.<br>
-                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 재생 기록 목록은 스크립트 환경 내에서 발생한 재생 진행도만 기록합니다.</div>
+                • <b>시각 보조</b>: 다중 엔진 기반 <b>이미지로 검색</b> 기능을 지원합니다. "미디어 모드" 활성화 시 시리즈/만화 폴더가 자동으로 A-Z 순서로 정렬됩니다.<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 재생 기록 목록은 스크립트 환경 내에서 발생한 재생 진행도만 지속적으로 기록합니다.</div>
             </div>
             <div style="margin-bottom:12px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ 설정 및 데이터 관리</b><br>
-                • <b>설정 백업</b>: 개인 설정, 관리 규칙, 비밀번호 금고 및 히스토리 데이터를 디지털 지문이 포함된 JSON 파일로 내보내어 기기 간 이동을 지원합니다.<br>
-                • <b>데이터 정리</b>: 전체 인덱스, 설정, 규칙, 비밀번호 및 히스토리 데이터를 필요에 따라 개별 삭제하여 로컬 공간을 확보하고 프라이버시를 보호합니다.<br>
-                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 전체 인덱스는 웹페이지 종료 시 삭제되지만, 설정/규칙/비밀번호/기록 데이터는 영구 보관됩니다.</div>
+                • <b>설정 백업</b>: 개인 설정, 관리 규칙, 암호 금고 등을 디지털 지문이 포함된 JSON 파일로 내보낼 수 있으며, 가져오기 시 <b>스마트 병합 및 중복 제거</b>를 지원합니다.<br>
+                • <b>데이터 정리</b>: 전체 인덱스, 설정, 규칙, 암호 금고 및 캐시를 필요에 따라 지워 로컬 공간을 확보하고 개인 정보를 보호할 수 있습니다.<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 전체 인덱스는 웹페이지 종료 시 삭제되지만, 설정 및 비밀번호 금고 데이터는 영구 보관됩니다.</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚡ 다운로드 및 배포</b><br>
-                • <b>외부 직접 연결</b>: RPC 프로토콜을 통해 파일을 로컬 다운로드 없이 <b>Aria2</b> 노드로 즉시 전송할 수 있습니다.<br>
-                • <b>다운로드 필터링</b>: <b>폴더 다운로드 필터</b>를 설정하여 확장자나 키워드에 따라 특정 파일을 자동으로 제외할 수 있습니다.
+                • <b>외부 직접 연결</b>: 클릭 한 번으로 비디오 스트리밍 직링크를 얻거나 PotPlayer 재생을 호출합니다. RPC 프로토콜을 통해 파일을 즉시 <b>Aria2</b> 노드로 전송할 수 있습니다.<br>
+                • <b>배포 향상</b>: 폴더를 Aria2로 푸시할 때 <b>클라우드 트리 디렉토리 구조를 자동 복원</b>합니다. 장기 연결 모니터링을 지원하며 오류 발생 시 오류 목록을 자동 내보냅니다. <b>폴더 다운로드 필터링</b> 설정을 지원합니다.
             </div>
             <div style="margin-top:16px; color:#d93025; font-weight:bold; text-align:center; font-size:11px; border-top:1px dashed rgba(217,48,37,0.2); padding-top:12px; letter-spacing:0.5px; opacity:0.9;">
                 이 프로젝트는 CC-BY-NC-SA-4.0 라이선스를 엄격히 준수하며, 상업적 이용을 금지합니다.
@@ -4976,44 +4975,44 @@ const T = {
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">✨ エクスペリエンス＆ナビゲーション</b><br>
                 • <b>インタラクションの再構築</b>：公式機能をベースに、インターフェースを <b>Windows エクスプローラー</b> 風に刷新しました。<br>
-                • <b>ターボモード</b>：有効にするとスクリプトを自動ロードし、ウェブ版固有の同期ロジックを物理的にブロックします。メモリ不足（OOM）のリスクを大幅に軽減し、究極のレスポンスと安定性を確保します。<br>
-                • <b>高機能パスバー</b>：マウスホイールによるスクロールや、ドロップダウンメニューによる同階層の切り替えに対応。全体検索、ファイル/フォルダ分析がパスバーに統合され、パスの履歴表示やディレクトリの遡及がスムーズに行えます。<br>
-                • <b>UXの強化</b>：お気に入り、ファイルタイプ優先度など、多角的なソートに対応。ライト/ダークテーマの切り替えや、ワンクリックでの<b>サムネイルのぼかし</b>によるプライバシー保護機能を搭載しています。<br>
-                • <b>バックグラウンド・インデックス</b>：ホームアイコンに<b>青い点滅インジケーター</b>が表示されている間、バックグラウンドでディレクトリツリーを自動同期しています。<br>
+                • <b>ターボモード</b>：有効にするとウェブ版のロジックを完全に引き継ぎ、大量のファイルによるフリーズやクラッシュを根本から解決します。<br>
+                • <b>高機能パスバー</b>：マウスホイールのスクロールやドロップダウンでの同階層切り替えに対応。全体検索や分析スイートが統合され、パスの履歴表示や遡及ジャンプが可能です。<br>
+                • <b>UXの強化</b>：スター等の多角的なソート、ワンクリックでの<b>サムネイルぼかし</b>、ダークテーマ切り替えをサポート。バックグラウンドでは <b>SWR 戦略</b> を採用し、シームレスにビューを更新します。<br>
+                • <b>バックグラウンドインデックスと保護</b>：ホームアイコンの青い点滅はディレクトリツリーの同期中を示します。競合する操作をブロックし、データの破損を防ぐ同時実行の物理的ロックを備えています。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：デフォルトフォルダ（My Pack）はシステムにより保護されており、誤削除、コピー、移動、リネームが制限されています。</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 一括処理＆ストレージ管理</b><br>
-                • <b>一括リネーム</b>：<b>正規表現による置換/削除</b>、<b>エピソード番号</b>の生成、テキスト<b>整形</b>（大文字・小文字/全角・半角）、<b>品番/FC2 ID</b> のスマート認識、<b>広告プレフィックスの削除</b>、MIMEに基づく<b>拡張子の修復</b>に対応しています。<br>
-                • <b>分析スイート</b>：<b>ファイル分析</b>（ファイル抽出およびハッシュ/時間/名前による重複チェック）と<b>フォルダ分析</b>（フォルダ抽出および名前/類似度/包含率による重複チェック）を統合。現在のパスの<b>ディレクトリツリー</b>作成もサポートします。<br>
-                • <b>スマート整理</b>：ワンクリックで空フォルダを削除。<b>一括解凍</b>はパスワードの自動記憶とスマート入力を統合し、解凍済み項目の自動スキップや削除も可能です。<br>
-                • <b>リソースマネージャー</b>：不要なファイルを一括クリーンアップする<b>ブラックリスト</b>として、または一括削除時に特定のファイルを保護する<b>ホワイトリスト</b>として機能します。<br>
+                • <b>一括リネーム</b>：<b>正規表現による置換/削除</b>、<b>エピソード番号</b>生成、テキスト<b>整形</b>、<b>FC2 標準命名</b>、<b>広告プレフィックスの削除</b>、MIMEに基づく<b>拡張子の修復</b>に対応しています。<br>
+                • <b>分析スイート</b>：<b>ファイル分析</b>（フィルタおよびハッシュ/時間/名前による重複チェック）と<b>フォルダ分析</b>（フィルタおよび名前/類似度/包含率による重複チェック）を統合。現在のパスの<b>ディレクトリツリー</b>出力もサポートします。<br>
+                • <b>スマート整理</b>：ワンクリックで空フォルダを削除。<b>一括解凍</b>はパスワード自動記憶とスマート入力を統合し、解凍済み項目のスキップや削除も可能です。<br>
+                • <b>リソースマネージャー</b>：カスタム<b>ブラックリスト</b>として不要ファイルを一括クリーンアップ、または<b>ホワイトリスト</b>として一括削除時に自動保護します。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：データの同期競合を避けるため、処理中は他のクライアントでファイルを変更しないでください。</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🌐 転送＆共有センター</b><br>
-                • <b>共有管理</b>：抽出回数の制限設定に対応。制限に達すると自動的に共有が解除されます。<br>
-                • <b>オフラインダウンロード</b>：リンクによる一括オフライン保存、およびリソースリンクの一括書き出しをサポート。<br>
-                • <b>高速アップロード</b>：ローカルの大容量ファイルやネストされたフォルダのドラッグ＆ドロップによる直接アップロードに対応。公式の制限を回避し、<b>小容量ファイルの転送中断率を大幅に低減</b>しました。
+                • <b>共有管理</b>：抽出回数の上限設定に対応。制限に達すると自動的に共有が解除されます。<br>
+                • <b>高速アップロード</b>：ローカルファイルやフォルダのドラッグ＆ドロップによる直接アップロードに対応。公式の制限を突破し、<b>小容量ファイルの転送中断率を大幅に低減</b>しました。<br>
+                • <b>クラウドダウンロード強化</b>：一括オフラインリンクの<b>自動重複排除</b>。内蔵の<b>マグネットスマートクリーンエンジン</b>（Base32/Hex ハッシュを自動抽出してノイズを除去）。<b>.torrent</b> シードファイルの解析をサポート。制限付きリンクに対する<b>ウェブスナップショット保存</b>のフォールバック機能を提供。
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：抽出回数による自動解除は、ページを開いており、コンピュータがスリープ状態でない場合にのみ動作します。</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">🎬 没入型メディア拡張</b><br>
-                • <b>再生エンジン</b>：0.5x〜3.0xの倍速再生、画面の回転/反転、アスペクト比の強制調整をサポート。レジューム再生、OP/EDスキップ、<b>連続再生/ループ</b>、リアルタイムの<b>サムネイルプレビュー</b>に対応しています。<br>
-                • <b>字幕システム</b>：クラウド内の同名字幕、ローカルファイル、およびオンライン字幕検索の読み込みに対応。字幕のズレをミリ秒単位で調整でき、ローカルテキストの<b>ドラッグ＆ドロップ解析</b>も可能です。<br>
+                • <b>再生エンジン</b>：0.5x〜3.0xの倍速再生、画面の回転/反転、アスペクト比の強制調整、OP/EDスキップ、<b>連続再生/ループ</b>モードをサポートし、プログレスバーのサムネイルプレビューに対応。内蔵の<b>ウォッチドッグ</b>により、ブラックスクリーンや非対応コーデック時に互換画質へ自動フォールバックします。<br>
+                • <b>字幕システム</b>：クラウド内の同名字幕、ローカルファイル、およびオンライン字幕検索の読み込みに対応。字幕のズレをミリ秒単位で微調整でき、ローカルテキストの<b>ドラッグ＆ドロップ解析</b>も可能です。<br>
                 • <b>ビジュアルアシスト</b>：複数のエンジンによる<b>画像検索</b>（逆引き）を内蔵。「メディアモード」を有効にすると、マンガやアニメのフォルダが自動的に名前順（A-Z）でソートされます。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：再生履歴リストは、スクリプト環境内で発生した再生進捗のみを記録します。</div>
             </div>
             <div style="margin-bottom:12px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ 設定＆データ管理</b><br>
-                • <b>設定のバックアップ</b>：個人設定、ルール、パスワード庫、履歴データをデジタル指紋付きのJSONファイルとしてエクスポートでき、デバイス間の移行が容易です。<br>
-                • <b>データの削除</b>：インデックス、設定、ルール、パスワード、履歴データを必要に応じて個別に削除し、ストレージの解放とプライバシー保護を行えます。<br>
-                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：インデックスはページを閉じると消去されますが、設定や履歴データなどは永続的に保存されます。</div>
+                • <b>設定のバックアップ</b>：個人設定、管理ルール、パスワード庫等をデジタル指紋付きの JSON ファイルとしてエクスポートでき、インポート時の<b>スマート結合と重複排除</b>をサポートします。<br>
+                • <b>データの削除</b>：インデックス、設定、ルール、パスワード、キャッシュデータを必要に応じて個別に削除し、ストレージの解放とプライバシー保護を行えます。<br>
+                <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：インデックスはページを閉じると消去されますが、設定やパスワード庫などのデータは永続的に保存されます。</div>
             </div>
             <div style="margin-bottom:24px;">
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚡ ダウンロード＆配布</b><br>
-                • <b>外部ダイレクト接続</b>：RPCプロトコルを通じて、ファイルをダウンロードすることなく <b>Aria2</b> ノードへ即座に転送できます。<br>
-                • <b>ダウンロードフィルタ</b>：<b>フォルダ単位のフィルタ</b>を設定し、拡張子やキーワードに基づいて特定のファイルを自動的に除外できます。
+                • <b>外部ダイレクト接続</b>：ワンクリックでビデオストリームの直リンクを取得、または PotPlayer を起動。RPC プロトコルを通じてファイルを <b>Aria2</b> ノードへ即座に転送できます。<br>
+                • <b>配布の強化</b>：フォルダを Aria2 にプッシュする際、<b>クラウドのツリーディレクトリ構造を自動復元</b>します。持続的な接続監視をサポートし、エラー時にエラーリストを自動出力します。<b>フォルダダウンロードフィルタ</b>の設定をサポート。
             </div>
             <div style="margin-top:16px; color:#d93025; font-weight:bold; text-align:center; font-size:11px; border-top:1px dashed rgba(217,48,37,0.2); padding-top:12px; letter-spacing:0.5px; opacity:0.9;">
                 このプロジェクトは CC-BY-NC-SA-4.0 ライセンスに厳格に従っており、あらゆる形式の商用利用を禁止します。
@@ -5026,7 +5025,6 @@ function getStrings() {
     return T[getLang()] || T.zh;
 };
 
-// ./src/api.js
 let cachedCredKey = null;
 let cachedCaptchaKey = null;
 
@@ -5052,6 +5050,9 @@ function purgeAllCachesOnLogout() {
         document.body.style.overflow = '';
         document.documentElement.style.overflow = '';
     }
+
+    const btn = document.getElementById('pk-launch');
+    if (btn) btn.remove();
 
     if (typeof pkState !== 'undefined' && pkState) pkState = null;
     if (typeof globalSavedState !== 'undefined') globalSavedState = null;
@@ -6752,12 +6753,14 @@ async function openManager(initialCache, preloadPromise) {
 
         document.documentElement.style.setProperty('--pk-zoom', z);
 
+        const isTurboCurrent = typeof GM_getValue !== 'undefined' ? GM_getValue('pk_turbo_mode', false) : false;
+
         const MIN_WIDTH = 940 * z;
         const MIN_HEIGHT = 450;
         const isTooSmall = width < MIN_WIDTH || height < MIN_HEIGHT;
         const isGuiVisible = el.style.display !== 'none';
 
-        if (isTooSmall) {
+        if (isTooSmall && !isTurboCurrent) {
             document.body.classList.add('pk-hide-all-ui');
             if (isGuiVisible) {
                 el.style.display = 'none';
@@ -11216,14 +11219,24 @@ async function openManager(initialCache, preloadPromise) {
                         let pathHtml = '';
                         const homeIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;flex-shrink:0;vertical-align:-4px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
                         const homeText = L.btn_nav_home;
-                        const isHomeMatched = shouldShowHl && (S.search.toLowerCase().includes(homeText.toLowerCase()) || homeText.toLowerCase().includes(S.search.toLowerCase()));
-                        const homeDisplay = isHomeMatched ? getSearchHlHTML(homeText, S.search.split('/')[0], 20) : esc(homeText);
-                        const restQuery = S.search.includes('/') ? S.search.split('/').slice(1).join('/') : S.search;
+                        let homeQuery = S.search;
+                        let restQuery = S.search;
+                        let isSlashMatched = false;
+                        if (S.search) {
+                            const qLower = S.search.toLowerCase();
+                            const hLower = homeText.toLowerCase();
+                            if (qLower.startsWith(hLower + '/')) {
+                                homeQuery = S.search.substring(0, homeText.length);
+                                restQuery = S.search.substring(homeText.length + 1);
+                                isSlashMatched = true;
+                            }
+                        }
+                        const isHomeMatched = shouldShowHl && homeQuery && homeText.toLowerCase().includes(homeQuery.toLowerCase());
+                        const homeDisplay = isHomeMatched ? getSearchHlHTML(homeText, homeQuery, 20) : esc(homeText);
                         const prefix = homeText + '/';
                         const rootStyle = isMax? "display:inline-flex;align-items:baseline;flex-shrink:0;margin-right:2px;": "display:inline-flex;align-items:baseline;flex-shrink:0;line-height:1.2;padding-bottom:0;";
                         const contentStyle = isMax ? '' : 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.5;padding-bottom:2px;';
                         const containerStyle = isMax? "display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-all;line-height:1.4;white-space:normal;color:var(--pk-fg);": "display:flex;align-items:center;overflow:hidden;white-space:nowrap;color:var(--pk-fg);line-height:1.5;padding-bottom:2px;";
-                        const slashHtml = `<span style="margin:0 1px;line-height:1.5;padding-bottom:2px;">/</span>`;
 
                         if (isAnalyzeRoot) {
                             const pStr = d._pathStr || d.path || "";
@@ -11241,14 +11254,24 @@ async function openManager(initialCache, preloadPromise) {
                                 if (pStr === homeText) content = "";
                                 else if (pStr.startsWith(prefix)) content = pStr.substring(prefix.length);
 
+                                let hq = restQuery;
+                                let sm = isSlashMatched;
+                                if (hq.endsWith('/')) hq = hq.slice(0, -1);
+                                if (hq.startsWith('/') && content.toLowerCase().startsWith(hq.substring(1).toLowerCase())) {
+                                    sm = true;
+                                    hq = hq.substring(1);
+                                }
+                                const sDisp = (shouldShowHl && sm) ? `<b style="color:var(--pk-match-fg); background:var(--pk-match-bg); border-radius:2px; padding:0 2px;">/</b>` : '/';
+                                const sHtml = `<span style="margin:0 1px;line-height:1.5;padding-bottom:2px;">${sDisp}</span>`;
+
                                 const includePath = UI.chkSearchPath && UI.chkSearchPath.checked;
                                 const pathDisplay = (shouldShowHl && includePath && content)
-                                    ? getSearchHlHTML(content, restQuery, pathCharCapacity)
+                                    ? getSearchHlHTML(content, hq, pathCharCapacity)
                                     : esc(content);
 
                                 let innerHtml = `<span style="${rootStyle}">${homeIcon}<span style="${isMax ? '' : 'transform:translateY(-2px);'}">${homeDisplay}</span></span>`;
                                 if (content) {
-                                    innerHtml += `${slashHtml}<span style="${contentStyle}">${pathDisplay}</span>`;
+                                    innerHtml += `${sHtml}<span style="${contentStyle}">${pathDisplay}</span>`;
                                 }
                                 pathHtml = `<div style="${containerStyle}">${innerHtml}</div>`;
                             }
@@ -11275,14 +11298,24 @@ async function openManager(initialCache, preloadPromise) {
                                     contentStr = realPath.substring(prefix.length);
                                 }
 
+                                let hq = restQuery;
+                                let sm = isSlashMatched;
+                                if (hq.endsWith('/')) hq = hq.slice(0, -1);
+                                if (hq.startsWith('/') && contentStr.toLowerCase().startsWith(hq.substring(1).toLowerCase())) {
+                                    sm = true;
+                                    hq = hq.substring(1);
+                                }
+                                const sDisp = (shouldShowHl && sm) ? `<b style="color:var(--pk-match-fg); background:var(--pk-match-bg); border-radius:2px; padding:0 2px;">/</b>` : '/';
+                                const sHtml = `<span style="margin:0 1px;line-height:1.5;padding-bottom:2px;">${sDisp}</span>`;
+
                                 const includePath = UI.chkSearchPath && UI.chkSearchPath.checked;
                                 const pathDisplay = (shouldShowHl && includePath && contentStr)
-                                    ? getSearchHlHTML(contentStr, restQuery, pathCharCapacity)
+                                    ? getSearchHlHTML(contentStr, hq, pathCharCapacity)
                                     : esc(contentStr);
 
                                 let innerHtml = `<span style="${rootStyle}">${homeIcon}<span style="${isMax ? '' : 'transform:translateY(-2px);'}">${homeDisplay}</span></span>`;
                                 if (contentStr) {
-                                    innerHtml += `${slashHtml}<span style="${contentStyle}">${pathDisplay}</span>`;
+                                    innerHtml += `${sHtml}<span style="${contentStyle}">${pathDisplay}</span>`;
                                 }
                                 pathHtml = `<div style="${containerStyle}">${innerHtml}</div>`;
                             }
@@ -11317,14 +11350,24 @@ async function openManager(initialCache, preloadPromise) {
                                 if (isSameAsPrev) {
                                     pathHtml = `<span style="color:var(--pk-fg);">${L.str_same_folder}</span>`;
                                 } else {
+                                    let hq = restQuery;
+                                    let sm = isSlashMatched;
+                                    if (hq.endsWith('/')) hq = hq.slice(0, -1);
+                                    if (hq.startsWith('/') && fullPathStr.toLowerCase().startsWith(hq.substring(1).toLowerCase())) {
+                                        sm = true;
+                                        hq = hq.substring(1);
+                                    }
+                                    const sDisp = (shouldShowHl && sm) ? `<b style="color:var(--pk-match-fg); background:var(--pk-match-bg); border-radius:2px; padding:0 2px;">/</b>` : '/';
+                                    const sHtml = `<span style="margin:0 1px;line-height:1.5;padding-bottom:2px;">${sDisp}</span>`;
+
                                     const includePath = UI.chkSearchPath && UI.chkSearchPath.checked;
                                     const pathDisplay = (shouldShowHl && includePath && fullPathStr)
-                                        ? getSearchHlHTML(fullPathStr, restQuery, pathCharCapacity)
+                                        ? getSearchHlHTML(fullPathStr, hq, pathCharCapacity)
                                         : esc(fullPathStr);
 
                                     let innerHtml = `<span style="${rootStyle}">${homeIcon}<span style="${isMax ? '' : 'transform:translateY(-2px);'}">${homeDisplay}</span></span>`;
                                     if (fullPathStr) {
-                                        innerHtml += `${slashHtml}<span style="${contentStyle}">${pathDisplay}</span>`;
+                                        innerHtml += `${sHtml}<span style="${contentStyle}">${pathDisplay}</span>`;
                                     }
                                     pathHtml = `<div style="${containerStyle}">${innerHtml}</div>`;
                                 }
@@ -11334,12 +11377,24 @@ async function openManager(initialCache, preloadPromise) {
                         let pathTipHtml = getTooltipHlHTML(displayPath || "", S.search);
                         if (displayPath && displayPath.startsWith(homeText)) {
                             const rest = displayPath.substring(homeText.length);
-                            const sParts = S.search.split('/');
-                            const homeQuery = sParts[0];
-                            const restQuery = sParts.length > 1 ? sParts.slice(1).join('/') : S.search;
-
                             const homeDisplayTip = getTooltipHlHTML(homeText, homeQuery);
-                            const restDisplayTip = getTooltipHlHTML(rest, restQuery);
+
+                            let restDisplayTip = '';
+                            if (rest.startsWith('/')) {
+                                const pureRest = rest.substring(1);
+                                let hq = restQuery;
+                                let sm = isSlashMatched;
+                                if (hq.endsWith('/')) hq = hq.slice(0, -1);
+                                if (hq.startsWith('/') && pureRest.toLowerCase().startsWith(hq.substring(1).toLowerCase())) {
+                                    sm = true;
+                                    hq = hq.substring(1);
+                                }
+                                const slashTip = (shouldShowHl && sm) ? `<b style="color:var(--pk-match-fg); background:var(--pk-match-bg); border-radius:2px; padding:0 2px;">/</b>` : '/';
+                                restDisplayTip = slashTip + getTooltipHlHTML(pureRest, hq);
+                            } else {
+                                restDisplayTip = getTooltipHlHTML(rest, restQuery);
+                            }
+
                             const homeGroup = `<span style="display:inline-flex;align-items:center;vertical-align:bottom;">${homeIcon}${homeDisplayTip}</span>`;
                             pathTipHtml = `<div style="line-height:1.6;word-break:break-all;">${homeGroup}${restDisplayTip}</div>`;
                         }
@@ -27828,8 +27883,6 @@ async function openManager(initialCache, preloadPromise) {
          m.querySelector('#set_save').onclick = async () => {
             const newTurbo = m.querySelector('#set_turbo').checked;
             const oldTurbo = gmGet('pk_turbo_mode', false);
-            gmSet('pk_turbo_mode', newTurbo);
-            if (newTurbo !== oldTurbo) { location.reload(); return; }
             const newUrl = m.querySelector('#set_aria_url').value.trim();
             const newToken = m.querySelector('#set_aria_token').value.trim();
             const newBlur = m.querySelector('#set_thumb').checked;
@@ -27856,6 +27909,7 @@ async function openManager(initialCache, preloadPromise) {
 
             gmSet('pk_lang', selectedLang);
             gmSet('pk_search_engine', selectedEngine);
+            gmSet('pk_turbo_mode', newTurbo);
             gmSet('pk_dl_filter_ext', m.querySelector('#set_dl_filter_ext').value.trim());
             gmSet('pk_dl_filter_name', m.querySelector('#set_dl_filter_name').value.trim());
 
@@ -27864,6 +27918,11 @@ async function openManager(initialCache, preloadPromise) {
 
                 const savedMsg = (T[selectedLang] || T['en']).msg_settings_saved;
                 showToast(savedMsg);
+
+                if (newTurbo !== oldTurbo) {
+                    setTimeout(() => location.reload(), 300);
+                    return;
+                }
 
                 if (curLang !== selectedLang) {
                     let safePath = [...S.path];
@@ -31793,19 +31852,23 @@ const DurationProber = (() => {
     let queue = [];
     let isRunning = false;
     let probeVideo = null;
+    let loopTimer = null;
+    let runToken = 0;
 
     const startNext = async () => {
-        if (queue.length === 0) { isRunning = false; return; }
+        if (!isRunning || queue.length === 0) { isRunning = false; return; }
+
+        const currentToken = runToken;
 
         if (document.hidden) {
             console.log(`[Prober] Running in background... Queue: ${queue.length}`);
         }
 
         const isUserWatching = !!document.getElementById('pk-player-ov');
-        const isSystemScanning = pkState && pkState.scanning;
+        const isSystemScanning = typeof pkState !== 'undefined' && pkState && pkState.scanning;
 
         if (isUserWatching || isSystemScanning) {
-            setTimeout(startNext, 2000);
+            loopTimer = setTimeout(startNext, 2000);
             return;
         }
 
@@ -31818,12 +31881,20 @@ const DurationProber = (() => {
 
         console.log(`[Prober] Probing duration for: ${item.name}`);
 
+        let watchdog = null;
+        const currentVideo = probeVideo;
+
         const cleanup = () => {
-            probeVideo.removeEventListener('loadedmetadata', onLoaded);
-            probeVideo.removeEventListener('error', onError);
-            probeVideo.src = "";
-            probeVideo.load();
-            setTimeout(startNext, 8000);
+            if (watchdog) clearTimeout(watchdog);
+            if (currentVideo) {
+                currentVideo.removeEventListener('loadedmetadata', onLoaded);
+                currentVideo.removeEventListener('error', onError);
+                currentVideo.src = "";
+                currentVideo.load();
+            }
+            if (isRunning && currentToken === runToken) {
+                loopTimer = setTimeout(startNext, 1500);
+            }
         };
 
         const saveAndNotify = (targetItem, dur) => {
@@ -31848,44 +31919,175 @@ const DurationProber = (() => {
         };
 
         const onLoaded = () => {
-            const dur = Math.round(probeVideo.duration);
-            if (dur > 0) {
-                console.log(`[Prober] Success: ${item.name} -> ${dur}s`);
-                saveAndNotify(item, dur);
+            if (currentToken === runToken) {
+                const dur = Math.round(currentVideo.duration);
+                if (dur > 0) {
+                    console.log(`[Prober] Success: ${item.name} -> ${dur}s`);
+                    saveAndNotify(item, dur);
+                }
             }
             cleanup();
         };
 
         const onError = () => { cleanup(); };
 
-        probeVideo.addEventListener('loadedmetadata', onLoaded);
-        probeVideo.addEventListener('error', onError);
+        currentVideo.addEventListener('loadedmetadata', onLoaded);
+        currentVideo.addEventListener('error', onError);
 
         try {
             const res = await apiGet(item.id);
+
+            if (currentToken !== runToken) { cleanup(); return; }
             if (!res || !res.web_content_link) { cleanup(); return; }
 
             const url = res.web_content_link;
-            const isM3u8 = (item.name || '').toLowerCase().endsWith('.m3u8') || url.includes('.m3u8');
+            const nameLower = (item.name || '').toLowerCase();
+            const urlLower = url.toLowerCase();
+
+            const isM3u8 = nameLower.endsWith('.m3u8') || urlLower.includes('.m3u8');
+            const isWmv = nameLower.endsWith('.wmv') || urlLower.includes('.wmv') || nameLower.endsWith('.asf') || urlLower.includes('.asf');
+            const isAvi = nameLower.endsWith('.avi') || urlLower.includes('.avi') || nameLower.endsWith('.divx') || urlLower.includes('.divx');
+            const isFlv = nameLower.endsWith('.flv') || urlLower.includes('.flv');
+            const isMkv = nameLower.endsWith('.mkv') || urlLower.includes('.mkv');
+            const isRmvb = nameLower.endsWith('.rmvb') || urlLower.includes('.rmvb') || nameLower.endsWith('.rm') || urlLower.includes('.rm');
 
             if (isM3u8) {
-                const text = await fetch(url).then(r => r.text());
-                const matches = text.matchAll(/#EXTINF:([\d.]+)/g);
-                let total = 0;
-                for (const m of matches) total += parseFloat(m[1]);
-                if (total > 0) saveAndNotify(item, Math.round(total));
+                const fetchOptions = window.AbortSignal ? { signal: AbortSignal.timeout(15000) } : {};
+                const text = await fetch(url, fetchOptions).then(r => r.text());
+
+                if (currentToken === runToken) {
+                    const matches = text.matchAll(/#EXTINF:([\d.]+)/g);
+                    let total = 0;
+                    for (const m of matches) total += parseFloat(m[1]);
+                    if (total > 0) saveAndNotify(item, Math.round(total));
+                }
                 cleanup();
-            } else {
+            }
+            else if (isWmv || isAvi || isFlv || isMkv || isRmvb) {
+                const rangeEnd = isMkv ? 65535 : 8191;
+                const fetchOptions = {
+                    headers: { 'Range': `bytes=0-${rangeEnd}` },
+                    ...(window.AbortSignal ? { signal: AbortSignal.timeout(15000) } : {})
+                };
+
+                try {
+                    const response = await fetch(url, fetchOptions);
+                    if (currentToken === runToken && (response.ok || response.status === 206)) {
+                        const buffer = await response.arrayBuffer();
+                        const view = new DataView(buffer);
+                        const bytes = new Uint8Array(buffer);
+                        let seconds = 0;
+                        let formatName = '';
+
+                        if (isWmv) {
+                            formatName = nameLower.endsWith('.asf') ? 'ASF' : 'WMV';
+                            const guid = [0xA1, 0xDC, 0xAB, 0x8C, 0x47, 0xA9, 0xCF, 0x11, 0x8E, 0xE4, 0x00, 0xC0, 0x0C, 0x20, 0x53, 0x65];
+                            let foundIdx = -1;
+                            for (let i = 0; i < bytes.length - 88; i++) {
+                                let match = true;
+                                for (let j = 0; j < 16; j++) { if (bytes[i + j] !== guid[j]) { match = false; break; } }
+                                if (match) { foundIdx = i; break; }
+                            }
+                            if (foundIdx !== -1) {
+                                const playDur = view.getBigUint64(foundIdx + 64, true);
+                                const preroll = view.getBigUint64(foundIdx + 80, true);
+                                seconds = Number(playDur - preroll) / 10000000;
+                            }
+                        } else if (isAvi) {
+                            formatName = nameLower.endsWith('.divx') ? 'DIVX' : 'AVI';
+                            const avih = [0x61, 0x76, 0x69, 0x68];
+                            let foundIdx = -1;
+                            for (let i = 0; i < bytes.length - 28; i++) {
+                                if (bytes[i] === avih[0] && bytes[i+1] === avih[1] && bytes[i+2] === avih[2] && bytes[i+3] === avih[3]) { foundIdx = i; break; }
+                            }
+                            if (foundIdx !== -1) {
+                                const microSecPerFrame = view.getUint32(foundIdx + 8, true);
+                                const totalFrames = view.getUint32(foundIdx + 24, true);
+                                seconds = (microSecPerFrame * totalFrames) / 1000000;
+                            }
+                        } else if (isFlv) {
+                            formatName = 'FLV';
+                            const durKey = [0x00, 0x08, 0x64, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x00];
+                            let foundIdx = -1;
+                            for (let i = 0; i < bytes.length - 19; i++) {
+                                let match = true;
+                                for (let j = 0; j < 11; j++) { if (bytes[i + j] !== durKey[j]) { match = false; break; } }
+                                if (match) { foundIdx = i; break; }
+                            }
+                            if (foundIdx !== -1) seconds = view.getFloat64(foundIdx + 11, false);
+                        } else if (isRmvb) {
+                            formatName = 'RM/RMVB';
+                            const prop = [0x50, 0x52, 0x4F, 0x50];
+                            let foundIdx = -1;
+                            for (let i = 0; i < bytes.length - 36; i++) {
+                                if (bytes[i] === prop[0] && bytes[i+1] === prop[1] && bytes[i+2] === prop[2] && bytes[i+3] === prop[3]) { foundIdx = i; break; }
+                            }
+                            if (foundIdx !== -1) {
+                                const ms = view.getUint32(foundIdx + 32, false);
+                                seconds = ms / 1000;
+                            }
+                        } else if (isMkv) {
+                            formatName = 'MKV';
+                            let timecodeScale = 1000000;
+                            let durationVal = 0;
+
+                            for (let i = 0; i < bytes.length - 10; i++) {
+                                if (bytes[i] === 0x2A && bytes[i+1] === 0xD7 && bytes[i+2] === 0xB1) {
+                                    let len = bytes[i+3] & 0x7F;
+                                    if (len === 3) timecodeScale = (bytes[i+4]<<16) | (bytes[i+5]<<8) | bytes[i+6];
+                                    if (len === 4) timecodeScale = (bytes[i+4]<<24) | (bytes[i+5]<<16) | (bytes[i+6]<<8) | bytes[i+7];
+                                    break;
+                                }
+                            }
+                            for (let i = 0; i < bytes.length - 10; i++) {
+                                if (bytes[i] === 0x44 && bytes[i+1] === 0x89) {
+                                    let lenByte = bytes[i+2];
+                                    if (lenByte === 0x84) {
+                                        durationVal = view.getFloat32(i+3, false);
+                                        break;
+                                    } else if (lenByte === 0x88) {
+                                        durationVal = view.getFloat64(i+3, false);
+                                        break;
+                                    }
+                                }
+                            }
+                            if (durationVal > 0) {
+                                seconds = (durationVal * timecodeScale) / 1000000000;
+                            }
+                        }
+
+                        if (seconds > 0) {
+                            console.log(`[Prober] Success (${formatName} Binary Parsing): ${item.name} -> ${Math.round(seconds)}s`);
+                            saveAndNotify(item, Math.round(seconds));
+                        } else {
+                            console.warn(`[Prober] Binary parsed but got 0 duration for ${item.name}`);
+                        }
+                    }
+                } catch (e) {
+                    console.warn(`[Prober] Failed to parse binary header for ${item.name}`);
+                }
+                cleanup();
+            }
+            else {
                 if (document.hidden) {
-                    console.log(`[Prober] Video tag throttled by browser, re-queueing: ${item.name}`);
-                    queue.push(item);
-                    setTimeout(startNext, 1000);
+                    console.log(`[Prober] Video tag throttled by browser, pausing prober: ${item.name}`);
+                    queue.unshift(item);
+                    isRunning = false;
+                    cleanup();
                     return;
                 }
-                probeVideo.src = url;
-                probeVideo.load();
+
+                watchdog = setTimeout(() => {
+                    console.warn(`[Prober] Watchdog timeout fetching metadata for: ${item.name}`);
+                    cleanup();
+                }, 15000);
+
+                currentVideo.src = url;
+                currentVideo.load();
             }
-        } catch(e) { cleanup(); }
+        } catch(e) {
+            cleanup();
+        }
     };
 
     return {
@@ -31906,8 +32108,10 @@ const DurationProber = (() => {
         },
         reset: () => {
             console.log(`[Prober] Resetting queue (Dropped ${queue.length} tasks).`);
+            runToken++;
             queue = [];
             isRunning = false;
+            if (loopTimer) clearTimeout(loopTimer);
             if (probeVideo) {
                 probeVideo.removeAttribute('src');
                 probeVideo.load();
@@ -32162,9 +32366,6 @@ async function tryInject() {
     if (isTurbo) {
         console.log("🚀[Turbo Mode] Fast-track rendering...");
         const startTurbo = async () => {
-            const currentHeaders = getHeaders();
-            if (!currentHeaders.Authorization || currentHeaders.Authorization.length < 10) return;
-
             const preload = preLoadRootFiles();
             if (!document.querySelector('.pk-ov')) {
                 await openManager(globalCache, preload);
