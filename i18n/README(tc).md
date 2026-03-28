@@ -4,15 +4,7 @@
 
 # 📦 PikPak 增強大師
 
-<a href="https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js" target="_blank">
-  <img src="https://img.shields.io/badge/Version-1.2.0-0067C0?style=flat-square" alt="Version">
-</a>
-<a href="https://spdx.org/licenses/CC-BY-NC-SA-4.0.html" target="_blank">
-  <img src="https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square" alt="License">
-</a>
-<a href="https://mypikpak.com/drive/all" target="_blank">
-  <img src="https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square" alt="Platform">
-</a>
+[![Version](https://img.shields.io/badge/Version-1.2.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js) [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html) [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
 > 整合批次解壓縮、智慧重複檢查、多模態批次重新命名、Aria2 推送、垃圾檔案清理、匯出目錄、媒體播放引擎增強等功能的桌面級檔案管理員。
 
