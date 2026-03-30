@@ -9,12 +9,12 @@
 // @version            1.2.0
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
-// @description        集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的网盘管理器。
-// @description:zh-CN  集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的网盘管理器。
-// @description:zh-TW  整合批量解壓縮、智慧重複檢查、多模態批量重新命名、Aria2 推送、垃圾檔案清理、匯出目錄、媒體播放引擎增強等功能的網盤管理器。
-// @description:en     A desktop-grade file manager featuring batch extraction, smart deduplication, multi-modal bulk renaming, Aria2 pushing, junk file cleanup, directory export, and an enhanced media playback engine.
-// @description:ko     일괄 압축 해제, 스마트 중복 체크, 멀티모달 일괄 이름 변경, Aria2 푸시, 정크 파일 정리, 디렉토리 내보내기, 미디어 재생 엔진 강화 기능을 통합한 클라우드 드라이브 관리자입니다.
-// @description:ja     一括解凍、スマート重複チェック、マルチモーダル一括リネーム、Aria2 プッシュ、不要ファイル削除、ディレクトリ書き出し、メディア再生エンジン強化などの機能を統合したクラウドストレージマネージャー。
+// @description        桌面级PikPak网盘管家！包含多模态文件查重（哈希/时长/名称）、多模态文件夹查重（名称/相似度/包含率）、多模态批量重命名（正则替换/剧集流水号生成/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、Aria2/Motrix带目录结构推送、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
+// @description:zh-CN  桌面级PikPak网盘管家！包含多模态文件查重（哈希/时长/名称）、多模态文件夹查重（名称/相似度/包含率）、多模态批量重命名（正则替换/剧集流水号生成/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、Aria2/Motrix带目录结构推送、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
+// @description:zh-TW  桌面級PikPak網盤管家！包含多模態檔案重複檢查（雜湊/時長/名稱）、多模態資料夾重複檢查（名稱/相似度/包含率）、多模態批次重新命名（正規替換/劇集流水號產生/文字格式化/FC2名稱清洗/前綴去廣告/副檔名智慧修復）、清理空資料夾、內建解壓縮密碼庫的批次解壓縮、Aria2/Motrix帶目錄結構推送、夾雜無關文字或「去頭」的污染磁鏈智慧識別、自訂資源黑白名單：清理垃圾檔案/資料夾、分享提取次數限制、匯出目錄樹等。沉浸式媒體播放引擎：以圖搜圖、進階字幕載入、跳過片頭尾及進度列縮圖預覽。叫「增強大師」是有原因的，何不進來看看？
+// @description:en     Desktop-grade PikPak file manager! Features multi-modal file deduplication (hash/duration/name), folder deduplication (name/similarity/containment), bulk renaming (regex/serialization/formatting/FC2 cleaning/ad-removal/MIME-fix), empty folder pruning, batch extraction with password vault, Aria2/Motrix push with directory structure, smart corrupted magnet link recognition, custom resource black/whitelist, share limits, directory tree export, etc. Immersive media player: reverse image search, advanced subtitles, intro/outro skipping, and thumbnail previews. There's a reason it's called the "Enhancement Master", why not take a look?
+// @description:ko     데스크톱 수준의 PikPak 클라우드 관리자! 다중 모드 파일 중복 체크(해시/시간/이름), 폴더 중복 체크(이름/유사도/포함율), 다중 모드 일괄 이름 변경(정규식/에피소드 번호/포맷팅/FC2 정리/광고 제거/확장자 복구), 빈 폴더 정리, 비밀번호 금고 기반 일괄 압축 해제, 디렉토리 구조 유지 Aria2/Motrix 푸시, 손상된 마그넷 링크 스마트 인식, 리소스 블랙/화이트리스트, 공유 횟수 제한, 디렉토리 트리 내보내기 등을 제공합니다. 몰입형 미디어 플레이어: 이미지 검색, 고급 자막, 오프닝/엔딩 건너뛰기, 진행률 썸네일 미리보기. "인핸서 마스터"라고 불리는 데에는 이유가 있습니다. 한번 확인해 보세요!
+// @description:ja     デスクトップクラスのPikPakマネージャー！マルチモーダルなファイル重複チェック（ハッシュ/時間/名前）、フォルダ重複チェック（名前/類似度/包含率）、一括リネーム（正規表現/連番/フォーマット化/FC2クリーンアップ/広告削除/拡張子修復）、空フォルダのクリーンアップ、パスワード庫連携の自動一括解凍、ディレクトリ構造を保持したAria2/Motrixプッシュ、破損マグネットリンクのスマート認識、リソースのブラック/ホワイトリスト、共有回数制限、ディレクトリツリーのエクスポートなどを備えています。没入型メディアプレーヤー：画像検索、高度な字幕、OP/EDスキップ、プログレスバーのサムネイル。なぜ「拡張マスター」と呼ばれるのか、ぜひお試しください！
 // @match              https://mypikpak.com/drive/*
 // @match              https://app.mypikpak.com/*
 // @match              https://drive.mypikpak.com/*
