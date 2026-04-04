@@ -6,15 +6,15 @@
 // @name:ko            PikPak 인핸서 마스터
 // @name:ja            PikPak 拡張マスター
 // @namespace          https://github.com/digbug82/
-// @version            1.2.0
+// @version            1.3.0
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
-// @description        桌面级PikPak网盘管家！包含多模态文件查重（哈希/时长/名称）、多模态文件夹查重（名称/相似度/包含率）、多模态批量重命名（正则替换/剧集流水号生成/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、Aria2/Motrix带目录结构推送、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
-// @description:zh-CN  桌面级PikPak网盘管家！包含多模态文件查重（哈希/时长/名称）、多模态文件夹查重（名称/相似度/包含率）、多模态批量重命名（正则替换/剧集流水号生成/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、Aria2/Motrix带目录结构推送、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
-// @description:zh-TW  桌面級PikPak網盤管家！包含多模態檔案重複檢查（雜湊/時長/名稱）、多模態資料夾重複檢查（名稱/相似度/包含率）、多模態批次重新命名（正規替換/劇集流水號產生/文字格式化/FC2名稱清洗/前綴去廣告/副檔名智慧修復）、清理空資料夾、內建解壓縮密碼庫的批次解壓縮、Aria2/Motrix帶目錄結構推送、夾雜無關文字或「去頭」的污染磁鏈智慧識別、自訂資源黑白名單：清理垃圾檔案/資料夾、分享提取次數限制、匯出目錄樹等。沉浸式媒體播放引擎：以圖搜圖、進階字幕載入、跳過片頭尾及進度列縮圖預覽。叫「增強大師」是有原因的，何不進來看看？
-// @description:en     Desktop-grade PikPak file manager! Features smart dedupe (files/folders), advanced bulk rename, empty folder pruning, batch extraction with password vault, Aria2/Motrix push with folder structure, smart corrupted magnet recognition, custom resource black/whitelist, share limits, directory tree export, etc. Immersive media player: reverse image search, advanced subtitles, intro/outro skipping, and thumbnails previews. There's a reason it's called the "Enhancement Master", why not take a look!
-// @description:ko     데스크톱 수준의 PikPak 클라우드 관리자! 다중 모드 파일 중복 체크(해시/시간/이름), 폴더 중복 체크(이름/유사도/포함율), 다중 모드 일괄 이름 변경(정규식/에피소드 번호/포맷팅/FC2 정리/광고 제거/확장자 복구), 빈 폴더 정리, 비밀번호 금고 기반 일괄 압축 해제, 디렉토리 구조 유지 Aria2/Motrix 푸시, 손상된 마그넷 링크 스마트 인식, 리소스 블랙/화이트리스트, 공유 횟수 제한, 디렉토리 트리 내보내기 등을 제공합니다. 몰입형 미디어 플레이어: 이미지 검색, 고급 자막, 오프닝/엔딩 건너뛰기, 진행률 썸네일 미리보기. "인핸서 마스터"라고 불리는 데에는 이유가 있습니다. 한번 확인해 보세요!
-// @description:ja     デスクトップクラスのPikPakマネージャー！マルチモーダルなファイル重複チェック（ハッシュ/時間/名前）、フォルダ重複チェック（名前/類似度/包含率）、一括リネーム（正規表現/連番/フォーマット化/FC2クリーンアップ/広告削除/拡張子修復）、空フォルダのクリーンアップ、パスワード庫連携の自動一括解凍、ディレクトリ構造を保持したAria2/Motrixプッシュ、破損マグネットリンクのスマート認識、リソースのブラック/ホワイトリスト、共有回数制限、ディレクトリツリーのエクスポートなどを備えています。没入型メディアプレーヤー：画像検索、高度な字幕、OP/EDスキップ、プログレスバーのサムネイル。なぜ「拡張マスター」と呼ばれるのか、ぜひお試しください！
+// @description        桌面级PikPak网盘管家！包含Aria2/Motrix带目录结构推送、文件查重（哈希/时长/名称）、文件夹查重（名称/相似度/包含率）、批量重命名（正则替换/连续编号/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、多账号数据迁移、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
+// @description:zh-CN  桌面级PikPak网盘管家！包含Aria2/Motrix带目录结构推送、文件查重（哈希/时长/名称）、文件夹查重（名称/相似度/包含率）、批量重命名（正则替换/连续编号/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、多账号数据迁移、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
+// @description:zh-TW  桌面級PikPak網盤管家！包含Aria2/Motrix帶目錄結構推送、檔案查重（雜湊/時長/名稱）、資料夾查重（名稱/相似度/包含率）、批次重新命名（正規替換/連續編號/文字格式化/FC2名稱清洗/前綴去廣告/後綴智慧修復）、清理空資料夾、內建解壓縮密碼庫的批次解壓縮、夾雜無關文字或「去頭」的污染磁鏈智慧識別、自訂資源黑白名單：清理垃圾檔案/資料夾、多帳號資料遷移、分享提取次數限制、匯出目錄樹等。沉浸式媒體播放引擎：以圖搜圖、進階字幕載入、跳過片頭尾及進度條縮圖預覽。叫「增強大師」是有原因的，何不進來看看？
+// @description:en     Desktop-grade PikPak manager! Features Aria2/Motrix push with folders, file dedupe (hash/time/name), folder dedupe (name/similarity/inclusion), bulk rename (regex/sequential/format/FC2/ad-free/ext-fix), empty folder pruning, batch extract via password vault, corrupted magnet recognition, custom trash black/whitelists, multi-account migration, share limit restrictions, tree export. Immersive player: image search, advanced subs, intro/outro skip, thumbnails. Why not take a look?
+// @description:ko     데스크톱급 PikPak 관리자! 구조 유지 Aria2/Motrix 푸시, 파일(해시/시간/이름)·폴더(이름/유사도/포함율) 중복 검사, 일괄 이름 변경(정규식/순번/포맷/FC2/광고제거/확장자복구), 빈 폴더 정리, 내장 암호 일괄 압축 해제, 오염 마그넷 인식, 지정 흑백명단 쓰레기 정리, 다중 계정 마이그레이션, 공유 횟수 제한, 트리 내보내기. 몰입형 플레이어: 이미지 검색, 고급 자막, 오프/엔딩 스킵, 썸네일. "인핸서 마스터"인 이유를 확인해보세요!
+// @description:ja     デスクトップ級PikPakマネージャー！階層保持Aria2/Motrix転送、ファイル(ハッシュ/時間/名前)・フォルダ(名前/類似度/包含率)重複チェック、一括リネーム(正規表現/連番/書式/FC2/広告削除/拡張子修復)、空フォルダ削除、内蔵パス庫の一括解凍、破損マグネット認識、白/黒リストによる不要ファイル整理、複数アカウント移行、共有回数制限、ツリー出力。没入型プレーヤー：画像検索、高度な字幕、OP/EDスキップ、サムネイル。なぜ「拡張マスター」なのか、ぜひお試しを！
 // @match              https://mypikpak.com/drive/*
 // @match              https://app.mypikpak.com/*
 // @match              https://drive.mypikpak.com/*
@@ -39,6 +39,7 @@
 // @require            https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js
 // @downloadURL        https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.user.js
 // @updateURL          https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.meta.js
+
 // ==/UserScript==
 
 /*
@@ -85,6 +86,8 @@
 
 (() => {
 "use strict";
+
+if (window.self !== window.top) return;
 
 const NativeTokenSniffer = {
     init: () => {
@@ -187,7 +190,7 @@ const CONF = {
         offline: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="M12 12v9"></path><path d="m8 17 4 4 4-4"></path></svg>`,
         navShare: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`,
         unshare: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M392.2 517.2c0-13.8-2.4-26.9-5.9-39.6l280-168c27.6 34.6 69.6 57.1 117.2 57.1 83.1 0 150.4-67.4 150.4-150.4S866.5 65.8 783.5 65.8s-150.4 67.4-150.4 150.4c0 13.8 2.4 26.9 5.9 39.6l-280 168c-27.6-34.6-69.6-57.1-117.2-57.1-83.1 0-150.4 67.4-150.4 150.4s67.4 150.4 150.4 150.4c47.6 0 89.6-22.6 117.2-57.1l160.2 96.1 30.9-51.6-163.8-98.2c3.5-12.7 5.9-25.8 5.9-39.5z m391.3-391.3c49.8 0 90.3 40.5 90.3 90.3s-40.5 90.3-90.3 90.3-90.3-40.5-90.3-90.3 40.5-90.3 90.3-90.3zM241.8 607.4c-49.8 0-90.3-40.5-90.3-90.3s40.5-90.3 90.3-90.3 90.3 40.5 90.3 90.3c0 49.9-40.5 90.3-90.3 90.3z m640.7 69l-99 99-99.1-99-42.6 42.5 99.1 99.1-99.1 99.1 42.6 42.6 99.1-99.1 99 99.1 42.6-42.6L826 818l99-99.1-42.5-42.5z" fill="currentColor"></path></svg>`,
-        refresh: `<svg width="18" height="18" viewBox="80 80 864 864" fill="currentColor" stroke="currentColor" stroke-width="45" stroke-linejoin="round" version="1.1" xmlns="http://www.w3.org/2000/svg" style="flex-shrink: 0;"><path d="M950.371072 532.795629l-84.398202-84.393085c-6.101975-6.096858-14.093996-9.145287-22.087041-9.143241-7.995091-0.001023-15.988136 3.047406-22.079878 9.148357l-84.519975 84.530209c-12.20088 12.195763-12.20088 31.971156 0 44.171012 6.099928 6.094812 14.09195 9.145287 22.082948 9.145287s15.993253-3.050476 22.082948-9.150404l33.171494-33.175587c-16.019859 175.330214-163.813926 313.145-343.250668 313.145-190.096523 0-344.749812-154.653289-344.749812-344.749812s154.653289-344.754928 344.749812-344.754928c92.084255 0 178.658006 35.859719 243.779166 100.975762 12.20088 12.20088 31.966039 12.20088 44.166919 0 12.20088-12.195763 12.20088-31.971156 0-44.166919-76.914764-76.91988-179.176822-119.27657-287.946085-119.27657-224.543056 0-407.217539 182.679599-407.217539 407.222655 0 224.537939 182.674483 407.217539 407.217539 407.217539 212.604142 0 387.574153-163.800623 405.591505-371.808074l29.239951 29.238928c6.099928 6.094812 14.09195 9.145287 22.082948 9.145287 7.990998 0 15.98302-3.050476 22.082948-9.150404C962.571952 564.770877 962.571952 544.995485 950.371072 532.795629zM411.244248 429.099918l22.082948-22.082948c12.20088-12.195763 12.20088-31.971156 0-44.166919-12.20088-12.20088-31.966039-12.20088-44.166919 0l-22.082948 22.082948c-12.20088 12.195763-12.20088 31.971156 0 44.166919 6.099928 6.099928 14.09195 9.150404 22.082948 9.150404S405.143297 435.199847 411.244248 429.099918zM565.846372 539.536146l-22.082948 22.082948c-12.20088 12.195763-12.20088 31.971156 0 44.166919 6.099928 6.099928 14.09195 9.150404 22.082948 9.150404s15.98302-3.050476 22.082948-9.150404l22.082948-22.082948c12.20088-12.195763 12.20088-31.971156 0-44.165896C597.812411 527.335267 578.047252 527.335267 565.846372 539.536146zM336.453868 521.093099c-4.869914 20.679995-4.809539 63.99757 26.373671 95.175663 22.663162 22.658046 51.944046 29.03222 74.18049 29.03222 8.194636 0 15.433504-0.868787 21.025872-2.104941 16.694217-3.691065 27.115568-20.070104 23.638373-36.810371-3.477194-16.730033-19.968797-27.578102-36.754089-24.258497-0.25378 0.035816-23.5166 4.376681-37.923728-10.030447-14.010085-14.020318-9.953699-35.539424-9.658987-37.003775 3.741207-16.673751-6.639211-33.302477-23.312962-37.231973C357.26587 493.89055 340.408947 504.296551 336.453868 521.093099z" /></svg>`,
+        refresh: `<svg width="16" height="16" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform: scale(1.4); transform-origin: center;"><path d="M950.371072 532.795629l-84.398202-84.393085c-6.101975-6.096858-14.093996-9.145287-22.087041-9.143241-7.995091-0.001023-15.988136 3.047406-22.079878 9.148357l-84.519975 84.530209c-12.20088 12.195763-12.20088 31.971156 0 44.171012 6.099928 6.094812 14.09195 9.145287 22.082948 9.145287s15.993253-3.050476 22.082948-9.150404l33.171494-33.175587c-16.019859 175.330214-163.813926 313.145-343.250668 313.145-190.096523 0-344.749812-154.653289-344.749812-344.749812s154.653289-344.754928 344.749812-344.754928c92.084255 0 178.658006 35.859719 243.779166 100.975762 12.20088 12.20088 31.966039 12.20088 44.166919 0 12.20088-12.195763 12.20088-31.971156 0-44.166919-76.914764-76.91988-179.176822-119.27657-287.946085-119.27657-224.543056 0-407.217539 182.679599-407.217539 407.222655 0 224.537939 182.674483 407.217539 407.217539 407.217539 212.604142 0 387.574153-163.800623 405.591505-371.808074l29.239951 29.238928c6.099928 6.094812 14.09195 9.145287 22.082948 9.145287 7.990998 0 15.98302-3.050476 22.082948-9.150404C962.571952 564.770877 962.571952 544.995485 950.371072 532.795629zM411.244248 429.099918l22.082948-22.082948c12.20088-12.195763 12.20088-31.971156 0-44.166919-12.20088-12.20088-31.966039-12.20088-44.166919 0l-22.082948 22.082948c-12.20088 12.195763-12.20088 31.971156 0 44.166919 6.099928 6.099928 14.09195 9.150404 22.082948 9.150404S405.143297 435.199847 411.244248 429.099918zM565.846372 539.536146l-22.082948 22.082948c-12.20088 12.195763-12.20088 31.971156 0 44.166919 6.099928 6.099928 14.09195 9.150404 22.082948 9.150404s15.98302-3.050476 22.082948-9.150404l22.082948-22.082948c12.20088-12.195763 12.20088-31.971156 0-44.165896C597.812411 527.335267 578.047252 527.335267 565.846372 539.536146zM336.453868 521.093099c-4.869914 20.679995-4.809539 63.99757 26.373671 95.175663 22.663162 22.658046 51.944046 29.03222 74.18049 29.03222 8.194636 0 15.433504-0.868787 21.025872-2.104941 16.694217-3.691065 27.115568-20.070104 23.638373-36.810371-3.477194-16.730033-19.968797-27.578102-36.754089-24.258497-0.25378 0.035816-23.5166 4.376681-37.923728-10.030447-14.010085-14.020318-9.953699-35.539424-9.658987-37.003775 3.741207-16.673751-6.639211-33.302477-23.312962-37.231973C357.26587 493.89055 340.408947 504.296551 336.453868 521.093099z" fill="currentColor"/></svg>`,
         retry: `<svg width="18" height="18" viewBox="0 0 1024 1024" fill="currentColor" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform: scale(1.1); vertical-align: -4px;"><path d="M233.088 189.141333A425.002667 425.002667 0 0 1 512 85.333333c235.648 0 426.666667 191.018667 426.666667 426.666667 0 91.136-28.586667 175.616-77.226667 244.906667L725.333333 512h128A341.333333 341.333333 0 0 0 275.626667 265.728l-42.538667-76.586667z m557.824 645.717334A425.002667 425.002667 0 0 1 512 938.666667C276.352 938.666667 85.333333 747.648 85.333333 512c0-91.136 28.586667-175.616 77.226667-244.906667L298.666667 512H170.666667a341.333333 341.333333 0 0 0 577.706666 246.272l42.538667 76.586667z" /></svg>`,
         settings: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
         home: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`,
@@ -206,6 +209,7 @@ const CONF = {
         rename: `<svg width="16" height="16" viewBox="0 0 1024 1024" fill="currentColor" version="1.1"><path d="M56.925091 777.495273v189.579636h189.579636L805.655273 407.924364l-189.579637-189.579637L56.925091 777.495273zM952.32 261.306182a50.315636 50.315636 0 0 0 0-71.354182L834.048 71.68a50.315636 50.315636 0 0 0-71.400727 0L670.254545 164.165818 859.787636 353.745455l92.532364-92.439273v-0.093091z" fill="currentColor"></path></svg>`,
         bulkrename: `<svg width="16" height="16" viewBox="0 0 1024 1024" fill="currentColor" version="1.1" style="transform: scale(1.2);"><path d="M882.88 280.64l42.88-45.76a13.76 13.76 0 0 0 0-19.2L829.12 128a13.12 13.12 0 0 0-18.88 0L768 173.12zM739.84 202.56l-218.88 234.88a17.28 17.28 0 0 0-3.52 8.64L512 547.84a13.44 13.44 0 0 0 15.04 14.08l102.08-12.48a13.76 13.76 0 0 0 7.68-5.44l218.88-233.6z" fill="currentColor"></path><path d="M864 381.12a24 24 0 0 0-24 24v317.76H304.96V189.12h317.76a24 24 0 0 0 0-48H296.96A40 40 0 0 0 256 181.12v82.56H174.72a40 40 0 0 0-40 40v549.44a40 40 0 0 0 40 40h549.44a40 40 0 0 0 40-40v-75.84a20.8 20.8 0 0 0 0-6.4h83.84a40.32 40.32 0 0 0 40-40V405.12a24.32 24.32 0 0 0-24-24z m-147.84 396.16v67.84H182.72V311.68H256v419.2a40 40 0 0 0 40 40h421.44a20.8 20.8 0 0 0-1.28 6.4z" fill="currentColor" stroke="currentColor" stroke-width="35"></path></svg>`,
         unzip: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M1024 927.168V237.696c0-37.12-29.248-74.112-73.152-74.112H526.72L394.88 30.08H65.92C29.248 30.08 0 59.776 0 96.832v830.336c0 37.12 29.248 66.688 65.856 66.688h892.352c36.48 0 65.792-29.632 65.792-66.688zM943.552 245.12v667.2H80.448V111.68H358.4L497.344 245.12h146.304v96.384h95.104v96.384h-95.104v96.384h95.104v96.32h-95.104v185.344h190.208V534.272h-95.104V437.888h95.104V341.504h-95.104V245.12h204.8z" fill="currentColor"></path></svg>`,
+        migrate: `<svg width="16" height="16" viewBox="0 0 1024 1024" fill="currentColor" style="transform: scale(1.1);"><path d="M212.224 495.530667l50.517333-17.898667 5.824-53.269333c15.466667-141.738667 135.68-252.096 281.557334-252.096 108.416 0 202.773333 60.949333 250.389333 150.613333h93.632c-53.269333-138.026667-187.2-235.946667-344.021333-235.946667-189.888 0-346.24 143.616-366.378667 328.170667C79.488 452.053333 4.821333 551.509333 4.821333 668.394667c0 148.394667 120.277333 268.672 268.650667 268.672h206.506667v-85.333334h-206.506667a183.317333 183.317333 0 0 1-183.317333-183.317333 183.445333 183.445333 0 0 1 122.069333-172.885333z"></path><path d="M811.946667 528.576l-46.933334-46.933333 60.330667-60.330667 192.64 192.618667H897.28v-0.021334H508.416v-85.333333H811.946667z m207.232 202.453333v85.333334H715.669333l46.933334 46.933333-60.330667 60.330667-192.618667-192.597334h509.525334z"></path></svg>`,
         prune: `<svg width="16" height="16" viewBox="0 0 1064 1024" fill="currentColor" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M155.648 419.84H909.312l15.40096 369.90976a215.04 215.04 0 0 1-214.8352 224.01024H355.1232a215.04 215.04 0 0 1-214.8352-224.01024L155.648 419.84z m98.26304 102.4l-11.34592 271.81056A112.64 112.64 0 0 0 355.1232 911.36h354.7136a112.64 112.64 0 0 0 112.51712-117.30944l-11.30496-271.81056H253.91104z" /><path d="M358.4 184.32a174.08 174.08 0 0 1 348.16 0v30.72h133.12a174.08 174.08 0 0 1 174.08 174.08V450.56A71.68 71.68 0 0 1 942.08 522.24H122.88A71.68 71.68 0 0 1 51.2 450.56V389.12A174.08 174.08 0 0 1 225.28 215.04h133.12V184.32zM532.48 112.64a71.68 71.68 0 0 0-71.68 71.68v81.92c0 28.2624-22.9376 51.2-51.2 51.2H225.28A71.68 71.68 0 0 0 153.6 389.12v30.72h757.76V389.12a71.68 71.68 0 0 0-71.68-71.68H655.36c-28.2624 0-51.2-22.9376-51.2-51.2v-81.92A71.68 71.68 0 0 0 532.48 112.64zM442.90048 686.16192a51.2 51.2 0 0 1 48.5376 53.6576l-10.24 204.8a51.2 51.2 0 0 1-102.23616-5.07904l10.24-204.8a51.2 51.2 0 0 1 53.6576-48.57856z" /></svg>`,
         blacklist: `<svg width="16" height="16" viewBox="0 0 1024 1024" fill="currentColor" version="1.1"><path d="M134.8 86.7H261c25.1 0 46.6 17.9 51.2 42.6l20.9 111.9c11.7 62.6 66.4 108 130.1 108h385.6c29.9 0 54.2 24.3 54.2 54.3v45.8c0 22.2 18 40.3 40.3 40.3s40.3-18 40.3-40.3v-45.8c0-74.3-60.5-134.8-134.8-134.8H463.3c-24.9 0-46.3-17.8-50.9-42.3l-20.9-111.9C379.7 51.8 324.9 6.2 261 6.2H134.8C60.5 6.2 0 66.7 0 141v633.6C0 847 58.9 905.9 131.3 905.9h279.4c22.2 0 40.3-18 40.3-40.3 0-22.2-18-40.3-40.3-40.3H131.3c-28 0-50.7-22.8-50.7-50.7V141c-0.1-29.9 24.3-54.3 54.2-54.3z" p-id="32404"></path><path d="M554.2 140.4h338.3c22.2 0 40.3-18 40.3-40.3 0-22.2-18-40.3-40.3-40.3H554.2c-22.2 0-40.3 18-40.3 40.3 0.1 22.3 18.1 40.3 40.3 40.3zM792.7 555.1c-127.6 0-231.4 103.8-231.4 231.4 0 127.6 103.8 231.3 231.4 231.3 127.6 0 231.3-103.8 231.3-231.3 0-127.6-103.8-231.4-231.3-231.4z m0 64.4c34.4 0 66.4 10.5 93 28.4L654.1 879.4c-17.9-26.6-28.4-58.6-28.4-93 0-92 74.9-166.9 167-166.9z m0 333.9c-34.4 0-66.4-10.5-93-28.4l231.5-231.5c17.9 26.6 28.4 58.6 28.4 93 0 92-74.9 166.9-166.9 166.9z" p-id="32405"></path></svg>`,
         invert: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M910.69 235.796H788.834V112.482c0-61.833-50.136-112.01-112.01-112.01H113.232C51.318 0.473 1.18 50.61 1.18 112.483v563.673c0 61.873 50.137 112.05 112.05 112.05h121.895v123.273c0 61.873 50.137 112.05 112.05 112.05H910.69c61.913 0 112.09-50.137 112.09-112.05V347.845c0-61.873-50.177-112.05-112.09-112.05zM235.126 347.845V712.9h-91.412c-37.14 0-67.23-30.13-67.23-67.23V143.006c0-37.1 30.09-67.23 67.23-67.23H646.38c37.061 0 67.151 30.13 67.151 67.23v92.79H347.175c-61.912 0-112.049 50.176-112.049 112.049zM844.25 533.937L598.016 780.091c-4.923 4.923-11.146 7.365-17.605 8.192-11.618 6.499-26.466 5.238-36.352-4.687L413.735 653.273c-12.012-12.013-12.012-31.469 0-43.481l14.455-14.454c12.012-12.012 31.468-12.012 43.48 0l97.595 97.634 217.088-217.009c11.934-12.012 31.39-12.012 43.402 0l14.533 14.494c11.855 12.012 11.855 31.468-0.04 43.48z" fill="currentColor"></path></svg>`,
@@ -299,10 +303,10 @@ const CSS = `
     .pk-btn.pri { color: var(--pk-pri); font-weight: 600; }
     .pk-btn svg { width: 18px; height: 18px; flex-shrink: 0; display: inline-block; vertical-align: -4px; }
     .pk-btn span { white-space: nowrap; pointer-events: none; }
-    @media (max-width: 1550px) { .pk-maximized .pk-btn:not(#pk-btn-folder-first):not(#pk-btn-invert):not(#pk-filter-btn):not(#pk-btn-exit):not(#pk-scan-dup):not(#pk-analyze):not(#pk-export):not(#pk-ext):not(#pk-aria2):not(#pk-down) span { display: none !important; } .pk-maximized .pk-btn { padding: 0 8px !important; } }
-    @media (max-width: 1360px) { .pk-btn:not(#pk-btn-folder-first):not(#pk-btn-invert):not(#pk-filter-btn):not(#pk-btn-exit):not(#pk-scan-dup):not(#pk-analyze):not(#pk-export):not(#pk-ext):not(#pk-aria2):not(#pk-down):not(#btn_cfg_clean):not(#btn_cfg_export):not(#btn_cfg_import) span { display: none !important; } .pk-btn { padding: 0 8px !important; } }
+    @media (max-width: 1360px) { .pk-maximized .pk-btn:not(#pk-btn-folder-first):not(#pk-btn-invert):not(#pk-filter-btn):not(#pk-btn-exit):not(#pk-scan-dup):not(#pk-analyze):not(#pk-export):not(#pk-migrate):not(#pk-ext):not(#pk-aria2):not(#pk-down) span { display: none !important; } .pk-maximized .pk-btn { padding: 0 8px !important; } }
+    @media (max-width: 1360px) { .pk-btn:not(#pk-btn-folder-first):not(#pk-btn-invert):not(#pk-filter-btn):not(#pk-btn-exit):not(#pk-scan-dup):not(#pk-analyze):not(#pk-export):not(#pk-migrate):not(#pk-ext):not(#pk-aria2):not(#pk-down):not(#btn_cfg_clean):not(#btn_cfg_export):not(#btn_cfg_import) span { display: none !important; } .pk-btn { padding: 0 8px !important; } }
     @media (max-width: 1150px) { #pk-btn-folder-first span, #pk-btn-invert span, #pk-filter-btn span, #pk-btn-exit span, #pk-scan-dup span, #pk-analyze span, #pk-export span { display: none !important; } }
-    @media (max-width: 1000px) { #pk-ext span, #pk-aria2 span, #pk-down span { display: none !important; } }
+    @media (max-width: 1000px) { #pk-migrate span, #pk-ext span, #pk-aria2 span, #pk-down span { display: none !important; } }
     .pk-blacklist-area { display: flex; align-items: center; gap: 8px; margin-left: auto; max-width: 300px; min-width: 150px; flex-shrink: 1; }
     .pk-blacklist-area input { height: 32px; padding: 0 8px; border: 1px solid var(--pk-bd); border-radius: 4px; background: var(--pk-bg); color: var(--pk-fg); font-size: 13px; width: 100%; transition: border-color 0.2s; }
     .pk-blacklist-area input:focus { border-color: var(--pk-pri); outline: none; }
@@ -413,7 +417,7 @@ const CSS = `
     .pk-sep { width: 1px; height: 16px; background: var(--pk-bd); margin: 0 4px; display: none; flex-shrink: 0; }
     .pk-sep-sm { width: 1px; height: 16px; background: var(--pk-bd); margin: 0 8px; flex-shrink: 0; }
     #pk-refresh, #pk-trash-refresh { width: auto !important; justify-content: center !important; flex-shrink: 0; }
-    #pk-refresh svg, #pk-trash-refresh svg { width: 18px !important; height: 18px !important; transform: none !important; stroke-width: 2 !important; }
+    #pk-refresh svg, #pk-trash-refresh svg { width: 16px !important; height: 16px !important; }
     .pk-grid-hd input[type="checkbox"], .pk-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; margin: 0 auto !important; flex-shrink: 0; accent-color: var(--pk-pri); box-sizing: content-box; transform: translateZ(0); display: block; position: relative; }
     .pk-player-box { position: relative; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; user-select: none; overflow: hidden; }
     .pk-player-video { width: 100%; height: 100%; object-fit: contain; outline: none; transform: translateZ(0); backface-visibility: hidden; image-rendering: -webkit-optimize-contrast; -webkit-font-smoothing: antialiased; }
@@ -1037,6 +1041,16 @@ const T = {
         str_share_deleted: "文件已删",
         title_edit_pwd: "密码修改",
         lbl_share_code_title: "分享代码",
+        btn_migrate: "数据迁移",
+        tip_migrate: "打包选中项并准备迁移至新账号 [Alt] + [M]",
+        msg_migrate_confirm: "确定要将选中的 {n} 个项目迁移至其他账号吗？\n\n打包成功后，会自动退出。\n登录【目标账号】以完成接收。",
+        msg_migrate_packing: "正在构建加密迁移包...",
+        msg_migrate_ready: "✅ 迁移包已就绪！\n\n即将退出当前账号，请登录您的【目标账号】。\n重新登录后系统将自动接管转存工作。\n(注：迁移数据包将在 1 天后自动过期失效)",
+        err_migrate_ban: "打包失败：选中的内容中包含违规或被官方限制分享的资源。\n请剔除违规文件后重试。",
+        msg_migrate_detect: "📦 检测到来自另一个账号的迁移数据包！\n\n包含 {n} 个项目。\n是否立即接收并保存至 [Pack From Shared] 文件夹？\n(选\"是\"执行迁移；选\"否\"则终止本次迁移)",
+        msg_migrate_same_account: "迁移已取消：您登录的仍然是原账号，存根已清除。",
+        msg_migrate_saving: "正在从加密通道高速转存数据...",
+        msg_migrate_success: "🎉 跨账号迁移完成！\n所有文件已成功转存至当前账号。",
         ph_password: "密码",
         ph_pass_range: "4-10位字符",
         cal_week_days:["日", "一", "二", "三", "四", "五", "六"],
@@ -1180,7 +1194,6 @@ const T = {
         lbl_sub_offset: "字幕进度",
         title_sel_sub: "选择字幕",
         ph_sub_search: "输入关键词，下方链接自动更新...",
-        btn_force_play: "尝试强行播放",
         str_compat_mode: "兼容模式",
         lang_code: "zh",
         btn_go_search: "🔍 去 {n} 手动搜",
@@ -1350,8 +1363,6 @@ const T = {
         str_upload_2: "节点1超时，切换节点 2...",
         str_upload_3: "节点2超时，尝试最后节点...",
         str_upload_fail_copy: "上传失败，准备写入剪贴板...",
-        msg_transcoding: "云端转码中...",
-        msg_transcoding_wait: "服务器正在处理此视频，请稍候",
         str_preparing: "准备解压...",
         str_unzipping: "正在解压: {n}",
         str_unzipping_state: "解压中...",
@@ -1391,7 +1402,7 @@ const T = {
         msg_batch_txt: "已生成下载列表 (.txt)。",
         msg_clear_history_done: "已从历史记录中移除",
         msg_skip_unzipped: "已跳过 {n} 个已解压的项目。",
-        msg_unzip_skip_del_confirm: "检测到 {n} 个已解压的压缩包，是否将其移入回收站？",
+        msg_unzip_skip_del_confirm: "检测到 {n} 个压缩包在当前路径存在同名文件夹且状态标记为已解压，大概率已完成解压。是否将其移入回收站？\n\n(建议：请先检查同名文件夹内容是否完整)",
         msg_cancel_share_confirm: "确定要取消选中的 {n} 个分享吗？\n链接将立即失效。",
         msg_pwd_updating: "正在更新密码...",
         msg_pwd_updated: "密码已更新",
@@ -1434,7 +1445,6 @@ const T = {
         msg_restore_done: "已成功还原 {n} 个项目。",
         msg_auto_sub_load: "已自动加载字幕：{n}",
         msg_dl_sub: "正在下载字幕...",
-        msg_transcode_done: "✅ 转码完成，开始播放",
         msg_fallback_report: "⚠️ 原画不可播放(MPEG4/HEVC)，已自动切换至 {n}",
         tip_manual_sub: "提示：下载 .srt 或 .vtt 后，直接拖入播放器即可加载。",
         msg_sub_drop_load: "已通过拖拽加载字幕：{n}",
@@ -1544,6 +1554,10 @@ const T = {
         msg_turbo_activated: "极速模式已激活：脚本已深度接管网页逻辑，确保稳定流畅。",
         msg_console_legal: "严禁商业用途：本项目仅供个人学习与交流使用。",
         msg_ana_warn: "文件夹查重提示：判定基于算法推测，删除前请务必人工核对，以防误删。",
+        err_migrate_too_many: "⚠️ 选中项过多\n\n当前请求数据量 ({s}MB) 已超过服务器 4MB 的硬性限制。\n\n【解决方案】：\n请在常规目录中直接选中【文件夹】进行迁移，而不是在全盘透视模式下选中海量独立文件。",
+        msg_migrate_quota_err: "⚠️ 目标账号空间不足！\n\n系统提示：{d}\n\n是否保留迁移记录？\n(选\"是\"保留记录，清理空间后刷新页面可重试；选\"否\"则终止本次迁移)",
+        msg_migrate_err_keep: "迁移异常：\n{e}\n\n是否保留迁移记录以便稍后重试？\n(选\"否\"将清除记录，不再弹窗)",
+        title_migrate_fail: "迁移失败",
 
         /* --- 错误提示 --- */
         err_invalid_links: "请输入正确的链接",
@@ -1583,6 +1597,9 @@ const T = {
         err_quota_exceeded: "存储空间不足",
         err_name_exists: "文件名称不能重复",
         err_share_pass: "自定义提取码需为 4-10 位字符",
+        err_share_limit: "分享失败：单次最多只能分享 100 个项目",
+        err_migrate_limit: "迁移失败：单次最多只能迁移 100 个项目",
+        lbl_hard_delete: "彻底删除 (不进入回收站)",
         str_error: "错误",
         str_error_crit: "严重错误",
         str_error_paste: "粘贴错误",
@@ -1609,7 +1626,7 @@ const T = {
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 批量与空间管理</b><br>
                 • <b>批量重命名</b>：支持<b>正则替换/删除</b>、<b>剧集流水号</b>、文本<b>格式化</b>、<b>FC2 规范命名</b>、<b>前缀去广告</b>及基于 MIME 的<b>后缀修复</b>。<br>
                 • <b>分析套件</b>：<b>文件分析</b>整合了筛选与查重（哈希/时长/名称三模态）；<b>文件夹分析</b>整合了筛选与查重（名称/相似度/包含率三模态）；并支持导出当前<b>目录树</b>列表。<br>
-                • <b>智能整理</b>：一键清理空文件夹；<b>批量解压</b>集成密码自动记忆与智能填充，支持跳过并删除已解压项。<br>
+                • <b>智能整理</b>：删除时支持<b>彻底删除</b>（跳过回收站）；一键清理空文件夹；<b>批量解压</b>集成密码自动记忆与智能填充，支持跳过并删除已解压项。<br>
                 • <b>资源管理器</b>：自定义<b>文件黑名单</b>一键清理垃圾资源；或作为<b>文件白名单</b>，在批量删除时自动保护。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：为避免数据同步冲突，处理期间请勿在其他客户端修改文件。</div>
             </div>
@@ -1631,6 +1648,7 @@ const T = {
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ 配置与数据管理</b><br>
                 • <b>配置备份</b>：支持将偏好设置、管理规则、密码金库等导出为带数字指纹的 JSON 备份文件，导入时支持<b>智能合并去重</b>。<br>
                 • <b>数据清理</b>：支持对全盘索引、偏好设置、管理规则、密码金库与缓存按需清除，释放本地空间并保障隐私。<br>
+                • <b>数据迁移</b>：支持将选中项目加密打包，通过自动接管机制实现跨账号的无缝转存。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：全盘索引在网页关闭后清空，而偏好设置、密码金库等则持久化保存。</div>
             </div>
             <div style="margin-bottom:24px;">
@@ -1881,6 +1899,16 @@ const T = {
         str_share_deleted: "檔案已刪",
         title_edit_pwd: "密碼修改",
         lbl_share_code_title: "分享代碼",
+        btn_migrate: "數據遷移",
+        tip_migrate: "打包選取項並準備遷移至新帳號 [Alt] + [M]",
+        msg_migrate_confirm: "確定要將選取的 {n} 個項目遷移至其他帳號嗎？\n\n打包成功後，會自動登出。\n登入【目標帳號】以完成接收。",
+        msg_migrate_packing: "正在構建加密遷移包...",
+        msg_migrate_ready: "✅ 遷移包已就緒！\n\n即將登出目前帳號，請登入您的【目標帳號】。\n重新登入後系統將自動接管轉存工作。\n(註：遷移數據包將在 1 天後自動過期失效)",
+        err_migrate_ban: "打包失敗：選取的內容中包含違規或被官方限制分享的資源。\n請剔除違規檔案後重試。",
+        msg_migrate_detect: "📦 偵測到來自另一個帳號的遷移數據包！\n\n包含 {n} 個項目。\n是否立即接收並儲存至 [Pack From Shared] 資料夾？\n(選\"是\"執行遷移；選\"否\"則終止本次遷移)",
+        msg_migrate_same_account: "遷移已取消：您登入的仍然是原帳號，存根已清除。",
+        msg_migrate_saving: "正在從加密通道高速轉存數據...",
+        msg_migrate_success: "🎉 跨帳號遷移完成！\n所有檔案已成功轉存至目前帳號。",
         ph_password: "密碼",
         ph_pass_range: "4-10位字元",
         cal_week_days:["日", "一", "二", "三", "四", "五", "六"],
@@ -2024,7 +2052,6 @@ const T = {
         lbl_sub_offset: "字幕進度",
         title_sel_sub: "選擇字幕",
         ph_sub_search: "輸入關鍵字，下方連結將自動更新...",
-        btn_force_play: "嘗試強制播放",
         str_compat_mode: "相容模式",
         lang_code: "zh-TW",
         btn_go_search: "🔍 去 {n} 手動搜尋",
@@ -2194,8 +2221,6 @@ const T = {
         str_upload_2: "節點1超時，切換節點 2...",
         str_upload_3: "節點2超時，嘗試最後節點...",
         str_upload_fail_copy: "上傳失敗，準備寫入剪貼簿...",
-        msg_transcoding: "雲端轉碼中...",
-        msg_transcoding_wait: "伺服器正在處理此影片，請稍候",
         str_preparing: "準備解壓縮...",
         str_unzipping: "正在解壓縮：{n}",
         str_unzipping_state: "解壓縮中...",
@@ -2235,7 +2260,7 @@ const T = {
         msg_batch_txt: "已產生下載清單 (.txt)。",
         msg_clear_history_done: "已從歷史紀錄中移除",
         msg_skip_unzipped: "已跳過 {n} 個已解壓縮的項目。",
-        msg_unzip_skip_del_confirm: "偵測到 {n} 個已解壓縮的壓縮檔，是否將其移入資源回收筒？",
+        msg_unzip_skip_del_confirm: "檢測到 {n} 個壓縮檔在目前路徑存在同名資料夾且狀態標記為已解壓，極大機率已完成解壓。是否將其移入資源回收筒？\n\n(建議：請先檢查同名資料夾內容是否完整)",
         msg_cancel_share_confirm: "確定要取消選取的 {n} 個分享嗎？\n連結將立即失效。",
         msg_pwd_updating: "正在更新密碼...",
         msg_pwd_updated: "密碼已更新",
@@ -2278,7 +2303,6 @@ const T = {
         msg_restore_done: "已成功還原 {n} 個項目。",
         msg_auto_sub_load: "已自動載入字幕：{n}",
         msg_dl_sub: "正在下載字幕...",
-        msg_transcode_done: "✅ 轉碼完成，開始播放",
         msg_fallback_report: "⚠️ 原畫無法播放 (MPEG4/HEVC)，已自動切換至 {n}",
         tip_manual_sub: "提示：下載 .srt 或 .vtt 後，直接拖入播放器即可載入。",
         msg_sub_drop_load: "已透過拖曳載入字幕：{n}",
@@ -2388,6 +2412,10 @@ const T = {
         msg_turbo_activated: "極速模式已激活：腳本已深度接管網頁邏輯，確保穩定流暢。",
         msg_console_legal: "嚴禁商業用途：本項目僅供個人學習與交流使用。",
         msg_ana_warn: "資料夾查重提示：判定基於演算法推測，刪除前請務必人工核對，以防誤刪。",
+        err_migrate_too_many: "⚠️ 選取項過多\n\n目前請求數據量 ({s}MB) 已超過伺服器 4MB 的硬性限制。\n\n【解決方案】：\n請在常規目錄中直接選取【資料夾】進行遷移，而不是在全盤透視模式下選取海量獨立檔案。",
+        msg_migrate_quota_err: "⚠️ 目標帳號空間不足！\n\n系統提示：{d}\n\n是否保留遷移紀錄？\n(選\"是\"保留紀錄，清理空間後重新整理頁面可重試；選\"否\"則終止本次遷移)",
+        msg_migrate_err_keep: "遷移異常：\n{e}\n\n是否保留遷移紀錄以便稍後重試？\n(選\"否\"將清除紀錄，不再彈出視窗)",
+        title_migrate_fail: "遷移失敗",
 
         /* --- 错误提示 --- */
         err_invalid_links: "請輸入正確的連結",
@@ -2427,6 +2455,9 @@ const T = {
         err_quota_exceeded: "儲存空間不足",
         err_name_exists: "檔案名稱不能重複",
         err_share_pass: "自訂提取碼需為 4-10 個字元",
+        err_share_limit: "分享失敗：單次最多只能分享 100 個項目",
+        err_migrate_limit: "遷移失敗：單次最多只能遷移 100 個項目",
+        lbl_hard_delete: "徹底刪除 (不進入資源回收筒)",
         str_error: "錯誤",
         str_error_crit: "嚴重錯誤",
         str_error_paste: "貼上錯誤",
@@ -2453,7 +2484,7 @@ const T = {
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 批次與空間管理</b><br>
                 • <b>批次重新命名</b>：支援<b>正規替換/刪除</b>、<b>劇集流水號</b>、文字<b>格式化</b>、<b>FC2 規範命名</b>、<b>前綴去廣告</b>及基於 MIME 的<b>副檔名修復</b>。<br>
                 • <b>分析套件</b>：<b>檔案分析</b>整合了篩選與查重（雜湊/時長/名稱三模態）；<b>資料夾分析</b>整合了篩選與查重（名稱/相似度/包含率三模態）；並支援匯出目前<b>目錄樹</b>清單。<br>
-                • <b>智慧整理</b>：一鍵清理空資料夾；<b>批次解壓縮</b>整合密碼自動記憶與智慧填入，支援跳過並刪除已解壓縮項目。<br>
+                • <b>智慧整理</b>：刪除時支援<b>徹底刪除</b>（跳過資源回收筒）；一鍵清理空資料夾；<b>批次解壓縮</b>整合密碼自動記憶與智慧填入，支援跳過並刪除已解壓縮項目。<br>
                 • <b>資源管理器</b>：自訂<b>檔案黑名單</b>一鍵清理垃圾資源；或作為<b>檔案白名單</b>，在批次刪除時自動保護。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 註：為避免資料同步衝突，處理期間請勿在其他用戶端修改檔案。</div>
             </div>
@@ -2475,6 +2506,7 @@ const T = {
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ 配置與資料管理</b><br>
                 • <b>配置備份</b>：支援將偏好設定、管理規則、密碼金庫等匯出為帶數位指紋的 JSON 備份檔案，匯入時支援<b>智慧合併去重</b>。<br>
                 • <b>資料清理</b>：支援對全盤索引、偏好設定、管理規則、密碼金庫與快取按需清除，釋放本機空間並保障隱私。<br>
+                • <b>數據遷移</b>：支援將選取項目加密打包，透過自動接管機制實現跨帳號的無縫轉存。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 註：全盤索引在網頁關閉後清空，而偏好設定、密碼金庫等則持久化保存。</div>
             </div>
             <div style="margin-bottom:24px;">
@@ -2725,6 +2757,16 @@ const T = {
         str_share_deleted: "File Deleted",
         title_edit_pwd: "Change Password",
         lbl_share_code_title: "Share Code",
+        btn_migrate: "Data Migration",
+        tip_migrate: "Pack selected items and prepare migration to a new account [Alt] + [M]",
+        msg_migrate_confirm: "Are you sure you want to migrate the {n} selected items to another account?\n\nAfter packing, you will be logged out automatically.\nLog in to the [Target Account] to complete the transfer.",
+        msg_migrate_packing: "Building encrypted migration package...",
+        msg_migrate_ready: "✅ Migration package ready!\n\nYou will be logged out shortly. Please log in to your [Target Account].\nThe system will automatically take over the transfer after re-login.\n(Note: The migration package will expire in 1 day)",
+        err_migrate_ban: "Packing failed: Selected items contain restricted or policy-violating content.\nPlease remove violating files and try again.",
+        msg_migrate_detect: "📦 Migration package from another account detected!\n\nContains {n} items.\nWould you like to receive and save them to the [Pack From Shared] folder now?\n(Select 'Yes' to migrate; 'No' to discard this package)",
+        msg_migrate_same_account: "Migration cancelled: You are still logged into the original account. Stub cleared.",
+        msg_migrate_saving: "Transferring data at high speed via encrypted channel...",
+        msg_migrate_success: "🎉 Cross-account migration complete!\nAll files have been successfully transferred to the current account.",
         ph_password: "Password",
         ph_pass_range: "4-10 characters",
         cal_week_days:["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
@@ -2868,7 +2910,6 @@ const T = {
         lbl_sub_offset: "Subtitle Sync",
         title_sel_sub: "Select Subtitles",
         ph_sub_search: "Type keywords, links will update below...",
-        btn_force_play: "Force Playback",
         str_compat_mode: "Compatibility Mode",
         lang_code: "en",
         btn_go_search: "🔍 Manual Search on {n}",
@@ -3038,8 +3079,6 @@ const T = {
         str_upload_2: "Node 1 timeout, switching to Node 2...",
         str_upload_3: "Node 2 timeout, trying last node...",
         str_upload_fail_copy: "Upload failed, copying to clipboard...",
-        msg_transcoding: "Transcoding in cloud...",
-        msg_transcoding_wait: "Server is processing this video, please wait.",
         str_preparing: "Preparing extraction...",
         str_unzipping: "Extracting: {n}",
         str_unzipping_state: "Extracting...",
@@ -3079,7 +3118,7 @@ const T = {
         msg_batch_txt: "Download list (.txt) generated.",
         msg_clear_history_done: "Removed from history.",
         msg_skip_unzipped: "Skipped {n} already extracted items.",
-        msg_unzip_skip_del_confirm: "Detected {n} already extracted archives. Move them to Trash?",
+        msg_unzip_skip_del_confirm: "Detected {n} archives marked as unzipped with matching folders in this directory. They have likely been extracted. Move them to Trash?\n\n(Tip: Please verify the matching folders' contents before proceeding)",
         msg_cancel_share_confirm: "Are you sure you want to stop {n} shares?\nLinks will expire immediately.",
         msg_pwd_updating: "Updating password...",
         msg_pwd_updated: "Password updated.",
@@ -3122,7 +3161,6 @@ const T = {
         msg_restore_done: "Successfully restored {n} items.",
         msg_auto_sub_load: "Auto-loaded subtitle: {n}",
         msg_dl_sub: "Downloading subtitles...",
-        msg_transcode_done: "✅ Transcode finished. Starting playback.",
         msg_fallback_report: "⚠️ Original quality unplayable (MPEG4/HEVC). Switched to {n}.",
         tip_manual_sub: "Tip: Drag and drop .srt or .vtt files into the player to load.",
         msg_sub_drop_load: "Subtitle loaded via drag-and-drop: {n}",
@@ -3232,6 +3270,10 @@ const T = {
         msg_turbo_activated: "Turbo Mode Active: Script has taken over web logic for peak performance.",
         msg_console_legal: "Strictly Non-Commercial: This project is strictly for personal study and communication only.",
         msg_ana_warn: "Folder Deduplication Hint: Based on algorithmic inference. Please double-check manually before deleting.",
+        err_migrate_too_many: "⚠️ Too many items selected\n\nThe current request payload ({s}MB) exceeds the server's 4MB gRPC limit.\n\n[Solution]:\nPlease select [Folders] in a standard directory instead of selecting massive individual files in the Perspective/Flat view.",
+        msg_migrate_quota_err: "⚠️ Insufficient storage in target account!\n\nSystem message: {d}\n\nKeep migration record?\n(Select 'Yes' to keep; you can retry after freeing up space and refreshing. Select 'No' to cancel.)",
+        msg_migrate_err_keep: "Migration error:\n{e}\n\nKeep the record to retry later?\n(Select 'No' to clear the record and stop prompts.)",
+        title_migrate_fail: "Migration Failed",
 
         /* --- 错误提示 --- */
         err_invalid_links: "Please enter valid links.",
@@ -3271,6 +3313,9 @@ const T = {
         err_quota_exceeded: "Storage quota exceeded.",
         err_name_exists: "File name already exists.",
         err_share_pass: "Access code must be 4-10 characters.",
+        err_share_limit: "Share failed: Maximum 100 items can be shared at once.",
+        err_migrate_limit: "Migration failed: Maximum 100 items can be migrated at once.",
+        lbl_hard_delete: "Delete permanently (skip Trash)",
         str_error: "Error",
         str_error_crit: "Critical Error",
         str_error_paste: "Paste Error",
@@ -3297,7 +3342,7 @@ const T = {
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 Batch & Space Management</b><br>
                 • <b>Batch Rename</b>: Supports <b>Regex replace/delete</b>, <b>episode serialization</b>, text <b>formatting</b>, <b>AV/FC2 standard naming</b>, <b>ad prefix removal</b>, and MIME-based <b>extension fixing</b>.<br>
                 • <b>Analysis Suite</b>: <b>File Analysis</b> integrates filtering and deduplication (hash/duration/name tri-modal); <b>Folder Analysis</b> integrates filtering and deduplication (name/similarity/containment tri-modal); and supports exporting the <b>directory tree</b>.<br>
-                • <b>Smart Organizing</b>: One-click empty folder cleanup; <b>Batch Unzip</b> integrates automatic password memory and smart auto-filling, supporting auto-skip and deletion of extracted items.<br>
+                • <b>Smart Organizing</b>: Supports <b>Hard Delete</b> (skip Trash) when deleting items; one-click empty folder cleanup; <b>Batch Unzip</b> integrates automatic password memory and smart auto-filling, supporting auto-skip and deletion of extracted items.<br>
                 • <b>Resource Manager</b>: Can be used as a <b>File Blacklist</b> to clean up junk resources; or as a <b>File Whitelist</b> to auto-skip and protect items during batch deletion.<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* Note: To avoid data sync conflicts, please do not modify files via other clients during processing.</div>
             </div>
@@ -3319,6 +3364,7 @@ const T = {
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ Configuration & Data Management</b><br>
                 • <b>Config Backup</b>: Supports exporting preferences, rules, password vaults as JSON backup files with digital fingerprints. Supports <b>smart merge & deduplication</b> upon importing.<br>
                 • <b>Data Cleanup</b>: Supports on-demand clearing of global index, preferences, rules, password vaults, and caches to free up local storage and protect privacy.<br>
+                • <b>Data Migration</b>: Supports encrypted packing of selected items with an automatic takeover mechanism for seamless cross-account transfers.<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* Note: The global index is cleared when the webpage is closed, while preferences, password vaults, etc., are saved persistently.</div>
             </div>
             <div style="margin-bottom:24px;">
@@ -3569,6 +3615,16 @@ const T = {
         str_share_deleted: "파일 삭제됨",
         title_edit_pwd: "비밀번호 변경",
         lbl_share_code_title: "공유 코드",
+        btn_migrate: "데이터 마이그레이션",
+        tip_migrate: "선택한 항목을 패키징하여 새 계정으로 마이그레이션 준비 [Alt] + [M]",
+        msg_migrate_confirm: "선택한 {n}개의 항목을 다른 계정으로 마이그레이션하시겠습니까?\n\n패키징 완료 후 자동으로 로그아웃됩니다.\n【대상 계정】으로 로그인하여 수신을 완료하세요.",
+        msg_migrate_packing: "암호화된 마이그레이션 패키지 생성 중...",
+        msg_migrate_ready: "✅ 마이그레이션 패키지가 준비되었습니다!\n\n현재 계정에서 로그아웃됩니다. 【대상 계정】으로 로그인해 주세요.\n재로그인 시 시스템이 자동으로 전송 작업을 이어받습니다.\n(참고: 마이그레이션 패키지는 1일 후 자동으로 만료됩니다)",
+        err_migrate_ban: "패키징 실패: 선택한 항목에 운영 정책 위반 또는 공유가 제한된 리소스가 포함되어 있습니다.\n위반 파일을 제거한 후 다시 시도해 주세요.",
+        msg_migrate_detect: "📦 다른 계정에서 보낸 마이그레이션 패키지가 감지되었습니다!\n\n{n}개의 항목이 포함되어 있습니다.\n즉시 수신하여 [Pack From Shared] 폴더에 저장하시겠습니까?\n(\"예\"를 누르면 마이그레이션을 실행하고, \"아니요\"를 누르면 중단합니다)",
+        msg_migrate_same_account: "마이그레이션 취소: 여전히 기존 계정으로 로그인되어 있어 기록이 삭제되었습니다.",
+        msg_migrate_saving: "암호화 채널을 통해 데이터를 고속으로 전송 중...",
+        msg_migrate_success: "🎉 계정 간 마이그레이션 완료!\n모든 파일이 현재 계정으로 성공적으로 복사되었습니다.",
         ph_password: "비밀번호",
         ph_pass_range: "4-10자",
         cal_week_days:["일", "월", "화", "수", "목", "금", "토"],
@@ -3712,7 +3768,6 @@ const T = {
         lbl_sub_offset: "자막 싱크",
         title_sel_sub: "자막 선택",
         ph_sub_search: "키워드 입력 시 아래 링크가 자동 업데이트됩니다...",
-        btn_force_play: "강제 재생 시도",
         str_compat_mode: "호환 모드",
         lang_code: "ko",
         btn_go_search: "🔍 {n}에서 직접 검색",
@@ -3882,8 +3937,6 @@ const T = {
         str_upload_2: "노드 1 타임아웃, 노드 2로 전환...",
         str_upload_3: "노드 2 타임아웃, 마지막 노드 시도...",
         str_upload_fail_copy: "업로드 실패, 클립보드 작성을 준비합니다...",
-        msg_transcoding: "클라우드 인코딩 중...",
-        msg_transcoding_wait: "서버에서 비디오를 처리 중입니다. 잠시만 기다려 주세요.",
         str_preparing: "압축 해제 준비 중...",
         str_unzipping: "압축 해제 중: {n}",
         str_unzipping_state: "압축 해제 중...",
@@ -3923,7 +3976,7 @@ const T = {
         msg_batch_txt: "다운로드 목록(.txt)이 생성되었습니다.",
         msg_clear_history_done: "기록에서 제거되었습니다.",
         msg_skip_unzipped: "이미 압축 해제된 항목 {n}개를 건너뛰었습니다.",
-        msg_unzip_skip_del_confirm: "이미 압축 해제된 {n}개의 압축 파일을 감지했습니다. 휴지통으로 이동하시겠습니까?",
+        msg_unzip_skip_del_confirm: "현재 경로에 동일한 이름의 폴더가 있고 해제 완료로 표시된 압축 파일 {n}개를 감지했습니다. 이미 압축 해제가 완료되었을 가능성이 높습니다. 휴지통으로 이동하시겠습니까?\n\n(주의: 이동 전 동명 폴더의 내용이 완전한지 확인을 권장합니다)",
         msg_cancel_share_confirm: "선택한 {n}개의 공유를 취소하시겠습니까?\n링크가 즉시 무효화됩니다.",
         msg_pwd_updating: "비밀번호 업데이트 중...",
         msg_pwd_updated: "비밀번호가 업데이트되었습니다",
@@ -3966,7 +4019,6 @@ const T = {
         msg_restore_done: "{n}개 항목이 성공적으로 복원되었습니다.",
         msg_auto_sub_load: "자막이 자동으로 로드되었습니다: {n}",
         msg_dl_sub: "자막 다운로드 중...",
-        msg_transcode_done: "✅ 인코딩 완료, 재생을 시작합니다",
         msg_fallback_report: "⚠️ 원본 재생 불가(MPEG4/HEVC), 자동으로 {n} 화질로 전환되었습니다",
         tip_manual_sub: "팁: .srt 또는 .vtt 파일을 플레이어에 드래그하여 로드할 수 있습니다.",
         msg_sub_drop_load: "드래그를 통해 자막이 로드되었습니다: {n}",
@@ -4076,6 +4128,10 @@ const T = {
         msg_turbo_activated: "터보 모드 활성화: 스크립트가 웹 로직을 제어하여 최상의 성능을 유지합니다.",
         msg_console_legal: "상업적 이용 엄격 금지: 이 프로젝트는 개인 학습 및 교류 목적으로만 사용됩니다.",
         msg_ana_warn: "폴더 중복 확인 팁: 알고리즘 추측을 바탕으로 합니다. 삭제 전 반드시 직접 확인하여 오삭제를 방지하세요。",
+        err_migrate_too_many: "⚠️ 선택한 항목이 너무 많음\n\n현재 요청 데이터 크기({s}MB)가 서버의 4MB 제한을 초과했습니다.\n\n[해결 방법]:\n전체 파일 투시 모드에서 수많은 파일을 개별적으로 선택하는 대신, 일반 디렉토리에서 [폴더]를 선택하여 마이그레이션해 주세요.",
+        msg_migrate_quota_err: "⚠️ 대상 계정의 저장 공간이 부족합니다!\n\n시스템 메시지: {d}\n\n마이그레이션 기록을 보관하시겠습니까?\n('예'를 선택하면 기록을 보관하며, 공간 확보 후 새로고침하여 재시도할 수 있습니다. '아니요'를 선택하면 중단됩니다.)",
+        msg_migrate_err_keep: "마이그레이션 오류:\n{e}\n\n나중에 다시 시도할 수 있도록 기록을 보관하시겠습니까?\n('아니요'를 선택하면 기록이 삭제되어 더 이상 팝업이 표시되지 않습니다.)",
+        title_migrate_fail: "마이그레이션 실패",
 
         /* --- 错误提示 --- */
         err_invalid_links: "올바른 링크를 입력해 주세요",
@@ -4115,6 +4171,9 @@ const T = {
         err_quota_exceeded: "저장 공간 부족",
         err_name_exists: "파일 이름이 중복될 수 없습니다",
         err_share_pass: "추출 코드는 4-10자여야 합니다",
+        err_share_limit: "공유 실패: 한 번에 최대 100개의 항목만 공유할 수 있습니다.",
+        err_migrate_limit: "마이그레이션 실패: 한 번에 최대 100개의 항목만 이동할 수 있습니다.",
+        lbl_hard_delete: "영구 삭제 (휴지통에 버리지 않음)",
         str_error: "오류",
         str_error_crit: "치명적 오류",
         str_error_paste: "붙여넣기 오류",
@@ -4141,7 +4200,7 @@ const T = {
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 일괄 처리 및 공간 관리</b><br>
                 • <b>일괄 이름 변경</b>: <b>정규식 치환/삭제</b>, <b>에피소드 번호</b> 생성, 텍스트 <b>포맷팅</b>, <b>FC2 표준 네이밍</b>, <b>광고 제거</b> 및 MIME 기반 <b>확장자 복구</b>를 지원합니다.<br>
                 • <b>분석 도구</b>: <b>파일 분석</b>(필터링 및 해시/시간/이름 3가지 모드 중복 검사)과 <b>폴더 분석</b>(필터링 및 이름/유사도/포함율 3가지 모드 중복 검사)을 통합 제공하며, 현재 경로의 <b>디렉토리 트리</b> 내보내기를 지원합니다.<br>
-                • <b>스마트 정리</b>: 원클릭 빈 폴더 정리; <b>일괄 압축 해제</b> 기능은 암호 자동 기억 및 스마트 입력을 지원하며, 해제된 항목 건너뛰기 및 삭제를 지원합니다.<br>
+                • <b>스마트 정리</b>: 삭제 시 <b>영구 삭제</b>(휴지통 건너뛰기)를 지원하며, 원클릭 빈 폴더 정리 및 <b>일괄 압축 해제</b>(비밀번호 자동 기억 및 스마트 입력) 기능을 제공합니다.<br>
                 • <b>리소스 관리자</b>: <b>파일 블랙리스트</b>를 설정하여 스팸 리소스를 한 번에 정리하거나, <b>화이트리스트</b>로 설정하여 일괄 삭제 시 해당 파일을 보호할 수 있습니다.<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 데이터 동기화 충돌을 방지하기 위해 처리 중에는 다른 클라이언트에서 파일을 수정하지 마십시오.</div>
             </div>
@@ -4163,6 +4222,7 @@ const T = {
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ 설정 및 데이터 관리</b><br>
                 • <b>설정 백업</b>: 개인 설정, 관리 규칙, 암호 금고 등을 디지털 지문이 포함된 JSON 파일로 내보낼 수 있으며, 가져오기 시 <b>스마트 병합 및 중복 제거</b>를 지원합니다.<br>
                 • <b>데이터 정리</b>: 전체 인덱스, 설정, 규칙, 암호 금고 및 캐시를 필요에 따라 지워 로컬 공간을 확보하고 개인 정보를 보호할 수 있습니다.<br>
+                • <b>데이터 마이그레이션</b>: 선택한 항목을 암호화 패키지로 묶어, 자동 인수 메커니즘을 통해 계정 간 원활한 전송을 지원합니다.<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 참고: 전체 인덱스는 웹페이지 종료 시 삭제되지만, 설정 및 비밀번호 금고 데이터는 영구 보관됩니다.</div>
             </div>
             <div style="margin-bottom:24px;">
@@ -4413,6 +4473,16 @@ const T = {
         str_share_deleted: "ファイル削除済み",
         title_edit_pwd: "パスワード変更",
         lbl_share_code_title: "共有コード",
+        btn_migrate: "データ移行",
+        tip_migrate: "選択項目をパッケージ化し、新しいアカウントへの移行を準備します [Alt] + [M]",
+        msg_migrate_confirm: "選択した {n} 個の項目を別のアカウントに移行しますか？\n\nパッケージ化完了後、自動的にログアウトします。\n【移行先アカウント】にログインして受信を完了させてください。",
+        msg_migrate_packing: "暗号化移行パッケージを作成中...",
+        msg_migrate_ready: "✅ 移行パッケージの準備が完了しました！\n\nまもなくログアウトします。【移行先アカウント】でログインしてください。\n再ログイン後、システムが自動的に転送を開始します。\n(注：移行パッケージの有効期限は 1 日です)",
+        err_migrate_ban: "パッケージ化失敗：選択した内容に規約違反または公式に共有制限されたリソースが含まれています。\n違反ファイルを削除してから再試行してください。",
+        msg_migrate_detect: "📦 別のアカウントからの移行パッケージが検出されました！\n\n{n} 個の項目が含まれています。\n即座に受信して [Pack From Shared] フォルダに保存しますか？\n(「はい」で移行を実行、「いいえ」で中止します)",
+        msg_migrate_same_account: "移行がキャンセルされました：元の元のカウントのままログインしているため、データが削除されました。",
+        msg_migrate_saving: "暗号化チャネル経由でデータを高速転送中...",
+        msg_migrate_success: "🎉 アカウント間移行が完了しました！\nすべてのファイルが現在のアカウントに正常に転送されました。",
         ph_password: "パスワード",
         ph_pass_range: "4-10文字",
         cal_week_days: ["日", "月", "火", "水", "木", "金", "土"],
@@ -4556,7 +4626,6 @@ const T = {
         lbl_sub_offset: "字幕のズレ調整",
         title_sel_sub: "字幕の選択",
         ph_sub_search: "キーワードを入力すると、下のリンクが自動更新されます...",
-        btn_force_play: "強制再生を試行",
         str_compat_mode: "互換モード",
         lang_code: "ja",
         btn_go_search: "🔍 {n} で手動検索",
@@ -4726,8 +4795,6 @@ const T = {
         str_upload_2: "ノード1タイムアウト、ノード2へ切替...",
         str_upload_3: "ノード2タイムアウト、最終ノードを試行...",
         str_upload_fail_copy: "アップロード失敗、クリップボードへ書き込み中...",
-        msg_transcoding: "クラウドでトランスコード中...",
-        msg_transcoding_wait: "サーバーで処理中です。少々お待ちください",
         str_preparing: "解凍準備中...",
         str_unzipping: "解凍中: {n}",
         str_unzipping_state: "解凍中...",
@@ -4767,7 +4834,7 @@ const T = {
         msg_batch_txt: "ダウンロードリスト (.txt) を作成しました。",
         msg_clear_history_done: "履歴から削除しました",
         msg_skip_unzipped: "解凍済みの {n} 個の項目をスキップしました。",
-        msg_unzip_skip_del_confirm: "解凍済みの {n} 個の圧縮ファイルを検出しました。ゴミ箱に移動しますか？",
+        msg_unzip_skip_del_confirm: "現在のパスに同名のフォルダが存在し、解凍済みとしてマークされている圧縮ファイルが {n} 個検出されました。すでに解凍されている可能性が高いです。これらをゴミ箱に移動しますか？\n\n(推奨：移動前に同名フォルダの内容が完全かどうか確認してください)",
         msg_cancel_share_confirm: "選択した {n} 個の共有を解除しますか？\nリンクは即座に無効になります。",
         msg_pwd_updating: "パスワードを更新中...",
         msg_pwd_updated: "パスワードを更新しました",
@@ -4810,7 +4877,6 @@ const T = {
         msg_restore_done: "{n} 個の項目を復元しました。",
         msg_auto_sub_load: "字幕を自動読み込みしました：{n}",
         msg_dl_sub: "字幕をダウンロード中...",
-        msg_transcode_done: "✅ トランスコード完了。再生を開始します",
         msg_fallback_report: "⚠️ 原画が再生不可 (MPEG4/HEVC) なため、{n} に切り替えました",
         tip_manual_sub: "ヒント: .srt または .vtt ファイルをプレーヤーにドラッグ＆ドロップして読み込めます。",
         msg_sub_drop_load: "ドラッグ＆ドロップで字幕を読み込みました：{n}",
@@ -4920,6 +4986,10 @@ const T = {
         msg_turbo_activated: "ターボモード起動：スクリプトがウェブ論理を完全制御し、最高の快適さを提供。",
         msg_console_legal: "商用利用厳禁：このプロジェクトは個人の学習および交流目的のみに使用されます。",
         msg_ana_warn: "フォルダ重複チェックのヒント：判定はアルゴリズムに基づいています。誤削除を防ぐため、削除前に必ず目視で確認してください。",
+        err_migrate_too_many: "⚠️ 選択項目が多すぎます\n\n現在のリクエストデータ量 ({s}MB) がサーバーの 4MB 制限を超えています。\n\n【解決策】:\nファイル透視モードで大量のファイルを個別に選択するのではなく、通常のディレクトリで【フォルダ】を選択して移行してください。",
+        msg_migrate_quota_err: "⚠️ 移行先アカウントの空き容量が不足しています！\n\nシステムメッセージ：{d}\n\n移行記録を保持しますか？\n(「はい」で記録を保持し、容量確保後にページ更新で再試行可能です。「いいえ」で移行を中止します)",
+        msg_migrate_err_keep: "移行エラー：\n{e}\n\n後で再試行するために移行記録を保持しますか？\n(「いいえ」を選択すると記録が削除され、ポップアップが表示されなくなります)",
+        title_migrate_fail: "移行失敗",
 
         /* --- 错误提示 --- */
         err_invalid_links: "有効なリンクを入力してください",
@@ -4959,6 +5029,9 @@ const T = {
         err_quota_exceeded: "ストレージ容量が不足しています",
         err_name_exists: "同名のファイルが既に存在します",
         err_share_pass: "抽出コードは4-10文字である必要があります",
+        err_share_limit: "共有失敗: 一度に共有できる項目は最大100個までです。",
+        err_migrate_limit: "移行失敗: 一度に移行できる項目は最大100個までです。",
+        lbl_hard_delete: "完全に削除 (ゴミ箱をスキップ)",
         str_error: "エラー",
         str_error_crit: "致命的なエラー",
         str_error_paste: "貼り付けエラー",
@@ -4985,7 +5058,7 @@ const T = {
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">📂 一括処理＆ストレージ管理</b><br>
                 • <b>一括リネーム</b>：<b>正規表現による置換/削除</b>、<b>エピソード番号</b>生成、テキスト<b>整形</b>、<b>FC2 標準命名</b>、<b>広告プレフィックスの削除</b>、MIMEに基づく<b>拡張子の修復</b>に対応しています。<br>
                 • <b>分析スイート</b>：<b>ファイル分析</b>（フィルタおよびハッシュ/時間/名前による重複チェック）と<b>フォルダ分析</b>（フィルタおよび名前/類似度/包含率による重複チェック）を統合。現在のパスの<b>ディレクトリツリー</b>出力もサポートします。<br>
-                • <b>スマート整理</b>：ワンクリックで空フォルダを削除。<b>一括解凍</b>はパスワード自動記憶とスマート入力を統合し、解凍済み項目のスキップや削除も可能です。<br>
+                • <b>スマート整理</b>：削除時に<b>完全に削除</b>（ゴミ箱をスキップ）が可能。ワンクリックで空フォルダを削除。<b>一括解凍</b>はパスワード自動記憶とスマート入力を統合し、解凍済み項目のスキップや削除も可能です。<br>
                 • <b>リソースマネージャー</b>：カスタム<b>ブラックリスト</b>として不要ファイルを一括クリーンアップ、または<b>ホワイトリスト</b>として一括削除時に自動保護します。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：データの同期競合を避けるため、処理中は他のクライアントでファイルを変更しないでください。</div>
             </div>
@@ -5007,6 +5080,7 @@ const T = {
                 <b style="font-size:14px; color:var(--pk-pri); display:inline-block; margin-bottom:4px;">⚙️ 設定＆データ管理</b><br>
                 • <b>設定のバックアップ</b>：個人設定、管理ルール、パスワード庫等をデジタル指紋付きの JSON ファイルとしてエクスポートでき、インポート時の<b>スマート結合と重複排除</b>をサポートします。<br>
                 • <b>データの削除</b>：インデックス、設定、ルール、パスワード、キャッシュデータを必要に応じて個別に削除し、ストレージの解放とプライバシー保護を行えます。<br>
+                • <b>データ移行</b>：選択項目を暗号化パッケージ化し、自動引き継ぎメカニズムによりアカウント間でのシームレスな転送をサポートします。<br>
                 <div style="color:var(--pk-fg); opacity:0.6; font-size:12px; margin-top:6px;">* 注：インデックスはページを閉じると消去されますが、設定やパスワード庫などのデータは永続的に保存されます。</div>
             </div>
             <div style="margin-bottom:24px;">
@@ -5200,15 +5274,19 @@ async function apiList(parentId, limit = 1000, onProgress, signal, trashed = fal
                         return [];
                     }
 
-                    if (res.status === 401 || res.status === 400) {
-                        console.warn(`[API] ${res.status} Error. Flushing auth cache...`);
+                    if (res.status === 401 || res.status === 403) {
+                        console.warn(`[API] ${res.status} Unauthorized. Throwing hard auth error...`);
                         localStorage.removeItem('pk_captured_captcha');
                         resetHeaderCache();
-                        if (res.status === 400) {
-                            try { if (typeof showToast !== 'undefined') showToast(getStrings().err_captcha_simple, 'error'); } catch(e){}
-                            throw new Error('CAPTCHA_INTERCEPT');
-                        }
-                        throw new Error('AUTH_RETRY');
+                        throw new Error(`API Error ${res.status}`);
+                    }
+
+                    if (res.status === 400) {
+                        console.warn(`[API] 400 Error. Possible captcha intercept.`);
+                        localStorage.removeItem('pk_captured_captcha');
+                        resetHeaderCache();
+                        try { if (typeof showToast !== 'undefined') showToast(getStrings().err_captcha_simple, 'error'); } catch(e){}
+                        throw new Error('CAPTCHA_INTERCEPT');
                     }
                     if (res.status === 429) {
                         await sleep(3000 * (pageRetries + 1));
@@ -5372,8 +5450,10 @@ async function apiTaskList(limit = 500, onBatch = null, session = null, signal =
                 try {
                     res = await fetch(url, { headers: getHeaders() });
                     if (res.ok) break;
+                    if (res.status === 401 || res.status === 403) throw new Error(`API Error ${res.status}`);
                     if (res.status === 429) await sleep(2000);
                 } catch (e) {
+                    if (e.message.includes('401') || e.message.includes('403')) throw e;
                     await sleep(1000);
                 }
             }
@@ -6357,6 +6437,7 @@ async function openManager(initialCache, preloadPromise) {
             <div class="pk-ft">
                 <div class="pk-stat" id="pk-stat">${L.status_ready.replace('{n}', 0)}</div>
                 <div class="pk-grp">
+                    <button class="pk-btn" id="pk-migrate" data-pk-tip="${L.tip_migrate}" style="color: var(--pk-pri);">${CONF.icons.migrate} <span>${L.btn_migrate}</span></button>
                     <button class="pk-btn" id="pk-ext" data-pk-tip="${L.tip_ext}">${CONF.icons.ext} <span>${L.btn_ext}</span></button>
                     <button class="pk-btn" id="pk-aria2" data-pk-tip="${L.tip_aria2}">${CONF.icons.aria2} <span>${L.btn_aria2}</span></button>
                     <button class="pk-btn" id="pk-down" data-pk-tip="${L.tip_down}">${CONF.icons.download} <span>${L.btn_down}</span></button>
@@ -6492,8 +6573,9 @@ async function openManager(initialCache, preloadPromise) {
             const isPath = target.classList.contains('pk-path') || target.closest('.pk-path');
             const isThumb = target.hasAttribute('data-pk-thumb');
             const isUI = target.closest('.pk-tb, .pk-sidebar, .pk-hd, .pk-ft, .pk-player-box, .pk-modal, .pk-img-box');
+            const isForceTip = target.classList.contains('pk-force-tip');
 
-            if (!isName && !isPath && !isThumb && !isUI) {
+            if (!isName && !isPath && !isThumb && !isUI && !isForceTip) {
                 if (target.scrollWidth <= target.clientWidth + 1) return;
             }
 
@@ -6564,8 +6646,9 @@ async function openManager(initialCache, preloadPromise) {
             const isPath = target.classList.contains('pk-path') || target.closest('.pk-path');
             const isThumb = target.hasAttribute('data-pk-thumb');
             const isUI = target.closest('.pk-tb, .pk-sidebar, .pk-hd, .pk-ft, .pk-player-box, .pk-modal, .pk-img-box');
+            const isForceTip = target.classList.contains('pk-force-tip');
 
-            if (!isName && !isPath && !isThumb && !isUI) {
+            if (!isName && !isPath && !isThumb && !isUI && !isForceTip) {
                 if (target.scrollWidth <= target.clientWidth + 1) {
                     hideTip();
                     return;
@@ -6633,6 +6716,7 @@ async function openManager(initialCache, preloadPromise) {
         btnBulkRename: el.querySelector('#pk-bulkrename'),
         btnPrune: el.querySelector('#pk-prune'),
         btnUnzip: el.querySelector('#pk-unzip'),
+        btnMigrate: el.querySelector('#pk-migrate'),
         btnBlacklistManager: el.querySelector('#pk-blacklist-manager'),
         uploadWrap: el.querySelector('#pk-upload-wrap'),
         btnUpload: el.querySelector('#pk-btn-upload'),
@@ -6906,7 +6990,7 @@ async function openManager(initialCache, preloadPromise) {
         };
     }
 
-    let modalZIndexCounter = 100000;
+    let modalZIndexCounter = 2147483640;
     function showModal(html) {
         let container = document.getElementById('pk-toast-container');
         if (container) document.body.appendChild(container);
@@ -6917,7 +7001,7 @@ async function openManager(initialCache, preloadPromise) {
             m.classList.add('pk-dark');
         }
 
-        m.innerHTML = `<div class="pk-modal" style="height:auto; min-height:auto; max-height:85vh; overflow:visible;"><div class="pk-modal-close" style="z-index:10;">${CONF.icons.close}</div>${html}</div>`;
+        m.innerHTML = `<div class="pk-modal" style="height:auto; min-height:auto; max-height:92vh; overflow:hidden; display:flex; flex-direction:column;"><div class="pk-modal-close" style="z-index:10;">${CONF.icons.close}</div>${html}</div>`;
 
         const actBars = m.querySelectorAll('.pk-modal-act');
         actBars.forEach(bar => {
@@ -7013,6 +7097,47 @@ async function openManager(initialCache, preloadPromise) {
             m.querySelector('#cfm_no').onclick = () => { m.remove(); resolve(false); };
             m.querySelector('#cfm_yes').onclick = () => { m.remove(); resolve(true); };
             m.querySelector('.pk-modal-close').onclick = () => { m.remove(); resolve(false); };
+
+            m.tabIndex = 0;
+            setTimeout(() => m.focus(), 10);
+            m.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); e.stopPropagation();
+                    m.querySelector('#cfm_yes').click();
+                }
+            });
+        });
+    }
+
+    function showDeleteConfirm(msg, title = L.title_confirm) {
+        return new Promise((resolve) => {
+            const m = showModal(`
+                <h3 style="border:none; margin-bottom:16px; font-size:18px; font-weight:700; color:var(--pk-fg);">${title}</h3>
+                <div style="margin-bottom:20px; line-height:1.6; font-size:14px; color:var(--pk-fg);">${esc(msg).replace(/\n/g, '<br>')}</div>
+                <div style="margin-bottom:20px; display:flex; align-items:center;">
+                    <label style="display:flex; align-items:center; cursor:pointer; font-size:13px; color:#d93025; user-select:none; font-weight:600; opacity:0.9;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.9">
+                        <input type="checkbox" id="pk_hard_delete_chk" style="margin-right:8px; width:16px; height:16px; accent-color:#d93025; cursor:pointer;">
+                        <span>${L.lbl_hard_delete}</span>
+                    </label>
+                </div>
+                <div class="pk-modal-act" style="display:flex; justify-content:flex-end; gap:12px; align-items:center;">
+                    <button class="pk-btn" id="cfm_no" style="height:40px; min-width:86px; padding:0 24px; border-radius:8px; font-weight:500; justify-content:center; background:transparent;">${L.btn_no}</button>
+                    <button class="pk-btn pri" id="cfm_yes" style="height:40px; min-width:86px; padding:0 24px; border-radius:8px; background:var(--pk-pri); color:#fff; font-weight:bold; justify-content:center;">${L.btn_yes}</button>
+                </div>
+            `);
+            const modalBox = m.querySelector('.pk-modal');
+            if (modalBox) {
+                Object.assign(modalBox.style, { width: '420px', height: 'auto', minHeight: 'auto', padding: '30px' });
+                const closeBtn = m.querySelector('.pk-modal-close');
+                if (closeBtn) Object.assign(closeBtn.style, { top: '26px', right: '26px' });
+            }
+            m.querySelector('#cfm_no').onclick = () => { m.remove(); resolve({ confirm: false }); };
+            m.querySelector('#cfm_yes').onclick = () => {
+                const isHard = m.querySelector('#pk_hard_delete_chk').checked;
+                m.remove();
+                resolve({ confirm: true, hardDelete: isHard });
+            };
+            m.querySelector('.pk-modal-close').onclick = () => { m.remove(); resolve({ confirm: false }); };
 
             m.tabIndex = 0;
             setTimeout(() => m.focus(), 10);
@@ -7670,7 +7795,11 @@ async function openManager(initialCache, preloadPromise) {
                     </div>
                 </div>
 
-                <div class="pk-modal-act" style="padding: 20px 30px 24px 30px; margin-top:0; display:flex; align-items:center; justify-content:flex-end; flex-shrink:0;">
+                <div class="pk-modal-act" style="padding: 20px 30px 24px 30px; margin-top:0; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+                    <label style="display:flex; align-items:center; cursor:pointer; font-size:13px; color:#d93025; user-select:none; font-weight:600; opacity:0.9;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.9">
+                        <input type="checkbox" id="bl_prev_hard_delete" style="margin-right:8px; width:16px; height:16px; accent-color:#d93025; cursor:pointer;">
+                        <span>${L.lbl_hard_delete}</span>
+                    </label>
                     <div style="display:flex; gap:12px;">
                         <button class="pk-btn" id="bl_prev_cancel" style="height:40px; padding:0 20px; border-radius:8px; background:transparent; font-weight:600; color:var(--pk-fg);">${L.btn_cancel}</button>
                         <button class="pk-btn pri" id="bl_prev_del" style="height:40px; padding:0 24px; border-radius:8px; background:#d93025; border:none; color:#fff; font-weight:bold; box-shadow:0 4px 12px rgba(217,48,37,0.3); transition:all 0.2s;">${L.btn_bl_delete}</button>
@@ -8016,6 +8145,8 @@ async function openManager(initialCache, preloadPromise) {
             const confirmed = await showConfirm(L.warn_del.replace('{n}', selectedIds.size));
             if (!confirmed) return;
 
+            const isHardDelete = m.querySelector('#bl_prev_hard_delete').checked;
+
             m.remove();
 
             const allIds = Array.from(selectedIds).filter(id => {
@@ -8034,7 +8165,8 @@ async function openManager(initialCache, preloadPromise) {
             const itemsToDelete = matches.filter(m => allIds.includes(m.item.id)).map(m => m.item);
             await executeBatchDelete(allIds, {
                 silent: false,
-                explicitItems: itemsToDelete
+                explicitItems: itemsToDelete,
+                hardDelete: isHardDelete
             });
         };
     }
@@ -8553,8 +8685,13 @@ async function openManager(initialCache, preloadPromise) {
                 setLoad(true);
                 updateLoadTxt(L.str_waiting_token);
             }
-            const isAuthReady = await waitForAuth(15000);
-            if (!isAuthReady) console.warn("PikPak Master: Auth token wait timeout.");
+            const isAuthReady = await waitForAuth(2500);
+            if (!isAuthReady) {
+                console.warn("PikPak Master: Auth token wait timeout. Redirecting to login...");
+                if (typeof purgeAllCachesOnLogout === 'function') purgeAllCachesOnLogout();
+                if (!location.href.includes('/login')) window.location.href = 'https://mypikpak.com/drive/login';
+                return;
+            }
         }
 
         if (!isResuming && el) {
@@ -8948,7 +9085,7 @@ async function openManager(initialCache, preloadPromise) {
                     console.error("API Error encountered:", e);
                     if (typeof resetHeaderCache === 'function') resetHeaderCache();
 
-                    const isAuthError = e.message.includes('401') || e.message.includes('403') || e.message.includes('400') || e.message.includes('CAPTCHA');
+                    const isAuthError = e.message.includes('401') || e.message.includes('403') || e.message.includes('400') || e.message.includes('CAPTCHA') || e.message.includes('AUTH_RETRY');
                     const isNotFoundError = e.message.includes('404');
                     const isNetworkError = e.name === 'TypeError' || e.message.includes('Failed to fetch') || e.message.includes('NetworkError');
 
@@ -8959,18 +9096,20 @@ async function openManager(initialCache, preloadPromise) {
                         if (isAuthError) {
                             resetHeaderCache();
                             updateLoadTxt(L.str_waiting_token);
-                            await sleep(2000);
+                            await sleep(1000);
 
                             try {
                                 const h = getHeaders();
                                 if (!h.Authorization || h.Authorization.length < 10) {
-                                    location.reload();
+                                    if (typeof purgeAllCachesOnLogout === 'function') purgeAllCachesOnLogout();
+                                    if (!location.href.includes('/login')) window.location.href = 'https://mypikpak.com/drive/login';
                                     return;
                                 }
                                 const testRes = await fetch('https://api-drive.mypikpak.com/drive/v1/about', { headers: h });
                                 if (!testRes.ok) {
-                                    console.warn("[Auth] Token still rejected by server, forcing page reload to recover...");
-                                    location.reload();
+                                    console.warn("[Auth] Token still rejected by server, redirecting to login...");
+                                    if (typeof purgeAllCachesOnLogout === 'function') purgeAllCachesOnLogout();
+                                    if (!location.href.includes('/login')) window.location.href = 'https://mypikpak.com/drive/login';
                                     return;
                                 }
                             } catch(testErr) {}
@@ -9015,6 +9154,8 @@ async function openManager(initialCache, preloadPromise) {
     async function refresh() {
         S.sortId++;
         const currentReqId = S.sortId;
+
+        renderCrumb();
 
         if (!S.dupMode) S.dupItemMap = null;
 
@@ -9762,6 +9903,7 @@ async function openManager(initialCache, preloadPromise) {
                             }
 
                             if (sort === 'size') {
+                                if (a.k !== b.k) return folderFirst ? (b.k - a.k) : (a.k - b.k);
                                 const sizeA = parseSize(a.s), sizeB = parseSize(b.s);
                                 if (sizeA !== sizeB) return (sizeB - sizeA) * dir;
                                 return compareNames(a.n, b.n) * dir;
@@ -11148,7 +11290,8 @@ async function openManager(initialCache, preloadPromise) {
 
                     const saveVal = d.limit_count > 0 ? `${d.save_count || 0}/${d.limit_count}` : (d.save_count || 0);
                     const saveTip = d.limit_count > 0 ? `${L.lbl_limit_tip}: ${d.limit_count}` : '';
-                    html += `<div style="text-align:left; padding-left:2px; font-variant-numeric:tabular-nums;" data-pk-tip="${saveTip}">${saveVal}</div>`;
+                    const saveClass = d.limit_count > 0 ? "pk-force-tip" : "";
+                    html += `<div class="${saveClass}" style="text-align:left; padding-left:2px; font-variant-numeric:tabular-nums; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${saveTip}">${saveVal}</div>`;
 
                     let statusColor = 'inherit';
                     let statusText = '';
@@ -11162,13 +11305,13 @@ async function openManager(initialCache, preloadPromise) {
                         statusText = L.share_perm;
                     } else {
                         statusText = timeLeft + (L.str_expire_suffix);
-                        const isUrgent = timeLeft.includes('小时') || timeLeft.includes('hour') || timeLeft.includes('시간') || timeLeft.includes('時間');
+                        const isUrgent = timeLeft.includes('小时') || timeLeft.includes('hour') || timeLeft.includes('时间') || timeLeft.includes('时间');
                         statusColor = isUrgent ? '#ff4d4f' : 'inherit';
                     }
-                    html += `<div style="text-align:center;color:${statusColor};font-size:12px;" data-pk-tip="${esc(statusText)}">${statusText}</div>`;
+                    html += `<div style="text-align:center;color:${statusColor};font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${esc(statusText)}">${statusText}</div>`;
 
                     const shareDate = fmtDate(d.modified_time);
-                    html += `<div style="text-align:right;font-size:12px;" data-pk-tip="${shareDate}">${shareDate}</div>`;
+                    html += `<div style="text-align:right;font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${shareDate}">${shareDate}</div>`;
 
                 } else {
                     const isRoot = S.path.length === 1 && S.path[0].id === '';
@@ -11553,7 +11696,14 @@ async function openManager(initialCache, preloadPromise) {
                     };
 
                     if (S.uploadMode) {
-                        if (d.status !== 'DONE') return;
+                        if (d.status !== 'DONE') {
+                            if (d.file_id) {
+                                S.sel.clear(); S.sel.add(d.id); S.activeId = d.id;
+                                const locateBtn = document.getElementById('ctx-locate');
+                                if (locateBtn) locateBtn.click();
+                            }
+                            return;
+                        }
                         const t = checkType(d);
                         if (t.isTorrent) handleTorrentFile(d);
                         else if (t.isVideo || t.isImage) {
@@ -11568,6 +11718,15 @@ async function openManager(initialCache, preloadPromise) {
 
                     if (S.offlineMode) {
                         if (!d.file_id || d.phase === 'PHASE_TYPE_ERROR') return;
+
+                        if (d.phase !== 'PHASE_TYPE_COMPLETE') {
+                            S.sel.clear();
+                            S.sel.add(d.id);
+                            S.activeId = d.id;
+                            const locateBtn = document.getElementById('ctx-locate');
+                            if (locateBtn) locateBtn.click();
+                            return;
+                        }
 
                         const t = checkType(d);
 
@@ -12100,13 +12259,15 @@ async function openManager(initialCache, preloadPromise) {
                         let g1 = 0;
                         if (els.open) {
                             els.open.style.order = '10';
-                            const canOpen = isSingle && firstItem?.file_id && firstItem.phase !== 'PHASE_TYPE_ERROR' && (isVid || isImg);
+                            const isFolderLike = (firstItem.mime_type && (firstItem.mime_type.includes('folder') || firstItem.mime_type.includes('directory'))) || (firstItem.icon_link && firstItem.icon_link.includes('folder'));
+                            const isReadyMedia = firstItem.phase === 'PHASE_TYPE_COMPLETE' && (isVid || isImg);
+                            const canOpen = isSingle && firstItem?.file_id && firstItem.phase !== 'PHASE_TYPE_ERROR' && (isReadyMedia || isFolderLike);
                             els.open.style.display = canOpen ? 'flex' : 'none';
                             if(canOpen) g1++;
                         }
                         if (els.ext) {
                             els.ext.style.order = '11';
-                            const canExt = isSingle && firstItem?.file_id && firstItem.phase !== 'PHASE_TYPE_ERROR' && isVid;
+                            const canExt = isSingle && firstItem?.file_id && firstItem.phase === 'PHASE_TYPE_COMPLETE' && isVid;
                             els.ext.style.display = canExt ? 'flex' : 'none';
                             if(canExt) g1++;
                         }
@@ -12885,7 +13046,7 @@ async function openManager(initialCache, preloadPromise) {
     };
 
     UI.vp.addEventListener('mousedown', (e) => {
-        if (e.button !== 0 || S.loading || e.detail > 1) return;
+        if (e.button !== 0 || e.detail > 1) return;
 
         if (e.target.closest('.pk-btn, .pk-star-icon, input')) return;
 
@@ -13013,7 +13174,11 @@ async function openManager(initialCache, preloadPromise) {
 
         if (targetId === 'virtual_search_root' || targetId === 'analyze_root' || targetId === 'recent_root') {
             let sourceItems = [];
-            if (targetId === 'analyze_root') {
+            const isAnalyzeSimMode = targetId === 'analyze_root' && S.analyzeSimGroups;
+
+            if (isAnalyzeSimMode) {
+                sourceItems = S.display.filter(item => !item.isHeader);
+            } else if (targetId === 'analyze_root') {
                 sourceItems = (S.analyzeResultItems && S.analyzeResultItems.length > 0) ? S.analyzeResultItems : S.items;
             } else if (targetId === 'recent_root') {
                 if (S.recentResultItems && S.recentResultItems.length > 0) {
@@ -13064,34 +13229,94 @@ async function openManager(initialCache, preloadPromise) {
 
         const renderMenu = (list) => {
             let s = S.sort, d = S.dir;
-            const isNormalFolder = targetId && !targetId.includes('_root');
 
-            if (isNormalFolder) {
-                if (gmGet('pk_sort_independent', false)) {
-                    const prefs = JSON.parse(gmGet('pk_folder_sort_prefs', '{}'));
-                    if (prefs[targetId]) { s = prefs[targetId].sort; d = prefs[targetId].dir; }
-                    else { s = 'modified_time'; d = 1; }
-                } else {
-                    const g = JSON.parse(gmGet('pk_global_sort_pref', '{"sort":"modified_time","dir":1}'));
-                    s = g.sort; d = g.dir;
+            const isStandard = !S.trashMode && !S.shareMode && !S.offlineMode && !S.starredMode && !S.recentMode && !S.historyMode && !S.isFlattened && !S.dupMode && !S.analyzeMode && !S.path.some(p => p.id === 'virtual_search_root');
+
+            if (isStandard) {
+                const isNormalFolder = targetId && !targetId.includes('_root');
+                if (isNormalFolder) {
+                    if (gmGet('pk_sort_independent', false)) {
+                        const prefs = JSON.parse(gmGet('pk_folder_sort_prefs', '{}'));
+                        if (prefs[targetId]) { s = prefs[targetId].sort; d = prefs[targetId].dir; }
+                        else { s = 'modified_time'; d = 1; }
+                    } else {
+                        const g = JSON.parse(gmGet('pk_global_sort_pref', '{"sort":"modified_time","dir":1}'));
+                        s = g.sort; d = g.dir;
+                    }
                 }
             }
 
-            const sortKey = (s === 'modified_time') ? 'modified_time' : 'name';
-            const collator = new Intl.Collator(({ 'zh': 'zh-CN', 'tc': 'zh-TW', 'ja': 'ja', 'ko': 'ko' })[getLang()] || 'en', { numeric: true, sensitivity: 'base' });
+            const isAnalyzeSimMode = S.analyzeMode && targetId === 'analyze_root' && S.analyzeSimGroups;
 
-            list.sort((a, b) => {
-                const isSysA = a.name === CONF.SYSTEM_FOLDER_NAME && (!a.parent_id || a.parent_id === '' || a.parent_id === 'root');
-                const isSysB = b.name === CONF.SYSTEM_FOLDER_NAME && (!b.parent_id || b.parent_id === '' || b.parent_id === 'root');
-                if (isSysA !== isSysB) return isSysA ? -1 : 1;
+            if (!isAnalyzeSimMode) {
+                const collator = new Intl.Collator(({ 'zh': 'zh-CN', 'tc': 'zh-TW', 'ja': 'ja', 'ko': 'ko' })[getLang()] || 'en', { numeric: true, sensitivity: 'base' });
+                const parseSize = n => parseInt(n || 0);
+                const parseTime = t => t ? new Date(t).getTime() : 0;
 
-                if (sortKey === 'modified_time') {
-                    const tA = a.modified_time ? new Date(a.modified_time).getTime() : 0;
-                    const tB = b.modified_time ? new Date(b.modified_time).getTime() : 0;
-                    return (tB - tA) * d;
-                }
-                return collator.compare(a.name, b.name) * d;
-            });
+                const getCharWeight = (str) => {
+                    if (!str) return 0;
+                    const c = str.charAt(0);
+                    if (/[0-9]/.test(c)) return 20;
+                    if (/[\u4e00-\u9fa5]/.test(c)) return 30;
+                    if (/[a-zA-Z]/.test(c)) return 40;
+                    return 10;
+                };
+
+                const compareNames = (nameA, nameB) => {
+                    const rankA = getCharWeight(nameA);
+                    const rankB = getCharWeight(nameB);
+                    if (rankA !== rankB) return rankA - rankB;
+                    return collator.compare(nameA, nameB);
+                };
+
+                list.sort((a, b) => {
+                    const isSysA = a.name === CONF.SYSTEM_FOLDER_NAME && (!a.parent_id || a.parent_id === '' || a.parent_id === 'root');
+                    const isSysB = b.name === CONF.SYSTEM_FOLDER_NAME && (!b.parent_id || b.parent_id === '' || b.parent_id === 'root');
+                    if (isSysA !== isSysB) return isSysA ? -1 : 1;
+
+                    if (s === 'modified_time') {
+                        const tA = parseTime(a.modified_time);
+                        const tB = parseTime(b.modified_time);
+                        if (tA !== tB) return (tB - tA) * d;
+                    } else if (s === 'created_time') {
+                        const tA = parseTime(a.created_time);
+                        const tB = parseTime(b.created_time);
+                        if (tA !== tB) return (tB - tA) * d;
+                    } else if (s === 'size') {
+                        const sizeA = parseSize(a.size);
+                        const sizeB = parseSize(b.size);
+                        if (sizeA !== sizeB) return (sizeB - sizeA) * d;
+                    } else if (s === 'play_time') {
+                        const ptA = a._history_ts || 0;
+                        const ptB = b._history_ts || 0;
+                        if (ptA !== ptB) return (ptB - ptA) * d;
+                    } else if (s === 'view_count' || s === 'save_count') {
+                        const valA = s === 'view_count' ? parseSize(a.view_count) : parseSize(a.save_count);
+                        const valB = s === 'view_count' ? parseSize(b.view_count) : parseSize(b.save_count);
+                        if (valA !== valB) return (valB - valA) * d;
+                    } else if (s === 'starred') {
+                        const isItemStarred = (item) => S.starredSet.has(item.id) || !!(item.starred || (item.tags && item.tags.some(t => t.name === 'STAR')));
+                        const stA = isItemStarred(a) ? 1 : 0;
+                        const stB = isItemStarred(b) ? 1 : 0;
+                        if (stA !== stB) return stB - stA;
+                        const tA = parseTime(a.modified_time);
+                        const tB = parseTime(b.modified_time);
+                        return (tB - tA) * d;
+                    } else if (s === 'path') {
+                        const getPath = (item) => {
+                            if (S.analyzeMode) return item._pathStr || "";
+                            if (item._lineage) return item._lineage.map(x => x.name).join('/');
+                            return "";
+                        };
+                        const pA = getPath(a);
+                        const pB = getPath(b);
+                        const pathCmp = compareNames(pA, pB);
+                        if (pathCmp !== 0) return pathCmp * d;
+                    }
+
+                    return compareNames(a.name, b.name) * d;
+                });
+            }
 
             let pop = document.getElementById('pk-main-crumb-pop');
             if (!pop) {
@@ -13114,10 +13339,13 @@ async function openManager(initialCache, preloadPromise) {
                 const fallbackSvg = CONF.typeIcons.folder.replace(/width="\d+"/, 'width="18"').replace(/height="\d+"/, 'height="18"');
 
                 const iconHtml = iconSrc
-                    ? `<img src="${iconSrc}" style="width:18px;height:18px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='inline-flex';"><span style="display:none;align-items:center;flex-shrink:0;">${fallbackSvg}</span>`
-                    : fallbackSvg;
+                ? `<img src="${iconSrc}" style="width:18px;height:18px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='inline-flex';"><span style="display:none;align-items:center;flex-shrink:0;">${fallbackSvg}</span>`
+                : fallbackSvg;
 
-                item.innerHTML = `${iconHtml}<span>${esc(f.name)}</span>`;
+                const isInPath = S.path.some(pathNode => pathNode.id === f.id);
+                const textStyle = isInPath ? 'font-weight:bold; color:var(--pk-pri);' : '';
+
+                item.innerHTML = `${iconHtml}<span style="${textStyle}">${esc(f.name)}</span>`;
 
                 if (f.id !== 'loading' && f.id !== 'error') {
                     item.onclick = (ev) => {
@@ -13309,7 +13537,19 @@ async function openManager(initialCache, preloadPromise) {
 
             UI.crumb.appendChild(s);
 
-            if (i < S.path.length - 1) {
+            const isLast = i === S.path.length - 1;
+            let showArrow = !isLast;
+
+            if (isLast) {
+                const isUnsupportedVirtual = p.id === 'history_root' || p.id === 'offline_root' || p.id === 'upload_root';
+                if (!S.isFlattened && !S.dupMode && !isUnsupportedVirtual) {
+                    if (S.items && S.items.some(item => item.kind === 'drive#folder')) {
+                        showArrow = true;
+                    }
+                }
+            }
+
+            if (showArrow) {
                 const sep = document.createElement('span');
                 sep.className = 'pk-crumb-sep';
                 sep.innerHTML = CONF.crumbIcons.right;
@@ -13472,7 +13712,15 @@ async function openManager(initialCache, preloadPromise) {
             }
         }
 
-        if (e.key === 'm' || e.key === 'M') {
+        if (e.altKey && (e.key === 'm' || e.key === 'M')) {
+            e.preventDefault();
+            if (UI.btnMigrate && !UI.btnMigrate.disabled && UI.btnMigrate.style.display !== 'none') {
+                UI.btnMigrate.click();
+            }
+            return;
+        }
+
+        if ((e.key === 'm' || e.key === 'M') && !e.altKey && !e.ctrlKey && !e.metaKey) {
             const imgPlayer = document.querySelector('.pk-img-ov');
             const vidPlayer = document.getElementById('pk-player-ov');
             if (!imgPlayer && !vidPlayer) {
@@ -13860,6 +14108,12 @@ async function openManager(initialCache, preloadPromise) {
 
         if (isShare && UI.btnCancelShare) {
             UI.btnCancelShare.disabled = !hasSel;
+        }
+
+        if (UI.btnMigrate) {
+            UI.btnMigrate.disabled = !hasSel;
+            UI.btnMigrate.style.cursor = UI.btnMigrate.disabled ? 'not-allowed' : 'pointer';
+            UI.btnMigrate.style.opacity = UI.btnMigrate.disabled ? '0.4' : '1';
         }
 
         const hasClipData = S.clipItems && S.clipItems.length > 0;
@@ -17228,90 +17482,30 @@ async function openManager(initialCache, preloadPromise) {
         };
         document.addEventListener('keydown', playerKeyHandler);
 
-        const smartLoad = async () => {
-            if (item.phase === 'PHASE_TYPE_RUNNING' || item.phase === 'PHASE_TYPE_PENDING') {
-                console.log("[Transcode] Video is processing, entering polling mode.");
+        const initDur = (item.params && item.params.duration) ||
+                        S.durationMap.get(item.id) ||
+                        gmGet('pk_duration_' + item.id, 0);
 
-                const mask = document.createElement('div');
-                mask.className = 'pk-transcode-mask';
-                mask.innerHTML = `
-                    <div class="pk-tc-icon"></div>
-                    <div style="font-weight:bold;margin-bottom:8px;">${L.msg_transcoding}</div>
-                    <div style="color:#888;font-size:12px;">${L.msg_transcoding_wait}</div>
-                    <div class="pk-tc-btn" id="pk_tc_force">${L.btn_force_play}</div>
-                `;
-                box.appendChild(mask);
+        if (tDur && initDur > 0) tDur.textContent = fmtT(initDur);
 
-                mask.querySelector('#pk_tc_force').onclick = (e) => {
-                    e.stopPropagation();
-                    if (transcodeTimer) clearInterval(transcodeTimer);
-                    mask.remove();
-                    loadSource(currentLink);
-                    v.play();
-                };
+        loadSource(currentLink, null);
+        setTimeout(() => {
+            if (isPlayerDestroyed) return;
 
-                transcodeTimer = setInterval(async () => {
-                    try {
-                        const freshData = await apiGet(item.id);
-                        if (freshData.phase === 'PHASE_TYPE_COMPLETE') {
-                            clearInterval(transcodeTimer);
-                            mask.remove();
+            const p = v.play();
+            if (p !== undefined) { p.catch(() => updateState()); }
 
-                            item = freshData;
-                            const best = getBestSource(freshData);
-                            currentLink = best.src;
-
-                            loadSource(currentLink);
-                            if (typeof ThumbnailEngine !== 'undefined') ThumbnailEngine.resetSource(currentLink);
-
-                            v.play();
-
-                            qualityList = best.list;
-                            currentResName = best.name;
-                            const resTxt = d.querySelector('#pk_p_res_txt');
-                            const resList = d.querySelector('#pk_p_res_list');
-                            if(resTxt) resTxt.textContent = currentResName;
-                            if(resList) {
-                                resList.innerHTML = renderQualityMenu(qualityList, currentResName);
-                                bindResEvents();
-                            }
-
-                            const toast = document.createElement('div');
-                            toast.style.cssText = "position:absolute;top:20px;left:50%;transform:translateX(-50%);background:rgba(76, 175, 80, 0.9);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;z-index:100;animation:pkFadeIn 0.5s;";
-                            toast.textContent = L.msg_transcode_done;
-                            box.appendChild(toast);
-                            setTimeout(()=>toast.remove(), 3000);
-                        }
-                    } catch(e) { console.warn("[TranscodePoll] Error:", e); }
-                }, 3000);
-
-            } else {
-                const initDur = (item.params && item.params.duration) ||
-                                S.durationMap.get(item.id) ||
-                                gmGet('pk_duration_' + item.id, 0);
-
-                if (tDur && initDur > 0) tDur.textContent = fmtT(initDur);
-
-                loadSource(currentLink, null);
-                setTimeout(() => {
-                    if (isPlayerDestroyed) return;
-
-                    const p = v.play();
-                    if (p !== undefined) { p.catch(() => updateState()); }
-
-                    if (startFullscreen) {
-                        const box = d.querySelector('#pk_p_box');
-                        const btnFull = d.querySelector('#pk_p_full');
-                        if (box && box.requestFullscreen) {
-                            box.requestFullscreen().then(() => {
-                                if(btnFull) btnFull.innerHTML = mkSvg(icons.exitFull);
-                            }).catch(err => console.warn("Fullscreen auto-resume failed", err));
-                        }
-                    }
-                }, 100);
+            if (startFullscreen) {
+                const box = d.querySelector('#pk_p_box');
+                const btnFull = d.querySelector('#pk_p_full');
+                if (box && box.requestFullscreen) {
+                    box.requestFullscreen().then(() => {
+                        if(btnFull) btnFull.innerHTML = mkSvg(icons.exitFull);
+                    }).catch(err => console.warn("Fullscreen auto-resume failed", err));
+                }
             }
-        };
-        smartLoad();
+        }, 100);
+
         autoMatchSubtitle(item);
     }
 
@@ -17637,21 +17831,56 @@ async function openManager(initialCache, preloadPromise) {
                 viewport.classList.toggle('pk-fit-mode');
             }
         };
+        d.addEventListener('wheel', (e) => {
+            if (isLongImageMode) return;
+
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            let newScale = Math.max(0.1, Math.min(10, scale + delta));
+
+            if (img.naturalWidth && viewport) {
+                const vw = viewport.clientWidth;
+                const vh = viewport.clientHeight;
+                const iw = img.naturalWidth;
+                const ih = img.naturalHeight;
+
+                const baseRatio = Math.min(vw / iw, vh / ih);
+                let curW = iw * baseRatio * newScale;
+                let curH = ih * baseRatio * newScale;
+
+                if (Math.abs(rotation % 180) === 90) [curW, curH] = [curH, curW];
+
+                const limitX = curW > vw ? (curW - vw) / 2 : 0;
+                const limitY = curH > vh ? (curH - vh) / 2 : 0;
+
+                transX = Math.max(-limitX, Math.min(limitX, transX));
+                transY = Math.max(-limitY, Math.min(limitY, transY));
+            }
+
+            scale = newScale;
+            updateTransform();
+        });
+
+        img.onclick = () => {
+            if (isLongImageMode) {
+                viewport.classList.toggle('pk-fit-mode');
+            }
+        };
         img.addEventListener('mousedown', (e) => {
             if (e.button !== 0 || (isLongImageMode && !viewport.classList.contains('pk-fit-mode'))) return;
             e.preventDefault();
             const z = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
             isDrag = true;
             img.style.cursor = 'grabbing';
-            startX = e.clientX - transX * scale * z;
-            startY = e.clientY - transY * scale * z;
+            startX = e.clientX - transX * z;
+            startY = e.clientY - transY * z;
         });
 
         document.addEventListener('mousemove', (e) => {
             if (!isDrag || isLongImageMode) return;
             const z = parseFloat(document.documentElement.style.getPropertyValue('--pk-zoom')) || 1;
-            let tx = (e.clientX - startX) / (scale * z);
-            let ty = (e.clientY - startY) / (scale * z);
+            let tx = (e.clientX - startX) / z;
+            let ty = (e.clientY - startY) / z;
 
             if (img.naturalWidth && viewport) {
                 const vw = viewport.clientWidth;
@@ -17665,8 +17894,8 @@ async function openManager(initialCache, preloadPromise) {
 
                 if (Math.abs(rotation % 180) === 90) [curW, curH] = [curH, curW];
 
-                const limitX = curW > vw ? (curW - vw) / (2 * scale) : 0;
-                const limitY = curH > vh ? (curH - vh) / (2 * scale) : 0;
+                const limitX = curW > vw ? (curW - vw) / 2 : 0;
+                const limitY = curH > vh ? (curH - vh) / 2 : 0;
 
                 tx = Math.max(-limitX, Math.min(limitX, tx));
                 ty = Math.max(-limitY, Math.min(limitY, ty));
@@ -23375,12 +23604,14 @@ async function openManager(initialCache, preloadPromise) {
                 const cacheHitCount = Array.from(folderMap.keys()).filter(id => globalCache.has(id)).length;
                 let confirmMsg = L.msg_prune_found.replace('{n}', toDeleteList.length);
 
-                if (await showConfirm(confirmMsg)) {
+                const delRes = await showDeleteConfirm(confirmMsg);
+                if (delRes.confirm) {
                     const allIds = toDeleteList.map(f => f.id);
 
                     await executeBatchDelete(allIds, {
                         silent: true,
-                        forceRefresh: false
+                        forceRefresh: false,
+                        hardDelete: delRes.hardDelete
                     });
 
                     if (myScanId === S.scanId) {
@@ -24227,7 +24458,7 @@ async function openManager(initialCache, preloadPromise) {
                         failListText += L.msg_aria2_batch_fail_log;
                     }
 
-                    await showAlert(`${L.str_failed}: ${failedFiles.length}\n\n${failListText}`, L.title_alert);
+                    await showAlert(`${L.str_failed} ${failedFiles.length} ${L.str_items}\n\n${failListText}`, L.title_alert);
 
                     if (failedFiles.length > 10) {
                         try {
@@ -24296,8 +24527,8 @@ async function openManager(initialCache, preloadPromise) {
             });
         }
 
-        const BATCH_SIZE = hardDelete ? 1000 : 200;
-        const SKIP_VERIFY = hardDelete;
+        const BATCH_SIZE = 200;
+        const SKIP_VERIFY = false;
 
         const progressTask = FloatBarManager.create(L.str_deleting);
         const updateFloat = progressTask.update;
@@ -24335,7 +24566,6 @@ async function openManager(initialCache, preloadPromise) {
         S.activeId = null;
 
         try {
-            const BATCH_SIZE = 200;
             const totalToDelete = ids.length;
             let deletedCount = 0;
             const affectedParentIds = new Set();
@@ -24379,7 +24609,7 @@ async function openManager(initialCache, preloadPromise) {
                     while (verifyRetries < 20) {
                         try {
                             const meta = await apiGet(lastId);
-                            if (meta.trashed) break;
+                            if (!hardDelete && meta.trashed) break;
                         } catch (e) {
                             break;
                         }
@@ -24742,9 +24972,10 @@ async function openManager(initialCache, preloadPromise) {
             return;
         }
 
-        if (!await showConfirm(L.warn_del.replace('{n}', toDeleteIds.length))) return;
+        const delRes = await showDeleteConfirm(L.warn_del.replace('{n}', toDeleteIds.length));
+        if (!delRes.confirm) return;
 
-        await executeBatchDelete(toDeleteIds);
+        await executeBatchDelete(toDeleteIds, { hardDelete: delRes.hardDelete });
     };
 
     UI.btnDeselect.onclick = () => {
@@ -25797,7 +26028,7 @@ async function openManager(initialCache, preloadPromise) {
         if(UI.crumb) { UI.crumb.style.opacity = '1'; UI.crumb.style.display = 'flex'; }
         if(UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'flex';
 
-        const stdBtns = [UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnBlacklistManager];
+        const stdBtns = [UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate, UI.btnBlacklistManager];
         const shareBtns = [document.getElementById('pk-cancel-share')];
         const upBtns = [UI.btnUpPause, UI.btnUpStart, UI.btnUpDel, UI.btnUpClearAll];
         const upSep = document.getElementById('pk-up-sep');
@@ -25810,8 +26041,9 @@ async function openManager(initialCache, preloadPromise) {
         if (S.historyMode) {
             UI.win.classList.remove('pk-mode-trash');
 
-            stdBtns.forEach(b => { if(b && b !== UI.btnBlacklistManager) b.style.display = 'none'; });
+            stdBtns.forEach(b => { if(b && b !== UI.btnBlacklistManager && b !== UI.btnMigrate) b.style.display = 'none'; });
             if (UI.btnBlacklistManager) UI.btnBlacklistManager.style.display = 'inline-flex';
+            if (UI.btnMigrate) UI.btnMigrate.style.display = 'inline-flex';
             if (UI.btnRefresh) UI.btnRefresh.style.display = 'inline-flex';
 
             [UI.btnUpPause, UI.btnUpStart, UI.btnUpDel, UI.btnUpClearAll, UI.btnUpClearDone, UI.btnUpClearIng].forEach(b => { if(b) b.style.display = 'none'; });
@@ -25866,7 +26098,7 @@ async function openManager(initialCache, preloadPromise) {
         else if (S.offlineMode) {
             UI.win.classList.remove('pk-mode-trash');
 
-            [UI.btnNewFolder, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip].forEach(b => { if(b) b.style.display = 'none'; });
+            [UI.btnNewFolder, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate].forEach(b => { if(b) b.style.display = 'none'; });
 
             [UI.btnDel, UI.btnRefresh, UI.btnBlacklistManager].forEach(b => { if(b) b.style.display = 'inline-flex'; });
 
@@ -26033,6 +26265,21 @@ async function openManager(initialCache, preloadPromise) {
 
         const applySort = () => {
             const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+            const getCharWeight = (str) => {
+                if (!str) return 0;
+                const c = str.charAt(0);
+                if (/[0-9]/.test(c)) return 20;
+                if (/[\u4e00-\u9fa5]/.test(c)) return 30;
+                if (/[a-zA-Z]/.test(c)) return 40;
+                return 10;
+            };
+            const compareNames = (nameA, nameB) => {
+                const rankA = getCharWeight(nameA);
+                const rankB = getCharWeight(nameB);
+                if (rankA !== rankB) return rankA - rankB;
+                return collator.compare(nameA, nameB);
+            };
+
             currentList.sort((a, b) => {
                 if (a.kind !== b.kind) return a.kind === 'drive#folder' ? -1 : 1;
 
@@ -26040,8 +26287,8 @@ async function openManager(initialCache, preloadPromise) {
                 const isSysB = b.name === CONF.SYSTEM_FOLDER_NAME && (!b.parent_id || b.parent_id === '' || b.parent_id === 'root');
                 if (isSysA !== isSysB) return isSysA ? -1 : 1;
 
-                if (sortMode === 'az') return collator.compare(a.name, b.name);
-                if (sortMode === 'za') return collator.compare(b.name, a.name);
+                if (sortMode === 'az') return compareNames(a.name, b.name);
+                if (sortMode === 'za') return compareNames(b.name, a.name);
                 if (sortMode === 'new') return new Date(b.modified_time) - new Date(a.modified_time);
                 if (sortMode === 'old') return new Date(a.modified_time) - new Date(b.modified_time);
                 return 0;
@@ -26158,12 +26405,31 @@ async function openManager(initialCache, preloadPromise) {
 
             const renderMenu = (list) => {
                 const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+                const getCharWeight = (str) => {
+                    if (!str) return 0;
+                    const c = str.charAt(0);
+                    if (/[0-9]/.test(c)) return 20;
+                    if (/[\u4e00-\u9fa5]/.test(c)) return 30;
+                    if (/[a-zA-Z]/.test(c)) return 40;
+                    return 10;
+                };
+                const compareNames = (nameA, nameB) => {
+                    const rankA = getCharWeight(nameA);
+                    const rankB = getCharWeight(nameB);
+                    if (rankA !== rankB) return rankA - rankB;
+                    return collator.compare(nameA, nameB);
+                };
+
                 list.sort((a, b) => {
                     const isSysA = a.name === CONF.SYSTEM_FOLDER_NAME && (!a.parent_id || a.parent_id === '' || a.parent_id === 'root');
                     const isSysB = b.name === CONF.SYSTEM_FOLDER_NAME && (!b.parent_id || b.parent_id === '' || b.parent_id === 'root');
                     if (isSysA !== isSysB) return isSysA ? -1 : 1;
+
+                    if (sortMode === 'az') return compareNames(a.name, b.name);
+                    if (sortMode === 'za') return compareNames(b.name, a.name);
                     if (sortMode === 'new') return new Date(b.modified_time || 0) - new Date(a.modified_time || 0);
-                    return collator.compare(a.name, b.name);
+                    if (sortMode === 'old') return new Date(a.modified_time || 0) - new Date(b.modified_time || 0);
+                    return 0;
                 });
 
                 if (list.length === 0) { cleanup(); return; }
@@ -26174,7 +26440,9 @@ async function openManager(initialCache, preloadPromise) {
                     const iconSrc = f.icon_link || '';
                     const fallbackSvg = CONF.typeIcons.folder.replace(/width="\d+"/, 'width="18"').replace(/height="\d+"/, 'height="18"');
                     const iconHtml = iconSrc ? `<img src="${iconSrc}" style="width:18px;height:18px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"><span style="display:none;align-items:center;flex-shrink:0;">${fallbackSvg}</span>` : fallbackSvg;
-                    itemDiv.innerHTML = `${iconHtml}<span>${esc(f.name)}</span>`;
+                    const isInPath = currentPath.some(pathNode => pathNode.id === f.id);
+                    const textStyle = isInPath ? 'font-weight:bold; color:var(--pk-pri);' : '';
+                    itemDiv.innerHTML = `${iconHtml}<span style="${textStyle}">${esc(f.name)}</span>`;
 
                     itemDiv.onclick = (ev) => {
                         ev.stopPropagation();
@@ -26230,7 +26498,14 @@ async function openManager(initialCache, preloadPromise) {
                 }
                 crumbEl.appendChild(sp);
 
-                if (!isLast) {
+                let showArrow = !isLast;
+                if (isLast) {
+                    if (currentList && currentList.some(item => item.kind === 'drive#folder')) {
+                        showArrow = true;
+                    }
+                }
+
+                if (showArrow) {
                     const sep = document.createElement('span');
                     sep.className = 'pk-picker-arrow';
                     sep.innerHTML = CONF.crumbIcons.right;
@@ -26303,6 +26578,7 @@ async function openManager(initialCache, preloadPromise) {
 
                 applySort();
                 renderList();
+                renderCrumb();
             } catch (e) {
                 listEl.innerHTML = `<div style="color:#d93025; text-align:center; padding:20px;">${L.str_error}: ${esc(e.message)}</div>`;
             }
@@ -27892,28 +28168,30 @@ async function openManager(initialCache, preloadPromise) {
             const sortPref = m.querySelector('input[name="set_sort_pref"]:checked').value;
             const saveBtn = m.querySelector('#set_save');
 
-            gmSet('pk_blur_thumb', newBlur);
-            gmSet('pk_keep_pos', newKeepPos);
-            gmSet('pk_comic_mode', newComicMode);
-            gmSet('pk_skip_bl_on_del', newSkipBl);
-
-            const wasIndep = gmGet('pk_sort_independent', false);
-            const isIndep = (sortPref === 'indep');
-            gmSet('pk_sort_independent', isIndep);
-
-            if (wasIndep && !isIndep) {
-                gmSet('pk_folder_sort_prefs', '{}');
-                gmSet('pk_global_sort_pref', JSON.stringify({ sort: 'modified_time', dir: 1 }));
-                S.sort = 'modified_time'; S.dir = 1;
-            }
-
-            gmSet('pk_lang', selectedLang);
-            gmSet('pk_search_engine', selectedEngine);
-            gmSet('pk_turbo_mode', newTurbo);
-            gmSet('pk_dl_filter_ext', m.querySelector('#set_dl_filter_ext').value.trim());
-            gmSet('pk_dl_filter_name', m.querySelector('#set_dl_filter_name').value.trim());
-
             const applyChangesAndClose = () => {
+                gmSet('pk_blur_thumb', newBlur);
+                gmSet('pk_keep_pos', newKeepPos);
+                gmSet('pk_comic_mode', newComicMode);
+                gmSet('pk_skip_bl_on_del', newSkipBl);
+
+                const wasIndep = gmGet('pk_sort_independent', false);
+                const isIndep = (sortPref === 'indep');
+                gmSet('pk_sort_independent', isIndep);
+
+                if (wasIndep && !isIndep) {
+                    gmSet('pk_folder_sort_prefs', '{}');
+                    gmSet('pk_global_sort_pref', JSON.stringify({ sort: 'modified_time', dir: 1 }));
+                    S.sort = 'modified_time'; S.dir = 1;
+                }
+
+                gmSet('pk_lang', selectedLang);
+                gmSet('pk_search_engine', selectedEngine);
+                gmSet('pk_turbo_mode', newTurbo);
+                gmSet('pk_dl_filter_ext', m.querySelector('#set_dl_filter_ext').value.trim());
+                gmSet('pk_dl_filter_name', m.querySelector('#set_dl_filter_name').value.trim());
+                gmSet('pk_aria2_url', newUrl);
+                gmSet('pk_aria2_token', newToken);
+
                 m.remove();
 
                 const savedMsg = (T[selectedLang] || T['en']).msg_settings_saved;
@@ -27959,7 +28237,6 @@ async function openManager(initialCache, preloadPromise) {
             };
 
             if (!newUrl && !newToken) {
-                gmSet('pk_aria2_url', ''); gmSet('pk_aria2_token', '');
                 applyChangesAndClose();
                 return;
             }
@@ -27979,13 +28256,9 @@ async function openManager(initialCache, preloadPromise) {
                         ontimeout: () => rejectReq(new Error('Timeout'))
                     });
                 });
-                gmSet('pk_aria2_url', newUrl);
-                gmSet('pk_aria2_token', newToken);
                 applyChangesAndClose();
             } catch (e) {
                 if (await showConfirm(L.msg_aria2_test_fail, L.title_aria2_fail)) {
-                    gmSet('pk_aria2_url', newUrl);
-                    gmSet('pk_aria2_token', newToken);
                     applyChangesAndClose();
                 } else {
                     saveBtn.disabled = false;
@@ -28071,7 +28344,7 @@ async function openManager(initialCache, preloadPromise) {
                 }
                 keysToRemove.forEach(k => localStorage.removeItem(k));
                 if (typeof purgeAllCachesOnLogout === 'function') purgeAllCachesOnLogout();
-                window.location.href = 'https://mypikpak.com/drive/login';
+                if (!location.href.includes('/login')) window.location.href = 'https://mypikpak.com/drive/login';
             }
         };
     };
@@ -28369,7 +28642,7 @@ async function openManager(initialCache, preloadPromise) {
                 const upSep = document.getElementById('pk-up-sep');
                 if(upSep) upSep.style.display = 'none';
 
-                [UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnRefresh, UI.btnBlacklistManager].forEach(b => { if(b) b.style.display = 'inline-flex'; });
+                [UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate, UI.btnRefresh, UI.btnBlacklistManager].forEach(b => { if(b) b.style.display = 'inline-flex'; });
                 if(UI.uploadWrap) UI.uploadWrap.style.display = 'inline-flex';
 
                 S.path = pathChain;
@@ -28491,6 +28764,19 @@ async function openManager(initialCache, preloadPromise) {
         if (!id) return;
         const item = S.items.find(x => x.id === id);
         if (!item) return;
+
+        if (S.offlineMode && item.phase !== 'PHASE_TYPE_COMPLETE') {
+            const locateBtn = document.getElementById('ctx-locate');
+            if (locateBtn) locateBtn.click();
+            return;
+        }
+        if (S.uploadMode && item.status !== 'DONE') {
+            if (item.file_id) {
+                const locateBtn = document.getElementById('ctx-locate');
+                if (locateBtn) locateBtn.click();
+            }
+            return;
+        }
 
         if (item.kind === 'drive#folder') {
             if (S.loading) return;
@@ -30679,6 +30965,115 @@ async function openManager(initialCache, preloadPromise) {
         };
     }
 
+    UI.btnMigrate.onclick = async () => {
+        if (S.sel.size === 0) return;
+        const L = getStrings();
+
+        const hasConflict = Array.from(S.sel).some(id => {
+            const item = S.itemMap.get(id);
+            if (item && item.kind === 'drive#folder') return isPathBusy(item.id);
+            return S.movingIds.has(id);
+        });
+        if (hasConflict) {
+            showAlert(L.msg_op_blocked_moving);
+            return;
+        }
+
+        if (S.sel.size > 100) {
+            showToast(L.err_migrate_limit, 'error');
+            return;
+        }
+
+        const selectedIds = Array.from(S.sel);
+        const estimatedSize = JSON.stringify(selectedIds).length;
+        if (estimatedSize > 3.8 * 1024 * 1024) {
+            const mb = (estimatedSize / 1024 / 1024).toFixed(2);
+            showAlert(L.err_migrate_too_many.replace('{s}', mb));
+            return;
+        }
+
+        if (!await showConfirm(L.msg_migrate_confirm.replace('{n}', S.sel.size))) return;
+
+        setLoad(true);
+        updateLoadTxt(L.msg_migrate_packing);
+
+        try {
+            let sourceUid = "";
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k && k.startsWith('credentials')) {
+                    try {
+                        const v = JSON.parse(localStorage.getItem(k));
+                        if (v && v.sub) { sourceUid = v.sub; break; }
+                    } catch {}
+                }
+            }
+            if (!sourceUid) sourceUid = "UNKNOWN_UID_" + Date.now();
+
+            const randPass = Math.random().toString(36).slice(-5) + Math.random().toString(36).slice(-5).toUpperCase();
+
+            const payload = {
+                file_ids: Array.from(S.sel),
+                share_to: 'encryptedlink',
+                expiration_days: 1,
+                pass_code_option: 'REQUIRED',
+                custom_pass_code: randPass,
+                limit_count: 1
+            };
+
+            const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/share`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                if (res.status === 403 || res.status === 400) {
+                    throw new Error(L.err_migrate_ban);
+                }
+                throw new Error(err.error_description || `API Error ${res.status}`);
+            }
+
+            const data = await res.json();
+
+            const stub = {
+                source_uid: sourceUid,
+                share_id: data.share_id,
+                pass_code: randPass,
+                file_count: S.sel.size,
+                file_ids: Array.from(S.sel),
+                timestamp: Date.now()
+            };
+
+            gmSet('pk_migration_stub', JSON.stringify(stub));
+
+            try {
+                const store = JSON.parse(gmGet('pk_share_limits', '{}'));
+                store[data.share_id] = 1;
+                gmSet('pk_share_limits', JSON.stringify(store));
+            } catch(e) {}
+
+            setLoad(false);
+            await showAlert(L.msg_migrate_ready, L.btn_migrate);
+
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k && (k.startsWith('credentials') || k.startsWith('captcha') || k === 'pk_captured_captcha')) {
+                    keysToRemove.push(k);
+                }
+            }
+            keysToRemove.forEach(k => localStorage.removeItem(k));
+            if (typeof purgeAllCachesOnLogout === 'function') purgeAllCachesOnLogout();
+            if (!location.href.includes('/login')) window.location.href = 'https://mypikpak.com/drive/login';
+
+        } catch (e) {
+            setLoad(false);
+            showAlert(`${L.str_error}: ${e.message}`);
+        }
+    };
+
     UI.btnUnzip.onclick = async () => {
         ensureItemMap();
         const isArchive = (it) => {
@@ -30710,9 +31105,10 @@ async function openManager(initialCache, preloadPromise) {
         const skippedCount = skippedItems.length;
 
         if (skippedCount > 0) {
-            if (await showConfirm(L.msg_unzip_skip_del_confirm.replace('{n}', skippedCount))) {
+            const delRes = await showDeleteConfirm(L.msg_unzip_skip_del_confirm.replace('{n}', skippedCount));
+            if (delRes.confirm) {
                 const idsToDelete = skippedItems.map(i => i.id);
-                await executeBatchDelete(idsToDelete, { silent: true, forceRefresh: false });
+                await executeBatchDelete(idsToDelete, { silent: true, forceRefresh: false, hardDelete: delRes.hardDelete });
                 showToast(L.msg_del_items_done.replace('{n}', skippedCount));
             } else {
                 showToast(L.msg_skip_unzipped.replace('{n}', skippedCount));
@@ -30730,6 +31126,11 @@ async function openManager(initialCache, preloadPromise) {
         ctx.style.display = 'none';
         const ids = Array.from(S.sel);
         if (ids.length === 0) return;
+
+        if (ids.length > 100) {
+            showToast(L.err_share_limit, 'error');
+            return;
+        }
 
         const item = S.itemMap.get(ids[0]);
         if (!item) return;
@@ -31155,7 +31556,7 @@ async function openManager(initialCache, preloadPromise) {
         const navs =[UI.btnNavHome, UI.btnNavTrash, UI.btnNavShare, UI.btnNavStarred, UI.btnNavRecent, UI.btnNavHistory, UI.btnNavOffline, UI.btnNavUpload];
         navs.forEach(n => { if(n) n.classList.remove('act'); });
 
-        const stdBtns =[UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnBlacklistManager];
+        const stdBtns =[UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate, UI.btnBlacklistManager];
         const shareBtns =[UI.btnCancelShare];
         const upBtns =[UI.btnUpPause, UI.btnUpStart, UI.btnUpDel, UI.btnUpClearAll];
         const upSep = el.querySelector('#pk-up-sep');
@@ -31184,7 +31585,7 @@ async function openManager(initialCache, preloadPromise) {
         else if (S.offlineMode) {
             if(UI.btnNavOffline) UI.btnNavOffline.classList.add('act');
             if (S.path[0]) S.path[0].name = L.title_offline;
-            if(UI.bottomGrp) UI.bottomGrp.style.display = 'flex';[UI.btnNewFolder, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip].forEach(b => { if(b) b.style.display = 'none'; });
+            if(UI.bottomGrp) UI.bottomGrp.style.display = 'flex';[UI.btnNewFolder, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate].forEach(b => { if(b) b.style.display = 'none'; });
             [UI.btnDel, UI.btnRefresh, UI.btnBlacklistManager].forEach(b => { if(b) b.style.display = 'inline-flex'; });
             shareBtns.forEach(b => { if(b) b.style.display = 'none'; });
         }
@@ -31205,8 +31606,9 @@ async function openManager(initialCache, preloadPromise) {
             if (S.path[0]) S.path[0].name = L.btn_nav_history;
             if(UI.bottomGrp) UI.bottomGrp.style.display = 'flex';
 
-            stdBtns.forEach(b => { if(b && b !== UI.btnBlacklistManager) b.style.display = 'none'; });
+            stdBtns.forEach(b => { if(b && b !== UI.btnBlacklistManager && b !== UI.btnMigrate) b.style.display = 'none'; });
             if (UI.btnBlacklistManager) UI.btnBlacklistManager.style.display = 'inline-flex';
+            if (UI.btnMigrate) UI.btnMigrate.style.display = 'inline-flex';
             shareBtns.forEach(b => { if(b) b.style.display = 'none'; });
             if(UI.uploadWrap) UI.uploadWrap.style.display = 'none';
         }
@@ -31397,7 +31799,13 @@ async function openManager(initialCache, preloadPromise) {
 
                         const netPriority = bypassLock ? 'high' : 'low';
                         const res = await fetch(url, { headers: getHeaders(), signal: signal, priority: netPriority });
-                        if (!res.ok) throw new Error("Recent SWR fetch error");
+                        if (!res.ok) {
+                            if (res.status === 401 || res.status === 403) {
+                                if (typeof purgeAllCachesOnLogout === 'function') purgeAllCachesOnLogout();
+                                if (!location.href.includes('/login')) window.location.href = 'https://mypikpak.com/drive/login';
+                            }
+                            throw new Error("Recent SWR fetch error");
+                        }
 
                         const json = await res.json();
                         const validTasks = (json.tasks ||[]).filter(t =>
@@ -31466,7 +31874,13 @@ async function openManager(initialCache, preloadPromise) {
 
                         const netPriority = bypassLock ? 'high' : 'low';
                         const res = await fetch(url, { headers: getHeaders(), signal: signal, priority: netPriority });
-                        if (!res.ok) throw new Error("Silent fetch error");
+                        if (!res.ok) {
+                            if (res.status === 401 || res.status === 403) {
+                                if (typeof purgeAllCachesOnLogout === 'function') purgeAllCachesOnLogout();
+                                if (!location.href.includes('/login')) window.location.href = 'https://mypikpak.com/drive/login';
+                            }
+                            throw new Error("Silent fetch error");
+                        }
 
                         const data = await res.json();
                         if (data.files) {
@@ -31732,7 +32146,9 @@ async function openManager(initialCache, preloadPromise) {
             const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/about?_t=${Date.now()}`, { headers: getHeaders() });
             if (!res.ok) {
                 if (res.status === 401 || res.status === 403) {
-                    setTimeout(updateQuotaUI, 2000);
+                    console.warn("[Quota] Auth rejected. Redirecting to login...");
+                    if (typeof purgeAllCachesOnLogout === 'function') purgeAllCachesOnLogout();
+                    if (!location.href.includes('/login')) window.location.href = 'https://mypikpak.com/drive/login';
                 }
                 return;
             }
@@ -31798,11 +32214,117 @@ async function openManager(initialCache, preloadPromise) {
 
     if (gmGet('pk_turbo_mode', false)) {
         setTimeout(() => {
+            if (location.href.includes('/login') || location.pathname.includes('login')) return;
             if (typeof showToast === 'function') {
                 showToast(getStrings().msg_turbo_activated, 'success', 5000);
             }
         }, 800);
     }
+
+    setTimeout(async () => {
+        const stubStr = gmGet('pk_migration_stub', '');
+        if (!stubStr) return;
+
+        try {
+            const stub = JSON.parse(stubStr);
+
+            if (Date.now() - stub.timestamp > 86400000) {
+                console.log("[Migration] Stub expired, clearing silently.");
+                gmSet('pk_migration_stub', '');
+                return;
+            }
+
+            const isAuthReady = await waitForAuth(5000);
+            if (!isAuthReady) {
+                console.warn("[Migration] Auth not ready, aborting detection.");
+                return;
+            }
+
+            const aboutRes = await fetch(`https://api-drive.mypikpak.com/drive/v1/about?_t=${Date.now()}`, { headers: getHeaders() });
+            if (!aboutRes.ok) throw new Error(`About API Error ${aboutRes.status}`);
+            const aboutData = await aboutRes.json();
+            const currentUid = aboutData.sub;
+
+            if (currentUid === stub.source_uid) {
+                gmSet('pk_migration_stub', '');
+                showToast(L.msg_migrate_same_account, 'warning');
+                return;
+            }
+
+            if (await showConfirm(L.msg_migrate_detect.replace('{n}', stub.file_count), L.btn_migrate)) {
+                setLoad(true);
+                updateLoadTxt(L.msg_migrate_saving);
+
+                const infoRes = await fetch(`https://api-drive.mypikpak.com/drive/v1/share?share_id=${stub.share_id}&pass_code=${stub.pass_code}`, {
+                    method: 'GET',
+                    headers: getHeaders()
+                });
+
+                if (!infoRes.ok) throw new Error(`Share Info Fetch Error ${infoRes.status}`);
+                const infoData = await infoRes.json();
+                const passCodeToken = infoData.pass_code_token || "";
+
+                const savePayload = {
+                    share_id: stub.share_id,
+                    pass_code_token: passCodeToken,
+                    params: {
+                        trace_file_ids: stub.file_ids.join(',')
+                    }
+                };
+
+                const saveRes = await fetch(`https://api-drive.mypikpak.com/drive/v1/share/restore`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify(savePayload)
+                });
+
+                if (!saveRes.ok) {
+                    const errData = await saveRes.json().catch(() => ({}));
+                    if (errData.error === 'file_restore_own' || errData.error_code === 9) {
+                        gmSet('pk_migration_stub', '');
+                        setLoad(false);
+                        showToast(L.msg_migrate_same_account, 'warning');
+                        return;
+                    }
+                    if (errData.error === 'file_space_not_enough' || errData.error_code === 8) {
+                        setLoad(false);
+                        const keep = await showConfirm(L.msg_migrate_quota_err.replace('{d}', errData.error_description), L.title_migrate_fail);
+                        if (!keep) gmSet('pk_migration_stub', '');
+                        return;
+                    }
+                    throw new Error(errData.error_description || `Save API Error ${saveRes.status}`);
+                }
+                const saveData = await saveRes.json();
+
+                if (saveData.task_id) {
+                    let isDone = false;
+                    let pollCount = 0;
+                    while(!isDone && pollCount < 300) {
+                        await sleep(2000);
+                        pollCount++;
+                        const tRes = await fetch(`https://api-drive.mypikpak.com/drive/v1/tasks/${saveData.task_id}`, { headers: getHeaders() });
+                        if (!tRes.ok) continue;
+                        const tData = await tRes.json();
+                        if (tData.phase === 'PHASE_TYPE_COMPLETE') isDone = true;
+                        else if (tData.phase === 'PHASE_TYPE_ERROR') throw new Error("Transfer task failed on server.");
+                    }
+                    if (!isDone) console.warn("[Migration] Task polling timed out, but might still be running.");
+                }
+
+                gmSet('pk_migration_stub', '');
+                setLoad(false);
+                await showAlert(L.msg_migrate_success, "🎉 " + L.title_alert);
+                UI.btnRefresh.click();
+
+            } else {
+                gmSet('pk_migration_stub', '');
+            }
+        } catch(e) {
+            setLoad(false);
+            const keep = await showConfirm(L.msg_migrate_err_keep.replace('{e}', e.message), L.title_alert);
+            if (!keep) gmSet('pk_migration_stub', '');
+        }
+    }, 1500);
 }
 
 let backgroundQueue = [];
@@ -32316,9 +32838,11 @@ async function preLoadRootFiles(onProgress) {
     globalPreloadPromise = new Promise(async (resolve) => {
         try {
 
-            const isAuthReady = await waitForAuth(15000);
+            const isAuthReady = await waitForAuth(2500);
             if (!isAuthReady) {
-                console.warn("Background Crawler: Auth token wait timeout.");
+                console.warn("Background Crawler: Auth token wait timeout. Halting preload.");
+                resolve(false);
+                return;
             }
 
             const rootFiles = await apiList('', 1000, onProgress);
@@ -32479,12 +33003,17 @@ function inject() {
                     return;
                 }
 
+                const currentHeaders = getHeaders();
+                if (!currentHeaders.Authorization || currentHeaders.Authorization.length < 10) {
+                    console.warn("PikPak Master: No auth token on button click. Redirecting to login...");
+                    if (typeof purgeAllCachesOnLogout === 'function') purgeAllCachesOnLogout();
+                    if (!location.href.includes('/login')) window.location.href = 'https://mypikpak.com/drive/login';
+                    return;
+                }
+
                 const existingWin = document.querySelector('.pk-ov');
                 if (existingWin) {
                     if (existingWin.style.display === 'none') {
-                        const currentHeaders = getHeaders();
-                        if (!currentHeaders.Authorization || currentHeaders.Authorization.length < 10) return;
-
                         if (existingWin.querySelector('.pk-win.pk-maximized')) {
                             document.body.classList.add('pk-body-max');
                         }
@@ -32494,9 +33023,6 @@ function inject() {
                         existingWin.style.display = 'none';
                     }
                 } else {
-                    const currentHeaders = getHeaders();
-                    if (!currentHeaders.Authorization || currentHeaders.Authorization.length < 10) return;
-
                     openManager(globalCache, globalPreloadPromise);
                 }
             } else {
