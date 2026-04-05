@@ -6,7 +6,7 @@
 // @name:ko            PikPak 인핸서 마스터
 // @name:ja            PikPak 拡張マスター
 // @namespace          https://github.com/digbug82/
-// @version            1.3.0
+// @version            1.3.1
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        桌面级PikPak网盘管家！包含Aria2/Motrix带目录结构推送、文件查重（哈希/时长/名称）、文件夹查重（名称/相似度/包含率）、批量重命名（正则替换/连续编号/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、多账号数据迁移、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
@@ -138,21 +138,37 @@ const NativeTokenSniffer = {
                     try {
                         const opts = args[1] || {};
                         let cap = null;
+                        let auth = null;
                         if (opts.headers) {
-                            if (opts.headers instanceof Headers) cap = opts.headers.get('x-captcha-token') || opts.headers.get('X-Captcha-Token');
+                            if (opts.headers instanceof Headers) {
+                                cap = opts.headers.get('x-captcha-token') || opts.headers.get('X-Captcha-Token');
+                                auth = opts.headers.get('authorization') || opts.headers.get('Authorization');
+                            }
                             else if (typeof opts.headers === 'object') {
-                                const key = Object.keys(opts.headers).find(k => k.toLowerCase() === 'x-captcha-token');
-                                if (key) cap = opts.headers[key];
+                                const capKey = Object.keys(opts.headers).find(k => k.toLowerCase() === 'x-captcha-token');
+                                if (capKey) cap = opts.headers[capKey];
+                                const authKey = Object.keys(opts.headers).find(k => k.toLowerCase() === 'authorization');
+                                if (authKey) auth = opts.headers[authKey];
                             }
                         }
                         if (cap && cap.length > 20) localStorage.setItem('pk_captured_captcha', cap);
+
+                        let auth = null;
+                        if (opts.headers) {
+                            if (opts.headers instanceof Headers) auth = opts.headers.get('authorization') || opts.headers.get('Authorization');
+                            else if (typeof opts.headers === 'object') {
+                                const authKey = Object.keys(opts.headers).find(k => k.toLowerCase() === 'authorization');
+                                if (authKey) auth = opts.headers[authKey];
+                            }
+                        }
+                        if (auth && auth.length > 20) document.dispatchEvent(new CustomEvent('pk-token-captured', { detail: auth }));
                     } catch (e) {}
                     return _f.apply(this, args);
                 };
             })()`;
             (document.head || document.documentElement).appendChild(s).remove();
         };
-        document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', inject) : inject();
+        inject();
     }
 };
 
@@ -5101,10 +5117,16 @@ function getStrings() {
 
 let cachedCredKey = null;
 let cachedCaptchaKey = null;
+let memoryCapturedToken = '';
+
+document.addEventListener('pk-token-captured', (e) => {
+    memoryCapturedToken = e.detail;
+});
 
 function resetHeaderCache() {
     cachedCredKey = null;
     cachedCaptchaKey = null;
+    memoryCapturedToken = '';
 }
 
 function purgeAllCachesOnLogout() {
@@ -5182,9 +5204,9 @@ function purgeAllCachesOnLogout() {
 })();
 
 function getHeaders() {
-    let token = '', captcha = '';
+    let token = memoryCapturedToken || '', captcha = '';
 
-    if (cachedCredKey) {
+    if (!token && cachedCredKey) {
         try {
             const v = JSON.parse(localStorage.getItem(cachedCredKey));
             if (v && v.access_token) token = v.token_type + ' ' + v.access_token;
@@ -6545,6 +6567,9 @@ async function openManager(initialCache, preloadPromise) {
             if (!text && !thumb) { hideTip(); return; }
 
             activeTarget = target;
+            if (tipEl.parentNode && tipEl.nextSibling) {
+                document.body.appendChild(tipEl);
+            }
             let html = '';
             if (thumb && thumb !== 'undefined' && thumb !== 'null' && (thumb.startsWith('http') || thumb.startsWith('blob:'))) {
                 const isBlur = gmGet('pk_blur_thumb', false);
@@ -8685,7 +8710,7 @@ async function openManager(initialCache, preloadPromise) {
                 setLoad(true);
                 updateLoadTxt(L.str_waiting_token);
             }
-            const isAuthReady = await waitForAuth(2500);
+            const isAuthReady = await waitForAuth(5000);
             if (!isAuthReady) {
                 console.warn("PikPak Master: Auth token wait timeout. Redirecting to login...");
                 if (typeof purgeAllCachesOnLogout === 'function') purgeAllCachesOnLogout();
@@ -26210,7 +26235,7 @@ async function openManager(initialCache, preloadPromise) {
                 </div>
 
                 <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; height:32px;">
-                    <div id="pk_picker_crumb" class="pk-no-scrollbar" style="flex:1; overflow-x:auto; overflow-y:hidden; white-space:nowrap; display:flex; align-items:center; font-size:14px; color:#666; height:100%; mask-image: linear-gradient(to right, transparent 0%, black 10px, black 95%, transparent 100%); -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10px, black 95%, transparent 100%); scroll-behavior: smooth;"></div>
+                    <div id="pk_picker_crumb" class="pk-no-scrollbar" style="flex:1; overflow-x:auto; overflow-y:hidden; white-space:nowrap; display:flex; align-items:center; font-size:14px; color:#666; height:100%; scroll-behavior: smooth;"></div>
                     <div style="position:relative; flex-shrink:0;">
                         <div id="pk_sort_trigger" style="cursor:pointer; font-size:13px; color:var(--pk-fg); font-weight:500; display:flex; align-items:center; gap:4px; user-select:none; padding:4px 8px; border-radius:6px; background:transparent; transition:background 0.2s;">
                             <span id="pk_sort_txt">${L.picker_sort_new}</span>
