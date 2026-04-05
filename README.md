@@ -44,9 +44,9 @@
 * **分析套件**：**文件分析**整合了筛选与查重（哈希/时长/名称三模态）；**文件夹分析**整合了筛选与查重（名称/相似度/包含率三模态）；并支持导出当前**目录树**列表。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_zh.png" width="350" alt="导出目录">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file/file_zh.gif" width="300" alt="文件分析">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder/folder_zh.gif" width="350" alt="文件夹分析">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_zh.png" width="300" alt="导出目录">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file/file_zh.gif" width="280" alt="文件分析">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder/folder_zh.gif" width="300" alt="文件夹分析">
 </p>
 
 * **智能整理**：删除时支持**彻底删除**（跳过回收站）；一键清理空文件夹；**批量解压**集成密码自动记忆与智能填充，支持跳过并删除已解压项。
