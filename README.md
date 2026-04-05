@@ -4,9 +4,9 @@
 
 # 📦 PikPak 增强大师
 
-[![Version](https://img.shields.io/badge/Version-1.2.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js) [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html) [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
+[![Version](https://img.shields.io/badge/Version-1.3.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js) [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html) [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
-> 集成批量解压、智能查重、多模态批量重命名、Aria2 推送、垃圾文件清理、导出目录、媒体播放引擎增强等功能的桌面级文件管理器。
+> 旨在解决 PikPak 网盘核心痛点而生，深度接管并替代原生网页端，彻底重塑您的交互体验。以桌面级文件管家的标准，全面集成智能查重、批量解压、多模态重命名、多账号无缝迁移、Aria2 结构化推送及沉浸式媒体播放引擎，让云端数据管理前所未有地高效与流畅。
 
 ---
 
@@ -20,11 +20,11 @@
 
 ### ✨ 体验与导航引擎
 
-* **交互重构**：界面基于类 Windows 文件资源管理器设计，全面提升操作体验
-* **极速模式**：替换网页端逻辑，屏蔽原生同步（**推荐在设置中勾选**）
-* **高级路径栏**：支持滚轮滑动、下拉切换、路径回显与溯源跳转
-* **后台自动索引**：主页图标蓝色呼吸点提示目录同步状态
-* **体验增强**：支持夜间模式、视频时长显示、一键模糊封面（隐私保护）、星标与文件类型排序
+* **交互重构**：在官方功能基础上，界面仿 **Windows 文件资源管理器** 重构。
+* **极速模式**：开启后接管原生逻辑，彻底解决海量文件下的卡顿与崩溃问题。
+* **高级路径栏**：支持滚轮滑动、下拉菜单同级切换定位。全盘搜索、分析套件均集成路径栏，支持路径回显与溯源跳转。
+* **体验增强**：支持星标等多维度排序，及一键**模糊封面**与暗黑皮肤切换。后台采用 **SWR 策略**静默无感刷新视图。
+* **后台索引与保护**：主页蓝点闪烁表示正同步目录树。系统自带并发操作物理锁，拦截冲突操作，严防脏数据产生。（注：默认文件夹 My Pack 受官方保护，严防误删等操作）
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_zh.gif" width="1100" alt="路径">
@@ -35,27 +35,27 @@
 
 ### 📂 批量与空间管理
 
-* **批量重命名**：支持正则替换/删除、剧集流水号生成、文本格式化、FC2 规范命名、前缀去广告及基于 MIME 的后缀修复
+* **批量重命名**：支持**正则替换/删除**、**剧集流水号**、文本**格式化**、**FC2 规范命名**、**前缀去广告**及基于 MIME 的**后缀智能修复**。
   
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/rename/rename_zh.gif" width="550" alt="批量重命名">
 </p>
 
-* **分析套件**：包含文件分析（类型筛选及哈希/时长/名称查重）、文件夹分析（大小筛选及名称/相似度/包含率查重）与导出目录树功能
+* **分析套件**：**文件分析**整合了筛选与查重（哈希/时长/名称三模态）；**文件夹分析**整合了筛选与查重（名称/相似度/包含率三模态）；并支持导出当前**目录树**列表。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_zh.png" width="260" alt="导出目录">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file/file_zh.gif" width="220" alt="文件分析">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder/folder_zh.gif" width="260" alt="文件夹分析">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_zh.png" width="350" alt="导出目录">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file/file_zh.gif" width="300" alt="文件分析">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder/folder_zh.gif" width="350" alt="文件夹分析">
 </p>
 
-* **智能整理**：一键清理空文件夹、支持批量解压（记忆解压成功密码、带密码的压缩包智能填充密码并删除已解压项）
+* **智能整理**：删除时支持**彻底删除**（跳过回收站）；一键清理空文件夹；**批量解压**集成密码自动记忆与智能填充，支持跳过并删除已解压项。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/archive/archive_zh.png" width="250" alt="密码库">
 </p>
 
-* **资源管理器**：支持在设置中自定义资源管理器为文件黑名单（快速清理垃圾文件）或文件白名单（批量删除时保护记录文件）
+* **资源管理器**：自定义**文件黑名单**一键清理垃圾资源；或作为**文件白名单**，在批量删除时自动保护。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/manager/manager_zh.gif" width="550" alt="资源管理器">
@@ -65,25 +65,24 @@
 
 ### 🌐 传输与分享中心
 
-* **分享管理**：支持提取次数限制，自动取消分享
-* **离线下载**：批量离线任务 + 链接导出
-* **极速上传**：支持上传超大文件，大幅降低小文件上传失败率
-* **云下载增强**：支持批量添加链接时**自动去重**；内置**磁链智能清洗引擎**，自动从乱码或带干扰文本中提取磁链并支持 Base32 解码
+* **分享管理**：支持设定提取次数上限，次数达标后链接自动失效取消分享。
+* **极速上传**：支持将本地文件/文件夹拖拽至网页直传，突破官方大文件限制并**大幅降低小文件传输中断率**。
+* **云下载增强**：批量离线链接**自动去重**。内置**磁链智能清洗引擎**（自动提取 Base32/Hex 哈希去干扰）；支持解析 **.torrent** 种子文件；针对受限链接提供**保存网页快照**兜底方案。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_zh.png" width="380" alt="磁链">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_zh.gif" width="350" alt="分享">
 </p>
 
-> ⚠️ 分享中设置提取次数上限功能仅在网页保持开启且设备未休眠时生效
+> ⚠️ 分享中设置提取次数上限功能仅在网页保持开启且设备未休眠时生效。
 
 ---
 
 ### 🎬 沉浸式媒体增强
 
-* **播放引擎**：支持 0.5x–3.0x 倍速、旋转/镜像/比例调整、自动跳过片头片尾、连播/循环模式及进度条缩略图预览
-* **字幕系统**：支持云端/本地/在线搜索、字幕个性化设置及拖拽加载字幕
-* **视觉辅助**：支持以图搜图（图片/视频帧）与媒体模式（剧集/漫画文件夹自动 A-Z 排序）
+* **播放引擎**：支持 0.5x-3.0x 倍速、旋转翻转、强制比例、自动跳过片头片尾及**连播/循环**模式，进度条支持缩略图预览。内置**看门狗**，遇黑屏或不支持编码自动回退兼容画质。
+* **字幕系统**：支持加载云端同名字幕、本地文件及跨站在线搜索。支持字幕轴毫秒级偏移微调，及本地文本直接**拖拽解析**挂载。
+* **视觉辅助**：内嵌多引擎支持图片或视频当前帧**以图搜图**；设置中可激活“媒体模式”，使剧集/漫画文件夹自动按名称 A-Z 顺序排列。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/video/video_zh.gif" alt="视频">
@@ -93,9 +92,8 @@
 
 ### ⚡ 下载与分发
 
-* **Aria2 目录重建**：批量推送文件夹至 Aria2 或 Motrix 时，**自动还原云盘原有的树状目录结构**，下载后无需重新整理。
-* **长连接监控**：配置 Aria2 时自动校验 RPC 连通性，并在批量推送失败时自动导出 `.txt` 错误清单（Aria2_失败清单.txt）以供追溯。
-* **下载过滤**：文件夹下载支持按后缀 / 关键词过滤其中文件
+* **外部直连**：支持一键获取视频流直链，或唤起 PotPlayer 播放。支持将文件通过 RPC 协议一键推送到 **Aria2/Motrix** 节点。
+* **分发增强**：推送文件夹至 Aria2/Motrix 时**自动还原云盘树状目录结构**。支持长连接监控，遇错自动导出错误清单。支持设置**文件夹下载过滤**。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_zh.gif" width="400" alt="aria2">
@@ -105,14 +103,15 @@
 
 ### ⚙️ 配置与数据管理
 
-* **配置备份**：支持 JSON 导出与跨设备迁移
-* **数据清理**：支持清理全盘索引、偏好设置、管理规则、密码金库、视频缓存与运行缓存
+* **配置备份**：支持将偏好设置、管理规则、密码金库等导出为带数字指纹的 JSON 备份文件，导入时支持**智能合并去重**。
+* **数据清理**：支持对全盘索引、偏好设置、管理规则、密码金库与缓存按需清除，释放本地空间并保障隐私。
+* **数据迁移**：支持将选中项目加密打包，通过自动接管机制实现跨账号的无缝转存。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/cache/cache_zh.png" width="350" alt="缓存">
 </p>
 
-> 📌 全盘索引为临时数据，每次刷新网页重新构建。其余为持久化数据，不随网页刷新而消失。
+> 📌 全盘索引在网页关闭后清空，而偏好设置、密码金库等则持久化保存。
 
 ---
 
@@ -194,6 +193,12 @@
 **A：** **Aria2/Motrix 会保留层级**。脚本采用了目录层级克隆技术，下载完成后您的本地硬盘将完美还原网盘中的树状结构，且会自动清洗网盘文件夹名称中 Windows 不支持的特殊字符（如 `:` `*` `?` 等）并智能缩短冗余路径以确保下载不报错。  
 **浏览器下载则不会保留层级**。受限于浏览器原生下载协议的局限，文件夹内的所有文件将被“平铺”下载到同一个目录下。**建议：** 若需保留复杂的文件夹结构，请务必优先选择 Aria2 推送。
 
+**Q：什么是“多账号数据迁移”？具体该如何操作？**  
+**A：** 该功能允许您将当前账号的文件无缝、快速地转存到您的另一个账号。
+1. 在当前账号选中需要转移的文件或文件夹，点击底部的“数据迁移”按钮。
+2. 脚本会自动将数据加密打包，并自动为您退出当前账号。
+3. 随后，您只需正常登录您的【目标账号】，脚本会在登录成功后自动侦测到本地缓存的迁移包，并弹窗提示您一键接收。
+
 ---
 
 ## 🛡️ 隐私与安全声明 (Privacy & Security)
@@ -201,6 +206,35 @@
 * **数据本地化**：本脚本所有核心功能（如批量重命名、文件分析、解压等）均通过您的浏览器直接与 PikPak 官方 API 进行交互。您的账号 Token、密码金库及文件数据均**仅保存在本地浏览器中**。
 * **零收集**：脚本**不会**收集任何用户隐私数据，也**绝不会**将您的文件信息或账号凭证上传至任何第三方服务器。
 * **第三方接口**：仅在使用“在线字幕搜索”或“以图搜图”等扩展功能时，脚本会向相关公共服务接口发送必要的搜索关键词或图片特征参数，不涉及您的任何个人身份信息。
+
+---
+
+## 🚀 更新日志
+
+### V1.3.1
+*  对登录闪烁问题进一步优化，若发现仍存在脚本一直卡在“正在同步登录状态”请及时反馈您的浏览器版本。
+
+### V1.3.0
+* **核心更新**：新增**多账号数据迁移**功能，支持一键将海量文件加密打包并无缝转存至您的其他账号。
+* **核心更新**：新增**彻底删除**机制，删除时可一键跳过回收站，瞬间释放网盘空间。
+* **UI 与交互体验优化**：
+  * 修复了图片在极端缩放或长图模式下，无法拖拽至图片最边缘的边界限制计算错误问题。
+  * 全面修复了“最近添加”、“分析”等特殊视图下，路径栏下拉文件夹列表排序与表头不一致、排序模式失效等问题。
+  * 优化了多尺寸屏幕（高低分辨率）的响应式布局切换阈值与交互细节。
+  * 修复了某些特殊情况下模态窗口层级相互遮挡的问题。
+  * 强化了未登录状态的侦测逻辑，避免极端情况下的网络死循环重试。
+
+### V1.2.0
+*   **视频时长嗅探引擎重构**：深度加固视频时长嗅探逻辑。
+*   **UI 交互优化**：精修部分 UI 组件在不同缩放比例下的视觉表现。
+*   **核心 Bug 修复**：修复路径检索时高亮失效的 Bug；修复在设置中保存“极速模式”修改时会导致其他设置项被阻断失效的 Bug。
+
+### V1.1.0
+*   **Aria2 增强**：支持**保留文件夹路径结构**，新增投递丢包提醒及错误清单一键导出。
+*   **云下载进化**：支持批量提交与智能去重，**自动清洗防屏蔽污染磁链**（支持 Base32 自动解码）。
+*   **重命名优化**：预览界面新增**图标与封面展示**，支持文件夹悬浮大图预览。
+*   **配置管理**：导入功能升级为**“智能合并”**模式，导入备份时不再覆盖本地已有的名单和记录。
+*   **体验提升**：大幅优化极速模式加载速度，修复账号切换时的 UI 残留 Bug，提升搜图成功率。
 
 ---
 
@@ -214,20 +248,4 @@
 
 本项目遵循 **CC-BY-NC-SA-4.0 协议**
 * 🚫 禁止用于任何商业用途
-* 📢 二次分发必须署名并保持相同协议
-
----
-
-## 🚀 更新日志
-
-### V1.2.0
-*   **视频时长嗅探引擎重构**：深度加固视频时长嗅探逻辑。
-*   **UI 交互优化**：精修部分 UI 组件在不同缩放比例下的视觉表现。
-*   **核心 Bug 修复**：修复路径检索时高亮失效的 Bug；修复在设置中保存“极速模式”修改时会导致其他设置项被阻断失效的 Bug。
-
-### V1.1.0
-*   **Aria2 增强**：支持**保留文件夹路径结构**，新增投递丢包提醒及错误清单一键导出。
-*   **云下载进化**：支持批量提交与智能去重，**自动清洗防屏蔽污染磁链**（支持 Base32 自动解码）。
-*   **重命名优化**：预览界面新增**图标与封面展示**，支持文件夹悬浮大图预览。
-*   **配置管理**：导入功能升级为**“智能合并”**模式，导入备份时不再覆盖本地已有的名单和记录。
-*   **体验提升**：大幅优化极速模式加载速度，修复账号切换时的 UI 残留 Bug，提升搜图成功率。
+* 📢 二次分发必须署名并保持相同协议，仅供个人学习与技术交流。
