@@ -4,7 +4,7 @@
 
 # 📦 PikPak Enhancement Master
 
-[![Version](https://img.shields.io/badge/Version-1.3.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js) [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html) [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
+[![Version](https://img.shields.io/badge/Version-1.3.2-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js) [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html) [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
 > Designed to solve the core pain points of the PikPak cloud drive, it deeply takes over and replaces the native web client, completely reshaping your interactive experience. With the standard of a desktop-level file manager, it fully integrates smart deduplication, batch extraction, multi-modal renaming, seamless multi-account migration, Aria2 structured push, and an immersive media playback engine, making cloud data management unprecedentedly efficient and smooth.
 
@@ -211,30 +211,34 @@ Solutions:
 
 ## 🚀 Changelog
 
+### V1.3.2
+* Reinforced local upload logic with new direct connections for Mainland China IPs.
+* Adjusted duration similarity thresholds for file deduplication to improve detection precision.
+* Deeply optimized interaction logic to enhance stability during complex operations.
+
 ### V1.3.1
-* Further optimized the login flickering issue. If you find the script still gets stuck at "Syncing login status...", please report your browser version.
+* Further optimized login flickering issues. If the script remains stuck on "Syncing login status," please report your browser version.
 
 ### V1.3.0
-* **Core Update**: Added **Multi-account Data Migration** feature, supporting one-click encrypted packaging of massive files for seamless transfer to your other accounts.
-* **Core Update**: Added **Permanent Deletion** mechanism, allowing one-click skipping of the recycle bin to instantly free up cloud space upon deletion.
-* **UI & Interaction Optimization**:
-  * Fixed a boundary limit calculation error that prevented dragging images to the very edge in extreme zoom or long-image modes.
-  * Completely fixed issues in special views like "Recently Added" and "Analysis" where the path bar dropdown folder list sorting was inconsistent with the table header, and sorting modes failed.
-  * Optimized responsive layout switching thresholds and interaction details for multi-size screens (high and low resolutions).
-  * Fixed an issue where modal window layers overlapped each other under certain special circumstances.
-  * Strengthened unlogged-in status detection logic to avoid infinite network loop retries in extreme cases.
+* Added **Multi-Account Data Migration**: supports encrypted batching and seamless transfer of massive files to your other accounts.
+* Added **Hard Delete** mechanism: allows items to skip the Trash and free up cloud space instantly.
+* Fixed boundary limit calculation errors for images in extreme zoom or long-image modes.
+* Resolved sorting inconsistencies in the path bar dropdown for special views (e.g., "Recently Added," "Analysis") to match header settings.
+* Polished responsive layout thresholds and interaction details for various screen sizes and resolutions.
+* Fixed z-index layering issues where multiple modal windows would overlap incorrectly.
+* Strengthened unauthorized state detection to prevent infinite network retry loops when logged out.
 
 ### V1.2.0
-* **Video Duration Sniffing Engine Refactor**: Deeply fortified video duration sniffing logic.
-* **UI Interaction Optimization**: Refined the visual performance of some UI components across different scaling ratios.
-* **Core Bug Fixes**: Fixed a bug where highlights failed during path retrieval; fixed a bug where saving "Turbo Mode" modifications in settings would block other settings from taking effect.
+* Refactored the video duration sniffing engine for better performance.
+* Polished UI components for consistent visual performance across different browser zoom levels.
+* Fixed highlighting bugs during path retrieval; fixed a bug where saving "Turbo Mode" would block other settings from being applied.
 
 ### V1.1.0
-* **Aria2 Enhancement**: Supports **retaining folder path structure**, added drop packet reminders for deliveries, and one-click export for error lists.
-* **Cloud Download Evolution**: Supports batch submission and smart deduplication, **automatically cleans anti-block polluted magnet links** (supports Base32 auto-decoding).
-* **Renaming Optimization**: Added **icon and cover display** in the preview interface, supporting hovering large image previews for folders.
-* **Config Management**: Import feature upgraded to **"Smart Merge"** mode. Importing backups no longer overrides existing local lists and records.
-* **Experience Upgrade**: Significantly optimized Turbo Mode loading speed, fixed UI residue bugs during account switching, and improved image search success rates.
+* Aria2 now supports **preserving folder structures**; added delivery packet loss alerts and one-click error log export.
+* Cloud download now supports batch submission and smart deduplication with **automatic cleaning of masked magnet links** (supports Base32 auto-decoding).
+* The Bulk Rename preview now includes **icon and cover displays**, with support for large image hover previews on folders.
+* Upgraded the Import feature to **"Smart Merge"** mode; backups no longer overwrite existing local blacklists or records.
+* Significantly optimized loading speeds in Turbo Mode, fixed UI residue when switching accounts, and improved image search success rates.
 
 ---
 
