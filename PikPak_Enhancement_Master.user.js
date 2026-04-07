@@ -6,7 +6,7 @@
 // @name:ko            PikPak 인핸서 마스터
 // @name:ja            PikPak 拡張マスター
 // @namespace          https://github.com/digbug82/
-// @version            1.3.1
+// @version            1.3.2
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        桌面级PikPak网盘管家！包含Aria2/Motrix带目录结构推送、文件查重（哈希/时长/名称）、文件夹查重（名称/相似度/包含率）、批量重命名（正则替换/连续编号/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、多账号数据迁移、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
@@ -91,18 +91,66 @@ if (window.self !== window.top) return;
 
 const NativeTokenSniffer = {
     init: () => {
-        const isTurbo = typeof GM_getValue !== 'undefined' ? GM_getValue('pk_turbo_mode', false) : false;
-        if (!isTurbo) { console.log('🚀 [PikPak Master] Turbo Mode OFF. Native Hijacking Disabled.'); return; }
-        if (location.href.includes('/login') || location.pathname.includes('login')) {
-            console.log('🚀 [PikPak Master] Login page detected. OOM-Guard suspended.');
-            return;
-        }
-
         const inject = () => {
             const s = document.createElement('script');
             s.textContent = `(function(){
+                const _f = window.fetch;
+                window.fetch = async function(...args) {
+                    const url = args[0] ? args[0].toString() : '';
+
+                    if (url.includes('area_accessible')) {
+                        return new Promise((_, reject) => {
+                            reject(new Error("Bypassed area_accessible"));
+                        });
+                    }
+
+                    const isTurbo = localStorage.getItem('pk_turbo_mode') === 'true';
+
+                    if (isTurbo) {
+                        if (location.href.includes('/login') || location.pathname.includes('login')) {
+                            return _f.apply(this, args);
+                        }
+
+                        if (url.includes(':incremental_sync') || url.includes(':sync')) {
+                            return new Response(JSON.stringify({
+                                error_code: 0,
+                                data: [],
+                                files: [],
+                                tasks: [],
+                                next_page_token: ''
+                            }), {status: 200, headers: {'Content-Type': 'application/json'}});
+                        }
+
+                        try {
+                            const opts = args[1] || {};
+                            let cap = null;
+                            let auth = null;
+                            if (opts.headers) {
+                                if (opts.headers instanceof Headers) {
+                                    cap = opts.headers.get('x-captcha-token') || opts.headers.get('X-Captcha-Token');
+                                    auth = opts.headers.get('authorization') || opts.headers.get('Authorization');
+                                }
+                                else if (typeof opts.headers === 'object') {
+                                    const capKey = Object.keys(opts.headers).find(k => k.toLowerCase() === 'x-captcha-token');
+                                    if (capKey) cap = opts.headers[capKey];
+                                    const authKey = Object.keys(opts.headers).find(k => k.toLowerCase() === 'authorization');
+                                    if (authKey) auth = opts.headers[authKey];
+                                }
+                            }
+                            if (cap && cap.length > 20) localStorage.setItem('pk_captured_captcha', cap);
+
+                            if (auth && auth.length > 20) document.dispatchEvent(new CustomEvent('pk-token-captured', { detail: auth }));
+                        } catch (e) {}
+                    }
+
+                    return _f.apply(this, args);
+                };
+
                 const _W = window.Worker;
                 window.Worker = function(url, opts) {
+                    const isTurbo = localStorage.getItem('pk_turbo_mode') === 'true';
+                    if (!isTurbo) return new _W(url, opts);
+
                     if (location.href.includes('/login') || location.pathname.includes('login')) {
                         return new _W(url, opts);
                     }
@@ -117,54 +165,6 @@ const NativeTokenSniffer = {
                     return new _W(url, opts);
                 };
 
-                const _f = window.fetch;
-                window.fetch = async function(...args) {
-                    if (location.href.includes('/login') || location.pathname.includes('login')) {
-                        return _f.apply(this, args);
-                    }
-
-                    const url = args[0] ? args[0].toString() : '';
-
-                    if (url.includes(':incremental_sync') || url.includes(':sync')) {
-                        return new Response(JSON.stringify({
-                            error_code: 0,
-                            data: [],
-                            files: [],
-                            tasks: [],
-                            next_page_token: ''
-                        }), {status: 200, headers: {'Content-Type': 'application/json'}});
-                    }
-
-                    try {
-                        const opts = args[1] || {};
-                        let cap = null;
-                        let auth = null;
-                        if (opts.headers) {
-                            if (opts.headers instanceof Headers) {
-                                cap = opts.headers.get('x-captcha-token') || opts.headers.get('X-Captcha-Token');
-                                auth = opts.headers.get('authorization') || opts.headers.get('Authorization');
-                            }
-                            else if (typeof opts.headers === 'object') {
-                                const capKey = Object.keys(opts.headers).find(k => k.toLowerCase() === 'x-captcha-token');
-                                if (capKey) cap = opts.headers[capKey];
-                                const authKey = Object.keys(opts.headers).find(k => k.toLowerCase() === 'authorization');
-                                if (authKey) auth = opts.headers[authKey];
-                            }
-                        }
-                        if (cap && cap.length > 20) localStorage.setItem('pk_captured_captcha', cap);
-
-                        let auth = null;
-                        if (opts.headers) {
-                            if (opts.headers instanceof Headers) auth = opts.headers.get('authorization') || opts.headers.get('Authorization');
-                            else if (typeof opts.headers === 'object') {
-                                const authKey = Object.keys(opts.headers).find(k => k.toLowerCase() === 'authorization');
-                                if (authKey) auth = opts.headers[authKey];
-                            }
-                        }
-                        if (auth && auth.length > 20) document.dispatchEvent(new CustomEvent('pk-token-captured', { detail: auth }));
-                    } catch (e) {}
-                    return _f.apply(this, args);
-                };
             })()`;
             (document.head || document.documentElement).appendChild(s).remove();
         };
@@ -180,6 +180,90 @@ window.addEventListener('beforeunload', (e) => {
     if (tasks.some(t => activeStatus.includes(t.status))) {
         e.preventDefault();
         return e.returnValue;
+    }
+});
+
+window.pkAddGhostFile = function(id) {
+    try {
+        const ghosts = JSON.parse(localStorage.getItem('pk_ghost_files') || '[]');
+        if (!ghosts.includes(id)) {
+            ghosts.push(id);
+            localStorage.setItem('pk_ghost_files', JSON.stringify(ghosts));
+        }
+    } catch(e){}
+};
+window.pkRemoveGhostFile = function(id) {
+    try {
+        const ghosts = JSON.parse(localStorage.getItem('pk_ghost_files') || '[]');
+        const updated = ghosts.filter(x => x !== id);
+        localStorage.setItem('pk_ghost_files', JSON.stringify(updated));
+    } catch(e){}
+};
+window.pkCleanupGhostFiles = function() {
+    try {
+        const ghosts = JSON.parse(localStorage.getItem('pk_ghost_files') || '[]');
+        if (ghosts.length > 0) {
+            console.log(`[GhostCleanup] Found ${ghosts.length} interrupted uploads. Cleaning up...`);
+            const BATCH_SIZE = 100;
+            for (let i = 0; i < ghosts.length; i += BATCH_SIZE) {
+                const chunk = ghosts.slice(i, i + BATCH_SIZE);
+                fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ ids: chunk })
+                }).catch(()=>{});
+            }
+            localStorage.setItem('pk_ghost_files', '[]');
+        }
+    } catch(e){}
+
+    try {
+        const phases = "PHASE_TYPE_UNKNOW,PHASE_TYPE_PENDING,PHASE_TYPE_RUNNING,PHASE_TYPE_PAUSED,PHASE_TYPE_ERROR";
+        const filters = encodeURIComponent(JSON.stringify({ "phase": { "in": phases } }));
+        const url = `https://api-drive.mypikpak.com/drive/v1/tasks?type=upload&limit=100&filters=${filters}&_t=${Date.now()}`;
+        fetch(url, { headers: getHeaders() })
+            .then(res => res.json())
+            .then(cloudData => {
+                const cloudTasks = cloudData.tasks || [];
+                const ghostIds = [];
+                cloudTasks.forEach(ct => {
+                    if (ct.file_id) {
+                        const ref = ct.reference_resource || {};
+                        const taskName = ref.name || ct.name || ct.file_name || 'Ghost Task';
+                        if (taskName === 'upload' || taskName === 'Ghost Task') {
+                            ghostIds.push(ct.file_id);
+                        }
+                    }
+                });
+                if (ghostIds.length > 0) {
+                    console.log(`[Reconcile] Auto-cleaning orphaned cloud ghost files on startup: ${ghostIds.length} files`);
+                    fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
+                        method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: ghostIds })
+                    }).catch(()=>{});
+                }
+            }).catch(()=>{});
+    } catch (e) {}
+};
+
+window.addEventListener('beforeunload', () => {
+    const tasks = pkState?.uploadTasks || [];
+    const filesToDelete = tasks.filter(t => t.status !== 'DONE' && t.file_id && !t._deleted).map(t => t.file_id);
+    if (filesToDelete.length > 0) {
+        const BATCH_SIZE = 100;
+        for (let i = 0; i < filesToDelete.length; i += BATCH_SIZE) {
+            const chunk = filesToDelete.slice(i, i + BATCH_SIZE);
+            try {
+                fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ ids: chunk }),
+                    keepalive: true
+                }).catch(()=>{});
+            } catch(e) {}
+        }
+        if (typeof window.pkRemoveGhostFile === 'function') {
+            filesToDelete.forEach(id => window.pkRemoveGhostFile(id));
+        }
     }
 });
 
@@ -365,7 +449,7 @@ const CSS = `
     .pk-nav { display: flex !important; align-items: center !important; gap: 4px; overflow: hidden; white-space: nowrap; font-size: 13px; color: #666; margin: 0 8px; height: 100%; max-width: 60%; }
     .pk-nav span { cursor: pointer; padding: 2px 6px; border-radius: 4px; }
     .pk-nav span:hover { background: var(--pk-hl); color: var(--pk-fg); }
-    .pk-nav span.act { font-weight: 600; color: var(--pk-fg); cursor: default; }
+    .pk-nav span.act { font-weight: 600; color: var(--pk-fg); cursor: pointer; }
     .pk-grid-hd, .pk-row { display: grid; column-gap: 10px; align-items: center; font-size: 14px; color: var(--pk-fg); box-sizing: border-box; width: 100%; }
     .pk-grid-hd > div, .pk-row > div { display: flex; align-items: center; justify-content: flex-start !important; overflow: hidden; white-space: nowrap; text-align: left; }
     .pk-grid-hd > div:first-child, .pk-row > div:first-child { justify-content: center !important; overflow: visible !important; }
@@ -1487,6 +1571,16 @@ const T = {
         msg_system_busy_retry: "系统繁忙，等待重试 ({n}/5)...",
         msg_unzip_running_bg: "[{n}] 已在云端解压中，请稍后刷新查看",
         msg_share_code_updated: "分享代码已更新",
+        msg_ghost_task_resume: "云端未完成 (点击恢复重选文件)",
+        msg_parsing_files: "正在解析文件，请稍候...",
+        msg_token_expired_retry: "登录过期，正在重试...",
+        str_empty_str: "(空)",
+        err_clipboard_failed: "写入剪贴板失败",
+        err_cors_blocked: "安全拦截: 跨域访问被拒绝",
+        err_worker_failed: "工作线程遇到错误",
+        str_target_folder: "目标文件夹",
+        str_unknown_name: "未知名称",
+        btn_default: "默认",
         msg_retry_submitted: "已重试提交 {n} 个任务",
         msg_aria2_batch_fail_log: "\n\n检测到失败项较多，已为您自动导出完整错误清单 (.txt)",
         str_aria2_fetch_err: "(获取链接失败)",
@@ -2345,6 +2439,16 @@ const T = {
         msg_system_busy_retry: "系統忙碌，等待重試 ({n}/5)...",
         msg_unzip_running_bg: "[{n}] 已在雲端解壓縮中，請稍後重新整理檢視",
         msg_share_code_updated: "分享代碼已更新",
+        msg_ghost_task_resume: "雲端未完成 (點擊恢復重選檔案)",
+        msg_parsing_files: "正在解析檔案，請稍候...",
+        msg_token_expired_retry: "登入過期，正在重試...",
+        str_empty_str: "(空)",
+        err_clipboard_failed: "寫入剪貼簿失敗",
+        err_cors_blocked: "安全攔截：跨網域存取被拒絕",
+        err_worker_failed: "工作執行緒遇到錯誤",
+        str_target_folder: "目標資料夾",
+        str_unknown_name: "未知名稱",
+        btn_default: "預設",
         msg_retry_submitted: "已重試提交 {n} 個任務",
         msg_aria2_batch_fail_log: "\n\n檢測到失敗項較多，已為您自動匯出完整錯誤清單 (.txt)",
         str_aria2_fetch_err: "(獲取連結失敗)",
@@ -3203,6 +3307,16 @@ const T = {
         msg_system_busy_retry: "System busy, retrying ({n}/5)...",
         msg_unzip_running_bg: "[{n}] is being extracted in the cloud. Refresh later.",
         msg_share_code_updated: "Share code updated.",
+        msg_ghost_task_resume: "Cloud incomplete (Click to reselect file)",
+        msg_parsing_files: "Parsing files, please wait...",
+        msg_token_expired_retry: "Token Expired, retrying...",
+        str_empty_str: "(Empty)",
+        err_clipboard_failed: "Clipboard Failed",
+        err_cors_blocked: "Security Error: CORS Blocked",
+        err_worker_failed: "Worker Error",
+        str_target_folder: "Target",
+        str_unknown_name: "Unknown",
+        btn_default: "Default",
         msg_retry_submitted: "Resubmitted {n} tasks.",
         msg_aria2_batch_fail_log: "\n\nToo many failures. A complete log (.txt) has been exported.",
         str_aria2_fetch_err: "(Fetch Error)",
@@ -4061,6 +4175,16 @@ const T = {
         msg_system_busy_retry: "시스템이 바쁩니다. 재시도 중 ({n}/5)...",
         msg_unzip_running_bg: "[{n}] 클라우드에서 압축 해제 중입니다. 잠시 후 새로고침하여 확인하세요.",
         msg_share_code_updated: "공유 코드가 업데이트되었습니다",
+        msg_ghost_task_resume: "클라우드 미완료 (클릭하여 파일 다시 선택)",
+        msg_parsing_files: "파일 분석 중, 잠시만 기다려주세요...",
+        msg_token_expired_retry: "토큰 만료, 재시도 중...",
+        str_empty_str: "(비어 있음)",
+        err_clipboard_failed: "클립보드 실패",
+        err_cors_blocked: "보안 오류: CORS 차단됨",
+        err_worker_failed: "워커 스레드 오류",
+        str_target_folder: "대상 폴더",
+        str_unknown_name: "알 수 없는 이름",
+        btn_default: "기본값",
         msg_retry_submitted: "{n}개의 작업을 다시 제출했습니다",
         msg_aria2_batch_fail_log: "\n\n실패 항목이 많아 전체 오류 목록(.txt)을 자동으로 내보냈습니다.",
         str_aria2_fetch_err: "(링크 가져오기 실패)",
@@ -4919,6 +5043,16 @@ const T = {
         msg_system_busy_retry: "システム混雑中。リトライしています ({n}/5)...",
         msg_unzip_running_bg: "[{n}] クラウドで解凍中です。後で更新して確認してください",
         msg_share_code_updated: "共有コードが更新されました",
+        msg_ghost_task_resume: "クラウド未完了 (クリックしてファイルを再選択)",
+        msg_parsing_files: "ファイルを解析中、少々お待ちください...",
+        msg_token_expired_retry: "トークン有効期限切れ、再試行中...",
+        str_empty_str: "(空)",
+        err_clipboard_failed: "クリップボード失敗",
+        err_cors_blocked: "セキュリティエラー: CORS ブロック",
+        err_worker_failed: "ワーカーエラー",
+        str_target_folder: "ターゲット",
+        str_unknown_name: "不明な名前",
+        btn_default: "デフォルト",
         msg_retry_submitted: "{n} 個のタスクを再送信しました",
         msg_aria2_batch_fail_log: "\n\n失敗項目が多いため、詳細なエラーリスト(.txt)を自動的に書き出しました。",
         str_aria2_fetch_err: "(リンク取得失敗)",
@@ -6301,13 +6435,13 @@ async function openManager(initialCache, preloadPromise) {
                         </label>
                     </div>
 
-                                        <div class="pk-dup-toolbar" id="pk-dup-filters" style="margin-left:10px; border-right:1px solid var(--pk-bd); padding-right:10px; margin-right:10px;">
+                    <div class="pk-dup-toolbar" id="pk-dup-filters" style="margin-left:10px; padding-right:2px;">
                         ${mkLbl('pk-chk-hash', L.tag_hash, L.tag_hash_short, L.tag_hash)}
                         ${mkLbl('pk-chk-sim', L.tag_sim, L.tag_sim_short, L.tag_sim)}
                         ${mkLbl('pk-chk-name', L.tag_name, L.tag_name_short, L.tag_name)}
                     </div>
 
-                    <div class="pk-dup-toolbar" id="pk-dup-tools" style="display:none; align-items:center; gap:4px; padding:0 10px; height:100%; border-right:1px solid var(--pk-bd); margin-right:10px;">
+                    <div class="pk-dup-toolbar" id="pk-dup-tools" style="display:none; align-items:center; gap:4px; padding:0 10px; height:100%; border-left:1px solid var(--pk-bd); border-right:1px solid var(--pk-bd); margin-right:10px;">
                         <select id="pk-dup-folder-sel" style="height:28px; border:1px solid var(--pk-bd); border-radius:4px; font-size:12px; background:var(--pk-bg); color:var(--pk-fg); margin-right:5px;">
                             <option value="">${L.lbl_dup_select_folder}</option>
                         </select>
@@ -6443,7 +6577,7 @@ async function openManager(initialCache, preloadPromise) {
                         <span style="margin-left:2px;">${L.lbl_folder_first}</span>
                     </div>
 
-                    <div id="pk-btn-invert" data-pk-tip="${L.btn_invert}" style="margin-left:12px; cursor:pointer; display:none; align-items:center; color:var(--pk-fg); transition:color 0.2s;">
+                    <div id="pk-btn-invert" data-pk-tip="${L.btn_invert}" style="margin-left:12px; cursor:pointer; display:none; align-items:center; color:var(--pk-fg); transition:color 0.2s; pointer-events:auto;">
                         ${CONF.icons.invert}
                         <span style="margin-left:2px; color:var(--pk-fg);">${L.btn_invert}</span>
                    </div>
@@ -8268,7 +8402,7 @@ async function openManager(initialCache, preloadPromise) {
                     const target = validVideos[j];
                     if (assigned.has(target.id)) continue;
 
-                    const durThreshold = (strictness === 'loose') ? 2.0 : 1.0;
+                    const durThreshold = (strictness === 'loose') ? 3.0 : 2.0;
                     const targetDur = parseFloat(target.params?.duration || 0);
                     const durDiff = Math.abs(targetDur - rootDur);
 
@@ -8280,7 +8414,7 @@ async function openManager(initialCache, preloadPromise) {
                          const maxBase = Math.max(targetSize, rootSize);
                          const ratio = sizeDiff / maxBase;
 
-                         if (ratio <= sizeRatioLimit) {
+                         if (strictness === 'loose' || ratio <= 0.10) {
                              groupItems.push(target);
                          }
                     }
@@ -8944,6 +9078,85 @@ async function openManager(initialCache, preloadPromise) {
                 }
                 else if (S.uploadMode) {
                     if (pageCount > 0) break;
+
+                    try {
+                        const phases = "PHASE_TYPE_UNKNOW,PHASE_TYPE_PENDING,PHASE_TYPE_RUNNING,PHASE_TYPE_PAUSED,PHASE_TYPE_ERROR";
+                        const filters = encodeURIComponent(JSON.stringify({ "phase": { "in": phases } }));
+                        const url = `https://api-drive.mypikpak.com/drive/v1/tasks?type=upload&limit=100&filters=${filters}&_t=${Date.now()}`;
+                        const res = await fetch(url, { headers: getHeaders(), signal: signal });
+
+                        if (res.ok) {
+                            const cloudData = await res.json();
+                            const cloudTasks = cloudData.tasks || [];
+
+                            const cloudIds = new Set(cloudTasks.map(ct => ct.id));
+                            const cloudFileIds = new Set(cloudTasks.map(ct => ct.file_id).filter(Boolean));
+
+                            S.uploadTasks = S.uploadTasks.filter(lt => {
+                                if (lt.status === 'DONE' || (!lt.file_id && !lt._uploadId)) return true;
+
+                                if ((lt.name === 'upload' || lt.name === 'Ghost Task') && !lt.file && lt.file_id) {
+                                    console.log(`[Reconcile] Auto-cleaning orphaned local ghost file: ${lt.file_id}`);
+                                    fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
+                                        method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: [lt.file_id] })
+                                    }).catch(()=>{});
+                                    if (S.upMng) S.upMng.removeTask(lt.id);
+                                    return false;
+                                }
+
+                                const existsInCloud = cloudIds.has(lt.id) || (lt.file_id && cloudFileIds.has(lt.file_id)) || (lt._sourceTaskId && cloudIds.has(lt._sourceTaskId));
+                                if (!existsInCloud) {
+                                    console.log(`[Reconcile] 发现死任务，云端已清理，同步清理本地库: ${lt.name}`);
+                                    if (S.upMng) S.upMng.removeTask(lt.id);
+                                    return false;
+                                }
+                                return true;
+                            });
+
+                            cloudTasks.forEach(ct => {
+                                const existsLocally = S.uploadTasks.some(lt => lt.id === ct.id || lt.file_id === ct.file_id || lt._sourceTaskId === ct.id);
+                                if (!existsLocally && ct.file_id) {
+                                    const ref = ct.reference_resource || {};
+                                    const taskName = ref.name || ct.name || ct.file_name || 'Ghost Task';
+
+                                    if (taskName === 'upload' || taskName === 'Ghost Task') {
+                                        console.log(`[Reconcile] Auto-cleaning orphaned cloud ghost file: ${ct.file_id}`);
+                                        fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
+                                            method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: [ct.file_id] })
+                                        }).catch(()=>{});
+                                        return;
+                                    }
+
+                                    const ghostTask = {
+                                        id: 'up_' + Date.now() + '_' + Math.random().toString(36).substr(2),
+                                        _sourceTaskId: ct.id,
+                                        kind: 'pk#upload',
+                                        file: null, 
+                                        name: taskName,
+                                        size: ct.file_size,
+                                        parentId: '',
+                                        status: 'PAUSED',
+                                        progress: parseInt(ct.progress || 0),
+                                        speed: 0,
+                                        message: L.msg_ghost_task_resume,
+                                        file_id: ct.file_id,
+                                        hash: (ct.params && ct.params.hash) || '',
+                                        _xhr: null,
+                                        _lastCalcTime: 0,
+                                        _lastCalcLoaded: 0,
+                                        _lastUiTime: 0,
+                                        icon_link: ct.icon_link || '',
+                                        thumbnail_link: ct.thumbnail_link || ''
+                                    };
+                                    S.uploadTasks.push(ghostTask);
+                                    if (S.upMng) S.upMng.saveTask(ghostTask);
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.warn("[Upload] Failed to sync cloud upload tasks:", e);
+                    }
+
                     data = { files: [...S.uploadTasks], next_page_token: null };
                 }
                 else {
@@ -10398,7 +10611,7 @@ async function openManager(initialCache, preloadPromise) {
                         <div><input type="checkbox" id="pk-all"></div>
                         <div class="pk-col" data-k="name" style="justify-content:flex-start;">
                             <div id="pk-name-text-wrap" style="display:flex;align-items:center;">${L.col_name}<span style="display:inline-block; min-width:18px; text-align:center;"></span></div>
-                            <div id="pk-btn-invert" class="pk-btn" data-pk-tip="${L.btn_invert}" style="margin-left:12px; cursor:pointer; display:none; align-items:center; color:var(--pk-fg); padding:0;">
+                            <div id="pk-btn-invert" class="pk-btn" data-pk-tip="${L.btn_invert}" style="margin-left:12px; cursor:pointer; display:none; align-items:center; color:var(--pk-fg); padding:0; pointer-events:auto;">
                                 ${CONF.icons.invert}
                                 <span style="margin-left:2px;">${L.btn_invert}</span>
                             </div>
@@ -10449,7 +10662,7 @@ async function openManager(initialCache, preloadPromise) {
                                 ${CONF.icons.folderFirst}
                                 <span style="margin-left:2px; white-space:nowrap;">${L.lbl_folder_first}</span>
                              </div>` : ''}
-                             <div id="pk-btn-invert" class="pk-btn" data-pk-tip="${L.btn_invert}" style="margin-left:12px; cursor:pointer; display:none; align-items:center; color:var(--pk-fg); padding:0;">
+                             <div id="pk-btn-invert" class="pk-btn" data-pk-tip="${L.btn_invert}" style="margin-left:12px; cursor:pointer; display:none; align-items:center; color:var(--pk-fg); padding:0; pointer-events:auto;">
                                 ${CONF.icons.invert}
                                 <span style="margin-left:2px; white-space:nowrap;">${L.btn_invert}</span>
                              </div>
@@ -11271,12 +11484,12 @@ async function openManager(initialCache, preloadPromise) {
                     else if (d.status === 'PAUSED') statusColor = '#faad14';
 
                     html += `
-                        <div style="display:flex; flex-direction:column; justify-content:center; gap:4px; width:100%;">
-                            <div style="display:flex; justify-content:space-between; font-size:12px;">
-                                <span style="color:${statusColor}">${d.message}</span>
-                                <span class="pk-up-prog-txt">${Math.floor(d.progress)}%</span>
+                        <div style="display:flex; flex-direction:column; justify-content:center; gap:4px; width:100%; min-width:0;">
+                            <div style="display:flex; justify-content:space-between; font-size:12px; min-width:0;">
+                                <span class="pk-force-tip" style="color:${statusColor}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-right:8px; display:block;" data-pk-tip="${esc(d.message)}">${esc(d.message)}</span>
+                                <span class="pk-up-prog-txt" style="flex-shrink:0;">${Math.floor(d.progress)}%</span>
                             </div>
-                            <div style="width:100%; height:4px; background:var(--pk-bd); border-radius:2px; overflow:hidden;">
+                            <div style="width:100%; height:4px; background:var(--pk-bd); border-radius:2px; overflow:hidden; flex-shrink:0;">
                                 <div class="pk-up-prog-bar" style="width:${d.progress}%; height:100%; background:${statusColor}; transition:width 0.2s;"></div>
                             </div>
                         </div>
@@ -12782,7 +12995,7 @@ async function openManager(initialCache, preloadPromise) {
                 const chunk = items.slice(i, i + BATCH_SIZE);
                 const chunkIds = chunk.map(it => it.id);
 
-                updateFloat(`${actionText} ${processedCount}/${total} -> ${esc(targetNameForLog || 'Target')}`);
+                updateFloat(`${actionText} ${processedCount}/${total} -> ${esc(targetNameForLog || L.str_target_folder)}`);
 
                 const apiTargetPid = (targetPid === 'root') ? '' : targetPid;
 
@@ -12952,15 +13165,15 @@ async function openManager(initialCache, preloadPromise) {
         if (fileDragGhost) fileDragGhost.remove();
         fileDragGhost = null;
 
-        let targetName = "Folder";
+        let targetName = L.lbl_type_folder;
         if (dropTargetType === 'menu_item') {
             const activeItem = document.querySelector('.pk-crumb-item.pk-drop-target span');
             if (activeItem) targetName = activeItem.textContent;
         } else if (dropTargetType === 'row') {
-            targetName = S.itemMap.get(dropTargetId)?.name || "Folder";
+            targetName = S.itemMap.get(dropTargetId)?.name || L.lbl_type_folder;
         } else if (dropTargetType === 'crumb') {
             const pathNode = S.path.find(p => (p.id || 'root') === (dropTargetId || 'root'));
-            targetName = pathNode ? pathNode.name : "Parent";
+            targetName = pathNode ? pathNode.name : L.str_target_folder;
         }
 
         const targets = document.querySelectorAll('.pk-drop-target');
@@ -13557,6 +13770,8 @@ async function openManager(initialCache, preloadPromise) {
 
                     S.path = S.path.slice(0, i + 1);
                     load();
+                } else {
+                    if (UI.btnRefresh && !UI.btnRefresh.disabled) UI.btnRefresh.click();
                 }
             };
 
@@ -18558,7 +18773,7 @@ async function openManager(initialCache, preloadPromise) {
                     await navigator.clipboard.write([item]);
                 } catch (clipErr) {
                     console.error("Clipboard write failed:", clipErr);
-                    if (txtDiv) txtDiv.textContent = "Clipboard Failed";
+                    if (txtDiv) txtDiv.textContent = L.err_clipboard_failed;
                     await sleep(1000);
                 }
 
@@ -18587,7 +18802,7 @@ async function openManager(initialCache, preloadPromise) {
             }
         } catch (e) {
             console.error("Search Error:", e);
-            const errorMsg = e.message.includes('Tainted') ? "Security Error: CORS Blocked" : e.message;
+            const errorMsg = e.message.includes('Tainted') ? L.err_cors_blocked : e.message;
             ov.innerHTML = `<div style="background:#d93025; color:#fff; padding:12px 24px; border-radius:8px; font-weight:bold;">❌ ${errorMsg}</div>`;
             await sleep(2000);
         } finally {
@@ -21902,7 +22117,7 @@ async function openManager(initialCache, preloadPromise) {
         S.clipType = '';
         updateStat();
 
-        const targetFolderName = S.path[S.path.length - 1].name || "Target";
+        const targetFolderName = S.path[S.path.length - 1].name || L.str_target_folder;
         await executeFileTransfer(items, type, normalize(srcId), normalize(destId), targetFolderName);
     };
 
@@ -22272,7 +22487,7 @@ async function openManager(initialCache, preloadPromise) {
                 let html = `<div class="pk-hist-hd"><span>${L.title_search_hist}</span><span class="pk-hist-clear-btn" id="pk-hist-del" style="cursor:pointer; opacity:0.8;">${L.btn_clear_hist}</span></div>`;
 
                 list.forEach(txt => {
-                    const displayTxt = txt === "" ? "(Empty)" : (txt.replace(/\s/g, '') === "" ? `"${txt}"` : txt);
+                    const displayTxt = txt === "" ? L.str_empty_str : (txt.replace(/\s/g, '') === "" ? `"${txt}"` : txt);
 
                     html += `<div class="pk-select-item" data-raw="${esc(txt)}" style="display:flex; align-items:center; gap:10px; padding:8px 12px;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0; opacity:0.5;">
@@ -23350,7 +23565,7 @@ async function openManager(initialCache, preloadPromise) {
             };
             previewWorker.onerror = (e) => {
                 console.error("Worker Error:", e);
-                rnIn.innerHTML = `<div style="padding:40px; text-align:center; color:#d93025;">❌ Worker Error</div>`;
+                rnIn.innerHTML = `<div style="padding:40px; text-align:center; color:#d93025;">❌ ${L.err_worker_failed}</div>`;
                 previewWorker.terminate();
                 URL.revokeObjectURL(workerUrl);
             };
@@ -23737,41 +23952,54 @@ async function openManager(initialCache, preloadPromise) {
             m.remove();
 
             const ids = Array.from(S.sel);
-            const filesToDelete = [];
+            const filesToTrash = [];
+            const ghostsToHardDelete = [];
 
             ids.forEach(id => {
                 const task = S.uploadTasks.find(t => t.id === id);
                 if (task) {
                     task._deleted = true;
-                    task._deleteFileIntent = isDeleteFile;
+                    const forceDelete = task.status !== 'DONE';
+                    task._deleteFileIntent = forceDelete || isDeleteFile;
 
-                    if (isDeleteFile && task.file_id) {
-                        filesToDelete.push(task.file_id);
+                    if (task.file_id) {
+                        if (forceDelete) ghostsToHardDelete.push(task.file_id);
+                        else if (isDeleteFile) filesToTrash.push(task.file_id);
                     }
                     if (S.upMng) S.upMng.pause(task, true);
                 }
             });
 
             const idSet = S.sel;
-            S.uploadTasks = S.uploadTasks.filter(t => !idSet.has(t.id));
+            S.uploadTasks = S.uploadTasks.filter(t => {
+                if(idSet.has(t.id)) {
+                    if (S.upMng) S.upMng.removeTask(t.id);
+                    return false;
+                }
+                return true;
+            });
 
             S.clearSelection();
             load(false, true);
 
-            if (filesToDelete.length > 0) {
+            if (filesToTrash.length > 0) {
                 try {
-                    await executeBatchDelete(filesToDelete, {
-                        silent: false,
-                        hardDelete: false,
-                        forceRefresh: false
-                    });
-                } catch(e) {
-                    console.error("Failed to delete uploaded files:", e);
-                    showToast(L.msg_file_del_failed + e.message, "error");
-                }
-            } else {
-                showToast(L.msg_task_del_success_fmt.replace('{n}', ids.length));
+                    await executeBatchDelete(filesToTrash, { silent: false, hardDelete: false, forceRefresh: false });
+                } catch(e) { console.error("Failed to trash uploaded files:", e); }
             }
+
+            if (ghostsToHardDelete.length > 0) {
+                try {
+                    await fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
+                        method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: ghostsToHardDelete })
+                    });
+                    ghostsToHardDelete.forEach(id => {
+                        if (typeof window.pkRemoveGhostFile === 'function') window.pkRemoveGhostFile(id);
+                    });
+                } catch (e) { console.error("Failed to hard delete ghost files:", e); }
+            }
+
+            showToast(L.msg_task_del_success_fmt.replace('{n}', ids.length));
         };
 
         m.tabIndex = 0;
@@ -23817,15 +24045,23 @@ async function openManager(initialCache, preloadPromise) {
             const isDeleteFile = m.querySelector('#clear_all_up_files').checked;
             m.remove();
 
-            const filesToDelete =[];
+            const filesToTrash = [];
+            const ghostsToHardDelete = [];
+            const count = S.uploadTasks.length;
 
             S.uploadTasks.forEach(task => {
                 task._deleted = true;
-                task._deleteFileIntent = isDeleteFile;
+                const forceDelete = task.status !== 'DONE';
+                task._deleteFileIntent = forceDelete || isDeleteFile;
 
-                if (S.upMng) S.upMng.pause(task, true);
-                if (isDeleteFile && task.file_id) {
-                    filesToDelete.push(task.file_id);
+                if (S.upMng) {
+                    S.upMng.pause(task, true);
+                    S.upMng.removeTask(task.id);
+                }
+
+                if (task.file_id) {
+                    if (forceDelete) ghostsToHardDelete.push(task.file_id);
+                    else if (isDeleteFile) filesToTrash.push(task.file_id);
                 }
             });
 
@@ -23833,19 +24069,23 @@ async function openManager(initialCache, preloadPromise) {
             S.clearSelection();
             load(false, true);
 
-            if (filesToDelete.length > 0) {
+            if (filesToTrash.length > 0) {
                 try {
-                    await executeBatchDelete(filesToDelete, {
-                        silent: false,
-                        hardDelete: false,
-                        forceRefresh: false
-                    });
-                } catch(e) {
-                    console.error("Clear All: Cloud deletion failed", e);
-                }
-            } else {
-                showToast(L.msg_task_clear_success_fmt.replace('{n}', count));
+                    await executeBatchDelete(filesToTrash, { silent: false, hardDelete: false, forceRefresh: false });
+                } catch(e) {}
             }
+
+            if (ghostsToHardDelete.length > 0) {
+                try {
+                    await fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
+                        method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: ghostsToHardDelete })
+                    });
+                    ghostsToHardDelete.forEach(id => {
+                        if (typeof window.pkRemoveGhostFile === 'function') window.pkRemoveGhostFile(id);
+                    });
+                } catch (e) {}
+            }
+            showToast(L.msg_task_clear_success_fmt.replace('{n}', count));
         };
 
         m.tabIndex = 0;
@@ -24148,7 +24388,7 @@ async function openManager(initialCache, preloadPromise) {
                                        oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
                                        style="width:100%; height:44px; padding:0 70px 0 12px; border:2px solid ${ (ariaUrl || 'http://localhost:6800/jsonrpc') ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
                                 <div class="pk-select-label">${L.label_aria2_url}</div>
-                                <div id="btn_pop_aria_default" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:4px 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2);" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">Default</div>
+                                <div id="btn_pop_aria_default" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:4px 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2);" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_default}</div>
                             </div>
                             <div class="pk-aria-status-box" id="pop_aria_test_res" style="cursor:help; margin-top: 8px;">
                                 <div class="pk-aria-dot" id="pop_aria_test_dot"></div>
@@ -25170,6 +25410,10 @@ async function openManager(initialCache, preloadPromise) {
         S.upMng = {
             limit: 3,
             running: 0,
+            store: null,
+            initStore: () => {},
+            saveTask: (task) => {},
+            removeTask: (id) => {},
 
             fmtSpeed: (bytesPerSec) => {
                 if (bytesPerSec === 0) return '0 B/s';
@@ -25179,22 +25423,26 @@ async function openManager(initialCache, preloadPromise) {
                 return bytesPerSec.toFixed(2) + ' ' + units[i];
             },
 
-            createTask: (file, parentId) => ({
-                id: 'up_' + Date.now() + '_' + Math.random().toString(36).substr(2),
-                kind: 'pk#upload',
-                file: file,
-                name: file.name,
-                size: file.size,
-                parentId: parentId,
-                status: 'WAITING',
-                progress: 0,
-                speed: 0,
-                message: L.msg_task_waiting,
-                _xhr: null,
-                _lastCalcTime: 0,
-                _lastCalcLoaded: 0,
-                _lastUiTime: 0
-            }),
+            createTask: (file, parentId) => {
+                const task = {
+                    id: 'up_' + Date.now() + '_' + Math.random().toString(36).substr(2),
+                    kind: 'pk#upload',
+                    file: file,
+                    name: file.name,
+                    size: file.size,
+                    parentId: parentId,
+                    status: 'WAITING',
+                    progress: 0,
+                    speed: 0,
+                    message: L.msg_task_waiting,
+                    _xhr: null,
+                    _lastCalcTime: 0,
+                    _lastCalcLoaded: 0,
+                    _lastUiTime: 0
+                };
+                S.upMng.saveTask(task);
+                return task;
+            },
 
             scheduler: () => {
                 if (S.upMng.running >= S.upMng.limit) return;
@@ -25203,7 +25451,7 @@ async function openManager(initialCache, preloadPromise) {
             },
 
             start: async (task) => {
-                if (S.quota && S.quota.limitRaw > 0) {
+                if (S.quota && S.quota.limitRaw > 0 && !task.file_id) {
                     const remaining = S.quota.limitRaw - S.quota.usedRaw;
                     if (task.size > remaining) {
                         task.status = 'ERROR';
@@ -25215,12 +25463,20 @@ async function openManager(initialCache, preloadPromise) {
                 }
 
                 S.upMng.running++;
-                task.status = 'HASHING';
-                task.message = L.msg_task_hashing;
-                task._totalUploadedBytes = 0;
+
+                if (!task.hash) {
+                    task.status = 'HASHING';
+                    task.message = L.msg_task_hashing;
+                    if (S.uploadMode) updateRowUI(task);
+                    task.hash = await calcSha1(task.file);
+                }
+                const hash = task.hash;
+                S.upMng.saveTask(task);
+
+                if (!task._totalUploadedBytes) task._totalUploadedBytes = 0;
 
                 let _lastPollTime = Date.now();
-                let _lastPollBytes = 0;
+                let _lastPollBytes = task._totalUploadedBytes;
 
                 const speedTimer = setInterval(() => {
                     if (task.status === 'UPLOADING') {
@@ -25368,10 +25624,6 @@ async function openManager(initialCache, preloadPromise) {
 
                     if (task._deleted) throw new Error("Aborted");
 
-                    const hash = await calcSha1(task.file);
-
-                    if (task._deleted) throw new Error("Aborted");
-
                     task.status = 'UPLOADING';
                     task.message = L.msg_task_init_upload;
 
@@ -25380,60 +25632,67 @@ async function openManager(initialCache, preloadPromise) {
 
                     const safePid = (finalParentId === 'root' || finalParentId === 'upload_root') ? '' : (finalParentId || '');
 
-                    let res = null;
-                    let createRetry = 0;
-                    const maxCreateRetries = 5;
+                    let data = null;
 
-                    while (createRetry < maxCreateRetries) {
-                        try {
-                            res = await fetch('https://api-drive.mypikpak.com/drive/v1/files', {
-                                method: 'POST', headers: getHeaders(), body: JSON.stringify({
-                                    kind: "drive#file", parent_id: safePid, name: task.name, size: task.size, hash: hash, upload_type: "UPLOAD_TYPE_RESUMABLE"
-                                })
-                            });
+                    if (task._initData && task.file_id) {
+                        data = task._initData;
+                    } else {
+                        let res = null;
+                        let createRetry = 0;
+                        const maxCreateRetries = 5;
 
-                            if (res.status === 429) {
-                                const waitMs = 2000 + Math.random() * 2000 * (createRetry + 1);
-                                console.warn(`[Upload] Rate limited (429). Retrying in ${Math.round(waitMs)}ms...`);
-                                await new Promise(r => setTimeout(r, waitMs));
+                        while (createRetry < maxCreateRetries) {
+                            try {
+                                res = await fetch('https://api-drive.mypikpak.com/drive/v1/files', {
+                                    method: 'POST', headers: getHeaders(), body: JSON.stringify({
+                                        kind: "drive#file", parent_id: safePid, name: task.name, size: task.size, hash: hash, upload_type: "UPLOAD_TYPE_RESUMABLE"
+                                    })
+                                });
+
+                                if (res.status === 429) {
+                                    const waitMs = 2000 + Math.random() * 2000 * (createRetry + 1);
+                                    console.warn(`[Upload] Rate limited (429). Retrying in ${Math.round(waitMs)}ms...`);
+                                    await new Promise(r => setTimeout(r, waitMs));
+                                    createRetry++;
+                                    continue;
+                                }
+
+                                if (!res.ok) {
+                                    const errData = await res.json().catch(() => ({}));
+                                    const errMsg = errData.error_description || `HTTP ${res.status}`;
+
+                                    const isQuotaExceeded = res.status === 400 && (errData.error_code === 12 || errMsg.toLowerCase().includes('quota'));
+
+                                    if (isQuotaExceeded) {
+                                        const quotaErr = new Error(L.err_quota_exceeded);
+                                        quotaErr.isFatal = true;
+                                        throw quotaErr;
+                                    }
+
+                                    if (res.status === 404 || errMsg.toLowerCase().includes('not found') || errMsg.toLowerCase().includes('invalid parent')) {
+                                        if (S.upMng && S.upMng._syncLocks) S.upMng._syncLocks.clear();
+                                        throw new Error(L.err_parent_not_found);
+                                    }
+
+                                    throw new Error(errMsg);
+                                }
+
+                                break;
+
+                            } catch (e) {
+                                console.warn(`[Upload] Init request failed (${createRetry + 1}/${maxCreateRetries}):`, e.message);
+
+                                if (e.isFatal) throw e;
+
                                 createRetry++;
-                                continue;
+                                if (createRetry >= maxCreateRetries) throw e;
+                                await new Promise(r => setTimeout(r, 1500));
                             }
-
-                            if (!res.ok) {
-                                const errData = await res.json().catch(() => ({}));
-                                const errMsg = errData.error_description || `HTTP ${res.status}`;
-
-                                const isQuotaExceeded = res.status === 400 && (errData.error_code === 12 || errMsg.toLowerCase().includes('quota'));
-
-                                if (isQuotaExceeded) {
-                                    const quotaErr = new Error(L.err_quota_exceeded);
-                                    quotaErr.isFatal = true;
-                                    throw quotaErr;
-                                }
-
-                                if (res.status === 404 || errMsg.toLowerCase().includes('not found') || errMsg.toLowerCase().includes('invalid parent')) {
-                                    if (S.upMng && S.upMng._syncLocks) S.upMng._syncLocks.clear();
-                                    throw new Error(L.err_parent_not_found);
-                                }
-
-                                throw new Error(errMsg);
-                            }
-
-                            break;
-
-                        } catch (e) {
-                            console.warn(`[Upload] Init request failed (${createRetry + 1}/${maxCreateRetries}):`, e.message);
-
-                            if (e.isFatal) throw e;
-
-                            createRetry++;
-                            if (createRetry >= maxCreateRetries) throw e;
-                            await new Promise(r => setTimeout(r, 1500));
                         }
-                    }
 
-                    const data = await res.json();
+                        data = await res.json();
+                        task._initData = data;
+                    }
 
                     let newlyCreatedFileId = null;
                     if (data.file) {
@@ -25454,6 +25713,12 @@ async function openManager(initialCache, preloadPromise) {
                         if (data.name) task.name = data.name;
                     }
 
+                    if (newlyCreatedFileId && !task._ghostAdded) {
+                        if (typeof window.pkAddGhostFile === 'function') window.pkAddGhostFile(newlyCreatedFileId);
+                        task._ghostAdded = true;
+                    }
+                    S.upMng.saveTask(task);
+
                     if (task._deleted) {
                         console.warn(`[Upload] Task ${task.id} was deleted by user during initialization. Triggering self-destruct.`);
                         if (newlyCreatedFileId && task._deleteFileIntent) {
@@ -25473,6 +25738,8 @@ async function openManager(initialCache, preloadPromise) {
 
                     if (data.upload_type === "UPLOAD_TYPE_URL" || data.phase === "PHASE_TYPE_COMPLETE" || (data.file && data.file.phase === "PHASE_TYPE_COMPLETE")) {
                         task.status = 'DONE'; task.progress = 100; task.speed = 0; task.message = L.msg_task_fast_success;
+                        if (typeof window.pkRemoveGhostFile === 'function' && task.file_id) window.pkRemoveGhostFile(task.file_id);
+                        S.upMng.removeTask(task.id);
                         if (S.uploadMode) {
                             updateRowUI(task);
                             requestAnimationFrame(() => { if (typeof renderVisible === 'function') renderVisible(); });
@@ -25537,6 +25804,9 @@ async function openManager(initialCache, preloadPromise) {
                                 try {
                                     const creds = await getAuth(method, query, contentType);
                                     const url = `${host}/${objectName.split('/').map(encodeURIComponent).join('/')}${query ? '?' + query : ''}`;
+
+                                    if (!task._xhrs) task._xhrs = new Set();
+
                                     const req = GM_xmlhttpRequest({
                                         method: method, url: url, data: body,
                                         headers: {
@@ -25548,12 +25818,24 @@ async function openManager(initialCache, preloadPromise) {
                                         },
                                         upload: { onprogress: onProgress },
                                         onload: (res) => {
+                                            task._xhrs.delete(req);
                                             if (res.status >= 200 && res.status < 300) resolve(res);
-                                            else reject(new Error(`OSS ${method} Error: ${res.status} ${res.statusText}`));
+                                            else {
+                                                const err = new Error(`OSS ${method} Error: ${res.status} ${res.statusText}`);
+                                                err.status = res.status;
+                                                reject(err);
+                                            }
                                         },
-                                        onerror: (err) => reject(new Error("Network Error")),
-                                        onabort: () => reject(new Error("Aborted"))
+                                        onerror: (err) => {
+                                            task._xhrs.delete(req);
+                                            reject(new Error("Network Error"));
+                                        },
+                                        onabort: () => {
+                                            task._xhrs.delete(req);
+                                            reject(new Error("Aborted"));
+                                        }
                                     });
+                                    task._xhrs.add(req);
                                     if (onProgress) task._xhr = { abort: () => req.abort() };
                                 } catch (e) { reject(e); }
                             });
@@ -25565,27 +25847,66 @@ async function openManager(initialCache, preloadPromise) {
                             await ossRequest('PUT', '', task.file, 'application/octet-stream', (pe) => {
                                 task._totalUploadedBytes = pe.loaded;
                                 task.progress = (pe.loaded / totalSize) * 100;
-                                const now = Date.now();
-                                if (now - task._lastUiTime > 100) {
-                                    if (S.uploadMode) updateRowUI(task);
-                                    task._lastUiTime = now;
-                                }
                             });
                             task.progress = 100;
                         } else {
                             task.message = L.msg_task_init_part;
                             if (S.uploadMode) updateRowUI(task);
 
-                            const initRes = await ossRequest('POST', 'uploads', null, '');
-                            const initXml = new DOMParser().parseFromString(initRes.responseText, "text/xml");
-                            const uploadId = initXml.querySelector('UploadId')?.textContent || initXml.getElementsByTagName('UploadId')[0]?.textContent;
-                            if (!uploadId) throw new Error("Failed to get UploadId");
+                            let uploadId = task._uploadId;
+                            let isResuming = !!uploadId;
+
+                            if (!uploadId) {
+                                const initRes = await ossRequest('POST', 'uploads', null, '');
+                                const initXml = new DOMParser().parseFromString(initRes.responseText, "text/xml");
+                                uploadId = initXml.querySelector('UploadId')?.textContent || initXml.getElementsByTagName('UploadId')[0]?.textContent;
+                                if (!uploadId) throw new Error("Failed to get UploadId");
+                                task._uploadId = uploadId;
+                            }
 
                             const parts = new Array(partCount);
                             const CONCURRENCY = 3;
 
                             let completedBytes = 0;
                             const activeParts = new Map();
+                            const uploadedPartNumbers = new Set();
+
+                            if (isResuming) {
+                                try {
+                                    let nextMarker = '';
+                                    let isTruncated = true;
+                                    while (isTruncated) {
+                                        const query = `uploadId=${uploadId}` + (nextMarker ? `&part-number-marker=${nextMarker}` : '');
+                                        const listRes = await ossRequest('GET', query, null, '');
+                                        const listXml = new DOMParser().parseFromString(listRes.responseText, "text/xml");
+
+                                        const partNodes = listXml.querySelectorAll('Part') || listXml.getElementsByTagName('Part');
+                                        Array.from(partNodes).forEach(node => {
+                                            const pNum = parseInt(node.querySelector('PartNumber')?.textContent || node.getElementsByTagName('PartNumber')[0]?.textContent);
+                                            const etag = node.querySelector('ETag')?.textContent || node.getElementsByTagName('ETag')[0]?.textContent;
+                                            if (pNum && etag && !uploadedPartNumbers.has(pNum)) {
+                                                parts[pNum - 1] = { partNumber: pNum, etag: etag };
+                                                uploadedPartNumbers.add(pNum);
+                                                const pSize = (pNum === partCount) ? (totalSize - (partCount - 1) * PART_SIZE) : PART_SIZE;
+                                                completedBytes += pSize;
+                                            }
+                                        });
+
+                                        const truncNode = listXml.querySelector('IsTruncated') || listXml.getElementsByTagName('IsTruncated')[0];
+                                        isTruncated = truncNode ? (truncNode.textContent === 'true') : false;
+                                        if (isTruncated) {
+                                            const markerNode = listXml.querySelector('NextPartNumberMarker') || listXml.getElementsByTagName('NextPartNumberMarker')[0];
+                                            nextMarker = markerNode ? markerNode.textContent : '';
+                                        }
+                                    }
+
+                                    task._totalUploadedBytes = completedBytes;
+                                    task.progress = (completedBytes / totalSize) * 100;
+                                    console.log(`[Upload] Resume Check: Found ${uploadedPartNumbers.size}/${partCount} parts. Total: ${fmtSize(completedBytes)}`);
+                                } catch (e) {
+                                    console.warn(`[Upload] Failed to fetch existing parts. Overwriting.`, e);
+                                }
+                            }
 
                             const updateProgress = () => {
                                 let activeTotal = 0;
@@ -25594,19 +25915,16 @@ async function openManager(initialCache, preloadPromise) {
 
                                 task._totalUploadedBytes = currentTotal;
                                 task.progress = (currentTotal / totalSize) * 100;
-
-                                const now = Date.now();
-                                if (now - task._lastUiTime > 100) {
-                                    if (S.uploadMode) updateRowUI(task);
-                                    task._lastUiTime = now;
-                                }
                             };
 
-                            const pool = Array.from({length: partCount}, (_, k) => k + 1);
+                            const pool = Array.from({length: partCount}, (_, k) => k + 1).filter(num => !uploadedPartNumbers.has(num));
 
                             const worker = async () => {
                                 while (pool.length > 0) {
-                                    if (task.status === 'PAUSED' || !document.body.contains(el)) throw new Error("Aborted");
+                                    if (task.status === 'PAUSED' || !document.body.contains(el)) {
+                                        activeParts.clear();
+                                        throw new Error("Aborted");
+                                    }
 
                                     const i = pool.shift();
 
@@ -25618,30 +25936,41 @@ async function openManager(initialCache, preloadPromise) {
 
                                     const query = `partNumber=${i}&uploadId=${uploadId}`;
 
-                                    const partRes = await ossRequest('PUT', query, chunk, 'application/octet-stream', (pe) => {
-                                        activeParts.set(i, pe.loaded);
+                                    try {
+                                        const partRes = await ossRequest('PUT', query, chunk, 'application/octet-stream', (pe) => {
+                                            activeParts.set(i, pe.loaded);
+                                            updateProgress();
+                                        });
+
+                                        const finalizedSize = chunk.size;
+                                        completedBytes += finalizedSize;
+                                        activeParts.delete(i);
+
                                         updateProgress();
-                                    });
 
-                                    const finalizedSize = chunk.size;
-                                    completedBytes += finalizedSize;
-                                    activeParts.delete(i);
+                                        const etagHeader = partRes.responseHeaders.match(/etag:\s*"?([^"\r\n]+)"?/i);
+                                        const etag = etagHeader ? etagHeader[1] : null;
+                                        if (!etag) throw new Error(`Part ${i} missing ETag`);
 
-                                    updateProgress();
-
-                                    const etagHeader = partRes.responseHeaders.match(/etag:\s*"?([^"\r\n]+)"?/i);
-                                    const etag = etagHeader ? etagHeader[1] : null;
-                                    if (!etag) throw new Error(`Part ${i} missing ETag`);
-
-                                    parts[i - 1] = { partNumber: i, etag: etag };
+                                        parts[i - 1] = { partNumber: i, etag: etag };
+                                        if (!task._parts) task._parts = [];
+                                        task._parts[i - 1] = parts[i - 1];
+                                        S.upMng.saveTask(task);
+                                    } catch (err) {
+                                        activeParts.delete(i);
+                                        pool.unshift(i);
+                                        throw err;
+                                    }
                                 }
                             };
 
                             task.message = L.msg_task_uploading_2;
                             if (S.uploadMode) updateRowUI(task);
 
-                            const workers = Array(Math.min(partCount, CONCURRENCY)).fill(0).map(worker);
-                            await Promise.all(workers);
+                            if (pool.length > 0) {
+                                const workers = Array(Math.min(pool.length, CONCURRENCY)).fill(0).map(worker);
+                                await Promise.all(workers);
+                            }
 
                             if (task._deleted) throw new Error("Aborted");
 
@@ -25689,7 +26018,7 @@ async function openManager(initialCache, preloadPromise) {
                                                     if (globalCache.has(pid)) {
                                                         const list = globalCache.get(pid);
                                                         const target = Array.isArray(list) ? list.find(f => f.id === task.file_id) :
-                                                                     (list.items ? list.items.find(f => f.id === task.file_id) : null);
+                                                        (list.items ? list.items.find(f => f.id === task.file_id) : null);
                                                         if (target) target.thumbnail_link = testUrl;
                                                     }
                                                 }
@@ -25734,6 +26063,8 @@ async function openManager(initialCache, preloadPromise) {
                         }
 
                         task.status = 'DONE'; task.progress = 100; task.speed = 0; task.message = L.msg_task_upload_done;
+                        if (typeof window.pkRemoveGhostFile === 'function' && task.file_id) window.pkRemoveGhostFile(task.file_id);
+                        S.upMng.removeTask(task.id);
                         if (S.uploadMode) {
                             updateRowUI(task);
                             requestAnimationFrame(() => { if (typeof renderVisible === 'function') renderVisible(); });
@@ -25766,7 +26097,21 @@ async function openManager(initialCache, preloadPromise) {
                     task.status = isManualAbort ? 'PAUSED' : 'ERROR';
                     task.message = isManualAbort ? L.msg_task_paused : (e.message || L.err_unknown);
 
+                    if (e.status === 403 && task.file_id) {
+                        task.message = L.msg_token_expired_retry;
+                        task._initData = null;
+                        task._uploadId = null;
+                        task.progress = 0;
+                        task._totalUploadedBytes = 0;
+                        fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
+                            method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: [task.file_id] })
+                        }).catch(()=>{});
+                        if (typeof window.pkRemoveGhostFile === 'function') window.pkRemoveGhostFile(task.file_id);
+                        task.file_id = null;
+                    }
+
                     if (S.uploadMode) updateRowUI(task);
+                    S.upMng.saveTask(task);
                 } finally {
                     clearInterval(speedTimer);
                     task._xhr = null; S.upMng.running--;
@@ -25778,11 +26123,24 @@ async function openManager(initialCache, preloadPromise) {
             },
 
             pause: (task, skipRender = false) => {
-                if (task.status === 'UPLOADING' && task._xhr) {
-                    task._xhr.abort();
+                if (task.status === 'UPLOADING') {
+                    task.status = 'PAUSED'; 
+                    task.message = L.msg_task_paused;
+
+                    if (task._xhrs && task._xhrs.size > 0) {
+                        task._xhrs.forEach(req => req.abort());
+                        task._xhrs.clear();
+                    }
+                    if (task._xhr) {
+                        task._xhr.abort();
+                        task._xhr = null;
+                    }
+                    S.upMng.saveTask(task);
+                    if (S.uploadMode && !skipRender) { refresh(); }
                 } else if (task.status === 'WAITING') {
                     task.status = 'PAUSED';
                     task.message = L.msg_task_paused;
+                    S.upMng.saveTask(task);
                     if (S.uploadMode && !skipRender) { refresh(); }
                 }
             },
@@ -25791,11 +26149,14 @@ async function openManager(initialCache, preloadPromise) {
                 if (task.status === 'PAUSED' || task.status === 'ERROR') {
                     task.status = 'WAITING';
                     task.message = L.msg_task_waiting;
+                    S.upMng.saveTask(task);
                     S.upMng.scheduler();
                     if (S.uploadMode && !skipRender) { refresh(); }
                 }
             }
         };
+
+        S.upMng.initStore();
 
         const handleUploadInput = async (files) => {
             if (!files || files.length === 0) return;
@@ -25807,44 +26168,37 @@ async function openManager(initialCache, preloadPromise) {
             const safeParentId = (curPath.id && !isVirtual) ? curPath.id : '';
 
             let addedCount = 0;
-
-            const processEntry = async (entry, parentId) => {
-                if (entry.isFile) {
-                    return new Promise(resolve => {
-                        entry.file(file => {
-                            if (file.name.startsWith('.')) return resolve();
-                            if (S.upMng) {
-                                const task = S.upMng.createTask(file, parentId);
-                                S.uploadTasks.push(task);
-                                addedCount++;
-                            }
-                            resolve();
-                        });
-                    });
-                } else if (entry.isDirectory) {
-
-                }
-            };
-
             const fileList = Array.from(files);
 
-            for (const file of fileList) {
-                if (file.name.startsWith('.')) continue;
+            const BATCH_SIZE = 50;
 
-                let relativeFolder = "";
-                if (file.webkitRelativePath) {
-                    const parts = file.webkitRelativePath.split('/');
-                    if (parts.length > 1) {
-                        parts.pop();
-                        relativeFolder = parts.join('/');
+            if (fileList.length > BATCH_SIZE) {
+                showToast(L.msg_parsing_files, 'info', 2000);
+            }
+
+            for (let i = 0; i < fileList.length; i += BATCH_SIZE) {
+                const batch = fileList.slice(i, i + BATCH_SIZE);
+
+                await new Promise(resolve => setTimeout(resolve, 0));
+
+                for (const file of batch) {
+                    if (file.name.startsWith('.')) continue;
+
+                    let relativeFolder = "";
+                    if (file.webkitRelativePath) {
+                        const parts = file.webkitRelativePath.split('/');
+                        if (parts.length > 1) {
+                            parts.pop();
+                            relativeFolder = parts.join('/');
+                        }
                     }
-                }
 
-                if (S.upMng) {
-                    const task = S.upMng.createTask(file, safeParentId);
-                    task.relativeFolder = relativeFolder;
-                    S.uploadTasks.unshift(task);
-                    addedCount++;
+                    if (S.upMng) {
+                        const task = S.upMng.createTask(file, safeParentId);
+                        task.relativeFolder = relativeFolder;
+                        S.uploadTasks.unshift(task);
+                        addedCount++;
+                    }
                 }
             }
 
@@ -25871,19 +26225,48 @@ async function openManager(initialCache, preloadPromise) {
         UI.win.appendChild(dragMask);
 
         const parseEntries = async (entries, relPath = "") => {
-            for (const entry of entries) {
-                if (entry.isFile) {
-                    const file = await new Promise(res => entry.file(res));
-                    const curPath = S.path[S.path.length - 1];
-                    const safeParentId = (curPath.id && !curPath.id.includes('_root')) ? curPath.id : '';
-                    const task = S.upMng.createTask(file, safeParentId);
-                    task.relativeFolder = relPath;
-                    S.uploadTasks.unshift(task);
-                } else if (entry.isDirectory) {
-                    const reader = entry.createReader();
-                    const subEntries = await new Promise(res => reader.readEntries(res));
-                    await parseEntries(subEntries, (relPath ? relPath + "/" : "") + entry.name);
-                }
+            const BATCH_SIZE = 10; 
+            for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+                const batch = entries.slice(i, i + BATCH_SIZE);
+                await Promise.all(batch.map(async (entry) => {
+                    if (entry.isFile) {
+                        return new Promise((res) => {
+                            entry.file(file => {
+                                if (!file.name.startsWith('.')) {
+                                    const curPath = S.path[S.path.length - 1];
+                                    const safeParentId = (curPath.id && !curPath.id.includes('_root')) ? curPath.id : '';
+                                    const task = S.upMng.createTask(file, safeParentId);
+                                    task.relativeFolder = relPath;
+                                    S.uploadTasks.unshift(task);
+                                }
+                                res();
+                            }, () => res()); 
+                        });
+                    } else if (entry.isDirectory) {
+                        return new Promise((res) => {
+                            const reader = entry.createReader();
+                            const readAllEntries = async () => {
+                                let allSubEntries = [];
+                                let readBatch = async () => {
+                                    return new Promise((r) => {
+                                        reader.readEntries((sub) => {
+                                            if (sub.length > 0) {
+                                                allSubEntries = allSubEntries.concat(sub);
+                                                readBatch().then(r);
+                                            } else {
+                                                r();
+                                            }
+                                        }, () => r());
+                                    });
+                                };
+                                await readBatch();
+                                await parseEntries(allSubEntries, (relPath ? relPath + "/" : "") + entry.name);
+                                res();
+                            };
+                            readAllEntries();
+                        });
+                    }
+                }));
             }
         };
 
@@ -26503,24 +26886,24 @@ async function openManager(initialCache, preloadPromise) {
                 if (i === 0) {
                     const homeIcon = CONF.icons.home.replace('<svg', '<svg style="width:15px;height:15px;margin-right:4px;"');
                     sp.innerHTML = `${homeIcon}${L.btn_nav_home}`;
-                    sp.title = L.picker_all;
                 } else {
                     sp.textContent = p.name;
                 }
 
                 sp.style.cssText = "display:flex; align-items:center; height:100%; padding:0 6px; border-radius:4px; flex-shrink:0; transition:background 0.2s; white-space:nowrap;";
-                sp.style.cursor = isLast ? 'default' : 'pointer';
+                sp.style.cursor = 'pointer';
                 sp.style.color = isLast ? 'var(--pk-fg)' : '#888';
                 sp.style.fontWeight = isLast ? 'bold' : 'normal';
 
-                if (!isLast) {
-                    sp.onclick = () => {
+                sp.onclick = () => {
+                    if (!isLast) {
                         currentPath = currentPath.slice(0, i + 1);
-                        loadFolder(p.id, null, true);
-                    };
-                    sp.onmouseover = () => sp.style.background = 'var(--pk-hl)';
-                    sp.onmouseout = () => sp.style.background = 'transparent';
-                }
+                    }
+                    loadFolder(p.id, null, true);
+                };
+                sp.onmouseover = () => sp.style.background = 'var(--pk-hl)';
+                sp.onmouseout = () => sp.style.background = 'transparent';
+
                 crumbEl.appendChild(sp);
 
                 let showArrow = !isLast;
@@ -27588,7 +27971,7 @@ async function openManager(initialCache, preloadPromise) {
                                        oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
                                        style="width:100%; height:44px; padding:0 70px 0 12px; border:2px solid ${curAriaUrl ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
                                 <div class="pk-select-label">${L.label_aria2_url}</div>
-                                <div id="btn_aria_default" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:4px 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2);" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">Default</div>
+                                <div id="btn_aria_default" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:4px 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2);" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_default}</div>
                             </div>
                             <div class="pk-aria-status-box" id="aria_test_res" style="margin-top: 8px;">
                                 <div class="pk-aria-dot" id="aria_test_dot"></div>
@@ -29563,7 +29946,7 @@ async function openManager(initialCache, preloadPromise) {
                     listContainer.appendChild(emptyMsg);
                 } else {
                     items.forEach(f => {
-                        const itemName = f.filename || f.file_name || f.name || "Unknown";
+                        const itemName = f.filename || f.file_name || f.name || L.str_unknown_name;
                         const itemSize = f.filesize || f.size || 0;
                         const isDir = f.kind === 'drive#folder' || (itemSize == 0 && !f.mime_type);
 
@@ -32869,6 +33252,8 @@ async function preLoadRootFiles(onProgress) {
                 resolve(false);
                 return;
             }
+
+            if (typeof window.pkCleanupGhostFiles === 'function') window.pkCleanupGhostFiles();
 
             const rootFiles = await apiList('', 1000, onProgress);
             globalCache.set('root', rootFiles);
