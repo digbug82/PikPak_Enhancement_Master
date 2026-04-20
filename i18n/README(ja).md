@@ -89,8 +89,8 @@
 * **Torrent とフォールバック**：**.torrent** ファイルの解析に対応し、一部制限リンクに対しては**Web スナップショット保存**をフォールバック手段として提供します。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_ja.png" width="380" alt="磁力リンク">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_ja.gif" width="350" alt="共有">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_ja.png" height="350" alt="磁力リンク">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_ja.gif" height="350" alt="共有">
 </p>
 
 > ⚠️ 共有の抽出回数制限による自動遮断は、Web ページが開いたままで端末がスリープしていない場合にのみ有効です。
