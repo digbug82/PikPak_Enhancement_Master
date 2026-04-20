@@ -119,8 +119,8 @@
 * **分發增強**：支援長連線狀態監控、失敗後自動匯出錯誤清單，並支援**資料夾下載過濾**。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_tc.png" width="400" alt="資料夾下載過濾">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_tc.gif" width="400" alt="Aria2">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_tc.png" height="290" alt="資料夾下載過濾">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_tc.gif" height="290" alt="Aria2">
 </p>
 
 ---
