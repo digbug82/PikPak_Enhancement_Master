@@ -89,8 +89,8 @@
 * **Torrent & Fallback**: Supports parsing **.torrent** files, and provides **web snapshot saving** as a fallback for some restricted links.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_en.png" width="380" alt="Magnet">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_en.gif" width="350" alt="Share">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_en.png" height="350" alt="Magnet">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_en.gif" height="350" alt="Share">
 </p>
 
 > ⚠️ Automatic interception based on extraction limits only works while the webpage remains open and the device is not sleeping.
