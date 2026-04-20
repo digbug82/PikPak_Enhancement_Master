@@ -119,8 +119,8 @@
 * **Enhanced Distribution**: Supports persistent connection monitoring, automatic export of detailed error lists after failures, and **Folder Download Filter** support.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_en.png" width="400" alt="Folder Download Filter">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_en.gif" width="400" alt="Aria2">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_en.png" height="290" alt="Folder Download Filter">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_en.gif" height="290" alt="Aria2">
 </p>
 
 ---
