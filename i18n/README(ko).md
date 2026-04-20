@@ -89,8 +89,8 @@
 * **토렌트 및 대체 저장**: **.torrent** 파일 파싱을 지원하며, 일부 제한 링크에 대해서는 **웹페이지 스냅샷 저장 방식**을 대체 수단으로 제공합니다.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_ko.png" width="380" alt="마그넷">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_ko.gif" width="350" alt="공유">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_ko.png" height="350" alt="마그넷">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_ko.gif" height="350" alt="공유">
 </p>
 
 > ⚠️ 공유 추출 횟수 제한의 자동 차단 기능은 웹페이지가 켜져 있고, 기기가 절전 상태가 아닐 때만 동작합니다.
