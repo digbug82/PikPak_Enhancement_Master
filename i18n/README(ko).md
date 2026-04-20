@@ -119,8 +119,8 @@
 * **배포 강화**: 장기 연결 상태 모니터링, 실패 후 오류 목록 자동 내보내기, **폴더 다운로드 필터링**을 지원합니다.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_ko.png" width="400" alt="다운로드 필터링">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_ko.gif" width="400" alt="aria2">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_ko.png" height="290" alt="다운로드 필터링">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_ko.gif" height="290" alt="aria2">
 </p>
 
 ---
