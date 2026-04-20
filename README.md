@@ -89,8 +89,8 @@
 * **种子与兜底**：支持解析 **.torrent** 种子文件；对部分受限链接提供**网页快照保存方案**作为兜底。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_zh.png" width="380" alt="磁链">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_zh.gif" width="350" alt="分享">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_zh.png" height="350" alt="磁链">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_zh.gif" height="350" alt="分享">
 </p>
 
 > ⚠️ 分享提取次数上限的自动拦截，仅在网页保持开启且设备未休眠时生效。
