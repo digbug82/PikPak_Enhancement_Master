@@ -89,8 +89,8 @@
 * **種子與兜底**：支援解析 **.torrent** 種子檔；對部分受限連結提供**網頁快照保存方案**作為兜底。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_tc.png" width="380" alt="磁鏈">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_tc.gif" width="350" alt="分享">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_tc.png" height="350" alt="磁鏈">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_tc.gif" height="350" alt="分享">
 </p>
 
 > ⚠️ 分享提取次數上限的自動攔截，僅在網頁保持開啟且裝置未休眠時生效。
