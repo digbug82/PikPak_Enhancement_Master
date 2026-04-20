@@ -119,8 +119,8 @@
 * **配信強化**：長時間接続の状態監視、失敗時のエラー一覧自動出力、さらに**フォルダダウンロードフィルタ**にも対応。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_ja.png" width="400" alt="ダウンロードフィルタ">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_ja.gif" width="400" alt="aria2">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_ja.png" height="290" alt="ダウンロードフィルタ">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_ja.gif" height="290" alt="aria2">
 </p>
 
 ---
