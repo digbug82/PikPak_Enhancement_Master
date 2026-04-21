@@ -2,6 +2,11 @@
   "version": "2.0.0-i18n-001",
   "baseUrl": "https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/i18n/",
   "files": {
-    "en": "en.json"
+    "tc": "tc.json",
+    "en": "en.json",
+    "ko": "ko.json",
+    "ja": "ja.json",
+    "id": "id.json",
+    "ms": "ms.json"
   }
 }
