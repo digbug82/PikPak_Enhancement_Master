@@ -1139,6 +1139,7 @@ function isValidI18nPayload(data){return !!(data&&typeof data==='object'&&!Array
 async function loadI18nManifest(force=false){if(!force){const cached=readI18nManifestCache();if(isValidI18nManifest(cached))return cached;}const manifestUrl=`${I18N_CONF.manifestUrl}${I18N_CONF.manifestUrl.includes('?')?'&':'?'}_t=${Date.now()}`;const manifest=await fetchI18nJson(manifestUrl);if(!isValidI18nManifest(manifest))throw new Error('Invalid i18n manifest');writeI18nManifestCache(manifest);return manifest;}
 async function loadRemoteLangPack(force=false,langOverride=''){const lang=langOverride||getLang();if(!I18N_CONF.remoteLangs.includes(lang)||!I18N_CONF.manifestUrl){pkRemoteI18n=null;return null;}const manifest=await loadI18nManifest(force);const version=String(manifest.version||'');if(!force){const cached=readI18nCache(lang,version);if(cached){pkRemoteI18n={lang,version:cached.version,data:cached.data};return pkRemoteI18n;}}const file=manifest.files&&manifest.files[lang];if(!file){pkRemoteI18n=null;return null;}const baseUrl=manifest.baseUrl||I18N_CONF.baseUrl;const fileUrl=/^https?:\/\//.test(file)?file:`${baseUrl}${file}`;const data=await fetchI18nJson(`${fileUrl}${fileUrl.includes('?')?'&':'?'}_v=${encodeURIComponent(version)}`);if(!isValidI18nPayload(data))throw new Error('Invalid i18n payload');writeI18nCache(lang,version,data);pkRemoteI18n={lang,version,data};return pkRemoteI18n;}
 function ensureI18nReady(force=false,langOverride=''){const lang=langOverride||getLang();if(force||!pkI18nReadyPromise||pkI18nReadyLang!==lang){pkI18nReadyLang=lang;pkI18nReadyPromise=loadRemoteLangPack(force,lang).catch(()=>null);}return pkI18nReadyPromise;}
+async function ensureI18nReadyBeforeOpen(langOverride=''){const lang=langOverride||getLang();if(lang==='zh')return null;try{return await Promise.race([ensureI18nReady(false,lang),sleep(4000).then(()=>null)]);}catch(e){return null;}}
 const T_LOCAL = {
     zh: {
         /* --- 通用与基础UI --- */
@@ -29412,7 +29413,8 @@ async function openManager(initialCache, preloadPromise) {
                     if (visibilityListener && visibilityListener.abort) visibilityListener.abort();
                     el.remove();
 
-                    openManager(S.cache, S.preLoadPromise);
+                    await ensureI18nReadyBeforeOpen(selectedLang);
+                    await openManager(S.cache, S.preLoadPromise);
                 } else {
                     renderVisible();
                 }
@@ -34252,6 +34254,7 @@ async function tryInject() {
             }
             const preload = preLoadRootFiles();
             if (!document.querySelector('.pk-ov')) {
+                await ensureI18nReadyBeforeOpen();
                 await openManager(globalCache, preload);
             }
         };
@@ -34429,6 +34432,7 @@ function inject() {
                         existingWin.style.display = 'none';
                     }
                 } else {
+                    await ensureI18nReadyBeforeOpen();
                     openManager(globalCache, globalPreloadPromise);
                 }
             } else {
