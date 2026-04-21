@@ -89,8 +89,8 @@
 * **种子与兜底**：支持解析 **.torrent** 种子文件；对部分受限链接提供**网页快照保存方案**作为兜底。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_zh.png" height="350" alt="磁链">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_zh.gif" height="350" alt="分享">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_zh.png" height="320" alt="磁链">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_zh.gif" height="320" alt="分享">
 </p>
 
 > ⚠️ 分享提取次数上限的自动拦截，仅在网页保持开启且设备未休眠时生效。
@@ -119,8 +119,8 @@
 * **分发增强**：支持长连接状态监控、失败后自动导出错误清单，并支持**文件夹下载过滤**。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_zh.png" height="270" alt="下载过滤">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_zh.gif" height="270" alt="aria2">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_zh.png" height="290" alt="下载过滤">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_zh.gif" height="290" alt="aria2">
 </p>
 
 ---
