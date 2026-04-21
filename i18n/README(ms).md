@@ -29,11 +29,11 @@
 * **Peningkatan pengalaman**: Menyokong penyusunan berbilang dimensi seperti bintang dan jenis fail, **kaburkan kulit hadapan** dengan satu klik, tema gelap, serta meningkatkan pengalaman kemas kini paparan melalui **strategi SWR refresh senyap**.
 * **Pengindeksan latar belakang & perlindungan**: Titik pernafasan biru di halaman utama menunjukkan status penyegerakan pokok direktori di latar belakang; sistem turut terbina dengan perlindungan operasi serentak untuk mengurangkan data kotor dan konflik penulisan.
 
-> 📌 Folder lalai **My Pack** dilindungi oleh sistem rasmi, dan skrip tidak akan menjalankan operasi berisiko tinggi yang boleh menyebabkan pemadaman tersilap ke atasnya.
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_ms.gif" width="1100" alt="Laluan">
 </p>
+
+> 📌 Folder lalai **My Pack** dilindungi oleh sistem rasmi, dan skrip tidak akan menjalankan operasi berisiko tinggi yang boleh menyebabkan pemadaman tersilap ke atasnya.
 
 ---
 
