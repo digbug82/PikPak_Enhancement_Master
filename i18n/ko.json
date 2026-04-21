@@ -520,9 +520,9 @@
     "opt_sort_size": "크기",
     "opt_sort_path": "경로",
     "opt_sort_name": "이름",
-    "opt_keep_new": "최신 항목 유지",  "opt_keep_old": "오래된 항목 유지",
-    "opt_keep_large": "가장 큰 항목 유지",   "opt_keep_small": "가장 작은 항목 유지",
-    "opt_keep_short": "이름이 가장 짧은 항목 유지",  "opt_keep_long": "이름이 가장 긴 항목 유지",
+    "opt_keep_new": "최신 항목 유지", "opt_keep_old": "오래된 항목 유지",
+    "opt_keep_large": "가장 큰 항목 유지", "opt_keep_small": "가장 작은 항목 유지",
+    "opt_keep_short": "이름이 가장 짧은 항목 유지", "opt_keep_long": "이름이 가장 긴 항목 유지",
 
     "loading": "로딩 중...",
     "loading_detail": "디렉토리 구조를 최고 속도로 인덱싱 중...",
