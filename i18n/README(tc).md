@@ -29,11 +29,11 @@
 * **體驗增強**：支援星號、類型等多維排序、暗黑皮膚、一鍵**模糊封面**，並結合 **SWR 靜默刷新策略** 提升視圖更新體驗。
 * **後台索引與保護**：首頁藍色呼吸點提示後台目錄樹同步狀態；系統內建並發操作保護，盡量避免髒資料與衝突寫入。
 
-> 📌 預設資料夾 **My Pack** 受官方保護，腳本不會對其執行誤刪風險較高的危險操作。
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_tc.gif" width="1100" alt="路徑">
 </p>
+
+> 📌 預設資料夾 **My Pack** 受官方保護，腳本不會對其執行誤刪風險較高的危險操作。
 
 ---
 
