@@ -29,11 +29,11 @@
 * **Peningkatan Pengalaman**: Mendukung pengurutan multi-dimensi seperti bintang dan tipe, tema gelap, **buramkan sampul** sekali klik, serta meningkatkan pengalaman pembaruan tampilan dengan **strategi refresh senyap SWR**.
 * **Pengindeksan Latar Belakang & Perlindungan**: Titik biru bernapas di beranda menunjukkan status sinkronisasi pohon direktori di latar belakang; sistem juga memiliki perlindungan operasi konkurensi untuk sebisa mungkin menghindari data kotor dan penulisan yang saling bertabrakan.
 
-> 📌 Folder default **My Pack** dilindungi oleh sistem resmi. Skrip tidak akan menjalankan operasi berisiko tinggi yang berpotensi menyebabkan salah hapus pada folder ini.
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_id.gif" width="1100" alt="Path">
 </p>
+
+> 📌 Folder default **My Pack** dilindungi oleh sistem resmi. Skrip tidak akan menjalankan operasi berisiko tinggi yang berpotensi menyebabkan salah hapus pada folder ini.
 
 ---
 
