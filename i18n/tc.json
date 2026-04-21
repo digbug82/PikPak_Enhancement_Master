@@ -520,9 +520,9 @@
     "opt_sort_size": "大小",
     "opt_sort_path": "路徑",
     "opt_sort_name": "名稱",
-    "opt_keep_new": "保留最新的","opt_keep_old": "保留最舊的",
-    "opt_keep_large": "保留最大的","opt_keep_small": "保留最小的",
-    "opt_keep_short": "保留名稱最短的","opt_keep_long": "保留名稱最長的",
+    "opt_keep_new": "保留最新的", "opt_keep_old": "保留最舊的",
+    "opt_keep_large": "保留最大的", "opt_keep_small": "保留最小的",
+    "opt_keep_short": "保留名稱最短的", "opt_keep_long": "保留名稱最長的",
 
     "loading": "載入中...",
     "loading_detail": "正在全速索引目錄結構...",
