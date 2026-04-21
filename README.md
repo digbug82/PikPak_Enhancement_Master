@@ -29,11 +29,11 @@
 * **体验增强**：支持星标、类型等多维排序、暗黑皮肤、一键**模糊封面**，并结合 **SWR 静默刷新策略** 提升视图更新体验。
 * **后台索引与保护**：主页蓝色呼吸点提示后台目录树同步状态；系统内置并发操作保护，尽量避免脏数据与冲突写入。
 
-> 📌 默认文件夹 **My Pack** 受官方保护，脚本不会对其执行误删风险较高的危险操作。
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_zh.gif" width="1100" alt="路径">
 </p>
+
+> 📌 默认文件夹 **My Pack** 受官方保护，脚本不会对其执行误删风险较高的危险操作。
 
 ---
 
