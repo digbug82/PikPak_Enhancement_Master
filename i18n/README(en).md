@@ -29,11 +29,11 @@
 * **Enhanced Experience**: Supports multi-dimensional sorting such as Favorites and Type, dark theme, one-click **Blur Cover Images**, and uses an **SWR strategy** for silent view updates.
 * **Background Indexing & Protection**: A blinking blue dot on the Home icon indicates directory tree syncing in the background. A built-in physical concurrency lock helps reduce dirty data and conflicting operations.
 
-> 📌 The default folder **My Pack** is officially protected. The script will not perform high-risk operations on it that could cause accidental deletion.
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_en.gif" width="1100" alt="Path">
 </p>
+
+> 📌 The default folder **My Pack** is officially protected. The script will not perform high-risk operations on it that could cause accidental deletion.
 
 ---
 
