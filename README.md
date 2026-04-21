@@ -119,8 +119,8 @@
 * **分发增强**：支持长连接状态监控、失败后自动导出错误清单，并支持**文件夹下载过滤**。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_zh.png" height="290" alt="下载过滤">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_zh.gif" height="290" alt="aria2">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_zh.png" height="270" alt="下载过滤">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_zh.gif" height="270" alt="aria2">
 </p>
 
 ---
