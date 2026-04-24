@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            2.0.0
+// @version            2.1.0
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        桌面级PikPak网盘管家！包含Aria2/Motrix带目录结构推送、文件查重（哈希/时长/名称）、文件夹查重（名称/相似度/包含率）、批量重命名（正则替换/连续编号/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、多账号数据迁移、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
@@ -41,9 +41,9 @@
 // @run-at             document-start
 // @require            https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js
 // @require            https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js
-// @downloadURL        https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.user.js
-// @updateURL          https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.meta.js
 
+// @downloadURL https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.user.js
+// @updateURL https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.meta.js
 // ==/UserScript==
 
 /*
@@ -281,6 +281,8 @@ const CONF = {
     SYSTEM_FOLDER_NAME: 'My Pack',
     browserDownloadConfirmFileCount: 10,
     browserDownloadConfirmTotalBytes: 10 * 1024 * 1024 * 1024,
+    mouseSideNavHistoryMax: 50,
+    mouseSideNavDebug: false,
     logoSVG: `<svg viewBox="0 0 238 200" style="width:24px;height:24px;border-radius:4px;flex-shrink:0;"><path d="M0 0 C1.82724609 0.01353516 1.82724609 0.01353516 3.69140625 0.02734375 C4.59761719 0.03894531 5.50382812 0.05054688 6.4375 0.0625 C5.95097979 7.11704304 4.33696858 12.90149479 1.6875 19.4375 C1.35234375 20.32566406 1.0171875 21.21382812 0.671875 22.12890625 C0.3315625 22.98097656 -0.00875 23.83304688 -0.359375 24.7109375 C-0.66198242 25.47583496 -0.96458984 26.24073242 -1.27636719 27.02880859 C-3.01571023 29.77913653 -4.60880008 30.70366989 -7.5625 32.0625 C-10.93383789 32.72265625 -10.93383789 32.72265625 -14.78515625 33.125 C-15.47874237 33.20142731 -16.17232849 33.27785461 -16.88693237 33.3565979 C-18.36660067 33.51855298 -19.84685768 33.67520381 -21.3276062 33.82696533 C-25.19232303 34.22318595 -29.05286739 34.65697538 -32.9140625 35.0859375 C-33.67180466 35.16903168 -34.42954681 35.25212585 -35.21025085 35.33773804 C-40.99791882 35.97875931 -46.74864414 36.77615252 -52.5 37.6875 C-61.81496788 39.10080547 -71.19269316 40.07620454 -80.5625 41.0625 C-19.8425 41.0625 40.8775 41.0625 103.4375 41.0625 C91.8875 39.7425 80.3375 38.4225 68.4375 37.0625 C63.8175 36.4025 59.1975 35.7425 54.4375 35.0625 C49.17221542 34.42736314 43.90722683 33.79696512 38.63671875 33.20703125 C37.62996094 33.08714844 36.62320313 32.96726563 35.5859375 32.84375 C34.69052246 32.74126953 33.79510742 32.63878906 32.87255859 32.53320312 C30.35601376 32.0467485 28.59527547 31.44037784 26.4375 30.0625 C23.38532266 24.97553776 21.3341425 19.45473677 19.1875 13.9375 C18.91695801 13.25671387 18.64641602 12.57592773 18.36767578 11.87451172 C16.82394482 7.78804812 16.13851057 4.42502757 16.4375 0.0625 C33.20320897 -0.76054389 50.04132 2.04640823 66.578125 4.53515625 C70.96365446 5.13439358 75.35589707 5.627565 79.75488281 6.11669922 C97.85972043 8.13836316 97.85972043 8.13836316 106.6875 9.4375 C107.39487305 9.52700928 108.10224609 9.61651855 108.83105469 9.70874023 C113.96714941 10.51808328 116.87598017 12.31623275 120.4375 16.0625 C121.69830294 18.53927732 122.67025259 20.7202309 123.5625 23.3125 C124.02136126 24.56846882 124.48232815 25.8236702 124.9453125 27.078125 C125.27250149 28.00288179 125.27250149 28.00288179 125.60630035 28.94632053 C126.38750394 31.05750635 126.38750394 31.05750635 127.44002533 32.93062496 C131.07482517 39.83448151 131.00351579 46.31795394 130.95507812 53.99243164 C130.96050802 55.37978344 130.96763552 56.76712947 130.97631836 58.15446472 C130.99445028 61.89829685 130.98752708 65.6416848 130.97480202 69.38552403 C130.96462344 73.31622656 130.97408092 77.24689291 130.98034668 81.17759705 C130.98760817 87.77544941 130.97807403 94.37312221 130.95898438 100.97094727 C130.93720936 108.58452515 130.94427739 116.19767461 130.96629 123.81124216 C130.98447611 130.36524706 130.98698696 136.91912344 130.97653532 143.47314543 C130.97031913 147.38014362 130.96941296 151.2869408 130.98268127 155.19392586 C130.99428653 158.8672447 130.9861299 162.54001414 130.96310425 166.213274 C130.95534421 168.19404482 130.96713242 170.17486244 130.97961426 172.15560913 C130.90049754 180.52230774 129.95755225 186.09535704 124.25390625 192.5234375 C123.51011719 193.15507812 122.76632813 193.78671875 122 194.4375 C121.25878906 195.08460938 120.51757812 195.73171875 119.75390625 196.3984375 C114.7661098 199.98157627 110.22842399 200.35421576 104.22135925 200.32992554 C103.39785408 200.33445665 102.5743489 200.33898776 101.72588903 200.34365618 C98.968488 200.35630894 96.21128426 200.35467924 93.45385742 200.35302734 C91.475975 200.35901206 89.49809491 200.36581748 87.5202179 200.37338257 C82.14823484 200.39105594 76.77631549 200.39573853 71.40430617 200.39701414 C66.91878502 200.39891354 62.4332787 200.40627158 57.94776326 200.41335833 C47.36384951 200.42964512 36.77996977 200.43452703 26.19604492 200.43310547 C15.28118177 200.43190408 4.36651636 200.45300486 -6.54829675 200.4845928 C-15.92170288 200.51075235 -25.29504442 200.52147289 -34.66848677 200.52019465 C-40.26569836 200.51968491 -45.86273424 200.52537507 -51.45990944 200.54655075 C-56.725388 200.56592749 -61.99052314 200.5660613 -67.25601387 200.55151749 C-69.1861191 200.54942757 -71.11624579 200.55414114 -73.04631424 200.5662384 C-75.68641426 200.58171127 -78.32533312 200.57236959 -80.96540833 200.55697632 C-81.72466655 200.56726344 -82.48392478 200.57755057 -83.26619083 200.58814943 C-90.327556 200.49750269 -96.39704041 197.82485418 -101.375 192.75 C-102.18904297 191.95142578 -102.18904297 191.95142578 -103.01953125 191.13671875 C-108.29053612 184.05088689 -108.01804154 177.09915158 -108.0300293 168.55004883 C-108.04229625 167.18245883 -108.05575106 165.81487905 -108.07029724 164.4473114 C-108.10523797 160.74401042 -108.12059214 157.04088761 -108.13013434 153.33744264 C-108.13673436 151.01403475 -108.14708893 148.69067299 -108.15863991 146.36728477 C-108.19836069 138.23287671 -108.22038571 130.09860956 -108.22827148 121.96411133 C-108.23610728 114.43116961 -108.28516577 106.89925647 -108.35333699 99.36664182 C-108.41007964 92.86514961 -108.43519788 86.36399446 -108.43721896 79.86225718 C-108.43904166 75.9947118 -108.45309089 72.1282487 -108.50003624 68.26096535 C-108.72797687 48.29049317 -107.52961567 30.83210742 -95.5625 14.0625 C-92.23797604 10.732487 -88.44904231 10.20048941 -83.953125 9.5 C-83.20613342 9.37633057 -82.45914185 9.25266113 -81.68951416 9.12524414 C-74.04584045 7.901492 -66.3645662 7.06662299 -58.66394043 6.29776001 C-54.62860447 5.8940274 -50.59547976 5.46951727 -46.5625 5.04296875 C-45.77776306 4.96008102 -44.99302612 4.8771933 -44.18450928 4.79179382 C-36.33754684 3.9513441 -28.53467892 2.87051571 -20.734375 1.67578125 C-13.79617508 0.63078847 -7.03103815 -0.06826251 0 0 Z M-47 131 L-15 106 L-47 81 L-47 91 L-27 106 L-47 121 Z M45.4375 89.0625 C43.16309531 93.61130937 44.11732026 99.81887268 44.0625 104.8125 C44.02511719 106.08867188 43.98773438 107.36484375 43.94921875 108.6796875 C43.6563417 116.25277258 43.6563417 116.25277258 46.7109375 122.91015625 C50.0632924 125.55649945 51.41007501 125.90713502 55.50390625 125.58984375 C58.83921214 124.68021487 60.4149221 122.75927054 62.4375 120.0625 C64.03299443 115.26404894 63.62174204 110.1852134 63.625 105.1875 C63.64336914 103.71603516 63.64336914 103.71603516 63.66210938 102.21484375 C63.77173933 93.57358621 63.77173933 93.57358621 59.75 86.1875 C54.01325068 83.39664894 49.78182352 84.71817648 45.4375 89.0625 Z M-18.5625 155.0625 C-20.89546251 157.88967213 -20.89546251 157.88967213 -20.3125 161.125 C-19.8031756 164.161959 -19.8031756 164.161959 -17.5625 166.0625 C-15.5023267 166.81656896 -13.41368556 167.49416461 -11.3125 168.125 C-10.19359375 168.46660156 -9.0746875 168.80820313 -7.921875 169.16015625 C-1.62436639 170.85169635 4.26860909 171.24487637 10.75 171.25 C11.9555957 171.26836914 11.9555957 171.26836914 13.18554688 171.28710938 C21.14907742 171.30632948 28.31945463 169.57146397 35.875 167.125 C36.88433594 166.80660156 37.89367187 166.48820313 38.93359375 166.16015625 C41.73511224 165.200361 41.73511224 165.200361 43.4375 162.0625 C43.1133631 158.74009676 42.82973697 157.45473697 40.4375 155.0625 C35.63637087 154.61062902 31.50016124 155.74460874 26.9375 157.0625 C14.69655136 160.31686985 0.09246916 160.8899845 -11.5625 155.0625 C-15.0625 154.72916667 -15.0625 154.72916667 -18.5625 155.0625 Z " fill="currentColor" transform="translate(107.5625,-0.0625)"/></svg>`,
     emptySVG: `<svg viewBox="-2 -2 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 10L7 5H17L19 10H5Z" fill="#E2E8F0" stroke="#94A3B8" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 10V18C4 19.1 4.9 20 6 20H18C19.1 20 20 19.1 20 18V10" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10L1 6.5" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 10L23 6.5" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><g stroke="#64748B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 13L10 14L9 15"/><path d="M15 13L14 14L15 15"/><path d="M11 17.5H13"/></g>`,
     dupHashSVG: `<svg style="width:24px;height:24px;margin-right:8px;flex-shrink:0;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M798 322.42A308.78 308.78 0 0 0 676.73 211.1a17.5 17.5 0 1 0-15.94 31.16 272.73 272.73 0 0 1 148.71 243v63.83c0 25.58-3.14 134.1-8.62 159.68a17.5 17.5 0 0 0 13.44 20.78 17.94 17.94 0 0 0 3.69 0.39 17.5 17.5 0 0 0 17.09-13.83c6.81-31.76 9.4-148.75 9.4-167v-63.88A307 307 0 0 0 798 322.42zM365.68 272.82a273.38 273.38 0 0 1 231.18-53.68 17.5 17.5 0 1 0 7.68-34.14 307.93 307.93 0 0 0-367.72 231.18 17.5 17.5 0 1 0 34.11 7.82 273.89 273.89 0 0 1 94.75-151.18zM246.54 467.73a17.49 17.49 0 0 0-17.5 17.5v69c0 50.29-14.45 87.61-44.18 114.11a17.5 17.5 0 0 0 23.28 26.13c22.56-20.11 38.52-45.63 47.43-75.85 5.7-19.34 8.47-40.4 8.47-64.39v-69a17.5 17.5 0 0 0-17.5-17.5zM743.42 636.35v-0.17l-0.5-52.83a17.5 17.5 0 1 0-35 0.34l0.5 52.74c0 4.2 0 8.79 0.05 13.68 0.21 34.94 0.53 87.74-9.16 116.81a17.5 17.5 0 1 0 33.2 11.08c11.52-34.56 11.2-88.62 11-128.09-0.07-4.85-0.09-9.4-0.09-13.56z" fill="currentColor"></path><path d="M707.92 527.26a17.5 17.5 0 0 0 35 0v-45c0-114.17-92.89-207-207.06-207a207.35 207.35 0 0 0-58.49 8.38 17.5 17.5 0 0 0 9.87 33.58 172.24 172.24 0 0 1 48.62-7c94.87 0 172.06 77.18 172.06 172.05zM363.81 482.22A172.4 172.4 0 0 1 437 341.4a17.5 17.5 0 1 0-20.14-28.62 207.45 207.45 0 0 0-88 169.44v108.39a203 203 0 0 1-6.86 55.17 162.05 162.05 0 0 1-47.22 77.75 17.5 17.5 0 1 0 23.65 25.8c27.84-25.53 47.13-57.24 57.32-94.26a236.32 236.32 0 0 0 8.09-64.46zM440.83 566a17.5 17.5 0 0 0-17.5 17.47l-0.11 56.86c0 12.5-2.7 77.59-56 131.85a17.5 17.5 0 1 0 25 24.53 229.06 229.06 0 0 0 56.17-94.59c8.93-29.25 9.89-53 9.89-61.75l0.11-56.84A17.5 17.5 0 0 0 440.83 566z" fill="currentColor"></path><path d="M604.17 419.76a17.5 17.5 0 0 0-4.71-24.3 113 113 0 0 0-176.16 93.68v38.12a17.5 17.5 0 0 0 35 0v-38.12a78 78 0 0 1 121.57-64.68 17.49 17.49 0 0 0 24.3-4.7zM618.85 438.05a17.51 17.51 0 0 0-9.92 22.68 77.55 77.55 0 0 1 5.33 28.41v206.29c0 33.49-6.45 66.07-19.71 99.61a17.5 17.5 0 1 0 32.55 12.87c14.9-37.71 22.16-74.51 22.16-112.48V489.14a112.38 112.38 0 0 0-7.74-41.14 17.5 17.5 0 0 0-22.67-9.95z" fill="currentColor"></path><path d="M549.91 488a17.5 17.5 0 0 0-35 0v174.37c0 0.51 0 1 0.06 1.52 0.08 0.88 7 89.15-51.16 152.8a17.5 17.5 0 0 0 25.83 23.62c66-72.15 61-168 60.27-178.62z" fill="currentColor"></path></svg>`,
@@ -518,7 +520,7 @@ const CSS = `
     .pk-grid-view .pk-vp { padding: 14px 0 18px; }
     .pk-grid-view .pk-in { left: 0; right: 0; }
     .pk-view-switching .pk-row, .pk-view-switching .pk-row::before, .pk-view-switching .pk-row::after, .pk-view-switching .pk-row *, .pk-grid-resizing .pk-row, .pk-grid-resizing .pk-row::before, .pk-grid-resizing .pk-row::after, .pk-grid-resizing .pk-row *, .pk-grid-scrolling .pk-row, .pk-grid-scrolling .pk-row::before, .pk-grid-scrolling .pk-row::after, .pk-grid-scrolling .pk-row * { transition: none !important; animation: none !important; }
-    .pk-view-switching.pk-grid-view .pk-row, .pk-view-switching.pk-grid-view .pk-row:hover, .pk-view-switching.pk-grid-view .pk-row.sel, .pk-view-switching.pk-grid-view .pk-row.sel.pk-focused, .pk-dark .pk-view-switching.pk-grid-view .pk-row, .pk-dark .pk-view-switching.pk-grid-view .pk-row:hover, .pk-dark .pk-view-switching.pk-grid-view .pk-row.sel, .pk-dark .pk-view-switching.pk-grid-view .pk-row.sel.pk-focused, .pk-grid-resizing.pk-grid-view .pk-row, .pk-grid-resizing.pk-grid-view .pk-row:hover, .pk-grid-resizing.pk-grid-view .pk-row.sel, .pk-grid-resizing.pk-grid-view .pk-row.sel.pk-focused, .pk-dark .pk-grid-resizing.pk-grid-view .pk-row, .pk-dark .pk-grid-resizing.pk-grid-view .pk-row:hover, .pk-dark .pk-grid-resizing.pk-grid-view .pk-row.sel, .pk-dark .pk-grid-resizing.pk-grid-view .pk-row.sel.pk-focused, .pk-grid-scrolling.pk-grid-view .pk-row:not(.sel), .pk-grid-scrolling.pk-grid-view .pk-row:hover:not(.sel), .pk-dark .pk-grid-scrolling.pk-grid-view .pk-row:not(.sel), .pk-dark .pk-grid-scrolling.pk-grid-view .pk-row:hover:not(.sel) { border-color: transparent !important; box-shadow: none !important; outline: none !important; }
+    .pk-view-switching.pk-grid-view .pk-row, .pk-view-switching.pk-grid-view .pk-row:hover, .pk-view-switching.pk-grid-view .pk-row.sel, .pk-view-switching.pk-grid-view .pk-row.sel.pk-focused, .pk-dark .pk-view-switching.pk-grid-view .pk-row, .pk-dark .pk-view-switching.pk-grid-view .pk-row:hover, .pk-dark .pk-view-switching.pk-grid-view .pk-row.sel, .pk-dark .pk-view-switching.pk-grid-view .pk-row.sel.pk-focused, .pk-grid-resizing.pk-grid-view .pk-row, .pk-grid-resizing.pk-grid-view .pk-row:hover, .pk-grid-resizing.pk-grid-view .pk-row.sel, .pk-grid-resizing.pk-grid-view .pk-row.sel.pk-focused, .pk-dark .pk-grid-resizing.pk-grid-view .pk-row, .pk-dark .pk-grid-resizing.pk-grid-view .pk-row:hover, .pk-dark .pk-grid-resizing.pk-grid-view .pk-row.sel, .pk-dark .pk-grid-resizing.pk-grid-view .pk-row.sel.pk-focused { border-color: transparent !important; box-shadow: none !important; outline: none !important; }
     .pk-grid-view .pk-row { box-sizing: border-box; border-radius: 16px; border: 1px solid transparent; background: #e3e9f2; box-shadow: none; overflow: hidden; transition: background 0.2s, border-color 0.2s, box-shadow 0.2s; }
     .pk-grid-view .pk-row:hover { background: #d9e1ec; transform: none; box-shadow: none; }
     .pk-grid-view .pk-row.sel { background: #d4deeb; border-color: rgba(0,103,192,0.15); box-shadow: 0 0 0 1px rgba(0,103,192,0.15); }
@@ -586,9 +588,9 @@ const CSS = `
     .pk-gv-fcount { flex:0 0 auto; max-width:34%; text-align:left; }
     .pk-gv-meta-sep { display:block; width:3px; height:3px; margin:0 6px; border-radius:50%; background:currentColor; opacity:0.5; flex:0 0 auto; align-self:center; }
     .pk-gv-date, .pk-gv-size, .pk-gv-dur, .pk-gv-fcount { color: inherit; opacity: 1; }
-    .pk-dark .pk-grid-view .pk-row { background: rgba(39,45,54,0.96); border-color: rgba(84,95,110,0.4); box-shadow: 0 12px 26px rgba(0,0,0,0.22); }
-    .pk-dark .pk-grid-view .pk-row:hover { background: rgba(45,52,62,0.98); }
-    .pk-dark .pk-grid-view .pk-row.sel { background: rgba(34,60,96,0.9); border-color: rgba(92,169,255,0.42); box-shadow: 0 12px 28px rgba(18,44,82,0.32); }
+    .pk-dark .pk-grid-view .pk-row { background: rgba(39,45,54,0.96); border-color: transparent; box-shadow: 0 12px 26px rgba(0,0,0,0.22); outline: none; background-clip: padding-box; }
+    .pk-dark .pk-grid-view .pk-row:hover { background: rgba(45,52,62,0.98); border-color: transparent; outline: none; }
+    .pk-dark .pk-grid-view .pk-row.sel { background: rgba(34,60,96,0.9); border-color: rgba(92,169,255,0.42); box-shadow: 0 12px 28px rgba(18,44,82,0.32); outline: none; background-clip: padding-box; }
     .pk-dark .pk-gv-check::before { background: rgba(37,42,50,0.92); border-color: rgba(124,137,156,0.9); }
     .pk-dark .pk-gv-more { background: rgba(34,40,48,0.94); color: #c0c7d2; box-shadow: 0 6px 14px rgba(0,0,0,0.24); }
     .pk-dark .pk-gv-more:hover { background: rgba(46,54,64,0.98); color: #fff; }
@@ -609,6 +611,7 @@ const CSS = `
     .pk-row:hover { background: var(--pk-hl); }
     .pk-row.sel { background: var(--pk-sel-bg); border: 1px solid transparent; }
     .pk-row.sel.pk-focused { border: 1px solid var(--pk-pri); border-radius: 4px; }
+    .pk-grid-view .pk-row.sel.pk-focused { border-color: var(--pk-pri); box-shadow: 0 0 0 1px var(--pk-pri); border-radius: 16px; }
     .pk-name { display: flex; align-items: center; overflow: visible; min-width: 0; cursor: default; }
     .pk-name .pk-name-txt { transition: color 0.1s; border-bottom: 1px solid transparent; }
     .pk-name svg { flex-shrink: 0; margin-right: 8px; cursor: default; }
@@ -3006,6 +3009,25 @@ async function openManager(initialCache, preloadPromise) {
         historyMode: (globalSavedState && globalSavedState.historyMode) || false,
         offlineMode: (globalSavedState && globalSavedState.offlineMode) || false,
         uploadMode: (globalSavedState && globalSavedState.uploadMode) || false,
+        navBuckets: {
+            home: { backStack: [], current: null, forwardStack: [] },
+            starred: { backStack: [], current: null, forwardStack: [] },
+            recent: { backStack: [], current: null, forwardStack: [] }
+        },
+        navScrollStore: {
+            home: Object.create(null),
+            starred: Object.create(null),
+            recent: Object.create(null)
+        },
+        navActiveBucket: null,
+        navFrozenBucket: null,
+        navContext: 'none',
+        navSyncSig: '',
+        navMaxHistory: CONF.mouseSideNavHistoryMax,
+        navSuspendRecord: false,
+        navTransitionBusy: false,
+        navLastModalType: '',
+        navVideoBackArmed: false,
         scanId: 0,
         preloaded: (globalSavedState || (initialCache && initialCache.has('root'))) ? true : false,
         preLoadPromise: preloadPromise || null,
@@ -3020,6 +3042,485 @@ async function openManager(initialCache, preloadPromise) {
         movingDestId: null,
         uploadTasks: (globalSavedState && globalSavedState.uploadTasks) ? globalSavedState.uploadTasks : [],
         broadcast: new BroadcastChannel('pk_act_sync'),
+        getNavBucketKey: () => {
+            if (S.starredMode) return 'starred';
+            if (S.recentMode) return 'recent';
+            if (S.trashMode || S.shareMode || S.historyMode || S.offlineMode || S.uploadMode) return null;
+            if (S.isFlattened || S.dupMode || S.analyzeMode) return null;
+
+            const cur = Array.isArray(S.path) && S.path.length ? S.path[S.path.length - 1] : null;
+            if (cur && typeof cur.id === 'string' && (cur.id.startsWith('virtual_') || cur.id === 'analyze_root')) return null;
+
+            return 'home';
+        },
+        getActiveNavBucket: () => {
+            const key = S.getNavBucketKey();
+            return key ? S.navBuckets[key] : null;
+        },
+        cloneNavPath: (path = S.path) => (Array.isArray(path) ? path : []).map(n => ({ id: n.id, name: n.name })),
+        getNavPathSig: (path = S.path) => {
+            const arr = Array.isArray(path) ? path : [];
+            return arr.map(n => n && n.id || '').join('>');
+        },
+        saveNavScrollTop: (bucketKey = null, path = S.path, scrollTop = null) => {
+            const key = bucketKey || S.getNavBucketKey() || S.navActiveBucket || null;
+            if (!key || !S.navScrollStore[key] || !UI.vp) return;
+            const sig = S.getNavPathSig(path);
+            if (!sig) return;
+            S.navScrollStore[key][sig] = Math.max(0, Math.round(scrollTop == null ? UI.vp.scrollTop : scrollTop));
+        },
+        getNavScrollTop: (bucketKey = null, path = S.path) => {
+            const key = bucketKey || S.getNavBucketKey() || S.navActiveBucket || null;
+            if (!key || !S.navScrollStore[key]) return null;
+            const sig = S.getNavPathSig(path);
+            if (!sig) return null;
+            const v = S.navScrollStore[key][sig];
+            return Number.isFinite(v) ? v : null;
+        },
+        restoreNavScrollTop: (bucketKey = null, path = S.path) => {
+            if (!gmGet('pk_keep_pos', true) || !UI.vp) return;
+            const savedTop = S.getNavScrollTop(bucketKey, path);
+            if (!Number.isFinite(savedTop)) return;
+            requestAnimationFrame(() => {
+                if (!UI.vp) return;
+                const maxTop = Math.max(0, UI.vp.scrollHeight - UI.vp.clientHeight);
+                UI.vp.scrollTop = Math.max(0, Math.min(savedTop, maxTop));
+                if (typeof renderVisible === 'function') renderVisible();
+            });
+        },
+        isSameNavPath: (a, b) => {
+            if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+            for (let i = 0; i < a.length; i++) {
+                if ((a[i] && a[i].id) !== (b[i] && b[i].id)) return false;
+            }
+            return true;
+        },
+        trimNavStack: (stack) => {
+            if (!Array.isArray(stack) || stack.length <= S.navMaxHistory) return;
+            stack.splice(0, stack.length - S.navMaxHistory);
+        },
+        getNavContext: () => {
+            if (S.isStrictVirtualNavMode()) return 'virtual';
+            const key = S.getNavBucketKey();
+            return key || 'none';
+        },
+        recordNavSnapshot: (bucketKey, path = S.path) => {
+            const bucket = bucketKey ? S.navBuckets[bucketKey] : null;
+            if (!bucket) return;
+
+            const snap = S.cloneNavPath(path);
+            if (!snap.length) return;
+
+            if (bucket.current && S.isSameNavPath(bucket.current, snap)) return;
+
+            if (bucket.current && bucket.current.length) {
+                bucket.backStack.push(S.cloneNavPath(bucket.current));
+                S.trimNavStack(bucket.backStack);
+            }
+
+            bucket.current = snap;
+            bucket.forwardStack = [];
+        },
+        restoreFrozenNavBucketPath: () => {
+            const key = S.navFrozenBucket;
+            const bucket = key ? S.navBuckets[key] : null;
+            if (!bucket || !bucket.current || !bucket.current.length) return false;
+
+            S.navSuspendRecord = true;
+            S.path = S.cloneNavPath(bucket.current);
+            S.navActiveBucket = key;
+            S.navContext = key;
+            S.navSyncSig = '';
+            queueMicrotask(() => { S.navSuspendRecord = false; });
+            return true;
+        },
+        loadNavPath: async (path, bucketKey = null, opts = null) => {
+            const targetPath = S.cloneNavPath(path);
+            if (!targetPath.length) return false;
+            if (S.navTransitionBusy) return false;
+
+            const key = bucketKey || S.getNavBucketKey() || S.navActiveBucket || null;
+            const skipNavSync = !!(opts && opts.skipNavSync);
+
+            const prevPath = S.cloneNavPath(S.path);
+            const prevActiveBucket = S.navActiveBucket;
+            const prevContext = S.navContext;
+            const prevSyncSig = S.navSyncSig;
+            const prevSuspendRecord = S.navSuspendRecord;
+            const prevScrollTop = UI.vp ? UI.vp.scrollTop : 0;
+
+            const prevSelMode = S.selMode;
+            const prevSel = new Set(S.sel);
+            const prevSelEx = new Set(S.selEx);
+            const prevLastSelIdx = S.lastSelIdx;
+            const prevActiveIdForRollback = S.activeId;
+
+            const targetSig = S.getNavPathSig(targetPath);
+
+            S.navTransitionBusy = true;
+            S.navSuspendRecord = true;
+
+            S.saveNavScrollTop(prevActiveBucket || S.getNavBucketKey(), prevPath, prevScrollTop);
+
+            S.path = targetPath;
+            S.navActiveBucket = key;
+            S.navContext = key || 'none';
+            S.navSyncSig = '';
+
+            try {
+                updateQuotaUI();
+
+                const pendingLoad = Promise.resolve(load());
+                await new Promise(r => requestAnimationFrame(r));
+                S.clearSelection();
+
+                pendingLoad.then(() => {
+                    if (S.getNavPathSig() === targetSig) {
+                        S.restoreNavScrollTop(key, targetPath);
+                    }
+                }).catch(err => {
+                    S.sideNavLog('loadNavPath async error', err);
+                });
+
+                return true;
+            } catch (err) {
+                S.sideNavLog('loadNavPath rollback', err);
+                S.path = prevPath;
+                S.navActiveBucket = prevActiveBucket;
+                S.navContext = prevContext;
+                S.navSyncSig = prevSyncSig || '';
+
+                S.selMode = prevSelMode;
+                S.sel = new Set(prevSel);
+                S.selEx = new Set(prevSelEx);
+                S.lastSelIdx = prevLastSelIdx;
+                S.activeId = prevActiveIdForRollback;
+                if (typeof updateStat === 'function') updateStat();
+
+                try {
+                    updateQuotaUI();
+                    await load();
+                    S.restoreNavScrollTop(prevActiveBucket || S.getNavBucketKey(), prevPath);
+                } catch (restoreErr) {
+                    S.sideNavLog('loadNavPath restore failed', restoreErr);
+                }
+                return false;
+            } finally {
+                S.navSuspendRecord = prevSuspendRecord;
+                S.navTransitionBusy = false;
+                if (!skipNavSync) {
+                    S.navSyncSig = '';
+                    S.syncNavContextState();
+                }
+            }
+        },
+        navGoBack: async () => {
+            const key = S.getNavBucketKey();
+            const bucket = key ? S.navBuckets[key] : null;
+            if (!bucket || !bucket.backStack.length || S.navTransitionBusy) return false;
+
+            const prevPath = S.cloneNavPath(bucket.backStack[bucket.backStack.length - 1]);
+            if (!prevPath.length) return false;
+
+            const currentPath = bucket.current && bucket.current.length ? S.cloneNavPath(bucket.current) : S.cloneNavPath(S.path);
+            const ok = await S.loadNavPath(prevPath, key, { skipNavSync: true });
+            if (!ok) return false;
+
+            bucket.backStack.pop();
+            if (currentPath.length) {
+                bucket.forwardStack.push(currentPath);
+                S.trimNavStack(bucket.forwardStack);
+            }
+            bucket.current = S.cloneNavPath(prevPath);
+            S.navActiveBucket = key;
+            S.navContext = key;
+            S.navFrozenBucket = null;
+            S.navSyncSig = '';
+            S.syncNavContextState();
+            return true;
+        },
+        navGoForward: async () => {
+            const key = S.getNavBucketKey();
+            const bucket = key ? S.navBuckets[key] : null;
+            if (!bucket || !bucket.forwardStack.length || S.navTransitionBusy) return false;
+
+            const nextPath = S.cloneNavPath(bucket.forwardStack[bucket.forwardStack.length - 1]);
+            if (!nextPath.length) return false;
+
+            const currentPath = bucket.current && bucket.current.length ? S.cloneNavPath(bucket.current) : S.cloneNavPath(S.path);
+            const ok = await S.loadNavPath(nextPath, key, { skipNavSync: true });
+            if (!ok) return false;
+
+            bucket.forwardStack.pop();
+            if (currentPath.length) {
+                bucket.backStack.push(currentPath);
+                S.trimNavStack(bucket.backStack);
+            }
+            bucket.current = S.cloneNavPath(nextPath);
+            S.navActiveBucket = key;
+            S.navContext = key;
+            S.navFrozenBucket = null;
+            S.navSyncSig = '';
+            S.syncNavContextState();
+            return true;
+        },
+        exitVirtualNavMode: async () => {
+            const cur = Array.isArray(S.path) && S.path.length ? S.path[S.path.length - 1] : null;
+            const isAnalyzeGroupedGrid = S.analyzeMode && !!S.analyzeSimGroups && !!cur && cur.id === 'analyze_root' && S.viewMode === 'grid';
+            const shouldSyncGroupedGridExit = (S.dupMode && S.viewMode === 'grid') || isAnalyzeGroupedGrid;
+
+            S.scanning = false;
+            S.dupMode = false;
+            S.suppressClearConfirm = false;
+            S.isFlattened = false;
+            S.scanFilter = null;
+            if (S.filterState) S.filterState = { active: false, cat: 'all', ext: 'all' };
+            if (shouldSyncGroupedGridExit) S._groupedGridExitSyncPending = true;
+
+            S._sortAppliedForId = null;
+            S._comicApplied = false;
+
+            if (S.analyzeMode) {
+                S.analyzeMode = false;
+                S.analyzeResultItems = null;
+                S.analyzeSimGroups = null;
+                S.analyzeMap = null;
+            }
+
+            S.dupRawGroups = [];
+            S.dupBuckets = null;
+            S.dupItemMap = null;
+            S.pinnedDupPath = null;
+
+            if (UI.selDupFolder) UI.selDupFolder.value = "";
+            const invertChk = document.getElementById('pk-dup-invert');
+            if (invertChk) {
+                invertChk.checked = false;
+                invertChk.disabled = true;
+                invertChk.parentNode.style.opacity = '0.5';
+            }
+            if (UI.chkSearchPath) UI.chkSearchPath.checked = false;
+
+            isGUISensitive = false;
+
+            S.sort = 'modified_time';
+            S.dir = 1;
+
+            if (UI.crumb) UI.crumb.style.display = '';
+
+            const frozenKey = S.navFrozenBucket;
+            const frozenBucket = frozenKey ? S.navBuckets[frozenKey] : null;
+            const fallbackPath = [{ id: '', name: L.btn_nav_home }];
+            const targetPath = (frozenBucket && frozenBucket.current && frozenBucket.current.length)
+                ? frozenBucket.current
+                : fallbackPath;
+
+            S.navFrozenBucket = null;
+
+            return await S.loadNavPath(targetPath, frozenBucket ? frozenKey : null);
+        },
+        getTopModalOverlay: () => {
+            const list = Array.from(document.querySelectorAll('.pk-modal-ov')).filter(m => {
+                if (!m || !m.isConnected) return false;
+                const st = window.getComputedStyle(m);
+                return st.display !== 'none' && st.visibility !== 'hidden';
+            });
+            return list.length ? list[list.length - 1] : null;
+        },
+        hasFrontOverlayForSideNav: () => {
+            return !!(document.getElementById('pk-player-ov') || document.querySelector('.pk-img-ov') || S.getTopModalOverlay());
+        },
+        isManagerSideNavScope: () => {
+            const win = document.querySelector('.pk-ov');
+            return !!(win && win.style.display !== 'none');
+        },
+        sideNavLog: (...args) => {
+            if (!CONF.mouseSideNavDebug) return;
+            console.log('[PK SideNav]', ...args);
+        },
+        closePlayerOverlay: () => {
+            const player = document.getElementById('pk-player-ov');
+            if (!player) return false;
+
+            S.navVideoBackArmed = false;
+
+            const pTip = document.getElementById('pk_p_plist_tip_global');
+            if (pTip) pTip.style.display = 'none';
+
+            const v = player.querySelector('#pk_video');
+            if (v) {
+                try {
+                    v.pause();
+                    v.removeAttribute('src');
+                    v.load();
+                } catch (e) {}
+            }
+
+            player.remove();
+            S.sideNavLog('player close: unified');
+            return true;
+        },
+        closeImageOverlay: () => {
+            const d = document.querySelector('.pk-img-ov');
+            if (!d) return false;
+
+            const pTip = document.getElementById('pk_p_plist_tip_global');
+            if (pTip) pTip.style.display = 'none';
+
+            const cleanup = d._pkResizeHandler;
+            if (cleanup) {
+                window.removeEventListener('resize', cleanup);
+                d._pkResizeHandler = null;
+            }
+
+            const imgList = d._pkImgList || [];
+            const curIdx = Number.isInteger(d._pkCurIdx) ? d._pkCurIdx : -1;
+            const currentItem = curIdx >= 0 ? imgList[curIdx] : null;
+
+            if (currentItem) {
+                const targetId = currentItem.id;
+                const targetIdx = S.display.findIndex(x => x.id === targetId);
+                if (targetIdx !== -1) {
+                    S.sel.clear();
+                    S.sel.add(targetId);
+                    S.activeId = targetId;
+                    const rowTop = getItemScrollTopByIndex(targetIdx);
+                    const vpHeight = UI.vp.clientHeight;
+                    UI.vp.scrollTop = Math.max(0, rowTop - (vpHeight / 2) + (CONF.rowHeight / 2));
+                    renderVisible();
+                    updateStat();
+                }
+            }
+
+            d.remove();
+            S.sideNavLog('image close: unified');
+            return true;
+        },
+        closeTopModalOverlay: () => {
+            const openModal = S.getTopModalOverlay();
+            if (!openModal) return false;
+            const closeBtn = openModal.querySelector('.pk-modal-close');
+            if (closeBtn) closeBtn.click();
+            else openModal.remove();
+            return true;
+        },
+        handleOverlayMouseSideBack: () => {
+            const player = document.getElementById('pk-player-ov');
+            if (player) {
+                S.sideNavLog('back: video close');
+                return S.closePlayerOverlay();
+            }
+
+            const imgPlayer = document.querySelector('.pk-img-ov');
+            if (imgPlayer) {
+                S.sideNavLog('back: image close');
+                return S.closeImageOverlay();
+            }
+
+            if (S.closeTopModalOverlay()) {
+                S.sideNavLog('back: modal close');
+                return true;
+            }
+
+            return false;
+        },
+        canHandleMouseSideBack: () => S.isManagerSideNavScope(),
+        canHandleMouseSideForward: () => S.isManagerSideNavScope(),
+        handleMouseSideBack: async () => {
+            if (!S.isManagerSideNavScope() || S.navTransitionBusy) return false;
+            if (S.handleOverlayMouseSideBack()) return true;
+            if (S.isStrictVirtualNavMode()) {
+                await S.exitVirtualNavMode();
+                return true;
+            }
+            if (S.getNavBucketKey() !== null) {
+                await S.navGoBack();
+                return true;
+            }
+            return true;
+        },
+        handleMouseSideForward: async () => {
+            if (!S.isManagerSideNavScope() || S.navTransitionBusy) return false;
+
+            const player = document.getElementById('pk-player-ov');
+            if (player) {
+                const v = player.querySelector('#pk_video');
+                if (v) {
+                    if (v.ended) {
+                        S.sideNavLog('forward: video restart');
+                        try { v.currentTime = 0; } catch (e) {}
+                        v.play().catch(()=>{});
+                        return true;
+                    }
+                    if (v.paused) {
+                        S.sideNavLog('forward: video play');
+                        v.play().catch(()=>{});
+                        return true;
+                    }
+                    S.sideNavLog('forward: video pause');
+                    v.pause();
+                    return true;
+                }
+                return true;
+            }
+
+            if (S.hasFrontOverlayForSideNav()) return true;
+            if (S.isStrictVirtualNavMode()) return true;
+            if (S.getNavBucketKey() !== null) {
+                await S.navGoForward();
+                return true;
+            }
+            return true;
+        },
+        syncNavContextState: () => {
+            const ctx = S.getNavContext();
+            const sig = `${ctx}|${(Array.isArray(S.path) ? S.path.map(n => n.id).join('>') : '')}`;
+
+            if (S.navSyncSig === sig) return;
+
+            const prevCtx = S.navContext;
+            const prevBucketKey = (prevCtx === 'home' || prevCtx === 'starred' || prevCtx === 'recent') ? prevCtx : null;
+            const curBucketKey = (ctx === 'home' || ctx === 'starred' || ctx === 'recent') ? ctx : null;
+
+            if (S.navSuspendRecord) {
+                S.navContext = ctx;
+                S.navSyncSig = sig;
+                if (curBucketKey) S.navActiveBucket = curBucketKey;
+                return;
+            }
+
+            if (ctx === 'virtual') {
+                if (prevBucketKey) S.navFrozenBucket = prevBucketKey;
+                S.navContext = 'virtual';
+                S.navSyncSig = sig;
+                return;
+            }
+
+            if (ctx === 'none') {
+                if (prevBucketKey) S.navFrozenBucket = prevBucketKey;
+                S.navContext = 'none';
+                S.navSyncSig = sig;
+                return;
+            }
+
+            S.navActiveBucket = curBucketKey;
+            S.recordNavSnapshot(curBucketKey);
+
+            if (prevCtx === 'virtual' && S.navFrozenBucket === curBucketKey) {
+                S.navFrozenBucket = null;
+            } else if (prevCtx !== 'virtual') {
+                S.navFrozenBucket = null;
+            }
+
+            S.navContext = curBucketKey;
+            S.navSyncSig = sig;
+        },
+        canUseMouseSideNav: () => S.canHandleMouseSideBack() || S.canHandleMouseSideForward(),
+        isStrictVirtualNavMode: () => {
+            if (S.isFlattened || S.dupMode || S.analyzeMode) return true;
+            const cur = Array.isArray(S.path) && S.path.length ? S.path[S.path.length - 1] : null;
+            return !!(cur && typeof cur.id === 'string' && (cur.id.startsWith('virtual_') || cur.id === 'analyze_root'));
+        },
         getSelectableItems: () => {
             const out = [];
             const list = Array.isArray(S.display) ? S.display : [];
@@ -8161,6 +8662,7 @@ async function openManager(initialCache, preloadPromise) {
         const prevViewMode = S.viewMode === 'grid' ? 'grid' : 'list';
         const nextCur = S.path[S.path.length - 1] || { id: '' };
         const nextIsStandardView = !S.trashMode && !S.shareMode && !S.offlineMode && !S.starredMode && !S.recentMode && !S.historyMode && !S.isFlattened && !S.dupMode && !S.analyzeMode && (!nextCur.id.startsWith('virtual_') || nextCur.id === 'virtual_search_root');
+        const groupedGridExitSyncPending = !!S._groupedGridExitSyncPending;
 
         if (nextIsStandardView) {
             const nextFolderId = nextCur.id || 'root';
@@ -8168,9 +8670,13 @@ async function openManager(initialCache, preloadPromise) {
             ? resolvePreferredViewMode(nextFolderId)
             : (gmGet('pk_file_view_mode', 'grid') === 'list' ? 'list' : 'grid');
 
-            if (prevViewMode !== nextViewMode) beginFolderViewSync();
+            if (prevViewMode !== nextViewMode || (groupedGridExitSyncPending && nextViewMode === 'grid')) {
+                beginFolderViewSync();
+            }
+            S._groupedGridExitSyncPending = false;
             S.viewMode = nextViewMode;
         } else {
+            S._groupedGridExitSyncPending = false;
             endFolderViewSync();
         }
 
@@ -8180,6 +8686,8 @@ async function openManager(initialCache, preloadPromise) {
 
         const isStrictVirtual = S.isFlattened || S.dupMode || S.analyzeMode;
         const cur = S.path[S.path.length - 1];
+
+        S.syncNavContextState();
 
         if (!isStrictVirtual) {
             restoreFolderFirstAfterStrictMode();
@@ -9456,7 +9964,6 @@ async function openManager(initialCache, preloadPromise) {
         renderList();
         updateStat();
     }
-
 
     function renderList() {
         syncLayoutMetrics();
@@ -11363,6 +11870,7 @@ async function openManager(initialCache, preloadPromise) {
                                     S.folderFirst = false;
                                 }
                                 if (S.renderFolderFirst) S.renderFolderFirst();
+                                S.saveNavScrollTop(S.getNavBucketKey(), S.path);
                                 S.path.push(d); load();
                             }
                         }
@@ -11564,6 +12072,7 @@ async function openManager(initialCache, preloadPromise) {
                             S.folderFirst = false;
                             if (S.renderFolderFirst) S.renderFolderFirst();
 
+                            S.saveNavScrollTop(S.getNavBucketKey(), S.path);
                             S.path.push(d);
                             load();
                         }
@@ -13445,22 +13954,9 @@ async function openManager(initialCache, preloadPromise) {
             const pTip = document.getElementById('pk_p_plist_tip_global');
             if (pTip) pTip.style.display = 'none';
 
-            const player = document.getElementById('pk-player-ov');
-            if (player) {
-                const closeBtn = document.getElementById('pk_p_close');
-                if (closeBtn) closeBtn.click();
-                else player.remove();
-                return;
-            }
-            const imgPlayer = document.querySelector('.pk-img-ov');
-            if (imgPlayer) {
-                const closeBtn = document.getElementById('pk_img_close');
-                if (closeBtn) closeBtn.click();
-                else imgPlayer.remove();
-                return;
-            }
-            const openModal = document.querySelector('.pk-modal-ov');
-            if (openModal) { openModal.remove(); return; }
+            if (S.closePlayerOverlay()) return;
+            if (S.closeImageOverlay()) return;
+            if (S.closeTopModalOverlay()) return;
             if (UI.ctx.style.display === 'block') { UI.ctx.style.display = 'none'; return; }
 
             const isAtRoot = S.path.length === 1 || (S.path.length === 2 && S.path[1].id === 'virtual_search_root');
@@ -13709,6 +14205,103 @@ async function openManager(initialCache, preloadPromise) {
     };
 
     document.addEventListener('keydown', keyHandler);
+
+    if (document._pkPlayerCloseClickHandler) {
+        document.removeEventListener('click', document._pkPlayerCloseClickHandler, true);
+    }
+    document._pkPlayerCloseClickHandler = (e) => {
+        const btn = e.target && e.target.closest ? e.target.closest('#pk_p_close') : null;
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        S.closePlayerOverlay();
+    };
+    document.addEventListener('click', document._pkPlayerCloseClickHandler, true);
+
+    if (document._pkImageCloseClickHandler) {
+        document.removeEventListener('click', document._pkImageCloseClickHandler, true);
+    }
+    document._pkImageCloseClickHandler = (e) => {
+        const btn = e.target && e.target.closest ? e.target.closest('#pk_img_close') : null;
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        S.closeImageOverlay();
+    };
+    document.addEventListener('click', document._pkImageCloseClickHandler, true);
+
+    let sideMouseBusy = false;
+    let lastSideMouseBtn = -1;
+    let lastSideMouseTs = 0;
+
+    const mouseSideNavHandler = async (e) => {
+        const btn = e.button;
+        if (btn !== 3 && btn !== 4) return;
+
+        const win = document.querySelector('.pk-ov');
+        if (!win || win.style.display === 'none') return;
+
+        S.sideNavLog('event', { type: e.type, button: btn, target: e.target });
+
+        const now = Date.now();
+        if (lastSideMouseBtn === btn && (now - lastSideMouseTs) < 250) {
+            S.sideNavLog('blocked: duplicate');
+            e.preventDefault();
+            e.stopPropagation();
+            if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+            return;
+        }
+        lastSideMouseBtn = btn;
+        lastSideMouseTs = now;
+
+        const hasFrontOverlay = !!document.querySelector('.pk-modal-ov, .pk-img-ov, #pk-player-ov');
+        if (!hasFrontOverlay) {
+            const t = e.target;
+            if (t && (t.closest('textarea') || t.closest('input:not([type="checkbox"]):not([type="button"]):not([type="submit"])') || t.closest('[contenteditable="true"]'))) {
+                S.sideNavLog('pass-through: editing target');
+                return;
+            }
+        }
+
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+
+        if (sideMouseBusy) {
+            S.sideNavLog('blocked: busy');
+            return;
+        }
+        sideMouseBusy = true;
+
+        try {
+            if (btn === 3) {
+                S.sideNavLog('dispatch: back');
+                await S.handleMouseSideBack();
+            } else {
+                S.sideNavLog('dispatch: forward');
+                await S.handleMouseSideForward();
+            }
+        } catch (err) {
+            S.sideNavLog('error', err);
+            throw err;
+        } finally {
+            setTimeout(() => { sideMouseBusy = false; }, 0);
+        }
+    };
+
+    if (window._pkMouseSideNavHandler) {
+        window.removeEventListener('mousedown', window._pkMouseSideNavHandler, true);
+        window.removeEventListener('mouseup', window._pkMouseSideNavHandler, true);
+        window.removeEventListener('auxclick', window._pkMouseSideNavHandler, true);
+        window.removeEventListener('click', window._pkMouseSideNavHandler, true);
+    }
+    window._pkMouseSideNavHandler = mouseSideNavHandler;
+    window.addEventListener('mousedown', mouseSideNavHandler, { capture: true, passive: false });
+    window.addEventListener('mouseup', mouseSideNavHandler, { capture: true, passive: false });
+    window.addEventListener('auxclick', mouseSideNavHandler, { capture: true, passive: false });
+    window.addEventListener('click', mouseSideNavHandler, { capture: true, passive: false });
 
     const showProperty = (item) => {
         const L = getStrings();
@@ -14582,47 +15175,11 @@ async function openManager(initialCache, preloadPromise) {
             if(pTab) pTab.innerHTML = `${curListIdx + 1} / ${totalInList} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>`;
 
             if (pScroll) {
-                pScroll.innerHTML = renderPlaylistItems();
-                pScroll.querySelectorAll('.pk-p-plist-item').forEach(el => {
-                    el.onclick = (e) => {
-                        e.stopPropagation();
-                        if (pTip) pTip.style.display = 'none';
-                        const idx = parseInt(e.currentTarget.dataset.idx);
-                        if (idx === curListIdx) return;
-                        softSwitch(idx, 'instant');
-                    };
-                    el.onmouseenter = (e) => {
-                        if (!plist.classList.contains('open')) return;
-                        pTip.innerHTML = `<strong>${e.currentTarget.dataset.name}</strong><br>${e.currentTarget.dataset.size}`;
-                        pTip.style.display = 'block';
-                    };
-                    el.onmousemove = (e) => {
-                        if (pTip.style.display === 'block') {
-                            const tW = pTip.offsetWidth || 150;
-                            pTip.style.left = (e.clientX - (tW / 2)) + 'px';
-                            pTip.style.top = (e.clientY - 60) + 'px';
-                        }
-                    };
-                    el.onmouseleave = () => { if (pTip) pTip.style.display = 'none'; };
-                });
-                const activeItem = pScroll.querySelector('.pk-p-plist-item.active');
-                if (activeItem && box.classList.contains('plist-active')) {
-                    if (scrollMode === 'instant') {
-                        pScroll.style.scrollBehavior = 'auto';
-                    } else {
-                        pScroll.style.scrollBehavior = 'smooth';
-                    }
-
-                    activeItem.scrollIntoView({
-                        behavior: scrollMode === 'instant' ? 'auto' : 'smooth',
-                        block: 'nearest',
-                        inline: 'center'
-                    });
-
-                    if (scrollMode === 'instant') {
-                        setTimeout(() => { pScroll.style.scrollBehavior = 'smooth'; }, 50);
-                    }
-                }
+                syncVideoPlistItems(
+                    scrollMode === 'instant'
+                    ? 'instant'
+                    : (box.classList.contains('plist-active') ? 'smooth' : false)
+                );
             }
 
             const btnL = d.querySelector('#pk_p_side_L');
@@ -15367,29 +15924,84 @@ async function openManager(initialCache, preloadPromise) {
             }
         };
 
-        pScroll.querySelectorAll('.pk-p-plist-item').forEach(el => {
-            el.onmouseenter = (e) => {
-                if (!plist.classList.contains('open')) return;
-                pTip.innerHTML = `<strong>${e.currentTarget.dataset.name}</strong><br>${e.currentTarget.dataset.size}`;
-                pTip.style.display = 'block';
-            };
-            el.onmousemove = (e) => {
-                if (pTip.style.display === 'block') {
-                    const tW = pTip.offsetWidth || 150;
-                    pTip.style.left = (e.clientX - (tW / 2)) + 'px';
-                    pTip.style.top = (e.clientY - 60) + 'px';
-                }
-            };
-            el.onmouseleave = () => pTip.style.display = 'none';
+        const bindVideoPlistItems = () => {
+            pScroll.querySelectorAll('.pk-p-plist-item').forEach(el => {
+                el.onmouseenter = (e) => {
+                    if (!plist.classList.contains('open')) return;
+                    pTip.innerHTML = `<strong>${e.currentTarget.dataset.name}</strong><br>${e.currentTarget.dataset.size}`;
+                    pTip.style.display = 'block';
+                };
+                el.onmousemove = (e) => {
+                    if (pTip.style.display === 'block') {
+                        const tW = pTip.offsetWidth || 150;
+                        pTip.style.left = (e.clientX - (tW / 2)) + 'px';
+                        pTip.style.top = (e.clientY - 60) + 'px';
+                    }
+                };
+                el.onmouseleave = () => pTip.style.display = 'none';
 
-            el.onclick = (e) => {
-                e.stopPropagation();
-                if (pTip) pTip.style.display = 'none';
-                const idx = parseInt(e.currentTarget.dataset.idx);
-                if (idx === curListIdx) return;
-                softSwitch(idx);
-            };
-        });
+                el.onclick = (e) => {
+                    e.stopPropagation();
+                    if (pTip) pTip.style.display = 'none';
+                    const idx = parseInt(e.currentTarget.dataset.idx, 10);
+                    if (idx === curListIdx) return;
+                    softSwitch(idx);
+                };
+            });
+        };
+
+        const syncVideoPlistItems = (scrollMode = 'smooth') => {
+            const RANGE = 150;
+            const desiredStart = Math.max(0, curListIdx - RANGE);
+            const desiredEnd = Math.min(videoPlaylist.length, curListIdx + RANGE + 1);
+
+            const prevStart = parseInt(pScroll.dataset.pkStart || '-1', 10);
+            const prevEnd = parseInt(pScroll.dataset.pkEnd || '-1', 10);
+
+            const needRebuild =
+                !Number.isFinite(prevStart) ||
+                !Number.isFinite(prevEnd) ||
+                curListIdx < prevStart ||
+                curListIdx >= prevEnd ||
+                pScroll.childElementCount === 0 ||
+                pScroll.dataset.pkTotal !== String(videoPlaylist.length);
+
+            if (needRebuild) {
+                pScroll.innerHTML = renderPlaylistItems();
+                pScroll.dataset.pkStart = String(desiredStart);
+                pScroll.dataset.pkEnd = String(desiredEnd);
+                pScroll.dataset.pkTotal = String(videoPlaylist.length);
+                bindVideoPlistItems();
+            }
+
+            pScroll.querySelectorAll('.pk-p-plist-item').forEach(el => {
+                const idx = parseInt(el.dataset.idx, 10);
+                el.classList.toggle('active', idx === curListIdx);
+            });
+
+            const activeItem = pScroll.querySelector('.pk-p-plist-item.active');
+            if (activeItem && plist.classList.contains('open') && scrollMode !== false) {
+                if (scrollMode === 'instant') {
+                    pScroll.style.scrollBehavior = 'auto';
+                } else {
+                    pScroll.style.scrollBehavior = 'smooth';
+                }
+
+                activeItem.scrollIntoView({
+                    behavior: scrollMode === 'instant' ? 'auto' : 'smooth',
+                    block: 'nearest',
+                    inline: 'center'
+                });
+
+                if (scrollMode === 'instant') {
+                    setTimeout(() => { pScroll.style.scrollBehavior = 'smooth'; }, 50);
+                }
+            }
+
+            if (typeof updatePlistNav === 'function') updatePlistNav();
+        };
+
+        bindVideoPlistItems();
 
         const updatePlistNav = () => {
             const sl = pScroll.scrollLeft;
@@ -15412,7 +16024,7 @@ async function openManager(initialCache, preloadPromise) {
 
         pScroll.addEventListener('scroll', updatePlistNav, { passive: true });
 
-        setTimeout(updatePlistNav, 50);
+        setTimeout(() => syncVideoPlistItems(false), 50);
 
         document.body.appendChild(d);
 
@@ -15809,7 +16421,10 @@ async function openManager(initialCache, preloadPromise) {
             d.remove();
         };
 
-        v.addEventListener('play', updateState);
+        v.addEventListener('play', () => {
+            S.navVideoBackArmed = false;
+            updateState();
+        });
         v.addEventListener('pause', updateState);
 
         const markStarted = () => {
@@ -17874,28 +18489,14 @@ async function openManager(initialCache, preloadPromise) {
             resetView(true);
         };
         window.addEventListener('resize', resizeHandler);
+        d._pkResizeHandler = resizeHandler;
+        d._pkImgList = imgList;
+        d._pkGetCurIdx = () => curIdx;
+        Object.defineProperty(d, '_pkCurIdx', { get: () => curIdx, configurable: true });
 
         d.querySelector('#pk_img_close').onclick = (e) => {
             e.stopPropagation();
-            const pTip = document.getElementById('pk_p_plist_tip_global');
-            if (pTip) pTip.style.display = 'none';
-            const currentItem = imgList[curIdx];
-            if (currentItem) {
-                const targetId = currentItem.id;
-                const targetIdx = S.display.findIndex(x => x.id === targetId);
-                if (targetIdx !== -1) {
-                    S.sel.clear();
-                    S.sel.add(targetId);
-                    S.activeId = targetId;
-                    const rowTop = getItemScrollTopByIndex(targetIdx);
-                    const vpHeight = UI.vp.clientHeight;
-                    UI.vp.scrollTop = Math.max(0, rowTop - (vpHeight / 2) + (CONF.rowHeight / 2));
-                    renderVisible();
-                    updateStat();
-                }
-            }
-            window.removeEventListener('resize', resizeHandler);
-            d.remove();
+            S.closeImageOverlay();
         };
 
         btnFull.onclick = (e) => {
@@ -17964,42 +18565,62 @@ async function openManager(initialCache, preloadPromise) {
         const updateImgPlistUI = (scrollType = 'smooth') => {
             if (pTxt) pTxt.textContent = `${curIdx + 1} / ${imgList.length}`;
 
-            pScroll.innerHTML = renderImgListItems();
+            const RANGE = 150;
+            const desiredStart = Math.max(0, curIdx - RANGE);
+            const desiredEnd = Math.min(imgList.length, curIdx + RANGE + 1);
 
-            pScroll.querySelectorAll('.pk-p-plist-item').forEach(el => {
-                el.onclick = (e) => {
-                    e.stopPropagation();
-                    const idx = parseInt(e.currentTarget.dataset.idx);
-                    if (idx === curIdx) return;
-                    curIdx = idx;
-                    loadCurrent('instant');
-                };
+            const prevStart = parseInt(pScroll.dataset.pkStart || '-1', 10);
+            const prevEnd = parseInt(pScroll.dataset.pkEnd || '-1', 10);
 
-                el.onmouseenter = (e) => {
-                    if (plist.classList.contains('open')) {
-                        const name = e.currentTarget.dataset.name;
-                        const size = e.currentTarget.dataset.size;
-                        pTip.innerHTML = `<strong>${name}</strong><br>${size}`;
-                        pTip.style.display = 'block';
-                    }
-                };
+            const needRebuild =
+                  !Number.isFinite(prevStart) ||
+                  !Number.isFinite(prevEnd) ||
+                  curIdx < prevStart ||
+                  curIdx >= prevEnd ||
+                  pScroll.childElementCount === 0 ||
+                  pScroll.dataset.pkTotal !== String(imgList.length);
 
-                el.onmousemove = (e) => {
-                    if (pTip.style.display === 'block') {
-                        const tW = pTip.offsetWidth || 150;
-                        pTip.style.left = (e.clientX - (tW / 2)) + 'px';
-                        pTip.style.top = (e.clientY - 60) + 'px';
-                    }
-                };
+            if (needRebuild) {
+                pScroll.innerHTML = renderImgListItems();
+                pScroll.dataset.pkStart = String(desiredStart);
+                pScroll.dataset.pkEnd = String(desiredEnd);
+                pScroll.dataset.pkTotal = String(imgList.length);
 
-                el.onmouseleave = () => {
-                    pTip.style.display = 'none';
-                };
-            });
+                pScroll.querySelectorAll('.pk-p-plist-item').forEach(el => {
+                    el.onclick = (e) => {
+                        e.stopPropagation();
+                        const idx = parseInt(e.currentTarget.dataset.idx, 10);
+                        if (idx === curIdx) return;
+                        curIdx = idx;
+                        loadCurrent('instant');
+                    };
+
+                    el.onmouseenter = (e) => {
+                        if (plist.classList.contains('open')) {
+                            const name = e.currentTarget.dataset.name;
+                            const size = e.currentTarget.dataset.size;
+                            pTip.innerHTML = `<strong>${name}</strong><br>${size}`;
+                            pTip.style.display = 'block';
+                        }
+                    };
+
+                    el.onmousemove = (e) => {
+                        if (pTip.style.display === 'block') {
+                            const tW = pTip.offsetWidth || 150;
+                            pTip.style.left = (e.clientX - (tW / 2)) + 'px';
+                            pTip.style.top = (e.clientY - 60) + 'px';
+                        }
+                    };
+
+                    el.onmouseleave = () => {
+                        pTip.style.display = 'none';
+                    };
+                });
+            }
 
             const itemsInDom = pScroll.querySelectorAll('.pk-p-plist-item');
             itemsInDom.forEach((el) => {
-                const absIdx = parseInt(el.dataset.idx);
+                const absIdx = parseInt(el.dataset.idx, 10);
                 const isActive = absIdx === curIdx;
                 el.classList.toggle('active', isActive);
 
@@ -18125,9 +18746,7 @@ async function openManager(initialCache, preloadPromise) {
         d.focus();
         d.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                const closeBtn = d.querySelector('#pk_img_close');
-                if (closeBtn) closeBtn.click();
-                else d.remove();
+                S.closeImageOverlay();
             }
             else if (e.key === 'ArrowLeft') goPrev();
             else if (e.key === 'ArrowRight') goNext();
@@ -20001,6 +20620,12 @@ async function openManager(initialCache, preloadPromise) {
                         UI.chkAll.checked = false;
                         S.clearSelection();
 
+                        S.search = '';
+                        S.lastGlobalResults = [];
+                        if (UI.searchInput) UI.searchInput.value = '';
+                        if (UI.searchClear) UI.searchClear.style.display = 'none';
+                        if (UI.searchHist) UI.searchHist.style.display = 'none';
+
                         UI.scan.style.display = 'none';
                         UI.btnExit.style.display = 'flex';
                         if (UI.btnAnalyze) UI.btnAnalyze.style.display = 'none';
@@ -20107,70 +20732,7 @@ async function openManager(initialCache, preloadPromise) {
     }
 
     UI.btnExit.onclick = async () => {
-        S.scanning = false;
-        S.dupMode = false;
-        S.suppressClearConfirm = false;
-        S.isFlattened = false;
-        S.scanFilter = null;
-        if (S.filterState) S.filterState = { active: false, cat: 'all', ext: 'all' };
-
-        S._sortAppliedForId = null;
-        S._comicApplied = false;
-
-        if (S.analyzeMode) {
-            S.analyzeMode = false;
-            S.analyzeResultItems = null;
-            S.analyzeSimGroups = null;
-            S.analyzeMap = null;
-            S.path = [{ id: '', name: L.btn_nav_home }];
-        }
-        S.dupRawGroups = [];
-        S.dupBuckets = null;
-        S.dupItemMap = null;
-        S.pinnedDupPath = null;
-
-        if (UI.selDupFolder) UI.selDupFolder.value = "";
-        const invertChk = document.getElementById('pk-dup-invert');
-        if (invertChk) {
-            invertChk.checked = false;
-            invertChk.disabled = true;
-            invertChk.parentNode.style.opacity = '0.5';
-        }
-        if (UI.chkSearchPath) UI.chkSearchPath.checked = false;
-
-        isGUISensitive = false;
-
-        S.sort = 'modified_time';
-        S.dir = 1;
-
-        if (UI.crumb) UI.crumb.style.display = '';
-
-        S.items.sort((a, b) => {
-            if (a.kind !== b.kind) return a.kind === 'drive#folder' ? -1 : 1;
-            return a.name.localeCompare(b.name);
-        });
-
-        S.clearSelection();
-
-        const targetNode = S.path[S.path.length - 1];
-        const targetKey = S.getRealCacheKey(targetNode.id);
-        const cachedData = (typeof globalCache !== 'undefined') ? (globalCache.get(targetKey) || globalCache.get('')) : null;
-
-        if (cachedData) {
-            if (cachedData.items) S.items = [...cachedData.items];
-            else if (Array.isArray(cachedData)) S.items = [...cachedData];
-            S.itemMap.clear();
-            for (const it of S.items) S.itemMap.set(it.id, it);
-        } else {
-            S.items = [];
-            S.itemMap.clear();
-        }
-
-        setLoad(true, true);
-        refresh();
-        updateQuotaUI();
-
-        await load(false, true);
+        await S.exitVirtualNavMode();
 
         if (typeof S.wasGlobalChecked !== 'undefined' && UI.chkGlobal) {
             UI.chkGlobal.checked = S.wasGlobalChecked;
@@ -27565,8 +28127,6 @@ async function openManager(initialCache, preloadPromise) {
             const submit = m.querySelector('#cloud_submit');
             const dirLabel = m.querySelector('#pk_cloud_dir_name');
 
-            input.focus();
-
             m.querySelector('#pk_cloud_change_dir').onclick = () => {
                 showFolderSelector(saveToId, (id, name, fullItem, selectedPathChain) => {
                     saveToId = id;
@@ -33415,6 +33975,13 @@ async function openManager(initialCache, preloadPromise) {
         el.remove();
         document.removeEventListener('keydown', keyHandler);
         document.removeEventListener('mouseup', mouseHandler);
+
+        if (window._pkMouseSideNavHandler) {
+            window.removeEventListener('mousedown', window._pkMouseSideNavHandler, true);
+            window.removeEventListener('mouseup', window._pkMouseSideNavHandler, true);
+            window.removeEventListener('auxclick', window._pkMouseSideNavHandler, true);
+            window.removeEventListener('click', window._pkMouseSideNavHandler, true);
+        }
 
         document.body.style.overflow = '';
         document.documentElement.style.overflow = '';
