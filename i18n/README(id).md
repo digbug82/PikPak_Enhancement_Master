@@ -4,7 +4,7 @@
 
 # 📦 PikPak Enhancement Master
 
-[![Version](https://img.shields.io/badge/Version-2.1.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.1.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
@@ -273,6 +273,9 @@ Karena keterbatasan protokol unduhan browser itu sendiri, file di dalam folder b
 ---
 
 ## 🚀 Changelog
+
+### V2.1.1
+* Memperbaiki kegagalan koneksi Aria2 / Motrix pada lingkungan reverse proxy yang hanya mendukung RPC `ws://` / `wss://` atau menggunakan port nonstandar.
 
 ### V2.1.0
 * Mendukung **deteksi tombol samping mouse** untuk navigasi tingkat direktori.
