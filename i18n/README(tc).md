@@ -4,7 +4,7 @@
 
 # 📦 PikPak 增強大師
 
-[![Version](https://img.shields.io/badge/Version-2.1.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.1.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
@@ -273,6 +273,9 @@
 ---
 
 ## 🚀 更新日誌
+
+### V2.1.1
+* 修復 Aria2 / Motrix 在僅支援 `ws://` / `wss://` RPC 或非標準連接埠反向代理環境下連線失敗的問題。
 
 ### V2.1.0
 * 支援**監聽側鍵**，實現目錄層級跳轉。
