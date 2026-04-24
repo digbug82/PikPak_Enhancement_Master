@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            2.1.0
+// @version            2.1.1
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        桌面级PikPak网盘管家！包含Aria2/Motrix带目录结构推送、文件查重（哈希/时长/名称）、文件夹查重（名称/相似度/包含率）、批量重命名（正则替换/连续编号/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、多账号数据迁移、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
@@ -41,9 +41,9 @@
 // @run-at             document-start
 // @require            https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js
 // @require            https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js
+// @downloadURL        https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.user.js
+// @updateURL          https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.meta.js
 
-// @downloadURL https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.user.js
-// @updateURL https://update.greasyfork.org/scripts/570993/PikPak%20%E5%A2%9E%E5%BC%BA%E5%A4%A7%E5%B8%88.meta.js
 // ==/UserScript==
 
 /*
@@ -352,6 +352,8 @@ const CONF = {
         close: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
         help: `<svg width="19" height="19" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M878.08 731.274667a32 32 0 0 1-54.88-32.938667A360.789333 360.789333 0 0 0 874.666667 512c0-200.298667-162.368-362.666667-362.666667-362.666667S149.333333 311.701333 149.333333 512s162.368 362.666667 362.666667 362.666667a360.789333 360.789333 0 0 0 186.314667-51.445334 32 32 0 0 1 32.928 54.88A424.778667 424.778667 0 0 1 512 938.666667C276.362667 938.666667 85.333333 747.637333 85.333333 512S276.362667 85.333333 512 85.333333s426.666667 191.029333 426.666667 426.666667c0 78.293333-21.152 153.568-60.586667 219.274667zM650.666667 437.333333c0 65.898667-46.72 120.853333-109.194667 135.082667V608a32 32 0 0 1-64 0v-64a32 32 0 0 1 32-32C552.266667 512 586.666667 478.4 586.666667 437.333333s-34.4-74.666667-77.194667-74.666666c-26.773333 0-51.082667 13.248-65.173333 34.624a73.088 73.088 0 0 0-8.522667 17.717333 32 32 0 0 1-60.885333-19.690667c3.797333-11.754667 9.173333-22.933333 15.978666-33.237333 25.856-39.253333 70.186667-63.413333 118.613334-63.413333C587.274667 298.666667 650.666667 360.576 650.666667 437.333333zM512 736a32 32 0 1 1 0-64 32 32 0 0 1 0 64z" fill="currentColor"></path></svg>`,
         warning: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;margin-right:8px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
+        eyeOff: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>`,
+        eye: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"></path><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"></path><path d="M9.9 4.4A9.8 9.8 0 0 1 12 4c6.5 0 10 8 10 8a18.4 18.4 0 0 1-3.1 4.4"></path><path d="M6.1 6.7C3.5 8.6 2 12 2 12s3.5 8 10 8a9.7 9.7 0 0 0 4.1-.9"></path></svg>`,
         lock: `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
         uploadBtn: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:translateY(-1px);"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>`,
         upFile: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>`,
@@ -591,6 +593,7 @@ const CSS = `
     .pk-dark .pk-grid-view .pk-row { background: rgba(39,45,54,0.96); border-color: transparent; box-shadow: 0 12px 26px rgba(0,0,0,0.22); outline: none; background-clip: padding-box; }
     .pk-dark .pk-grid-view .pk-row:hover { background: rgba(45,52,62,0.98); border-color: transparent; outline: none; }
     .pk-dark .pk-grid-view .pk-row.sel { background: rgba(34,60,96,0.9); border-color: rgba(92,169,255,0.42); box-shadow: 0 12px 28px rgba(18,44,82,0.32); outline: none; background-clip: padding-box; }
+    .pk-dark .pk-grid-view .pk-row.pk-sel-single, .pk-dark .pk-grid-view .pk-row.pk-sel-single.pk-focused { transition: background 0.2s !important; }
     .pk-dark .pk-gv-check::before { background: rgba(37,42,50,0.92); border-color: rgba(124,137,156,0.9); }
     .pk-dark .pk-gv-more { background: rgba(34,40,48,0.94); color: #c0c7d2; box-shadow: 0 6px 14px rgba(0,0,0,0.24); }
     .pk-dark .pk-gv-more:hover { background: rgba(46,54,64,0.98); color: #fff; }
@@ -1008,6 +1011,9 @@ const CSS = `
     .pk-pop-max .pk-dropdown-item svg { width: 22px !important; height: 22px !important; }
     .pk-btn-arrow { margin-left: 2px; opacity: 0.6; transition: transform 0.2s; }
     .pk-aria-status-box { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: bold; margin-top: 6px; transform: translateZ(0); -webkit-transform: translateZ(0); backface-visibility: hidden; will-change: transform; cursor: default; }
+    .pk-token-eye { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border: none; border-radius: 6px; background: transparent; color: #8a94a4; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; transition: background 0.15s, color 0.15s; z-index: 20; }
+    .pk-token-eye:hover { background: rgba(0,103,192,0.1); color: var(--pk-pri); }
+    .pk-token-eye svg { width: 18px; height: 18px; display: block; }
     .pk-aria-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; transform: translateZ(0); }
     .pk-aria-dot.ok { background: #52c41a; box-shadow: 0 0 8px rgba(82, 196, 26, 0.5); }
     .pk-aria-dot.err { background: #ff4d4f; }
@@ -2952,6 +2958,134 @@ function getIcon(item) {
 async function openManager(initialCache, preloadPromise) {
     const L = getStrings();
     const lang = getLang();
+
+    function normalizeAriaRpcUrl(url) {
+        let u = (url || '').trim();
+        if (!u) u = 'http://localhost:6800/jsonrpc';
+        if (!/^https?:\/\//i.test(u) && !/^wss?:\/\//i.test(u)) u = 'http://' + u;
+        if (!u.includes('/jsonrpc') && !u.includes('?')) {
+            u = u.endsWith('/') ? u + 'jsonrpc' : u + '/jsonrpc';
+        }
+        return u;
+    }
+
+    function buildAriaRpcParams(token, params = []) {
+        const t = (token || '').trim();
+        return t ? [`token:${t}`, ...params] : params;
+    }
+
+    function isAriaWsRpcUrl(url) {
+        return /^wss?:\/\//i.test(url || '');
+    }
+
+    function getAriaRpcError(data) {
+        const list = Array.isArray(data) ? data : [data];
+        const hit = list.find(x => x && x.error);
+        if (!hit) return null;
+        const err = hit.error || {};
+        return new Error(err.message || `RPC ${err.code || 'Error'}`);
+    }
+
+    function aria2RpcHttpRequest(url, payload, timeout = 5000) {
+        return new Promise((resolveReq, rejectReq) => {
+            GM_xmlhttpRequest({
+                method: 'POST',
+                url,
+                data: JSON.stringify(payload),
+                headers: { 'Content-Type': 'application/json' },
+                timeout,
+                onload: (r) => {
+                    if (r.status !== 200) {
+                        rejectReq(new Error('HTTP ' + r.status));
+                        return;
+                    }
+                    try {
+                        const data = r.responseText ? JSON.parse(r.responseText) : null;
+                        const rpcErr = getAriaRpcError(data);
+                        if (rpcErr) rejectReq(rpcErr);
+                        else resolveReq(data);
+                    } catch (e) {
+                        rejectReq(new Error('Invalid JSON'));
+                    }
+                },
+                onerror: () => rejectReq(new Error('Network Error')),
+                ontimeout: () => rejectReq(new Error('Timeout'))
+            });
+        });
+    }
+
+    function aria2RpcWsRequest(url, payload, timeout = 5000) {
+        return new Promise((resolveReq, rejectReq) => {
+            let ws = null;
+            let settled = false;
+            const requests = Array.isArray(payload) ? payload : [payload];
+            const pending = new Set(requests.map(req => String(req.id)));
+            const results = [];
+
+            const finish = (ok, value) => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timer);
+                try {
+                    if (ws && ws.readyState <= 1) ws.close();
+                } catch (e) {}
+                ok ? resolveReq(value) : rejectReq(value);
+            };
+
+            const timer = setTimeout(() => finish(false, new Error('Timeout')), timeout);
+
+            try {
+                ws = new WebSocket(url);
+            } catch (e) {
+                finish(false, e);
+                return;
+            }
+
+            ws.onopen = () => {
+                try {
+                    requests.forEach(req => ws.send(JSON.stringify(req)));
+                } catch (e) {
+                    finish(false, e);
+                }
+            };
+
+            ws.onmessage = (ev) => {
+                try {
+                    const data = JSON.parse(ev.data);
+                    const list = Array.isArray(data) ? data : [data];
+                    const rpcErr = getAriaRpcError(list);
+                    if (rpcErr) {
+                        finish(false, rpcErr);
+                        return;
+                    }
+
+                    list.forEach(item => {
+                        if (!item || item.id === undefined || item.id === null) return;
+                        const id = String(item.id);
+                        if (!pending.has(id)) return;
+                        pending.delete(id);
+                        results.push(item);
+                    });
+
+                    if (pending.size === 0) {
+                        finish(true, Array.isArray(payload) ? results : results[0]);
+                    }
+                } catch (e) {
+                    finish(false, new Error('Invalid JSON'));
+                }
+            };
+
+            ws.onerror = () => finish(false, new Error('Network Error'));
+            ws.onclose = () => {
+                if (!settled) finish(false, new Error('Network Error'));
+            };
+        });
+    }
+
+    function aria2RpcRequest(url, payload, timeout = 5000) {
+        const rpcUrl = normalizeAriaRpcUrl(url);
+        return isAriaWsRpcUrl(rpcUrl) ? aria2RpcWsRequest(rpcUrl, payload, timeout) : aria2RpcHttpRequest(rpcUrl, payload, timeout);
+    }
 
     if (document.querySelector('.pk-ov')) return;
 
@@ -5937,6 +6071,18 @@ async function openManager(initialCache, preloadPromise) {
         checkGuiResponsiveness();
         syncDupFolderButtonText();
         if (el.style.display === 'none') return;
+
+        const isAuthManagerReloading = !!(
+            typeof window.pkIsAuthManagerReloading === 'function' &&
+            window.pkIsAuthManagerReloading()
+        );
+
+        if (isAuthManagerReloading) {
+            if (typeof window.pkDeferAuthManagerRelayout === 'function') {
+                window.pkDeferAuthManagerRelayout();
+            }
+            return;
+        }
 
         const isDupAnalyzeMaskBusy = !!(
             S.loading &&
@@ -13416,6 +13562,7 @@ async function openManager(initialCache, preloadPromise) {
     el.addEventListener('click', (e) => {
         if (!S.activeId) return;
         if (e.target.closest('.pk-row')) return;
+        if (e.target.closest('#pk-theme')) return;
         if (e.target.closest('#pk-view-switch') || e.target.closest('.pk-view-switch') || e.target.closest('#pk-view-list') || e.target.closest('#pk-view-grid') || e.target.closest('.pk-view-btn')) return;
         S.activeId = null;
         renderVisible();
@@ -25051,7 +25198,8 @@ async function openManager(initialCache, preloadPromise) {
                             <input type="text" id="pop_aria_token" value="${ariaToken || ''}" placeholder="${L.ph_aria2_secret}"
                                    autocomplete="one-time-code" spellcheck="false" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly');"
                                    oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                                   style="width:100%; height:44px; padding:0 12px; border:2px solid ${ariaToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; -webkit-text-security: disc; transform: translateZ(0);">
+                                   style="width:100%; height:44px; padding:0 48px 0 12px; border:2px solid ${ariaToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; -webkit-text-security: disc; transform: translateZ(0);">
+                            <button type="button" id="btn_pop_aria_token_eye" class="pk-token-eye">${CONF.icons.eye}</button>
                             <div class="pk-select-label">${L.label_aria2_token}</div>
                         </div>
                     </div>
@@ -25070,10 +25218,12 @@ async function openManager(initialCache, preloadPromise) {
 
                 const inpU = m.querySelector('#pop_aria_url');
                 const inpT = m.querySelector('#pop_aria_token');
+                const inpTEye = m.querySelector('#btn_pop_aria_token_eye');
                 const dot = m.querySelector('#pop_aria_test_dot');
                 const txt = m.querySelector('#pop_aria_test_txt');
                 const boxRes = m.querySelector('#pop_aria_test_res');
                 let testTimer = null;
+                let popAriaTokenVisible = false;
 
                 const runLiveTest = async () => {
                     const url = inpU.value.trim();
@@ -25091,20 +25241,10 @@ async function openManager(initialCache, preloadPromise) {
                     txt.textContent = L.str_connecting;
                     boxRes.onclick = showTip;
                     boxRes.style.cursor = 'pointer';
-                    const payload = { jsonrpc: '2.0', method: 'aria2.getVersion', id: 'pk_quick_test', params: [`token:${token}`] };
-                    let testUrl = url.replace(/^ws/i, 'http');
-                    if (!testUrl.includes('/jsonrpc') && !testUrl.includes('?')) {
-                        testUrl = testUrl.endsWith('/') ? testUrl + 'jsonrpc' : testUrl + '/jsonrpc';
-                    }
+                    const testUrl = normalizeAriaRpcUrl(url);
+                    const payload = { jsonrpc: '2.0', method: 'aria2.getVersion', id: 'pk_quick_test', params: buildAriaRpcParams(token) };
                     try {
-                        await new Promise((resolveReq, rejectReq) => {
-                            GM_xmlhttpRequest({
-                                method: 'POST', url: testUrl, data: JSON.stringify(payload),
-                                headers: { 'Content-Type': 'application/json' }, timeout: 3000,
-                                onload: (r) => { if (r.status === 200) resolveReq(); else rejectReq(new Error(r.status)); },
-                                onerror: (e) => rejectReq(e)
-                            });
-                        });
+                        await aria2RpcRequest(testUrl, payload, 3000);
                         dot.className = 'pk-aria-dot ok';
                         txt.textContent = L.str_connected;
                         boxRes.onclick = null;
@@ -25126,6 +25266,15 @@ async function openManager(initialCache, preloadPromise) {
                     e.target.style.borderColor = e.target.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
                     triggerTest();
                 };
+                if (inpTEye) {
+                    inpTEye.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        popAriaTokenVisible = !popAriaTokenVisible;
+                        inpT.style.webkitTextSecurity = popAriaTokenVisible ? 'none' : 'disc';
+                        inpTEye.innerHTML = popAriaTokenVisible ? CONF.icons.eyeOff : CONF.icons.eye;
+                    };
+                }
 
                 m.querySelector('#btn_pop_aria_default').onclick = () => {
                     inpU.value = 'http://localhost:6800/jsonrpc';
@@ -25151,20 +25300,9 @@ async function openManager(initialCache, preloadPromise) {
                     saveBtn.textContent = L.str_saving_dots;
 
                     try {
-                        const testUrl = u.replace(/^ws/i, 'http');
-                        const payload = { jsonrpc: '2.0', method: 'aria2.getVersion', id: 'pk_quick_test', params: [`token:${t}`] };
-                        await new Promise((resolveReq, rejectReq) => {
-                            GM_xmlhttpRequest({
-                                method: 'POST',
-                                url: testUrl,
-                                data: JSON.stringify(payload),
-                                headers: { 'Content-Type': 'application/json' },
-                                timeout: 5000,
-                                onload: (r) => { if (r.status === 200) resolveReq(); else rejectReq(new Error('HTTP ' + r.status)); },
-                                onerror: () => rejectReq(new Error('Network Error')),
-                                ontimeout: () => rejectReq(new Error('Timeout'))
-                            });
-                        });
+                        u = normalizeAriaRpcUrl(u);
+                        const payload = { jsonrpc: '2.0', method: 'aria2.getVersion', id: 'pk_quick_test', params: buildAriaRpcParams(t) };
+                        await aria2RpcRequest(u, payload, 5000);
 
                         gmSet('pk_aria2_url', u); gmSet('pk_aria2_token', t);
                         m.remove();
@@ -25210,10 +25348,7 @@ async function openManager(initialCache, preloadPromise) {
 
         UI.stopBtn.onclick = () => { isRunning = false; abortCtrl.abort(); updateLoadTxt(L.str_stopping); };
 
-        if (ariaUrl.startsWith('ws')) ariaUrl = ariaUrl.replace(/^ws/, 'http');
-        if (!ariaUrl.includes('/jsonrpc') && !ariaUrl.includes('?')) {
-            ariaUrl = ariaUrl.endsWith('/') ? ariaUrl + 'jsonrpc' : ariaUrl + '/jsonrpc';
-        }
+        ariaUrl = normalizeAriaRpcUrl(ariaUrl);
 
         const allFiles = [];
         const rootNodes = [];
@@ -25356,26 +25491,15 @@ async function openManager(initialCache, preloadPromise) {
                         return {
                             jsonrpc: '2.0', method: 'aria2.addUri',
                             id: `pk_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-                            params:[`token:${ariaToken}`, [f.web_content_link], {
+                            params: buildAriaRpcParams(ariaToken, [[f.web_content_link], {
                                 out: outPath,
-                                header:[`User-Agent: ${navigator.userAgent}`, `Referer: https://mypikpak.com/`]
-                            }]
+                                header: [`User-Agent: ${navigator.userAgent}`, `Referer: https://mypikpak.com/`]
+                            }])
                         };
                     });
 
                     try {
-                        await new Promise((resolveReq, rejectReq) => {
-                            GM_xmlhttpRequest({
-                                method: 'POST', url: ariaUrl, data: JSON.stringify(payload),
-                                headers: { 'Content-Type': 'application/json' },
-                                onload: (r) => {
-                                    if (r.status === 200) resolveReq();
-                                    else rejectReq(new Error(`RPC ${r.status}`));
-                                },
-                                onerror: () => rejectReq(new Error("Network Error")),
-                                ontimeout: () => rejectReq(new Error("Timeout"))
-                            });
-                        });
+                        await aria2RpcRequest(ariaUrl, payload, Math.max(10000, chunk.length * 800));
                         successCount += chunk.length;
                     } catch (rpcErr) {
                         console.error("[RPC Batch Error]", rpcErr);
@@ -29042,7 +29166,8 @@ async function openManager(initialCache, preloadPromise) {
                             <input type="text" id="set_aria_token" value="${esc(curAriaToken)}" placeholder="${L.ph_aria2_secret}"
                                    autocomplete="off" spellcheck="false" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly');"
                                    oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                                   style="width:100%; height:44px; padding:0 12px; border:2px solid ${curAriaToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; -webkit-text-security: disc; transform: translateZ(0);">
+                                   style="width:100%; height:44px; padding:0 48px 0 12px; border:2px solid ${curAriaToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; -webkit-text-security: disc; transform: translateZ(0);">
+                            <button type="button" id="btn_aria_token_eye" class="pk-token-eye">${CONF.icons.eye}</button>
                             <div class="pk-select-label">${L.label_aria2_token}</div>
                         </div>
 
@@ -29131,10 +29256,12 @@ async function openManager(initialCache, preloadPromise) {
 
         const ariaInp = m.querySelector('#set_aria_url');
         const ariaTok = m.querySelector('#set_aria_token');
+        const ariaEye = m.querySelector('#btn_aria_token_eye');
         const ariaDot = m.querySelector('#aria_test_dot');
         const ariaTxt = m.querySelector('#aria_test_txt');
         const ariaBox = m.querySelector('#aria_test_res');
         let ariaTimer = null;
+        let ariaTokenVisible = false;
 
         const runAriaTest = async () => {
             const url = ariaInp.value.trim();
@@ -29154,21 +29281,11 @@ async function openManager(initialCache, preloadPromise) {
             ariaBox.onclick = showTip;
             ariaBox.style.cursor = 'pointer';
 
-            const payload = { jsonrpc: '2.0', method: 'aria2.getVersion', id: 'pk_live_test', params: [`token:${token}`] };
-            let testUrl = url.replace(/^ws/i, 'http');
-            if (!testUrl.includes('/jsonrpc') && !testUrl.includes('?')) {
-                testUrl = testUrl.endsWith('/') ? testUrl + 'jsonrpc' : testUrl + '/jsonrpc';
-            }
+            const testUrl = normalizeAriaRpcUrl(url);
+            const payload = { jsonrpc: '2.0', method: 'aria2.getVersion', id: 'pk_live_test', params: buildAriaRpcParams(token) };
 
             try {
-                await new Promise((resolve, reject) => {
-                    GM_xmlhttpRequest({
-                        method: 'POST', url: testUrl, data: JSON.stringify(payload),
-                        headers: { 'Content-Type': 'application/json' }, timeout: 3000,
-                        onload: (r) => { if (r.status === 200) resolve(); else reject(new Error(r.status)); },
-                        onerror: (e) => reject(e)
-                    });
-                });
+                await aria2RpcRequest(testUrl, payload, 3000);
                 ariaDot.className = 'pk-aria-dot ok';
                 ariaTxt.textContent = L.str_connected;
                 ariaBox.onclick = null;
@@ -29194,6 +29311,15 @@ async function openManager(initialCache, preloadPromise) {
             if (e.target.oninput) e.target.style.borderColor = e.target.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
             debouncedTest();
         };
+        if (ariaEye) {
+            ariaEye.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                ariaTokenVisible = !ariaTokenVisible;
+                ariaTok.style.webkitTextSecurity = ariaTokenVisible ? 'none' : 'disc';
+                ariaEye.innerHTML = ariaTokenVisible ? CONF.icons.eyeOff : CONF.icons.eye;
+            };
+        }
         m.querySelector('#btn_aria_default').onclick = () => {
             ariaInp.value = 'http://localhost:6800/jsonrpc';
             ariaInp.style.borderColor = 'var(--pk-pri)';
@@ -29989,17 +30115,9 @@ async function openManager(initialCache, preloadPromise) {
             saveBtn.textContent = L.str_saving_dots;
 
             try {
-                const payload = { jsonrpc: '2.0', method: 'aria2.getVersion', id: 'pk_test', params: [`token:${newToken}`] };
-                let fetchUrl = (newUrl || "http://localhost:6800/jsonrpc").replace('ws', 'http');
-                await new Promise((resolveReq, rejectReq) => {
-                    GM_xmlhttpRequest({
-                        method: 'POST', url: fetchUrl, data: JSON.stringify(payload),
-                        headers: { 'Content-Type': 'application/json' }, timeout: 5000,
-                        onload: (r) => { if(r.status === 200) resolveReq(); else rejectReq(new Error('HTTP ' + r.status)); },
-                        onerror: () => rejectReq(new Error('Network Error')),
-                        ontimeout: () => rejectReq(new Error('Timeout'))
-                    });
-                });
+                const fetchUrl = normalizeAriaRpcUrl(newUrl || 'http://localhost:6800/jsonrpc');
+                const payload = { jsonrpc: '2.0', method: 'aria2.getVersion', id: 'pk_test', params: buildAriaRpcParams(newToken) };
+                await aria2RpcRequest(fetchUrl, payload, 5000);
                 await applyChangesAndClose();
             } catch (e) {
                 if (await showConfirm(L.msg_aria2_test_fail, L.title_aria2_fail)) {
@@ -33402,6 +33520,39 @@ async function openManager(initialCache, preloadPromise) {
 
     window.pkForceManagerReloadAfterAuth = (() => {
         let timer = null;
+        let reloadSeq = 0;
+        let authReloading = false;
+        let pendingRelayout = false;
+
+        const flushDeferredRelayout = () => {
+            if (!pendingRelayout) return;
+            pendingRelayout = false;
+            if (!el || el.style.display === 'none') return;
+
+            requestAnimationFrame(() => {
+                if (!el || el.style.display === 'none') return;
+                if (typeof syncLayoutMetrics === 'function') syncLayoutMetrics();
+
+                if (isGridView() && typeof scheduleGridRelayout === 'function') {
+                    scheduleGridRelayout(true);
+                } else if (typeof renderList === 'function') {
+                    renderList();
+                } else if (typeof renderVisible === 'function') {
+                    if (UI.in) UI.in.style.height = `${S.display.length * CONF.rowHeight}px`;
+                    renderVisible();
+                }
+            });
+        };
+
+        const finishAuthReload = (seq) => {
+            if (seq !== reloadSeq) return;
+            authReloading = false;
+            requestAnimationFrame(flushDeferredRelayout);
+        };
+
+        window.pkIsAuthManagerReloading = () => authReloading;
+        window.pkDeferAuthManagerRelayout = () => { pendingRelayout = true; };
+
         return (reason = 'auth-recovered') => {
             if (timer) clearTimeout(timer);
             timer = setTimeout(() => {
@@ -33444,8 +33595,14 @@ async function openManager(initialCache, preloadPromise) {
                         scannedFolderIds.delete(folderId === 'root' ? '' : folderId);
                     }
 
+                    const seq = ++reloadSeq;
+                    authReloading = true;
+                    pendingRelayout = false;
+
+                    let reloadTask = Promise.resolve();
+
                     if (typeof load === 'function') {
-                        Promise.resolve(load(false, true)).catch(e => console.warn('[Auth Sync] Forced reload failed:', e));
+                        reloadTask = Promise.resolve(load(false, true)).catch(e => console.warn('[Auth Sync] Forced reload failed:', e));
                     }
                     else if (typeof window.pkSmartRefreshTrigger === 'function') {
                         window.pkSmartRefreshTrigger(true);
@@ -33457,7 +33614,11 @@ async function openManager(initialCache, preloadPromise) {
                     if (typeof runBackgroundCrawler === 'function' && typeof isBackgroundRunning !== 'undefined' && !isBackgroundRunning) {
                         runBackgroundCrawler();
                     }
+
+                    reloadTask.finally(() => finishAuthReload(seq));
                 } catch (e) {
+                    authReloading = false;
+                    requestAnimationFrame(flushDeferredRelayout);
                     console.warn('[Auth Sync] Force reload error:', e);
                 }
             }, 260);
