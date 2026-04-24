@@ -4,7 +4,7 @@
 
 # 📦 PikPak Enhancement Master
 
-[![Version](https://img.shields.io/badge/Version-2.0.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.1.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
@@ -273,6 +273,10 @@ Due to browser download limitations, files inside folders are usually flattened 
 ---
 
 ## 🚀 Changelog
+
+### V2.1.0
+* Support **mouse side button listening** for directory-level navigation.
+* Stability improvements.
 
 ### V2.0.0
 * Added support for **简体中文 / 繁體中文 / English / 한국어 / 日本語 / Indonesia / Bahasa Melayu**.
