@@ -4,7 +4,7 @@
 
 # 📦 PikPak 增強大師
 
-[![Version](https://img.shields.io/badge/Version-2.0.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.1.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
@@ -273,6 +273,10 @@
 ---
 
 ## 🚀 更新日誌
+
+### V2.1.0
+* 支援**監聽側鍵**，實現目錄層級跳轉。
+* 穩定性優化。
 
 ### V2.0.0
 * 支援語言擴展為 **简体中文 / 繁體中文 / English / 한국어 / 日本語 / Indonesia / Bahasa Melayu**。
