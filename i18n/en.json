@@ -524,7 +524,7 @@
     "opt_keep_large": "Keep Largest", "opt_keep_small": "Keep Smallest",
     "opt_keep_short": "Keep Shortest Name", "opt_keep_long": "Keep Longest Name",
     "label_clipboard_magnet_focus": "Clipboard Magnet Detection",
-    "desc_clipboard_magnet_focus": "Detect magnet links in the clipboard when returning to the foreground",
+    "desc_clipboard_magnet_focus": "Detect magnets when foregrounded",
     "msg_magnet_preview_desc": "A magnet link was detected in the clipboard. Confirm to directly create a cloud download task.",
     "msg_magnet_preview_fail": "Public preview information could not be retrieved. You can still continue.",
     "str_magnet_unknown_name": "Unknown resource",
