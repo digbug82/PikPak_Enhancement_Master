@@ -524,7 +524,7 @@
     "opt_keep_large": "Pertahankan yang terbesar", "opt_keep_small": "Pertahankan yang terkecil",
     "opt_keep_short": "Nama pendek", "opt_keep_long": "Nama panjang",
     "label_clipboard_magnet_focus": "Deteksi Magnet Clipboard",
-    "desc_clipboard_magnet_focus": "Deteksi tautan magnet di clipboard saat kembali ke depan",
+    "desc_clipboard_magnet_focus": "Deteksi magnet saat fokus",
     "msg_magnet_preview_desc": "Tautan magnet terdeteksi di clipboard. Konfirmasi untuk langsung membuat tugas unduhan cloud.",
     "msg_magnet_preview_fail": "Info pratinjau publik tidak dapat diambil. Anda tetap bisa melanjutkan.",
     "str_magnet_unknown_name": "Sumber tidak dikenal",
