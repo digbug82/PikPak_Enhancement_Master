@@ -4,7 +4,7 @@
 
 # 📦 PikPak Enhancement Master
 
-[![Version](https://img.shields.io/badge/Version-2.1.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.2.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
@@ -273,6 +273,10 @@ Disebabkan had protokol muat turun pelayar itu sendiri, fail dalam folder biasan
 ---
 
 ## 🚀 Log Kemas Kini
+
+### V2.2.0
+* Menambah ciri **pemantauan pautan magnet daripada papan klip** dan **pratonton pautan magnet**.
+* Meningkatkan kestabilan UI.
 
 ### V2.1.1
 * Membetulkan kegagalan sambungan Aria2 / Motrix dalam persekitaran proksi songsang yang hanya menyokong RPC `ws://` / `wss://` atau menggunakan port bukan standard.
