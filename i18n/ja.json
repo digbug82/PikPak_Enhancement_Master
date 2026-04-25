@@ -524,7 +524,7 @@
     "opt_keep_large": "最大を保持", "opt_keep_small": "最小を保持",
     "opt_keep_short": "名前が最短のものを保持", "opt_keep_long": "名前が最長のものを保持",
     "label_clipboard_magnet_focus": "クリップボードのマグネット検出",
-    "desc_clipboard_magnet_focus": "前面に戻ったときにクリップボード内のマグネットリンクを検出します",
+    "desc_clipboard_magnet_focus": "前面復帰時にマグネット検出",
     "msg_magnet_preview_desc": "クリップボード内のマグネットリンクを検出しました。確認後、クラウドダウンロードタスクを直接作成します。",
     "msg_magnet_preview_fail": "公開プレビュー情報を取得できませんでした。続行は可能です。",
     "str_magnet_unknown_name": "不明なリソース",
