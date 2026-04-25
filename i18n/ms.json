@@ -524,7 +524,7 @@
     "opt_keep_large": "Kekalkan yang terbesar", "opt_keep_small": "Kekalkan yang terkecil",
     "opt_keep_short": "Kekalkan nama terpendek", "opt_keep_long": "Kekalkan nama terpanjang",
     "label_clipboard_magnet_focus": "Pengesanan Magnet Papan Klip",
-    "desc_clipboard_magnet_focus": "Kesan pautan magnet dalam papan klip apabila kembali ke depan",
+    "desc_clipboard_magnet_focus": "Kesan magnet apabila fokus",
     "msg_magnet_preview_desc": "Pautan magnet dikesan dalam papan klip. Sahkan untuk terus mencipta tugasan muat turun awan.",
     "msg_magnet_preview_fail": "Maklumat pratonton awam gagal diperoleh. Anda masih boleh teruskan.",
     "str_magnet_unknown_name": "Sumber tidak diketahui",
