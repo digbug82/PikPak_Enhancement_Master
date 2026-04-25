@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            2.1.1
+// @version            2.2.0
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        桌面级PikPak网盘管家！包含Aria2/Motrix带目录结构推送、文件查重（哈希/时长/名称）、文件夹查重（名称/相似度/包含率）、批量重命名（正则替换/连续编号/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、多账号数据迁移、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
@@ -37,6 +37,7 @@
 // @connect            litterbox.catbox.moe
 // @connect            uguu.se
 // @connect            mypikpak.com
+// @connect            whatslink.info
 // @connect            localhost
 // @run-at             document-start
 // @require            https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js
@@ -92,6 +93,67 @@
 "use strict";
 
 if (window.self !== window.top) return;
+
+const parseCloudLinks = (rawString, isSmartFix) => {
+    const formattedVal = String(rawString || '').replace(/(https?:\/\/|ftp:\/\/|sftp:\/\/|magnet:\?|ed2k:\/\/|thunder:\/\/)/gi, '\n$1');
+    const lines = formattedVal.split('\n').map(l => l.trim()).filter(l => l);
+    const uniqueTasks = new Map();
+    const linkRegex = /^(https?:\/\/|ftp:\/\/|sftp:\/\/|magnet:\?|ed2k:\/\/|thunder:\/\/)/i;
+    const base32ToHex = (b32) => {
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+        let bits = "";
+        const input = String(b32 || '').toUpperCase();
+        for (let i = 0; i < input.length; i++) {
+            const val = alphabet.indexOf(input[i]);
+            if (val === -1) return null;
+            bits += val.toString(2).padStart(5, '0');
+        }
+        let hex = "";
+        for (let i = 0; i + 4 <= bits.length; i += 4) {
+            const chunk = bits.substring(i, i + 4);
+            const num = parseInt(chunk, 2);
+            if (!isNaN(num)) hex += num.toString(16);
+        }
+        return hex.toUpperCase();
+    };
+    const extractHexHash = (url) => {
+        const match = String(url || '').match(/urn:btih:([^&]+)/i);
+        if (!match) return null;
+        const hash = match[1].toUpperCase();
+        if (hash.length === 40) return hash;
+        if (hash.length === 32) return base32ToHex(hash);
+        return null;
+    };
+    const addResult = (url) => {
+        const hash = extractHexHash(url);
+        if (hash) {
+            if (!uniqueTasks.has(hash)) uniqueTasks.set(hash, url);
+        } else {
+            uniqueTasks.set(url, url);
+        }
+    };
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        if (linkRegex.test(line)) {
+            addResult(line);
+            continue;
+        }
+        if (isSmartFix) {
+            let cleanedStr = line.replace(/[^a-zA-Z0-9]/g, '');
+            const hexMatches = cleanedStr.matchAll(/([a-fA-F0-9]{40})/g);
+            for (const match of hexMatches) {
+                addResult(`magnet:?xt=urn:btih:${match[1].toUpperCase()}`);
+                cleanedStr = cleanedStr.replace(match[1], ' '.repeat(40));
+            }
+            const b32Matches = cleanedStr.matchAll(/([a-zA-Z2-7]{32})/g);
+            for (const match of b32Matches) {
+                const hex = base32ToHex(match[1].toUpperCase());
+                if (hex) addResult(`magnet:?xt=urn:btih:${hex}`);
+            }
+        }
+    }
+    return Array.from(uniqueTasks.values());
+};
 
 const NativeTokenSniffer = {
     init: () => {
@@ -283,6 +345,18 @@ const CONF = {
     browserDownloadConfirmTotalBytes: 10 * 1024 * 1024 * 1024,
     mouseSideNavHistoryMax: 50,
     mouseSideNavDebug: false,
+    clipboardMagnetPaste: true,
+    clipboardMagnetFocusCooldown: 2500,
+    clipboardMagnetDenyCooldown: 60000,
+    clipboardMagnetPromptGap: 10 * 60 * 1000,
+    clipboardMagnetIgnoreTTL: 10 * 60 * 1000,
+    clipboardMagnetMaxChars: 200000,
+    magnetPreviewApi: 'https://whatslink.info/api/v1/link',
+    magnetPreviewTimeout: 9000,
+    magnetPreviewCacheTTL: 60 * 60 * 1000,
+    magnetPreviewErrorCacheTTL: 10 * 60 * 1000,
+    magnetPreviewCircuitTTL: 5 * 60 * 1000,
+    magnetPreviewMaxShots: 5,
     logoSVG: `<svg viewBox="0 0 238 200" style="width:24px;height:24px;border-radius:4px;flex-shrink:0;"><path d="M0 0 C1.82724609 0.01353516 1.82724609 0.01353516 3.69140625 0.02734375 C4.59761719 0.03894531 5.50382812 0.05054688 6.4375 0.0625 C5.95097979 7.11704304 4.33696858 12.90149479 1.6875 19.4375 C1.35234375 20.32566406 1.0171875 21.21382812 0.671875 22.12890625 C0.3315625 22.98097656 -0.00875 23.83304688 -0.359375 24.7109375 C-0.66198242 25.47583496 -0.96458984 26.24073242 -1.27636719 27.02880859 C-3.01571023 29.77913653 -4.60880008 30.70366989 -7.5625 32.0625 C-10.93383789 32.72265625 -10.93383789 32.72265625 -14.78515625 33.125 C-15.47874237 33.20142731 -16.17232849 33.27785461 -16.88693237 33.3565979 C-18.36660067 33.51855298 -19.84685768 33.67520381 -21.3276062 33.82696533 C-25.19232303 34.22318595 -29.05286739 34.65697538 -32.9140625 35.0859375 C-33.67180466 35.16903168 -34.42954681 35.25212585 -35.21025085 35.33773804 C-40.99791882 35.97875931 -46.74864414 36.77615252 -52.5 37.6875 C-61.81496788 39.10080547 -71.19269316 40.07620454 -80.5625 41.0625 C-19.8425 41.0625 40.8775 41.0625 103.4375 41.0625 C91.8875 39.7425 80.3375 38.4225 68.4375 37.0625 C63.8175 36.4025 59.1975 35.7425 54.4375 35.0625 C49.17221542 34.42736314 43.90722683 33.79696512 38.63671875 33.20703125 C37.62996094 33.08714844 36.62320313 32.96726563 35.5859375 32.84375 C34.69052246 32.74126953 33.79510742 32.63878906 32.87255859 32.53320312 C30.35601376 32.0467485 28.59527547 31.44037784 26.4375 30.0625 C23.38532266 24.97553776 21.3341425 19.45473677 19.1875 13.9375 C18.91695801 13.25671387 18.64641602 12.57592773 18.36767578 11.87451172 C16.82394482 7.78804812 16.13851057 4.42502757 16.4375 0.0625 C33.20320897 -0.76054389 50.04132 2.04640823 66.578125 4.53515625 C70.96365446 5.13439358 75.35589707 5.627565 79.75488281 6.11669922 C97.85972043 8.13836316 97.85972043 8.13836316 106.6875 9.4375 C107.39487305 9.52700928 108.10224609 9.61651855 108.83105469 9.70874023 C113.96714941 10.51808328 116.87598017 12.31623275 120.4375 16.0625 C121.69830294 18.53927732 122.67025259 20.7202309 123.5625 23.3125 C124.02136126 24.56846882 124.48232815 25.8236702 124.9453125 27.078125 C125.27250149 28.00288179 125.27250149 28.00288179 125.60630035 28.94632053 C126.38750394 31.05750635 126.38750394 31.05750635 127.44002533 32.93062496 C131.07482517 39.83448151 131.00351579 46.31795394 130.95507812 53.99243164 C130.96050802 55.37978344 130.96763552 56.76712947 130.97631836 58.15446472 C130.99445028 61.89829685 130.98752708 65.6416848 130.97480202 69.38552403 C130.96462344 73.31622656 130.97408092 77.24689291 130.98034668 81.17759705 C130.98760817 87.77544941 130.97807403 94.37312221 130.95898438 100.97094727 C130.93720936 108.58452515 130.94427739 116.19767461 130.96629 123.81124216 C130.98447611 130.36524706 130.98698696 136.91912344 130.97653532 143.47314543 C130.97031913 147.38014362 130.96941296 151.2869408 130.98268127 155.19392586 C130.99428653 158.8672447 130.9861299 162.54001414 130.96310425 166.213274 C130.95534421 168.19404482 130.96713242 170.17486244 130.97961426 172.15560913 C130.90049754 180.52230774 129.95755225 186.09535704 124.25390625 192.5234375 C123.51011719 193.15507812 122.76632813 193.78671875 122 194.4375 C121.25878906 195.08460938 120.51757812 195.73171875 119.75390625 196.3984375 C114.7661098 199.98157627 110.22842399 200.35421576 104.22135925 200.32992554 C103.39785408 200.33445665 102.5743489 200.33898776 101.72588903 200.34365618 C98.968488 200.35630894 96.21128426 200.35467924 93.45385742 200.35302734 C91.475975 200.35901206 89.49809491 200.36581748 87.5202179 200.37338257 C82.14823484 200.39105594 76.77631549 200.39573853 71.40430617 200.39701414 C66.91878502 200.39891354 62.4332787 200.40627158 57.94776326 200.41335833 C47.36384951 200.42964512 36.77996977 200.43452703 26.19604492 200.43310547 C15.28118177 200.43190408 4.36651636 200.45300486 -6.54829675 200.4845928 C-15.92170288 200.51075235 -25.29504442 200.52147289 -34.66848677 200.52019465 C-40.26569836 200.51968491 -45.86273424 200.52537507 -51.45990944 200.54655075 C-56.725388 200.56592749 -61.99052314 200.5660613 -67.25601387 200.55151749 C-69.1861191 200.54942757 -71.11624579 200.55414114 -73.04631424 200.5662384 C-75.68641426 200.58171127 -78.32533312 200.57236959 -80.96540833 200.55697632 C-81.72466655 200.56726344 -82.48392478 200.57755057 -83.26619083 200.58814943 C-90.327556 200.49750269 -96.39704041 197.82485418 -101.375 192.75 C-102.18904297 191.95142578 -102.18904297 191.95142578 -103.01953125 191.13671875 C-108.29053612 184.05088689 -108.01804154 177.09915158 -108.0300293 168.55004883 C-108.04229625 167.18245883 -108.05575106 165.81487905 -108.07029724 164.4473114 C-108.10523797 160.74401042 -108.12059214 157.04088761 -108.13013434 153.33744264 C-108.13673436 151.01403475 -108.14708893 148.69067299 -108.15863991 146.36728477 C-108.19836069 138.23287671 -108.22038571 130.09860956 -108.22827148 121.96411133 C-108.23610728 114.43116961 -108.28516577 106.89925647 -108.35333699 99.36664182 C-108.41007964 92.86514961 -108.43519788 86.36399446 -108.43721896 79.86225718 C-108.43904166 75.9947118 -108.45309089 72.1282487 -108.50003624 68.26096535 C-108.72797687 48.29049317 -107.52961567 30.83210742 -95.5625 14.0625 C-92.23797604 10.732487 -88.44904231 10.20048941 -83.953125 9.5 C-83.20613342 9.37633057 -82.45914185 9.25266113 -81.68951416 9.12524414 C-74.04584045 7.901492 -66.3645662 7.06662299 -58.66394043 6.29776001 C-54.62860447 5.8940274 -50.59547976 5.46951727 -46.5625 5.04296875 C-45.77776306 4.96008102 -44.99302612 4.8771933 -44.18450928 4.79179382 C-36.33754684 3.9513441 -28.53467892 2.87051571 -20.734375 1.67578125 C-13.79617508 0.63078847 -7.03103815 -0.06826251 0 0 Z M-47 131 L-15 106 L-47 81 L-47 91 L-27 106 L-47 121 Z M45.4375 89.0625 C43.16309531 93.61130937 44.11732026 99.81887268 44.0625 104.8125 C44.02511719 106.08867188 43.98773438 107.36484375 43.94921875 108.6796875 C43.6563417 116.25277258 43.6563417 116.25277258 46.7109375 122.91015625 C50.0632924 125.55649945 51.41007501 125.90713502 55.50390625 125.58984375 C58.83921214 124.68021487 60.4149221 122.75927054 62.4375 120.0625 C64.03299443 115.26404894 63.62174204 110.1852134 63.625 105.1875 C63.64336914 103.71603516 63.64336914 103.71603516 63.66210938 102.21484375 C63.77173933 93.57358621 63.77173933 93.57358621 59.75 86.1875 C54.01325068 83.39664894 49.78182352 84.71817648 45.4375 89.0625 Z M-18.5625 155.0625 C-20.89546251 157.88967213 -20.89546251 157.88967213 -20.3125 161.125 C-19.8031756 164.161959 -19.8031756 164.161959 -17.5625 166.0625 C-15.5023267 166.81656896 -13.41368556 167.49416461 -11.3125 168.125 C-10.19359375 168.46660156 -9.0746875 168.80820313 -7.921875 169.16015625 C-1.62436639 170.85169635 4.26860909 171.24487637 10.75 171.25 C11.9555957 171.26836914 11.9555957 171.26836914 13.18554688 171.28710938 C21.14907742 171.30632948 28.31945463 169.57146397 35.875 167.125 C36.88433594 166.80660156 37.89367187 166.48820313 38.93359375 166.16015625 C41.73511224 165.200361 41.73511224 165.200361 43.4375 162.0625 C43.1133631 158.74009676 42.82973697 157.45473697 40.4375 155.0625 C35.63637087 154.61062902 31.50016124 155.74460874 26.9375 157.0625 C14.69655136 160.31686985 0.09246916 160.8899845 -11.5625 155.0625 C-15.0625 154.72916667 -15.0625 154.72916667 -18.5625 155.0625 Z " fill="currentColor" transform="translate(107.5625,-0.0625)"/></svg>`,
     emptySVG: `<svg viewBox="-2 -2 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 10L7 5H17L19 10H5Z" fill="#E2E8F0" stroke="#94A3B8" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 10V18C4 19.1 4.9 20 6 20H18C19.1 20 20 19.1 20 18V10" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10L1 6.5" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 10L23 6.5" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><g stroke="#64748B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 13L10 14L9 15"/><path d="M15 13L14 14L15 15"/><path d="M11 17.5H13"/></g>`,
     dupHashSVG: `<svg style="width:24px;height:24px;margin-right:8px;flex-shrink:0;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M798 322.42A308.78 308.78 0 0 0 676.73 211.1a17.5 17.5 0 1 0-15.94 31.16 272.73 272.73 0 0 1 148.71 243v63.83c0 25.58-3.14 134.1-8.62 159.68a17.5 17.5 0 0 0 13.44 20.78 17.94 17.94 0 0 0 3.69 0.39 17.5 17.5 0 0 0 17.09-13.83c6.81-31.76 9.4-148.75 9.4-167v-63.88A307 307 0 0 0 798 322.42zM365.68 272.82a273.38 273.38 0 0 1 231.18-53.68 17.5 17.5 0 1 0 7.68-34.14 307.93 307.93 0 0 0-367.72 231.18 17.5 17.5 0 1 0 34.11 7.82 273.89 273.89 0 0 1 94.75-151.18zM246.54 467.73a17.49 17.49 0 0 0-17.5 17.5v69c0 50.29-14.45 87.61-44.18 114.11a17.5 17.5 0 0 0 23.28 26.13c22.56-20.11 38.52-45.63 47.43-75.85 5.7-19.34 8.47-40.4 8.47-64.39v-69a17.5 17.5 0 0 0-17.5-17.5zM743.42 636.35v-0.17l-0.5-52.83a17.5 17.5 0 1 0-35 0.34l0.5 52.74c0 4.2 0 8.79 0.05 13.68 0.21 34.94 0.53 87.74-9.16 116.81a17.5 17.5 0 1 0 33.2 11.08c11.52-34.56 11.2-88.62 11-128.09-0.07-4.85-0.09-9.4-0.09-13.56z" fill="currentColor"></path><path d="M707.92 527.26a17.5 17.5 0 0 0 35 0v-45c0-114.17-92.89-207-207.06-207a207.35 207.35 0 0 0-58.49 8.38 17.5 17.5 0 0 0 9.87 33.58 172.24 172.24 0 0 1 48.62-7c94.87 0 172.06 77.18 172.06 172.05zM363.81 482.22A172.4 172.4 0 0 1 437 341.4a17.5 17.5 0 1 0-20.14-28.62 207.45 207.45 0 0 0-88 169.44v108.39a203 203 0 0 1-6.86 55.17 162.05 162.05 0 0 1-47.22 77.75 17.5 17.5 0 1 0 23.65 25.8c27.84-25.53 47.13-57.24 57.32-94.26a236.32 236.32 0 0 0 8.09-64.46zM440.83 566a17.5 17.5 0 0 0-17.5 17.47l-0.11 56.86c0 12.5-2.7 77.59-56 131.85a17.5 17.5 0 1 0 25 24.53 229.06 229.06 0 0 0 56.17-94.59c8.93-29.25 9.89-53 9.89-61.75l0.11-56.84A17.5 17.5 0 0 0 440.83 566z" fill="currentColor"></path><path d="M604.17 419.76a17.5 17.5 0 0 0-4.71-24.3 113 113 0 0 0-176.16 93.68v38.12a17.5 17.5 0 0 0 35 0v-38.12a78 78 0 0 1 121.57-64.68 17.49 17.49 0 0 0 24.3-4.7zM618.85 438.05a17.51 17.51 0 0 0-9.92 22.68 77.55 77.55 0 0 1 5.33 28.41v206.29c0 33.49-6.45 66.07-19.71 99.61a17.5 17.5 0 1 0 32.55 12.87c14.9-37.71 22.16-74.51 22.16-112.48V489.14a112.38 112.38 0 0 0-7.74-41.14 17.5 17.5 0 0 0-22.67-9.95z" fill="currentColor"></path><path d="M549.91 488a17.5 17.5 0 0 0-35 0v174.37c0 0.51 0 1 0.06 1.52 0.08 0.88 7 89.15-51.16 152.8a17.5 17.5 0 0 0 25.83 23.62c66-72.15 61-168 60.27-178.62z" fill="currentColor"></path></svg>`,
@@ -387,6 +461,41 @@ const CONF = {
 const CSS = `
     :root { --pk-zoom: 1; --pk-bg: #ffffff; --pk-bg-rgb: 255, 255, 255; --pk-fg: #1a1a1a; --pk-bd: #e5e5e5; --pk-hl: #f0f0f0; --pk-sel-bg: #e6f3ff; --pk-sel-bd: #cce8ff; --pk-pri: #0067c0; --pk-btn-hov: #e0e0e0; --pk-gh: #f5f5f5; --pk-gh-fg: #333; --pk-sb-bg: transparent; --pk-sb-th: #ccc; --pk-sb-hov: #aaa; --pk-icon-c: #888; --pk-tip-bg: rgba(255, 255, 255, 0.95); --pk-tip-fg: #1a1a1a; --pk-tip-bd: rgba(0, 0, 0, 0.06); --pk-tip-sd: rgba(0, 0, 0, 0.12); --pk-toast-bg: rgba(255, 255, 255, 0.95); --pk-toast-fg: #1a1a1a; --pk-toast-bd: rgba(0, 0, 0, 0.08); --pk-match-bg: #fff2cc; --pk-match-fg: #d93025; --pk-v-line: #d1d1d1; }
     .pk-no-transition, .pk-no-transition * { transition: none !important; }
+    .pk-magnet-preview-wrap { width:420px; max-width:86vw; display:flex; flex-direction:column; color:var(--pk-fg); overflow:hidden; }
+    .pk-magnet-hero { width:100%; height:210px; background:var(--pk-hl); display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:14px 14px 0 0; }
+    .pk-magnet-hero img { width:100%; height:100%; object-fit:cover; display:block; }
+    .pk-magnet-empty { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:14px; opacity:0.62; }
+    .pk-magnet-body { padding:18px 20px 20px 20px; display:flex; flex-direction:column; gap:12px; }
+    .pk-magnet-title { font-size:16px; font-weight:800; line-height:1.45; overflow:hidden; word-break:break-all; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; text-overflow:ellipsis; }
+    .pk-magnet-desc { font-size:12px; line-height:1.5; opacity:0.68; }
+    .pk-magnet-meta { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+    .pk-magnet-meta-item { border:1px solid var(--pk-bd); border-radius:10px; padding:8px 9px; background:var(--pk-bg); min-width:0; }
+    .pk-magnet-meta-label { font-size:11px; opacity:0.58; margin-bottom:4px; }
+    .pk-magnet-meta-value { font-size:13px; font-weight:700; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+    .pk-magnet-hash { font-size:11px; line-height:1.45; opacity:0.62; word-break:break-all; background:var(--pk-hl); border-radius:8px; padding:8px 10px; }
+    .pk-magnet-save-row { display:flex; align-items:center; gap:5px; min-width:0; height:26px; margin-top:-2px; font-size:12px; color:var(--pk-fg); }
+    .pk-magnet-save-label { opacity:.72; flex-shrink:0; }
+    .pk-magnet-save-icon { width:16px; height:16px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; }
+    .pk-magnet-save-icon svg { width:16px !important; height:16px !important; display:block; }
+    .pk-magnet-save-name { font-weight:700; max-width:150px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .pk-magnet-save-help { color:#aaa; display:flex; align-items:center; flex-shrink:0; }
+    .pk-magnet-save-change { color:var(--pk-pri); cursor:pointer; font-size:12px; font-weight:700; flex-shrink:0; }
+    .pk-magnet-save-change:hover { text-decoration:underline; }
+    .pk-magnet-source { font-size:11px; line-height:1.35; opacity:.58; display:flex; align-items:center; gap:4px; }
+    .pk-magnet-source a { color:var(--pk-pri); text-decoration:none; font-weight:700; }
+    .pk-magnet-source a:hover { text-decoration:underline; }
+    .pk-magnet-warn { font-size:12px; line-height:1.45; color:#d93025; background:rgba(217,48,37,0.08); border:1px solid rgba(217,48,37,0.16); border-radius:8px; padding:8px 10px; }
+    .pk-magnet-shots { display:flex; gap:7px; overflow-x:auto; padding-bottom:2px; }
+    .pk-magnet-thumb-wrap { width:68px; height:42px; border-radius:7px; overflow:hidden; flex:0 0 auto; position:relative; border:1px solid var(--pk-bd); cursor:pointer; user-select:none; transition:border-color .16s ease, box-shadow .16s ease; }
+    .pk-magnet-thumb-wrap:hover { }
+    .pk-magnet-thumb-wrap.active { border-color:var(--pk-pri); box-shadow:0 0 0 2px rgba(0,103,192,18); }
+    .pk-magnet-thumb-wrap .pk-magnet-thumb { width:100%; height:100%; border:none; border-radius:0; display:block; object-fit:cover; }
+    .pk-magnet-shot-time { position:absolute; right:3px; bottom:3px; padding:1px 4px; border-radius:4px; background:rgba(0,0,0,.62); color:#fff; font-size:10px; line-height:1.25; pointer-events:none; }
+    .pk-magnet-thumb { width:68px; height:42px; border-radius:7px; object-fit:cover; flex:0 0 auto; border:1px solid var(--pk-bd); cursor:pointer; user-select:none; -webkit-user-drag:none; transition:border-color .16s ease, box-shadow .16s ease; }
+    .pk-magnet-thumb:hover { }
+    .pk-magnet-thumb.active { border-color:var(--pk-pri); box-shadow:0 0 0 2px rgba(0,103,192,18); }
+    .pk-magnet-hero img { user-select:none; -webkit-user-drag:none; }
+    .pk-magnet-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:2px; }
     .pk-dark { --pk-bg: #202020; --pk-bg-rgb: 32, 32, 32; --pk-fg: #f5f5f5; --pk-bd: #333333;
     --pk-hl: #2d2d2d; --pk-sel-bg: #2b3a4a; --pk-sel-bd: #0067c0; --pk-pri: #4cc2ff; --pk-btn-hov: #3a3a3a; --pk-gh: #2a2a2a; --pk-gh-fg: #eee; --pk-sb-th: #555; --pk-sb-hov: #777; --pk-icon-c: #aaa; --pk-tip-bg: rgba(20, 20, 20, 0.95); --pk-tip-fg: #ffffff; --pk-tip-bd: rgba(255, 255, 255, 0.1); --pk-tip-sd: rgba(0, 0, 0, 0.4); --pk-toast-bg: rgba(45, 45, 45, 0.95); --pk-toast-fg: #ffffff; --pk-toast-bd: rgba(255, 255, 255, 0.15); --pk-v-line: rgba(255, 255, 255, 0.25); }
     .pk-dark .pk-loading-ov { background: rgba(0,0,0,0.8); }
@@ -1686,6 +1795,21 @@ const T_LOCAL = {
         opt_keep_new: "保留最新的", opt_keep_old: "保留最旧的",
         opt_keep_large: "保留最大的", opt_keep_small: "保留最小的",
         opt_keep_short: "保留名称最短的", opt_keep_long: "保留名称最长的",
+        label_clipboard_magnet_focus: "剪贴板磁链识别",
+        desc_clipboard_magnet_focus: "回到前台时检测剪贴板磁链",
+        msg_magnet_preview_desc: "已识别到剪贴板磁链，确认后将直接创建云下载任务。",
+        msg_magnet_preview_fail: "未获取到公开预览信息，仍可继续添加。",
+        str_magnet_unknown_name: "未知资源",
+        str_no_preview: "暂无预览图",
+        lbl_magnet_count: "文件数",
+        lbl_magnet_size: "总大小",
+        lbl_magnet_type: "类型",
+        lbl_magnet_hash: "磁链",
+        btn_magnet_continue: "高速云下载",
+        lbl_magnet_preview_source: "预览信息来自",
+        msg_magnet_preview_rate_limited: "预览服务请求过于频繁，已临时降级。仍可继续添加。",
+        msg_magnet_preview_timeout: "预览服务响应超时，仍可继续添加。",
+        msg_magnet_preview_network: "预览服务暂不可用，仍可继续添加。",
 
         /* --- 状态、进度与加载短语 --- */
         loading: "加载中...",
@@ -2054,8 +2178,9 @@ const T_LOCAL = {
 function getStrings() {
     const lang = getLang();
     const base = T_LOCAL.zh || {};
+    const local = T_LOCAL[lang] || {};
     const remote = pkRemoteI18n && pkRemoteI18n.lang === lang ? pkRemoteI18n.data : null;
-    return mergeI18nPack(base, remote);
+    return mergeI18nPack(mergeI18nPack(base, remote), local);
 };
 
 ensureI18nReady();
@@ -5037,9 +5162,11 @@ async function openManager(initialCache, preloadPromise) {
         const hd = UI.win && UI.win.querySelector('.pk-grid-hd');
         if (hd) hd.style.visibility = 'hidden';
     };
-    const endFolderViewSync = () => {
+    const endFolderViewSync = (force = false) => {
         if (!S._folderViewSyncing) return;
+        if (S._folderViewSyncHold && !force) return;
         requestAnimationFrame(() => {
+            if (S._folderViewSyncHold && !force) return;
             if (UI.vp) {
                 UI.vp.style.visibility = '';
                 UI.vp.style.pointerEvents = '';
@@ -10131,8 +10258,8 @@ async function openManager(initialCache, preloadPromise) {
             S._gridLayoutKey = '';
             S.dupGridMeta = null;
             S.dupGridMetaKey = '';
+            if (UI.win) UI.win.classList.remove('pk-grid-view', 'pk-grid-resizing', 'pk-grid-scrolling');
             UI.in.style.height = `${S.display.length * CONF.rowHeight}px`;
-            endFolderViewSync();
         }
         let colDef;
 
@@ -10503,7 +10630,15 @@ async function openManager(initialCache, preloadPromise) {
             UI.chkAll.indeterminate = selectedCount > 0 && selectedCount < totalSelectable;
         }
 
-        requestAnimationFrame(renderVisible);
+        requestAnimationFrame(() => {
+            renderVisible();
+            if (!isGridView()) {
+                requestAnimationFrame(() => {
+                    endFolderViewSync();
+                    if (UI.win) UI.win.classList.remove('pk-view-switching');
+                });
+            }
+        });
     }
 
     const getStarIcon = (isStarred) => {
@@ -14106,14 +14241,12 @@ async function openManager(initialCache, preloadPromise) {
             if (S.closeTopModalOverlay()) return;
             if (UI.ctx.style.display === 'block') { UI.ctx.style.display = 'none'; return; }
 
-            const isAtRoot = S.path.length === 1 || (S.path.length === 2 && S.path[1].id === 'virtual_search_root');
-
             if (S.getSelectedCount() > 0) {
                 S.clearSelection();
                 refresh();
             } else if (UI.win.classList.contains('pk-maximized')) {
                 if (!isTurbo && btnMax) btnMax.click();
-            } else if (isAtRoot) {
+            } else {
                 if (!isTurbo) UI.btnClose.click();
             }
             return;
@@ -27470,13 +27603,43 @@ async function openManager(initialCache, preloadPromise) {
             S.loading = false;
         }
 
+        const isForcedListTab = mode === 'offline' || mode === 'upload' || mode === 'history' || mode === 'trash' || mode === 'share' || mode === 'starred' || mode === 'recent';
+        const needListTabSync = isForcedListTab && (isGridView() || (UI.win && UI.win.classList.contains('pk-grid-view')) || CONF.rowHeight !== getListRowHeight() || (UI.vp && UI.vp.scrollTop > 0));
+        if (needListTabSync) {
+            beginFolderViewSync();
+            if (UI.win) {
+                UI.win.classList.add('pk-view-switching');
+                UI.win.classList.remove('pk-grid-view', 'pk-grid-resizing', 'pk-grid-scrolling');
+            }
+            S.viewMode = 'list';
+            CONF.rowHeight = getListRowHeight();
+            S._gridLayoutKey = '';
+            S.dupGridMeta = null;
+            S.dupGridMetaKey = '';
+            if (UI.in) {
+                UI.in.style.height = '0px';
+                UI.in.style.transform = 'none';
+            }
+            if (UI.vp) {
+                UI.vp.scrollTop = 0;
+                UI.vp.scrollLeft = 0;
+            }
+        }
+
         S.items = [];
         S.display = [];
         S.recentResultItems = null;
         S.itemMap.clear();
         S.sel.clear();
-        if (UI.in) UI.in.innerHTML = '';
-        if (UI.vp) UI.vp.scrollTop = 0;
+        if (UI.in) {
+            UI.in.innerHTML = '';
+            UI.in.style.height = '0px';
+            UI.in.style.transform = 'none';
+        }
+        if (UI.vp) {
+            UI.vp.scrollTop = 0;
+            UI.vp.scrollLeft = 0;
+        }
 
         if (mode === 'history') {
             S.sort = 'play_time';
@@ -28186,6 +28349,549 @@ async function openManager(initialCache, preloadPromise) {
         loadFolder(initialId || '', null, true);
     };
 
+    window.pkPendingCloudPresetLinks = '';
+    window.pkOpenCloudTaskWithLinks = (links) => {
+        const text = Array.isArray(links) ? links.map(x => String(x || '').trim()).filter(Boolean).join('\n') : String(links || '').trim();
+        if (!text) return false;
+        window.pkPendingCloudPresetLinks = text;
+        if (btnCloud) {
+            btnCloud.click();
+            return true;
+        }
+        return false;
+    };
+
+    const initClipboardMagnetFocusWatcher = () => {
+        if (window.__pkClipboardMagnetFocusWatcherBound) return;
+        window.__pkClipboardMagnetFocusWatcherBound = true;
+
+        const state = {
+            lastCheckAt: 0,
+            lastDeniedAt: 0,
+            lastPromptAt: 0,
+            lastSignature: '',
+            prompting: false,
+            processing: false,
+            ignored: new Map(),
+            queue: [],
+            queued: new Set(),
+            previewCache: new Map(),
+            previewCircuitUntil: 0
+        };
+
+        const getClipText = () => getStrings();
+
+        const normalizeHash = (link) => {
+            const match = String(link || '').match(/urn:btih:([^&]+)/i);
+            return match ? match[1].toUpperCase() : String(link || '').trim().toLowerCase();
+        };
+
+        const makeSignature = (links) => links.map(normalizeHash).filter(Boolean).sort().join('\n');
+
+        const isIgnoredSignature = (signature) => {
+            const until = state.ignored.get(signature) || 0;
+            if (!until) return false;
+            if (Date.now() < until) return true;
+            state.ignored.delete(signature);
+            return false;
+        };
+
+        const markIgnoredSignature = (signature) => {
+            state.ignored.set(signature, Date.now() + CONF.clipboardMagnetIgnoreTTL);
+        };
+
+        const getDefaultMagnetSaveTarget = () => {
+            const curFolder = S.path[S.path.length - 1] || { id: '', name: L.lbl_default_folder };
+            const curId = curFolder.id || '';
+            const isVirtual = curId.startsWith('virtual_') || curId.includes('_root') || curId === 'analyze_root';
+            const isHomeSubDir = !S.trashMode && !S.shareMode && !S.offlineMode && !S.starredMode && !S.recentMode && !S.isFlattened && !S.dupMode && S.path.length > 1 && !isVirtual;
+            return { id: isHomeSubDir ? curId : '', name: isHomeSubDir ? (curFolder.name || L.lbl_default_folder) : L.lbl_default_folder, path: isHomeSubDir ? S.path.filter(p => !p.id.startsWith('virtual_')) : null };
+        };
+
+        const createMagnetCloudTasks = async (links, targetId) => {
+            const progressTask = FloatBarManager.create(L.msg_creating_cloud_task);
+            let successCount = 0;
+            let failCount = 0;
+
+            for (let i = 0; i < links.length; i++) {
+                progressTask.update(L.str_creating_task_n.replace('{n}', i + 1).replace('{t}', links.length));
+                try {
+                    let retry = 0;
+                    let created = false;
+                    while (retry < 3) {
+                        try {
+                            await apiAddOfflineTask(links[i], targetId || '', {});
+                            successCount++;
+                            created = true;
+                            if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
+                            break;
+                        } catch (reqErr) {
+                            const isRateLimited = String((reqErr && (reqErr.message || reqErr.status || reqErr.code)) || '').includes('429');
+                            if (isRateLimited) {
+                                retry++;
+                                if (retry >= 3) throw reqErr;
+                                await sleep(2000 * retry);
+                            } else {
+                                throw reqErr;
+                            }
+                        }
+                    }
+                    if (!created) throw new Error('Magnet task create failed after retry');
+                } catch (e) {
+                    console.error(`Magnet Task Create Failed[${links[i]}]:`, e);
+                    failCount++;
+                }
+                await sleep(300);
+            }
+
+            progressTask.destroy();
+
+            if (failCount > 0) {
+                showToast(L.msg_cloud_task_finish.replace('{s}', successCount).replace('{f}', failCount), 'warning');
+            } else {
+                showToast(L.msg_cloud_task_success.replace('{n}', successCount));
+            }
+
+            setTimeout(() => updateQuotaUI(), 1000);
+
+            const curPathId = S.path[S.path.length - 1].id || '';
+            if (S.offlineMode || (targetId && curPathId === targetId)) {
+                load(false, true);
+            } else if (!targetId && S.path.length === 1) {
+                if (window.pkSmartRefreshTrigger) window.pkSmartRefreshTrigger(true);
+            }
+        };
+
+        const extractMagnetLinks = (rawText) => {
+            const text = String(rawText || '').trim();
+            if (!text || text.length > CONF.clipboardMagnetMaxChars) return [];
+
+            const unique = new Map();
+
+            const addMagnet = (value) => {
+                let link = String(value || '').trim();
+                if (!link) return;
+
+                const urnOnly = link.match(/^urn:btih:([a-fA-F0-9]{40}|[a-zA-Z2-7]{32})(?:[^\s"'<>`]*)?$/i);
+                if (urnOnly) link = `magnet:?xt=urn:btih:${urnOnly[1].toUpperCase()}`;
+
+                const pureHash = link.match(/^([a-fA-F0-9]{40}|[a-zA-Z2-7]{32})$/i);
+                if (pureHash) link = `magnet:?xt=urn:btih:${pureHash[1].toUpperCase()}`;
+
+                if (!/^magnet:\?/i.test(link)) return;
+                const hashMatch = link.match(/[?&]xt=urn:btih:([a-fA-F0-9]{40}|[a-zA-Z2-7]{32})/i);
+                if (!hashMatch) return;
+
+                const signature = hashMatch[1].toUpperCase();
+                if (!unique.has(signature)) unique.set(signature, link);
+            };
+
+            if (!/(magnet:\?|urn:btih:)/i.test(text)) {
+                const lines = text.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+                if (lines.length === 1) addMagnet(lines[0]);
+                return Array.from(unique.values());
+            }
+
+            const magnetRegex = /magnet:\?[^\s"'<>`]+/gi;
+            let match;
+            while ((match = magnetRegex.exec(text))) addMagnet(match[0]);
+
+            const urnRegex = /urn:btih:([a-fA-F0-9]{40}|[a-zA-Z2-7]{32})(?:[^\s"'<>`]*)?/gi;
+            while ((match = urnRegex.exec(text))) addMagnet(match[0]);
+
+            return Array.from(unique.values());
+        };
+
+        const requestMagnetPreview = (link) => {
+            return new Promise((resolve) => {
+                const hash = normalizeHash(link);
+                const now = Date.now();
+                const cached = state.previewCache.get(hash);
+                if (cached && now - cached.at < cached.ttl) {
+                    resolve(cached.data);
+                    return;
+                }
+
+                const finish = (data) => {
+                    const ttl = data && data.ok ? CONF.magnetPreviewCacheTTL : CONF.magnetPreviewErrorCacheTTL;
+                    state.previewCache.set(hash, { at: Date.now(), ttl, data });
+                    resolve(data);
+                };
+
+                if (state.previewCircuitUntil && now < state.previewCircuitUntil) {
+                    finish({ ok: false, code: 'rate_limited' });
+                    return;
+                }
+
+                const url = `${CONF.magnetPreviewApi}?url=${encodeURIComponent(link)}`;
+
+                const handleStatus = (status) => {
+                    if (status === 429) {
+                        state.previewCircuitUntil = Date.now() + CONF.magnetPreviewCircuitTTL;
+                        finish({ ok: false, code: 'rate_limited', status });
+                        return true;
+                    }
+                    if (status >= 500) {
+                        state.previewCircuitUntil = Date.now() + CONF.magnetPreviewCircuitTTL;
+                        finish({ ok: false, code: 'network', status });
+                        return true;
+                    }
+                    if (status && (status < 200 || status >= 300)) {
+                        finish({ ok: false, code: 'network', status });
+                        return true;
+                    }
+                    return false;
+                };
+
+                if (typeof GM_xmlhttpRequest !== 'function') {
+                    fetch(url, { cache: 'no-store' }).then(r => {
+                        if (handleStatus(r.status)) return null;
+                        return r.json();
+                    }).then(data => {
+                        if (data) finish({ ok: true, code: 'ok', data });
+                    }).catch(() => finish({ ok: false, code: 'network' }));
+                    return;
+                }
+
+                GM_xmlhttpRequest({
+                    method: 'GET',
+                    url,
+                    responseType: 'json',
+                    timeout: CONF.magnetPreviewTimeout,
+                    onload: (res) => {
+                        if (handleStatus(res.status)) return;
+                        try {
+                            const data = res.response && typeof res.response === 'object' ? res.response : JSON.parse(res.responseText || '{}');
+                            finish({ ok: true, code: 'ok', data });
+                        } catch (e) {
+                            finish({ ok: false, code: 'network' });
+                        }
+                    },
+                    onerror: () => finish({ ok: false, code: 'network' }),
+                    ontimeout: () => finish({ ok: false, code: 'timeout' })
+                });
+            });
+        };
+
+        const showMagnetPreviewModal = (links, preview) => {
+            return new Promise((resolve) => {
+                const TXT = getClipText();
+                const data = preview && preview.ok && preview.data ? preview.data : {};
+                let saveTarget = getDefaultMagnetSaveTarget();
+                const toWhatslinkImageUrl = (value) => {
+                    let url = String(value || '').trim();
+                    if (!url) return '';
+                    if (/^\/\//.test(url)) url = `https:${url}`;
+                    else if (/^\//.test(url)) url = `https://whatslink.info${url}`;
+                    else if (!/^https?:\/\//i.test(url) && /\.(webp|png|jpe?g|gif)(\?|#|$)/i.test(url)) url = `https://whatslink.info/${url.replace(/^\.?\//, '')}`;
+                    return /^https?:\/\//i.test(url) ? url : '';
+                };
+
+                const pickShot = (item) => {
+                    if (!item) return null;
+                    if (typeof item === 'string') {
+                        const src = toWhatslinkImageUrl(item);
+                        return src ? { src, time: 0 } : null;
+                    }
+                    if (Array.isArray(item)) {
+                        for (const sub of item) {
+                            const shot = pickShot(sub);
+                            if (shot) return shot;
+                        }
+                        return null;
+                    }
+                    if (typeof item === 'object') {
+                        const officialSrc = toWhatslinkImageUrl(item.screenshot);
+                        if (officialSrc) return { src: officialSrc, time: Number(item.time || 0) || 0 };
+                        const keys = ['url', 'src', 'image', 'img', 'thumbnail', 'thumb', 'preview', 'poster', 'file', 'path'];
+                        for (const key of keys) {
+                            const shot = pickShot(item[key]);
+                            if (shot) return { src: shot.src, time: Number(item.time || shot.time || 0) || 0 };
+                        }
+                        for (const val of Object.values(item)) {
+                            const shot = pickShot(val);
+                            if (shot) return { src: shot.src, time: Number(item.time || shot.time || 0) || 0 };
+                        }
+                    }
+                    return null;
+                };
+
+                const collectShots = (source) => {
+                    const list = [];
+                    const seen = new Set();
+                    const push = (value) => {
+                        const shot = pickShot(value);
+                        if (shot && shot.src && !seen.has(shot.src)) {
+                            seen.add(shot.src);
+                            list.push(shot);
+                        }
+                    };
+                    if (Array.isArray(source.screenshots)) source.screenshots.forEach(push);
+                    if (source.screenshot) push({ screenshot: source.screenshot, time: source.time });
+                    if (Array.isArray(source.thumbnails)) source.thumbnails.forEach(push);
+                    if (Array.isArray(source.images)) source.images.forEach(push);
+                    if (Array.isArray(source.files)) source.files.forEach(file => {
+                        if (file && (file.screenshots || file.screenshot || file.thumbnail || file.thumb || file.preview || file.poster || file.image || file.url || file.path)) push(file);
+                    });
+                    return list.slice(0, CONF.magnetPreviewMaxShots);
+                };
+
+                const fmtShotTime = (seconds) => {
+                    const total = Math.floor(Number(seconds || 0));
+                    if (!Number.isFinite(total) || total <= 0) return '';
+                    const h = Math.floor(total / 3600);
+                    const m = Math.floor((total % 3600) / 60);
+                    const s = total % 60;
+                    return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
+                };
+
+                const shots = collectShots(data);
+                const name = data.name || TXT.str_magnet_unknown_name;
+                const size = Number(data.size || 0) > 0 ? fmtSize(data.size) : TXT.str_magnet_unknown_name;
+                const count = Number(data.count || 0) > 0 ? String(data.count) : String(links.length);
+                const type = data.file_type || data.type || TXT.str_magnet_unknown_name;
+                const hashText = normalizeHash(links[0]);
+                const heroHtml = shots[0] ? `<img src="${esc(shots[0].src)}" alt="" draggable="false" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'pk-magnet-empty',textContent:'${esc(TXT.str_no_preview).replace(/'/g, '&#39;')}'}));">` : `<div class="pk-magnet-empty">${esc(TXT.str_no_preview)}</div>`;
+                const shotsHtml = shots.length > 1 ? `<div class="pk-magnet-shots">${shots.map((shot, idx) => `<div class="pk-magnet-thumb-wrap${idx === 0 ? ' active' : ''}" data-shot-index="${idx}" data-shot-src="${esc(shot.src)}"><img class="pk-magnet-thumb" src="${esc(shot.src)}" alt="" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.pk-magnet-thumb-wrap')?.remove();">${fmtShotTime(shot.time) ? `<span class="pk-magnet-shot-time">${esc(fmtShotTime(shot.time))}</span>` : ''}</div>`).join('')}</div>` : '';
+                const getPreviewFailText = () => {
+                    if (preview && preview.ok) return '';
+                    if (preview && preview.code === 'rate_limited') return TXT.msg_magnet_preview_rate_limited;
+                    if (preview && preview.code === 'timeout') return TXT.msg_magnet_preview_timeout;
+                    if (preview && preview.code === 'network') return TXT.msg_magnet_preview_network;
+                    return TXT.msg_magnet_preview_fail;
+                };
+                const failText = getPreviewFailText();
+                const warnHtml = failText ? `<div class="pk-magnet-warn">${esc(failText)}</div>` : '';
+
+                const m = showModal(`
+                    <div class="pk-magnet-preview-wrap">
+                        <div class="pk-magnet-hero">${heroHtml}</div>
+                        <div class="pk-magnet-body">
+                            <div>
+                                <div class="pk-magnet-title">${esc(name)}</div>
+                                <div class="pk-magnet-desc">${esc(TXT.msg_magnet_preview_desc)}</div>
+                            </div>
+                            ${warnHtml}
+                            ${shotsHtml}
+                            <div class="pk-magnet-meta">
+                                <div class="pk-magnet-meta-item"><div class="pk-magnet-meta-label">${esc(TXT.lbl_magnet_count)}</div><div class="pk-magnet-meta-value">${esc(count)}</div></div>
+                                <div class="pk-magnet-meta-item"><div class="pk-magnet-meta-label">${esc(TXT.lbl_magnet_size)}</div><div class="pk-magnet-meta-value">${esc(size)}</div></div>
+                                <div class="pk-magnet-meta-item"><div class="pk-magnet-meta-label">${esc(TXT.lbl_magnet_type)}</div><div class="pk-magnet-meta-value">${esc(type)}</div></div>
+                            </div>
+                            <div class="pk-magnet-hash">${esc(TXT.lbl_magnet_hash)}：${esc(hashText)}</div>
+                            <div class="pk-magnet-save-row">
+                                <span class="pk-magnet-save-label">${esc(L.lbl_save_to)}</span>
+                                <span class="pk-magnet-save-icon">${CONF.typeIcons.folder}</span>
+                                <span class="pk-magnet-save-name" id="pk_magnet_save_name">${esc(saveTarget.name)}</span>
+                                ${L.tip_cloud_save_path ? `<span class="pk-magnet-save-help" data-pk-tip="${esc(L.tip_cloud_save_path)}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>` : ''}
+                                <span class="pk-magnet-save-change" id="pk_magnet_change_dir">${esc(L.btn_modify)}</span>
+                            </div>
+                            <div class="pk-magnet-source">${esc(TXT.lbl_magnet_preview_source)} <a href="https://whatslink.info/" target="_blank" rel="noopener noreferrer">whatslink.info</a></div>
+                            <div class="pk-magnet-actions">
+                                <button class="pk-btn" id="pk_magnet_cancel" style="height:38px; min-width:86px; border-radius:9px;">${esc(TXT.btn_cancel)}</button>
+                                <button class="pk-btn pri" id="pk_magnet_continue" style="height:38px; min-width:128px; border-radius:9px; background:var(--pk-pri); border:none; color:#fff; font-weight:800;">${esc(TXT.btn_magnet_continue)}</button>
+                            </div>
+                        </div>
+                    </div>
+                `);
+
+                const box = m.querySelector('.pk-modal');
+                if (box) {
+                    box.style.width = '420px';
+                    box.style.padding = '0';
+                    box.style.borderRadius = '16px';
+                }
+
+                const heroBox = m.querySelector('.pk-magnet-hero');
+                const setHeroShot = (src, thumb) => {
+                    if (!heroBox || !src) return;
+                    let heroImg = heroBox.querySelector('img');
+                    if (!heroImg) {
+                        heroBox.innerHTML = `<img src="${esc(src)}" alt="" draggable="false" referrerpolicy="no-referrer">`;
+                        heroImg = heroBox.querySelector('img');
+                    }
+                    heroImg.src = src;
+                    heroImg.setAttribute('draggable', 'false');
+                    heroImg.setAttribute('referrerpolicy', 'no-referrer');
+                    m.querySelectorAll('.pk-magnet-thumb-wrap').forEach(x => x.classList.remove('active'));
+                    if (thumb) thumb.classList.add('active');
+                };
+
+                m.querySelectorAll('.pk-magnet-thumb-wrap').forEach(thumb => {
+                    thumb.addEventListener('dragstart', e => e.preventDefault());
+                    thumb.addEventListener('click', () => setHeroShot(thumb.dataset.shotSrc || thumb.querySelector('img')?.getAttribute('src'), thumb));
+                });
+
+                const heroImg = m.querySelector('.pk-magnet-hero img');
+                if (heroImg) heroImg.addEventListener('dragstart', e => e.preventDefault());
+
+                const saveNameEl = m.querySelector('#pk_magnet_save_name');
+                const changeDirEl = m.querySelector('#pk_magnet_change_dir');
+
+                if (changeDirEl) {
+                    changeDirEl.onclick = () => {
+                        showFolderSelector(saveTarget.id, (id, name, fullItem, selectedPathChain) => {
+                            saveTarget.id = id || '';
+                            saveTarget.name = name || L.lbl_default_folder;
+                            saveTarget.path = selectedPathChain || null;
+                            if (saveNameEl) saveNameEl.textContent = saveTarget.name;
+                        }, saveTarget.path);
+                    };
+                }
+
+                const close = () => {
+                    m.remove();
+                    resolve({ confirm: false });
+                };
+
+                m.querySelector('.pk-modal-close').onclick = close;
+                m.querySelector('#pk_magnet_cancel').onclick = close;
+                m.querySelector('#pk_magnet_continue').onclick = () => {
+                    m.remove();
+                    resolve({ confirm: true, targetId: saveTarget.id, targetName: saveTarget.name });
+                };
+            });
+        };
+
+        const processMagnetQueue = async () => {
+            if (state.processing) return;
+            state.processing = true;
+
+            try {
+                while (state.queue.length > 0) {
+                    const task = state.queue.shift();
+                    if (!task || !task.link || !task.signature) continue;
+
+                    if (isIgnoredSignature(task.signature)) {
+                        state.queued.delete(task.signature);
+                        continue;
+                    }
+
+                    if (state.lastSignature === task.signature && Date.now() - state.lastPromptAt < CONF.clipboardMagnetPromptGap) {
+                        state.queued.delete(task.signature);
+                        continue;
+                    }
+
+                    state.prompting = true;
+                    state.lastSignature = task.signature;
+                    state.lastPromptAt = Date.now();
+
+                    let result = null;
+
+                    try {
+                        const preview = await requestMagnetPreview(task.link);
+                        result = await showMagnetPreviewModal([task.link], preview);
+                    } catch (e) {
+                        console.error('Magnet preview queue failed:', e);
+                        result = { confirm: false };
+                    } finally {
+                        state.prompting = false;
+                    }
+
+                    if (!result || !result.confirm) {
+                        markIgnoredSignature(task.signature);
+                        state.queued.delete(task.signature);
+                        continue;
+                    }
+
+                    try {
+                        await createMagnetCloudTasks([task.link], result.targetId || '');
+                    } catch (e) {
+                        console.error('Magnet cloud task failed:', e);
+                        if (L.err_operation_failed) showToast(L.err_operation_failed, 'error');
+                    }
+
+                    state.queued.delete(task.signature);
+                    await sleep(80);
+                }
+            } finally {
+                state.processing = false;
+                if (state.queue.length > 0) processMagnetQueue();
+            }
+        };
+
+        const handleMagnetLinks = (links) => {
+            if (!links || links.length === 0) return;
+
+            let added = false;
+            const now = Date.now();
+
+            links.forEach(link => {
+                const cleanLink = String(link || '').trim();
+                if (!/^magnet:\?/i.test(cleanLink)) return;
+
+                const signature = normalizeHash(cleanLink);
+                if (!signature) return;
+                if (isIgnoredSignature(signature)) return;
+                if (state.queued.has(signature)) return;
+                if (state.lastSignature === signature && now - state.lastPromptAt < CONF.clipboardMagnetPromptGap) return;
+
+                state.queue.push({ link: cleanLink, signature });
+                state.queued.add(signature);
+                added = true;
+            });
+
+            if (added) processMagnetQueue();
+        };
+
+        const handleRawText = (rawText) => {
+            const magnetLinks = extractMagnetLinks(rawText);
+            if (magnetLinks.length === 0) return;
+            handleMagnetLinks(magnetLinks);
+        };
+
+        const shouldSkipFocusCheck = () => {
+            if (gmGet('pk_clipboard_magnet_focus', false) !== true) return true;
+            if (document.hidden) return true;
+            if (!navigator.clipboard || typeof navigator.clipboard.readText !== 'function') return true;
+            if (document.querySelector('#pk_cloud_input')) return true;
+            if (document.querySelector('.pk-modal-ov') && !state.processing && !state.prompting) return true;
+            const now = Date.now();
+            if (now - state.lastCheckAt < CONF.clipboardMagnetFocusCooldown) return true;
+            if (now - state.lastDeniedAt < CONF.clipboardMagnetDenyCooldown) return true;
+            return false;
+        };
+
+        const checkClipboardMagnet = async () => {
+            if (shouldSkipFocusCheck()) return;
+
+            state.lastCheckAt = Date.now();
+
+            let rawText = '';
+            try {
+                rawText = await navigator.clipboard.readText();
+            } catch (e) {
+                state.lastDeniedAt = Date.now();
+                return;
+            }
+
+            handleRawText(rawText);
+        };
+
+        const scheduleClipboardMagnetCheck = () => {
+            if (window.__pkClipboardMagnetFocusTimer) clearTimeout(window.__pkClipboardMagnetFocusTimer);
+            window.__pkClipboardMagnetFocusTimer = setTimeout(checkClipboardMagnet, 350);
+        };
+
+        document.addEventListener('paste', (e) => {
+            if (gmGet('pk_clipboard_magnet_paste', CONF.clipboardMagnetPaste) === false) return;
+            if (document.querySelector('#pk_cloud_input')) return;
+            const active = document.activeElement;
+            if (active && (active.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName))) return;
+            const rawText = e.clipboardData ? e.clipboardData.getData('text/plain') : '';
+            handleRawText(rawText);
+        }, true);
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) scheduleClipboardMagnetCheck();
+        });
+
+        window.addEventListener('focus', scheduleClipboardMagnetCheck);
+        window.addEventListener('pageshow', scheduleClipboardMagnetCheck);
+    };
+
+    initClipboardMagnetFocusWatcher();
+
     if (btnCloud) {
         btnCloud.onclick = () => {
             const curFolder = S.path[S.path.length - 1];
@@ -28265,80 +28971,7 @@ async function openManager(initialCache, preloadPromise) {
             const smartFixCheckbox = m.querySelector('#pk_cloud_smart_fix');
             if (smartFixCheckbox) smartFixCheckbox.onchange = () => input.dispatchEvent(new Event('input'));
 
-            const parseAndCleanLinks = (rawString, isSmartFix) => {
-                const formattedVal = rawString.replace(/(https?:\/\/|ftp:\/\/|sftp:\/\/|magnet:\?|ed2k:\/\/|thunder:\/\/)/gi, '\n$1');
-                const lines = formattedVal.split('\n').map(l => l.trim()).filter(l => l);
-
-                const uniqueTasks = new Map();
-                const linkRegex = /^(https?:\/\/|ftp:\/\/|sftp:\/\/|magnet:\?|ed2k:\/\/|thunder:\/\/)/i;
-
-                const base32ToHex = (b32) => {
-                    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-                    let bits = "";
-                    const input = b32.toUpperCase();
-                    for (let i = 0; i < input.length; i++) {
-                        const val = alphabet.indexOf(input[i]);
-                        if (val === -1) return null;
-                        bits += val.toString(2).padStart(5, '0');
-                    }
-                    let hex = "";
-                    for (let i = 0; i + 4 <= bits.length; i += 4) {
-                        const chunk = bits.substring(i, i + 4);
-                        const num = parseInt(chunk, 2);
-                        if (!isNaN(num)) hex += num.toString(16);
-                    }
-                    return hex.toUpperCase();
-                };
-
-                const extractHexHash = (url) => {
-                    const match = url.match(/urn:btih:([^&]+)/i);
-                    if (!match) return null;
-                    const hash = match[1].toUpperCase();
-                    if (hash.length === 40) return hash;
-                    if (hash.length === 32) return base32ToHex(hash);
-                    return null;
-                };
-
-                const addResult = (url) => {
-                    const hash = extractHexHash(url);
-                    if (hash) {
-                        if (!uniqueTasks.has(hash)) {
-                            uniqueTasks.set(hash, url);
-                        }
-                    } else {
-                        uniqueTasks.set(url, url);
-                    }
-                };
-
-                for (let i = 0; i < lines.length; i++) {
-                    let line = lines[i];
-
-                    if (linkRegex.test(line)) {
-                        addResult(line);
-                        continue;
-                    }
-
-                    if (isSmartFix) {
-                        let cleanedStr = line.replace(/[^a-zA-Z0-9]/g, '');
-
-                        const hexMatches = cleanedStr.matchAll(/([a-fA-F0-9]{40})/g);
-                        for (const match of hexMatches) {
-                            addResult(`magnet:?xt=urn:btih:${match[1].toUpperCase()}`);
-                            cleanedStr = cleanedStr.replace(match[1], ' '.repeat(40));
-                        }
-
-                        const b32Matches = cleanedStr.matchAll(/([a-zA-Z2-7]{32})/g);
-                        for (const match of b32Matches) {
-                            const hex = base32ToHex(match[1].toUpperCase());
-                            if (hex) {
-                                addResult(`magnet:?xt=urn:btih:${hex}`);
-                            }
-                        }
-                    }
-                }
-
-                return Array.from(uniqueTasks.values());
-            };
+            const parseAndCleanLinks = parseCloudLinks;
 
             input.oninput = () => {
                 const rawVal = input.value.trim();
@@ -28356,6 +28989,15 @@ async function openManager(initialCache, preloadPromise) {
 
                 submit.disabled = !allValid;
             };
+
+            const presetLinks = String(window.pkPendingCloudPresetLinks || '').trim();
+            window.pkPendingCloudPresetLinks = '';
+            if (presetLinks) {
+                input.value = presetLinks;
+                if (smartFixCheckbox) smartFixCheckbox.checked = true;
+                input.dispatchEvent(new Event('input'));
+                setTimeout(() => input.focus(), 0);
+            }
 
             m.querySelector('#cloud_cancel').onclick = () => m.remove();
 
@@ -29024,6 +29666,17 @@ async function openManager(initialCache, preloadPromise) {
                         </div>
 
                         <div style="position:relative;">
+                            <label for="set_clipboard_magnet_focus"
+                                   onmouseover="this.style.borderColor='var(--pk-pri)'"
+                                   onmouseout="this.style.borderColor='var(--pk-bd)'"
+                                   style="display:flex; align-items:center; justify-content:space-between; height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:0 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box;">
+                                <span style="font-size:14px; color:var(--pk-fg);user-select:none;">${L.desc_clipboard_magnet_focus}</span>
+                                <input type="checkbox" id="set_clipboard_magnet_focus" ${gmGet('pk_clipboard_magnet_focus', false)?'checked':''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer;">
+                            </label>
+                            <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; pointer-events:none; line-height:1;">${L.label_clipboard_magnet_focus}</div>
+                        </div>
+
+                        <div style="position:relative;">
                             <label for="set_keep_pos"
                                    onmouseover="this.style.borderColor='var(--pk-pri)'"
                                    onmouseout="this.style.borderColor='var(--pk-bd)'"
@@ -29669,6 +30322,7 @@ async function openManager(initialCache, preloadPromise) {
                 'pk_blur_thumb',
                 'pk_blur_scope',
                 'pk_comic_mode',
+                'pk_clipboard_magnet_focus',
                 'pk_sort_independent',
                 'pk_folder_first',
                 'pk_folder_sort_prefs',
@@ -29723,7 +30377,7 @@ async function openManager(initialCache, preloadPromise) {
                 if (k.startsWith('pk_archive_pwd_') || k === 'pk_pwd_vault' || k === 'pk_pwd_try_count' || k === 'pk_share_limits') return 3;
                 if (k.startsWith('pk_progress_') || k.startsWith('pk_duration_')) return 4;
 
-                const ruleKeys = ['pk_blacklist', 'pk_blacklist_folders', 'pk_aria2_url', 'pk_aria2_token', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_bn_find_hist', 'pk_bn_rep_hist', 'pk_dup_strictness', 'pk_skip_bl_on_del'];
+                const ruleKeys = ['pk_blacklist', 'pk_blacklist_folders', 'pk_aria2_url', 'pk_aria2_token', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_bn_find_hist', 'pk_bn_rep_hist', 'pk_dup_strictness', 'pk_skip_bl_on_del', 'pk_clipboard_magnet_focus'];
                 if (ruleKeys.includes(k) || k.startsWith('pk_scan_last_') || k.startsWith('pk_analyze_last_')) return 2;
 
                 return 1;
@@ -29792,6 +30446,7 @@ async function openManager(initialCache, preloadPromise) {
                         'pk_blur_thumb',
                         'pk_blur_scope',
                         'pk_comic_mode',
+                        'pk_clipboard_magnet_focus',
                         'pk_sort_independent',
                         'pk_folder_first',
                         'pk_folder_sort_prefs',
@@ -30017,6 +30672,7 @@ async function openManager(initialCache, preloadPromise) {
             const newBlurScope = m.querySelector('#set_thumb_scope').value;
             const newKeepPos = m.querySelector('#set_keep_pos').checked;
             const newSkipBl = m.querySelector('#set_skip_bl').checked;
+            const newClipboardMagnetFocus = m.querySelector('#set_clipboard_magnet_focus').checked;
             const newComicMode = m.querySelector('#set_comic_mode').checked;
             const sortPref = m.querySelector('input[name="set_sort_pref"]:checked').value;
             const viewPref = m.querySelector('input[name="set_view_pref"]:checked').value;
@@ -30027,6 +30683,7 @@ async function openManager(initialCache, preloadPromise) {
                 gmSet('pk_blur_thumb', newBlurScope !== 'off');
                 gmSet('pk_keep_pos', newKeepPos);
                 gmSet('pk_comic_mode', newComicMode);
+                gmSet('pk_clipboard_magnet_focus', newClipboardMagnetFocus);
                 gmSet('pk_skip_bl_on_del', newSkipBl);
 
                 const wasIndep = gmGet('pk_sort_independent', false);
@@ -30524,14 +31181,30 @@ async function openManager(initialCache, preloadPromise) {
 
                 S.sort = 'modified_time'; S.dir = 1;
 
+                const locateTargetViewMode = (typeof resolvePreferredViewMode === 'function')
+                ? resolvePreferredViewMode(targetContextId || 'root')
+                : (gmGet('pk_file_view_mode', 'grid') === 'list' ? 'list' : 'grid');
+                const shouldHoldLocateGridSync = locateTargetViewMode === 'grid';
+                if (shouldHoldLocateGridSync) {
+                    S._folderViewSyncHold = true;
+                    beginFolderViewSync();
+                }
+
                 await load();
 
                 let trackCount = 0;
                 const maxTracks = 10;
                 let trackerInterval = null;
 
-                const stopTracking = () => {
+                const releaseLocateViewSync = () => {
+                    if (!S._folderViewSyncHold) return;
+                    S._folderViewSyncHold = false;
+                    endFolderViewSync(true);
+                };
+
+                const stopTracking = (releaseViewSync = true) => {
                     if (trackerInterval) { clearInterval(trackerInterval); trackerInterval = null; }
+                    if (releaseViewSync) releaseLocateViewSync();
                 };
 
                 let hasTriedRecovery = false;
@@ -30569,17 +31242,37 @@ async function openManager(initialCache, preloadPromise) {
 
                     if (targetIdx !== -1) {
                         const vpHeight = UI.vp.clientHeight;
-                        const rowTop = targetIdx * CONF.rowHeight;
+                        let rowTop = targetIdx * CONF.rowHeight;
+
+                        if (isGridView()) {
+                            syncLayoutMetrics();
+                            const gridLayout = getGridLayout();
+                            const cols = Math.max(1, gridLayout.cols || 1);
+                            rowTop = Math.floor(targetIdx / cols) * CONF.rowHeight;
+                        }
+
                         const centerScroll = Math.max(0, rowTop - (vpHeight / 2) + (CONF.rowHeight / 2));
 
                         if (Math.abs(UI.vp.scrollTop - centerScroll) > (CONF.rowHeight / 2)) {
                             UI.vp.scrollTop = centerScroll;
-                            renderVisible();
                         }
+
+                        renderVisible();
 
                         const row = UI.in.querySelector(`.pk-row[data-id="${item.id}"]`);
                         if (row) {
-                            if (!row.dataset.flashing) {
+                            if (isGridView()) {
+                                delete row.dataset.flashing;
+                                row.style.transition = '';
+                                row.style.backgroundColor = '';
+                                row.style.border = '';
+                                row.style.borderRadius = '';
+                                row.style.boxShadow = '';
+                                row.style.outline = '';
+                                row.className = getRowClassName(true, true, S.movingIds.has(item.id));
+                                const chk = row.querySelector('input[type="checkbox"]');
+                                if (chk && !chk.checked) chk.checked = true;
+                            } else if (!row.dataset.flashing) {
                                 row.dataset.flashing = "true";
                                 row.style.transition = "none";
                                 row.style.backgroundColor = "rgba(255, 193, 7, 0.5)";
@@ -30592,6 +31285,10 @@ async function openManager(initialCache, preloadPromise) {
                             }
                         }
                     }
+
+                    requestAnimationFrame(() => {
+                        releaseLocateViewSync();
+                    });
                 };
 
                 performLocate();
