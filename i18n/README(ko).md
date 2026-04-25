@@ -4,7 +4,7 @@
 
 # 📦 PikPak Enhancement Master
 
-[![Version](https://img.shields.io/badge/Version-2.1.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.2.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
@@ -273,6 +273,10 @@ PikPak 의 일부 원시 인터페이스는 비디오 길이를 직접 반환하
 ---
 
 ## 🚀 업데이트 로그
+
+### V2.2.0
+* **클립보드 마그넷 링크 감지** 및 **마그넷 링크 미리보기** 기능을 추가했습니다.
+* UI 안정성을 개선했습니다.
 
 ### V2.1.1
 * `ws://` / `wss://` RPC만 지원하거나 비표준 포트를 사용하는 리버스 프록시 환경에서 Aria2 / Motrix 연결이 실패하는 문제를 수정했습니다.
