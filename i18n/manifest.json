@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0-i18n-001",
+  "version": "2.0.1-i18n-001",
   "baseUrl": "https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/i18n/",
   "files": {
     "tc": "tc.json",
