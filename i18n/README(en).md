@@ -4,7 +4,7 @@
 
 # 📦 PikPak Enhancement Master
 
-[![Version](https://img.shields.io/badge/Version-2.1.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.2.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
@@ -273,6 +273,10 @@ Due to browser download limitations, files inside folders are usually flattened 
 ---
 
 ## 🚀 Changelog
+
+### V2.2.0
+* Added **clipboard magnet link monitoring** and **magnet link preview**.
+* Improved UI stability.
 
 ### V2.1.1
 * Fixed Aria2 / Motrix connection failures in reverse proxy environments that only support `ws://` / `wss://` RPC or use non-standard ports.
