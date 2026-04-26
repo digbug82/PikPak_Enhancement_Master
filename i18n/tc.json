@@ -749,6 +749,8 @@
     "msg_batch_scanning": "🚀 正在高速掃描目錄結構...",
     "msg_batch_hydrating": "⚡ 正在平行擷取下載連結...",
     "msg_batch_no_files": "未發現可下載的檔案。",
+    "msg_batch_filtered": "下載過濾規則已略過 {n} 個檔案。",
+    "msg_batch_all_filtered": "已全部過濾：{n} 個檔案皆符合下載過濾規則。",
     "msg_dup_warn": "是否開始搜尋重複檔案？",
     "msg_dup_result": "發現 {n} 組重複項目。",
     "msg_dup_none": "未發現重複檔案。",
