@@ -749,6 +749,8 @@
     "msg_batch_scanning": "🚀 디렉토리 구조 고속 스캔 중...",
     "msg_batch_hydrating": "⚡ 다운로드 링크 병렬 추출 중...",
     "msg_batch_no_files": "다운로드 가능한 파일을 찾을 수 없습니다.",
+    "msg_batch_filtered": "다운로드 필터가 {n}개 파일을 건너뛰었습니다.",
+    "msg_batch_all_filtered": "모두 필터링됨: {n}개 파일이 다운로드 필터와 일치합니다.",
     "msg_dup_warn": "중복 파일 검색을 시작하시겠습니까?",
     "msg_dup_result": "{n}그룹의 중복 항목을 발견했습니다.",
     "msg_dup_none": "중복 파일을 찾지 못했습니다.",
