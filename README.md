@@ -4,7 +4,7 @@
 
 # 📦 PikPak 增强大师
 
-[![Version](https://img.shields.io/badge/Version-2.2.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.2.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
@@ -273,6 +273,9 @@
 ---
 
 ## 🚀 更新日志
+
+### V2.2.1 
+* 修复Aria2 / Motrix下载问题。
 
 ### V2.2.0
 * 新增**剪切板磁链监听**与**磁链预览**功能。 
