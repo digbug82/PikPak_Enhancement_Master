@@ -749,6 +749,8 @@
     "msg_batch_scanning": "🚀 ディレクトリ構造を高速スキャン中...",
     "msg_batch_hydrating": "⚡ ダウンロードリンクを並列抽出中...",
     "msg_batch_no_files": "ダウンロード可能なファイルが見つかりませんでした。",
+    "msg_batch_filtered": "ダウンロードフィルターにより {n} 個のファイルをスキップしました。",
+    "msg_batch_all_filtered": "すべてフィルター済み：{n} 個のファイルがダウンロードフィルターに一致しました。",
     "msg_dup_warn": "重複ファイルの検索を開始しますか？",
     "msg_dup_result": "{n} 組の重複が見つかりました。",
     "msg_dup_none": "重複ファイルは見つかりませんでした。",
