@@ -749,6 +749,8 @@
     "msg_batch_scanning": "🚀 Scanning directory structure...",
     "msg_batch_hydrating": "⚡ Extracting download links...",
     "msg_batch_no_files": "No downloadable files found.",
+    "msg_batch_filtered": "Download filters skipped {n} files.",
+    "msg_batch_all_filtered": "All filtered: {n} files matched the download filters.",
     "msg_dup_warn": "Search for duplicate files?",
     "msg_dup_result": "Found {n} duplicate groups.",
     "msg_dup_none": "No duplicates found.",
