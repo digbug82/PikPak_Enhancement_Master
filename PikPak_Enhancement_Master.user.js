@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            2.2.0
+// @version            2.2.1
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        桌面级PikPak网盘管家！包含Aria2/Motrix带目录结构推送、文件查重（哈希/时长/名称）、文件夹查重（名称/相似度/包含率）、批量重命名（正则替换/连续编号/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、多账号数据迁移、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
@@ -2023,6 +2023,8 @@ const T_LOCAL = {
         msg_batch_scanning: "🚀 正在高速扫描目录结构...",
         msg_batch_hydrating: "⚡ 正在并行提取下载链路...",
         msg_batch_no_files: "未发现可下载的文件。",
+        msg_batch_filtered: "下载过滤规则已跳过 {n} 个文件。",
+        msg_batch_all_filtered: "已全部过滤：{n} 个文件均命中下载过滤规则。",
         msg_dup_warn: "是否开始搜索重复文件？",
         msg_dup_result: "发现 {n} 组重复项。",
         msg_dup_none: "未发现重复文件。",
@@ -25154,6 +25156,7 @@ async function openManager(initialCache, preloadPromise) {
         const fNameStr = gmGet('pk_dl_filter_name', '').toLowerCase();
         const fExts = fExtStr.split(/[,，]/).map(s => s.trim().replace(/^\./, '')).filter(Boolean);
         const fNames = fNameStr.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+        const filterStats = { scanned: 0, blocked: 0 };
 
         const fSizeMinStr = gmGet('pk_dl_filter_size_min', '');
         const fSizeMaxStr = gmGet('pk_dl_filter_size_max', '');
@@ -25171,10 +25174,13 @@ async function openManager(initialCache, preloadPromise) {
             if (fSizeMax >= 0) fSizeMax *= 1024 * 1024;
         }
 
+        const hasDownloadFilterRules = fExts.length > 0 || fNames.length > 0 || (Number.isFinite(fSizeMin) && fSizeMin >= 0) || (Number.isFinite(fSizeMax) && fSizeMax >= 0);
+
         try {
             await coreRecursiveEngine(rootNodes, {
                 signal,
                 onFile: (f) => {
+                    filterStats.scanned++;
                     const lowName = f.name.toLowerCase();
                     const ext = lowName.split('.').pop();
                     let isBlocked = fExts.some(e => ext === e) || fNames.some(n => lowName.includes(n));
@@ -25183,7 +25189,11 @@ async function openManager(initialCache, preloadPromise) {
                         if (fSizeMin >= 0 && sz < fSizeMin) isBlocked = true;
                         if (fSizeMax >= 0 && sz > fSizeMax) isBlocked = true;
                     }
-                    if (!isBlocked) allFiles.push(f);
+                    if (isBlocked) {
+                        filterStats.blocked++;
+                        return;
+                    }
+                    allFiles.push(f);
                 },
                 onProgress: (st) => {
                     updateLoadTxt(`${L.msg_batch_scanning}\n${L.str_files}: ${allFiles.length} | ${L.str_speed}: ${st.currentConcurrency}`);
@@ -25191,7 +25201,18 @@ async function openManager(initialCache, preloadPromise) {
             });
 
             if (!isRunning) throw new Error('StoppedByUser');
-            if (allFiles.length === 0) { setLoad(false); showToast(L.msg_batch_no_files); return; }
+            if (allFiles.length === 0) {
+                setLoad(false);
+                if (hasDownloadFilterRules && filterStats.scanned > 0 && filterStats.blocked === filterStats.scanned) {
+                    showToast(L.msg_batch_all_filtered.replace('{n}', filterStats.blocked));
+                } else {
+                    showToast(L.msg_batch_no_files);
+                }
+                return;
+            }
+            if (hasDownloadFilterRules && filterStats.blocked > 0) {
+                showToast(L.msg_batch_filtered.replace('{n}', filterStats.blocked));
+            }
 
             let totalBytes = 0;
             for (let i = 0; i < allFiles.length; i++) {
@@ -25491,6 +25512,7 @@ async function openManager(initialCache, preloadPromise) {
         const fExts = fExtStr.split(/[,，]/).map(s => s.trim().replace(/^\./, '')).filter(Boolean);
         const fNames = fNameStr.split(/[,，]/).map(s => s.trim()).filter(Boolean);
         const stats = { hydratedCount: 0, lastUiTime: 0 };
+        const filterStats = { scanned: 0, blocked: 0 };
 
         const fSizeMinStr = gmGet('pk_dl_filter_size_min', '');
         const fSizeMaxStr = gmGet('pk_dl_filter_size_max', '');
@@ -25508,7 +25530,10 @@ async function openManager(initialCache, preloadPromise) {
             if (fSizeMax >= 0) fSizeMax *= 1024 * 1024;
         }
 
-        S.sel.forEach(id => {
+        const hasDownloadFilterRules = fExts.length > 0 || fNames.length > 0 || (Number.isFinite(fSizeMin) && fSizeMin >= 0) || (Number.isFinite(fSizeMax) && fSizeMax >= 0);
+
+        const selectedIdsForAria2 = S.getSelectedIds();
+        selectedIdsForAria2.forEach(id => {
             const item = S.itemMap.get(id);
             if (item) {
                 if (item.kind === 'drive#folder') {
@@ -25524,6 +25549,7 @@ async function openManager(initialCache, preloadPromise) {
             await coreRecursiveEngine(rootNodes, {
                 signal,
                 onFile: (f, parent) => {
+                    filterStats.scanned++;
                     const lowName = f.name.toLowerCase();
                     const ext = lowName.split('.').pop();
                     let isBlocked = fExts.some(e => ext === e) || fNames.some(n => lowName.includes(n));
@@ -25532,10 +25558,12 @@ async function openManager(initialCache, preloadPromise) {
                         if (fSizeMin >= 0 && sz < fSizeMin) isBlocked = true;
                         if (fSizeMax >= 0 && sz > fSizeMax) isBlocked = true;
                     }
-                    if (!isBlocked) {
-                        f._lineage = parent.lineage || [];
-                        allFiles.push(f);
+                    if (isBlocked) {
+                        filterStats.blocked++;
+                        return;
                     }
+                    f._lineage = parent.lineage || [];
+                    allFiles.push(f);
                 },
                 onProgress: (st) => {
                     const now = Date.now();
@@ -25547,7 +25575,18 @@ async function openManager(initialCache, preloadPromise) {
             });
 
             if (!isRunning) throw new Error('StoppedByUser');
-            if (allFiles.length === 0) { setLoad(false); showToast(L.msg_batch_no_files); return; }
+            if (allFiles.length === 0) {
+                setLoad(false);
+                if (hasDownloadFilterRules && filterStats.scanned > 0 && filterStats.blocked === filterStats.scanned) {
+                    showToast(L.msg_batch_all_filtered.replace('{n}', filterStats.blocked));
+                } else {
+                    showToast(L.msg_batch_no_files);
+                }
+                return;
+            }
+            if (hasDownloadFilterRules && filterStats.blocked > 0) {
+                showToast(L.msg_batch_filtered.replace('{n}', filterStats.blocked));
+            }
 
             setLoad(false);
             progressTask = FloatBarManager.create(L.msg_batch_hydrating);
