@@ -749,6 +749,8 @@
     "msg_batch_scanning": "🚀 Sedang memindai struktur direktori dengan kecepatan tinggi...",
     "msg_batch_hydrating": "⚡ Sedang mengekstrak jalur unduhan secara paralel...",
     "msg_batch_no_files": "Tidak ditemukan file yang dapat diunduh.",
+    "msg_batch_filtered": "Filter unduhan melewati {n} file.",
+    "msg_batch_all_filtered": "Semua terfilter: {n} file cocok dengan filter unduhan.",
     "msg_dup_warn": "Mulai mencari file duplikat?",
     "msg_dup_result": "Ditemukan {n} grup item duplikat.",
     "msg_dup_none": "Tidak ditemukan file duplikat.",
