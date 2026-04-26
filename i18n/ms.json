@@ -749,6 +749,8 @@
     "msg_batch_scanning": "🚀 Sedang mengimbas struktur direktori pada kelajuan tinggi...",
     "msg_batch_hydrating": "⚡ Sedang mengekstrak laluan muat turun secara selari...",
     "msg_batch_no_files": "Tiada fail yang boleh dimuat turun ditemui.",
+    "msg_batch_filtered": "Penapis muat turun melangkau {n} fail.",
+    "msg_batch_all_filtered": "Semua ditapis: {n} fail sepadan dengan penapis muat turun.",
     "msg_dup_warn": "Mula mencari fail pendua?",
     "msg_dup_result": "{n} kumpulan item pendua ditemui.",
     "msg_dup_none": "Tiada fail pendua ditemui.",
