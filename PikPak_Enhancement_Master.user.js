@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            2.2.1
+// @version            2.2.2
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        桌面级PikPak网盘管家！包含Aria2/Motrix带目录结构推送、文件查重（哈希/时长/名称）、文件夹查重（名称/相似度/包含率）、批量重命名（正则替换/连续编号/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、多账号数据迁移、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
@@ -3607,6 +3607,12 @@ async function openManager(initialCache, preloadPromise) {
 
             const pTip = document.getElementById('pk_p_plist_tip_global');
             if (pTip) pTip.style.display = 'none';
+
+            if (typeof player._pkDestroyPlayer === 'function') {
+                player._pkDestroyPlayer();
+                S.sideNavLog('player close: unified destroy');
+                return true;
+            }
 
             const v = player.querySelector('#pk_video');
             if (v) {
@@ -14254,6 +14260,9 @@ async function openManager(initialCache, preloadPromise) {
             return;
         }
 
+        const hasMediaOverlay = document.querySelector('.pk-img-ov, #pk-player-ov');
+        if (hasMediaOverlay) return;
+
         if (!e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey) {
             if (e.key === 'f' || e.key === 'F') {
                 if (UI.btnImgSearch && !UI.btnImgSearch.disabled && UI.btnImgSearch.style.display !== 'none') {
@@ -14294,7 +14303,7 @@ async function openManager(initialCache, preloadPromise) {
             return;
         }
 
-        const hasActiveOverlay = document.querySelector('.pk-modal-ov, .pk-img-ov, #pk-player-ov');
+        const hasActiveOverlay = document.querySelector('.pk-modal-ov');
         if (hasActiveOverlay) return;
 
         if (e.key === 'F2') {
@@ -16700,8 +16709,10 @@ async function openManager(initialCache, preloadPromise) {
             v.load();
 
             if (styleEl) styleEl.remove();
+            d._pkDestroyPlayer = null;
             d.remove();
         };
+        d._pkDestroyPlayer = destroyPlayer;
 
         v.addEventListener('play', () => {
             S.navVideoBackArmed = false;
@@ -19076,8 +19087,11 @@ async function openManager(initialCache, preloadPromise) {
         }
     `;
 
+    let isImageSearchRunning = false;
+
     async function startImageSearch(mediaElement, fileName, containerElement, originalLink) {
-        if (document.querySelector('#pk-img-search-float')) return;
+        if (isImageSearchRunning) return;
+        isImageSearchRunning = true;
 
         try { window.focus(); if (containerElement) containerElement.focus(); } catch (e) {}
 
@@ -19436,6 +19450,7 @@ async function openManager(initialCache, preloadPromise) {
             }
         } finally {
             if (progressTask) progressTask.destroy();
+            isImageSearchRunning = false;
         }
     }
 
