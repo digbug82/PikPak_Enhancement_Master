@@ -702,6 +702,7 @@ const CSS = `
     .pk-dark .pk-grid-view .pk-row { background: rgba(39,45,54,0.96); border-color: transparent; box-shadow: 0 12px 26px rgba(0,0,0,0.22); outline: none; background-clip: padding-box; }
     .pk-dark .pk-grid-view .pk-row:hover { background: rgba(45,52,62,0.98); border-color: transparent; outline: none; }
     .pk-dark .pk-grid-view .pk-row.sel { background: rgba(34,60,96,0.9); border-color: rgba(92,169,255,0.42); box-shadow: 0 12px 28px rgba(18,44,82,0.32); outline: none; background-clip: padding-box; }
+    .pk-dark .pk-grid-view .pk-row.sel:not(.pk-sel-single), .pk-dark .pk-grid-view .pk-row.sel:not(.pk-sel-single):hover, .pk-dark .pk-grid-view .pk-row.sel:not(.pk-sel-single).pk-focused { transition: none !important; animation: none !important; }
     .pk-dark .pk-grid-view .pk-row.pk-sel-single, .pk-dark .pk-grid-view .pk-row.pk-sel-single.pk-focused { transition: background 0.2s !important; }
     .pk-dark .pk-gv-check::before { background: rgba(37,42,50,0.92); border-color: rgba(124,137,156,0.9); }
     .pk-dark .pk-gv-more { background: rgba(34,40,48,0.94); color: #c0c7d2; box-shadow: 0 6px 14px rgba(0,0,0,0.24); }
