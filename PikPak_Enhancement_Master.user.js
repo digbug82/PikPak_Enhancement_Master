@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            2.2.2
+// @version            2.2.3
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        桌面级PikPak网盘管家！包含Aria2/Motrix带目录结构推送、文件查重（哈希/时长/名称）、文件夹查重（名称/相似度/包含率）、批量重命名（正则替换/连续编号/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、多账号数据迁移、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
@@ -37,6 +37,8 @@
 // @connect            litterbox.catbox.moe
 // @connect            uguu.se
 // @connect            mypikpak.com
+// @connect            upload.pikpak.site
+// @connect            *.upload.pikpak.site
 // @connect            whatslink.info
 // @connect            localhost
 // @run-at             document-start
@@ -343,6 +345,9 @@ const CONF = {
     SYSTEM_FOLDER_NAME: 'My Pack',
     browserDownloadConfirmFileCount: 10,
     browserDownloadConfirmTotalBytes: 10 * 1024 * 1024 * 1024,
+    uploadPartSizeOfficial: 1 * 1024 * 1024,
+    uploadPartMaxCount: 9999,
+    uploadPartConcurrencyOfficial: 5,
     mouseSideNavHistoryMax: 50,
     mouseSideNavDebug: false,
     clipboardMagnetPaste: true,
@@ -1223,22 +1228,44 @@ function isBlurEnabledForView(view) {
 
 const calcSha1 = async (file) => {
     if (!window.crypto || !window.crypto.subtle) return "";
-    const CHUNK_SIZE = 20 * 1024 * 1024;
-    const chunks = Math.ceil(file.size / CHUNK_SIZE);
-
-    if (file.size > 100 * 1024 * 1024) {
-        const head = file.slice(0, 1024 * 1024);
-        const mid = file.slice(file.size / 2, file.size / 2 + 1024 * 1024);
-        const tail = file.slice(file.size - 1024 * 1024);
-        const combined = new Blob([head, mid, tail]);
-        const buffer = await combined.arrayBuffer();
-        const hash = await crypto.subtle.digest('SHA-1', buffer);
-        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    const buffer = await file.arrayBuffer();
-    const hash = await crypto.subtle.digest('SHA-1', buffer);
-    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    const hexFromBytes = (bytes) => Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    const sha1Bytes = async (buffer) => new Uint8Array(await crypto.subtle.digest('SHA-1', buffer));
+    const calcXunleiCid = async () => {
+        const CID_SAMPLE_SIZE = 0x5000;
+        if (file.size < 0xF000) return hexFromBytes(await sha1Bytes(await file.arrayBuffer()));
+        const head = file.slice(0, CID_SAMPLE_SIZE);
+        const midStart = Math.floor(file.size / 3);
+        const mid = file.slice(midStart, midStart + CID_SAMPLE_SIZE);
+        const tail = file.slice(Math.max(0, file.size - CID_SAMPLE_SIZE), file.size);
+        return hexFromBytes(await sha1Bytes(await new Blob([head, mid, tail]).arrayBuffer()));
+    };
+    const calcXunleiGcid = async () => {
+        let partSize = 0x40000;
+        while ((file.size / partSize) > 0x200 && partSize < 0x200000) partSize <<= 1;
+        const digests = [];
+        if (file.size === 0) digests.push(await sha1Bytes(new ArrayBuffer(0)));
+        for (let offset = 0; offset < file.size; offset += partSize) {
+            const buffer = await file.slice(offset, Math.min(file.size, offset + partSize)).arrayBuffer();
+            digests.push(await sha1Bytes(buffer));
+        }
+        const merged = new Uint8Array(digests.length * 20);
+        digests.forEach((bytes, index) => merged.set(bytes, index * 20));
+        return hexFromBytes(await sha1Bytes(merged.buffer));
+    };
+    const queryGcidByCid = async (cid) => {
+        try {
+            const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/resource/cid?cid=${encodeURIComponent(String(cid || '').toLowerCase())}&file_size=${encodeURIComponent(String(file.size || 0))}`, { method: 'GET', headers: getHeaders() });
+            if (!res.ok) return "";
+            const data = await res.json().catch(() => null);
+            return data && data.gcid ? String(data.gcid).toUpperCase() : "";
+        } catch (e) {
+            console.warn('[Upload] CID precheck failed:', e);
+            return "";
+        }
+    };
+    const cid = await calcXunleiCid();
+    const gcid = await queryGcidByCid(cid);
+    return gcid || await calcXunleiGcid();
 };
 
 function getLang(){const u=gmGet('pk_lang','');if(u)return u;const n=navigator.language.toLowerCase();return (n==='zh'||n.startsWith('zh-cn')||n.startsWith('zh-sg'))?'zh':(n.startsWith('zh-tw')||n.startsWith('zh-hk')||n.startsWith('zh-mo'))?'tc':(n.startsWith('id')||n.startsWith('in'))?'id':n.startsWith('ms')?'ms':n.startsWith('ko')?'ko':n.startsWith('ja')?'ja':'en';}
@@ -4811,6 +4838,104 @@ async function openManager(initialCache, preloadPromise) {
         filterExtsMain: el.querySelector('#pk-filter-exts-main'),
         filterExtsMoreBtn: el.querySelector('#pk-filter-exts-more-btn'),
         filterExitBtn: el.querySelector('#pk-filter-exit-btn')
+    };
+
+    const isRealHomeUploadView = () => {
+        const path = Array.isArray(S.path) ? S.path : [];
+        const cur = path[path.length - 1] || { id: '' };
+        const pathStartsAtHome = path.length > 0 && path[0] && path[0].id === '';
+        const hasVirtualNode = path.some(p => {
+            const id = String((p && p.id) || '');
+            return id === 'virtual_search_root' || id === 'analyze_root' || id.startsWith('virtual_');
+        });
+
+        return pathStartsAtHome &&
+            !S.trashMode && !S.shareMode && !S.offlineMode && !S.uploadMode &&
+            !S.historyMode && !S.recentMode && !S.starredMode &&
+            !S.isFlattened && !S.dupMode && !S.analyzeMode && !S.scanning &&
+            !S.search && !hasVirtualNode &&
+            cur.id !== 'virtual_search_root' && cur.id !== 'analyze_root';
+    };
+
+    const closeLocalUploadMenu = () => {
+        if (typeof window.__pkCloseUploadMenu === 'function') {
+            try { window.__pkCloseUploadMenu(); } catch(e) {}
+        }
+
+        if (UI.uploadWrap) UI.uploadWrap.classList.remove('active');
+        const menus = [];
+        if (UI.uploadWrap) {
+            const localMenu = UI.uploadWrap.querySelector('.pk-dropdown-menu');
+            if (localMenu) menus.push(localMenu);
+        }
+        document.querySelectorAll('.pk-dropdown-menu[data-pk-portal="1"]').forEach(m => menus.push(m));
+
+        menus.forEach(menu => {
+            if (!menu) return;
+            if (menu._pkPlaceRaf1) cancelAnimationFrame(menu._pkPlaceRaf1);
+            if (menu._pkPlaceRaf2) cancelAnimationFrame(menu._pkPlaceRaf2);
+            menu._pkPlaceRaf1 = 0;
+            menu._pkPlaceRaf2 = 0;
+            menu.style.display = 'none';
+            if (menu._pkOriginParent && menu.parentNode !== menu._pkOriginParent) {
+                menu._pkOriginParent.appendChild(menu);
+            }
+            menu.style.position = '';
+            menu.style.top = '';
+            menu.style.left = '';
+            menu.style.right = '';
+            menu.style.bottom = '';
+            menu.style.marginTop = '';
+            menu.style.zIndex = '';
+            menu.style.minWidth = '';
+            menu.style.visibility = '';
+            menu.style.pointerEvents = '';
+            menu.style.zoom = '';
+            menu.style.transformOrigin = '';
+            delete menu.dataset.pkPortal;
+        });
+    };
+
+    const syncLocalUploadVisibility = () => {
+        if (!UI.uploadWrap) return;
+        const shouldShow = isRealHomeUploadView();
+        UI.uploadWrap.style.display = shouldShow ? 'inline-flex' : 'none';
+        if (!shouldShow) closeLocalUploadMenu();
+    };
+
+    const getBlacklistCleanKey = (str) => String(str || '').replace(/[\r\n\v\f\u2028\u2029]+/g, ' ').trim().toLowerCase();
+    const getBlacklistItemName = (item) => {
+        if (!item) return '';
+        return String(item.name || item.title || '').replace(/[\r\n\v\f\u2028\u2029]+/g, ' ').trim();
+    };
+    const getSelectedBlacklistItems = () => {
+        const selectedIds = S.getSelectedIds();
+        const items = [];
+        for (const id of selectedIds) {
+            const item = S.itemMap.get(id) ||
+                (Array.isArray(S.items) ? S.items.find(x => x && x.id === id) : null) ||
+                (Array.isArray(S.display) ? S.display.find(x => x && x.id === id) : null);
+            if (item && !item.isHeader && getBlacklistItemName(item)) items.push(item);
+        }
+        return items;
+    };
+    const isBlacklistFolderItem = (item) => item && item.kind === 'drive#folder';
+    const isItemInBlacklist = (item) => {
+        const key = getBlacklistCleanKey(getBlacklistItemName(item));
+        if (!key) return false;
+        return isBlacklistFolderItem(item) ? S.blFolderSet.has(key) : S.blSet.has(key);
+    };
+    const getBlacklistContextAction = () => {
+        if (S.updateBlCache) S.updateBlCache();
+        const items = getSelectedBlacklistItems();
+        if (items.length === 0) return 'add';
+        return items.every(isItemInBlacklist) ? 'remove' : 'add';
+    };
+    const setBlacklistContextItemState = (el) => {
+        if (!el) return;
+        const action = getBlacklistContextAction();
+        el.innerHTML = action === 'remove' ? `${ctxIcons.blRem} ${L.ctx_remove_bl}` : `${ctxIcons.blAdd} ${L.ctx_add_bl}`;
+        el.setAttribute('data-action', action);
     };
 
     const isAnalyzeGroupedRoot = () => {
@@ -8940,6 +9065,7 @@ async function openManager(initialCache, preloadPromise) {
     async function refresh() {
         S.sortId++;
         const currentReqId = S.sortId;
+        syncLocalUploadVisibility();
 
         const prevViewMode = S.viewMode === 'grid' ? 'grid' : 'list';
         const nextCur = S.path[S.path.length - 1] || { id: '' };
@@ -10870,12 +10996,15 @@ async function openManager(initialCache, preloadPromise) {
             const prevGridMediaMount = isGridMode ? row.querySelector('.pk-gv-media-mount') : null;
             const prevGridMediaNode = prevGridMediaMount ? prevGridMediaMount.firstElementChild : null;
             const prevGridMediaKey = prevGridMediaMount ? (prevGridMediaMount.dataset.pkMediaKey || '') : '';
-
+            const suppressGridRebindTransition = isGridMode && prevBoundId && prevBoundId !== d.id;
             if (isGridMode && prevBoundId && prevGridMediaNode && typeof stashFrozenGridMediaNode === 'function') {
                 stashFrozenGridMediaNode(prevBoundId, prevGridMediaKey, prevGridMediaNode, prevBoundKind);
             }
-
             resetPooledRow(row);
+            if (suppressGridRebindTransition) {
+                row.style.transition = 'none';
+                row.style.animation = 'none';
+            }
 
             const dupLayout = dupGridMeta ? dupGridMeta.indexLayout.get(i) : null;
 
@@ -11945,7 +12074,15 @@ async function openManager(initialCache, preloadPromise) {
 
                 row.dataset.pkBoundId = d.id || '';
                 row.dataset.pkBoundKind = d.kind || '';
-
+                if (suppressGridRebindTransition) {
+                    const reboundId = d.id || '';
+                    requestAnimationFrame(() => {
+                        if (row.dataset.pkBoundId === reboundId) {
+                            row.style.transition = '';
+                            row.style.animation = '';
+                        }
+                    });
+                }
                 if (isGridMode && typeof patchFrozenGridMedia === 'function') {
                     patchFrozenGridMedia(row, d, prevGridMediaNode, prevGridMediaKey);
                 }
@@ -12459,7 +12596,6 @@ async function openManager(initialCache, preloadPromise) {
                         const sh = {
                             name: UI.ctx.querySelector('#ctx-copy-name'),
                             cancel: UI.ctx.querySelector('#ctx-sh-cancel'),
-                            bl: UI.ctx.querySelector('#ctx-add-bl'),
                             detail: UI.ctx.querySelector('#ctx-sh-detail'),
                             copy: UI.ctx.querySelector('#ctx-sh-copy')
                         };
@@ -12474,16 +12610,6 @@ async function openManager(initialCache, preloadPromise) {
                         if(seps[2]) seps[2].style.display = 'block';
 
                         if(sh.cancel) sh.cancel.style.display = 'flex';
-                        if(sh.bl) {
-                            sh.bl.style.display = 'flex';
-                            let isRemoveMode = false;
-                            for (const id of selectedIds) {
-                                const target = S.itemMap.get(id);
-                                if (target && S.blSet.has((target.name || target.title || "").toLowerCase().trim())) { isRemoveMode = true; break; }
-                            }
-                            sh.bl.innerHTML = isRemoveMode ? `${ctxIcons.blRem} ${L.ctx_remove_bl}` : `${ctxIcons.blAdd} ${L.ctx_add_bl}`;
-                            sh.bl.setAttribute('data-action', isRemoveMode ? 'remove' : 'add');
-                        }
                         const showDetails = isSingle && !isShareDisabled;
                         if (showDetails) {
                             if(sepShareExtra) sepShareExtra.style.display = 'block';
@@ -12716,13 +12842,7 @@ async function openManager(initialCache, preloadPromise) {
                         if (els.bl) {
                             els.bl.style.order = '41';
                             els.bl.style.display = 'flex';
-                            let isRemove = false;
-                            for (const id of ids) {
-                                const t = S.itemMap.get(id);
-                                if (t && S.blSet.has((t.name||'').toLowerCase().trim())) { isRemove = true; break; }
-                            }
-                            els.bl.innerHTML = isRemove ? `${ctxIcons.blRem} ${L.ctx_remove_bl}` : `${ctxIcons.blAdd} ${L.ctx_add_bl}`;
-                            els.bl.setAttribute('data-action', isRemove ? 'remove' : 'add');
+                            setBlacklistContextItemState(els.bl);
                             g4++;
                         }
 
@@ -12762,14 +12882,7 @@ async function openManager(initialCache, preloadPromise) {
 
                             if(tr.addBl) {
                                 tr.addBl.style.display = 'flex';
-                                let isRemoveMode = false;
-                                const selectedIdsForBl = S.getSelectedIds();
-                                for (const id of selectedIdsForBl) {
-                                    const item = S.itemMap.get(id);
-                                    if (item && (item.kind === 'drive#folder' ? S.blFolderSet.has(item.name.toLowerCase().trim()) : S.blSet.has(item.name.toLowerCase().trim()))) { isRemoveMode = true; break; }
-                                }
-                                tr.addBl.innerHTML = isRemoveMode ? `${ctxIcons.blRem} ${L.ctx_remove_bl}` : `${ctxIcons.blAdd} ${L.ctx_add_bl}`;
-                                tr.addBl.setAttribute('data-action', isRemoveMode ? 'remove' : 'add');
+                                setBlacklistContextItemState(tr.addBl);
                             }
                         }else {
                             if(itms.share) itms.share.style.display = 'flex';
@@ -12847,24 +12960,7 @@ async function openManager(initialCache, preloadPromise) {
 
                             if (itms.addBl) {
                                 itms.addBl.style.display = 'flex';
-                                S.updateBlCache();
-
-                                let isRemoveMode = false;
-                                const selectedIdsForBl = S.getSelectedIds();
-                                for (const id of selectedIdsForBl) {
-                                    const item = S.itemMap.get(id);
-                                    if (!item) continue;
-                                    const cleanName = (item.name || "").replace(/[\r\n\v\f\u2028\u2029]+/g, ' ').trim().toLowerCase();
-
-                                    if (item.kind === 'drive#folder') {
-                                        if (S.blFolderSet.has(cleanName)) { isRemoveMode = true; break; }
-                                    } else {
-                                        if (S.blSet.has(cleanName)) { isRemoveMode = true; break; }
-                                    }
-                                }
-
-                                itms.addBl.innerHTML = isRemoveMode ? `${ctxIcons.blRem} ${L.ctx_remove_bl}` : `${ctxIcons.blAdd} ${L.ctx_add_bl}`;
-                                itms.addBl.setAttribute('data-action', isRemoveMode ? 'remove' : 'add');
+                                setBlacklistContextItemState(itms.addBl);
                             }
                             if (itms.del) itms.del.style.display = 'flex';
                         }
@@ -14276,7 +14372,7 @@ async function openManager(initialCache, preloadPromise) {
 
         if (e.key === 'Delete' && e.altKey) {
             e.preventDefault();
-            if (S.uploadMode) return;
+            if (S.shareMode || S.uploadMode) return;
 
             const existingModal = Array.from(document.querySelectorAll('.pk-modal-ov')).find(m => {
                 const title = m.querySelector('h3');
@@ -14696,6 +14792,8 @@ async function openManager(initialCache, preloadPromise) {
     document.addEventListener('mouseup', mouseHandler);
 
     function updateStat() {
+        syncLocalUploadVisibility();
+
         let total = 0;
         const visibleIdSet = new Set();
         const len = S.display.length;
@@ -19771,6 +19869,7 @@ async function openManager(initialCache, preloadPromise) {
         }
 
         S.search = txt;
+        syncLocalUploadVisibility();
 
         if (S.dupMode) {
             if (S.pinnedDupPath) {
@@ -20009,6 +20108,7 @@ async function openManager(initialCache, preloadPromise) {
                 UI.searchInput.value = '';
                 S.search = '';
                 S.lastGlobalResults = [];
+                syncLocalUploadVisibility();
 
                 try {
                     const prefStore = JSON.parse(gmGet('pk_folder_sort_prefs', '{}'));
@@ -20345,6 +20445,7 @@ async function openManager(initialCache, preloadPromise) {
         };
 
         S.scanning = true;
+        syncLocalUploadVisibility();
 
         try {
             await coreRecursiveEngine(rootNodes, {
@@ -20760,6 +20861,7 @@ async function openManager(initialCache, preloadPromise) {
                 if (UI.chkSearchPath) UI.chkSearchPath.checked = false;
 
                 S.scanning = true;
+                syncLocalUploadVisibility();
 
                 UI.scan.style.display = 'none';
                 UI.btnExit.style.display = 'flex';
@@ -20813,6 +20915,7 @@ async function openManager(initialCache, preloadPromise) {
                 m.remove();
 
                 S.scanning = true;
+                syncLocalUploadVisibility();
                 S.scanId = (S.scanId || 0) + 1;
                 const myScanId = S.scanId;
 
@@ -21845,6 +21948,7 @@ async function openManager(initialCache, preloadPromise) {
             };
 
             S.scanning = true;
+            syncLocalUploadVisibility();
             let totalFilesScanned = 0;
             let totalDirsScanned = 0;
 
@@ -26240,12 +26344,13 @@ async function openManager(initialCache, preloadPromise) {
     };
 
     const processBlacklistAction = async (action) => {
-        const selectedIds = S.getSelectedIds();
-        const selectedIdSet = new Set(selectedIds);
-        const totalSelected = selectedIds.length;
+        if (S.updateBlCache) S.updateBlCache();
+        const selectedItems = getSelectedBlacklistItems();
+        const totalSelected = selectedItems.length;
         if (totalSelected === 0) return;
 
-        const isRemove = action === 'remove';
+        const allSelectedAlreadyAdded = selectedItems.every(isItemInBlacklist);
+        const isRemove = allSelectedAlreadyAdded && action !== 'add';
         const progressTask = FloatBarManager.create(L.str_init_op);
         const updateFloat = progressTask.update;
 
@@ -26254,7 +26359,6 @@ async function openManager(initialCache, preloadPromise) {
 
         await sleep(16);
 
-        const getCleanKey = (str) => str ? str.toLowerCase().trim() : "";
         const parseList = (str) => str ? str.split(/[\r\n]+/).map(s => s.trim()).filter(s => s) : [];
 
         const fileListStr = gmGet('pk_blacklist', '');
@@ -26271,27 +26375,25 @@ async function openManager(initialCache, preloadPromise) {
         let processedCount = 0;
         let lastYieldTime = performance.now();
 
-        const len = S.items.length;
+        const len = selectedItems.length;
         for (let i = 0; i < len; i++) {
             if (!isRunning) break;
-            const item = S.items[i];
-            if (selectedIdSet.has(item.id)) {
-                const name = item.name.replace(/[\r\n\v\f\u2028\u2029]+/g, ' ').trim();
-                const key = getCleanKey(name);
-                if (item.kind === 'drive#folder') {
-                    targetFolderKeys.add(key);
-                    if (!isRemove) toAddFolders.push(name);
-                } else {
-                    targetFileKeys.add(key);
-                    if (!isRemove) toAddFiles.push(name);
-                }
-                processedCount++;
-                if ((processedCount & 63) === 0) {
-                    const now = performance.now();
-                    if (now - lastYieldTime > 12) {
-                        updateFloat(`${L.str_analyzing} ${processedCount} / ${totalSelected}`);
-                        await sleep(0); lastYieldTime = performance.now();
-                    }
+            const item = selectedItems[i];
+            const name = getBlacklistItemName(item);
+            const key = getBlacklistCleanKey(name);
+            if (isBlacklistFolderItem(item)) {
+                targetFolderKeys.add(key);
+                if (!isRemove) toAddFolders.push(name);
+            } else {
+                targetFileKeys.add(key);
+                if (!isRemove) toAddFiles.push(name);
+            }
+            processedCount++;
+            if ((processedCount & 63) === 0) {
+                const now = performance.now();
+                if (now - lastYieldTime > 12) {
+                    updateFloat(`${L.str_analyzing} ${processedCount} / ${totalSelected}`);
+                    await sleep(0); lastYieldTime = performance.now();
                 }
             }
         }
@@ -26307,22 +26409,22 @@ async function openManager(initialCache, preloadPromise) {
         if (isRemove) {
             const oldFileCount = currentFiles.length;
             const oldFolderCount = currentFolders.length;
-            currentFiles = currentFiles.filter(name => !targetFileKeys.has(getCleanKey(name)));
-            currentFolders = currentFolders.filter(name => !targetFolderKeys.has(getCleanKey(name)));
+            currentFiles = currentFiles.filter(name => !targetFileKeys.has(getBlacklistCleanKey(name)));
+            currentFolders = currentFolders.filter(name => !targetFolderKeys.has(getBlacklistCleanKey(name)));
             if (oldFileCount !== currentFiles.length || oldFolderCount !== currentFolders.length) {
                 dataChanged = true;
                 finalCount = (oldFileCount - currentFiles.length) + (oldFolderCount - currentFolders.length);
             }
         } else {
-            const existingFileKeys = new Set(currentFiles.map(s => getCleanKey(s)));
-            const existingFolderKeys = new Set(currentFolders.map(s => getCleanKey(s)));
+            const existingFileKeys = new Set(currentFiles.map(s => getBlacklistCleanKey(s)));
+            const existingFolderKeys = new Set(currentFolders.map(s => getBlacklistCleanKey(s)));
             let addedCount = 0;
             for (const name of toAddFiles) {
-                const key = getCleanKey(name);
+                const key = getBlacklistCleanKey(name);
                 if (!existingFileKeys.has(key)) { currentFiles.push(name); existingFileKeys.add(key); addedCount++; dataChanged = true; }
             }
             for (const name of toAddFolders) {
-                const key = getCleanKey(name);
+                const key = getBlacklistCleanKey(name);
                 if (!existingFolderKeys.has(key)) { currentFolders.push(name); existingFolderKeys.add(key); addedCount++; dataChanged = true; }
             }
             finalCount = addedCount;
@@ -26378,6 +26480,7 @@ async function openManager(initialCache, preloadPromise) {
             restoreUploadMenu();
             UI.uploadWrap.classList.remove('active');
         };
+        window.__pkCloseUploadMenu = closeUploadMenu;
 
         const placeUploadMenu = () => {
             if (!uploadMenu) return;
@@ -26517,6 +26620,10 @@ async function openManager(initialCache, preloadPromise) {
 
         UI.btnUpload.onclick = (e) => {
             e.stopPropagation();
+            if (!isRealHomeUploadView()) {
+                syncLocalUploadVisibility();
+                return;
+            }
             const isActive = uploadMenu && uploadMenu.style.display === 'flex' && UI.uploadWrap.classList.contains('active');
 
             document.querySelectorAll('.pk-dropdown-menu, .pk-select-menu').forEach(m => m.style.display = 'none');
@@ -26567,7 +26674,7 @@ async function openManager(initialCache, preloadPromise) {
                     }
                 }
 
-                if (spdTxt) spdTxt.innerHTML = task.status === 'DONE' ? '<span style="color:#52c41a">${L.lbl_done_check}</span>' : S.upMng.fmtSpeed(task.speed);
+                if (spdTxt) spdTxt.innerHTML = task.status === 'DONE' ? `<span style="color:#52c41a">${L.lbl_done_check}</span>` : S.upMng.fmtSpeed(task.speed);
             }
         };
         const resolveTask = (task) => { if (S.uploadMode) updateRowUI(task); };
@@ -26810,7 +26917,7 @@ async function openManager(initialCache, preloadPromise) {
                             try {
                                 res = await fetch('https://api-drive.mypikpak.com/drive/v1/files', {
                                     method: 'POST', headers: getHeaders(), body: JSON.stringify({
-                                        kind: "drive#file", parent_id: safePid, name: task.name, size: task.size, hash: hash, upload_type: "UPLOAD_TYPE_RESUMABLE"
+                                        hash: hash, name: task.name, size: String(task.size), kind: "drive#file", id: "", parent_id: safePid, upload_type: "UPLOAD_TYPE_RESUMABLE", folder_type: "NORMAL", resumable: { provider: "PROVIDER_ALIYUN" }
                                     })
                                 });
 
@@ -26878,11 +26985,50 @@ async function openManager(initialCache, preloadPromise) {
                         if (data.name) task.name = data.name;
                     }
 
+                    const uploadTaskId = (data.task && data.task.id) || data.task_id || data.upload_task_id || (data.resumable && data.resumable.task_id) || '';
+                    if (uploadTaskId) task._uploadTaskId = uploadTaskId;
+
                     if (newlyCreatedFileId && !task._ghostAdded) {
                         if (typeof window.pkAddGhostFile === 'function') window.pkAddGhostFile(newlyCreatedFileId);
                         task._ghostAdded = true;
                     }
                     S.upMng.saveTask(task);
+
+                    const waitOfficialUploadTaskComplete = async () => {
+                        if (!task._uploadTaskId) return true;
+                        const maxPoll = 20;
+                        for (let i = 1; i <= maxPoll; i++) {
+                            if (task._deleted) throw new Error("Aborted");
+                            task.status = 'RUNNING';
+                            task.speed = 0;
+                            task.progress = Math.min(99.8, Math.max(99, Number(task.progress) || 99));
+                            task.message = L.msg_wait_server.replace('{c}', i).replace('{t}', maxPoll);
+                            S.upMng.saveTask(task);
+                            if (S.uploadMode) updateRowUI(task);
+
+                            try {
+                                const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/tasks/${encodeURIComponent(task._uploadTaskId)}`, { headers: getHeaders() });
+                                if (res.ok) {
+                                    const taskData = await res.json().catch(() => null);
+                                    const phase = (taskData && taskData.phase) || (taskData && taskData.task && taskData.task.phase) || '';
+                                    const ref = (taskData && taskData.reference_resource) || (taskData && taskData.task && taskData.task.reference_resource) || {};
+                                    if (ref.name) task.name = ref.name;
+                                    if (ref.mime_type) task.mime_type = ref.mime_type;
+                                    if (ref.icon_link) task.icon_link = ref.icon_link;
+                                    if (ref.thumbnail_link) task.thumbnail_link = ref.thumbnail_link;
+                                    if (phase === 'PHASE_TYPE_COMPLETE') return true;
+                                    if (phase === 'PHASE_TYPE_ERROR') throw new Error((taskData && (taskData.message || taskData.error_description)) || L.err_unknown);
+                                }
+                            } catch (e) {
+                                if (e.message === "Aborted") throw e;
+                                console.warn('[Upload] Task completion poll warning:', e);
+                            }
+
+                            await sleep(i < 6 ? 1000 : 2000);
+                        }
+                        console.warn(`[Upload] Task completion poll timeout, fallback to local completion: ${task.name}`);
+                        return true;
+                    };
 
                     if (task._deleted) {
                         console.warn(`[Upload] Task ${task.id} was deleted by user during initialization. Triggering self-destruct.`);
@@ -26940,15 +27086,14 @@ async function openManager(initialCache, preloadPromise) {
                         const p = data.resumable.params;
                         const ossUA = 'aliyun-sdk-js/6.23.0 Microsoft Edge 144.0.0.0 on Windows 10 64-bit';
                         const objectName = p.key;
-                        const host = `https://${p.bucket}.${p.endpoint}`;
+                        const isOssCname = p.cname === true || String(p.cname || '').toLowerCase() === 'true';
+                        const ossEndpoint = String(p.endpoint || '').replace(/^https?:\/\//i, '').replace(/\/+$/g, '');
+                        const host = isOssCname ? `https://${ossEndpoint}` : `https://${p.bucket}.${ossEndpoint}`;
 
                         const totalSize = task.file.size;
-                        let PART_SIZE = 5 * 1024 * 1024;
-                        if (totalSize > 4 * 1024 * 1024 * 1024) {
-                            PART_SIZE = 20 * 1024 * 1024;
-                        } else if (totalSize > 1 * 1024 * 1024 * 1024) {
-                            PART_SIZE = 10 * 1024 * 1024;
-                        }
+                        const officialPartSize = Number(CONF.uploadPartSizeOfficial) || (1 * 1024 * 1024);
+                        const maxPartCount = Number(CONF.uploadPartMaxCount) || 9999;
+                        const PART_SIZE = Math.max(officialPartSize, Math.ceil(totalSize / maxPartCount));
 
                         const partCount = Math.ceil(totalSize / PART_SIZE);
 
@@ -27033,7 +27178,7 @@ async function openManager(initialCache, preloadPromise) {
                             }
 
                             const parts = new Array(partCount);
-                            const CONCURRENCY = 3;
+                            const CONCURRENCY = Math.max(1, Number(CONF.uploadPartConcurrencyOfficial) || 5);
 
                             let completedBytes = 0;
                             const activeParts = new Map();
@@ -27230,6 +27375,8 @@ async function openManager(initialCache, preloadPromise) {
                                 }
                             })();
                         }
+
+                        await waitOfficialUploadTaskComplete();
 
                         task.status = 'DONE'; task.progress = 100; task.speed = 0; task.message = L.msg_task_upload_done;
                         if (typeof window.pkRemoveGhostFile === 'function' && task.file_id) window.pkRemoveGhostFile(task.file_id);
@@ -27810,7 +27957,7 @@ async function openManager(initialCache, preloadPromise) {
             [UI.btnUpPause, UI.btnUpStart, UI.btnUpDel, UI.btnUpClearAll, UI.btnUpClearDone, UI.btnUpClearIng].forEach(b => { if(b) b.style.display = 'none'; });
             const upSep = document.getElementById('pk-up-sep');
             if(upSep) upSep.style.display = 'none';
-            if(UI.uploadWrap) UI.uploadWrap.style.display = 'inline-flex';
+            if(UI.uploadWrap) UI.uploadWrap.style.display = 'none';
 
             shareBtns.forEach(b => { if(b) b.style.display = 'none'; });
 
@@ -27823,8 +27970,7 @@ async function openManager(initialCache, preloadPromise) {
         }
         else if (S.shareMode) {
             UI.win.classList.remove('pk-mode-trash');
-            stdBtns.forEach(b => { if(b && b !== UI.btnBlacklistManager) b.style.display = 'none'; });
-            if (UI.btnBlacklistManager) UI.btnBlacklistManager.style.display = 'inline-flex';
+            stdBtns.forEach(b => { if(b) b.style.display = 'none'; });
             if (UI.btnRefresh) UI.btnRefresh.style.display = 'inline-flex';
             shareBtns.forEach(b => { if(b) b.style.display = 'inline-flex'; });
             if(UI.lblGlobal) UI.lblGlobal.style.display = 'none';
@@ -27903,6 +28049,7 @@ async function openManager(initialCache, preloadPromise) {
             if (UI.lblGlobal) UI.lblGlobal.style.display = 'none';
             if (UI.chkGlobal) UI.chkGlobal.checked = false;
         }
+        syncLocalUploadVisibility();
 
         S.clearSelection();
 
@@ -31220,6 +31367,7 @@ async function openManager(initialCache, preloadPromise) {
                 if(UI.uploadWrap) UI.uploadWrap.style.display = 'inline-flex';
 
                 S.path = pathChain;
+                syncLocalUploadVisibility();
 
                 if (UI.lblGlobal) UI.lblGlobal.style.display = 'flex';
 
@@ -34090,7 +34238,7 @@ async function openManager(initialCache, preloadPromise) {
     ctx.querySelector('#ctx-add-bl').onclick = (e) => {
         ctx.style.display = 'none';
 
-        const action = e.target.getAttribute('data-action');
+        const action = e.currentTarget.getAttribute('data-action');
 
         processBlacklistAction(action);
     };
@@ -34196,8 +34344,7 @@ async function openManager(initialCache, preloadPromise) {
             if(UI.bottomGrp) UI.bottomGrp.style.display = 'none';
             if (S.path[0]) S.path[0].name = L.btn_nav_share;
 
-            stdBtns.forEach(b => { if(b && b !== UI.btnBlacklistManager) b.style.display = 'none'; });
-            if (UI.btnBlacklistManager) UI.btnBlacklistManager.style.display = 'inline-flex';
+            stdBtns.forEach(b => { if(b) b.style.display = 'none'; });
             shareBtns.forEach(b => { if(b) b.style.display = 'inline-flex'; });
         }
         else if (S.offlineMode) {
@@ -34246,7 +34393,7 @@ async function openManager(initialCache, preloadPromise) {
 
             stdBtns.forEach(b => { if(b) b.style.display = 'inline-flex'; });
             shareBtns.forEach(b => { if(b) b.style.display = 'none'; });
-            if(UI.uploadWrap) UI.uploadWrap.style.display = 'inline-flex';
+            if(UI.uploadWrap) UI.uploadWrap.style.display = 'none';
             downBtns.forEach(b => { if(b) b.style.display = 'inline-flex'; });
         }
         else {
@@ -34262,6 +34409,7 @@ async function openManager(initialCache, preloadPromise) {
 
         if(UI.topBar) UI.topBar.style.display = 'flex';
         if(UI.crumb) { UI.crumb.style.opacity = '1'; UI.crumb.style.display = 'flex'; }
+        syncLocalUploadVisibility();
 
         refresh();
     };
