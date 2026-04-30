@@ -274,6 +274,10 @@ Due to browser download limitations, files inside folders are usually flattened 
 
 ## 🚀 Changelog
 
+### V2.2.3
+* Fixed upload failures.
+* Improved UI stability.
+
 ### V2.2.2
 * Fixed shortcut key hierarchy conflicts.
 
