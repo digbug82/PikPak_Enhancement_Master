@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            2.2.3
+// @version            2.2.4
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        桌面级PikPak网盘管家！包含Aria2/Motrix带目录结构推送、文件查重（哈希/时长/名称）、文件夹查重（名称/相似度/包含率）、批量重命名（正则替换/连续编号/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、多账号数据迁移、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
@@ -362,6 +362,19 @@ const CONF = {
     magnetPreviewErrorCacheTTL: 10 * 60 * 1000,
     magnetPreviewCircuitTTL: 5 * 60 * 1000,
     magnetPreviewMaxShots: 5,
+    potplayerLaunchStateKey: 'pk_potplayer_launch_state',
+    potplayerLaunchStateSchemaVersion: 1,
+    potplayerProtocolStateKey: 'pk_potplayer_protocol_state',
+    potplayerProtocolStateSchemaVersion: 1,
+    potplayerProtocolRepairVersion: '20260501',
+    potplayerRegDeleteFileName: 'pikpak-potplayer-delete.reg',
+    potplayerRegCustomInstallFileName: 'pikpak-potplayer-install-custom.reg',
+    potplayerBrowserPolicyRegFileName: 'pikpak-potplayer-browser-policy.reg',
+    potplayerAutoRepairFailThreshold: 2,
+    potplayerPromptCooldown: 10 * 60 * 1000,
+    potplayerLikelyOpenTrustTTL: 24 * 60 * 60 * 1000,
+    potplayerSuppressTodayTTL: 24 * 60 * 60 * 1000,
+    potplayerPostRepairConfirmDelay: 6000,
     logoSVG: `<svg viewBox="0 0 238 200" style="width:24px;height:24px;border-radius:4px;flex-shrink:0;"><path d="M0 0 C1.82724609 0.01353516 1.82724609 0.01353516 3.69140625 0.02734375 C4.59761719 0.03894531 5.50382812 0.05054688 6.4375 0.0625 C5.95097979 7.11704304 4.33696858 12.90149479 1.6875 19.4375 C1.35234375 20.32566406 1.0171875 21.21382812 0.671875 22.12890625 C0.3315625 22.98097656 -0.00875 23.83304688 -0.359375 24.7109375 C-0.66198242 25.47583496 -0.96458984 26.24073242 -1.27636719 27.02880859 C-3.01571023 29.77913653 -4.60880008 30.70366989 -7.5625 32.0625 C-10.93383789 32.72265625 -10.93383789 32.72265625 -14.78515625 33.125 C-15.47874237 33.20142731 -16.17232849 33.27785461 -16.88693237 33.3565979 C-18.36660067 33.51855298 -19.84685768 33.67520381 -21.3276062 33.82696533 C-25.19232303 34.22318595 -29.05286739 34.65697538 -32.9140625 35.0859375 C-33.67180466 35.16903168 -34.42954681 35.25212585 -35.21025085 35.33773804 C-40.99791882 35.97875931 -46.74864414 36.77615252 -52.5 37.6875 C-61.81496788 39.10080547 -71.19269316 40.07620454 -80.5625 41.0625 C-19.8425 41.0625 40.8775 41.0625 103.4375 41.0625 C91.8875 39.7425 80.3375 38.4225 68.4375 37.0625 C63.8175 36.4025 59.1975 35.7425 54.4375 35.0625 C49.17221542 34.42736314 43.90722683 33.79696512 38.63671875 33.20703125 C37.62996094 33.08714844 36.62320313 32.96726563 35.5859375 32.84375 C34.69052246 32.74126953 33.79510742 32.63878906 32.87255859 32.53320312 C30.35601376 32.0467485 28.59527547 31.44037784 26.4375 30.0625 C23.38532266 24.97553776 21.3341425 19.45473677 19.1875 13.9375 C18.91695801 13.25671387 18.64641602 12.57592773 18.36767578 11.87451172 C16.82394482 7.78804812 16.13851057 4.42502757 16.4375 0.0625 C33.20320897 -0.76054389 50.04132 2.04640823 66.578125 4.53515625 C70.96365446 5.13439358 75.35589707 5.627565 79.75488281 6.11669922 C97.85972043 8.13836316 97.85972043 8.13836316 106.6875 9.4375 C107.39487305 9.52700928 108.10224609 9.61651855 108.83105469 9.70874023 C113.96714941 10.51808328 116.87598017 12.31623275 120.4375 16.0625 C121.69830294 18.53927732 122.67025259 20.7202309 123.5625 23.3125 C124.02136126 24.56846882 124.48232815 25.8236702 124.9453125 27.078125 C125.27250149 28.00288179 125.27250149 28.00288179 125.60630035 28.94632053 C126.38750394 31.05750635 126.38750394 31.05750635 127.44002533 32.93062496 C131.07482517 39.83448151 131.00351579 46.31795394 130.95507812 53.99243164 C130.96050802 55.37978344 130.96763552 56.76712947 130.97631836 58.15446472 C130.99445028 61.89829685 130.98752708 65.6416848 130.97480202 69.38552403 C130.96462344 73.31622656 130.97408092 77.24689291 130.98034668 81.17759705 C130.98760817 87.77544941 130.97807403 94.37312221 130.95898438 100.97094727 C130.93720936 108.58452515 130.94427739 116.19767461 130.96629 123.81124216 C130.98447611 130.36524706 130.98698696 136.91912344 130.97653532 143.47314543 C130.97031913 147.38014362 130.96941296 151.2869408 130.98268127 155.19392586 C130.99428653 158.8672447 130.9861299 162.54001414 130.96310425 166.213274 C130.95534421 168.19404482 130.96713242 170.17486244 130.97961426 172.15560913 C130.90049754 180.52230774 129.95755225 186.09535704 124.25390625 192.5234375 C123.51011719 193.15507812 122.76632813 193.78671875 122 194.4375 C121.25878906 195.08460938 120.51757812 195.73171875 119.75390625 196.3984375 C114.7661098 199.98157627 110.22842399 200.35421576 104.22135925 200.32992554 C103.39785408 200.33445665 102.5743489 200.33898776 101.72588903 200.34365618 C98.968488 200.35630894 96.21128426 200.35467924 93.45385742 200.35302734 C91.475975 200.35901206 89.49809491 200.36581748 87.5202179 200.37338257 C82.14823484 200.39105594 76.77631549 200.39573853 71.40430617 200.39701414 C66.91878502 200.39891354 62.4332787 200.40627158 57.94776326 200.41335833 C47.36384951 200.42964512 36.77996977 200.43452703 26.19604492 200.43310547 C15.28118177 200.43190408 4.36651636 200.45300486 -6.54829675 200.4845928 C-15.92170288 200.51075235 -25.29504442 200.52147289 -34.66848677 200.52019465 C-40.26569836 200.51968491 -45.86273424 200.52537507 -51.45990944 200.54655075 C-56.725388 200.56592749 -61.99052314 200.5660613 -67.25601387 200.55151749 C-69.1861191 200.54942757 -71.11624579 200.55414114 -73.04631424 200.5662384 C-75.68641426 200.58171127 -78.32533312 200.57236959 -80.96540833 200.55697632 C-81.72466655 200.56726344 -82.48392478 200.57755057 -83.26619083 200.58814943 C-90.327556 200.49750269 -96.39704041 197.82485418 -101.375 192.75 C-102.18904297 191.95142578 -102.18904297 191.95142578 -103.01953125 191.13671875 C-108.29053612 184.05088689 -108.01804154 177.09915158 -108.0300293 168.55004883 C-108.04229625 167.18245883 -108.05575106 165.81487905 -108.07029724 164.4473114 C-108.10523797 160.74401042 -108.12059214 157.04088761 -108.13013434 153.33744264 C-108.13673436 151.01403475 -108.14708893 148.69067299 -108.15863991 146.36728477 C-108.19836069 138.23287671 -108.22038571 130.09860956 -108.22827148 121.96411133 C-108.23610728 114.43116961 -108.28516577 106.89925647 -108.35333699 99.36664182 C-108.41007964 92.86514961 -108.43519788 86.36399446 -108.43721896 79.86225718 C-108.43904166 75.9947118 -108.45309089 72.1282487 -108.50003624 68.26096535 C-108.72797687 48.29049317 -107.52961567 30.83210742 -95.5625 14.0625 C-92.23797604 10.732487 -88.44904231 10.20048941 -83.953125 9.5 C-83.20613342 9.37633057 -82.45914185 9.25266113 -81.68951416 9.12524414 C-74.04584045 7.901492 -66.3645662 7.06662299 -58.66394043 6.29776001 C-54.62860447 5.8940274 -50.59547976 5.46951727 -46.5625 5.04296875 C-45.77776306 4.96008102 -44.99302612 4.8771933 -44.18450928 4.79179382 C-36.33754684 3.9513441 -28.53467892 2.87051571 -20.734375 1.67578125 C-13.79617508 0.63078847 -7.03103815 -0.06826251 0 0 Z M-47 131 L-15 106 L-47 81 L-47 91 L-27 106 L-47 121 Z M45.4375 89.0625 C43.16309531 93.61130937 44.11732026 99.81887268 44.0625 104.8125 C44.02511719 106.08867188 43.98773438 107.36484375 43.94921875 108.6796875 C43.6563417 116.25277258 43.6563417 116.25277258 46.7109375 122.91015625 C50.0632924 125.55649945 51.41007501 125.90713502 55.50390625 125.58984375 C58.83921214 124.68021487 60.4149221 122.75927054 62.4375 120.0625 C64.03299443 115.26404894 63.62174204 110.1852134 63.625 105.1875 C63.64336914 103.71603516 63.64336914 103.71603516 63.66210938 102.21484375 C63.77173933 93.57358621 63.77173933 93.57358621 59.75 86.1875 C54.01325068 83.39664894 49.78182352 84.71817648 45.4375 89.0625 Z M-18.5625 155.0625 C-20.89546251 157.88967213 -20.89546251 157.88967213 -20.3125 161.125 C-19.8031756 164.161959 -19.8031756 164.161959 -17.5625 166.0625 C-15.5023267 166.81656896 -13.41368556 167.49416461 -11.3125 168.125 C-10.19359375 168.46660156 -9.0746875 168.80820313 -7.921875 169.16015625 C-1.62436639 170.85169635 4.26860909 171.24487637 10.75 171.25 C11.9555957 171.26836914 11.9555957 171.26836914 13.18554688 171.28710938 C21.14907742 171.30632948 28.31945463 169.57146397 35.875 167.125 C36.88433594 166.80660156 37.89367187 166.48820313 38.93359375 166.16015625 C41.73511224 165.200361 41.73511224 165.200361 43.4375 162.0625 C43.1133631 158.74009676 42.82973697 157.45473697 40.4375 155.0625 C35.63637087 154.61062902 31.50016124 155.74460874 26.9375 157.0625 C14.69655136 160.31686985 0.09246916 160.8899845 -11.5625 155.0625 C-15.0625 154.72916667 -15.0625 154.72916667 -18.5625 155.0625 Z " fill="currentColor" transform="translate(107.5625,-0.0625)"/></svg>`,
     emptySVG: `<svg viewBox="-2 -2 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 10L7 5H17L19 10H5Z" fill="#E2E8F0" stroke="#94A3B8" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 10V18C4 19.1 4.9 20 6 20H18C19.1 20 20 19.1 20 18V10" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10L1 6.5" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 10L23 6.5" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><g stroke="#64748B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 13L10 14L9 15"/><path d="M15 13L14 14L15 15"/><path d="M11 17.5H13"/></g>`,
     dupHashSVG: `<svg style="width:24px;height:24px;margin-right:8px;flex-shrink:0;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M798 322.42A308.78 308.78 0 0 0 676.73 211.1a17.5 17.5 0 1 0-15.94 31.16 272.73 272.73 0 0 1 148.71 243v63.83c0 25.58-3.14 134.1-8.62 159.68a17.5 17.5 0 0 0 13.44 20.78 17.94 17.94 0 0 0 3.69 0.39 17.5 17.5 0 0 0 17.09-13.83c6.81-31.76 9.4-148.75 9.4-167v-63.88A307 307 0 0 0 798 322.42zM365.68 272.82a273.38 273.38 0 0 1 231.18-53.68 17.5 17.5 0 1 0 7.68-34.14 307.93 307.93 0 0 0-367.72 231.18 17.5 17.5 0 1 0 34.11 7.82 273.89 273.89 0 0 1 94.75-151.18zM246.54 467.73a17.49 17.49 0 0 0-17.5 17.5v69c0 50.29-14.45 87.61-44.18 114.11a17.5 17.5 0 0 0 23.28 26.13c22.56-20.11 38.52-45.63 47.43-75.85 5.7-19.34 8.47-40.4 8.47-64.39v-69a17.5 17.5 0 0 0-17.5-17.5zM743.42 636.35v-0.17l-0.5-52.83a17.5 17.5 0 1 0-35 0.34l0.5 52.74c0 4.2 0 8.79 0.05 13.68 0.21 34.94 0.53 87.74-9.16 116.81a17.5 17.5 0 1 0 33.2 11.08c11.52-34.56 11.2-88.62 11-128.09-0.07-4.85-0.09-9.4-0.09-13.56z" fill="currentColor"></path><path d="M707.92 527.26a17.5 17.5 0 0 0 35 0v-45c0-114.17-92.89-207-207.06-207a207.35 207.35 0 0 0-58.49 8.38 17.5 17.5 0 0 0 9.87 33.58 172.24 172.24 0 0 1 48.62-7c94.87 0 172.06 77.18 172.06 172.05zM363.81 482.22A172.4 172.4 0 0 1 437 341.4a17.5 17.5 0 1 0-20.14-28.62 207.45 207.45 0 0 0-88 169.44v108.39a203 203 0 0 1-6.86 55.17 162.05 162.05 0 0 1-47.22 77.75 17.5 17.5 0 1 0 23.65 25.8c27.84-25.53 47.13-57.24 57.32-94.26a236.32 236.32 0 0 0 8.09-64.46zM440.83 566a17.5 17.5 0 0 0-17.5 17.47l-0.11 56.86c0 12.5-2.7 77.59-56 131.85a17.5 17.5 0 1 0 25 24.53 229.06 229.06 0 0 0 56.17-94.59c8.93-29.25 9.89-53 9.89-61.75l0.11-56.84A17.5 17.5 0 0 0 440.83 566z" fill="currentColor"></path><path d="M604.17 419.76a17.5 17.5 0 0 0-4.71-24.3 113 113 0 0 0-176.16 93.68v38.12a17.5 17.5 0 0 0 35 0v-38.12a78 78 0 0 1 121.57-64.68 17.49 17.49 0 0 0 24.3-4.7zM618.85 438.05a17.51 17.51 0 0 0-9.92 22.68 77.55 77.55 0 0 1 5.33 28.41v206.29c0 33.49-6.45 66.07-19.71 99.61a17.5 17.5 0 1 0 32.55 12.87c14.9-37.71 22.16-74.51 22.16-112.48V489.14a112.38 112.38 0 0 0-7.74-41.14 17.5 17.5 0 0 0-22.67-9.95z" fill="currentColor"></path><path d="M549.91 488a17.5 17.5 0 0 0-35 0v174.37c0 0.51 0 1 0.06 1.52 0.08 0.88 7 89.15-51.16 152.8a17.5 17.5 0 0 0 25.83 23.62c66-72.15 61-168 60.27-178.62z" fill="currentColor"></path></svg>`,
@@ -536,6 +549,34 @@ const CSS = `
     #pk-theme:active svg { transform: rotate(90deg) scale(0.8); }
     .pk-btn:hover:not(:disabled) { background: var(--pk-btn-hov) !important; }
     .pk-btn.pri:hover:not(:disabled) { background: var(--pk-pri) !important; filter: brightness(1.15); color: #fff !important; }
+    .pk-copy-success-freeze, .pk-copy-success-freeze:hover, .pk-copy-success-freeze:disabled, .pk-copy-success-freeze:disabled:hover, .pk-btn.pk-copy-success-freeze, .pk-btn.pk-copy-success-freeze:hover, .pk-btn.pk-copy-success-freeze:disabled, .pk-btn.pk-copy-success-freeze:disabled:hover, #pk_err_launch_btn.pk-copy-success-freeze, #pk_err_launch_btn.pk-copy-success-freeze:hover, #pk_err_launch_btn.pk-copy-success-freeze:disabled, #pk_err_launch_btn.pk-copy-success-freeze:disabled:hover { background:#52c41a !important; color:#fff !important; filter:none !important; opacity:1 !important; cursor:default !important; pointer-events:none !important; }
+    .pk-potfix-entry { align-self:flex-start; height:30px; padding:0 2px; border:none; background:transparent; color:var(--pk-pri); font-size:12px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:flex-start; }
+    .pk-potfix-entry:hover { text-decoration:underline; background:transparent !important; }
+    .pk-potfix-desc { white-space: pre-line;line-height:1.62; font-size:12px; color:var(--pk-fg); opacity:0.72; }
+    .pk-potfix-linkbox { width:100%; min-height:72px; max-height:110px; resize:none; border:1px solid var(--pk-bd); border-radius:6px; background:var(--pk-hl); color:var(--pk-fg); padding:10px 12px; box-sizing:border-box; font-size:12px; line-height:1.45; font-family:"SF Mono","Consolas",monospace; word-break:break-all; outline:none; }
+    .pk-potfix-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:0; }
+    .pk-potfix-actions .pk-btn, .pk-potfix-repair-actions .pk-btn { height:40px; justify-content:center; border-radius:6px; border:1px solid var(--pk-bd); background:var(--pk-bg); color:var(--pk-fg); box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .pk-potfix-repair-panel { border:1px solid var(--pk-bd); border-radius:6px; background:rgba(var(--pk-bg-rgb),0.76); padding:12px; display:flex; flex-direction:column; gap:10px; flex:0 0 auto; }
+    .pk-potfix-repair-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .pk-potfix-secondary { grid-column:1 / -1; position:static; display:flex; justify-content:flex-start; gap:8px; flex-wrap:wrap; margin:0; min-width:0; background:transparent; padding-right:0; }
+    .pk-potfix-secondary .pk-btn { height:30px; padding:0 12px; border:1px solid var(--pk-bd); border-radius:6px; background:var(--pk-bg); color:var(--pk-fg); opacity:.72; font-size:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .pk-potfix-secondary .pk-btn:hover:not(:disabled) { opacity:1; color:var(--pk-pri); border-color:var(--pk-pri); background:var(--pk-hl) !important; }
+    .pk-potfix-footer { position:relative; display:grid; grid-template-columns:1fr minmax(220px,236px) auto; align-items:center; gap:10px 12px; margin-top:8px; padding:12px 0 2px; border-top:1px solid var(--pk-bd); }
+    .pk-potfix-retry { grid-column:2; width:100%; height:42px !important; border:none !important; border-radius:6px !important; background:var(--pk-pri) !important; color:#fff !important; font-weight:700 !important; justify-content:center !important; box-shadow:0 2px 10px rgba(0,103,192,.28); }
+    .pk-potfix-foot { grid-column:3; display:flex; justify-content:flex-end; min-width:56px; }
+    .pk-potfix-version-note { font-size:12px; line-height:1.45; color:#b26a00; background:rgba(250,173,20,0.10); border:1px solid rgba(250,173,20,0.22); border-radius:8px; padding:8px 10px; }
+    .pk-modal.pk-potfix-modal { overflow-x:hidden !important; overflow-y:auto !important; max-height:92vh !important; align-items:stretch; gap:12px !important; }
+    .pk-modal.pk-potfix-modal > * { flex-shrink:0; }
+    .pk-potfix-adv-desc { font-size:12px; line-height:1.55; color:var(--pk-fg); opacity:.66; }
+    .pk-potfix-path-label { font-size:12px; font-weight:700; color:var(--pk-fg); opacity:.82; }
+    .pk-potfix-path-row { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; }
+    .pk-potfix-path-input { height:36px; min-width:0; border:1px solid var(--pk-bd); border-radius:6px; background:var(--pk-bg); color:var(--pk-fg); padding:0 10px; font-size:12px; outline:none; box-sizing:border-box; }
+    .pk-potfix-path-input:focus { border-color:var(--pk-pri); box-shadow:0 0 0 2px rgba(0,103,192,.12); }
+    .pk-potfix-path-row .pk-btn { height:34px; border:1px solid var(--pk-bd); border-radius:6px; background:transparent; color:var(--pk-fg); font-size:12px; justify-content:center; opacity:.86; }
+    .pk-potfix-repair-actions .pk-btn:hover:not(:disabled), .pk-potfix-path-row .pk-btn:hover:not(:disabled) { opacity:1; color:var(--pk-pri); border-color:var(--pk-pri); background:var(--pk-hl) !important; }
+    .pk-potfix-status { font-size:12px; line-height:1.45; border-radius:6px; padding:8px 10px; background:var(--pk-hl); color:var(--pk-fg); opacity:.86; }
+    .pk-potfix-status.warn { color:#b26a00; background:rgba(250,173,20,0.10); border:1px solid rgba(250,173,20,0.18); opacity:1; }
+    @media (max-width:520px) { .pk-modal.pk-potfix-modal { width:calc(100vw - 32px) !important; padding:22px !important; } .pk-potfix-actions, .pk-potfix-repair-actions, .pk-potfix-path-row, .pk-potfix-footer { grid-template-columns:1fr; } .pk-potfix-secondary { grid-column:auto; padding-right:0; margin-bottom:2px; } .pk-potfix-retry, .pk-potfix-foot { grid-column:auto; } .pk-potfix-foot { justify-content:center; } }
     .pk-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .pk-btn.pri { color: var(--pk-pri); font-weight: 600; }
     .pk-btn svg { width: 18px; height: 18px; flex-shrink: 0; display: inline-block; vertical-align: -4px; }
@@ -708,7 +749,7 @@ const CSS = `
     .pk-dark .pk-grid-view .pk-row:hover { background: rgba(45,52,62,0.98); border-color: transparent; outline: none; }
     .pk-dark .pk-grid-view .pk-row.sel { background: rgba(34,60,96,0.9); border-color: rgba(92,169,255,0.42); box-shadow: 0 12px 28px rgba(18,44,82,0.32); outline: none; background-clip: padding-box; }
     .pk-dark .pk-grid-view .pk-row.sel:not(.pk-sel-single), .pk-dark .pk-grid-view .pk-row.sel:not(.pk-sel-single):hover, .pk-dark .pk-grid-view .pk-row.sel:not(.pk-sel-single).pk-focused { transition: none !important; animation: none !important; }
-    .pk-dark .pk-grid-view .pk-row.pk-sel-single, .pk-dark .pk-grid-view .pk-row.pk-sel-single.pk-focused { transition: background 0.2s !important; }
+    .pk-dark .pk-grid-view .pk-row.pk-sel-single, .pk-dark .pk-grid-view .pk-row.pk-sel-single:hover, .pk-dark .pk-grid-view .pk-row.pk-sel-single.pk-focused { transition: none !important; animation: none !important; }
     .pk-dark .pk-gv-check::before { background: rgba(37,42,50,0.92); border-color: rgba(124,137,156,0.9); }
     .pk-dark .pk-gv-more { background: rgba(34,40,48,0.94); color: #c0c7d2; box-shadow: 0 6px 14px rgba(0,0,0,0.24); }
     .pk-dark .pk-gv-more:hover { background: rgba(46,54,64,0.98); color: #fff; }
@@ -1216,6 +1257,378 @@ const fmtDur = s => {
 function gmGet(key, def) { if (typeof GM_getValue !== 'undefined') { let v = GM_getValue(key, def); return (v === null) ? def : v; } return def; }
 function gmSet(key, val) { if (typeof GM_setValue !== 'undefined') GM_setValue(key, val); }
 
+function getDefaultPotPlayerProtocolState() {
+    return {
+        schemaVersion: CONF.potplayerProtocolStateSchemaVersion,
+        repairVersion: "",
+        confirmedRepairVersion: "",
+        installRegDownloadedAt: 0,
+        deleteRegDownloadedAt: 0,
+        browserPolicyRegDownloadedAt: 0,
+        customPlayerPath: "",
+        customPlayerPathUpdatedAt: 0,
+        pathBoundRepairVersion: "",
+        userConfirmedFixedAt: 0,
+        lastPromptAt: 0,
+        neverAutoPrompt: false,
+        suppressUntil: 0
+    };
+}
+
+function normalizePotPlayerProtocolState(rawState) {
+    const def = getDefaultPotPlayerProtocolState();
+    let data = rawState;
+    if (typeof data === 'string') {
+        try { data = data ? JSON.parse(data) : null; } catch (e) { data = null; }
+    }
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return def;
+
+    const toTime = (v) => {
+        const n = Number(v);
+        return Number.isFinite(n) && n > 0 ? n : 0;
+    };
+
+    return {
+        schemaVersion: CONF.potplayerProtocolStateSchemaVersion,
+        repairVersion: typeof data.repairVersion === 'string' ? data.repairVersion : "",
+        confirmedRepairVersion: typeof data.confirmedRepairVersion === 'string' ? data.confirmedRepairVersion : "",
+        installRegDownloadedAt: toTime(data.installRegDownloadedAt),
+        deleteRegDownloadedAt: toTime(data.deleteRegDownloadedAt),
+        browserPolicyRegDownloadedAt: toTime(data.browserPolicyRegDownloadedAt),
+        customPlayerPath: typeof data.customPlayerPath === 'string' ? data.customPlayerPath : "",
+        customPlayerPathUpdatedAt: toTime(data.customPlayerPathUpdatedAt),
+        pathBoundRepairVersion: typeof data.pathBoundRepairVersion === 'string' ? data.pathBoundRepairVersion : "",
+        userConfirmedFixedAt: toTime(data.userConfirmedFixedAt),
+        lastPromptAt: toTime(data.lastPromptAt),
+        neverAutoPrompt: data.neverAutoPrompt === true,
+        suppressUntil: toTime(data.suppressUntil)
+    };
+}
+
+function readPotPlayerProtocolState() {
+    try {
+        return normalizePotPlayerProtocolState(gmGet(CONF.potplayerProtocolStateKey, ''));
+    } catch (e) {
+        return getDefaultPotPlayerProtocolState();
+    }
+}
+
+function writePotPlayerProtocolState(state) {
+    try {
+        gmSet(CONF.potplayerProtocolStateKey, normalizePotPlayerProtocolState(state));
+    } catch (e) {}
+}
+
+function updatePotPlayerProtocolState(patch = {}) {
+    const state = readPotPlayerProtocolState();
+    Object.assign(state, patch, { repairVersion: CONF.potplayerProtocolRepairVersion });
+    writePotPlayerProtocolState(state);
+    return state;
+}
+
+function recordPotPlayerProtocolRegDownload(kind) {
+    const now = Date.now();
+    let patch;
+    if (kind === 'delete') patch = { deleteRegDownloadedAt: now };
+    else if (kind === 'browser_policy') patch = { browserPolicyRegDownloadedAt: now };
+    else patch = { installRegDownloadedAt: now };
+    return updatePotPlayerProtocolState(patch);
+}
+
+function recordPotPlayerProtocolUserFixed() {
+    const now = Date.now();
+    const state = readPotPlayerProtocolState();
+    const patch = {
+        confirmedRepairVersion: CONF.potplayerProtocolRepairVersion,
+        userConfirmedFixedAt: now
+    };
+    if (state.customPlayerPath) {
+        patch.pathBoundRepairVersion = CONF.potplayerProtocolRepairVersion;
+    }
+    return updatePotPlayerProtocolState(patch);
+}
+
+function recordPotPlayerProtocolAutoPrompt() {
+    return updatePotPlayerProtocolState({ lastPromptAt: Date.now() });
+}
+
+function suppressPotPlayerAutoPromptToday() {
+    return updatePotPlayerProtocolState({ suppressUntil: Date.now() + CONF.potplayerSuppressTodayTTL });
+}
+
+function disablePotPlayerAutoPrompt() {
+    return updatePotPlayerProtocolState({ neverAutoPrompt: true });
+}
+
+function shouldAutoPromptPotPlayerRepair(playUrl) {
+    const cleanUrl = String(playUrl || '').trim();
+    if (!cleanUrl) return false;
+
+    const now = Date.now();
+    const launchState = readPotPlayerLaunchState();
+    const protocolState = readPotPlayerProtocolState();
+
+    if (launchState.consecutiveFailCount < CONF.potplayerAutoRepairFailThreshold) return false;
+    if (launchState.lastLikelyOpenAt > 0 && now - launchState.lastLikelyOpenAt < CONF.potplayerLikelyOpenTrustTTL) return false;
+    if (protocolState.suppressUntil > now) return false;
+    if (protocolState.neverAutoPrompt === true) return false;
+    if (protocolState.lastPromptAt > 0 && now - protocolState.lastPromptAt < CONF.potplayerPromptCooldown) return false;
+
+    return true;
+}
+
+function schedulePotPlayerAutoRepairPrompt(playUrl, opts = {}) {
+    const cleanUrl = String(playUrl || '').trim();
+    if (!cleanUrl) return;
+    if (opts.autoRepairPrompt === false) return;
+
+    const source = normalizePotPlayerLaunchSource(opts.source);
+    const autoPromptDelay = Number.isFinite(Number(opts.autoRepairPromptDelay)) ? Math.max(0, Number(opts.autoRepairPromptDelay)) : 180;
+
+    setTimeout(() => {
+        if (!shouldAutoPromptPotPlayerRepair(cleanUrl)) return;
+        recordPotPlayerProtocolAutoPrompt();
+        openPotPlayerProtocolRepairHelper(cleanUrl, {
+            source,
+            autoPrompt: true,
+            button: null
+        });
+    }, autoPromptDelay);
+}
+
+function clearPotPlayerLaunchFailCount() {
+    const state = readPotPlayerLaunchState();
+    state.consecutiveFailCount = 0;
+    writePotPlayerLaunchState(state);
+    return state;
+}
+
+function escapeRegString(value) {
+    return String(value || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+function normalizePotPlayerCustomPath(input) {
+    return String(input || '').trim().replace(/^["']+|["']+$/g, '').trim();
+}
+
+function validatePotPlayerCustomPath(input) {
+    const path = normalizePotPlayerCustomPath(input);
+    if (!path) return { ok: false, path };
+    if (!/\.exe$/i.test(path)) return { ok: false, path };
+    if (!(/[A-Za-z]:\\/.test(path) || path.includes('\\'))) return { ok: false, path };
+    if (/[\r\n]/.test(path)) return { ok: false, path };
+    return { ok: true, path };
+}
+
+function savePotPlayerCustomPath(input) {
+    const checked = validatePotPlayerCustomPath(input);
+    if (!checked.ok) return { ok: false, changed: false, path: checked.path };
+
+    const state = readPotPlayerProtocolState();
+    const oldPath = state.customPlayerPath || "";
+    const changed = oldPath !== checked.path;
+    const patch = { customPlayerPath: checked.path };
+    if (changed) {
+        patch.customPlayerPathUpdatedAt = Date.now();
+        patch.confirmedRepairVersion = "";
+        patch.pathBoundRepairVersion = "";
+    }
+    updatePotPlayerProtocolState(patch);
+    return { ok: true, changed, wasConfigured: !!oldPath, path: checked.path };
+}
+
+function getValidSavedPotPlayerPath() {
+    const state = readPotPlayerProtocolState();
+    const checked = validatePotPlayerCustomPath(state.customPlayerPath);
+    return checked.ok ? checked.path : "";
+}
+
+function buildPotPlayerInstallReg(customPlayerPath = "") {
+    const checked = validatePotPlayerCustomPath(customPlayerPath);
+    const hasCustomPath = checked.ok;
+    const command = hasCustomPath
+        ? `"${checked.path}" "%1"`
+        : 'cmd.exe /d /s /c "start "" "PotPlayerMini64.exe" "%1" || start "" "PotPlayerMini.exe" "%1" || start "" "PotPlayer.exe" "%1""';
+    const defaultIcon = hasCustomPath ? `"${checked.path}",1` : 'PotPlayerMini64.exe,1';
+    return [
+        'Windows Registry Editor Version 5.00',
+        '',
+        '; PikPak Enhancement Master - PotPlayer protocol repair',
+        '; User-level protocol registration only. No browser policy is written.',
+        hasCustomPath ? '; This file binds potplayer:// to the custom PotPlayer executable path below.' : '; This file uses the PotPlayer executable discoverable from the Windows path.',
+        '',
+        '[HKEY_CURRENT_USER\\Software\\Classes\\potplayer]',
+        '@="URL:PotPlayer Protocol"',
+        '"URL Protocol"=""',
+        '',
+        '[HKEY_CURRENT_USER\\Software\\Classes\\potplayer\\DefaultIcon]',
+        `@="${escapeRegString(defaultIcon)}"`,
+        '',
+        '[HKEY_CURRENT_USER\\Software\\Classes\\potplayer\\shell]',
+        '@="open"',
+        '',
+        '[HKEY_CURRENT_USER\\Software\\Classes\\potplayer\\shell\\open]',
+        '@="open"',
+        '',
+        '[HKEY_CURRENT_USER\\Software\\Classes\\potplayer\\shell\\open\\command]',
+        `@="${escapeRegString(command)}"`,
+        ''
+    ].join('\r\n');
+}
+
+function buildPotPlayerDeleteReg() {
+    return [
+        'Windows Registry Editor Version 5.00',
+        '',
+        '; PikPak Enhancement Master - PotPlayer protocol cleanup',
+        '; User-level cleanup only. System-level registrations are not modified.',
+        '',
+        '[-HKEY_CURRENT_USER\\Software\\Classes\\potplayer]',
+        ''
+    ].join('\r\n');
+}
+
+function buildPotPlayerBrowserPolicyReg() {
+    return [
+        'Windows Registry Editor Version 5.00',
+        '',
+        '; PikPak Enhancement Master - optional browser external protocol helper',
+        '; Advanced option only. These HKLM policy keys may require administrator rights.',
+        '; Enterprise, school, or company devices may be controlled by existing policies.',
+        '',
+        '[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Google\\Chrome]',
+        '"ExternalProtocolDialogShowAlwaysOpenCheckbox"=dword:00000001',
+        '',
+        '[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Edge]',
+        '"ExternalProtocolDialogShowAlwaysOpenCheckbox"=dword:00000001',
+        ''
+    ].join('\r\n');
+}
+
+function makeUtf16LeBlob(text) {
+    const input = String(text || '');
+    const buffer = new ArrayBuffer(2 + input.length * 2);
+    const view = new DataView(buffer);
+    view.setUint16(0, 0xFEFF, true);
+    for (let i = 0; i < input.length; i++) {
+        view.setUint16(2 + i * 2, input.charCodeAt(i), true);
+    }
+    return new Blob([buffer], { type: 'application/octet-stream' });
+}
+
+function downloadPotPlayerRegFile(kind) {
+    const isDelete = kind === 'delete';
+    const isBrowserPolicy = kind === 'browser_policy';
+    const savedPath = getValidSavedPotPlayerPath();
+    if (!isDelete && !isBrowserPolicy && !savedPath) return false;
+    const content = isBrowserPolicy
+        ? buildPotPlayerBrowserPolicyReg()
+        : (isDelete ? buildPotPlayerDeleteReg() : buildPotPlayerInstallReg(savedPath));
+    const blob = makeUtf16LeBlob(content);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = isBrowserPolicy
+        ? CONF.potplayerBrowserPolicyRegFileName
+        : (isDelete ? CONF.potplayerRegDeleteFileName : CONF.potplayerRegCustomInstallFileName);
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    recordPotPlayerProtocolRegDownload(isBrowserPolicy ? 'browser_policy' : (isDelete ? 'delete' : 'install'));
+    return true;
+}
+
+function getDefaultPotPlayerLaunchState() {
+    return {
+        schemaVersion: CONF.potplayerLaunchStateSchemaVersion,
+        lastLikelyOpenAt: 0,
+        lastLikelyFailAt: 0,
+        consecutiveFailCount: 0,
+        lastFailSource: "",
+        lastCopiedAt: 0,
+        lastLaunchAt: 0
+    };
+}
+
+function normalizePotPlayerLaunchState(rawState) {
+    const def = getDefaultPotPlayerLaunchState();
+    let data = rawState;
+    if (typeof data === 'string') {
+        try { data = data ? JSON.parse(data) : null; } catch (e) { data = null; }
+    }
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return def;
+
+    const toTime = (v) => {
+        const n = Number(v);
+        return Number.isFinite(n) && n > 0 ? n : 0;
+    };
+    const toCount = (v) => {
+        const n = parseInt(v, 10);
+        return Number.isFinite(n) && n > 0 ? n : 0;
+    };
+
+    return {
+        schemaVersion: CONF.potplayerLaunchStateSchemaVersion,
+        lastLikelyOpenAt: toTime(data.lastLikelyOpenAt),
+        lastLikelyFailAt: toTime(data.lastLikelyFailAt),
+        consecutiveFailCount: toCount(data.consecutiveFailCount),
+        lastFailSource: typeof data.lastFailSource === 'string' ? data.lastFailSource : "",
+        lastCopiedAt: toTime(data.lastCopiedAt),
+        lastLaunchAt: toTime(data.lastLaunchAt)
+    };
+}
+
+function readPotPlayerLaunchState() {
+    try {
+        return normalizePotPlayerLaunchState(gmGet(CONF.potplayerLaunchStateKey, ''));
+    } catch (e) {
+        return getDefaultPotPlayerLaunchState();
+    }
+}
+
+function writePotPlayerLaunchState(state) {
+    try {
+        gmSet(CONF.potplayerLaunchStateKey, normalizePotPlayerLaunchState(state));
+    } catch (e) {}
+}
+
+function normalizePotPlayerLaunchSource(source) {
+    return ['normal', 'error_fallback', 'unknown'].includes(source) ? source : 'unknown';
+}
+
+function recordPotPlayerLaunchAttempt(source, launchAt = Date.now()) {
+    const state = readPotPlayerLaunchState();
+    const time = Number.isFinite(Number(launchAt)) && Number(launchAt) > 0 ? Number(launchAt) : Date.now();
+    state.lastLaunchAt = time;
+    writePotPlayerLaunchState(state);
+    return state;
+}
+
+function recordPotPlayerLaunchResult(result, opts = {}) {
+    const now = Date.now();
+    const launchAt = Number.isFinite(Number(opts.launchAt)) && Number(opts.launchAt) > 0 ? Number(opts.launchAt) : now;
+    const copiedAt = Number.isFinite(Number(opts.copiedAt)) && Number(opts.copiedAt) > 0 ? Number(opts.copiedAt) : now;
+    const source = normalizePotPlayerLaunchSource(opts.source);
+    const state = readPotPlayerLaunchState();
+
+    if (result === 'likely_open') {
+        state.lastLikelyOpenAt = now;
+        state.lastLaunchAt = launchAt;
+        state.consecutiveFailCount = 0;
+        state.lastFailSource = "";
+    } else if (result === 'likely_fail') {
+        state.lastLikelyFailAt = now;
+        state.lastLaunchAt = launchAt;
+        state.lastCopiedAt = copiedAt;
+        state.consecutiveFailCount += 1;
+        state.lastFailSource = source;
+    } else {
+        return state;
+    }
+
+    writePotPlayerLaunchState(state);
+    return state;
+}
+
 function getBlurScope() {
     const legacyBlur = gmGet('pk_blur_thumb', false);
     const scope = gmGet('pk_blur_scope', legacyBlur ? 'list' : 'off');
@@ -1373,7 +1786,6 @@ const T_LOCAL = {
         ctx_copy: "复制",
         ctx_copy_name: "复制文件名",
         ctx_copy_link: "复制链接",
-        ctx_cut: "移动",
         ctx_del: "删除",
         ctx_down: "下载",
         ctx_star: "添加星标",
@@ -1419,7 +1831,6 @@ const T_LOCAL = {
         tip_maximize: "最大化 [M]",
         tip_minimize: "最小化 [M]",
         tip_full_screen: "全屏 [Enter]",
-        btn_help: "帮助",
         tip_help: "帮助 [Alt] + [H]",
         btn_view_file: "查看文件",
         btn_jump: "跳转",
@@ -1519,7 +1930,6 @@ const T_LOCAL = {
         share_times: "次",
         btn_share_start: "立即分享",
         cal_custom_title: "自定义有效期",
-        lbl_share_link: "链接",
         lbl_share_code: "提取码",
         btn_copy_share: "复制全部",
         str_share_expired: "已过期",
@@ -1536,7 +1946,6 @@ const T_LOCAL = {
         msg_migrate_same_account: "迁移已取消：您登录的仍然是原账号，存根已清除。",
         msg_migrate_saving: "正在从加密通道高速转存数据...",
         msg_migrate_success: "🎉 跨账号迁移完成！\n所有文件已成功转存至当前账号。",
-        ph_password: "密码",
         ph_pass_range: "4-10位字符",
         cal_week_days:["日", "一", "二", "三", "四", "五", "六"],
         cal_months:["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
@@ -1552,7 +1961,6 @@ const T_LOCAL = {
         lbl_dup_selected: "对选中的 {n} 个项目执行文件查重",
         lbl_dup_current: "对当前路径下所有项目执行文件查重",
         tip_scan_dup: "筛选或查重文件",
-        lbl_dup_tool: "选择删除对象:",
         lbl_dup_reset: "↺ 复原 (取消置顶 & 清空选择)",
         lbl_dup_select_folder: "📂 按文件夹选择",
         lbl_dup_select_folder_short: "📂 文件夹",
@@ -1560,7 +1968,6 @@ const T_LOCAL = {
         lbl_dup_invert_short: "反选",
         tip_dup_invert_limit: "仅按文件夹选择可用",
         fmt_dup_count: "({n}个重复)",
-        btn_start_scan: "开始扫描",
         tag_hash: "精准匹配",
         tag_hash_short: "精准",
         tag_name: "名称相似",
@@ -1581,7 +1988,6 @@ const T_LOCAL = {
         opt_grid_view: "网格视图",
         msg_exporting: "正在生成目录树...",
         str_analyze_results: "匹配结果",
-        lbl_size_threshold: "检测阈值",
         title_analyze_result: "文件夹分析结果",
         opt_ana_large: "文件夹透视",
         lbl_analyze_selected: "对选中的 {n} 个项目执行文件夹透视",
@@ -1622,9 +2028,6 @@ const T_LOCAL = {
         btn_bl_delete: "删除选中项",
         modal_rename_title: "重命名",
         modal_rename_multi_title: "批量重命名",
-        btn_preview: "预览",
-        modal_preview_title: "确认更改",
-        label_pattern: "模式 (例: Video {n})",
         label_replace: "替换/删除",
         label_replace_note: "区分大小写",
         label_include_ext: "包含后缀",
@@ -1634,7 +2037,6 @@ const T_LOCAL = {
         label_jav: "FC2 纯净命名",
         lbl_rn_pattern: "命名模板",
         lbl_rn_case_convert: "大小写转换",
-        opt_rn_keep_origin: "(保持原样)",
         opt_rn_lower: "全部小写 (abc)",
         lbl_rn_mode_series: "剧集模式",
         lbl_rn_mode_format: "格式化",
@@ -1707,6 +2109,43 @@ const T_LOCAL = {
         export_link_title: "导出视频串流链接",
         btn_start_play: "开始播放",
         btn_copy_link: "复制链接",
+        msg_potplayer_launching: "正在唤起 PotPlayer...",
+        msg_potplayer_maybe_failed: "可能未唤起 PotPlayer，播放链接已复制，可手动粘贴到播放器。",
+        msg_potplayer_link_copied: "链接已复制",
+        potplayer_fix_entry: "PotPlayer 协议修复",
+        potplayer_fix_title: "PotPlayer 协议修复助手",
+        potplayer_fix_desc: "如果点击 PotPlayer 后没有响应，通常是系统没有正确注册 potplayer:// 协议，或协议指向旧路径。请按下面步骤填写 PotPlayer 程序路径并生成修复文件。",
+        potplayer_fix_manual_tip: "如果曾经修复过错误路径，请先下载并执行清理旧协议文件。\n推荐流程：填写 PotPlayer 程序路径 → 保存路径 → 下载协议修复文件 → 手动执行 .reg → 点击“已执行修复文件，重新尝试”。",
+        potplayer_fix_copy_link: "复制播放链接",
+        potplayer_fix_download_delete: "下载清理旧协议文件",
+        potplayer_fix_i_have_fixed: "已执行修复文件，重新尝试",
+        potplayer_fix_close: "关闭",
+        potplayer_fix_copy_success: "播放链接已复制",
+        potplayer_fix_install_downloaded: "协议修复文件已下载，请双击执行后再点击重新尝试",
+        potplayer_fix_delete_downloaded: "旧协议清理文件已下载，请双击执行后再重新生成修复文件",
+        potplayer_fix_confirmed: "已确认执行修复文件，正在重新尝试",
+        potplayer_fix_skip_today: "今日不再提示",
+        potplayer_fix_never_auto: "不再自动提示",
+        potplayer_fix_reason_auto: "已连续多次未检测到 PotPlayer 打开信号",
+        potplayer_fix_skip_today_done: "今日不再自动提示",
+        potplayer_fix_never_auto_done: "已关闭自动提示",
+        potplayer_fix_auto_title: "PotPlayer 可能需要协议修复",
+        potplayer_fix_advanced_desc: "请填写 PotPlayer.exe、PotPlayerMini64.exe 或 PotPlayerPortable.exe 的完整路径，不要填写其他程序。",
+        potplayer_fix_path_label: "PotPlayer 程序路径",
+        potplayer_fix_path_placeholder: "例如 C:\\PotPlayer\\PotPlayerMini64.exe",
+        potplayer_fix_save_path: "保存路径",
+        potplayer_fix_path_saved: "路径已保存，请重新下载并执行协议修复文件",
+        potplayer_fix_path_invalid: "请输入有效的 PotPlayer exe 路径",
+        potplayer_fix_retry_need_path: "请先填写 PotPlayer 程序路径，并下载执行协议修复文件",
+        potplayer_fix_path_changed: "路径已变更，修复状态已失效，请重新下载并执行协议修复文件",
+        potplayer_fix_download_custom_install: "下载协议修复文件",
+        potplayer_fix_version_outdated: "已保存的修复记录较旧，建议重新生成协议修复文件",
+        potplayer_fix_browser_policy: "下载兜底修复文件",
+        potplayer_fix_browser_policy_desc: "兜底修复文件仅当已执行协议修复文件、PotPlayer 本体能正常打开，但浏览器中点击 PotPlayer 仍无响应时使用。可能需要管理员权限。",
+        potplayer_fix_browser_policy_downloaded: "浏览器协议确认修复文件已下载",
+        potplayer_fix_path_status_empty: "请先填写 PotPlayer 程序路径",
+        potplayer_fix_path_status_confirmed: "已记录当前路径，请确认已执行修复文件后重新尝试",
+        potplayer_fix_path_status_unconfirmed: "路径已保存，请下载并执行协议修复文件",
         tip_copy_link: "复制链接 [Alt] + [C]",
         opt_player_other: "其他 (导出链接)",
         lbl_player: "播放器",
@@ -1754,7 +2193,6 @@ const T_LOCAL = {
         str_search_results: "搜索结果",
         modal_settings_title: "设置",
         label_lang: "语言 (Language)",
-        label_thumb: "模糊略缩图 (隐私模式)",
         label_keep_pos: "保持浏览位置 (返回时定位)",
         label_sort_pref: "排序偏好",
         opt_sort_indep: "每个文件夹独立",
@@ -1780,7 +2218,6 @@ const T_LOCAL = {
         label_aria2_token: "Aria2 密钥",
         label_privacy_mode: "隐私图",
         label_blur_cover: "模糊媒体封面缩略图",
-        label_privacy_scope: "作用范围",
         opt_privacy_off: "关闭",
         opt_privacy_list: "仅列表视图",
         opt_privacy_grid: "仅网格视图",
@@ -1867,15 +2304,11 @@ const T_LOCAL = {
         str_checking_bl: "匹配名单记录中...",
         str_processing: "系统正在全速处理中...",
         str_cleanup_done: "清理完成。",
-        str_waiting_preload: "等待预加载...",
         str_copying: "复制到剪贴板...",
         str_moving: "准备移动...",
         str_sorting: "正在排序...",
         str_refreshing: "刷新中...",
         str_refreshing_cache: "刷新缓存中...",
-        str_syncing_stars: "同步星标状态...",
-        str_updating_view: "更新视图中...",
-        str_generating_view: "生成视图中...",
         str_group: "组",
         str_init_rename: "初始化重命名...",
         str_renaming: "重命名中...",
@@ -1883,7 +2316,6 @@ const T_LOCAL = {
         str_scanning_dir: "扫描目录结构...",
         str_init_op: "初始化操作...",
         str_init_scan: "正在初始化全盘扫描...",
-        str_rebuilding: "正在重建索引...",
         str_upload_1: "正在上传 (节点 1/3)...",
         str_upload_2: "节点1超时，切换节点 2...",
         str_upload_3: "节点2超时，尝试最后节点...",
@@ -1911,6 +2343,7 @@ const T_LOCAL = {
         str_jav_querying: "正在查询...",
         lbl_done_check: "✔ 完成",
         msg_limit_updated: "提取次数已更新",
+        str_selected_items: "已选项目",
 
         /* --- 提示、确认与交互消息 --- */
         title_alert: "提示",
@@ -1928,22 +2361,20 @@ const T_LOCAL = {
         msg_skip_unzipped: "已跳过 {n} 个已解压的项目。",
         msg_unzip_skip_del_confirm: "检测到 {n} 个压缩包在当前路径存在同名文件夹且状态标记为已解压，大概率已完成解压。是否将其移入回收站？\n\n(建议：请先检查同名文件夹内容是否完整)",
         msg_cancel_share_confirm: "确定要取消选中的 {n} 个分享吗？\n链接将立即失效。",
-        msg_pwd_updating: "正在更新密码...",
         msg_pwd_updated: "密码已更新",
         msg_exp_updated: "有效期已更新",
         msg_cancel_share_done: "已取消 {n} 个分享。",
+        msg_cancel_share_ing: "正在取消分享...",
         msg_drag_drop_hint: "将文件拖拽到此处并释放",
         str_drag_files: " 等 {n} 个文件",
         msg_creating_share: "正在创建分享...",
         title_share_result: "分享成功",
         msg_no_files: "选中的项目为空。",
-        msg_no_selection: "请先选择项目。",
         warn_del: "确定要删除选中的 {n} 项吗？",
         msg_clear_sel_confirm: "已选中 {n} 个重复文件，确认要取消当前的勾选吗？",
         str_bl_stat: "匹配: {n} 项 | 已选中: {m} 项",
         str_hits: "命中",
         msg_settings_saved: "设置已保存。页面将刷新。",
-        msg_name_exists: "名称已存在: {n}",
         str_name_conflict: "(可能重名)",
         msg_newfolder_prompt: "新文件夹名称:",
         msg_rename_prompt: "输入新名称:",
@@ -1965,7 +2396,6 @@ const T_LOCAL = {
         msg_empty_trash_confirm: "确定要清空回收站吗？此操作无法撤销！",
         msg_trash_emptied: "回收站已清空。",
         msg_del_forever_confirm: "确定要彻底删除这 {n} 个项目吗？此操作无法撤销！",
-        msg_del_forever_done: "已彻底删除 {n} 个项目。",
         msg_restore_done: "已成功还原 {n} 个项目。",
         msg_auto_sub_load: "已自动加载字幕：{n}",
         msg_dl_sub: "正在下载字幕...",
@@ -2025,7 +2455,6 @@ const T_LOCAL = {
         err_task_conflict: "⚠️ 操作拦截\n\n后台正在执行文件搬运。全局清理需要稳定的目录结构，请等待搬运完成后再执行。",
         title_del_task_confirm_fmt: "确认删除 {n} 条传输任务?",
         lbl_del_cloud_files_too: "同时删除云盘内的文件",
-        msg_file_del_failed: "文件删除失败: ",
         msg_task_del_success_fmt: "已删除 {n} 个任务",
         title_clear_task_confirm: "确认清空所有上传任务?",
         msg_task_clear_success_fmt: "已清空 {n} 个上传任务",
@@ -2037,14 +2466,10 @@ const T_LOCAL = {
         tip_jump_to_folder: "跳转到此文件夹",
         msg_task_deleted: "任务已删除",
         msg_scan_done: "扫描完成！\n共发现 {n} 个文件，遍历了 {f} 个文件夹。",
-        msg_scan_fail: "\n\n❌ 有 {n} 个失败。",
-        msg_scan_fix: "\n\n✅ 自动修复了 {n} 次网络错误。",
-        msg_down_scanning: "正在解析文件夹内容...",
         msg_down_progress: "正在调用浏览器下载...",
         msg_down_confirm_total: "✅ 扫描完毕，共找到 {n} 个文件，总大小约 {s}。\n\n⚠️ 警告：当前任务规模较大，浏览器批量下载可能导致页面卡顿或被浏览器拦截。\n建议当文件数超过 {fc} 个或总大小超过 {fs} 时，优先使用 Aria2。\n\n是否仍然使用浏览器下载？",
         msg_aria2_sending_batch: "🚀 正在分批发送任务至 Aria2...",
         msg_aria2_check_fail: "Aria2 连接失败！\n请检查 URL 和 Token。",
-        msg_aria2_check_ok: "Aria2 连接成功！",
         msg_aria2_sent: "已将 {n} 个文件发送到 Aria2。",
         msg_aria2_test_fail: "Aria2 连接失败。\n仍然保存设置吗？",
         title_aria2_fail: "连接测试失败",
@@ -2053,8 +2478,6 @@ const T_LOCAL = {
         msg_batch_no_files: "未发现可下载的文件。",
         msg_batch_filtered: "下载过滤规则已跳过 {n} 个文件。",
         msg_batch_all_filtered: "已全部过滤：{n} 个文件均命中下载过滤规则。",
-        msg_dup_warn: "是否开始搜索重复文件？",
-        msg_dup_result: "发现 {n} 组重复项。",
         msg_dup_none: "未发现重复文件。",
         msg_bl_stop: "操作已停止。",
         msg_bl_add_done: "已将 {n} 个项目添加到记录。",
@@ -2062,11 +2485,9 @@ const T_LOCAL = {
         msg_bl_empty: "名单列表为空，无法运行。",
         msg_bl_clear_confirm: "确定要清空所有记录条目吗？此操作不可恢复。",
         msg_blacklist_run_none: "网盘中未发现符合名单条件的项目。",
-        msg_blacklist_run_confirm: "在网盘中发现了 {n} 个已记录项目。\n\n是否立即移入回收站？",
         msg_bl_run_limit: "⚠️ 模式限制\n\n清理操作涉及物理文件递归操作。目前处于非标准目录，无法准确定位物理扫描范围。\n\n请返回主页常规文件夹后再执行清理。",
         msg_del_protected: "资源管理器中已记录的 {n} 个文件，已保护并跳过删除。",
         msg_del_none: "没有可删除的文件。",
-        msg_bl_scanning: "全盘搜索中... \n已扫描目录: {d} | 命中: {f}",
         rn_tip_wait: "请设置规则",
         rn_tip_jav: "点击上方按钮开始智能匹配",
         rn_tip_none: "没有匹配的项目或名称",
@@ -2079,11 +2500,9 @@ const T_LOCAL = {
         msg_prune_confirm: "是否开始搜索当前列表中的空文件夹？",
         msg_prune_none: "未发现空文件夹。",
         msg_prune_found: "发现了 {n} 个空文件夹。\n是否立即删除？",
-        msg_deleting_folders: "正在删除 {n} 个文件夹...",
         msg_global_warn: "即将开始全盘文件同步。\n\n文件同步后缓存到本地内存中，网页刷新前持续存在。\n\n是否继续？",
         msg_init_scan_sel: "正在初始化选中项扫描...",
         warn_clear_history: "确定要从历史记录中移除选中的 {n} 项吗？\n(这不会删除您的云端文件)",
-        msg_img_copy_hint: "在新窗口中，请按下 {cmd} 即可搜索。",
         msg_aria2_not_set: "检测到您尚未配置 Aria2，请填写后继续：",
         str_jav_no_match: "(未匹配到番号)",
         msg_unzip_fail: "解压请求失败",
@@ -2098,7 +2517,6 @@ const T_LOCAL = {
 
         /* --- 错误提示 --- */
         err_invalid_links: "请输入正确的链接",
-        err_pwd_format: "密码必须为 4-10 位字母或数字",
         err_invalid_torrent: "无效的种子文件格式",
         err_torrent_complex: "解析复杂度过高，可能是非法文件",
         err_torrent_format: "种子文件结构损坏",
@@ -2107,10 +2525,8 @@ const T_LOCAL = {
         err_share_code_exists: "该分享代码已被占用",
         err_folder_not_ready: "云端文件夹正在创建中，请稍后再试",
         err_item_deleted: "该项目不存在",
-        err_network: "网络错误",
         err_clipboard_denied: "剪贴板访问被拒绝",
         err_worker: "工作线程错误",
-        err_api: "API 错误",
         err_capture: "截图失败。",
         err_captcha_simple: "验证失败。请在网页列表手动收藏一次文件以完成验证。",
         err_sub_dl_fail: "字幕下载失败: ",
@@ -2127,7 +2543,6 @@ const T_LOCAL = {
         err_invalid_regex: "无效的正则表达式",
         err_parent_not_found: "文件夹不存在",
         msg_sys_error: "不允许操作系统文件夹",
-        msg_download_fail: "无法获取下载链接。",
         msg_video_fail: "无法获取视频链接。",
         err_star_sync_fail: "星标同步失败",
         err_paste_descendant: "不能移动或复制到当前或当前子目录下",
@@ -2139,12 +2554,12 @@ const T_LOCAL = {
         lbl_hard_delete: "彻底删除 (不进入回收站)",
         str_error: "错误",
         str_error_crit: "严重错误",
-        str_error_paste: "粘贴错误",
         str_action_failed: "操作失败",
         str_scan_error: "扫描错误",
         err_limit_too_low: "修改失败：新次数 ({n}) 必须大于当前已保存次数 ({s})",
         err_vault_max: "密码金库最多仅支持存储 50 个常用密码",
         err_pwd_len: "单个密码长度不能超过 127 个字符",
+        err_operation_failed: "操作失败",
 
         /* --- 帮助文档 --- */
         modal_help_title: "帮助",
@@ -6100,39 +6515,6 @@ async function openManager(initialCache, preloadPromise) {
         UI.viewSwitch.style.pointerEvents = '';
         if (UI.btnViewList) UI.btnViewList.classList.toggle('active', !isGridView());
         if (UI.btnViewGrid) UI.btnViewGrid.classList.toggle('active', isGridView());
-    };
-
-    const invokeExternalPlayer = async (item) => {
-        const player = gmGet('pk_ext_player', 'system');
-        const L = getStrings();
-
-        let link = item.web_content_link;
-        if (!link) {
-            try {
-                const detail = await apiGet(item.id);
-                link = detail.web_content_link;
-            } catch (e) {
-                showAlert(L.msg_video_fail);
-                return;
-            }
-        }
-
-        if (!link) { showAlert(L.msg_video_fail); return; }
-
-        if (player === 'potplayer') {
-            let cleanLink = link.replace('&ext=.m3u8', '');
-            if (cleanLink.includes('ts_downloader') && cleanLink.includes('url=')) {
-                const urlParam = new URL(cleanLink).searchParams.get('url');
-                if (urlParam) cleanLink = decodeURIComponent(urlParam);
-            }
-
-            const ua = navigator.userAgent.replace(/"/g, '');
-            const cmd = `${cleanLink} /user_agent="${ua}" /referer="https://mypikpak.com/"`;
-            window.location.href = `potplayer://${cmd}`;
-        }
-        else {
-            playVideo(item);
-        }
     };
 
     const isSystemItem = (item) => {
@@ -15178,6 +15560,300 @@ async function openManager(initialCache, preloadPromise) {
         return { src: bestMatch.link, name: bestMatch.name, list: list };
     };
 
+    const launchPotPlayerWithFallback = (cleanUrl, opts = {}) => {
+        const L = getStrings();
+        const button = opts.button || null;
+        const timeout = opts.timeout || 3500;
+        const source = normalizePotPlayerLaunchSource(opts.source);
+        const launchAt = Date.now();
+        let copiedAt = launchAt;
+        let likelyOpened = false;
+        let finished = false;
+        let timer = null;
+        let confirmTimer = null;
+        let focusProbe = null;
+
+        const markOpened = () => {
+            likelyOpened = true;
+        };
+        const onVisibility = () => {
+            if (document.hidden) markOpened();
+        };
+        const cleanup = () => {
+            window.removeEventListener('blur', markOpened);
+            document.removeEventListener('visibilitychange', onVisibility, true);
+            if (timer) clearTimeout(timer);
+            if (confirmTimer) clearTimeout(confirmTimer);
+            if (focusProbe) clearInterval(focusProbe);
+        };
+
+        recordPotPlayerLaunchAttempt(source, launchAt);
+
+        try {
+            GM_setClipboard(cleanUrl);
+            copiedAt = Date.now();
+        } catch (e) {}
+
+        if (button) {
+            button.disabled = true;
+            button.textContent = L.msg_potplayer_launching;
+        }
+
+        window.addEventListener('blur', markOpened, { once: true });
+        document.addEventListener('visibilitychange', onVisibility, true);
+        if (typeof document.hasFocus === 'function') {
+            focusProbe = setInterval(() => {
+                if (!document.hasFocus()) markOpened();
+            }, 120);
+        }
+
+        try {
+            const ua = navigator.userAgent.replace(/"/g, '');
+            const cmd = `${cleanUrl} /user_agent="${ua}" /referer="https://mypikpak.com/"`;
+            window.location.href = `potplayer://${cmd}`;
+        } catch (e) {}
+
+        const finishLikelyOpen = () => {
+            if (finished) return;
+            finished = true;
+            cleanup();
+            recordPotPlayerLaunchResult('likely_open', { source, launchAt });
+            if (typeof opts.onLikelyOpen === 'function') opts.onLikelyOpen();
+        };
+
+        const finishLikelyFail = () => {
+            if (finished) return;
+            finished = true;
+            cleanup();
+
+            recordPotPlayerLaunchResult('likely_fail', { source, launchAt, copiedAt });
+            const failToastDuration = opts.failToastDuration || 6500;
+            const failCloseDelay = opts.failCloseDelay || 3200;
+            showToast(L.msg_potplayer_maybe_failed, 'warning', failToastDuration);
+
+            const notifyLikelyFail = () => {
+                if (typeof opts.onLikelyFail === 'function') {
+                    opts.onLikelyFail({
+                        source,
+                        launchAt,
+                        copiedAt,
+                        cleanUrl,
+                        autoRepairPrompt: opts.autoRepairPrompt,
+                        autoRepairPromptDelay: opts.autoRepairPromptDelay
+                    });
+                }
+            };
+
+            if (button) {
+                button.disabled = true;
+                button.textContent = L.msg_potplayer_link_copied;
+                button.classList.add('pk-copy-success-freeze');
+                button.style.setProperty('background', '#52c41a', 'important');
+                button.style.setProperty('color', '#fff', 'important');
+            }
+
+            setTimeout(notifyLikelyFail, failCloseDelay);
+        };
+
+        timer = setTimeout(() => {
+            if (finished) return;
+
+            if (likelyOpened) {
+                finishLikelyOpen();
+                return;
+            }
+
+            const confirmDelay = Number.isFinite(Number(opts.confirmFailDelay)) ? Math.max(0, Number(opts.confirmFailDelay)) : 0;
+            if (confirmDelay > 0) {
+                confirmTimer = setTimeout(() => {
+                    if (finished) return;
+                    if (likelyOpened) {
+                        finishLikelyOpen();
+                        return;
+                    }
+                    finishLikelyFail();
+                }, confirmDelay);
+                return;
+            }
+
+            finishLikelyFail();
+        }, timeout);
+
+        return cleanup;
+    };
+
+    const openPotPlayerProtocolRepairHelper = (playUrl, opts = {}) => {
+        const L = getStrings();
+        const cleanUrl = String(playUrl || '');
+        const isAutoPrompt = opts.autoPrompt === true;
+        const title = isAutoPrompt ? L.potplayer_fix_auto_title : L.potplayer_fix_title;
+        const autoReason = isAutoPrompt ? `<div class="pk-potfix-desc" style="font-size:12px; opacity:0.72; color:var(--pk-pri);">${L.potplayer_fix_reason_auto}</div>` : '';
+        const protocolState = readPotPlayerProtocolState();
+        const savedCustomPath = normalizePotPlayerCustomPath(protocolState.customPlayerPath);
+        const versionOutdated = !!protocolState.confirmedRepairVersion && protocolState.confirmedRepairVersion !== CONF.potplayerProtocolRepairVersion;
+        const getPathStatusText = () => {
+            const state = readPotPlayerProtocolState();
+            const checked = validatePotPlayerCustomPath(state.customPlayerPath);
+            if (!checked.ok) return L.potplayer_fix_path_status_empty;
+            return (state.confirmedRepairVersion === CONF.potplayerProtocolRepairVersion && state.pathBoundRepairVersion === CONF.potplayerProtocolRepairVersion)
+                ? L.potplayer_fix_path_status_confirmed
+                : L.potplayer_fix_path_status_unconfirmed;
+        };
+        const m = showModal(`
+            <h3 style="border:none; margin-bottom:14px; font-size:18px; font-weight:700; color:var(--pk-fg);">${title}</h3>
+            ${autoReason}
+            <div class="pk-potfix-desc">${L.potplayer_fix_desc}</div>
+            <textarea class="pk-potfix-linkbox" readonly>${esc(cleanUrl)}</textarea>
+            <div class="pk-potfix-desc" style="font-size:12px; opacity:0.66;">${L.potplayer_fix_manual_tip}</div>
+            ${versionOutdated ? `<div class="pk-potfix-version-note">${L.potplayer_fix_version_outdated}</div>` : ''}
+            <div class="pk-potfix-actions">
+                <button class="pk-btn" id="pk_potfix_copy">${L.potplayer_fix_copy_link}</button>
+                <button class="pk-btn" id="pk_potfix_delete">${L.potplayer_fix_download_delete}</button>
+            </div>
+            <div class="pk-potfix-repair-panel">
+                <div class="pk-potfix-adv-desc">${L.potplayer_fix_advanced_desc}</div>
+                <label class="pk-potfix-path-label" for="pk_potfix_path">${L.potplayer_fix_path_label}</label>
+                <div class="pk-potfix-path-row">
+                    <input class="pk-potfix-path-input" id="pk_potfix_path" value="${esc(savedCustomPath)}" placeholder="${esc(L.potplayer_fix_path_placeholder)}" autocomplete="off" spellcheck="false">
+                    <button type="button" class="pk-btn" id="pk_potfix_save_path">${L.potplayer_fix_save_path}</button>
+                </div>
+                <div class="pk-potfix-status" id="pk_potfix_path_status">${getPathStatusText()}</div>
+                <div class="pk-potfix-repair-actions">
+                    <button type="button" class="pk-btn" id="pk_potfix_custom_install">${L.potplayer_fix_download_custom_install}</button>
+                    <button type="button" class="pk-btn" id="pk_potfix_browser_policy">${L.potplayer_fix_browser_policy}</button>
+                </div>
+                <div class="pk-potfix-adv-desc">${L.potplayer_fix_browser_policy_desc}</div>
+            </div>
+            <div class="pk-potfix-footer">
+                <div class="pk-potfix-secondary">
+                    <button class="pk-btn" id="pk_potfix_skip_today">${L.potplayer_fix_skip_today}</button>
+                    <button class="pk-btn" id="pk_potfix_never_auto">${L.potplayer_fix_never_auto}</button>
+                </div>
+                <button class="pk-btn pri pk-potfix-retry" id="pk_potfix_retry">${L.potplayer_fix_i_have_fixed}</button>
+                <div class="pk-potfix-foot">
+                    <button class="pk-btn" id="pk_potfix_close" style="height:34px; min-width:52px; justify-content:center; border:none; background:transparent;">${L.potplayer_fix_close}</button>
+                </div>
+            </div>
+        `);
+
+        const modalBox = m.querySelector('.pk-modal');
+        if (modalBox) {
+            modalBox.classList.add('pk-potfix-modal');
+            Object.assign(modalBox.style, { width: '480px', padding: '24px', height: 'auto', minHeight: 'auto' });
+            modalBox.style.setProperty('max-height', '92vh', 'important');
+            modalBox.style.setProperty('overflow-x', 'hidden', 'important');
+            modalBox.style.setProperty('overflow-y', 'auto', 'important');
+            const closeBtn = m.querySelector('.pk-modal-close');
+            if (closeBtn) Object.assign(closeBtn.style, { top: '18px', right: '18px' });
+        }
+
+        const pathInput = m.querySelector('#pk_potfix_path');
+        const pathStatus = m.querySelector('#pk_potfix_path_status');
+        const refreshPathStatus = () => {
+            if (pathStatus) pathStatus.textContent = getPathStatusText();
+        };
+
+        m.querySelector('#pk_potfix_copy').onclick = () => {
+            try { GM_setClipboard(cleanUrl); } catch (e) {}
+            showToast(L.potplayer_fix_copy_success || L.msg_copy_success);
+        };
+
+        m.querySelector('#pk_potfix_delete').onclick = () => {
+            downloadPotPlayerRegFile('delete');
+            showToast(L.potplayer_fix_delete_downloaded);
+        };
+
+        m.querySelector('#pk_potfix_save_path').onclick = () => {
+            const result = savePotPlayerCustomPath(pathInput ? pathInput.value : '');
+            if (!result.ok) {
+                showToast(L.potplayer_fix_path_invalid, 'warning');
+                return;
+            }
+            if (pathInput) pathInput.value = result.path;
+            refreshPathStatus();
+            showToast(result.changed && result.wasConfigured ? L.potplayer_fix_path_changed : L.potplayer_fix_path_saved, result.changed && result.wasConfigured ? 'warning' : 'success');
+        };
+
+        m.querySelector('#pk_potfix_custom_install').onclick = () => {
+            const result = savePotPlayerCustomPath(pathInput ? pathInput.value : '');
+            if (!result.ok) {
+                showToast(L.potplayer_fix_path_invalid, 'warning');
+                return;
+            }
+            if (pathInput) pathInput.value = result.path;
+            refreshPathStatus();
+            if (!downloadPotPlayerRegFile('install')) {
+                showToast(L.potplayer_fix_path_invalid, 'warning');
+                return;
+            }
+            showToast(L.potplayer_fix_install_downloaded);
+        };
+
+        m.querySelector('#pk_potfix_browser_policy').onclick = () => {
+            downloadPotPlayerRegFile('browser_policy');
+            showToast(L.potplayer_fix_browser_policy_downloaded);
+        };
+
+        m.querySelector('#pk_potfix_retry').onclick = () => {
+            const savedPath = getValidSavedPotPlayerPath();
+            if (!savedPath) {
+                const result = savePotPlayerCustomPath(pathInput ? pathInput.value : '');
+                if (!result.ok) {
+                    showToast(L.potplayer_fix_retry_need_path || L.potplayer_fix_path_invalid, 'warning');
+                    return;
+                }
+                if (pathInput) pathInput.value = result.path;
+                refreshPathStatus();
+                showToast(L.potplayer_fix_retry_need_path || L.potplayer_fix_path_saved, 'warning');
+                return;
+            }
+
+            recordPotPlayerProtocolUserFixed();
+            clearPotPlayerLaunchFailCount();
+            showToast(L.potplayer_fix_confirmed);
+            m.remove();
+            launchPotPlayerWithFallback(cleanUrl, {
+                button: opts.button || null,
+                source: typeof opts.source === 'string' ? opts.source : 'normal',
+                failToastDuration: 6500,
+                failCloseDelay: 3200,
+                confirmFailDelay: CONF.potplayerPostRepairConfirmDelay,
+                autoRepairPrompt: false,
+                onLikelyOpen: () => {
+                    if (typeof opts.onRetryLikelyOpen === 'function') opts.onRetryLikelyOpen();
+                },
+                onLikelyFail: () => {
+                    if (typeof opts.onRetryLikelyFail === 'function') opts.onRetryLikelyFail();
+                }
+            });
+        };
+
+        m.querySelector('#pk_potfix_skip_today').onclick = () => {
+            suppressPotPlayerAutoPromptToday();
+            m.remove();
+            showToast(L.potplayer_fix_skip_today_done);
+        };
+
+        m.querySelector('#pk_potfix_never_auto').onclick = () => {
+            disablePotPlayerAutoPrompt();
+            m.remove();
+            showToast(L.potplayer_fix_never_auto_done);
+        };
+
+        m.querySelector('#pk_potfix_close').onclick = () => m.remove();
+        m.tabIndex = 0;
+        setTimeout(() => m.focus(), 10);
+        m.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                m.remove();
+            }
+        });
+
+        return m;
+    };
+
     async function playVideo(item, startFullscreen = false) {
         if (S.trashMode) return;
         const getPhysicalId = (it) => {
@@ -15207,6 +15883,10 @@ async function openManager(initialCache, preloadPromise) {
         const totalInList = videoPlaylist.length;
         let isSwitching = false;
         let switchReqId = 0;
+        let mediaSessionToken = 0;
+        let activeHealthTimer = null;
+        let activeHlsObjectUrl = null;
+        const isStaleMediaSession = (token) => token !== mediaSessionToken || isPlayerDestroyed;
         const showSadBox = (codecName) => {
             if (box.querySelector('.pk-err-dialog')) return;
             if (posterEl) {
@@ -15220,10 +15900,13 @@ async function openManager(initialCache, preloadPromise) {
             const sadBoxSVG = `<svg width="85" height="85" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 45l15-15h30l15 15H20z" fill="#777"/><path d="M20 45L5 30h20l15 15H20z" fill="#999"/><path d="M80 45l15-15H75L60 45h20z" fill="#999"/><path fill-rule="evenodd" d="M20 45h60v35c0 5-5 5-5 5H25c-5 0-5-5-5-5V45zm16.5 14c0 3.3 1.5 6 3.5 6s3.5-2.7 3.5-6-1.5-6-3.5-6-3.5 2.7-3.5 6zm20 0c0 3.3 1.5 6 3.5 6s3.5-2.7 3.5-6-1.5-6-3.5-6-3.5 2.7-3.5 6z" fill="#aaa"/><path d="M38 16a12 8 0 1 0 24 0a12 8 0 1 0-24 0M48 24l2 3.5l2-3.5h-4z" fill="#aaa"/><path d="M47 13l6 6M53 13l-6 6" stroke="#181818" stroke-width="1.8" stroke-linecap="round"/></svg>`;
             const recommended = qualityList.find(q => !q.isOriginal) || qualityList[0];
             const recommendedUrl = recommended.link || recommended.url;
+            let selectedErrUrl = recommendedUrl;
+            let selectedErrName = recommended.name;
+            let selectedErrPlayer = (savedPlayer === 'other') ? 'other' : 'potplayer';
             const resOptions = qualityList.map(q => {
                 const qUrl = q.link || q.url;
                 const isSelected = qUrl === recommendedUrl;
-                return `<option value="${qUrl}" ${isSelected ? 'selected' : ''}>${q.name}</option>`;
+                return `<div class="pk-select-item ${isSelected ? 'act' : ''}" data-val="${qUrl}">${q.name}</div>`;
             }).join('');
             const lblRes = L.lbl_resolution;
             const dialog = document.createElement('div');
@@ -15235,23 +15918,30 @@ async function openManager(initialCache, preloadPromise) {
                 <div style="font-size:16px;font-weight:bold;color:#fff;margin-bottom:10px;max-width:400px;line-height:1.4;">${L.err_codec_t1.replace('{c}', codecName)}</div>
                 <div style="font-size:12px;color:#999;margin-bottom:30px;">${L.err_codec_t2}</div>
 
-                <div style="display:grid;grid-template-columns:80px 1fr;gap:15px;align-items:center;width:100%;margin-bottom:15px;">
-                    <div style="color:#ccc;font-size:14px;text-align:right;">${lblRes}</div>
-                    <div style="position:relative;">
-                        <select id="pk_err_res_sel" style="width:100%;padding:8px 12px;border-radius:6px;background:rgba(0,0,0,0.3);color:#fff;border:1px solid #444;outline:none;cursor:pointer;font-size:14px;">
+                <div style="display:flex;flex-direction:column;gap:25px;width:100%;margin-bottom:25px;text-align:left;">
+                    <div class="pk-custom-select" id="pk_err_res_cs" style="width:100%;z-index:20;">
+                        <div class="pk-select-label">${lblRes}</div>
+                        <div class="pk-select-trigger">
+                            <span id="txt_err_res">${selectedErrName}</span>
+                            <div style="display:flex;color:#999;">${CONF.crumbIcons.down}</div>
+                        </div>
+                        <div class="pk-select-menu pk-scroll">
                             ${resOptions}
-                        </select>
+                        </div>
                     </div>
-                </div>
 
-                <div style="display:grid;grid-template-columns:80px 1fr;gap:15px;align-items:center;width:100%;margin-bottom:25px;">
-                    <div style="color:#ccc;font-size:14px;text-align:right;">${L.lbl_player}</div>
-                    <div style="position:relative;">
-                        <select id="pk_err_player_sel" style="width:100%;padding:8px 12px;border-radius:6px;background:rgba(0,0,0,0.3);color:#fff;border:1px solid #444;outline:none;cursor:pointer;font-size:14px;">
-                            <option value="potplayer" selected>PotPlayer</option>
-                            <option value="other">${L.opt_player_other}</option>
-                        </select>
+                    <div class="pk-custom-select" id="pk_err_player_cs" style="width:100%;z-index:10;">
+                        <div class="pk-select-label">${L.lbl_player}</div>
+                        <div class="pk-select-trigger">
+                            <span id="txt_err_player">${selectedErrPlayer === 'potplayer' ? 'PotPlayer' : L.opt_player_other}</span>
+                            <div style="display:flex;color:#999;">${CONF.crumbIcons.down}</div>
+                        </div>
+                        <div class="pk-select-menu">
+                            <div class="pk-select-item ${selectedErrPlayer === 'potplayer' ? 'act' : ''}" data-val="potplayer">PotPlayer</div>
+                            <div class="pk-select-item ${selectedErrPlayer === 'other' ? 'act' : ''}" data-val="other">${L.opt_player_other}</div>
+                        </div>
                     </div>
+                    <button type="button" class="pk-potfix-entry" id="pk_err_potplayer_fix" style="align-self:flex-start;color:#4cc2ff;margin-top:-14px;${selectedErrPlayer === 'potplayer' ? '' : 'display:none;'}">${L.potplayer_fix_entry}</button>
                 </div>
                 <button id="pk_err_launch_btn" style="background:#fff;color:#000;border:none;padding:10px 40px;border-radius:6px;font-size:14px;font-weight:bold;cursor:pointer;transition:background 0.2s;">${L.btn_start_play}</button>
             `;
@@ -15303,34 +15993,102 @@ async function openManager(initialCache, preloadPromise) {
                 m.onclick = (ev) => ev.stopPropagation();
             };
 
+            const launchBtn = dialog.querySelector('#pk_err_launch_btn');
+            const fixBtn = dialog.querySelector('#pk_err_potplayer_fix');
+
+            const closeErrMenus = () => dialog.querySelectorAll('.pk-select-menu').forEach(menu => menu.style.display = 'none');
+            const removeErrDialog = () => {
+                document.removeEventListener('click', closeErrMenus);
+                dialog.remove();
+            };
+            const getCleanErrSelectedUrl = () => {
+                let cleanLink = String(selectedErrUrl || '').replace('&ext=.m3u8', '');
+                if (cleanLink.includes('ts_downloader') && cleanLink.includes('url=')) {
+                    try {
+                        const urlParam = new URL(cleanLink).searchParams.get('url');
+                        if (urlParam) cleanLink = decodeURIComponent(urlParam);
+                    } catch (e) {}
+                }
+                return cleanLink;
+            };
+            const updateErrPotPlayerFixEntry = () => {
+                if (fixBtn) fixBtn.style.display = selectedErrPlayer === 'potplayer' ? 'inline-flex' : 'none';
+            };
+            const bindErrSelect = (id, onSelect) => {
+                const container = dialog.querySelector(`#${id}`);
+                if (!container) return;
+                const trigger = container.querySelector('.pk-select-trigger');
+                const menu = container.querySelector('.pk-select-menu');
+                const txt = container.querySelector('.pk-select-trigger > span');
+                if (!trigger || !menu || !txt) return;
+
+                trigger.onclick = (e) => {
+                    e.stopPropagation();
+                    const isOpen = menu.style.display === 'block';
+                    closeErrMenus();
+                    menu.style.display = isOpen ? 'none' : 'block';
+                };
+
+                container.querySelectorAll('.pk-select-item').forEach(item => {
+                    item.onclick = (e) => {
+                        e.stopPropagation();
+                        container.querySelectorAll('.pk-select-item').forEach(i => i.classList.remove('act'));
+                        item.classList.add('act');
+                        txt.textContent = item.textContent;
+                        menu.style.display = 'none';
+                        onSelect(item.dataset.val, item.textContent);
+                    };
+                });
+            };
+
             dialog.querySelector('.pk-err-close').onclick = (e) => {
                 e.stopPropagation();
-                dialog.remove();
+                removeErrDialog();
             };
 
             dialog.onclick = (e) => e.stopPropagation();
 
-            const playerSel = dialog.querySelector('#pk_err_player_sel');
-            const launchBtn = dialog.querySelector('#pk_err_launch_btn');
+            bindErrSelect('pk_err_res_cs', (val, text) => {
+                selectedErrUrl = val;
+                selectedErrName = text;
+            });
 
-            playerSel.onchange = () => {
-                launchBtn.textContent = (playerSel.value === 'other') ? L.btn_copy_link : L.btn_start_play;
-            };
-            launchBtn.textContent = L.btn_start_play;
+            bindErrSelect('pk_err_player_cs', (val) => {
+                selectedErrPlayer = val;
+                launchBtn.textContent = (val === 'other') ? L.btn_copy_link : L.btn_start_play;
+                updateErrPotPlayerFixEntry();
+            });
+
+            launchBtn.textContent = (selectedErrPlayer === 'other') ? L.btn_copy_link : L.btn_start_play;
+            setTimeout(() => document.addEventListener('click', closeErrMenus), 0);
+
+            if (fixBtn) {
+                fixBtn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openPotPlayerProtocolRepairHelper(getCleanErrSelectedUrl(), {
+                        button: launchBtn,
+                        source: 'error_fallback',
+                        onRetryLikelyOpen: () => {
+                            removeErrDialog();
+                            destroyPlayer();
+                        },
+                        onRetryLikelyFail: () => {
+                            removeErrDialog();
+                            destroyPlayer();
+                        }
+                    });
+                };
+            }
 
             launchBtn.onclick = (e) => {
                 e.stopPropagation();
-                const selPlayer = playerSel.value;
-                const selResLink = dialog.querySelector('#pk_err_res_sel').value;
-                const selResName = dialog.querySelector('#pk_err_res_sel').options[dialog.querySelector('#pk_err_res_sel').selectedIndex].text;
+                const selPlayer = selectedErrPlayer;
+                const selResName = selectedErrName;
 
                 gmSet('pk_ext_player', selPlayer);
 
-                let cleanLink = selResLink.replace('&ext=.m3u8', '');
-                if (cleanLink.includes('ts_downloader') && cleanLink.includes('url=')) {
-                    const urlParam = new URL(cleanLink).searchParams.get('url');
-                    if (urlParam) cleanLink = decodeURIComponent(urlParam);
-                }
+                const cleanLink = getCleanErrSelectedUrl();
 
                 if (selPlayer === 'other') {
                     GM_setClipboard(cleanLink);
@@ -15338,14 +16096,33 @@ async function openManager(initialCache, preloadPromise) {
                     launchBtn.style.background = "#52c41a";
                     launchBtn.style.color = "#fff";
                     setTimeout(() => {
+                        removeErrDialog();
                         if (typeof destroyPlayer === 'function') destroyPlayer();
                     }, 800);
                 }
                 else if (selPlayer === 'potplayer') {
-                    const ua = navigator.userAgent.replace(/"/g, '');
-                    const cmd = `${cleanLink} /user_agent="${ua}" /referer="https://mypikpak.com/"`;
-                    window.location.href = `potplayer://${cmd}`;
-                    destroyPlayer();
+                    launchPotPlayerWithFallback(cleanLink, {
+                        button: launchBtn,
+                        source: 'error_fallback',
+                        restoreText: L.btn_start_play,
+                        restoreBg: launchBtn.style.background,
+                        restoreColor: launchBtn.style.color,
+                        failToastDuration: 6500,
+                        failCloseDelay: 3200,
+                        onLikelyOpen: () => {
+                            removeErrDialog();
+                            destroyPlayer();
+                        },
+                        onLikelyFail: (ctx) => {
+                            removeErrDialog();
+                            destroyPlayer();
+                            schedulePotPlayerAutoRepairPrompt(cleanLink, {
+                                source: 'error_fallback',
+                                autoRepairPrompt: ctx && ctx.autoRepairPrompt,
+                                autoRepairPromptDelay: ctx && ctx.autoRepairPromptDelay
+                            });
+                        }
+                    });
                 }
                 else {
                     const curT = v.currentTime;
@@ -15372,7 +16149,7 @@ async function openManager(initialCache, preloadPromise) {
                         bindResEvents();
                     }
 
-                    dialog.remove();
+                    removeErrDialog();
                     shutterTargetTime = curT > 0.1 ? curT : 0;
                     loadSource(currentLink, curT);
                     v.play().catch(()=>{});
@@ -15463,8 +16240,12 @@ async function openManager(initialCache, preloadPromise) {
             if (!videoPlaylist[newIdx]) return;
 
             switchReqId++;
+            mediaSessionToken++;
             const myReqId = switchReqId;
             isSwitching = true;
+            lastWorkingLink = null;
+            lastWorkingResName = null;
+            failedUrls.clear();
             const v = d.querySelector('#pk_video');
             const loader = d.querySelector('.pk-p-loading');
             const poster = d.querySelector('#pk_p_poster');
@@ -15476,8 +16257,27 @@ async function openManager(initialCache, preloadPromise) {
                 });
             }
 
+            if (activeHealthTimer) {
+                clearInterval(activeHealthTimer);
+                activeHealthTimer = null;
+            }
+
+            if (pkHls) {
+                try { pkHls.stopLoad(); } catch (e) {}
+                try { pkHls.detachMedia(); } catch (e) {}
+                try { pkHls.destroy(); } catch (e) {}
+                pkHls = null;
+            }
+
+            if (activeHlsObjectUrl) {
+                try { URL.revokeObjectURL(activeHlsObjectUrl); } catch (e) {}
+                activeHlsObjectUrl = null;
+            }
+
             if (v) {
                 v.pause();
+                v._bufferingSince = null;
+                v._blackScreenCount = 0;
                 v._isRestarting = false;
                 v._hasShownResumeToast = false;
                 Array.from(v.querySelectorAll('track')).forEach(t => t.remove());
@@ -15496,7 +16296,6 @@ async function openManager(initialCache, preloadPromise) {
                 v.load();
             }
 
-            isSwitching = false;
             if (progFilled) progFilled.style.setProperty('width', '0%', 'important');
             const newItem = videoPlaylist[newIdx];
             if (tCur) tCur.textContent = '00:00:00';
@@ -15625,6 +16424,7 @@ async function openManager(initialCache, preloadPromise) {
             } finally {
                 if (myReqId === switchReqId) {
                     if(loader) loader.style.display = 'none';
+                    isSwitching = false;
                 }
             }
         };
@@ -15670,10 +16470,27 @@ async function openManager(initialCache, preloadPromise) {
                 progFilled.style.setProperty('width', `${pct}%`, 'important');
             }
 
+            const currentMediaToken = ++mediaSessionToken;
+            if (activeHealthTimer) {
+                clearInterval(activeHealthTimer);
+                activeHealthTimer = null;
+            }
+
             if (pkHls) {
-                pkHls.destroy();
+                try { pkHls.stopLoad(); } catch (e) {}
+                try { pkHls.detachMedia(); } catch (e) {}
+                try { pkHls.destroy(); } catch (e) {}
                 pkHls = null;
             }
+
+            if (activeHlsObjectUrl) {
+                try { URL.revokeObjectURL(activeHlsObjectUrl); } catch (e) {}
+                activeHlsObjectUrl = null;
+            }
+
+            v._pkMediaToken = currentMediaToken;
+            v._bufferingSince = null;
+            v._blackScreenCount = 0;
 
             const isM3u8 = url.includes('.m3u8');
 
@@ -15699,6 +16516,7 @@ async function openManager(initialCache, preloadPromise) {
 
                     const blob = new Blob([syntheticManifest], { type: 'application/x-mpegurl' });
                     finalPlayUrl = URL.createObjectURL(blob);
+                    activeHlsObjectUrl = finalPlayUrl;
                     console.log("[Hls] Generated synthetic manifest for TS stream");
                 }
 
@@ -15726,7 +16544,11 @@ async function openManager(initialCache, preloadPromise) {
                 pkHls.loadSource(finalPlayUrl);
                 pkHls.attachMedia(v);
                 const healthTimer = setInterval(() => {
-                    if (!pkHls || isPlayerDestroyed) { clearInterval(healthTimer); return; }
+                    if (isStaleMediaSession(currentMediaToken) || !pkHls) {
+                        clearInterval(healthTimer);
+                        if (activeHealthTimer === healthTimer) activeHealthTimer = null;
+                        return;
+                    }
 
                     if (box.classList.contains('buffering')) {
                         if (!v._bufferingSince) v._bufferingSince = Date.now();
@@ -15736,7 +16558,8 @@ async function openManager(initialCache, preloadPromise) {
                         if (Date.now() - v._bufferingSince > timeoutThreshold) {
                             console.warn(`[Watchdog] Buffering timeout (${isColdStart ? 'Cold Start' : 'Mid-Stream'}). Forcing error...`);
                             clearInterval(healthTimer);
-                            handleVideoError({ force: true, target: v });
+                            if (activeHealthTimer === healthTimer) activeHealthTimer = null;
+                            handleVideoError({ force: true, target: v, mediaToken: currentMediaToken });
                         }
                     } else {
                         v._bufferingSince = null;
@@ -15760,12 +16583,15 @@ async function openManager(initialCache, preloadPromise) {
                         if (v._blackScreenCount > 3) {
                             console.warn(`[Watchdog] Black screen detected (Time: ${v.currentTime.toFixed(1)}, Frames: 0). Forcing external player.`);
                             clearInterval(healthTimer);
-                            handleVideoError({ force: true, target: v });
+                            if (activeHealthTimer === healthTimer) activeHealthTimer = null;
+                            handleVideoError({ force: true, target: v, mediaToken: currentMediaToken });
                         }
                     }
                 }, 1000);
+                activeHealthTimer = healthTimer;
 
                 pkHls.on(window.Hls.Events.LEVEL_LOADED, function (event, data) {
+                    if (isStaleMediaSession(currentMediaToken)) return;
                     if (!data.details || !data.details.videoCodec) return;
 
                     const vCodec = data.details.videoCodec.toLowerCase();
@@ -15784,6 +16610,7 @@ async function openManager(initialCache, preloadPromise) {
                 });
 
                 pkHls.on(window.Hls.Events.AUDIO_TRACKS_UPDATED, function (event, data) {
+                    if (isStaleMediaSession(currentMediaToken)) return;
                     const tracks = data.audioTracks || [];
                     let detectedBadCodec = null;
 
@@ -15812,12 +16639,13 @@ async function openManager(initialCache, preloadPromise) {
                 });
 
                 pkHls.on(window.Hls.Events.ERROR, function (event, data) {
+                    if (isStaleMediaSession(currentMediaToken)) return;
                     if (data.fatal) {
                         switch (data.type) {
                             case window.Hls.ErrorTypes.NETWORK_ERROR:
                                 if (data.response && (data.response.code === 403 || data.response.code === 404 || data.response.code === 401)) {
                                     console.warn(`[Hls] Fatal Network Error (${data.response.code}). Triggering rollback.`);
-                                    handleVideoError({ target: v });
+                                    handleVideoError({ target: v, mediaToken: currentMediaToken });
                                 } else {
                                     console.log("[Hls] Network error, trying to recover...");
                                     pkHls.startLoad();
@@ -15826,20 +16654,22 @@ async function openManager(initialCache, preloadPromise) {
                             case window.Hls.ErrorTypes.MEDIA_ERROR:
                                 pkHls.recoverMediaError();
                                 setTimeout(() => {
+                                    if (isStaleMediaSession(currentMediaToken)) return;
                                     if (v.paused && !box.querySelector('.pk-err-dialog')) {
-                                        handleVideoError({ target: v });
+                                        handleVideoError({ target: v, mediaToken: currentMediaToken });
                                     }
                                 }, 1500);
                                 break;
                             default:
-                                handleVideoError({ target: v });
+                                handleVideoError({ target: v, mediaToken: currentMediaToken });
                                 break;
                         }
                     } else if (data.details === 'bufferStalledError' && v.currentTime < 1) {
-                        handleVideoError({ target: v });
+                        handleVideoError({ target: v, mediaToken: currentMediaToken });
                     }
                 });
             } else {
+                if (isStaleMediaSession(currentMediaToken)) return;
                 v.src = url;
                 if (startTime > 0) {
                     v.currentTime = startTime;
@@ -16006,8 +16836,7 @@ async function openManager(initialCache, preloadPromise) {
                     <div class="pk-prev-time">00:00</div>
                 </div>
                 <div id="pk_p_poster" style="position:absolute; inset:0; z-index:1; background:#000; display:flex; align-items:center; justify-content:center; pointer-events:none;">
-                    <img src="${posterUrl}" draggable="false" style="width:100%; height:100%; object-fit:contain; opacity:${posterUrl ? 1 : 0}; -webkit-user-drag:none; user-select:none;"
-                        onerror="this.style.display='none';">
+                    ${posterUrl ? `<img src="${posterUrl}" draggable="false" style="width:100%; height:100%; object-fit:contain; opacity:0; display:block; -webkit-user-drag:none; user-select:none;" onload="this.style.opacity='1';" onerror="this.removeAttribute('src'); this.style.display='none'; this.style.opacity='0';">` : ''}
                 </div>
 
                 <div id="pk_sub_render_layer" style="position:absolute; inset:0; z-index:40; pointer-events:none; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; padding-bottom:10%; text-align:center; overflow:hidden; transition: padding-bottom 0.1s linear;">
@@ -16454,6 +17283,7 @@ async function openManager(initialCache, preloadPromise) {
 
         const handleVideoError = (e) => {
             if (isSwitching) return;
+            if (e && e.mediaToken && e.mediaToken !== mediaSessionToken) return;
 
             if (!v.getAttribute('src') && !pkHls) return;
             if (v.networkState === 2 && !v.error && !e.force) return;
@@ -16543,8 +17373,11 @@ async function openManager(initialCache, preloadPromise) {
 
         (async () => {
             try {
-                const targetApiId = getPhysicalId(item);
+                const initReqId = switchReqId;
+                const initItem = item;
+                const targetApiId = getPhysicalId(initItem);
                 const newData = await apiGet(targetApiId);
+                if (isPlayerDestroyed || initReqId !== switchReqId || item !== initItem) return;
                 const freshData = getBestSource(newData);
                 qualityList = freshData.list;
                 resList.innerHTML = renderQualityMenu(qualityList, currentResName);
@@ -16772,6 +17605,11 @@ async function openManager(initialCache, preloadPromise) {
             window.removeEventListener('resize', onResizeTransform);
 
             if (transcodeTimer) { clearInterval(transcodeTimer); transcodeTimer = null; }
+            if (activeHealthTimer) { clearInterval(activeHealthTimer); activeHealthTimer = null; }
+            if (activeHlsObjectUrl) {
+                try { URL.revokeObjectURL(activeHlsObjectUrl); } catch (e) {}
+                activeHlsObjectUrl = null;
+            }
 
             if (v.duration > 0 && v.currentTime > 5 && v.duration - v.currentTime > 5) {
                 gmSet('pk_progress_' + getPhysicalId(item), {
@@ -16820,7 +17658,7 @@ async function openManager(initialCache, preloadPromise) {
         v.addEventListener('pause', updateState);
 
         const markStarted = () => {
-            if (isPlayerDestroyed) return;
+            if (isPlayerDestroyed || isSwitching) return;
             if (box) {
                 box.classList.add('pk-v-started');
                 stopSpinner();
@@ -25131,6 +25969,7 @@ async function openManager(initialCache, preloadPromise) {
                         <div class="pk-select-item ${selectedPlayer === 'other' ? 'act' : ''}" data-val="other">${L.opt_player_other}</div>
                     </div>
                 </div>
+                <button type="button" class="pk-potfix-entry" id="ext_potplayer_fix" style="${selectedPlayer === 'potplayer' ? '' : 'display:none;'}">${L.potplayer_fix_entry}</button>
             </div>
 
             <div class="pk-modal-act" style="margin-top:20px; display:flex; justify-content:flex-end; gap:12px;">
@@ -25173,11 +26012,28 @@ async function openManager(initialCache, preloadPromise) {
         };
 
         const runBtn = m.querySelector('#ext_run');
+        const fixBtn = m.querySelector('#ext_potplayer_fix');
+
+        const getCleanSelectedUrl = () => {
+            let cleanUrl = String(selectedUrl || '').replace('&ext=.m3u8', '');
+            if (cleanUrl.includes('ts_downloader') && cleanUrl.includes('url=')) {
+                try {
+                    const urlParam = new URL(cleanUrl).searchParams.get('url');
+                    if (urlParam) cleanUrl = decodeURIComponent(urlParam);
+                } catch (e) {}
+            }
+            return cleanUrl;
+        };
+
+        const updatePotPlayerFixEntry = () => {
+            if (fixBtn) fixBtn.style.display = selectedPlayer === 'potplayer' ? 'inline-flex' : 'none';
+        };
 
         bindSelect('cs_res', (val) => { selectedUrl = val; });
         bindSelect('cs_player', (val) => {
             selectedPlayer = val;
             runBtn.textContent = (val === 'potplayer') ? L.btn_start_play : L.btn_copy_link;
+            updatePotPlayerFixEntry();
         });
 
         const closeAllMenus = () => m.querySelectorAll('.pk-select-menu').forEach(om => om.style.display = 'none');
@@ -25195,25 +26051,49 @@ async function openManager(initialCache, preloadPromise) {
         setTimeout(() => m.focus(), 10);
         m.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
+                if (e.target && e.target.id === 'ext_potplayer_fix') return;
                 e.preventDefault(); e.stopPropagation();
                 runBtn.click();
             }
         });
 
+        if (fixBtn) {
+            fixBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openPotPlayerProtocolRepairHelper(getCleanSelectedUrl(), {
+                    button: runBtn,
+                    source: 'normal',
+                    onRetryLikelyOpen: () => m.remove(),
+                    onRetryLikelyFail: () => m.remove()
+                });
+            };
+        }
+
         runBtn.onclick = () => {
             gmSet('pk_ext_player', selectedPlayer);
 
-            let cleanUrl = selectedUrl.replace('&ext=.m3u8', '');
-            if (cleanUrl.includes('ts_downloader') && cleanUrl.includes('url=')) {
-                const urlParam = new URL(cleanUrl).searchParams.get('url');
-                if (urlParam) cleanUrl = decodeURIComponent(urlParam);
-            }
+            const cleanUrl = getCleanSelectedUrl();
 
             if (selectedPlayer === 'potplayer') {
-                m.remove();
-                const ua = navigator.userAgent.replace(/"/g, '');
-                const cmd = `${cleanUrl} /user_agent="${ua}" /referer="https://mypikpak.com/"`;
-                window.location.href = `potplayer://${cmd}`;
+                launchPotPlayerWithFallback(cleanUrl, {
+                    button: runBtn,
+                    source: 'normal',
+                    restoreText: L.btn_start_play,
+                    restoreBg: runBtn.style.background,
+                    restoreColor: runBtn.style.color,
+                    failToastDuration: 6500,
+                    failCloseDelay: 3200,
+                    onLikelyOpen: () => m.remove(),
+                    onLikelyFail: (ctx) => {
+                        m.remove();
+                        schedulePotPlayerAutoRepairPrompt(cleanUrl, {
+                            source: 'normal',
+                            autoRepairPrompt: ctx && ctx.autoRepairPrompt,
+                            autoRepairPromptDelay: ctx && ctx.autoRepairPromptDelay
+                        });
+                    }
+                });
             } else {
                 GM_setClipboard(cleanUrl);
                 runBtn.textContent = L.msg_copy_success;
