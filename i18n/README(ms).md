@@ -274,8 +274,8 @@ Disebabkan had protokol muat turun pelayar itu sendiri, fail dalam folder biasan
 
 ## 🚀 Log Kemas Kini
 
-### V2.3.0
-* Menambahkan pembantu pembaikan protokol PotPlayer.
+### V2.3.0 
+* Menambahkan **Pembantu Pembaikan Protokol PotPlayer**.
 
 ### V2.2.3
 * Membetulkan kegagalan muat naik.
