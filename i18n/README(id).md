@@ -274,8 +274,8 @@ Karena keterbatasan protokol unduhan browser itu sendiri, file di dalam folder b
 
 ## 🚀 Changelog
 
-### V2.3.0
-* Menambahkan asisten perbaikan protokol PotPlayer.
+### V2.3.0 
+* Menambahkan **Asisten Perbaikan Protokol PotPlayer**.
 
 ### V2.2.3
 * Memperbaiki kegagalan unggahan.
