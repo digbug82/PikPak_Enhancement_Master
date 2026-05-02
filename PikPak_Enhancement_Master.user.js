@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            2.2.4
+// @version            2.3.0
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        桌面级PikPak网盘管家！包含Aria2/Motrix带目录结构推送、文件查重（哈希/时长/名称）、文件夹查重（名称/相似度/包含率）、批量重命名（正则替换/连续编号/文本格式化/FC2名称清洗/前缀去广告/后缀智能修复）、清理空文件夹、内置解压密码库的批量解压、夹杂无关文字或“去头”的污染磁链智能识别、自定义资源黑白名单：清理垃圾文件/文件夹、多账号数据迁移、分享提取次数限制、导出目录树等。沉浸式媒体播放引擎：以图搜图、高级字幕加载、跳过片头尾及进度条缩略图预览。叫“增强大师”是有原因的，何不进来看看？
