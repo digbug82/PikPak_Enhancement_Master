@@ -1,0 +1,4 @@
+*.user.js linguist-language=JavaScript
+*.user.js linguist-detectable=true
+*.user.js linguist-generated=false
+*.user.js linguist-vendored=false
