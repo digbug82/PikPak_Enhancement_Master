@@ -274,8 +274,8 @@ Due to browser download limitations, files inside folders are usually flattened 
 
 ## 🚀 Changelog
 
-### V2.3.0
-* Added PotPlayer protocol repair assistant.
+### V2.3.0 
+* Added **PotPlayer Protocol Repair Assistant**.
 
 ### V2.2.3
 * Fixed upload failures.
