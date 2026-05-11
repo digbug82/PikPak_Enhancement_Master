@@ -660,7 +660,7 @@
     "str_bl_stat": "Matches: {n} | Selected: {m}",
     "str_hits": "Hits",
     "msg_settings_saved": "Settings saved. Page will refresh.",
-    "msg_script_update_new": "New version V{v} detected. Due to release size limits, automatic updates may not be available. You can visit the GitHub project homepage to view the changelog and development build notes.",
+    "msg_script_update_new": "New version V{v} detected. Due to release size limits, the current version may not be able to automatically sync the full update. You can visit the GitHub project page to view the changelog and project notes.",
     "msg_script_update_open": "View Details",
     "label_script_update_info": "Version Info",
     "label_script_current_version": "Current Version",
