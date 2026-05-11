@@ -660,7 +660,7 @@
     "str_bl_stat": "一致: {n} | 選択中: {m}",
     "str_hits": "ヒット",
     "msg_settings_saved": "設定を保存しました。ページをリロードします。",
-    "msg_script_update_new": "新しいバージョン V{v} を検出しました。配布サイズ制限により自動更新できない場合があります。GitHub プロジェクトホームで更新履歴と開発版の説明を確認できます。",
+    "msg_script_update_new": "新しいバージョン V{v} が検出されました。公開サイズの制限により、現在のバージョンでは完全な更新を自動同期できない場合があります。GitHub プロジェクトページで更新履歴とプロジェクト説明を確認できます。",
     "msg_script_update_open": "説明を見る",
     "label_script_update_info": "バージョン情報",
     "label_script_current_version": "現在のバージョン",
