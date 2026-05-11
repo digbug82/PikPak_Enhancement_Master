@@ -660,7 +660,7 @@
     "str_bl_stat": "일치: {n}개 | 선택됨: {m}개",
     "str_hits": "적중",
     "msg_settings_saved": "설정이 저장되었습니다. 페이지가 새로고침됩니다.",
-    "msg_script_update_new": "새 버전 V{v}이(가) 감지되었습니다. 배포 용량 제한으로 자동 업데이트가 불가능할 수 있습니다. GitHub 프로젝트 홈에서 업데이트 로그와 개발 버전 설명을 확인할 수 있습니다.",
+    "msg_script_update_new": "새 버전 V{v}이 감지되었습니다. 배포 용량 제한으로 인해 현재 버전은 전체 업데이트를 자동으로 동기화하지 못할 수 있습니다. GitHub 프로젝트 페이지에서 변경 내역과 프로젝트 설명을 확인할 수 있습니다.",
     "msg_script_update_open": "설명 보기",
     "label_script_update_info": "버전 정보",
     "label_script_current_version": "현재 버전",
