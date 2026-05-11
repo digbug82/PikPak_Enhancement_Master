@@ -4,9 +4,14 @@
 
 # 📦 PikPak Enhancement Master
 
-[![Version](https://img.shields.io/badge/Version-2.3.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Install / Update Latest](https://img.shields.io/badge/Install%20/%20Update%20Latest-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
+
+[![Version](https://img.shields.io/badge/Version-2.4.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
+[![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
+
+⭐ If this script helps you, feel free to give the project a Star.
 
 > A desktop-grade enhancement suite for PikPak Web.  
 > From browsing, searching, analyzing, and organizing to playback, downloading, and migration, it brings cloud file management much closer to the efficiency and smoothness of a local file manager.
@@ -25,9 +30,10 @@
 
 * **UI Refactoring**: Built on top of the official features, the overall interface is redesigned with the usage habits of **Windows File Explorer** in mind, making navigation paths more intuitive.
 * **Turbo Mode**: Deeply takes over native web logic after being enabled, significantly reducing lag, crashes, and memory pressure in massive-file scenarios.
+* **Side Button Navigation**: Supports mouse side-button forward / back actions, allowing fast directory-level switching across different views.
 * **Advanced Path Bar**: Supports mouse-wheel scrolling, same-level directory switching via dropdown, path echoing, and breadcrumb backtracking. Both Global Search and analysis tools share the same path system.
 * **Enhanced Experience**: Supports multi-dimensional sorting such as Favorites and Type, dark theme, one-click **Blur Cover Images**, and uses an **SWR strategy** for silent view updates.
-* **Background Indexing & Protection**: A blinking blue dot on the Home icon indicates directory tree syncing in the background. A built-in physical concurrency lock helps reduce dirty data and conflicting operations.
+* **Background Indexing & Protection**: A blinking blue dot on the Home icon indicates directory tree syncing in the background. A built-in concurrency protection mechanism helps reduce dirty data and conflicting operations.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_en.gif" width="1100" alt="Path">
@@ -39,20 +45,20 @@
 
 ### 📂 Batch & Space Management
 
-* **Bulk Rename**: Supports **Regex replace/delete**, **TV Show Mode**, text **Formatting**, **FC2 Clean Naming**, **Ad-Cleaner**, and MIME-based **Fix Extension**.
+* **Bulk Rename**: Supports **Regex replace/delete**, **TV Show Mode**, text **Formatting**, **FC2 standardized naming**, **Ad-prefix cleanup**, and MIME-based **smart extension repair**.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/rename/rename_en.gif" width="550" alt="Bulk Rename">
 </p>
 
-* **File Perspective / Deduplicate Files**: Integrates filtering and deduplication for files. Deduplication supports **Exact Match / Duration Sim / Name Sim** tri-modal analysis.
+* **File Analysis**: Integrates file filtering and deduplication. Deduplication supports **Hash / Duration / Name** tri-modal analysis.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_scan/file_scan_en.gif" alt="File Perspective">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_dup/file_dup_en.gif" alt="Deduplicate Files">
 </p>
 
-* **Folder Analysis / Folder Deduplication**: Integrates filtering and deduplication for folders. Deduplication supports **Name Match / Similarity Match / Containment Match** tri-modal analysis.
+* **Folder Analysis**: Integrates folder filtering and deduplication. Deduplication supports **Name / Similarity / Containment** tri-modal analysis.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder_scan/folder_scan_en.gif" alt="Folder Perspective">
@@ -65,13 +71,13 @@
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_en.png" width="350" alt="Export Directory">
 </p>
 
-* **Smart Organizing**: Supports **Delete Permanently** (skip Trash), one-click empty folder cleanup, and **Bulk Extract**, with built-in automatic password memory and smart autofill logic.
+* **Smart Organizing**: Supports **Delete Permanently** by skipping Trash, one-click empty folder cleanup, Bulk Extract, and built-in **automatic password memory** with **smart autofill** logic.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/archive/archive_en.png" width="250" alt="Password Vault">
 </p>
 
-* **Resource Manager**: Can be used as a custom cleanup list to remove junk resources with one click, or as a protection list to automatically skip matched items during batch deletion.
+* **Resource Manager**: Supports a custom **file blacklist** for one-click junk cleanup. It can also work as a **file whitelist** to automatically protect matched items during batch deletion.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/manager/manager_en.gif" width="550" alt="Resource Manager">
@@ -84,13 +90,13 @@
 ### 🌐 Transfer & Sharing Hub
 
 * **Share Management**: Supports setting extraction limits. Shares are automatically canceled once the limit is reached.
-* **Local Upload**: Supports dragging local files / folders directly into the page for upload, improving stability and the overall upload experience for small-file-heavy tasks.
+* **Turbo Upload**: Supports dragging local files / folders directly into the page for upload, improving interruption resistance and the overall transfer experience for small-file-heavy tasks.
 * **Cloud Download Enhancements**: Supports **auto-deduplication** for batch offline links. Includes a built-in **magnet smart cleaning engine** that extracts Base32 / Hex hashes and removes noisy text.
 * **Torrent & Fallback**: Supports parsing **.torrent** files, and provides **web snapshot saving** as a fallback for some restricted links.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_en.png" height="350" alt="Magnet">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_en.gif" height="350" alt="Share">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_en.png" height="320" alt="Magnet">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_en.gif" height="320" alt="Share">
 </p>
 
 > ⚠️ Automatic interception based on extraction limits only works while the webpage remains open and the device is not sleeping.
@@ -99,11 +105,11 @@
 
 ### 🎬 Immersive Media Enhancement
 
-* **Playback Engine**: Supports **0.5x - 3.0x speed**, rotation, flipping, forced aspect ratio, automatic intro/outro skipping, **List Loop / Single Loop / Pause after Playback**, and **thumbnail preview** on the progress bar.
+* **Playback Engine**: Supports **0.5x - 3.0x speed**, rotation, flipping, forced aspect ratio, automatic intro/outro skipping, **playlist / loop** modes, and **thumbnail preview** on the progress bar.
 * **Compatibility Fallback**: Built-in watchdog and compatibility logic can automatically fall back to a playable quality when black screens, unavailable resolutions, or codec compatibility issues occur.
-* **Subtitle System**: Supports **Cloud** subtitle loading, **Local File** subtitle import, and **Search Online** subtitle lookup. Also supports millisecond subtitle offset adjustment, position switching, size adjustment, and local text drag-and-drop loading.
+* **Subtitle System**: Supports **cloud same-name subtitle loading**, **local subtitle file import**, and **online subtitle search**. It also supports millisecond subtitle offset adjustment, position switching, size adjustment, and local text drag-and-drop loading.
 * **Visual Assistance**: Supports **Image Search** for images or the current video frame, making it easy to trace covers, actors, anime, or source materials.
-* **Media Mode**: Can be enabled in Settings so that image-only or video-only folders default to **A-Z** sorting for better browsing continuity.
+* **Media Mode**: Can be enabled in Settings so that series / comic-style folders are sorted by **A-Z** by default for better browsing continuity.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/video/video_en.gif" alt="Video">
@@ -148,7 +154,8 @@
 ## 💻 Compatibility
 
 * **Recommended Browsers**: Chrome / Edge (latest versions)
-* **Recommended Script Managers**: Tampermonkey / Violentmonkey
+* **Preferred Script Manager**: Violentmonkey (tested to be smoother in scrolling, uploading, and large-list scenarios)
+* **Compatible Script Manager**: Tampermonkey
 * **Supported Platform**: PikPak Web
 * *Note: Safari / Firefox and other script managers have not yet been fully tested in depth. The recommended environment above is suggested for the best experience.*
 
@@ -156,7 +163,7 @@
 
 ## 📥 Installation
 
-1. **Install a script manager**: Install [Tampermonkey](https://www.tampermonkey.net/) or a compatible script manager first.
+1. **Install a script manager**: [Violentmonkey](https://violentmonkey.github.io/get-it/) is recommended first. [Tampermonkey](https://www.tampermonkey.net/) is also supported.
 2. **Install the script**: Click **[Install Now](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**.
 3. **Open PikPak Web**: Visit [PikPak](https://mypikpak.com/drive) and log in to your account.
 4. **Launch PikPak Enhancement Master**:
@@ -168,7 +175,13 @@
 ## ❓ FAQ
 
 **Q: Why doesn’t the blue floating ball appear after installing the script?**  
-**A:** First make sure you are logged into PikPak Web. If you are already logged in and it still does not appear, try refreshing the page (F5). Also check whether it is being blocked by an ad blocker such as AdGuard or uBlock Origin. You can temporarily disable the blocker or whitelist the PikPak site and try again.
+**A: Please check the following in order:**
+
+1. Make sure **PikPak Enhancement Master** is enabled in your script manager.
+2. Make sure you have logged in to PikPak Web.
+3. If you are using **Tampermonkey**, make sure **“Allow user scripts”** is enabled on the browser extension details page.
+4. Chrome / Edge latest versions are recommended.
+5. If the floating ball still does not appear after the steps above, temporarily disable all other browser extensions and refresh the page (F5).
 
 **Q: What is Turbo Mode, and why is it recommended?**  
 **A:** Once enabled, the script deeply takes over the native web logic and covers the main interface in full screen. It actively blocks the original page’s high-memory sync workflow, which significantly reduces lag, crashes, and loading delays in large-file environments.  
@@ -180,13 +193,13 @@
 
 **Q: What is the difference between Deduplicate Files and Folder Deduplication? How should I choose between them?**  
 **A:**  
-**Deduplicate Files:** Designed for single-file-level comparison. It uses **Exact Match, Duration Sim, and Name Sim**, making it suitable for cleaning scattered duplicate files such as repeated single-episode videos, single images, or standalone archives.  
+**Deduplicate Files:** Designed for single-file-level comparison. It uses **Hash Exact Match, Video Duration Similarity, and Name Similarity**, making it suitable for cleaning scattered duplicate files such as repeated single-episode videos, single images, or standalone archives.  
 
-**Folder Deduplication:** Designed for whole-folder-level comparison. It uses **Name Match, Similarity Match, and Containment Match**, making it more suitable for cleaning duplicated full series folders, image packs, or multi-level resource folders. Even if two folders have different names, they can still be detected if their internal files are highly similar or if one folder is largely contained within another.
+**Folder Deduplication:** Designed for whole-folder-level comparison. It uses **Name Matching, internal file overlap matching, and containment matching**, making it more suitable for cleaning duplicated full series folders, image packs, or multi-level resource folders. Even if two folders have different names, they can still be detected if their internal files are highly similar or if one folder is largely contained within another.
 
 > **Recommendation:**  
-> In file deduplication, **Exact Match** is the most reliable and is usually safe to batch-select for deletion.  
-> **Duration Sim**, **Name Sim**, and the three folder deduplication modes are all similarity-based matching methods, so manual review is recommended before batch deletion.
+> In file deduplication, **Exact Match** is hash-based and the most reliable, so it is usually safe to batch-select for deletion.  
+> **Duration Match**, **Name Match**, and the three folder deduplication modes are all similarity-based matching methods, so manual review is recommended before batch deletion.
 
 **Q: Why do more and more duplicates appear over time? Did the full-disk index miss some files?**  
 **A:** No. This is not caused by missing index data or data corruption. The number of results in **Exact Match** is usually stable. The reason more duplicates appear later is that similarity matching based on **video duration** becomes more complete over time.  
@@ -218,26 +231,26 @@ If you have just made many changes in the mobile app or official web client, ref
 If a file still fails after several retries, it may be damaged, restricted, or affected by temporary cloud-side instability. Try again later or download it locally and process it there.
 
 **Q: What is included in the exported JSON backup?**  
-**A:** The exported JSON contains only local configuration data from PikPak Enhancement Master, such as deduplication preferences, list rules, Password Vault data, some history records, and feature settings.  
+**A:** The exported JSON contains only local configuration data from PikPak Enhancement Master, such as deduplication preferences, blacklist / whitelist rules, Password Vault data, some history records, and feature settings.  
 It **does not include** your PikPak account password, so it is safe to use for backup and migration across devices.
 
 **Q: Will Import Backup overwrite my current settings or lists?**  
 **A:** Usually not. The script uses a **smart merge** strategy on import. List-type data such as Resource Manager records and history entries are deduplicated and merged instead of simply overwritten.  
-Only a small number of basic settings, such as the image search engine or Aria2 RPC URL, may use the values from the imported file.
+Only a small number of basic settings, such as the image search engine or Aria2 RPC URL, may use the values from the imported file, so your long-term local lists and records are usually preserved.
 
 **Q: Why are some files protected or not deleted during batch deletion?**  
-**A:** Check whether those files have already been recorded in **Resource Manager**. If **Delete Permanently (skip Trash)** or batch deletion is used while protection is enabled for Resource Manager entries, matched items will be treated as protected to prevent accidental deletion.  
+**A:** Check whether those files have already been recorded in **Resource Manager**. If you have enabled “skip resources recorded in Resource Manager when deleting” in Settings, matched files will be treated as protected items to prevent accidental deletion.  
 **Solutions:**  
-1. Disable the relevant protection rule in Settings and try again.  
-2. Or open **Resource Manager** and click **Run Cleanup Now** to physically clean those recorded items.
+1. Disable the protection rule in Settings and try deleting again.  
+2. Or open **Resource Manager** from the toolbar / sidebar and choose **Run Cleanup Now** to physically clean those recorded items.
 
 **Q: Why doesn’t anything appear after I use Paste?**  
 **A:** First check whether your cloud storage still has enough free space. PikPak often handles **storage quota exceeded** situations through a silent block, meaning the action may simply stop in the background without a clear popup warning.  
-If nothing appears after Paste, the most common cause is insufficient remaining storage.
+If nothing appears after Paste, the most common cause is insufficient remaining storage. Clean up some space first, then try again.
 
 **Q: What is “Auto repair anti-block magnet links,” and when should I enable it?**  
 **A:** This feature automatically removes unrelated Chinese text, emojis, symbols, and other noise inserted into magnet links, then extracts the useful hash and reconstructs a standard magnet format.  
-**Recommendation:** Keep it enabled by default. It is especially useful for links copied from social platforms, forums, or chat apps where the magnet string may be polluted or intentionally obfuscated.  
+**Recommendation:** Keep it enabled by default. It is especially useful for links copied from social platforms, forums, or chat apps where the magnet string may be polluted, partially removed, or intentionally obfuscated.  
 For already standard links beginning with `magnet:?`, the script will skip repair automatically and download normally.
 
 **Q: What is Folder Download Filter, and which download methods does it affect?**  
@@ -267,12 +280,23 @@ Due to browser download limitations, files inside folders are usually flattened 
 ## 🛡️ Privacy & Security
 
 * **Local-first**: All core capabilities interact directly with official PikPak APIs through your browser. Your account token, Password Vault data, and most local configuration data remain in the local browser environment by default.
-* **No active collection**: The script **does not actively collect** user privacy data, and **does not** upload your file information or account credentials to any third-party server.
+* **No active collection**: The script **does not actively collect** user privacy data, and **will never** upload your file information or account credentials to any third-party server.
 * **Third-party services**: Only when using extended features such as **Search Online** subtitles or **Image Search** will the script send the necessary search keywords or image features to related public services. No personal identity information is involved.
 
 ---
 
 ## 🚀 Changelog
+
+### V2.4.0
+* Added **version checking and update notifications**.
+* Added **video playback settings**, including reading playback progress when opening videos and choosing the default quality.
+* Added **web fullscreen** support for video playback.
+* Added a **hide button labels** setting, allowing only icons and hover tooltips to remain.
+* Improved Grid View and video playback experience.
+* Improved the width of the Settings window and Password Vault dialog.
+* Optimized data fetching for Recently Added and Playback History modes.
+* Improved part of the interaction logic.
+* Cleaned up debug output, redundant configuration, and low-risk dead code to reduce script size.
 
 ### V2.3.0 
 * Added **PotPlayer Protocol Repair Assistant**.
@@ -285,7 +309,7 @@ Due to browser download limitations, files inside folders are usually flattened 
 * Fixed shortcut key hierarchy conflicts.
 
 ### V2.2.1
-* Aria2 / Motrix 다운로드 문제를 수정했습니다.
+* Fixed Aria2 / Motrix download issues.
 
 ### V2.2.0
 * Added **clipboard magnet link monitoring** and **magnet link preview**.
