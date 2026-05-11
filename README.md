@@ -4,10 +4,14 @@
 
 # 📦 PikPak 增强大师
 
+[![立即安装 / 更新最新版](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
+
 [![Version](https://img.shields.io/badge/Version-2.4.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
-[![Install](https://img.shields.io/badge/立即安装%20/%20更新-GitHub%20Latest-2EA44F?style=flat-square)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
+[![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
+
+⭐ 如果这个脚本帮到了你，欢迎给项目点一个 Star
 
 > 面向 PikPak 网页端的桌面级增强套件。  
 > 从浏览、搜索、分析、整理到播放、下载与迁移，让云盘管理真正接近本地文件管家的效率与流畅度。
@@ -150,7 +154,8 @@
 ## 💻 兼容性说明 (Compatibility)
 
 * **推荐浏览器**：Chrome / Edge（最新版）
-* **推荐脚本管理器**：Tampermonkey / Violentmonkey
+* **首推脚本管理器**：Violentmonkey（实测滚动、上传与大列表场景更流畅）
+* **兼容脚本管理器**：Tampermonkey
 * **适用平台**：PikPak Web
 * *注：Safari / Firefox 及其他脚本管理器暂未进行完整深度测试，建议使用上述推荐环境以获得最佳体验。*
 
@@ -158,7 +163,7 @@
 
 ## 📥 安装指南 (Installation)
 
-1. **安装脚本管理器**：先安装 [Tampermonkey](https://www.tampermonkey.net/) 或兼容脚本管理器。
+1. **安装脚本管理器**：建议优先安装 [Violentmonkey](https://violentmonkey.github.io/get-it/)，也可使用 [Tampermonkey](https://www.tampermonkey.net/)。
 2. **安装脚本**：点击 **[立即安装](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**。
 3. **打开 PikPak 网页端**：访问 [PikPak](https://mypikpak.com/drive) 并登录账号。
 4. **启动增强大师**：
@@ -170,7 +175,13 @@
 ## ❓ 常见问题解答 (FAQ)
 
 **Q：为什么安装了脚本却没有显示蓝色的悬浮球？**  
-**A：** 请先确认您已登录 PikPak 网页端。若已登录仍未显示，请尝试刷新网页（F5）；同时检查是否被广告拦截插件（如 AdGuard、uBlock Origin）误拦截。可临时关闭拦截插件，或将 PikPak 网页加入白名单后再试。
+**A：请按以下顺序检查：**
+
+1. 确保脚本管理器中 **PikPak 增强大师** 处于开启状态。
+2. 确保已登录 PikPak 网页端账号。
+3. 若使用的是 **Tampermonkey**，请确认浏览器扩展详情页中的 **“允许用户脚本”** 已勾选。
+4. 建议使用 **Edge / Chrome** 最新版浏览器。
+5. 若以上步骤完成后仍然没有显示悬浮球，请临时关闭其他全部浏览器插件，然后刷新网页（F5）再试。
 
 **Q：什么是“极速模式（Turbo Mode）”，为什么建议开启？**  
 **A：** 开启后，脚本会深度接管原生网页端逻辑，并全屏覆盖主要界面。该模式会主动屏蔽原网页中高内存占用的同步流程，因此能显著改善海量文件场景下的卡顿、崩溃与加载迟缓问题。  
