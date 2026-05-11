@@ -4,9 +4,10 @@
 
 # 📦 PikPak 增强大师
 
-[![Version](https://img.shields.io/badge/Version-2.3.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.4.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
+[![Install](https://img.shields.io/badge/立即安装%20/%20更新-GitHub%20Latest-2EA44F?style=flat-square)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
 > 面向 PikPak 网页端的桌面级增强套件。  
 > 从浏览、搜索、分析、整理到播放、下载与迁移，让云盘管理真正接近本地文件管家的效率与流畅度。
@@ -25,8 +26,9 @@
 
 * **交互重构**：在官方功能基础上，整体界面参照 **Windows 文件资源管理器** 的使用习惯进行重构，操作路径更直观。
 * **极速模式**：开启后深度接管网页端逻辑，针对海量文件场景显著缓解卡顿、崩溃与内存压力问题。
+* **侧键导航**：支持鼠标侧键前进 / 后退，在不同视图中快速切换目录层级。
 * **高级路径栏**：支持滚轮滑动、同级目录下拉切换、路径回显与溯源跳转；全盘搜索与分析套件均已接入统一路径体系。
-* **体验增强**：支持星标、类型等多维排序、暗黑皮肤、一键**模糊封面**，并结合 **SWR 静默刷新策略** 提升视图更新体验。
+* **体验增强**：支持星标、类型等多维排序、夜间模式、一键**模糊封面**，并结合 **SWR 静默刷新策略** 提升视图更新体验。
 * **后台索引与保护**：主页蓝色呼吸点提示后台目录树同步状态；系统内置并发操作保护，尽量避免脏数据与冲突写入。
 
 <p align="center">
@@ -273,6 +275,17 @@
 ---
 
 ## 🚀 更新日志
+
+### V2.4.0
+* 新增**版本检查与更新提示**。
+* 新增**视频播放设置**，支持打开视频时读取播放进度与默认清晰度选择。
+* 新增**视频播放网页全屏**功能。
+* 新增**隐藏按钮文字**设置，可仅保留图标与悬浮提示。
+* 优化网格视图与视频播放体验。
+* 优化设置窗口与密码保险库弹窗宽度。
+* 优化最近添加、播放历史模式的数据获取。
+* 优化部分交互逻辑。
+* 清理调试输出、冗余配置与低风险死代码，降低脚本体积。
 
 ### V2.3.0 
 * 新增 **PotPlayer 协议修复助手**。
