@@ -4,9 +4,14 @@
 
 # 📦 PikPak Enhancement Master
 
-[![Version](https://img.shields.io/badge/Version-2.3.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Pasang / Kemas Kini Terkini](https://img.shields.io/badge/Pasang%20/%20Kemas%20Kini%20Terkini-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
+
+[![Version](https://img.shields.io/badge/Version-2.4.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
+[![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
+
+⭐ Jika skrip ini membantu anda, sila beri Star kepada projek ini
 
 > Set peningkatan bertaraf desktop untuk PikPak Web.  
 > Daripada melayari, mencari, menganalisis, mengurus, memainkan, memuat turun hingga memindahkan data, pengurusan storan awan kini benar-benar lebih hampir kepada kecekapan dan kelancaran pengurus fail tempatan.
@@ -25,8 +30,9 @@
 
 * **Pembinaan semula interaksi**: Berdasarkan fungsi rasmi, keseluruhan antaramuka dibina semula dengan merujuk tabiat penggunaan **Windows File Explorer**, menjadikan laluan operasi lebih intuitif.
 * **Mod Turbo**: Selepas diaktifkan, ia mengambil alih logik web secara mendalam, dan secara ketara mengurangkan masalah lag, crash serta tekanan memori dalam senario fail berskala besar.
+* **Navigasi Butang Sisi**: Menyokong butang sisi tetikus untuk maju / undur, membolehkan pertukaran tahap direktori dengan pantas dalam pelbagai paparan.
 * **Bar laluan lanjutan**: Menyokong skrol roda tetikus, penukaran folder setara melalui menu lungsur, paparan semula laluan serta lompat jejak sumber; carian seluruh cakera dan suite analisis telah disepadukan ke dalam sistem laluan yang sama.
-* **Peningkatan pengalaman**: Menyokong penyusunan berbilang dimensi seperti bintang dan jenis fail, **kaburkan kulit hadapan** dengan satu klik, tema gelap, serta meningkatkan pengalaman kemas kini paparan melalui **strategi SWR refresh senyap**.
+* **Peningkatan pengalaman**: Menyokong penyusunan berbilang dimensi seperti bintang dan jenis fail, mod malam, **kaburkan kulit hadapan** dengan satu klik, serta meningkatkan pengalaman kemas kini paparan melalui **strategi SWR refresh senyap**.
 * **Pengindeksan latar belakang & perlindungan**: Titik pernafasan biru di halaman utama menunjukkan status penyegerakan pokok direktori di latar belakang; sistem turut terbina dengan perlindungan operasi serentak untuk mengurangkan data kotor dan konflik penulisan.
 
 <p align="center">
@@ -39,7 +45,7 @@
 
 ### 📂 Pemprosesan Kelompok & Pengurusan Ruang
 
-* **Penamaan Semula Kelompok**: Menyokong **penggantian / pemadaman regex**, **penomboran episod**, **pemformatan** teks, **penamaan FC2 yang bersih**, **pembuangan awalan iklan**, serta **pembaikan sambungan pintar** berdasarkan MIME.
+* **Penamaan Semula Kelompok**: Menyokong **penggantian / pemadaman regex**, **penomboran episod**, **pemformatan** teks, **penamaan FC2 standard**, **pembuangan awalan iklan**, serta **pembaikan sambungan pintar** berdasarkan MIME.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/rename/rename_ms.gif" width="550" alt="Penamaan Semula Kelompok">
@@ -89,8 +95,8 @@
 * **Torrent & sandaran**: Menyokong penghuraian fail torrent **.torrent**; untuk sebahagian pautan terhad, turut menyediakan **penyelesaian sandaran petikan halaman web**.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_ms.png" height="350" alt="Magnet">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_ms.gif" height="350" alt="Perkongsian">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_ms.png" height="320" alt="Magnet">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_ms.gif" height="320" alt="Perkongsian">
 </p>
 
 > ⚠️ Fungsi sekatan automatik bagi had bilangan ambilan hanya berfungsi apabila halaman web kekal dibuka dan peranti tidak berada dalam mod tidur.
@@ -148,7 +154,8 @@
 ## 💻 Penjelasan Keserasian (Compatibility)
 
 * **Pelayar disyorkan**: Chrome / Edge (versi terkini)
-* **Pengurus skrip disyorkan**: Tampermonkey / Violentmonkey
+* **Pengurus skrip paling disyorkan**: Violentmonkey (teruji lebih lancar dalam senario skrol, muat naik dan senarai besar)
+* **Pengurus skrip serasi**: Tampermonkey
 * **Platform yang disokong**: PikPak Web
 * *Nota: Safari / Firefox dan pengurus skrip lain belum diuji sepenuhnya secara mendalam. Disyorkan menggunakan persekitaran di atas untuk pengalaman terbaik.*
 
@@ -156,7 +163,7 @@
 
 ## 📥 Panduan Pemasangan (Installation)
 
-1. **Pasang pengurus skrip**: Pasang [Tampermonkey](https://www.tampermonkey.net/) atau pengurus skrip yang serasi terlebih dahulu.
+1. **Pasang pengurus skrip**: Disyorkan untuk memasang [Violentmonkey](https://violentmonkey.github.io/get-it/) terlebih dahulu; [Tampermonkey](https://www.tampermonkey.net/) juga boleh digunakan.
 2. **Pasang skrip**: Klik **[Pasang Sekarang](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**.
 3. **Buka PikPak Web**: Lawati [PikPak](https://mypikpak.com/drive) dan log masuk ke akaun anda.
 4. **Lancarkan Enhancement Master**:
@@ -168,7 +175,13 @@
 ## ❓ Soalan Lazim (FAQ)
 
 **S: Mengapa selepas memasang skrip, bola terapung biru tidak muncul?**  
-**J:** Sila pastikan anda telah log masuk ke PikPak Web. Jika sudah log masuk tetapi masih tidak muncul, cuba segarkan halaman (F5); pada masa yang sama, periksa sama ada ia disekat secara tersilap oleh pemalam penyekat iklan seperti AdGuard atau uBlock Origin. Anda boleh mematikan pemalam tersebut buat sementara waktu atau menambah PikPak ke senarai putih.
+**J: Sila semak mengikut urutan berikut:**
+
+1. Pastikan **PikPak Enhancement Master** berada dalam keadaan aktif di pengurus skrip.
+2. Pastikan anda telah log masuk ke akaun PikPak Web.
+3. Jika menggunakan **Tampermonkey**, pastikan **“Allow user scripts”** telah diaktifkan pada halaman butiran sambungan pelayar.
+4. Disyorkan menggunakan pelayar **Edge / Chrome** versi terkini.
+5. Jika bola terapung masih tidak muncul selepas semua langkah di atas, nyahaktifkan sementara semua sambungan pelayar lain, kemudian segarkan halaman (F5) dan cuba semula.
 
 **S: Apakah itu “Mod Turbo”, dan mengapa disyorkan untuk diaktifkan?**  
 **J:** Selepas diaktifkan, skrip akan mengambil alih logik halaman web asli secara mendalam dan menutup keseluruhan antaramuka utama secara skrin penuh. Mod ini akan secara aktif menyekat proses penyegerakan asal yang menggunakan memori tinggi, lalu meningkatkan dengan ketara kelancaran, kestabilan dan kelajuan muatan dalam senario fail yang sangat banyak.  
@@ -274,6 +287,17 @@ Disebabkan had protokol muat turun pelayar itu sendiri, fail dalam folder biasan
 
 ## 🚀 Log Kemas Kini
 
+### V2.4.0
+* Menambahkan **semakan versi dan pemberitahuan kemas kini**.
+* Menambahkan **tetapan main balik video**, termasuk membaca kemajuan main balik semasa membuka video dan memilih kualiti lalai.
+* Menambahkan fungsi **skrin penuh web untuk main balik video**.
+* Menambahkan tetapan **sembunyikan teks butang**, membolehkan hanya ikon dan tooltip hover dikekalkan.
+* Meningkatkan pengalaman paparan grid dan main balik video.
+* Meningkatkan lebar tetingkap Tetapan dan dialog Vault Kata Laluan.
+* Mengoptimumkan pengambilan data untuk mod Baru Ditambah dan Sejarah Main Balik.
+* Meningkatkan sebahagian logik interaksi.
+* Membersihkan output debug, konfigurasi berlebihan dan kod mati berisiko rendah untuk mengurangkan saiz skrip.
+
 ### V2.3.0 
 * Menambahkan **Pembantu Pembaikan Protokol PotPlayer**.
 
@@ -299,7 +323,7 @@ Disebabkan had protokol muat turun pelayar itu sendiri, fail dalam folder biasan
 * Penambahbaikan kestabilan.
 
 ### V2.0.0
-* Sokongan bahasa diperluas kepada **简体中文 / 繁體中文 / English / 한국어 / 日本語 / Indonesia / Bahasa Melayu**。
+* Sokongan bahasa diperluas kepada **简体中文 / 繁體中文 / English / 한국어 / 日本語 / Indonesia / Bahasa Melayu**.
 * Naik taraf UI dan seni bina, butang carian imej melalui imej diletakkan di luar, serta ditambah **paparan grid**.
 
 ### V1.3.2
