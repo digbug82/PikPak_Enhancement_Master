@@ -4,9 +4,14 @@
 
 # 📦 PikPak Enhancement Master
 
-[![Version](https://img.shields.io/badge/Version-2.3.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Pasang / Perbarui Terbaru](https://img.shields.io/badge/Pasang%20/%20Perbarui%20Terbaru-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
+
+[![Version](https://img.shields.io/badge/Version-2.4.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
+[![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
+
+⭐ Jika skrip ini membantu Anda, silakan beri Star pada proyek ini
 
 > Paket peningkatan tingkat desktop untuk PikPak Web.  
 > Dari penjelajahan, pencarian, analisis, penataan, hingga pemutaran, unduhan, dan migrasi, membuat pengelolaan cloud drive benar-benar mendekati efisiensi dan kelancaran pengelola file lokal.
@@ -25,8 +30,9 @@
 
 * **Rekonstruksi Interaksi**: Di atas fitur resmi, antarmuka secara keseluruhan dibangun ulang dengan mengacu pada kebiasaan penggunaan **Windows File Explorer**, sehingga alur operasi menjadi lebih intuitif.
 * **Mode Turbo**: Setelah diaktifkan, mode ini mengambil alih logika web secara mendalam dan secara signifikan mengurangi lag, crash, serta beban memori pada skenario dengan file dalam jumlah sangat besar.
+* **Navigasi Tombol Samping**: Mendukung tombol samping mouse untuk maju / mundur, sehingga Anda dapat berpindah tingkat direktori dengan cepat di berbagai tampilan.
 * **Bilah Path Lanjutan**: Mendukung scroll roda mouse, pergantian folder setingkat melalui dropdown, tampilan ulang path, serta lompatan pelacakan sumber; pencarian global dan paket analisis juga telah terintegrasi ke sistem path yang seragam.
-* **Peningkatan Pengalaman**: Mendukung pengurutan multi-dimensi seperti bintang dan tipe, tema gelap, **buramkan sampul** sekali klik, serta meningkatkan pengalaman pembaruan tampilan dengan **strategi refresh senyap SWR**.
+* **Peningkatan Pengalaman**: Mendukung pengurutan multi-dimensi seperti bintang dan tipe, mode malam, **buramkan sampul** sekali klik, serta meningkatkan pengalaman pembaruan tampilan dengan **strategi refresh senyap SWR**.
 * **Pengindeksan Latar Belakang & Perlindungan**: Titik biru bernapas di beranda menunjukkan status sinkronisasi pohon direktori di latar belakang; sistem juga memiliki perlindungan operasi konkurensi untuk sebisa mungkin menghindari data kotor dan penulisan yang saling bertabrakan.
 
 <p align="center">
@@ -39,7 +45,7 @@
 
 ### 📂 Operasi Massal & Manajemen Ruang
 
-* **Ganti Nama Massal**: Mendukung **penggantian / penghapusan regex**, **nomor episode berurutan**, **pemformatan** teks, **penamaan FC2 yang bersih**, **penghapusan iklan pada awalan**, serta **perbaikan ekstensi cerdas** berbasis MIME.
+* **Ganti Nama Massal**: Mendukung **penggantian / penghapusan regex**, **nomor episode berurutan**, **pemformatan** teks, **penamaan FC2 standar**, **penghapusan iklan pada awalan**, serta **perbaikan ekstensi cerdas** berbasis MIME.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/rename/rename_id.gif" width="550" alt="Ganti Nama Massal">
@@ -89,8 +95,8 @@
 * **Torrent & Cadangan**: Mendukung parsing file torrent **.torrent**; untuk sebagian tautan yang dibatasi, tersedia **solusi penyimpanan snapshot halaman web** sebagai cadangan.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_id.png" height="350" alt="Magnet">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_id.gif" height="350" alt="Berbagi">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_id.png" height="320" alt="Magnet">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_id.gif" height="320" alt="Berbagi">
 </p>
 
 > ⚠️ Intersepsi otomatis batas jumlah pengambilan hanya berlaku saat halaman web tetap terbuka dan perangkat tidak dalam keadaan tidur.
@@ -148,7 +154,8 @@
 ## 💻 Kompatibilitas (Compatibility)
 
 * **Browser yang Direkomendasikan**: Chrome / Edge (versi terbaru)
-* **Manajer Skrip yang Direkomendasikan**: Tampermonkey / Violentmonkey
+* **Manajer Skrip Utama yang Direkomendasikan**: Violentmonkey (teruji lebih lancar pada skenario scroll, unggah, dan daftar besar)
+* **Manajer Skrip yang Kompatibel**: Tampermonkey
 * **Platform yang Didukung**: PikPak Web
 * *Catatan: Safari / Firefox dan manajer skrip lainnya belum menjalani pengujian mendalam secara lengkap. Disarankan menggunakan lingkungan yang direkomendasikan di atas untuk pengalaman terbaik.*
 
@@ -156,7 +163,7 @@
 
 ## 📥 Panduan Instalasi (Installation)
 
-1. **Pasang manajer skrip**: Pasang terlebih dahulu [Tampermonkey](https://www.tampermonkey.net/) atau manajer skrip kompatibel lainnya.
+1. **Pasang manajer skrip**: Disarankan memasang [Violentmonkey](https://violentmonkey.github.io/get-it/) terlebih dahulu; [Tampermonkey](https://www.tampermonkey.net/) juga dapat digunakan.
 2. **Pasang skrip**: Klik **[Instal Sekarang](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**.
 3. **Buka PikPak Web**: Kunjungi [PikPak](https://mypikpak.com/drive) lalu login ke akun Anda.
 4. **Jalankan Enhancement Master**:
@@ -168,7 +175,13 @@
 ## ❓ FAQ
 
 **Q: Mengapa setelah memasang skrip, bola biru melayang tidak muncul?**  
-**A:** Pastikan Anda sudah login ke PikPak Web terlebih dahulu. Jika sudah login namun tetap tidak muncul, coba refresh halaman (F5); sekaligus periksa apakah diblokir secara keliru oleh plugin pemblokir iklan seperti AdGuard atau uBlock Origin. Anda dapat menonaktifkan plugin pemblokir sementara, atau menambahkan halaman PikPak ke whitelist, lalu coba lagi.
+**A: Silakan periksa sesuai urutan berikut:**
+
+1. Pastikan **PikPak Enhancement Master** dalam keadaan aktif di manajer skrip.
+2. Pastikan Anda sudah login ke akun PikPak Web.
+3. Jika menggunakan **Tampermonkey**, pastikan **“Allow user scripts”** sudah diaktifkan pada halaman detail ekstensi browser.
+4. Disarankan menggunakan browser **Edge / Chrome** versi terbaru.
+5. Jika bola melayang tetap tidak muncul setelah semua langkah di atas, nonaktifkan sementara semua ekstensi browser lainnya, lalu refresh halaman (F5) dan coba lagi.
 
 **Q: Apa itu “Mode Turbo” dan mengapa disarankan untuk diaktifkan?**  
 **A:** Setelah diaktifkan, skrip akan mengambil alih logika halaman web asli secara mendalam dan menutupi antarmuka utama dalam mode layar penuh. Mode ini secara aktif memblokir proses sinkronisasi bawaan web yang memakan memori tinggi, sehingga dapat secara signifikan memperbaiki masalah lag, crash, dan lambat memuat pada skenario dengan jumlah file besar.  
@@ -273,6 +286,17 @@ Karena keterbatasan protokol unduhan browser itu sendiri, file di dalam folder b
 ---
 
 ## 🚀 Changelog
+
+### V2.4.0
+* Menambahkan **pemeriksaan versi dan notifikasi pembaruan**.
+* Menambahkan **pengaturan pemutaran video**, termasuk membaca progres pemutaran saat membuka video dan memilih kualitas default.
+* Menambahkan fitur **layar penuh web untuk pemutaran video**.
+* Menambahkan pengaturan **sembunyikan teks tombol**, sehingga hanya ikon dan tooltip saat hover yang ditampilkan.
+* Meningkatkan pengalaman Tampilan Grid dan pemutaran video.
+* Meningkatkan lebar jendela Pengaturan dan dialog Brankas Kata Sandi.
+* Mengoptimalkan pengambilan data untuk mode Baru Ditambahkan dan Riwayat Pemutaran.
+* Meningkatkan sebagian logika interaksi.
+* Membersihkan output debug, konfigurasi redundan, dan kode mati berisiko rendah untuk mengurangi ukuran skrip.
 
 ### V2.3.0 
 * Menambahkan **Asisten Perbaikan Protokol PotPlayer**.
