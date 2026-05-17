@@ -6,7 +6,7 @@
 
 [![최신 버전 설치 / 업데이트](https://img.shields.io/badge/최신%20버전%20설치%20/%20업데이트-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
-[![Version](https://img.shields.io/badge/Version-2.4.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.5.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
@@ -286,6 +286,19 @@ PikPak 의 일부 원시 인터페이스는 비디오 길이를 직접 반환하
 ---
 
 ## 🚀 업데이트 로그
+
+### V2.5.0
+* **공유解析 모드**를 추가하여 공유 링크解析, 클립보드 인식, 재귀 투시 스캔, 파일 저장, 미디어 미리보기 및 압축 파일 미리보기/압축 해제를 지원합니다.
+* **직접 다운로드 가속 도메인 설정**을 추가하여 접두사 모드와 쿼리 매개변수 모드를 지원하며, 브라우저 다운로드 및 Aria2 / Motrix 전송 링크 재작성에 사용할 수 있습니다.
+* **플레이어 마우스 휠 볼륨 조절**을 추가하여 볼륨 오버레이 표시와 음소거 아이콘 상태를 지원합니다.
+* **웹 전체화면 플레이어**를 최적화하여 재생 목록, 컨트롤 바, 진행 바, 사이드 버튼의 상단 이동 불일치 및 흔들림 문제를 수정했습니다.
+* **좁은 화면 및 창 크기 조절 적응**을 최적화하여 기존 확대/축소 로직을 버튼 텍스트 자동 숨김 방식으로 정리하고, 작은 화면에서도 텍스트가 선명하게 보이도록 했습니다.
+* **재생 기록 그리드 정렬**을 최적화하여 정렬 드롭다운 선택 후 버튼 아이콘과 텍스트가 즉시 업데이트되지 않는 문제를 수정했습니다.
+* **검색 키워드 강조 표시**를 최적화하여 긴 파일명에서는 검색어 주변 내용을 우선 표시합니다.
+* **압축 파일 미리보기**를 최적화하여 정렬 메뉴와 경로 드롭다운을 추가하고, 선택한 일부 파일만 압축 해제할 수 있도록 지원합니다.
+* **설정 저장 알림**을 최적화하여 변경 사항이 없으면 더 이상 알리지 않으며, 일반 설정이 페이지 새로고침을 잘못 안내하지 않도록 했습니다.
+* **Aria2 / Motrix에 0KB 파일이 전송되는 문제**를 수정하여 유효하지 않은 빈 파일을 자동으로 건너뜁니다.
+* 행 높이 이상, 아이콘 통일, 영어 열 너비, 최대화 상태의 경로 드롭다운 글꼴 크기 등 일부 UI 세부 문제를 수정했습니다.
 
 ### V2.4.0
 * **버전 확인 및 업데이트 알림**을 추가했습니다.
