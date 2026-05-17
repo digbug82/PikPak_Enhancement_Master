@@ -576,7 +576,7 @@
     "label_aria2_token": "Aria2 RPC Token",
     "label_download_accel_enable": "Custom Download Acceleration Domain",
     "label_download_accel_domain": "Download Acceleration Domain",
-    "desc_download_accel_domain": "Use a custom acceleration domain for direct download links",
+    "desc_download_accel_domain": "Custom acceleration domain for direct download links",
     "label_download_accel_mode": "Reverse Proxy Rewrite Mode",
     "label_download_accel_mode_prefix": "Prefix Full Original URL",
     "label_download_accel_mode_query": "Pass via URL Parameter",
