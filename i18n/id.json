@@ -576,7 +576,7 @@
     "label_aria2_token": "Kunci Aria2",
     "label_download_accel_enable": "Domain Akselerasi Unduhan Kustom",
     "label_download_accel_domain": "Domain Akselerasi Unduhan",
-    "desc_download_accel_domain": "Gunakan domain akselerasi kustom untuk tautan langsung unduhan",
+    "desc_download_accel_domain": "Domain akselerasi kustom untuk tautan unduhan langsung",
     "label_download_accel_mode": "Mode Penulisan Ulang Reverse Proxy",
     "label_download_accel_mode_prefix": "Awali dengan Tautan Asli Lengkap",
     "label_download_accel_mode_query": "Lewatkan sebagai Parameter URL",
