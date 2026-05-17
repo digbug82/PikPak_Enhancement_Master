@@ -6,7 +6,7 @@
 
 [![立即安装 / 更新最新版](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
-[![Version](https://img.shields.io/badge/Version-2.4.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.5.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
@@ -286,6 +286,19 @@
 ---
 
 ## 🚀 更新日志
+
+### V2.5.0
+* 新增**分享解析模式**，支持分享链接解析、剪切板识别、递归透视扫描、文件保存、媒体预览与压缩包预览/解压等。
+* 新增**下载直链加速域名设置**，支持前缀模式与查询参数模式，可用于浏览器下载与 Aria2 / Motrix 推送链接改写。
+* 新增**播放器鼠标滚轮调节音量**，支持音量浮层提示与静音图标状态。
+* 优化**网页全屏播放器**，修复播放列表、控制栏、进度条、侧栏按钮上移不同步与抖动问题。
+* 优化**窄屏与窗口缩放适配**，将旧缩放逻辑收口为按钮文字自适应隐藏，确保小屏幕文字清晰。
+* 优化**播放历史网格排序**，修复排序下拉选择后按钮图标与文字不立即更新的问题。
+* 优化**搜索关键词高亮**，长文件名会优先展示命中关键词附近内容。
+* 优化**压缩包预览**，新增排序菜单与路径下拉，支持选中部分文件解压。
+* 优化**设置保存提示**，无改动时不再提示，普通设置不再误提示页面刷新。
+* 修复 **Aria2 / Motrix 推送 0KB 文件**问题，自动跳过无效空文件。
+* 修复部分 UI 细节问题，包括行高异常、图标统一、英文列宽与最大化路径下拉字体等。
 
 ### V2.4.0
 * 新增**版本检查与更新提示**。
