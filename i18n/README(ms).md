@@ -6,7 +6,7 @@
 
 [![Pasang / Kemas Kini Terkini](https://img.shields.io/badge/Pasang%20/%20Kemas%20Kini%20Terkini-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
-[![Version](https://img.shields.io/badge/Version-2.4.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.5.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
@@ -286,6 +286,19 @@ Disebabkan had protokol muat turun pelayar itu sendiri, fail dalam folder biasan
 ---
 
 ## 🚀 Log Kemas Kini
+
+### V2.5.0
+* Menambah **Mod Penghuraian Perkongsian**, menyokong penghuraian pautan perkongsian, pengecaman papan klip, imbasan insight rekursif, penyimpanan fail, pratonton media serta pratonton/nyahmampat arkib.
+* Menambah **tetapan domain pecutan pautan muat turun terus**, menyokong mod awalan dan mod parameter pertanyaan untuk menulis semula pautan muat turun pelayar serta tolakan Aria2 / Motrix.
+* Menambah **kawalan kelantangan pemain menggunakan roda tetikus**, menyokong paparan tindanan kelantangan dan status ikon senyap.
+* Mengoptimumkan **pemain skrin penuh web**, membetulkan masalah pergerakan ke atas yang tidak segerak dan gegaran pada senarai main, bar kawalan, bar kemajuan dan butang sisi.
+* Mengoptimumkan **penyesuaian skrin sempit dan penskalaan tetingkap**, menukar logik penskalaan lama kepada penyembunyian teks butang secara adaptif bagi memastikan teks jelas pada skrin kecil.
+* Mengoptimumkan **susunan grid sejarah main balik**, membetulkan masalah ikon dan teks butang susunan tidak dikemas kini serta-merta selepas memilih daripada dropdown.
+* Mengoptimumkan **serlahan kata kunci carian**, supaya nama fail panjang mengutamakan paparan kandungan berhampiran kata kunci yang dipadankan.
+* Mengoptimumkan **pratonton arkib**, menambah menu susunan dan dropdown laluan, serta menyokong nyahmampat sebahagian fail yang dipilih.
+* Mengoptimumkan **peringatan simpan tetapan**, supaya tiada peringatan dipaparkan apabila tiada perubahan, dan tetapan biasa tidak lagi tersilap memaklumkan muat semula halaman.
+* Membetulkan masalah **tolakan fail 0KB ke Aria2 / Motrix**, dengan melangkau fail kosong yang tidak sah secara automatik.
+* Membetulkan beberapa butiran UI, termasuk keabnormalan tinggi baris, penyatuan ikon, lebar lajur bahasa Inggeris dan saiz fon dropdown laluan ketika dimaksimumkan.
 
 ### V2.4.0
 * Menambahkan **semakan versi dan pemberitahuan kemas kini**.
