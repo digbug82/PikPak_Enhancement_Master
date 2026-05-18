@@ -1,1 +1,6 @@
 blank_issues_enabled: false
+
+contact_links:
+  - name: "💬 Discussions / 讨论区"
+    url: "https://github.com/digbug82/PikPak_Enhancement_Master/discussions"
+    about: "Please ask and answer questions here. / 建议在讨论区提问与交流。"
