@@ -1,0 +1,51 @@
+name: "✨ Feature request"
+description: "Suggest an idea or improvement."
+title: "[Feature] "
+labels: ["enhancement"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement for PikPak Enhancement Master.
+
+        Before submitting, please search existing Issues and Discussions first to avoid duplicates.
+
+  - type: textarea
+    id: feature-detail
+    attributes:
+      label: "Feature description"
+      description: "Please describe the feature or improvement you want."
+      placeholder: |
+        1. What feature do you want?
+        2. What problem does it solve?
+        3. How do you expect it to work?
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: "Use case"
+      description: "Please describe when and why this feature would be useful."
+      placeholder: "Example: When managing many files, I want to..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternative solutions"
+      description: "If you have tried other solutions or have another idea, describe it here."
+      placeholder: "Optional"
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "Screenshots or references"
+      description: "You can paste screenshots, drag images here, or provide reference links."
+      placeholder: "Paste images or add reference links here"
+    validations:
+      required: false
