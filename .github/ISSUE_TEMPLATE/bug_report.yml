@@ -21,7 +21,7 @@ body:
     attributes:
       label: 浏览器型号及版本 / Browser and version
       description: 请填写浏览器名称和版本号。 / Please enter your browser name and version.
-      placeholder: 例如 / Example: Edge 124.0.2478.80 / Chrome 124.0.6367.119
+      placeholder: "例如 / Example: Edge 124.0.2478.80 / Chrome 124.0.6367.119"
     validations:
       required: true
 
@@ -30,7 +30,7 @@ body:
     attributes:
       label: 脚本版本 / Script version
       description: 请填写 PikPak 增强大师的版本号。 / Please enter the PikPak Enhancement Master version.
-      placeholder: 例如 / Example: 2.5.0
+      placeholder: "例如 / Example: 2.5.0"
     validations:
       required: true
 
