@@ -1,0 +1,66 @@
+name: "🐛 问题反馈"
+description: "报告一个可复现的 Bug。"
+title: "[Bug] "
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈 PikPak 增强大师的问题。
+
+        提交前请先简单搜索已有 Issues，避免重复反馈。
+        请不要在日志或截图中泄露账号、Cookie、Authorization、Session、Token 等隐私信息。
+
+  - type: input
+    id: browser-version
+    attributes:
+      label: "浏览器型号及版本"
+      description: "请填写浏览器名称和版本号。"
+      placeholder: "例如：Edge 124.0.2478.80 / Chrome 124.0.6367.119"
+    validations:
+      required: true
+
+  - type: input
+    id: script-version
+    attributes:
+      label: "脚本版本"
+      description: "请填写 PikPak 增强大师的版本号。"
+      placeholder: "例如：2.5.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-detail
+    attributes:
+      label: "问题详情"
+      description: "请说明问题发生在哪个页面、哪个功能、如何触发、期望结果和实际结果。"
+      placeholder: |
+        1. 打开页面：
+        2. 使用功能：
+        3. 操作步骤：
+        4. 期望结果：
+        5. 实际结果：
+    validations:
+      required: true
+
+  - type: textarea
+    id: console-error
+    attributes:
+      label: "控制台报错信息"
+      description: |
+        请按 F12 或 Ctrl+Shift+I 打开开发者工具，复制 Console / 控制台中的报错信息。
+        如果没有报错，请填写“无”。
+      render: shell
+      placeholder: "请粘贴控制台报错信息"
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "截图或录屏"
+      description: "可以直接粘贴截图、拖入图片，或补充录屏链接。"
+      placeholder: "可在此粘贴图片或补充说明"
+    validations:
+      required: false
