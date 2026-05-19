@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            2.5.0
+// @version            2.5.1
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        PikPak 网页增强：集成 Aria2/Motrix 推送、文件/文件夹查重、批量重命名、分享链接解析、资源清理、批量解压、夜间模式、污染磁链识别、高级搜索、排序增强、多账号数据迁移、目录树导出、视频与图片播放体验增强等。叫“增强大师”是有原因的，何不进来看看？
@@ -327,6 +327,7 @@ downloadAccelEnable: false,
 downloadAccelDomain: '',
 downloadAccelMode: 'prefix',
 downloadAccelQueryParam: 'url',
+aria2KeepFolderStructure: true,
 uploadPartSizeOfficial: 1 * 1024 * 1024,
 uploadPartMaxCount: 9999,
 uploadPartConcurrencyOfficial: 5,
@@ -616,6 +617,8 @@ const CSS = `
 .pk-txt-short { display: none; }
 .pk-txt-long { display: inline; }
 #pk-search-path-con .pk-txt-short { font-weight: 500; color: var(--pk-fg); }
+#pk-search-path-con.pk-share-path-compact .pk-txt-long { display: none !important; }
+#pk-search-path-con.pk-share-path-compact .pk-txt-short { display: inline !important; }
 #pk-dup-folder-sel-wrap { position: relative; display: inline-flex; align-items: center; width: 220px; min-width: 0; flex-shrink: 0; }
 #pk-dup-folder-sel { position: absolute !important; inset: 0 !important; width: 0 !important; height: 0 !important; opacity: 0 !important; pointer-events: none !important; }
 #pk-dup-folder-btn { width: 100%; height: 30px; border: 1px solid var(--pk-bd); border-radius: 4px; background: var(--pk-bg); color: var(--pk-fg); padding: 0 28px 0 10px; font-size: 12px; text-align: left; cursor: pointer; position: relative; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -638,8 +641,8 @@ const CSS = `
 .pk-ov.pk-hide-btn-text .pk-txt-long, .pk-ov.pk-auto-hide-btn-text .pk-txt-long { display: none !important; }
 .pk-ov.pk-hide-btn-text .pk-txt-short, .pk-ov.pk-auto-hide-btn-text .pk-txt-short { display: inline !important; }
 .pk-ov.pk-hide-btn-text #pk-dup-folder-sel-wrap, .pk-ov.pk-auto-hide-btn-text #pk-dup-folder-sel-wrap { max-width: 100px !important; }
-.pk-ov.pk-hide-btn-text .pk-btn:not(#pk-filter-btn):not(#pk-filter-exit-btn) > span, .pk-ov.pk-auto-hide-btn-text .pk-btn:not(#pk-filter-btn):not(#pk-filter-exit-btn) > span, .pk-ov.pk-hide-btn-text .pk-nav-btn > span, .pk-ov.pk-auto-hide-btn-text .pk-nav-btn > span { display: none !important; }
-.pk-ov.pk-hide-btn-text .pk-tb .pk-btn:not(#pk-filter-btn):not(#pk-filter-exit-btn), .pk-ov.pk-auto-hide-btn-text .pk-tb .pk-btn:not(#pk-filter-btn):not(#pk-filter-exit-btn) { padding: 0 8px !important; min-width: 32px; justify-content: center; gap: 0 !important; }
+.pk-ov.pk-hide-btn-text .pk-btn:not(#pk-filter-btn):not(#pk-filter-exit-btn):not(#pk-share-parse-back-list) > span, .pk-ov.pk-auto-hide-btn-text .pk-btn:not(#pk-filter-btn):not(#pk-filter-exit-btn):not(#pk-share-parse-back-list) > span, .pk-ov.pk-hide-btn-text .pk-nav-btn > span, .pk-ov.pk-auto-hide-btn-text .pk-nav-btn > span { display: none !important; }
+.pk-ov.pk-hide-btn-text .pk-tb .pk-btn:not(#pk-filter-btn):not(#pk-filter-exit-btn):not(#pk-share-parse-back-list), .pk-ov.pk-auto-hide-btn-text .pk-tb .pk-btn:not(#pk-filter-btn):not(#pk-filter-exit-btn):not(#pk-share-parse-back-list) { padding: 0 8px !important; min-width: 32px; justify-content: center; gap: 0 !important; }
 .pk-ov.pk-hide-btn-text #pk-btn-upload, .pk-ov.pk-auto-hide-btn-text #pk-btn-upload { padding: 0 8px !important; gap: 4px !important; }
 .pk-ov.pk-hide-btn-text .pk-btn-arrow, .pk-ov.pk-auto-hide-btn-text .pk-btn-arrow { margin-left: 0 !important; }
 .pk-ov.pk-hide-btn-text .pk-maximized .pk-sidebar, .pk-ov.pk-auto-hide-btn-text .pk-maximized .pk-sidebar { width: 68px !important; align-items: center !important; padding: 16px 0 !important; }
@@ -1215,6 +1218,7 @@ body:has(.pk-ov:not([style*="display: none"])), body:has(.pk-img-ov), body:has(#
 .pk-pop-max .pk-dropdown-item svg { width: 22px !important; height: 22px !important; }
 .pk-btn-arrow { margin-left: 2px; opacity: 0.6; transition: transform 0.2s; }
 .pk-aria-status-box { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: bold; margin-top: 6px; transform: translateZ(0); -webkit-transform: translateZ(0); backface-visibility: hidden; will-change: transform; cursor: default; }
+.pk-setting-fieldset{position:relative;padding:25px 15px 15px 15px;border:2px solid var(--pk-bd);border-radius:8px;transition:border-color .2s;transform:translateZ(0);backface-visibility:hidden;}.pk-setting-fieldset:hover:not(.pk-inner-active){border-color:var(--pk-pri);}.pk-setting-fieldset.pk-inner-active{border-color:var(--pk-bd)!important;}.pk-setting-stack{display:flex;flex-direction:column;gap:15px;}.pk-setting-checkrow{display:flex;align-items:center;justify-content:space-between;height:44px;min-height:44px;border:2px solid var(--pk-bd);border-radius:8px;padding:0 12px;cursor:pointer;background:var(--pk-bg);transition:border-color .2s;box-sizing:border-box;}.pk-setting-checkrow:hover{border-color:var(--pk-pri);}.pk-setting-checkrow span{font-size:14px;font-weight:400;color:var(--pk-fg);user-select:none;line-height:1.4;}.pk-setting-checkrow input{width:16px;height:16px;accent-color:var(--pk-pri);cursor:pointer;flex-shrink:0;margin-left:12px;}
 .pk-token-eye { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border: none; border-radius: 6px; background: transparent; color: #8a94a4; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; transition: background 0.15s, color 0.15s; z-index: 20; }
 .pk-token-eye:hover { background: rgba(0,103,192,0.1); color: var(--pk-pri); }
 .pk-token-eye svg { width: 18px; height: 18px; display: block; }
@@ -1249,6 +1253,10 @@ body:has(.pk-ov:not([style*="display: none"])), body:has(.pk-img-ov), body:has(#
 .pk-drag-path { font-size: 14px; color: #888; display: flex; align-items: center; gap: 6px; }
 body.pk-hide-all-ui #pk-launch, body.pk-hide-all-ui .pk-ov, body.pk-hide-all-ui .pk-modal-ov, body.pk-hide-all-ui .pk-img-ov, body.pk-hide-all-ui #pk-player-ov, body.pk-hide-all-ui .pk-cal-pop, body.pk-hide-all-ui .pk-crumb-pop, body.pk-hide-all-ui .pk-hist-pop, body.pk-hide-all-ui .pk-tooltip, body.pk-hide-all-ui .pk-msg-toast, body.pk-hide-all-ui .pk-float-bar-item, body.pk-hide-all-ui .pk-selection-box, body.pk-hide-all-ui .pk-drag-ghost { display: none !important; opacity: 0 !important; pointer-events: none !important; }
 .pk-ana-select-btn { border: 1px solid var(--pk-bd); background: var(--pk-bg); color: var(--pk-fg); height: 32px; border-radius: 6px; padding: 0 10px; font-size: 13px; cursor: pointer; display: none; align-items: center; gap: 6px; transition: all 0.2s; white-space: nowrap; margin-right: 8px; }
+#pk-win:not(.pk-analyze-group-tools-on) #pk-ana-select-btn, #pk-win:not(.pk-analyze-group-tools-on) #pk-ana-sort-btn, #pk-win.pk-share-parse-mode #pk-ana-select-btn, #pk-win.pk-share-parse-mode #pk-ana-sort-btn { display: none !important; pointer-events: none !important; }
+#pk-share-parse-back-list.pk-share-exit-compact > span { display: none !important; }
+#pk-share-parse-back-list.pk-share-exit-compact { padding: 0 8px !important; min-width: 32px; justify-content: center; gap: 0 !important; }
+#pk-share-parse-back-list.pk-share-exit-cold:hover:not(:disabled),#pk-share-parse-back-list.pk-share-exit-cold:focus,#pk-share-parse-back-list.pk-share-exit-cold:active{background:transparent!important;filter:none!important;}
 .pk-ana-select-btn:hover { border-color: var(--pk-pri); color: var(--pk-pri); background: rgba(var(--pk-bg-rgb), 0.05); }
 .pk-ana-pop { position: absolute; background: var(--pk-bg); border: 1px solid var(--pk-bd); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 1000; display: none; flex-direction: column; padding: 8px; width: 340px; gap: 4px; pointer-events: auto; }
 .pk-ana-pop-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
@@ -1866,14 +1874,11 @@ label_share_parse_selected_count: "已选择 {n} 项",
 btn_share_parse_insight: "分享文件透视",
 btn_share_parse_stop_scan: "停止扫描",
 btn_share_parse_back_to_list: "返回分享目录",
-msg_share_parse_scan_start: "正在扫描当前分享的全部文件...",
 msg_share_parse_scan_done: "当前分享全部文件扫描完成",
-msg_share_parse_scan_stopped: "扫描已停止",
 msg_share_parse_scan_failed: "分享文件扫描失败",
 msg_share_parse_scan_empty: "未扫描到分享文件",
 msg_share_parse_scan_need_list: "请先加载分享文件列表",
 msg_share_parse_scan_progress: "已扫描 {folder} 个文件夹，发现 {file} 个文件",
-title_share_parse_insight: "分享文件透视",
 btn_nav_upload: "我的上传",
 title_offline: "我的离线",
 trash_title: "回收站",
@@ -2320,6 +2325,8 @@ label_comic_mode: "媒体模式",
 desc_comic_mode: "纯图片或纯视频文件夹默认 A-Z 排序",
 label_aria2_url: "Aria2 地址",
 label_aria2_token: "Aria2 密钥",
+label_aria2_config: "Aria2 配置",
+label_aria2_keep_structure: "下载保存文件夹内部结构",
 label_download_accel_enable: "自定义下载加速域名",
 label_download_accel_domain: "下载加速域名",
 desc_download_accel_domain: "下载直链使用自定义加速域名",
@@ -3946,6 +3953,7 @@ shareParseInsightMode: false,
 shareParseInsightItems: [],
 shareParseInsightDisplay: [],
 shareParseInsightItemMap: new Map(),
+shareParseInsightFilterState: { active: false, cat: 'all', ext: 'all' },
 shareParseInsightScanning: false,
 shareParseInsightStop: false,
 shareParseInsightProgress: { folder: 0, file: 0 },
@@ -5038,7 +5046,7 @@ el.innerHTML = `
                 <input type="checkbox" id="pk-chk-global" ${S.wasGlobalChecked ? 'checked' : ''}>
                 <span>${L.lbl_global_search}</span>
             </label>
-            <label class="pk-global-chk" id="pk-search-path-con" style="display:none; margin-right:8px;" data-pk-tip="${L.lbl_search_path}">
+            <label class="pk-global-chk" id="pk-search-path-con" style="display:none; margin-right:8px;">
                 <input type="checkbox" id="pk-chk-search-path">
                 <span class="pk-txt-long">${L.lbl_search_path}</span>
                 <span class="pk-txt-short">${L.lbl_search_path_short}</span>
@@ -5551,6 +5559,14 @@ filterExtsMain: el.querySelector('#pk-filter-exts-main'),
 filterExtsMoreBtn: el.querySelector('#pk-filter-exts-more-btn'),
 filterExitBtn: el.querySelector('#pk-filter-exit-btn')
 };
+
+(() => {
+const searchWrap = el.querySelector('.pk-search');
+const afterSearch = searchWrap ? searchWrap.nextSibling : null;
+const topBar = searchWrap && searchWrap.parentNode;
+if (topBar && UI.btnShareParseInsight) topBar.insertBefore(UI.btnShareParseInsight, afterSearch);
+if (topBar && UI.btnShareParseBackList) topBar.insertBefore(UI.btnShareParseBackList, afterSearch);
+})();
 
 const isRealHomeUploadView = () => {
 const path = Array.isArray(S.path) ? S.path : [];
@@ -6971,22 +6987,12 @@ if (gmGet('pk_sort_independent', false)) {
         const globalPref = JSON.parse(gmGet('pk_global_sort_pref', '{"sort":"modified_time","dir":1}'));
         globalPref.sort = S.sort;
         globalPref.dir = S.dir;
-        globalPref.folderFirst = S.folderFirst;
+        delete globalPref.folderFirst;
         gmSet('pk_global_sort_pref', JSON.stringify(globalPref));
     } catch(e) {
-        gmSet('pk_global_sort_pref', JSON.stringify({ sort: S.sort, dir: S.dir, folderFirst: S.folderFirst }));
+        gmSet('pk_global_sort_pref', JSON.stringify({ sort: S.sort, dir: S.dir }));
     }
 }
-
-try {
-    const globalPref = JSON.parse(gmGet('pk_global_sort_pref', '{"sort":"modified_time","dir":1}'));
-    globalPref.folderFirst = S.folderFirst;
-    gmSet('pk_global_sort_pref', JSON.stringify(globalPref));
-} catch(e) {
-    gmSet('pk_global_sort_pref', JSON.stringify({ sort: S.sort, dir: S.dir, folderFirst: S.folderFirst }));
-}
-
-gmSet('pk_folder_first', S.folderFirst);
 };
 const getGridSortOptions = () => {
 const cur = S.path[S.path.length - 1] || { id: 'root' };
@@ -7102,6 +7108,16 @@ updateGridSortUIInstant();
 if (!S.shareParseMode) persistSortPreference();
 refresh();
 };
+const syncFolderFirstFromGlobal = () => {
+const saved = gmGet('pk_folder_first', false);
+S.folderFirst = saved === true || saved === 'true';
+if (S.renderFolderFirst) S.renderFolderFirst();
+};
+const setFolderFirstGlobal = (enabled) => {
+S.folderFirst = enabled === true;
+gmSet('pk_folder_first', S.folderFirst);
+if (S.renderFolderFirst) S.renderFolderFirst();
+};
 const rememberFolderFirstBeforeStrictMode = () => {
 if (S.strictFolderFirstSnapshot === null) {
     S.strictFolderFirstSnapshot = S.folderFirst === true;
@@ -7109,26 +7125,12 @@ if (S.strictFolderFirstSnapshot === null) {
 };
 const restoreFolderFirstAfterStrictMode = () => {
 if (S.strictFolderFirstSnapshot === null) return;
-S.folderFirst = S.strictFolderFirstSnapshot === true;
 S.strictFolderFirstSnapshot = null;
-if (S.renderFolderFirst) S.renderFolderFirst();
+syncFolderFirstFromGlobal();
 };
 const toggleFolderFirst = () => {
-S.folderFirst = !S.folderFirst;
-gmSet('pk_folder_first', S.folderFirst);
-
-try {
-    const globalPref = JSON.parse(gmGet('pk_global_sort_pref', '{"sort":"modified_time","dir":1}'));
-    globalPref.sort = S.sort;
-    globalPref.dir = S.dir;
-    globalPref.folderFirst = S.folderFirst;
-    gmSet('pk_global_sort_pref', JSON.stringify(globalPref));
-} catch(e) {
-    gmSet('pk_global_sort_pref', JSON.stringify({ sort: S.sort, dir: S.dir, folderFirst: S.folderFirst }));
-}
-
+setFolderFirstGlobal(!S.folderFirst);
 closeGridSortMenu();
-if (S.renderFolderFirst) S.renderFolderFirst();
 refresh();
 };
 const ensureViewSwitch = () => {
@@ -7320,29 +7322,12 @@ requestAutoHideButtonTextCheck();
 
 const checkGuiResponsiveness = () => {
 const width = window.innerWidth;
-const height = window.innerHeight;
-const isGuiVisible = el.style.display !== 'none';
-const isTurboCurrent = typeof GM_getValue !== 'undefined' ? GM_getValue('pk_turbo_mode', false) : false;
 
-const MIN_WIDTH = 940;
-const MIN_HEIGHT = 450;
-const isTooSmall = width < MIN_WIDTH || height < MIN_HEIGHT;
-const keepContext = isGuiVisible || isForcedHidden;
-
-if (isTooSmall && !isTurboCurrent && keepContext) {
-    document.body.classList.add('pk-hide-all-ui');
-    if (isGuiVisible) {
-        el.style.display = 'none';
-        el.classList.remove('pk-auto-hide-btn-text');
-        isForcedHidden = true;
-    }
-} else {
-    document.body.classList.remove('pk-hide-all-ui');
-    if (isForcedHidden) {
-        el.style.display = 'flex';
-        if (el.focus) el.focus();
-        isForcedHidden = false;
-    }
+document.body.classList.remove('pk-hide-all-ui');
+if (isForcedHidden) {
+    el.style.display = 'flex';
+    if (el.focus) el.focus();
+    isForcedHidden = false;
 }
 
 const isCompact = width <= 1200;
@@ -7350,6 +7335,7 @@ const isCompact = width <= 1200;
 if (UI.searchInput) {
     UI.searchInput.placeholder = isCompact ? L.placeholder_search_short : L.placeholder_search;
 }
+if (typeof syncShareParseInsightSearchPathLabel === 'function') syncShareParseInsightSearchPathLabel();
 
 const folderSelPlaceholder = document.querySelector('#pk-dup-folder-sel option[value=""]');
 if (folderSelPlaceholder) {
@@ -7571,7 +7557,7 @@ const btnMax = el.querySelector('#pk-maximize');
 const isTurbo = gmGet('pk_turbo_mode', false);
 let isWinMaximized = (globalSavedState && typeof globalSavedState.isMaximized !== 'undefined') ? globalSavedState.isMaximized : isTurbo;
 let pkSyncHideMenuLock = false;
-const closeTransientDropdowns = (includeEscape = false, blurSearch = false) => {
+const closeTransientDropdowns = (includeEscape = false, blurSearch = false, dispatchNative = false) => {
 if (pkSyncHideMenuLock) return;
 pkSyncHideMenuLock = true;
 try {
@@ -7599,19 +7585,21 @@ try {
     });
     document.querySelectorAll('.pk-dropdown-menu[data-pk-portal="1"]').forEach(n => n.remove());
 
-    if (includeEscape) {
-        const keyInit = { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true, cancelable: true };
-        document.dispatchEvent(new KeyboardEvent('keydown', keyInit));
-        document.dispatchEvent(new KeyboardEvent('keyup', keyInit));
+    if (dispatchNative) {
+        if (includeEscape) {
+            const keyInit = { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true, cancelable: true };
+            document.dispatchEvent(new KeyboardEvent('keydown', keyInit));
+            document.dispatchEvent(new KeyboardEvent('keyup', keyInit));
+        }
+        document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, clientX: 0, clientY: 0, button: 0 }));
+        document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, clientX: 0, clientY: 0, button: 0 }));
+        document.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 0, clientY: 0, button: 0 }));
     }
-    document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, clientX: 0, clientY: 0, button: 0 }));
-    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, clientX: 0, clientY: 0, button: 0 }));
-    document.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 0, clientY: 0, button: 0 }));
 } catch (e) {}
 setTimeout(() => { pkSyncHideMenuLock = false; }, 0);
 };
 
-const syncHideNativeExitDropdown = () => closeTransientDropdowns(true);
+const syncHideNativeExitDropdown = () => closeTransientDropdowns(false);
 const pkWinHideObserver = new MutationObserver(() => {
 if (!el.isConnected) return;
 const cs = getComputedStyle(el);
@@ -8106,8 +8094,9 @@ const msg = esc(L.msg_script_update_new).replace('{v}', `<b>${esc(latest)}</b>`)
 t.innerHTML = `<span class="pk-script-update-msg">${msg}</span><button type="button" class="pk-script-update-open" data-pk-script-update-open="1">${esc(L.msg_script_update_open)}</button><button type="button" class="pk-script-update-close" data-pk-script-update-close="1">×</button>`;
 
 const openUrl = () => {
-    const url = (info.changelog || info.homepage || CONF.scriptUpdateProjectUrl || '').trim();
-    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    const m = {tc:'README(tc).md',en:'README(en).md',ko:'README(ko).md',ja:'README(ja).md',id:'README(id).md',ms:'README(ms).md'};
+    const f = m[getLang()];
+    window.open(`${CONF.scriptUpdateProjectUrl}/blob/main/${f ? `i18n/${f}` : 'README.md'}`, '_blank', 'noopener,noreferrer');
 };
 
 t.onclick = (e) => {
@@ -9327,6 +9316,7 @@ if (S.shareParseMode) {
     } else {
         renderShareParsePanel();
     }
+    syncShareParseInsightFilterBar();
     updateShareParseInsightButtons();
     updateStat();
     return;
@@ -9354,8 +9344,7 @@ if (isAnalyzeSub) {
     S.sort = 'size';
     S.dir = 1;
     if (S.strictFolderFirstSnapshot !== null) {
-        S.folderFirst = S.strictFolderFirstSnapshot === true;
-        if (S.renderFolderFirst) S.renderFolderFirst();
+        syncFolderFirstFromGlobal();
     }
 }
 
@@ -10591,6 +10580,7 @@ if (S.shareParseMode) {
     } else {
         renderShareParsePanel();
     }
+    syncShareParseInsightFilterBar();
     updateStat();
     return;
 }
@@ -10659,8 +10649,12 @@ if (UI.btnExit) {
 
 if (UI.lblSearchPath) {
     const isAnalyzeRoot = S.analyzeMode && cur.id === 'analyze_root';
-    const showAnalyzeGroupTools = isAnalyzeRoot && !S.search && S.analyzeSimGroups;
+    const showAnalyzeGroupTools = isAnalyzeRoot && !S.search && S.analyzeSimGroups && !S.shareParseMode;
     const isAnalyzeDupView = S.analyzeMode && S.analyzeSimGroups;
+    if (UI.win) {
+        UI.win.classList.toggle('pk-analyze-group-tools-on', !!showAnalyzeGroupTools);
+        UI.win.classList.toggle('pk-share-parse-mode', !!S.shareParseMode);
+    }
     UI.lblSearchPath.style.display = (S.dupMode || S.isFlattened || isAnalyzeRoot) ? 'flex' : 'none';
     if (UI.btnAnaSelect) UI.btnAnaSelect.style.display = showAnalyzeGroupTools ? 'flex' : 'none';
     if (UI.btnAnaSort) UI.btnAnaSort.style.display = showAnalyzeGroupTools ? 'flex' : 'none';
@@ -11058,13 +11052,7 @@ if (isStandardView) {
             S.dir = globalPref.dir;
         }
 
-        try {
-            const globalPref = JSON.parse(gmGet('pk_global_sort_pref', '{"sort":"modified_time","dir":1}'));
-            if (globalPref.folderFirst !== undefined) S.folderFirst = globalPref.folderFirst === true;
-            else S.folderFirst = gmGet('pk_folder_first', false);
-        } catch(e) {
-            S.folderFirst = gmGet('pk_folder_first', false);
-        }
+        syncFolderFirstFromGlobal();
 
         S._sortAppliedForId = folderId;
         S._comicApplied = false;
@@ -11089,13 +11077,7 @@ if (isStandardView) {
     }
 } else if (folderFirstViewKey) {
     if (S._sortAppliedForId !== folderFirstViewKey) {
-        try {
-            const globalPref = JSON.parse(gmGet('pk_global_sort_pref', '{"sort":"modified_time","dir":1}'));
-            if (globalPref.folderFirst !== undefined) S.folderFirst = globalPref.folderFirst === true;
-            else S.folderFirst = gmGet('pk_folder_first', false);
-        } catch(e) {
-            S.folderFirst = gmGet('pk_folder_first', false);
-        }
+        syncFolderFirstFromGlobal();
 
         S._sortAppliedForId = folderFirstViewKey;
 
@@ -12119,10 +12101,15 @@ if (!(S.shareParseMode && S.shareParseListActive)) {
 const items = Array.isArray(S.shareParseItems) ? S.shareParseItems : [];
 const baseDisplay = Array.isArray(S.shareParseDisplay) ? S.shareParseDisplay : items;
 const q = String(S.search || '').trim().toLowerCase();
+const includePath = !!(UI.chkSearchPath && UI.chkSearchPath.checked);
+const pathQ = normalizeSharePathSearchText(q);
 const display = sortShareParseDisplayList(q ? baseDisplay.filter(item => {
     if (!item || item.isHeader) return false;
     const name = String(item.name || '').toLowerCase();
-    return name.includes(q);
+    if (name.includes(q)) return true;
+    if (!includePath) return false;
+    const path = normalizeSharePathSearchText(item._shareFilePathText || item._pathStr || getSharePathText(item._sharePath) || '');
+    return path.includes(pathQ);
 }) : baseDisplay);
 if (!S.shareParseItemMap || typeof S.shareParseItemMap.clear !== 'function') S.shareParseItemMap = new Map();
 S.shareParseItemMap.clear();
@@ -12182,6 +12169,7 @@ if (clearData) {
     S.shareParseInsightItems = [];
     S.shareParseInsightDisplay = [];
     S.shareParseInsightItemMap = new Map();
+    S.shareParseInsightFilterState = { active: false, cat: 'all', ext: 'all' };
     S.shareParseInsightReturnPath = [];
     S.shareParseInsightReturnParentId = '';
 }
@@ -12262,19 +12250,41 @@ src.sort((a, b) => {
 return src;
 }
 
+function filterShareInsightItemsByCategory(items) {
+const state = S.shareParseInsightFilterState || { active: false, cat: 'all', ext: 'all' };
+if (!state.active || state.cat === 'all') return Array.isArray(items) ? items.slice() : [];
+const fExts = {
+    video: ['mp4','mkv','avi','mov','wmv','flv','webm','ts','m4v','3gp','mpg','mpeg','rm','rmvb','asf','vob','dat','divx','f4v','m2ts','mts','tp','trp','ogv','mpe','m2v','m3u8'],
+    audio: ['mp3','wav','flac','aac','ogg','wma','ape','m4a','amr','opus','m4b','alac','aiff','mid','midi','ra','dts','ac3','dsf','dff'],
+    image: ['jpg','jpeg','png','gif','bmp','webp','svg','tif','tiff','ico','heic','heif','raw','cr2','nef','arw','dng','orf','avif','psd','ai','eps','jfif','jpe'],
+    document: ['txt','html','pdf','pptx','chm','docx','xlsx','htm','doc','dwg','mdb','ppt','xls','rtf','odt','ods','odp','epub','mobi','azw3','djvu','cbz','cbr','md','log','csv','xml','json'],
+    software: ['apk','exe','ipa','dmg','rpm','deb','msi','pkg','xapk','apks','aab','jar','bin','sh','bat','cmd'],
+    archive: ['zip','rar','7z','tar','gz','iso','cab','bz2','xz','tgz','wim','esd','img','zst','lzh'],
+    torrent: ['torrent']
+};
+const definedExts = new Set([...fExts.video, ...fExts.audio, ...fExts.image, ...fExts.document, ...fExts.software, ...fExts.archive, ...fExts.torrent]);
+const matchExts = state.ext === 'all' ? (fExts[state.cat] || []) : [state.ext];
+return (Array.isArray(items) ? items : []).filter(item => {
+    if (!item || item.kind === 'drive#folder') return false;
+    const ext = String(item.name || '').toLowerCase().split('.').pop();
+    return state.cat === 'other' ? !definedExts.has(ext) : matchExts.includes(ext);
+});
+}
+
 function syncShareParseInsightMirror() {
 if (!(S.shareParseMode && S.shareParseListActive && S.shareParseInsightMode)) return false;
 const items = Array.isArray(S.shareParseInsightItems) ? S.shareParseInsightItems : [];
-const baseDisplay = Array.isArray(S.shareParseInsightDisplay) ? S.shareParseInsightDisplay : items;
+const baseDisplay = filterShareInsightItemsByCategory(items);
 const q = String(S.search || '').trim().toLowerCase();
 const includePath = !!(UI.chkSearchPath && UI.chkSearchPath.checked);
+const pathQ = normalizeSharePathSearchText(q);
 const display = sortShareParseDisplayList(q ? baseDisplay.filter(item => {
     if (!item || item.isHeader) return false;
     const name = String(item.name || '').toLowerCase();
     if (name.includes(q)) return true;
     if (!includePath) return false;
-    const path = String(item._shareFilePathText || item._pathStr || getSharePathText(item._sharePath) || '').toLowerCase();
-    return path.includes(q);
+    const path = normalizeSharePathSearchText(item._shareFilePathText || item._pathStr || getSharePathText(item._sharePath) || '');
+    return path.includes(pathQ);
 }) : baseDisplay);
 if (!S.shareParseInsightItemMap || typeof S.shareParseInsightItemMap.clear !== 'function') S.shareParseInsightItemMap = new Map();
 S.shareParseInsightItemMap.clear();
@@ -12294,6 +12304,36 @@ const p = S.shareParseInsightProgress || { folder: 0, file: 0 };
 return (L.msg_share_parse_scan_progress || '').replace('{folder}', p.folder || 0).replace('{file}', p.file || 0);
 }
 
+function syncSearchPathTooltipByTextState() {
+const con = UI && UI.lblSearchPath;
+if (!con) return;
+const L = getStrings();
+const shortTxt = con.querySelector('.pk-txt-short');
+const longTxt = con.querySelector('.pk-txt-long');
+const shortVisible = !!(shortTxt && getComputedStyle(shortTxt).display !== 'none' && (!longTxt || getComputedStyle(longTxt).display === 'none'));
+if (shortVisible) {
+    con.setAttribute('data-pk-tip', L.lbl_search_path);
+} else {
+    con.removeAttribute('data-pk-tip');
+    con.removeAttribute('title');
+}
+}
+
+function syncShareParseInsightExitCompact() {
+const btn = UI && UI.btnShareParseBackList;
+if (!btn) return;
+btn.classList.remove('pk-share-exit-compact');
+}
+
+function syncShareParseInsightSearchPathLabel() {
+const con = UI && UI.lblSearchPath;
+if (con) {
+    con.classList.remove('pk-share-path-compact');
+    syncSearchPathTooltipByTextState();
+}
+syncShareParseInsightExitCompact();
+}
+
 function updateShareParseInsightButtons() {
 const L = getStrings();
 const inList = !!(S.shareParseMode && S.shareParseListActive && S.shareParseInfo && S.shareParseInfo.pass_code_token);
@@ -12304,6 +12344,8 @@ if (UI.btnShareParseInsight) {
     UI.btnShareParseInsight.style.display = visible ? 'inline-flex' : 'none';
     UI.btnShareParseInsight.disabled = !visible;
     UI.btnShareParseInsight.setAttribute('data-pk-tip', L.btn_share_parse_insight);
+    UI.btnShareParseInsight.style.marginLeft = '8px';
+    UI.btnShareParseInsight.style.marginRight = '0';
     const span = UI.btnShareParseInsight.querySelector('span');
     if (span) span.textContent = L.btn_share_parse_insight;
 }
@@ -12314,11 +12356,19 @@ if (UI.btnShareParseStopScan) {
     UI.btnShareParseStopScan.setAttribute('data-pk-tip', L.btn_share_parse_stop_scan);
 }
 if (UI.btnShareParseBackList) {
-    const visible = inList && insightMode;
+    const visible = inList && insightMode && !scanning;
     UI.btnShareParseBackList.style.display = visible ? 'inline-flex' : 'none';
     UI.btnShareParseBackList.disabled = !visible;
-    UI.btnShareParseBackList.setAttribute('data-pk-tip', L.btn_share_parse_back_to_list);
+    UI.btnShareParseBackList.style.marginLeft = '8px';
+    UI.btnShareParseBackList.style.color = '#d93025';
+    UI.btnShareParseBackList.removeAttribute('data-pk-tip');
+    UI.btnShareParseBackList.removeAttribute('title');
+    UI.btnShareParseBackList.innerHTML = `${CONF.icons.close} <span>${L.btn_exit}</span>`;
+    UI.btnShareParseBackList.classList.toggle('pk-share-exit-cold', visible);
+    UI.btnShareParseBackList.onpointerenter = () => UI.btnShareParseBackList.classList.remove('pk-share-exit-cold');
+    if (!visible) UI.btnShareParseBackList.classList.remove('pk-share-exit-compact', 'pk-share-exit-cold');
 }
+syncShareParseInsightSearchPathLabel();
 }
 
 function isShareDetailFolder(raw) {
@@ -12339,6 +12389,10 @@ const L = getStrings();
 const nodes = (Array.isArray(pathNodes) ? pathNodes : []).filter(n => n && !n._sharePanel);
 const text = nodes.map(n => n.name || '').filter(Boolean).join(' / ');
 return text || L.label_share_parse_path_root;
+}
+
+function normalizeSharePathSearchText(text) {
+return String(text || '').toLowerCase().replace(/[\\／]+/g, '/').replace(/\s*\/\s*/g, '/');
 }
 
 function mapShareInsightFile(file, index, pathNodes, parentId) {
@@ -12381,14 +12435,47 @@ return Object.assign(mapped, {
 });
 }
 
-async function scanShareParseInsight(reqId) {
-const rootPath = buildShareParseRootPath();
-const rootParentId = getShareParseRootParentId();
-const queue = [{ id: rootParentId || '', path: rootPath }];
+async function scanShareParseInsight(reqId, targets = null, silent = false) {
+const currentPath = Array.isArray(S.shareParsePath) && S.shareParsePath.length ? S.shareParsePath.slice() : buildShareParseRootPath();
+const currentParentId = S.shareParseCurParentId || getShareParseRootParentId();
+const selected = Array.isArray(targets) ? targets.filter(item => item && item._isShareItem && item.id) : [];
+const queue = [];
 const result = [];
+const resultKeys = new Set();
+const pushInsightFile = (file, pathNodes, parentId) => {
+    const item = mapShareInsightFile(file, result.length, pathNodes, parentId || '');
+    const key = `${item._shareParentId || parentId || ''}/${item.id || item.name || result.length}`;
+    if (resultKeys.has(key)) return;
+    resultKeys.add(key);
+    result.push(item);
+};
+if (selected.length) {
+    selected.forEach(item => {
+        const parentId = item._shareParentId || item.parent_id || '';
+        const itemPath = Array.isArray(item._sharePath) && item._sharePath.length ? item._sharePath.slice() : (item.kind === 'drive#folder' ? currentPath.concat([{ id: item.id, name: item.name || '', parent_id: parentId }]) : currentPath);
+        if (item.kind === 'drive#folder') queue.push({ id: item.id, path: itemPath });
+        else pushInsightFile(item._rawShareFile || item, itemPath, parentId);
+    });
+} else {
+    queue.push({ id: currentParentId || '', path: currentPath });
+}
 let scannedFolders = 0;
+const startedAt = Date.now();
+const syncInsightProgress = () => {
+    S.shareParseInsightProgress = { folder: scannedFolders, file: result.length };
+    if (silent) {
+        const sec = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
+        const speed = Math.max(1, Math.round(scannedFolders / sec));
+        updateLoadTxt(`${L.str_scanning} ${scannedFolders} ${L.unit_folders} | ${L.str_files}: ${result.length} | ${L.str_speed}: ${speed}`);
+    } else {
+        S.shareParseInsightItems = result.slice();
+        S.shareParseInsightDisplay = S.shareParseInsightItems.slice();
+        syncShareParseInsightMirror();
+        renderShareParseCurrentView();
+    }
+};
 
-while (queue.length && S.shareParseMode && S.shareParseInsightMode && S.shareParseInsightReqId === reqId && !S.shareParseInsightStop) {
+while (queue.length && S.shareParseMode && (silent || S.shareParseInsightMode) && S.shareParseInsightReqId === reqId && !S.shareParseInsightStop) {
     const node = queue.shift();
     let pageToken = '';
     do {
@@ -12402,25 +12489,193 @@ while (queue.length && S.shareParseMode && S.shareParseInsightMode && S.sharePar
             if (isShareDetailFolder(file)) {
                 queue.push({ id: itemId, path: node.path.concat([{ id: itemId, name, parent_id: node.id || '' }]) });
             } else {
-                result.push(mapShareInsightFile(file, result.length, node.path, node.id || ''));
+                pushInsightFile(file, node.path, node.id || '');
             }
         });
-        S.shareParseInsightItems = result.slice();
-        S.shareParseInsightDisplay = S.shareParseInsightItems.slice();
-        S.shareParseInsightProgress = { folder: scannedFolders, file: result.length };
-        syncShareParseInsightMirror();
-        renderShareParseCurrentView();
+        syncInsightProgress();
         pageToken = getShareDetailNextToken(raw);
         if (pageToken) await sleep(30);
-    } while (pageToken && S.shareParseMode && S.shareParseInsightMode && S.shareParseInsightReqId === reqId && !S.shareParseInsightStop);
+    } while (pageToken && S.shareParseMode && (silent || S.shareParseInsightMode) && S.shareParseInsightReqId === reqId && !S.shareParseInsightStop);
     scannedFolders++;
-    S.shareParseInsightProgress = { folder: scannedFolders, file: result.length };
+    syncInsightProgress();
 }
 
 return result;
 }
 
-async function handleShareParseInsightStart() {
+function filterShareParseInsightItemsByScanRule(items, scanFilter) {
+const src = Array.isArray(items) ? items.slice() : [];
+const rawTotal = src.length;
+const hasActiveFilter = !!(scanFilter && ((scanFilter.keyword || '').trim() || scanFilter.minBytes > 0 || scanFilter.maxBytes > 0));
+if (!hasActiveFilter) return { items: src, rawTotal, hasActiveFilter };
+const kwList = String(scanFilter.keyword || '').toLowerCase().split(/[,，]/).map(k => k.trim()).filter(k => k);
+const minBytes = Math.max(0, parseInt(scanFilter.minBytes || 0, 10) || 0);
+const maxBytes = Math.max(0, parseInt(scanFilter.maxBytes || 0, 10) || 0);
+return { items: src.filter(item => {
+    if (kwList.length > 0) {
+        const fullLowerName = String(item && item.name || '').toLowerCase();
+        const lastDot = fullLowerName.lastIndexOf('.');
+        const nameWithoutExt = lastDot > 0 ? fullLowerName.substring(0, lastDot) : fullLowerName;
+        if (kwList.some(k => nameWithoutExt.includes(k))) return false;
+    }
+    const sz = parseInt(item && item.size || 0, 10) || 0;
+    if (sz < minBytes) return false;
+    if (maxBytes > 0 && sz > maxBytes) return false;
+    return true;
+}), rawTotal, hasActiveFilter };
+}
+
+function openShareParseInsightScanModal(selectedTargets = null) {
+const L = getStrings();
+const shareTargets = Array.isArray(selectedTargets) ? selectedTargets.filter(item => item && item._isShareItem && item.id).slice() : [];
+const lastMin = gmGet('pk_scan_last_min', 0);
+const lastMax = gmGet('pk_scan_last_max', '');
+const lastUnit = gmGet('pk_scan_last_unit', 'MB');
+const lastKeyword = gmGet('pk_scan_last_keyword', '');
+const targetDesc = shareTargets.length > 0 ? L.lbl_scan_selected.replace('{n}', shareTargets.length) : L.lbl_scan_current;
+const inputNonce = `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+const m = showModal(`
+    <div class="pk-share-modal-root" style="width:480px; max-width:90vw; display:flex; flex-direction:column; overflow:visible;">
+        <div style="padding:26px 30px 10px 30px; flex-shrink:0;">
+            <h3 style="margin:0; font-size:18px; font-weight:700; border:none; line-height:1.2; color:var(--pk-fg);">${L.btn_share_parse_insight}</h3>
+        </div>
+        <div style="padding:0 30px 20px 30px; flex-shrink:0;">
+            <div style="font-size:13px; color:#888; line-height:1.5;">${targetDesc}</div>
+        </div>
+        <div style="padding:0 30px;">
+            <div style="margin-bottom:20px; position:relative;">
+                <input type="text" id="spis_keyword" name="spis_keyword_${inputNonce}" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" value="${esc(lastKeyword)}" placeholder="${L.ph_keyword_filter}" oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'" style="width:100%; height:42px; padding:0 12px; border:2px solid ${lastKeyword ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; outline:none; transition:border-color 0.2s; box-sizing:border-box;">
+                <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L.lbl_keyword_filter}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:25px;">
+                <div style="flex:1; position:relative;">
+                    <input type="text" inputmode="numeric" id="spis_val_min" name="spis_val_min_${inputNonce}" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" value="${lastMin === 0 ? '' : lastMin}" placeholder="0" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
+                    <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L.lbl_ana_min}</div>
+                    <div class="pk-num-ctrl">
+                        <div class="pk-num-btn" id="spis_inc_min">${CONF.crumbIcons.down.replace('points="6 9 12 15 18 9"', 'points="18 15 12 9 6 15"')}</div>
+                        <div class="pk-num-btn" id="spis_dec_min">${CONF.crumbIcons.down}</div>
+                    </div>
+                </div>
+                <div style="color:#888; font-weight:bold; flex-shrink:0;">-</div>
+                <div style="flex:1; position:relative;">
+                    <input type="text" inputmode="numeric" id="spis_val_max" name="spis_val_max_${inputNonce}" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" value="${lastMax}" placeholder="∞" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
+                    <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L.lbl_ana_max}</div>
+                    <div class="pk-num-ctrl">
+                        <div class="pk-num-btn" id="spis_inc_max">${CONF.crumbIcons.down.replace('points="6 9 12 15 18 9"', 'points="18 15 12 9 6 15"')}</div>
+                        <div class="pk-num-btn" id="spis_dec_max">${CONF.crumbIcons.down}</div>
+                    </div>
+                </div>
+                <div class="pk-ana-select">
+                    <div class="pk-ana-trigger" id="spis_unit_btn">
+                        <span id="spis_unit_txt">${lastUnit}</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                    <div class="pk-ana-menu" id="spis_unit_menu">
+                        <div class="pk-ana-item ${lastUnit === 'MB' ? 'act' : ''}" data-v="MB">MB</div>
+                        <div class="pk-ana-item ${lastUnit === 'GB' ? 'act' : ''}" data-v="GB">GB</div>
+                        <div class="pk-ana-item ${lastUnit === 'TB' ? 'act' : ''}" data-v="TB">TB</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="padding:20px 30px 30px 30px; flex-shrink:0;">
+            <div class="pk-modal-act" style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin:0;">
+                <button class="pk-btn" id="spis_cancel" style="height:46px; border-radius:12px; justify-content:center; background:transparent; font-weight:600; font-size:15px;">${L.btn_cancel}</button>
+                <button class="pk-btn pri" id="spis_start" style="height:46px; border-radius:12px; background:var(--pk-pri); color:#fff; font-weight:bold; justify-content:center; border:none; font-size:15px; transition:filter 0.2s;">${L.btn_ok}</button>
+            </div>
+        </div>
+    </div>
+`);
+const modalBox = m.querySelector('.pk-modal');
+if (modalBox) {
+    Object.assign(modalBox.style, { width: 'auto', padding: '0', overflow: 'visible', height: 'auto', minHeight: 'auto' });
+    const closeBtn = m.querySelector('.pk-modal-close');
+    if (closeBtn) Object.assign(closeBtn.style, { top: '26px', right: '26px' });
+}
+const inpMin = m.querySelector('#spis_val_min');
+const inpMax = m.querySelector('#spis_val_max');
+const unitBtn = m.querySelector('#spis_unit_btn');
+const unitMenu = m.querySelector('#spis_unit_menu');
+const unitTxt = m.querySelector('#spis_unit_txt');
+let currentUnit = lastUnit;
+const syncLimitBorder = (inp) => {
+    if (!inp) return;
+    inp.style.borderColor = String(inp.value || '').trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
+};
+[inpMin, inpMax].forEach(inp => {
+    syncLimitBorder(inp);
+    inp.addEventListener('input', () => syncLimitBorder(inp));
+});
+m.querySelector('#spis_inc_min').onclick = (e) => { e.stopPropagation(); inpMin.value = (parseInt(inpMin.value) || 0) + 1; inpMin.dispatchEvent(new Event('input')); };
+m.querySelector('#spis_dec_min').onclick = (e) => { e.stopPropagation(); inpMin.value = Math.max(0, (parseInt(inpMin.value) || 1) - 1); inpMin.dispatchEvent(new Event('input')); };
+m.querySelector('#spis_inc_max').onclick = (e) => { e.stopPropagation(); inpMax.value = (parseInt(inpMax.value) || 0) + 1; inpMax.dispatchEvent(new Event('input')); };
+m.querySelector('#spis_dec_max').onclick = (e) => { e.stopPropagation(); inpMax.value = Math.max(0, (parseInt(inpMax.value) || 1) - 1); inpMax.dispatchEvent(new Event('input')); };
+unitBtn.onclick = (e) => { e.stopPropagation(); unitMenu.style.display = unitMenu.style.display === 'block' ? 'none' : 'block'; };
+m.querySelectorAll('#spis_unit_menu .pk-ana-item').forEach(item => {
+    item.onclick = (e) => {
+        e.stopPropagation();
+        m.querySelectorAll('#spis_unit_menu .pk-ana-item').forEach(i => i.classList.remove('act'));
+        item.classList.add('act');
+        currentUnit = item.dataset.v;
+        unitTxt.textContent = currentUnit;
+        unitMenu.style.display = 'none';
+    };
+});
+const closeMenu = () => { if (unitMenu) unitMenu.style.display = 'none'; };
+setTimeout(() => document.addEventListener('click', closeMenu), 0);
+const orgRemove = m.remove.bind(m);
+m.remove = () => {
+    document.removeEventListener('click', closeMenu);
+    orgRemove();
+};
+const saveShareInsightScanInputs = () => {
+    gmSet('pk_scan_last_min', parseInt(inpMin.value) || 0);
+    gmSet('pk_scan_last_max', inpMax.value.trim());
+    gmSet('pk_scan_last_unit', currentUnit);
+    gmSet('pk_scan_last_keyword', m.querySelector('#spis_keyword').value.trim());
+};
+m.querySelector('#spis_cancel').onclick = () => { saveShareInsightScanInputs(); m.remove(); };
+const closeBtn = m.querySelector('.pk-modal-close');
+if (closeBtn) closeBtn.onclick = () => { saveShareInsightScanInputs(); m.remove(); };
+m.tabIndex = 0;
+setTimeout(() => m.focus(), 10);
+m.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        m.querySelector('#spis_start').click();
+    }
+});
+m.querySelector('#spis_start').onclick = () => {
+    saveShareInsightScanInputs();
+    const vMin = parseInt(inpMin.value) || 0;
+    const vMax = parseInt(inpMax.value) || 0;
+    const kw = m.querySelector('#spis_keyword').value.trim();
+    if (vMin < 0 || (vMax > 0 && vMin > vMax)) {
+        inpMin.style.borderColor = '#d93025';
+        if (vMax > 0 && vMin > vMax) inpMax.style.borderColor = '#d93025';
+        return;
+    }
+    gmSet('pk_scan_last_min', vMin);
+    gmSet('pk_scan_last_max', vMax > 0 ? vMax : '');
+    gmSet('pk_scan_last_unit', currentUnit);
+    gmSet('pk_scan_last_keyword', kw);
+    let mult = 1;
+    if (currentUnit === 'MB') mult = 1024 * 1024;
+    else if (currentUnit === 'GB') mult = 1024 * 1024 * 1024;
+    else if (currentUnit === 'TB') mult = 1024 * 1024 * 1024 * 1024;
+    const scanFilter = {
+        minBytes: Math.floor(vMin * mult),
+        maxBytes: vMax > 0 ? Math.floor(vMax * mult) : 0,
+        keyword: kw
+    };
+    m.remove();
+    if (typeof runShareParseInsightScan === 'function') runShareParseInsightScan(scanFilter, shareTargets);
+};
+return m;
+}
+
+function handleShareParseInsightStart() {
 const L = getStrings();
 if (!(S.shareParseMode && S.shareParseListActive)) {
     showToast(L.msg_share_parse_scan_need_list, 'warning');
@@ -12432,12 +12687,29 @@ if (!info.share_id || !info.pass_code_token) {
     return;
 }
 if (S.shareParseInsightScanning) return;
+openShareParseInsightScanModal(getSelectedShareParseItems());
+}
+
+async function runShareParseInsightScan(scanFilter = null, presetTargets = null) {
+const L = getStrings();
+if (!(S.shareParseMode && S.shareParseListActive)) {
+    showToast(L.msg_share_parse_scan_need_list, 'warning');
+    return;
+}
+const info = S.shareParseInfo || {};
+if (!info.share_id || !info.pass_code_token) {
+    showToast(L.msg_share_parse_save_need_token || L.msg_share_parse_token_missing, 'warning');
+    return;
+}
+if (S.shareParseInsightScanning) return;
+const insightTargets = Array.isArray(presetTargets) ? presetTargets.filter(item => item && item._isShareItem && item.id) : getSelectedShareParseItems();
+const oldStopHandler = UI.stopBtn ? UI.stopBtn.onclick : null;
 
 clearShareParseSearch();
 
 const reqId = (S.shareParseInsightReqId || 0) + 1;
 S.shareParseInsightReqId = reqId;
-S.shareParseInsightMode = true;
+S.shareParseInsightMode = false;
 S.shareParseInsightScanning = true;
 S.shareParseInsightStop = false;
 S.shareParseInsightToastStopped = false;
@@ -12445,39 +12717,56 @@ S.shareParseInsightError = '';
 S.shareParseInsightItems = [];
 S.shareParseInsightDisplay = [];
 S.shareParseInsightItemMap = new Map();
+S.shareParseInsightFilterState = { active: false, cat: 'all', ext: 'all' };
 S.shareParseInsightProgress = { folder: 0, file: 0 };
 S.shareParseInsightReturnPath = Array.isArray(S.shareParsePath) ? S.shareParsePath.slice() : buildShareParseRootPath();
 S.shareParseInsightReturnParentId = S.shareParseCurParentId || getShareParseRootParentId();
-S.sel.clear();
-S.selEx.clear();
-S.selMode = 'explicit';
-S.activeId = null;
-S.lastSelIdx = -1;
-showToast(L.msg_share_parse_scan_start);
-renderShareParseCurrentView();
+setLoad(true);
+updateLoadTxt(`${L.str_scanning} 0 ${L.unit_folders} | ${L.str_files}: 0`);
+if (UI.stopBtn) UI.stopBtn.onclick = handleShareParseInsightStop;
 
 try {
-    const items = await scanShareParseInsight(reqId);
+    const rawItems = await scanShareParseInsight(reqId, insightTargets, true);
     if (!S.shareParseMode || S.shareParseInsightReqId !== reqId) return;
+    const filteredResult = filterShareParseInsightItemsByScanRule(rawItems, scanFilter);
+    const items = filteredResult.items;
+    if (S.shareParseInsightStop) {
+        return;
+    }
+    if (!items.length) {
+        S.shareParseInsightItems = [];
+        S.shareParseInsightDisplay = [];
+        S.shareParseInsightItemMap = new Map();
+        S.shareParseInsightError = '';
+        S.shareParseInsightProgress = { folder: 0, file: 0 };
+        if (filteredResult.rawTotal > 0 && filteredResult.hasActiveFilter) showToast(L.msg_scan_filter_empty || L.msg_share_parse_scan_empty);
+        else showToast(L.msg_share_parse_scan_empty, 'warning');
+        updateShareParseInsightButtons();
+        renderShareParseCurrentView();
+        return;
+    }
+    S.shareParseInsightMode = true;
     S.shareParseInsightItems = items.slice();
     S.shareParseInsightDisplay = S.shareParseInsightItems.slice();
     S.shareParseInsightError = '';
+    S.sel.clear();
+    S.selEx.clear();
+    S.selMode = 'explicit';
+    S.activeId = null;
+    S.lastSelIdx = -1;
     syncShareParseInsightMirror();
-    if (S.shareParseInsightStop) {
-        if (!S.shareParseInsightToastStopped) showToast(L.msg_share_parse_scan_stopped, 'warning');
-    } else if (items.length) {
-        showToast(L.msg_share_parse_scan_done, 'success');
-    } else {
-        showToast(L.msg_share_parse_scan_empty, 'warning');
-    }
+    showToast(L.msg_share_parse_scan_done, 'success');
+    renderShareParseCurrentView();
 } catch(e) {
     if (!S.shareParseMode || S.shareParseInsightReqId !== reqId) return;
     const msg = getShareParseErrorMessage(e) || L.msg_share_parse_scan_failed;
-    S.shareParseInsightError = msg;
+    S.shareParseInsightError = '';
     showToast(msg, 'error');
 } finally {
     if (S.shareParseInsightReqId === reqId) {
         S.shareParseInsightScanning = false;
+        setLoad(false);
+        if (UI.stopBtn) UI.stopBtn.onclick = oldStopHandler;
         updateShareParseInsightButtons();
         renderShareParseCurrentView();
     }
@@ -12485,12 +12774,11 @@ try {
 }
 
 function handleShareParseInsightStop() {
-const L = getStrings();
 if (!S.shareParseInsightScanning) return;
 S.shareParseInsightStop = true;
 S.shareParseInsightScanning = false;
 S.shareParseInsightToastStopped = true;
-showToast(L.msg_share_parse_scan_stopped, 'warning');
+setLoad(false);
 updateShareParseInsightButtons();
 renderShareParseCurrentView();
 }
@@ -12776,7 +13064,7 @@ function buildShareParseRootPath() {
 const L = getStrings();
 const info = S.shareParseInfo || {};
 const rootId = getShareParseRootParentId();
-const title = info.share_title || L.label_share_parse_root;
+const title = L.picker_all || L.label_share_parse_root;
 return [
     { id: 'share_parse_panel', name: L.label_share_parse_path_root, _sharePanel: true },
     { id: rootId || '', name: title, parent_id: rootId || '', _shareRoot: true }
@@ -12890,13 +13178,33 @@ if (!UI.in) return;
 if (typeof clearGridStableRows === 'function') clearGridStableRows(UI.in);
 UI.in.style.height = '100%';
 UI.in.style.transform = 'none';
-const spin = type === 'loading' ? '<div class="pk-spin-lg" style="width:32px;height:32px;border-width:3px;border-color:rgba(136,136,136,.2);border-top-color:var(--pk-pri);"></div>' : CONF.emptySVG;
-UI.in.innerHTML = `<div class="pk-share-parse-list-state ${type === 'err' ? 'err' : ''}">${spin}<div>${esc(message || '')}</div></div>`;
+if (type === 'loading') {
+    const spin = '<div class="pk-spin-lg" style="width:32px;height:32px;border-width:3px;border-color:rgba(136,136,136,.2);border-top-color:var(--pk-pri);"></div>';
+    UI.in.innerHTML = `<div class="pk-share-parse-list-state">${spin}<div>${esc(message || '')}</div></div>`;
+} else {
+    UI.in.innerHTML = `<div class="pk-empty">${CONF.emptySVG}<div class="pk-empty-txt">${esc(message || '')}</div></div>`;
+}
 if (UI.pop) {
     UI.pop.style.display = 'none';
     UI.pop.innerHTML = '';
 }
 if (UI.ctx) UI.ctx.style.display = 'none';
+}
+
+function syncShareParseInsightFilterBar() {
+if (!UI.filterBar) return;
+const visible = !!(S.shareParseMode && S.shareParseListActive && S.shareParseInsightMode && !S.shareParseInsightScanning);
+UI.filterBar.style.display = visible ? 'flex' : 'none';
+if (!visible) return;
+const state = S.shareParseInsightFilterState || { active: false, cat: 'all', ext: 'all' };
+if (state.active) {
+    UI.filterBtn.style.display = 'none';
+    UI.filterActiveUI.style.display = 'flex';
+    if (typeof renderActiveFilterUI === 'function') renderActiveFilterUI();
+} else {
+    UI.filterBtn.style.display = 'flex';
+    UI.filterActiveUI.style.display = 'none';
+}
 }
 
 function renderShareParseCurrentView() {
@@ -12909,6 +13217,7 @@ if (S.shareParseListActive) {
     renderShareParsePanel();
 }
 updateShareParseInsightButtons();
+syncShareParseInsightFilterBar();
 updateStat();
 }
 
@@ -13140,7 +13449,7 @@ return sendUnzipRequest(savedFile, pwdValue || "", archiveFiles || []);
 
 async function handleOpenShareArchive(item) {
 const L = getStrings();
-if (!item || !item._isShareItem || S.shareParseInsightMode) return;
+if (!item || !item._isShareItem) return;
 setLoad(true);
 updateLoadTxt(L.loading);
 try {
@@ -13166,7 +13475,7 @@ try {
 
 async function handleOpenShareFile(item) {
 const L = getStrings();
-if (!item || !item._isShareItem || S.shareParseInsightMode) return;
+if (!item || !item._isShareItem) return;
 setLoad(true);
 updateLoadTxt(L.loading);
 try {
@@ -13338,29 +13647,44 @@ if (S.shareParseMode && !S.shareParseListActive) {
     renderShareParsePanel();
     return;
 }
-if (S.shareParseMode) syncShareParseMirror();
+if (S.shareParseMode) {
+    if (UI.win) {
+        UI.win.classList.add('pk-share-parse-mode');
+        UI.win.classList.remove('pk-analyze-group-tools-on');
+    }
+    if (UI.btnAnaSelect) UI.btnAnaSelect.style.display = 'none';
+    if (UI.btnAnaSort) UI.btnAnaSort.style.display = 'none';
+    syncShareParseMirror();
+} else if (UI.win) {
+    UI.win.classList.remove('pk-share-parse-mode');
+}
 syncLayoutMetrics();
 UI.win.classList.toggle('pk-grid-view', isGridView());
 renderViewSwitch();
 const headerEl = UI.win.querySelector('.pk-grid-hd');
 if (headerEl) headerEl.style.display = '';
+const isEmptyDisplay = S.display.length === 0;
 if (isGridView()) {
     const gridLayout = getGridLayout();
     S._gridLayoutKey = getGridLayoutKey();
-    if (isGroupedGridView()) {
+    if (isEmptyDisplay) {
+        clearGroupedGridMetaCache();
+        UI.in.style.height = '100%';
+    } else if (isGroupedGridView()) {
         const dupGridMeta = getGroupedGridMeta(true);
         UI.in.style.height = `${Math.max(0, dupGridMeta ? dupGridMeta.totalHeight : 0)}px`;
+        scheduleGridRelayout();
     } else {
         clearGroupedGridMetaCache();
-        UI.in.style.height = `${Math.ceil((S.display.length || 0) / gridLayout.cols) * CONF.rowHeight}px`;
+        UI.in.style.height = `${Math.ceil(S.display.length / gridLayout.cols) * CONF.rowHeight}px`;
+        scheduleGridRelayout();
     }
-    scheduleGridRelayout();
 } else {
     S._gridLayoutKey = '';
     clearGroupedGridMetaCache();
     clearGridStableRows(UI.in);
     if (UI.win) UI.win.classList.remove('pk-grid-view', 'pk-grid-resizing', 'pk-grid-scrolling');
-    UI.in.style.height = `${S.display.length * CONF.rowHeight}px`;
+    UI.in.style.height = isEmptyDisplay ? '100%' : `${S.display.length * CONF.rowHeight}px`;
 }
 let colDef;
 
@@ -13596,8 +13920,9 @@ if (hd) {
         const hasDurationCol = !!hd.querySelector('[data-k="duration"]');
         const hasHistoryCol = !!hd.querySelector('[data-k="play_time"]');
         const hasOfflineCol = !!hd.querySelector('[data-k="offline_status"]');
+        const missingListFolderFirst = !S.shareParseMode && !S.trashMode && !S.shareMode && !S.offlineMode && !S.uploadMode && !S.historyMode && !isAnalyzeRoot && !S.isFlattened && !S.dupMode && !hd.querySelector('#pk-btn-folder-first');
 
-        if (S.shareParseMode || hasDurationCol === isAnalyzeRoot || !hd.querySelector('[data-k="name"]') || hasHistoryCol || hasOfflineCol) {
+        if (S.shareParseMode || missingListFolderFirst || hasDurationCol === isAnalyzeRoot || !hd.querySelector('[data-k="name"]') || hasHistoryCol || hasOfflineCol) {
                 hd.innerHTML = `
                 <div><input type="checkbox" id="pk-all"></div>
                 <div class="pk-col" data-k="starred" style="justify-content:center;">
@@ -13635,10 +13960,7 @@ if (hd) {
                 };
                 btnFF.onclick = (e) => {
                     e.stopPropagation();
-                    S.folderFirst = !S.folderFirst;
-                    gmSet('pk_folder_first', S.folderFirst);
-                    if(S.renderFolderFirst) S.renderFolderFirst();
-                    refresh();
+                    toggleFolderFirst();
                 };
                 if(S.renderFolderFirst) S.renderFolderFirst();
             } else {
@@ -13688,6 +14010,7 @@ const currentCols = isGridView() ? [] : hd.querySelectorAll('.pk-col');
 
 currentCols.forEach(c => {
     const span = c.querySelector('span');
+    if (span) { span.style.whiteSpace = 'pre'; span.style.fontSize = '11px'; span.style.lineHeight = '1'; }
     const isSimFolderView = (isAnalyzeRoot && S.analyzeSimGroups);
 
     if (S.dupMode || S.offlineMode || S.uploadMode || isSimFolderView) {
@@ -13716,11 +14039,12 @@ currentCols.forEach(c => {
                     const folderId = curNode.id || 'root';
                     try {
                         const prefStore = JSON.parse(gmGet('pk_folder_sort_prefs', '{}'));
-                        prefStore[folderId] = { sort: S.sort, dir: S.dir, folderFirst: S.folderFirst };
+                        const prev = prefStore[folderId] || {};
+                        prefStore[folderId] = { ...prev, sort: S.sort, dir: S.dir };
                         gmSet('pk_folder_sort_prefs', JSON.stringify(prefStore));
                     } catch(e) {}
                 } else {
-                    gmSet('pk_global_sort_pref', JSON.stringify({ sort: S.sort, dir: S.dir, folderFirst: S.folderFirst }));
+                    gmSet('pk_global_sort_pref', JSON.stringify({ sort: S.sort, dir: S.dir }));
                 }
             }
 
@@ -13790,10 +14114,6 @@ if (S.display.length === 0) {
 
     if (S.shareParseMode && S.shareParseListActive) {
         if (S.shareParseInsightMode) {
-            if (S.shareParseInsightScanning) {
-                renderShareParseListStatus(`${L.msg_share_parse_scan_start} ${formatShareParseInsightProgress()}`, 'loading');
-                return;
-            }
             if (S.shareParseInsightError) {
                 renderShareParseListStatus(S.shareParseInsightError, 'err');
                 return;
@@ -13835,7 +14155,7 @@ if (S.display.length === 0) {
         return;
     }
 
-    if (S.items.length > 0 && !S.search && !S.dupMode && !S.trashMode && !S.shareMode && !S.offlineMode && !S.uploadMode && !S.isFlattened) {
+    if (S.items.length > 0 && !S.search && !S.dupMode && !S.trashMode && !S.shareMode && !S.offlineMode && !S.uploadMode && !S.isFlattened && !(S.shareParseMode && S.shareParseInsightMode)) {
         return;
     }
 
@@ -14118,6 +14438,50 @@ const getSearchHlHTML = (name, query, capacity) => {
 
     const targetSlice = name.substring(start, end);
     return prefix + getTooltipHlHTML(targetSlice, query) + suffix;
+};
+
+const getSharePathSearchHlHTML = (text, query, capacity) => {
+    const raw = String(text || '');
+    const q = normalizeSharePathSearchText(query);
+    if (!q) return esc(raw);
+    let norm = '', map = [], slash = false;
+    for (let i = 0; i < raw.length; i++) {
+        const ch = raw[i];
+        if (/[\\/／]/.test(ch)) {
+            while (norm.endsWith(' ')) {
+                norm = norm.slice(0, -1);
+                map.pop();
+            }
+            norm += '/';
+            map.push(i);
+            slash = true;
+            continue;
+        }
+        if (slash && /\s/.test(ch)) continue;
+        slash = false;
+        norm += ch.toLowerCase();
+        map.push(i);
+    }
+    const idx = norm.indexOf(q);
+    if (idx === -1 || !map[idx] && map[idx] !== 0) return getSearchHlHTML(raw, query, capacity);
+    const matchStart = map[idx];
+    const matchEnd = (map[idx + q.length - 1] ?? matchStart) + 1;
+    let start = 0, end = raw.length, prefix = '', suffix = '';
+    if (raw.length > capacity) {
+        const cap = Math.max(q.length + 8, Math.floor(capacity || 30));
+        const preLimit = Math.max(0, Math.floor((cap - (matchEnd - matchStart)) * 0.3));
+        start = Math.max(0, matchStart - preLimit);
+        end = Math.min(raw.length, start + cap);
+        if (end < matchEnd) {
+            end = matchEnd;
+            start = Math.max(0, end - cap);
+        }
+        if (start > 0) prefix = '...';
+        if (end < raw.length) suffix = '...';
+    }
+    const hiStart = Math.max(matchStart, start);
+    const hiEnd = Math.min(matchEnd, end);
+    return prefix + esc(raw.substring(start, hiStart)) + `<b style="color:var(--pk-match-fg); background:var(--pk-match-bg); border-radius:2px; padding:0 2px;">${esc(raw.substring(hiStart, hiEnd))}</b>` + esc(raw.substring(hiEnd, end)) + suffix;
 };
 
 const getGridSearchHlHTML = (name, query, capacity) => {
@@ -15442,7 +15806,7 @@ for (let seqIdx = 0; seqIdx < renderCount; seqIdx++) {
                     } else {
                         const includePath = UI.chkSearchPath && UI.chkSearchPath.checked;
                         const pathDisplay = (shouldShowHl && includePath && shareInsightPathText)
-                            ? getSearchHlHTML(shareInsightPathText, S.search, pathCharCapacity)
+                            ? getSharePathSearchHlHTML(shareInsightPathText, S.search, pathCharCapacity)
                             : esc(shareInsightPathText);
                         pathHtml = `<div style="${containerStyle}"><span style="${contentStyle}">${pathDisplay}</span></div>`;
                     }
@@ -15849,8 +16213,9 @@ for (let seqIdx = 0; seqIdx < renderCount; seqIdx++) {
             if (S.movingIds.has(d.id)) return;
 
             if (d._isShareItem) {
-                if (S.shareParseInsightMode) return;
-                if (d.kind === 'drive#folder') handleShareParseFolderOpen(d);
+                if (d.kind === 'drive#folder') {
+                    if (!S.shareParseInsightMode) handleShareParseFolderOpen(d);
+                }
                 else if (isArchiveLike(d)) handleOpenShareArchive(d);
                 else if (isVideoLikeItem(d) || isImageLikeItem(d)) handleOpenShareFile(d);
                 return;
@@ -15957,12 +16322,7 @@ for (let seqIdx = 0; seqIdx < renderCount; seqIdx++) {
                         const lastNode = S.path[S.path.length - 1];
                         if (lastNode && lastNode.id === d.id) return;
 
-                        if (S.analyzeMode && S.strictFolderFirstSnapshot !== null) {
-                            S.folderFirst = S.strictFolderFirstSnapshot === true;
-                        } else {
-                            S.folderFirst = false;
-                        }
-                        if (S.renderFolderFirst) S.renderFolderFirst();
+                        syncFolderFirstFromGlobal();
                         S.saveNavScrollTop(S.getNavBucketKey(), S.path);
                         S.path.push(d); load();
                     }
@@ -16109,7 +16469,9 @@ for (let seqIdx = 0; seqIdx < renderCount; seqIdx++) {
         row.ondblclick = (e) => {
             e.preventDefault();
             if (d._isShareItem) {
-                if (d.kind === 'drive#folder') handleShareParseFolderOpen(d);
+                if (d.kind === 'drive#folder') {
+                    if (!S.shareParseInsightMode) handleShareParseFolderOpen(d);
+                } else triggerOpen();
                 return;
             }
             if (S.trashMode) return;
@@ -16171,8 +16533,7 @@ for (let seqIdx = 0; seqIdx < renderCount; seqIdx++) {
                     load();
 
                 } else {
-                    S.folderFirst = false;
-                    if (S.renderFolderFirst) S.renderFolderFirst();
+                    syncFolderFirstFromGlobal();
 
                     S.saveNavScrollTop(S.getNavBucketKey(), S.path);
                     S.path.push(d);
@@ -17915,6 +18276,7 @@ function renderCrumb() {
 const oldMainCrumbPop = document.getElementById('pk-main-crumb-pop');
 if (oldMainCrumbPop) oldMainCrumbPop.remove();
 UI.crumb.innerHTML = '';
+UI.crumb.style.display = '';
 
 if (S.offlineMode) {
     UI.crumb.style.pointerEvents = 'none';
@@ -17959,13 +18321,8 @@ if (S.shareParseMode) {
     }
     if (S.shareParseInsightMode) {
         UI.crumb.style.pointerEvents = 'none';
-        const pathText = getSharePathText((Array.isArray(S.shareParseInsightReturnPath) && S.shareParseInsightReturnPath.length) ? S.shareParseInsightReturnPath : S.shareParsePath);
-        UI.crumb.innerHTML = `
-            <div style="display:flex; align-items:center; color:var(--pk-fg); margin-left: -6px; gap:6px; min-width:0;">
-                <span style="font-weight:bold; font-size:15px; cursor:default; white-space:nowrap;">${L.title_share_parse_insight}</span>
-                <span style="color:#888; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(pathText || L.label_share_parse_root)}</span>
-            </div>
-        `;
+        UI.crumb.style.display = 'none';
+        UI.crumb.innerHTML = '';
         return;
     }
     UI.crumb.style.pointerEvents = 'auto';
@@ -17986,7 +18343,8 @@ if (S.shareParseMode) {
                 const id = String((raw.id || raw.file_id || raw.fileId || raw.resource_id || raw.resourceId || `share_${rootParentId || 'root'}_${idx}`));
                 const name = raw.name || raw.file_name || raw.title || '';
                 if (String(id || '') !== String(root.id || '') && String(name || '') !== String(root.name || '')) return null;
-                return { ...raw, id, name, kind: 'drive#folder', parent_id: rootParentId, icon_link: raw.icon_link || raw.iconLink || raw.icon || root.icon_link || root.iconLink || root.icon || '', _isShareItem: true, _sharePath: rootPath.concat([{ id, name, parent_id: rootParentId }]) };
+                const displayName = L.picker_all || L.label_share_parse_root;
+                return { ...raw, id, name: displayName, kind: 'drive#folder', parent_id: rootParentId, icon_link: raw.icon_link || raw.iconLink || raw.icon || root.icon_link || root.iconLink || root.icon || '', _isShareItem: true, _shareRoot: true, _sharePath: rootPath.concat([{ id, name: displayName, parent_id: rootParentId, _shareRoot: true }]) };
             };
             const cached = (Array.isArray(S.shareParseItems) && String(S.shareParseCurParentId || '') === String(rootParentId || '')) ? S.shareParseItems.map(makeRootFolder).filter(Boolean) : [];
             if (cached.length) return cached;
@@ -17995,7 +18353,7 @@ if (S.shareParseMode) {
                 const folders = getShareDetailFiles(raw).map(makeRootFolder).filter(Boolean);
                 if (folders.length) return folders;
             } catch(e) {}
-            return [{ id: root.id || '', name: root.name || L.label_share_parse_root, kind: 'drive#folder', icon_link: root.icon_link || root.iconLink || root.icon || '', _isShareItem: true, _sharePath: path.slice(0, 2) }];
+            return [{ id: root.id || '', name: L.picker_all || L.label_share_parse_root, kind: 'drive#folder', icon_link: root.icon_link || root.iconLink || root.icon || '', _isShareItem: true, _shareRoot: true, _sharePath: path.slice(0, 2).map(n => n && n._shareRoot ? { ...n, name: L.picker_all || L.label_share_parse_root } : n) }];
         }
         const target = basePath[basePath.length - 1];
         const parentId = target && !target._sharePanel ? (target.id || '') : getShareParseRootParentId();
@@ -18135,6 +18493,13 @@ if (S.trashMode) {
 }
 UI.crumb.style.pointerEvents = 'auto';
 
+if (S.isFlattened || S.dupMode) {
+    UI.crumb.style.pointerEvents = 'none';
+    UI.crumb.style.display = 'none';
+    UI.crumb.innerHTML = '';
+    return;
+}
+
 const svgStyle = 'width:14px;height:14px;vertical-align:-4px;margin-right:4px;display:inline-block;';
 const ICON_HOME = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="${svgStyle}"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
 const ICON_SEARCH = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="${svgStyle}"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
@@ -18179,8 +18544,7 @@ S.path.forEach((p, i) => {
                 S.latestChildId = S.path[i + 1].id;
             }
 
-            S.folderFirst = false;
-            if (S.renderFolderFirst) S.renderFolderFirst();
+            syncFolderFirstFromGlobal();
 
             S.path = S.path.slice(0, i + 1);
             load();
@@ -25194,9 +25558,24 @@ torrent: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="cu
 other: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`
 };
 
+const isShareInsightFilterContext = () => !!(S.shareParseMode && S.shareParseInsightMode);
+const getCurrentFilterState = () => {
+if (isShareInsightFilterContext()) {
+    if (!S.shareParseInsightFilterState) S.shareParseInsightFilterState = { active: false, cat: 'all', ext: 'all' };
+    return S.shareParseInsightFilterState;
+}
+if (!S.filterState) S.filterState = { active: false, cat: 'all', ext: 'all' };
+return S.filterState;
+};
+const commitFilterChange = () => {
+S.sel.clear();
+refresh();
+};
+
 const renderActiveFilterUI = () => {
 if (!UI.filterBar) return;
-const cat = S.filterState.cat;
+const state = getCurrentFilterState();
+const cat = state.cat;
 if (cat === 'all') return;
 
 UI.filterCatLabel.textContent = FILTER_NAMES[cat] || (L.cat_other);
@@ -25210,15 +25589,15 @@ if (cat === 'other') {
         const mainExts = exts.slice(0, 3);
         const moreExts = exts.slice(3);
 
-        let html = `<span class="pk-f-ext ${S.filterState.ext === 'all' ? 'act' : ''}" data-ext="all">${L.cat_all}</span>`;
+        let html = `<span class="pk-f-ext ${state.ext === 'all' ? 'act' : ''}" data-ext="all">${L.cat_all}</span>`;
 
         let displayExts = [...mainExts];
-        if (S.filterState.ext !== 'all' && moreExts.includes(S.filterState.ext)) {
-            displayExts[2] = S.filterState.ext;
+        if (state.ext !== 'all' && moreExts.includes(state.ext)) {
+            displayExts[2] = state.ext;
         }
 
         displayExts.forEach(e => {
-            html += `<span class="pk-f-ext ${S.filterState.ext === e ? 'act' : ''}" data-ext="${e}">${e}</span>`;
+            html += `<span class="pk-f-ext ${state.ext === e ? 'act' : ''}" data-ext="${e}">${e}</span>`;
         });
 
         UI.filterExtsMain.innerHTML = html;
@@ -25232,10 +25611,9 @@ if (cat === 'other') {
         UI.filterExtsMain.querySelectorAll('.pk-f-ext').forEach(span => {
             span.onclick = (e) => {
                 e.stopPropagation();
-                S.filterState.ext = span.dataset.ext;
+                getCurrentFilterState().ext = span.dataset.ext;
                 renderActiveFilterUI();
-                S.sel.clear();
-                refresh();
+                commitFilterChange();
             };
         });
 }
@@ -25255,19 +25633,20 @@ pop.style.cssText = `
 
 `;
 if (document.querySelector('.pk-ov')?.classList.contains('pk-dark')) pop.classList.add('pk-dark');
+const state = getCurrentFilterState();
 
 pop.innerHTML = `
     <div style="font-size: 13px; color: #888; margin-bottom: 12px; padding-left: 5px;">${L.title_file_filter}</div>
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-        <div class="pk-fc-btn ${S.filterState.cat === 'all' ? 'act' : ''}" data-cat="all">${fIcons.all} <span>${L.cat_all}</span></div>
-        <div class="pk-fc-btn ${S.filterState.cat === 'video' ? 'act' : ''}" data-cat="video">${fIcons.video} <span>${L.cat_video}</span></div>
-        <div class="pk-fc-btn ${S.filterState.cat === 'audio' ? 'act' : ''}" data-cat="audio">${fIcons.audio} <span>${L.cat_audio}</span></div>
-        <div class="pk-fc-btn ${S.filterState.cat === 'image' ? 'act' : ''}" data-cat="image">${fIcons.image} <span>${L.cat_image}</span></div>
-        <div class="pk-fc-btn ${S.filterState.cat === 'document' ? 'act' : ''}" data-cat="document">${fIcons.document} <span>${L.cat_document}</span></div>
-        <div class="pk-fc-btn ${S.filterState.cat === 'software' ? 'act' : ''}" data-cat="software">${fIcons.software} <span>${L.cat_software}</span></div>
-        <div class="pk-fc-btn ${S.filterState.cat === 'archive' ? 'act' : ''}" data-cat="archive">${fIcons.archive} <span>${L.cat_archive}</span></div>
-        <div class="pk-fc-btn ${S.filterState.cat === 'torrent' ? 'act' : ''}" data-cat="torrent">${fIcons.torrent} <span>${L.cat_torrent}</span></div>
-        <div class="pk-fc-btn ${S.filterState.cat === 'other' ? 'act' : ''}" data-cat="other">${fIcons.other} <span>${L.cat_other}</span></div>
+        <div class="pk-fc-btn ${state.cat === 'all' ? 'act' : ''}" data-cat="all">${fIcons.all} <span>${L.cat_all}</span></div>
+        <div class="pk-fc-btn ${state.cat === 'video' ? 'act' : ''}" data-cat="video">${fIcons.video} <span>${L.cat_video}</span></div>
+        <div class="pk-fc-btn ${state.cat === 'audio' ? 'act' : ''}" data-cat="audio">${fIcons.audio} <span>${L.cat_audio}</span></div>
+        <div class="pk-fc-btn ${state.cat === 'image' ? 'act' : ''}" data-cat="image">${fIcons.image} <span>${L.cat_image}</span></div>
+        <div class="pk-fc-btn ${state.cat === 'document' ? 'act' : ''}" data-cat="document">${fIcons.document} <span>${L.cat_document}</span></div>
+        <div class="pk-fc-btn ${state.cat === 'software' ? 'act' : ''}" data-cat="software">${fIcons.software} <span>${L.cat_software}</span></div>
+        <div class="pk-fc-btn ${state.cat === 'archive' ? 'act' : ''}" data-cat="archive">${fIcons.archive} <span>${L.cat_archive}</span></div>
+        <div class="pk-fc-btn ${state.cat === 'torrent' ? 'act' : ''}" data-cat="torrent">${fIcons.torrent} <span>${L.cat_torrent}</span></div>
+        <div class="pk-fc-btn ${state.cat === 'other' ? 'act' : ''}" data-cat="other">${fIcons.other} <span>${L.cat_other}</span></div>
     </div>
 `;
 document.body.appendChild(pop);
@@ -25293,16 +25672,16 @@ pop.querySelectorAll('.pk-fc-btn').forEach(btn => {
     btn.onclick = (ev) => {
         ev.stopPropagation();
         const cat = btn.dataset.cat;
-        S.filterState.cat = cat;
-        S.filterState.ext = 'all';
-        S.filterState.active = (cat !== 'all');
+        const st = getCurrentFilterState();
+        st.cat = cat;
+        st.ext = 'all';
+        st.active = (cat !== 'all');
         cleanup();
 
-        if (S.filterState.active) {
+        if (st.active) {
             renderActiveFilterUI();
         }
-        S.sel.clear();
-        refresh();
+        commitFilterChange();
     };
 });
 
@@ -25332,18 +25711,19 @@ UI.filterExtsMoreBtn.onclick = (e) => {
 
     `;
     if (document.querySelector('.pk-ov')?.classList.contains('pk-dark')) pop.classList.add('pk-dark');
-    const exts = FILTER_EXTS[S.filterState.cat] ||[];
+    const state = getCurrentFilterState();
+    const exts = FILTER_EXTS[state.cat] ||[];
     const mainExts = exts.slice(0, 3);
     const moreExts = exts.slice(3);
 
     let displayExts = [...mainExts];
-    if (S.filterState.ext !== 'all' && moreExts.includes(S.filterState.ext)) {
-        displayExts[2] = S.filterState.ext;
+    if (state.ext !== 'all' && moreExts.includes(state.ext)) {
+        displayExts[2] = state.ext;
     }
 
     const dropdownExts = exts.filter(ex => !displayExts.includes(ex));
 
-    pop.innerHTML = dropdownExts.map(ex => `<span class="pk-f-ext ${S.filterState.ext === ex ? 'act' : ''}" data-ext="${ex}" style="border:1px solid transparent; ${S.filterState.ext === ex ? 'background:rgba(0,103,192,0.1);' : 'background:var(--pk-hl);'}">${ex}</span>`).join('');
+    pop.innerHTML = dropdownExts.map(ex => `<span class="pk-f-ext ${state.ext === ex ? 'act' : ''}" data-ext="${ex}" style="border:1px solid transparent; ${state.ext === ex ? 'background:rgba(0,103,192,0.1);' : 'background:var(--pk-hl);'}">${ex}</span>`).join('');
 
     document.body.appendChild(pop);
 
@@ -25367,11 +25747,10 @@ UI.filterExtsMoreBtn.onclick = (e) => {
     pop.querySelectorAll('.pk-f-ext').forEach(span => {
             span.onclick = (ev) => {
                 ev.stopPropagation();
-                S.filterState.ext = span.dataset.ext;
+                getCurrentFilterState().ext = span.dataset.ext;
                 cleanup();
                 renderActiveFilterUI();
-                S.sel.clear();
-                refresh();
+                commitFilterChange();
             };
     });
 
@@ -25386,11 +25765,13 @@ UI.filterExtsMoreBtn.onclick = (e) => {
 
 if (UI.filterExitBtn) {
 UI.filterExitBtn.onclick = () => {
-    S.filterState = { active: false, cat: 'all', ext: 'all' };
+    const st = getCurrentFilterState();
+    st.active = false;
+    st.cat = 'all';
+    st.ext = 'all';
     UI.filterBtn.style.display = 'flex';
     UI.filterActiveUI.style.display = 'none';
-    S.sel.clear();
-    refresh();
+    commitFilterChange();
 };
 }
 
@@ -26282,11 +26663,19 @@ const unitBtn = m.querySelector('#sc_unit_btn');
 const unitMenu = m.querySelector('#sc_unit_menu');
 const unitTxt = m.querySelector('#sc_unit_txt');
 let currentUnit = lastUnit;
+const syncLimitBorder = (inp) => {
+    if (!inp) return;
+    inp.style.borderColor = String(inp.value || '').trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
+};
+[inpMin, inpMax].forEach(inp => {
+    syncLimitBorder(inp);
+    inp.addEventListener('input', () => syncLimitBorder(inp));
+});
 
-m.querySelector('#sc_inc_min').onclick = (e) => { e.stopPropagation(); inpMin.value = (parseInt(inpMin.value) || 0) + 1; };
-m.querySelector('#sc_dec_min').onclick = (e) => { e.stopPropagation(); inpMin.value = Math.max(0, (parseInt(inpMin.value) || 1) - 1); };
-m.querySelector('#sc_inc_max').onclick = (e) => { e.stopPropagation(); inpMax.value = (parseInt(inpMax.value) || 0) + 1; };
-m.querySelector('#sc_dec_max').onclick = (e) => { e.stopPropagation(); inpMax.value = Math.max(0, (parseInt(inpMax.value) || 1) - 1); };
+m.querySelector('#sc_inc_min').onclick = (e) => { e.stopPropagation(); inpMin.value = (parseInt(inpMin.value) || 0) + 1; inpMin.dispatchEvent(new Event('input')); };
+m.querySelector('#sc_dec_min').onclick = (e) => { e.stopPropagation(); inpMin.value = Math.max(0, (parseInt(inpMin.value) || 1) - 1); inpMin.dispatchEvent(new Event('input')); };
+m.querySelector('#sc_inc_max').onclick = (e) => { e.stopPropagation(); inpMax.value = (parseInt(inpMax.value) || 0) + 1; inpMax.dispatchEvent(new Event('input')); };
+m.querySelector('#sc_dec_max').onclick = (e) => { e.stopPropagation(); inpMax.value = Math.max(0, (parseInt(inpMax.value) || 1) - 1); inpMax.dispatchEvent(new Event('input')); };
 
 unitBtn.onclick = (e) => { e.stopPropagation(); unitMenu.style.display = unitMenu.style.display === 'block' ? 'none' : 'block'; };
 m.querySelectorAll('.pk-ana-item').forEach(item => {
@@ -26741,22 +27130,7 @@ S.renderFolderFirst();
 
 UI.btnFolderFirst.onclick = (e) => {
     e.stopPropagation();
-    S.folderFirst = !S.folderFirst;
-
-    gmSet('pk_folder_first', S.folderFirst);
-
-    try {
-        const globalPref = JSON.parse(gmGet('pk_global_sort_pref', '{"sort":"modified_time","dir":1}'));
-        globalPref.sort = S.sort;
-        globalPref.dir = S.dir;
-        globalPref.folderFirst = S.folderFirst;
-        gmSet('pk_global_sort_pref', JSON.stringify(globalPref));
-    } catch(e) {
-        gmSet('pk_global_sort_pref', JSON.stringify({ sort: S.sort, dir: S.dir, folderFirst: S.folderFirst }));
-    }
-
-    if (S.renderFolderFirst) S.renderFolderFirst();
-    refresh();
+    toggleFolderFirst();
 };
 }
 
@@ -27365,6 +27739,14 @@ UI.btnAnalyze.onclick = async () => {
         const inpMin = m.querySelector('#an_val_min');
         const inpMax = m.querySelector('#an_val_max');
         const btn = m.querySelector('#an_unit_btn');
+        const syncLimitBorder = (inp) => {
+            if (!inp) return;
+            inp.style.borderColor = String(inp.value || '').trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
+        };
+        [inpMin, inpMax].forEach(inp => {
+            syncLimitBorder(inp);
+            inp.addEventListener('input', () => syncLimitBorder(inp));
+        });
 
         m.querySelector('#an_inc_min').onclick = (e) => { e.stopPropagation(); inpMin.value = (parseInt(inpMin.value) || 0) + 1; inpMin.dispatchEvent(new Event('input')); };
         m.querySelector('#an_dec_min').onclick = (e) => { e.stopPropagation(); inpMin.value = Math.max(0, (parseInt(inpMin.value) || 1) - 1); inpMin.dispatchEvent(new Event('input')); };
@@ -31232,6 +31614,7 @@ let isRunning = true;
 UI.stopBtn.onclick = () => { isRunning = false; abortCtrl.abort(); updateLoadTxt(L.str_stopping); };
 
 ariaUrl = normalizeAriaRpcUrl(ariaUrl);
+const keepAria2Structure = getBoolPref('pk_aria2_keep_structure', CONF.aria2KeepFolderStructure);
 
 const allFiles = [];
 const rootNodes = [];
@@ -31369,7 +31752,7 @@ try {
             const sanitize = (s) => s.replace(/[\\/:*?"<>|]/g, '_').trim();
             const payload = chunk.map(f => {
                 let relativePrefix = '';
-                if (f._lineage && f._lineage.length > 0) {
+                if (keepAria2Structure && f._lineage && f._lineage.length > 0) {
                     relativePrefix = f._lineage.map(n => sanitize(n.name)).join('/') + '/';
                 }
                 const outPath = relativePrefix + sanitize(f.name);
@@ -33428,7 +33811,7 @@ if (S.historyMode && mode !== 'history') {
                 gmSet('pk_global_sort_pref', JSON.stringify({ ...globalPref, sort: 'modified_time', dir: 1 }));
             }
         } catch(e) {
-            gmSet('pk_global_sort_pref', JSON.stringify({ sort: 'modified_time', dir: 1, folderFirst: S.folderFirst }));
+            gmSet('pk_global_sort_pref', JSON.stringify({ sort: 'modified_time', dir: 1 }));
         }
     }
 }
@@ -33500,9 +33883,7 @@ if (mode === 'history') {
     S.sort = 'modified_time';
 }
 
-const savedFolderFirst = gmGet('pk_folder_first', false);
-S.folderFirst = savedFolderFirst === true || savedFolderFirst === 'true';
-if (S.renderFolderFirst) S.renderFolderFirst();
+syncFolderFirstFromGlobal();
 
 if (UI.chkGlobal && !S.trashMode && !S.shareMode && !S.shareParseMode && !S.starredMode && !S.offlineMode && !S.historyMode && !S.recentMode && !S.uploadMode) {
     S.wasGlobalChecked = UI.chkGlobal.checked;
@@ -33517,15 +33898,23 @@ S.historyMode = (mode === 'history');
 S.offlineMode = (mode === 'offline');
 S.uploadMode = (mode === 'upload');
 
+if (UI.win) UI.win.classList.toggle('pk-share-parse-mode', !!S.shareParseMode);
+
 if (S.shareParseMode) {
     S.dupMode = false;
     S.isFlattened = false;
     S.analyzeMode = false;
+    S.analyzeSimGroups = null;
     S.scanFilter = null;
     S.filterState = { active: false, cat: 'all', ext: 'all' };
+    S.shareParseInsightFilterState = { active: false, cat: 'all', ext: 'all' };
     S.preSearchPath = null;
     S.lastGlobalResults = [];
     clearShareParseSearch();
+    if (UI.win) UI.win.classList.remove('pk-analyze-group-tools-on');
+    if (UI.btnAnaSelect) UI.btnAnaSelect.style.display = 'none';
+    if (UI.btnAnaSort) UI.btnAnaSort.style.display = 'none';
+    document.querySelectorAll('.pk-ana-pop, .pk-ana-sort-pop').forEach(p => { p.style.display = 'none'; });
     if (UI.chkGlobal) UI.chkGlobal.checked = false;
     if (UI.btnExit) UI.btnExit.style.display = 'none';
     if (UI.lblGlobal) UI.lblGlobal.style.display = 'none';
@@ -33790,6 +34179,7 @@ if (S.shareParseMode) {
     } else {
         renderShareParsePanel();
     }
+    syncShareParseInsightFilterBar();
     updateStat();
     return;
 }
@@ -35497,6 +35887,7 @@ const curDefaultVideoQuality = getDefaultVideoQualityPref();
 const curVideoLoadProgressCache = shouldLoadVideoProgressCache();
 const curAriaUrl = gmGet('pk_aria2_url', '');
 const curAriaToken = gmGet('pk_aria2_token', '');
+const curAriaKeepStructure = getBoolPref('pk_aria2_keep_structure', CONF.aria2KeepFolderStructure);
 const curDownloadAccelEnable = getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable);
 const curDownloadAccelDomain = gmGet('pk_download_accel_domain', CONF.downloadAccelDomain);
 const curDownloadAccelMode = normalizeDownloadAccelMode(gmGet('pk_download_accel_mode', CONF.downloadAccelMode));
@@ -35809,28 +36200,37 @@ const m = showModal(`
                     </div>
                 </div>
 
-                <div style="position:relative; transform: translateZ(0);">
-                    <div style="position:relative;">
-                        <input type="text" id="set_aria_url" value="${esc(curAriaUrl)}" placeholder="http://localhost:6800/jsonrpc"
-                                autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
-                                oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                                style="width:100%; height:44px; padding:0 70px 0 12px; border:2px solid ${curAriaUrl ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
-                        <div class="pk-select-label">${L.label_aria2_url}</div>
-                        <div id="btn_aria_default" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:4px 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2);" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_default}</div>
-                    </div>
-                    <div class="pk-aria-status-box" id="aria_test_res" style="margin-top: 8px;">
-                        <div class="pk-aria-dot" id="aria_test_dot"></div>
-                        <span id="aria_test_txt" style="color:#888; font-size: 11px;">${L.lbl_aria2_status}</span>
-                    </div>
-                </div>
+                <div id="pk_aria2_group" class="pk-setting-fieldset ${(curAriaUrl || curAriaToken) ? 'pk-inner-active' : ''}">
+                    <div class="pk-select-label">${L.label_aria2_config}</div>
+                    <div class="pk-setting-stack">
+                        <label for="set_aria_keep_structure" class="pk-setting-checkrow">
+                            <span>${L.label_aria2_keep_structure}</span>
+                            <input type="checkbox" id="set_aria_keep_structure" ${curAriaKeepStructure ? 'checked' : ''}>
+                        </label>
+                        <div style="position:relative; transform: translateZ(0);">
+                            <div style="position:relative;">
+                                <input type="text" id="set_aria_url" value="${esc(curAriaUrl)}" placeholder="http://localhost:6800/jsonrpc"
+                                        autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
+                                        oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
+                                        style="width:100%; height:44px; padding:0 70px 0 12px; border:2px solid ${curAriaUrl ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+                                <div class="pk-select-label">${L.label_aria2_url}</div>
+                                <div id="btn_aria_default" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:4px 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2);" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_default}</div>
+                            </div>
+                            <div class="pk-aria-status-box" id="aria_test_res" style="margin-top: 8px;">
+                                <div class="pk-aria-dot" id="aria_test_dot"></div>
+                                <span id="aria_test_txt" style="color:#888; font-size: 11px;">${L.lbl_aria2_status}</span>
+                            </div>
+                        </div>
 
-                <div style="position:relative; transform: translateZ(0); -webkit-transform: translateZ(0);">
-                    <input type="text" id="set_aria_token" value="${esc(curAriaToken)}" placeholder="${L.ph_aria2_secret}"
-                            autocomplete="off" spellcheck="false" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly');"
-                            oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                            style="width:100%; height:44px; padding:0 48px 0 12px; border:2px solid ${curAriaToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; -webkit-text-security: disc; transform: translateZ(0);">
-                    <button type="button" id="btn_aria_token_eye" class="pk-token-eye">${CONF.icons.eye}</button>
-                    <div class="pk-select-label">${L.label_aria2_token}</div>
+                        <div style="position:relative; transform: translateZ(0); -webkit-transform: translateZ(0);">
+                            <input type="text" id="set_aria_token" value="${esc(curAriaToken)}" placeholder="${L.ph_aria2_secret}"
+                                    autocomplete="off" spellcheck="false" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly');"
+                                    oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
+                                    style="width:100%; height:44px; padding:0 48px 0 12px; border:2px solid ${curAriaToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; -webkit-text-security: disc; transform: translateZ(0);">
+                            <button type="button" id="btn_aria_token_eye" class="pk-token-eye">${CONF.icons.eye}</button>
+                            <div class="pk-select-label">${L.label_aria2_token}</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="position:relative; padding:20px 15px 15px 15px; border:2px solid var(--pk-bd); border-radius:8px; transition:border-color 0.2s; transform:translateZ(0); backface-visibility:hidden;" onmouseover="this.style.borderColor='var(--pk-pri)'" onmouseout="this.style.borderColor='var(--pk-bd)'">
@@ -35893,7 +36293,10 @@ const updateSettingsScriptVersionInfo = (info = readScriptUpdateCache()) => {
         const hasNew = isScriptUpdateNew(info);
         latestEl.textContent = getScriptUpdateLatestText(info);
         latestEl.classList.toggle('new', hasNew);
-        latestEl.onclick = hasNew ? () => window.open(CONF.scriptUpdateProjectUrl, '_blank', 'noopener,noreferrer') : null;
+        latestEl.onclick = hasNew ? () => {
+    const m = {tc:'README(tc).md',en:'README(en).md',ko:'README(ko).md',ja:'README(ja).md',id:'README(id).md',ms:'README(ms).md'};
+    const f = m[getLang()];
+    window.open(`${CONF.scriptUpdateProjectUrl}/blob/main/${f ? `i18n/${f}` : 'README.md'}`, '_blank', 'noopener,noreferrer');} : null;
     }
     if (checkEl) checkEl.textContent = formatScriptUpdateCheckedAt(info && info.checkedAt);
 };
@@ -35943,6 +36346,8 @@ const ariaEye = m.querySelector('#btn_aria_token_eye');
 const ariaDot = m.querySelector('#aria_test_dot');
 const ariaTxt = m.querySelector('#aria_test_txt');
 const ariaBox = m.querySelector('#aria_test_res');
+const ariaGroup = m.querySelector('#pk_aria2_group');
+const updateAriaGroupBorder = () => { if (ariaGroup) ariaGroup.classList.toggle('pk-inner-active', !!(ariaInp.value.trim() || ariaTok.value.trim())); };
 let ariaTimer = null;
 let ariaTokenVisible = false;
 
@@ -35988,10 +36393,12 @@ const debouncedTest = () => {
 
 ariaInp.oninput = (e) => {
     if (e.target.oninput) e.target.style.borderColor = e.target.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
+    updateAriaGroupBorder();
     debouncedTest();
 };
 ariaTok.oninput = (e) => {
     if (e.target.oninput) e.target.style.borderColor = e.target.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
+    updateAriaGroupBorder();
     debouncedTest();
 };
 if (ariaEye) {
@@ -36006,6 +36413,7 @@ if (ariaEye) {
 m.querySelector('#btn_aria_default').onclick = () => {
     ariaInp.value = 'http://localhost:6800/jsonrpc';
     ariaInp.style.borderColor = 'var(--pk-pri)';
+    updateAriaGroupBorder();
     debouncedTest();
 };
 
@@ -36250,7 +36658,9 @@ m.querySelector('#btn_open_vault').onclick = (e) => {
 };
 
 m.querySelector('#btn_cfg_clean').onclick = async () => {
-    const keys = typeof GM_listValues !== 'undefined' ? GM_listValues() : Object.keys(localStorage);
+    const gmKeys = typeof GM_listValues !== 'undefined' ? GM_listValues() : [];
+    const lsKeys = Object.keys(localStorage).filter(k => typeof k === 'string' && k.startsWith('pk_'));
+    const keys = Array.from(new Set([...(Array.isArray(gmKeys) ? gmKeys : []), ...lsKeys]));
 
     const sizes = { index: 0, pref: 0, rules: 0, vault: 0, history: 0, cache: 0 };
 
@@ -36275,7 +36685,8 @@ m.querySelector('#btn_cfg_clean').onclick = async () => {
     keys.forEach(k => {
         const cat = getCat(k);
         if (cat) {
-            const val = typeof GM_getValue !== 'undefined' ? GM_getValue(k) : localStorage.getItem(k);
+            let val = typeof GM_getValue !== 'undefined' ? GM_getValue(k) : undefined;
+            if (val === undefined || val === null) val = localStorage.getItem(k);
             sizes[cat] += (k.length + (val ? JSON.stringify(val).length : 0));
         }
     });
@@ -36398,6 +36809,7 @@ m.querySelector('#btn_cfg_export').onclick = () => {
         'pk_blacklist_folders',
         'pk_aria2_url',
         'pk_aria2_token',
+        'pk_aria2_keep_structure',
         'pk_download_accel_enable',
         'pk_download_accel_domain',
         'pk_download_accel_mode',
@@ -36528,6 +36940,7 @@ fileInput.onchange = async (e) => {
                 'pk_blacklist_folders',
                 'pk_aria2_url',
                 'pk_aria2_token',
+                'pk_aria2_keep_structure',
                 'pk_download_accel_enable',
                 'pk_download_accel_domain',
                 'pk_download_accel_mode',
@@ -36740,6 +37153,7 @@ m.querySelector('#set_save').onclick = async () => {
     const oldTurbo = gmGet('pk_turbo_mode', false);
     const newUrl = m.querySelector('#set_aria_url').value.trim();
     const newToken = m.querySelector('#set_aria_token').value.trim();
+    const newAriaKeepStructure = m.querySelector('#set_aria_keep_structure').checked;
     const newDownloadAccelEnable = m.querySelector('#set_download_accel_enable').checked;
     const rawDownloadAccelDomain = m.querySelector('#set_download_accel_domain').value.trim();
     const newDownloadAccelDomain = normalizeDownloadAccelBase(rawDownloadAccelDomain);
@@ -36754,8 +37168,8 @@ m.querySelector('#set_save').onclick = async () => {
     const sortPref = m.querySelector('input[name="set_sort_pref"]:checked').value;
     const viewPref = m.querySelector('input[name="set_view_pref"]:checked').value;
     const saveBtn = m.querySelector('#set_save');
-    const oldSig = JSON.stringify([curLang, oldTurbo, gmGet('pk_aria2_url', ''), gmGet('pk_aria2_token', ''), getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable), normalizeDownloadAccelBase(gmGet('pk_download_accel_domain', CONF.downloadAccelDomain)), normalizeDownloadAccelMode(gmGet('pk_download_accel_mode', CONF.downloadAccelMode)), normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam)), gmGet('pk_blur_scope', gmGet('pk_blur_thumb', false) ? 'list' : 'off'), gmGet('pk_hide_button_text', false), gmGet('pk_keep_pos', true), gmGet('pk_skip_bl_on_del', true), gmGet('pk_clipboard_magnet_focus', false), gmGet('pk_comic_mode', true), gmGet('pk_sort_independent', false) ? 'indep' : 'global', gmGet('pk_view_independent', false) ? 'indep' : 'global', curEngine, curDefaultVideoQuality, curVideoLoadProgressCache, gmGet('pk_dl_filter_ext', ''), gmGet('pk_dl_filter_size_min', ''), gmGet('pk_dl_filter_size_max', ''), gmGet('pk_dl_filter_size_unit', 'MB'), gmGet('pk_dl_filter_name', '')]);
-    const newSig = JSON.stringify([selectedLang, newTurbo, newUrl, newToken, newDownloadAccelEnable, newDownloadAccelDomain, newDownloadAccelMode, newDownloadAccelQueryParam, newBlurScope, newHideButtonText, newKeepPos, newSkipBl, newClipboardMagnetFocus, newComicMode, sortPref, viewPref, selectedEngine, normalizeDefaultVideoQuality(selectedDefaultVideoQuality), !!m.querySelector('#set_video_load_progress_cache').checked, m.querySelector('#set_dl_filter_ext').value.trim(), m.querySelector('#set_dl_filter_size_min').value.trim(), m.querySelector('#set_dl_filter_size_max').value.trim(), m.querySelector('#cs_set_dl_size_unit .pk-select-item.act') ? m.querySelector('#cs_set_dl_size_unit .pk-select-item.act').dataset.val : 'MB', m.querySelector('#set_dl_filter_name').value.trim()]);
+    const oldSig = JSON.stringify([curLang, oldTurbo, gmGet('pk_aria2_url', ''), gmGet('pk_aria2_token', ''), getBoolPref('pk_aria2_keep_structure', CONF.aria2KeepFolderStructure), getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable), normalizeDownloadAccelBase(gmGet('pk_download_accel_domain', CONF.downloadAccelDomain)), normalizeDownloadAccelMode(gmGet('pk_download_accel_mode', CONF.downloadAccelMode)), normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam)), gmGet('pk_blur_scope', gmGet('pk_blur_thumb', false) ? 'list' : 'off'), gmGet('pk_hide_button_text', false), gmGet('pk_keep_pos', true), gmGet('pk_skip_bl_on_del', true), gmGet('pk_clipboard_magnet_focus', false), gmGet('pk_comic_mode', true), gmGet('pk_sort_independent', false) ? 'indep' : 'global', gmGet('pk_view_independent', false) ? 'indep' : 'global', curEngine, curDefaultVideoQuality, curVideoLoadProgressCache, gmGet('pk_dl_filter_ext', ''), gmGet('pk_dl_filter_size_min', ''), gmGet('pk_dl_filter_size_max', ''), gmGet('pk_dl_filter_size_unit', 'MB'), gmGet('pk_dl_filter_name', '')]);
+    const newSig = JSON.stringify([selectedLang, newTurbo, newUrl, newToken, newAriaKeepStructure, newDownloadAccelEnable, newDownloadAccelDomain, newDownloadAccelMode, newDownloadAccelQueryParam, newBlurScope, newHideButtonText, newKeepPos, newSkipBl, newClipboardMagnetFocus, newComicMode, sortPref, viewPref, selectedEngine, normalizeDefaultVideoQuality(selectedDefaultVideoQuality), !!m.querySelector('#set_video_load_progress_cache').checked, m.querySelector('#set_dl_filter_ext').value.trim(), m.querySelector('#set_dl_filter_size_min').value.trim(), m.querySelector('#set_dl_filter_size_max').value.trim(), m.querySelector('#cs_set_dl_size_unit .pk-select-item.act') ? m.querySelector('#cs_set_dl_size_unit .pk-select-item.act').dataset.val : 'MB', m.querySelector('#set_dl_filter_name').value.trim()]);
     const hasSettingsChanged = oldSig !== newSig;
     const reloadSettingsChanged = curLang !== selectedLang || newTurbo !== oldTurbo;
     const ariaChanged = newUrl !== gmGet('pk_aria2_url', '') || newToken !== gmGet('pk_aria2_token', '');
@@ -36787,12 +37201,11 @@ m.querySelector('#set_save').onclick = async () => {
         gmSet('pk_sort_independent', isIndep);
 
         if (wasIndep && !isIndep) {
-            const keepFolderFirst = gmGet('pk_folder_first', false);
             gmSet('pk_folder_sort_prefs', '{}');
-            gmSet('pk_global_sort_pref', JSON.stringify({ sort: 'modified_time', dir: 1, folderFirst: keepFolderFirst }));
+            gmSet('pk_global_sort_pref', JSON.stringify({ sort: 'modified_time', dir: 1 }));
             S.sort = 'modified_time';
             S.dir = 1;
-            S.folderFirst = keepFolderFirst;
+            syncFolderFirstFromGlobal();
         }
 
         const isViewIndep = (viewPref === 'indep');
@@ -36815,6 +37228,7 @@ m.querySelector('#set_save').onclick = async () => {
         gmSet('pk_download_accel_query_param', newDownloadAccelQueryParam);
         gmSet('pk_aria2_url', newUrl);
         gmSet('pk_aria2_token', newToken);
+        gmSet('pk_aria2_keep_structure', newAriaKeepStructure);
 
         if (curLang !== selectedLang) {
             await ensureI18nReady(true, selectedLang);
@@ -36872,13 +37286,15 @@ m.querySelector('#set_save').onclick = async () => {
         }
     };
 
+    if (saveBtn.dataset.pkSaving === '1') return;
+    saveBtn.dataset.pkSaving = '1';
+    saveBtn.disabled = true;
+    saveBtn.textContent = L.str_saving;
+
     if (!ariaChanged || (!newUrl && !newToken)) {
         await applyChangesAndClose();
         return;
     }
-
-    saveBtn.disabled = true;
-    saveBtn.textContent = L.str_saving;
 
     try {
         const fetchUrl = normalizeAriaRpcUrl(newUrl || 'http://localhost:6800/jsonrpc');
@@ -36889,6 +37305,7 @@ m.querySelector('#set_save').onclick = async () => {
         if (await showConfirm(L.msg_aria2_test_fail, L.title_aria2_fail)) {
             await applyChangesAndClose();
         } else {
+            delete saveBtn.dataset.pkSaving;
             saveBtn.disabled = false;
             saveBtn.textContent = L.btn_save;
         }
