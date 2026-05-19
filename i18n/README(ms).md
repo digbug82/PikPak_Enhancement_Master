@@ -1,115 +1,105 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_ms.gif" alt="Kulit Hadapan">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_ms.gif" alt="Kulit">
 </p>
 
 # 📦 PikPak Enhancement Master
 
-[![Pasang / Kemas Kini Terkini](https://img.shields.io/badge/Pasang%20/%20Kemas%20Kini%20Terkini-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
+[![Pasang Sekarang / Kemas Kini Versi Terkini](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
-[![Version](https://img.shields.io/badge/Version-2.5.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.5.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
 
 ⭐ Jika skrip ini membantu anda, sila beri Star kepada projek ini
 
-> Set peningkatan bertaraf desktop untuk PikPak Web.  
-> Daripada melayari, mencari, menganalisis, mengurus, memainkan, memuat turun hingga memindahkan data, pengurusan storan awan kini benar-benar lebih hampir kepada kecekapan dan kelancaran pengurus fail tempatan.
-
 ---
 
-## 🌍 Sokongan Bahasa (Languages)
+## 🌍 Bahasa Disokong
 
 [Bahasa Melayu](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ms).md) | [简体中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/README.md) | [繁體中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(tc).md) | [English](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(en).md) | [한국어](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ko).md) | [日本語](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ja).md) | [Indonesia](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(id).md)
 
 ---
 
-## ✨ Ciri Utama (Features)
+## ✨ Ciri Utama
 
-### ✨ Enjin Pengalaman & Navigasi
+### ✨ Enjin Pengalaman dan Navigasi
 
-* **Pembinaan semula interaksi**: Berdasarkan fungsi rasmi, keseluruhan antaramuka dibina semula dengan merujuk tabiat penggunaan **Windows File Explorer**, menjadikan laluan operasi lebih intuitif.
-* **Mod Turbo**: Selepas diaktifkan, ia mengambil alih logik web secara mendalam, dan secara ketara mengurangkan masalah lag, crash serta tekanan memori dalam senario fail berskala besar.
-* **Navigasi Butang Sisi**: Menyokong butang sisi tetikus untuk maju / undur, membolehkan pertukaran tahap direktori dengan pantas dalam pelbagai paparan.
-* **Bar laluan lanjutan**: Menyokong skrol roda tetikus, penukaran folder setara melalui menu lungsur, paparan semula laluan serta lompat jejak sumber; carian seluruh cakera dan suite analisis telah disepadukan ke dalam sistem laluan yang sama.
-* **Peningkatan pengalaman**: Menyokong penyusunan berbilang dimensi seperti bintang dan jenis fail, mod malam, **kaburkan kulit hadapan** dengan satu klik, serta meningkatkan pengalaman kemas kini paparan melalui **strategi SWR refresh senyap**.
-* **Pengindeksan latar belakang & perlindungan**: Titik pernafasan biru di halaman utama menunjukkan status penyegerakan pokok direktori di latar belakang; sistem turut terbina dengan perlindungan operasi serentak untuk mengurangkan data kotor dan konflik penulisan.
+* **Navigasi butang sisi**: Menyokong butang sisi tetikus untuk maju / undur, supaya anda boleh bertukar pantas antara tahap direktori.
+* **Bar laluan lanjutan**: Menyokong gelongsor roda tetikus, pertukaran drop-down direktori setara, paparan laluan, dan lompatan jejakan asal.
+* **Carian seluruh pemacu dipertingkat**: Menyokong carian mengikut nama fail dan laluan fail, menandakan bahagian kata kunci yang sepadan dengan warna merah, dan mengutamakan paparan kandungan berhampiran kata kunci untuk nama fail panjang.
+* **Keutamaan pelayaran**: Menyokong keutamaan susunan, keutamaan paparan, mengekalkan posisi pelayaran, Mod Media, Sembunyikan Teks Butang, lakaran kecil kulit media kabur, dan mod malam.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_ms.gif" width="1100" alt="Laluan">
 </p>
 
-> 📌 Folder lalai **My Pack** dilindungi oleh sistem rasmi, dan skrip tidak akan menjalankan operasi berisiko tinggi yang boleh menyebabkan pemadaman tersilap ke atasnya.
-
 ---
 
-### 📂 Pemprosesan Kelompok & Pengurusan Ruang
+### 📂 Pengurusan Kelompok dan Ruang
 
-* **Penamaan Semula Kelompok**: Menyokong **penggantian / pemadaman regex**, **penomboran episod**, **pemformatan** teks, **penamaan FC2 standard**, **pembuangan awalan iklan**, serta **pembaikan sambungan pintar** berdasarkan MIME.
+* **Ubah Nama Kelompok**: Menyokong ganti / padam dengan regex, nombor siri episod, pemformatan teks, penamaan piawai FC2, pembuangan prefiks iklan, serta pembaikan sambungan pintar berasaskan MIME.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/rename/rename_ms.gif" width="550" alt="Penamaan Semula Kelompok">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/rename/rename_ms.gif" width="550" alt="Ubah Nama Kelompok">
 </p>
 
-* **Analisis fail**: Menggabungkan penapisan dan semakan pendua; semakan pendua menyokong tiga mod analisis: **hash / tempoh / nama**.
+* **Analisis fail**: Menggabungkan penapisan fail dan keupayaan Semak Pendua Fail. Semakan pendua menyokong tiga jenis analisis: **hash Padanan Tepat / Tempoh Serupa video / Nama Serupa**.
+* **Penapisan dipertingkat**: Menyokong penapisan mengikut saiz, jenis, laluan, kata kunci dan syarat lain, serta menyediakan bantuan kelompok seperti Tanda Sekali Klik, Songsang Pilihan, dan Pilih mengikut Folder.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_scan/file_scan_ms.gif" alt="Tinjauan Fail">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_dup/file_dup_ms.gif" alt="Semak Pendua Fail">
 </p>
 
-* **Analisis folder**: Menggabungkan penapisan dan semakan pendua; semakan pendua menyokong tiga mod analisis: **nama / keserupaan / kadar liputan**.
+* **Analisis folder**: Menggabungkan Tinjauan Folder dan Semak Pendua Folder. Semakan pendua menyokong tiga mod analisis: **nama / keserupaan / kadar liputan**, sesuai untuk mengendalikan episod pendua, pek gambar, direktori bahan dan sebagainya.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder_scan/folder_scan_ms.gif" alt="Tinjauan Folder">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder_dup/folder_dup_ms.gif" alt="Semak Pendua Folder">
 </p>
 
-* **Eksport direktori**: Menyokong eksport senarai **pokok direktori** bagi direktori semasa.
+* **Eksport Direktori**: Menyokong eksport direktori semasa sebagai pokok direktori atau senarai direktori, memudahkan pengarkiban, semakan dan perkongsian struktur fail.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_ms.png" width="350" alt="Eksport Direktori">
 </p>
 
-* **Pengemasan pintar**: Menyokong **padam kekal** (melangkau tong kitar semula), pembersihan folder kosong dengan satu klik, nyahmampat kelompok, serta logik **ingatan kata laluan automatik** dan **isian pintar**.
+* **Penyusunan pintar**: Menyokong padam kekal, pembersihan folder kosong, Nyahmampat, dan pembersihan automatik untuk fail yang sudah dinyahmampat.
+* **Senarai Pembersihan**: Menyokong senarai sumber tersuai yang boleh digunakan sebagai senarai hitam untuk pembersihan, atau sebagai senarai perlindungan yang melangkau item sepadan secara automatik semasa padam kelompok.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/archive/archive_ms.png" width="250" alt="Vault Kata Laluan">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/manager/manager_ms.gif" width="550" alt="Senarai Pembersihan">
 </p>
 
-* **Pengurus Sumber**: Menyokong **senarai hitam fail** tersuai untuk membersihkan sumber sampah dengan satu klik; juga boleh digunakan sebagai **senarai putih fail** untuk melindungi item yang dipadankan secara automatik semasa pemadaman kelompok.
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/manager/manager_ms.gif" width="550" alt="Pengurus Sumber">
-</p>
-
-> ⚠️ Untuk mengelakkan konflik penyegerakan data, semasa menjalankan operasi berat seperti analisis, pengemasan atau pemadaman kelompok, tidak disyorkan untuk mengubah kumpulan fail yang sama dari klien lain pada masa yang sama.
+> ⚠️ Semasa menjalankan operasi berat seperti analisis, penyusunan, padam kelompok, pindah kelompok atau Nyahmampat, tidak disarankan mengubah kumpulan fail yang sama daripada klien lain pada masa yang sama bagi mengelakkan konflik penyegerakan.
 
 ---
 
-### 🌐 Pusat Pemindahan & Perkongsian
+### 🌐 Pemindahan, Muat Turun Awan dan Hurai Perkongsian
 
-* **Pengurusan perkongsian**: Menyokong penetapan had bilangan ambilan; selepas had dicapai, perkongsian akan dibatalkan secara automatik dan pautan menjadi tidak sah.
-* **Muat Naik Turbo**: Menyokong seret fail / folder tempatan terus ke halaman web untuk dimuat naik, serta mengoptimumkan kadar gangguan dan pengalaman pemindahan keseluruhan dalam senario banyak fail kecil.
-* **Peningkatan Muat Turun Awan**: Menyokong **pembuangan pendua automatik** untuk pautan luar talian kelompok; enjin **pembersih magnet pintar** terbina dalam boleh mengekstrak hash Base32 / Hex secara automatik dan membuang teks gangguan.
-* **Torrent & sandaran**: Menyokong penghuraian fail torrent **.torrent**; untuk sebahagian pautan terhad, turut menyediakan **penyelesaian sandaran petikan halaman web**.
+* **Tinjauan Fail Perkongsian**: Menyokong imbasan dan penapisan rekursif pada kandungan perkongsian, memudahkan pratonton struktur dalaman perkongsian sebelum menyimpan.
+* **Pengurusan perkongsian**: Menyokong tetapan had jumlah ekstraksi perkongsian. Selepas syarat dicapai, perkongsian boleh dibatalkan secara automatik supaya pautan menjadi tidak sah.
+* **Perlindungan muat naik**: Menyertakan peringatan keluar semasa muat naik, serta perlindungan dan pembersihan untuk muat naik terganggu, tugas tertinggal, dan fail tidak normal.
+* **Peningkatan muat turun awan**: Menyokong nyahpenduaan automatik untuk pautan luar talian kelompok. Pembersihan magnet pintar terbina dalam boleh mengekstrak hash Base32 / Hex dan membuang teks gangguan.
+* **Pratonton magnet**: Jika kandungan magnet mempunyai beberapa gambar pratonton, pratonton berbilang gambar disokong.
+* **Sandaran torrent dan snapshot**: Menyokong penghuraian fail `.torrent`. Untuk sesetengah pautan yang medianya tidak dapat dikumpulkan secara langsung, penyelesaian simpanan snapshot web disediakan sebagai sandaran.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_ms.png" height="320" alt="Magnet">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_ms.gif" height="320" alt="Perkongsian">
 </p>
 
-> ⚠️ Fungsi sekatan automatik bagi had bilangan ambilan hanya berfungsi apabila halaman web kekal dibuka dan peranti tidak berada dalam mod tidur.
+> ⚠️ Pintasan automatik untuk had jumlah ekstraksi perkongsian hanya berkesan apabila halaman web kekal terbuka dan peranti tidak tidur. 
 
 ---
 
 ### 🎬 Peningkatan Media Imersif
 
-* **Enjin pemain**: Menyokong **kelajuan 0.5x - 3.0x**, putaran dan pembalikan, nisbah paksa, melangkau intro / outro secara automatik, mod **main berterusan / ulang**, serta **pratonton lakaran kecil** pada bar kemajuan.
-* **Fallback keserasian**: Dilengkapi watchdog dan logik keserasian terbina dalam. Apabila berlaku skrin hitam, resolusi tidak tersedia atau anomali keserasian codec, ia boleh fallback secara automatik ke kualiti yang boleh dimainkan.
-* **Sistem sari kata**: Menyokong **muat sari kata awan dengan nama sama**, **import fail sari kata tempatan** dan **carian sari kata dalam talian**; turut menyokong anjakan masa sari kata hingga ke aras milisaat, penukaran kedudukan, pelarasan saiz dan pemasangan teks tempatan melalui seret dan lepas.
-* **Bantuan visual**: Menyokong **carian imej melalui imej** berdasarkan gambar atau bingkai semasa video, bagi memudahkan semakan semula kulit hadapan, pelakon, anime atau sumber bahan.
-* **Mod media**: Boleh diaktifkan dalam tetapan supaya direktori siri / komik diprioritikan dalam susunan nama **A-Z**, menjadikan pengalaman melayari lebih berterusan.
+* **Peningkatan enjin main**: Menyokong kelajuan 0.5x - 3.0x, putar dan flip, nisbah paksa, langkau intro/outro automatik, main berterusan / gelung, dan pratonton lakaran kecil pada bar kemajuan.
+* **Sistem sari kata**: Menyokong pemuatan sari kata awan dengan nama sama, import sari kata tempatan, dan carian sari kata dalam talian. Juga menyokong pelarasan offset masa sari kata, posisi sari kata, saiz fon, dan ketelusan latar.
+* **Bantuan visual**: Menyokong carian imej daripada gambar atau bingkai video semasa, memudahkan semakan balik kulit, pelakon, anime atau sumber bahan.
+* **Mod Media**: Boleh diaktifkan dalam tetapan supaya direktori yang hanya mengandungi video atau hanya mengandungi gambar disusun secara lalai mengikut nama A-Z, meningkatkan kesinambungan pelayaran episod / komik.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/video/video_ms.gif" alt="Video">
@@ -117,260 +107,268 @@
 
 ---
 
-### ⚡ Muat Turun & Pengedaran
+### ⚡ Muat Turun, Main Luaran dan Pengedaran
 
-* **Pautan terus luaran**: Menyokong mendapatkan pautan terus aliran video dengan satu klik, atau melancarkan **PotPlayer** untuk main balik luaran.
-* **Pengedaran RPC**: Menyokong penghantaran fail melalui protokol RPC ke nod muat turun seperti **Aria2 / Motrix** dengan satu klik.
-* **Pemulihan struktur direktori**: Apabila menghantar seluruh folder, struktur **pokok direktori** dalam storan awan boleh dipulihkan secara automatik untuk mengelakkan direktori menjadi rata selepas dimuat turun.
-* **Peningkatan pengedaran**: Menyokong pemantauan status sambungan panjang, eksport automatik senarai ralat selepas kegagalan, dan turut menyokong **penapisan muat turun folder**.
+* **Pembantu baiki protokol PotPlayer**: Menyertakan pengesanan dan bantuan pembaikan protokol PotPlayer untuk mengurangkan masalah pelayar yang tidak dapat memanggil pemain luaran.
+* **Pengedaran RPC**: Menyokong penghantaran fail melalui protokol RPC ke nod muat turun seperti Aria2 / Motrix.
+* **Pemulihan struktur direktori**: Semasa menghantar seluruh folder, struktur direktori pokok dalam pemacu awan boleh dipulihkan secara automatik agar direktori tidak menjadi rata selepas dimuat turun.
+* **Tapis Muat Turun**: Menyokong penapisan fail mengikut saiz fail, sambungan, dan kata kunci nama, digunakan pada muat turun pelayar dan push Aria2 / Motrix.
+* **Domain pecutan pautan terus muat turun**: Menyokong domain pecutan muat turun tersuai, dengan dua mod tulis semula proksi songsang: prefiks pautan asal lengkap dan penghantaran parameter URL.
+* **Pengendalian pengecualian**: Melangkau fail tidak sah 0KB secara automatik semasa push, dan menyokong eksport senarai kegagalan.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_ms.png" height="290" alt="Penapisan Muat Turun">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_ms.png" height="290" alt="Tapis Muat Turun">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_ms.gif" height="290" alt="Aria2">
 </p>
 
 ---
 
-### ⚙️ Konfigurasi & Pengurusan Data
+### ⚙️ Konfigurasi dan Pengurusan Data
 
-* **Sandaran konfigurasi**: Menyokong eksport tetapan keutamaan, peraturan pengurusan, vault kata laluan dan lain-lain ke fail sandaran JSON dengan cap jari digital.
-* **Import pintar**: Menyokong **gabung dan buang pendua secara pintar** semasa import, bagi mengelakkan kehilangan peraturan lama akibat penindihan terus.
-* **Pembersihan data**: Menyokong pembersihan **indeks seluruh cakera**, **tetapan keutamaan**, **peraturan pengurusan**, **vault kata laluan** dan **cache** mengikut keperluan untuk mengosongkan ruang tempatan dan meningkatkan privasi.
-* **Vault kata laluan**: Pengurusan terpusat bagi kata laluan nyahmampat yang kerap digunakan, untuk panggilan automatik dan isian pantas semasa nyahmampat kelompok.
-* **Pemindahan data**: Menyokong pembungkusan terenkripsi bagi item terpilih, dan boleh dikenal pasti serta diambil alih secara automatik selepas log masuk ke akaun lain, bagi merealisasikan **pemindahan lancar merentas akaun**.
+* **Sandaran konfigurasi**: Menyokong eksport keutamaan, peraturan pengurusan, Bilik Simpanan Kata Sandi, rekod sejarah, dan sebahagian konfigurasi ciri sebagai fail sandaran JSON dengan pengesahan cap jari.
+* **Import pintar**: Semasa import, data berbentuk senarai seperti senarai dan rekod akan digabung serta dinyahpendua. Item tetapan asas dikemas kini mengikut fail import.
+* **Pembersihan data tempatan**: Menyokong pembersihan indeks seluruh pemacu, keutamaan, peraturan pengurusan, Bilik Simpanan Kata Sandi, cache video, dan cache jalan mengikut kategori.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/cache/cache_ms.png" width="350" alt="Cache">
 </p>
 
+* **Bilik Simpanan Kata Sandi**: Mengurus kata laluan nyahmampat yang kerap digunakan secara berpusat untuk percubaan automatik Nyahmampat dan pengisian pantas.
+
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/migrate/migrate_ms.gif" alt="Pemindahan Data">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/archive/archive_ms.png" width="250" alt="Bilik Simpanan Kata Sandi">
 </p>
 
-> 📌 Indeks seluruh cakera akan dikosongkan selepas halaman web ditutup; manakala tetapan keutamaan, peraturan pengurusan, vault kata laluan dan data lain akan disimpan secara berterusan dalam persekitaran skrip tempatan.
+* **Migrasi Data berbilang akaun**: Menyokong penyulitan dan pembungkusan item terpilih, kemudian dikenal pasti dan diambil alih secara automatik selepas akaun lain log masuk, membolehkan pemindahan merentas akaun.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/migrate/migrate_ms.gif" alt="Migrasi Data">
+</p>
+
+> 📌 Keutamaan, peraturan pengurusan, Bilik Simpanan Kata Sandi, cache dan data sejarah semuanya disimpan dalam persekitaran tempatan.
 
 ---
 
-## 💻 Penjelasan Keserasian (Compatibility)
+## 📥 Panduan Pemasangan
 
-* **Pelayar disyorkan**: Chrome / Edge (versi terkini)
-* **Pengurus skrip paling disyorkan**: Violentmonkey (teruji lebih lancar dalam senario skrol, muat naik dan senarai besar)
-* **Pengurus skrip serasi**: Tampermonkey
-* **Platform yang disokong**: PikPak Web
-* *Nota: Safari / Firefox dan pengurus skrip lain belum diuji sepenuhnya secara mendalam. Disyorkan menggunakan persekitaran di atas untuk pengalaman terbaik.*
-
----
-
-## 📥 Panduan Pemasangan (Installation)
-
-1. **Pasang pengurus skrip**: Disyorkan untuk memasang [Violentmonkey](https://violentmonkey.github.io/get-it/) terlebih dahulu; [Tampermonkey](https://www.tampermonkey.net/) juga boleh digunakan.
+1. **Pasang pengurus skrip**: Disarankan memasang [Violentmonkey](https://violentmonkey.github.io/get-it/) terlebih dahulu, atau gunakan [Tampermonkey](https://www.tampermonkey.net/).
 2. **Pasang skrip**: Klik **[Pasang Sekarang](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**.
 3. **Buka PikPak Web**: Lawati [PikPak](https://mypikpak.com/drive) dan log masuk ke akaun anda.
 4. **Lancarkan Enhancement Master**:
-   * Dalam mod biasa: selepas log masuk, klik **bola logo PikPak** biru terapung di bar sisi untuk masuk.
-   * Dalam Mod Turbo: selepas log masuk, skrip boleh diaktifkan secara automatik untuk mengambil alih halaman web.
+   * Dalam mod biasa: selepas log masuk, klik **bola PikPak Logo** biru yang terapung di sidebar.
+   * Dalam Mod Turbo: selepas log masuk, skrip boleh dihidupkan secara automatik dan mengambil alih klien web.
 
 ---
 
-## ❓ Soalan Lazim (FAQ)
+## ❓ Soalan Lazim
 
-**S: Mengapa selepas memasang skrip, bola terapung biru tidak muncul?**  
-**J: Sila semak mengikut urutan berikut:**
+**Q: Mengapa bola terapung biru tidak dipaparkan selepas skrip dipasang?**  
+**A:** Sila semak mengikut turutan berikut:
 
-1. Pastikan **PikPak Enhancement Master** berada dalam keadaan aktif di pengurus skrip.
-2. Pastikan anda telah log masuk ke akaun PikPak Web.
-3. Jika menggunakan **Tampermonkey**, pastikan **“Allow user scripts”** telah diaktifkan pada halaman butiran sambungan pelayar.
-4. Disyorkan menggunakan pelayar **Edge / Chrome** versi terkini.
-5. Jika bola terapung masih tidak muncul selepas semua langkah di atas, nyahaktifkan sementara semua sambungan pelayar lain, kemudian segarkan halaman (F5) dan cuba semula.
+1. Pastikan **PikPak Enhancement Master** berada dalam keadaan aktif dalam pengurus skrip.
+2. Pastikan anda sudah log masuk ke akaun PikPak Web.
+3. Jika menggunakan **Tampermonkey**, pastikan **"Allow user scripts"** pada halaman butiran sambungan pelayar telah ditanda.
+4. Disarankan menggunakan pelayar **Edge / Chrome** versi terkini.
+5. Jika bola terapung masih tidak dipaparkan selepas langkah di atas selesai, nyahaktifkan sementara semua sambungan pelayar lain, kemudian segar semula halaman (F5) dan cuba lagi.
 
-**S: Apakah itu “Mod Turbo”, dan mengapa disyorkan untuk diaktifkan?**  
-**J:** Selepas diaktifkan, skrip akan mengambil alih logik halaman web asli secara mendalam dan menutup keseluruhan antaramuka utama secara skrin penuh. Mod ini akan secara aktif menyekat proses penyegerakan asal yang menggunakan memori tinggi, lalu meningkatkan dengan ketara kelancaran, kestabilan dan kelajuan muatan dalam senario fail yang sangat banyak.  
-**Perhatian:** Selepas Mod Turbo diaktifkan, butang minimum dan tutup akan disembunyikan secara automatik; jika anda mahu kembali ke halaman asal, nyahaktifkan pilihan ini di tetapan.  
-**Cadangan:** Jika storan awan anda mempunyai banyak fail, sangat disyorkan untuk mengaktifkannya.
+**Q: Kembali ke tahap sebelumnya dalam folder berbilang lapisan agak menyusahkan. Adakah saya mesti masuk semula dari halaman utama?**  
+**A:** Tidak perlu. Semua halaman dalam skrip yang mempunyai bar laluan menyokong **tatal mendatar dengan roda tetikus**.
 
-**S: Mengapa My Pack di halaman utama memaparkan label “Lalai”, dan tidak boleh dibintangkan, disalin, dipindahkan, dinamakan semula atau dipadam?**  
-**J:** Ini ialah mekanisme perlindungan keselamatan rasmi PikPak untuk direktori lalai. Skrip mengekalkan lapisan perlindungan ini, tetapi pada masa yang sama telah membuka sekatan perkongsian untuk folder lalai **My Pack**.
+Apabila tahap direktori agak dalam dan laluan folder induk di hadapan disembunyikan, gerakkan tetikus ke kawasan bar laluan bahagian atas, kemudian tatal roda tetikus. Bar laluan akan menatal secara mendatar dan memaparkan laluan induk yang tersembunyi.
 
-**S: Apakah perbezaan asas antara “Semak Pendua Fail” dan “Semak Pendua Folder”? Bagaimana saya patut memilih ketika penggunaan sebenar?**  
-**J:**  
-**Semak Pendua Fail:** Ditujukan kepada tahap **fail tunggal**, menggunakan algoritma tiga mod iaitu **padanan hash tepat, keserupaan tempoh video dan keserupaan nama**, sesuai untuk membersihkan fail pendua yang bertaburan seperti video episod tunggal, gambar individu atau arkib berasingan.  
+Selepas dipaparkan, klik terus nama folder induk yang sepadan untuk kembali pantas ke tahap sebelumnya, atau lompat ke mana-mana direktori induk.
 
-**Semak Pendua Folder:** Ditujukan kepada tahap **struktur keseluruhan folder**, menggunakan tiga mod iaitu **padanan nama, tahap pertindihan fail dalaman (keserupaan) dan redundansi subset (kadar liputan)**. Ia lebih sesuai untuk membersihkan siri drama lengkap, set gambar penuh atau direktori bahan berlapis-lapis yang disimpan berulang kali. Walaupun nama dua folder berbeza, jika kandungan dalamannya sangat serupa atau mempunyai hubungan liputan yang jelas, ia tetap boleh dikenal pasti.
+**Q: Semasa Semak Pendua Fail / Semak Pendua Folder, adakah fail yang ditanda akan menyimpan satu fail asal secara automatik, atau saya perlu tapis lagi dalam senarai?**  
+**A:** Item yang ditanda dalam Semak Pendua Fail dan Semak Pendua Folder pada asasnya ialah **item operasi sebenar**. Mod semakan pendua tidak memadam fail secara langsung; ia hanya menyenaraikan item yang mungkin pendua. Anda perlu mengesahkan dan menandanya, kemudian klik padam sebelum pembersihan sebenar dilakukan.
 
-> **Cadangan:**  
-> “Semakan tepat” dalam semakan pendua fail ialah padanan hash, dan hasilnya paling boleh dipercayai, jadi biasanya selamat untuk dipilih dan dipadam secara kelompok.  
-> Bagi “padanan tempoh”, “padanan nama”, serta tiga mod dalam semakan pendua folder, semuanya pada asasnya ialah padanan keserupaan. Disyorkan supaya disemak secara manual dahulu sebelum pemadaman kelompok untuk mengelakkan pemadaman tersilap.
+Dalam hasil semakan pendua:
 
-**S: Mengapa fail pendua yang dikesan dalam semakan pendua fail semakin banyak? Adakah indeks seluruh cakera kehilangan data?**  
-**J:** Bukan kehilangan data indeks, dan bukan juga ralat data. Jumlah dalam bahagian “padanan tepat” biasanya stabil. Sebab hasil semakin banyak ialah kerana padanan keserupaan berasaskan **tempoh video** semakin lengkap dari semasa ke semasa.  
+* Kotak tanda pada pengepala setiap kumpulan bermaksud memilih seluruh kumpulan tersebut;
+* Susunan dalam kumpulan hanya menyusun semula paparan mengikut masa, saiz, laluan, nama dan peraturan lain. Ia tidak menentukan secara automatik apa yang dipadam dan apa yang disimpan;
+* Hanya apabila anda mengklik **Tanda Sekali Klik**, skrip akan memproses secara automatik mengikut peraturan: setiap kumpulan menyimpan 1 item, manakala item lain ditanda.
 
-Sebahagian API asal PikPak tidak terus memulangkan tempoh video, jadi banyak video pendua akan dilangkau buat sementara waktu semasa analisis pertama kerana kekurangan maklumat tempoh. Untuk menyelesaikan masalah ini, skrip mempunyai mekanisme sniffing asinkron di latar belakang yang akan membaca metadata video secara automatik, melengkapkan tempoh yang tepat, dan menyimpannya secara berterusan dalam pelayar tempatan. Semakin lama anda menggunakannya, pangkalan data tempoh tempatan akan menjadi semakin lengkap, maka enjin semakan pendua boleh mengenal pasti lebih banyak sumber pendua tersembunyi yang “berbeza nama tetapi mempunyai tempoh kandungan yang sama”.
+Selain itu, **Pilih mengikut Folder** dalam Semak Pendua Fail akan menanda fail dalam folder tertentu pada senarai pendua; **Songsang Pilihan** pula menanda fail dalam senarai pendua selain folder tersebut.
 
-**S: Mengapa “carian imej melalui imej” kadangkala tidak boleh terus memuat naik imej, sebaliknya meminta saya tampal?**  
-**J:** Ini disebabkan oleh sekatan keselamatan pelayar, terutamanya **sekatan CORS lintas domain**. Apabila skrip tidak dapat menghantar imej daripada storan awan terus ke perkhidmatan carian imej sasaran, ia akan menyalin tangkapan skrin semasa ke papan klip anda secara automatik. Pada ketika itu, anda hanya perlu tekan `Ctrl + V` pada halaman carian yang dibuka.
+Perlu diperhatikan bahawa **Padanan Tepat** dalam Semak Pendua Fail menggunakan padanan hash, jadi biasanya lebih sesuai digunakan bersama Tanda Sekali Klik untuk pembersihan. Manakala **Tempoh Serupa / Nama Serupa** dalam Semak Pendua Fail, serta Semak Pendua Folder, semuanya ialah padanan algoritma keserupaan. Disarankan membuat pengesahan manual sebelum memadam bagi mengelakkan salah padam.
 
-**S: Mengapa semasa memainkan video melalui skrip, hanya ada bunyi tetapi tiada gambar?**  
-**J:** Ini biasanya berlaku kerana video tersebut ialah aliran media **m3u8 berbilang trek audio / trek**. Selepas transcoding di awan, trek suara dan gambar mungkin berpisah, dan pemain web semasa tidak menyokong analisis lengkap untuk aliran khas sebegini.  
-Dalam keadaan ini, disyorkan untuk klik butang **“Main Luar”** di penjuru kanan bawah dan gunakan pemain tempatan profesional seperti PotPlayer.
+**Q: Mengapa "Padanan Tepat" skrip mengatakan tiada fail pendua, tetapi dalam klien saya boleh nampak fail pendua? Segar semula halaman atau tukar pelayar pun tidak dapat mengimbasnya, apa yang perlu dibuat?**  
+**A:** "Padanan Tepat" dalam skrip menilai berdasarkan **hash kandungan fail**, bukan berdasarkan nama fail. Hanya apabila nilai hash fail dan saiz fail sama, barulah ia dianggap pendua tepat.
 
-**S: Apakah perbezaan antara “Asal (Laju)” dan “Asal” dalam menu resolusi?**  
-**J:** Kedua-duanya hampir tiada perbezaan dari segi kualiti gambar. Perbezaan utamanya terletak pada laluan penghantaran dasar dan strategi penyahkodan.  
-Antaranya, “**Asal (Laju)**” menggunakan laluan rasmi yang dioptimumkan untuk penstriman, dan biasanya memberikan pemuatan lebih pantas, seretan lebih lancar dan respons lebih stabil apabila digunakan dalam PotPlayer atau pemain luaran lain.  
-**Cadangan:** Sama ada main balik di web atau penstriman luaran, biasanya utamakan “Asal (Laju)”.
+"Fail pendua" yang dipaparkan oleh klien tidak semestinya fail dengan kandungan yang benar-benar sama. Ia mungkin merangkumi fail bernama sama, fail dengan akhiran nama `(1)` / `(2)`, atau fail dengan saiz dan tempoh yang agak hampir. Selagi kandungan sebenar fail tersebut berbeza, "Padanan Tepat" skrip tidak akan mengelaskannya sebagai pendua.
 
-**S: Mengapa operasi yang baru saya lakukan dalam aplikasi telefon atau laman web rasmi (seperti muat naik, padam, pindah) tidak disegerakkan secara masa nyata dalam senarai analisis atau pendua skrip?**  
-**J:** Ini ialah strategi reka bentuk yang digunakan skrip untuk menjamin kelajuan carian, analisis dan penapisan. Bagi mengelakkan penarikan semula puluhan ribu maklumat fail setiap kali operasi dilakukan, skrip banyak menggunakan snapshot memori tempatan dan cache indeks.  
-Jika anda baru sahaja membuat banyak perubahan dalam aplikasi telefon atau laman web rasmi, disyorkan untuk segarkan halaman bagi mendapatkan semula indeks seluruh cakera.  
-**Cadangan:** Semasa skrip menjalankan analisis, semakan pendua atau pengemasan, cuba elakkan mengubah kumpulan data yang sama di berbilang klien serentak.
+Jika anda mahu mencari fail yang "kelihatan pendua" seperti ini, gunakan mod **Nama Serupa** dalam Semak Pendua Fail atau Semak Pendua Folder.
 
-**S: Semasa nyahmampat kelompok, bolehkah saya menetapkan kata laluan berbeza untuk beberapa fail sekali gus?**  
-**J:** Ya. Nyahmampat kelompok dalam skrip menggunakan mekanisme **padanan pintar vault kata laluan**: selagi anda menyimpan kata laluan yang diketahui dalam vault kata laluan terlebih dahulu, skrip akan mencuba semua kata laluan di dalam vault untuk setiap arkib. Sebaik sahaja padanan berjaya, proses nyahmampat akan bermula secara automatik tanpa perlu anda memasukkan satu demi satu.
+**Q: Mengapa sesetengah video memaparkan tidak dapat dimainkan ketika pertama kali dibuka atau ketika menukar kejelasan, tetapi boleh dimainkan semula selepas beberapa ketika?**  
+**A:** Keadaan ini biasanya berkaitan dengan status penyediaan strim video rasmi PikPak atau status penyahkodan pelayar, dan tidak semestinya ralat penilaian skrip itu sendiri.
 
-**S: Mengapa semasa nyahmampat kelompok muncul mesej “sistem sibuk / menunggu cuba semula”? Adakah skrip rosak?**  
-**J:** Tidak. Ini biasanya berlaku kerana pelayan awan PikPak telah mencetuskan had kekerapan serentak, iaitu antaramuka rasmi sedang sibuk dan bukannya skrip mengalami ralat.  
-Jika sesuatu fail masih gagal selepas beberapa percubaan semula, biasanya ini bermaksud sumber di awan mungkin rosak, terhad, atau keadaan pelayan semasa tidak baik. Disyorkan cuba lagi kemudian atau muat turun fail ke tempatan untuk diproses.
+Sesetengah video pada web rasmi juga mungkin gagal dibuka kali pertama, gagal sebentar semasa menukar kejelasan, kemudian boleh dimainkan selepas dibuka semula. Ralat lapisan bawah yang diterima oleh skrip biasanya seperti:
 
-**S: Apakah maklumat yang terkandung dalam JSON konfigurasi yang dieksport?**  
-**J:** Fail JSON yang dieksport hanya mengandungi data konfigurasi tempatan anda dalam Enhancement Master, seperti keutamaan semakan pendua, peraturan senarai hitam / putih, vault kata laluan, sebahagian rekod sejarah dan tetapan fungsi lain.  
-Ia **tidak mengandungi** kata laluan akaun PikPak anda, jadi ia selamat digunakan untuk sandaran dan pemindahan merentas peranti.
+```text
+[VideoError] Code: 4, Msg: PipelineStatus::DEMUXER_ERROR_COULD_NOT_OPEN: FFmpegDemuxer: open context failed
+```
 
-**S: Adakah import sandaran akan menimpa konfigurasi atau senarai saya yang sedia ada?**  
-**J:** Secara umum, tidak. Skrip telah dinaik taraf kepada logik **gabung pintar**: semasa import, data jenis senarai seperti Pengurus Sumber dan sejarah akan digabung serta dibuang pendua terlebih dahulu, dan bukan terus menindih kandungan tempatan.  
-Hanya sebilangan kecil tetapan asas seperti enjin carian imej atau alamat Aria2 akan mengikut nilai dalam fail import, jadi senarai dan rekod tempatan yang anda kumpul lama biasanya tidak akan hilang.
+Ralat ini tidak dapat membezakan secara stabil sama ada "sumber rasmi masih sedang disediakan" atau "kejelasan semasa memang tidak boleh dimainkan". Jika skrip memaksanya sebagai "sedang disediakan" dan terus mencuba semula, video yang benar-benar tidak dapat dimainkan juga mungkin tersilap dianggap boleh dimainkan, lalu menghasilkan pengalaman yang lebih buruk.
 
-**S: Mengapa semasa memadam fail secara kelompok, sesetengah fail dipaparkan sebagai dilindungi atau tidak boleh dipadam?**  
-**J:** Sila periksa dahulu sama ada fail tersebut telah direkodkan dalam **Pengurus Sumber**. Jika anda telah mengaktifkan pilihan “langkau sumber yang direkod dalam Pengurus Sumber semasa pemadaman”, skrip akan menganggap fail yang dipadankan sebagai item terlindung bagi mengelakkan pemadaman tersilap.  
-**Cara menyelesaikan:**  
-1. Nyahaktifkan peraturan perlindungan itu dalam tetapan, kemudian jalankan pemadaman semula;  
-2. Atau klik pintu masuk **“Pengurus Sumber”** pada bar alat / bar sisi, kemudian pilih **“Bersihkan Sekarang”** untuk melakukan pembersihan fizikal paksa ke atas item yang direkodkan.
+Oleh itu, skrip buat masa ini mengekalkan prompt "kejelasan semasa tidak tersedia" untuk mengelakkan pengguna tersalah faham.
 
-**S: Mengapa selepas saya menjalankan operasi “Tampal”, fail tidak muncul dalam senarai?**  
-**J:** Sila periksa dahulu sama ada baki ruang storan awan anda mencukupi. PikPak pada masa ini sering menggunakan strategi **sekatan senyap** apabila ruang tidak mencukupi, iaitu apabila kapasiti melebihi had, ia tidak semestinya memaparkan amaran yang jelas, sebaliknya terus menghentikan operasi di latar belakang.  
-Oleh itu, jika fail tidak muncul selepas operasi tampal, punca yang paling lazim ialah had kapasiti telah dicetuskan. Disyorkan kosongkan ruang dahulu, kemudian cuba semula.
+Apabila menghadapi keadaan ini, anda boleh cuba:
 
-**S: Apakah fungsi “automatik baiki magnet anti-sekatan” dalam tetingkap muat turun awan? Bilakah ia disyorkan untuk diaktifkan?**  
-**J:** Fungsi ini akan membersihkan kandungan gangguan yang tidak berkaitan seperti aksara Cina, emoji atau simbol yang diselitkan dalam pautan magnet, dan mengekstrak kod ciri secara pintar untuk memulihkan pautan kepada format standard.  
-**Cadangan:** Kekalkan ia aktif secara lalai. Ia amat sesuai untuk memproses pautan magnet dari media sosial, forum atau aplikasi sembang yang telah dicemari dengan teks tambahan, dipotong bahagian kepala, atau disengajakan tercemar.  
-Bagi pautan magnet standard yang sudah bermula dengan `magnet:?`, skrip akan melangkau proses pembaikan secara automatik dan tidak menjejaskan muat turun biasa.
+* Tunggu beberapa saat kemudian buka semula video;
+* Tukar ke kejelasan lain;
+* Cuba main menggunakan pemain luaran.
 
-**S: Apakah itu “penapisan muat turun folder”? Kaedah muat turun mana yang akan terjejas?**  
-**J:** Fungsi ini digunakan untuk **mengecualikan fail yang sepadan secara automatik mengikut sambungan atau peraturan nama** semasa memuat turun seluruh folder. Sebagai contoh, anda boleh mengecualikan `.txt`, `.jpg`, atau fail yang mengandungi kata kunci tertentu dalam nama. Ia bukan sahaja berfungsi untuk muat turun folder biasa, malah juga dalam senario penghantaran folder ke **Aria2 / Motrix**.
+Jika kemudian hari medan status rasmi yang lebih boleh dipercayai ditemui, isu salah pengesanan seperti ini boleh terus dioptimumkan.
 
-**S: Adakah struktur hierarki folder akan dikekalkan apabila menggunakan Aria2 / Motrix atau muat turun pelayar untuk memuat turun folder dari storan awan?**  
-**J:**  
-**Aria2 / Motrix: Struktur akan dikekalkan.**  
-Skrip akan mengklon dan memulihkan struktur pokok direktori dalam storan awan secara automatik semasa proses penghantaran. Selepas muat turun selesai, hierarki folder pada cakera tempatan akan dikekalkan sedekat mungkin dengan storan awan. Pada masa yang sama, skrip juga akan membersihkan aksara khas yang tidak disokong Windows seperti `:` `*` `?` dan cuba memendekkan laluan yang terlalu panjang untuk mengurangkan kegagalan muat turun.  
+**Q: Semasa Nyahmampat muncul prompt "sistem sibuk / menunggu cuba semula", adakah ini Bug skrip?**  
+**A:** Bukan. Ini biasanya kerana pelayan awan PikPak mencetuskan had serentak atau kekerapan. Ia bermaksud antara muka rasmi sedang sibuk, bukan skrip itu sendiri tidak normal.
 
-**Muat turun asli pelayar: Struktur tidak akan dikekalkan.**  
-Disebabkan had protokol muat turun pelayar itu sendiri, fail dalam folder biasanya akan “diratakan” ke dalam satu direktori.  
+Jika fail tertentu masih gagal selepas beberapa kali cuba semula, biasanya sumber tersebut mungkin sudah rosak dalam awan, terhad, atau status pelayan semasa kurang baik. Disarankan cuba lagi kemudian, atau muat turun fail ke tempatan sebelum memprosesnya.
 
-**Cadangan:** Jika anda mahu mengekalkan struktur direktori yang kompleks sepenuhnya, utamakan **penghantaran muat turun Aria2 / Motrix**.
+**Q: Selepas padam kelompok dan pulihkan semula, bilangan fail normal, tetapi fail tidak kembali ke folder asal dan struktur direktori kelihatan bercelaru. Bolehkah dipulihkan sekali klik?**  
+**A:** Keadaan ini biasanya bukan kesilapan operasi dan bukan bermaksud logik skrip kehilangan fail. Ia lebih hampir kepada kelakuan tong kitar semula rasmi PikPak semasa memulihkan daripada **laluan maya / hasil agregat**.
 
-**S: Apakah itu “pemindahan data berbilang akaun”? Bagaimana cara menggunakannya?**  
-**J:** Fungsi ini membolehkan anda memindahkan fail atau folder dalam akaun semasa ke akaun PikPak anda yang lain dengan cepat dan lancar.  
-**Langkah penggunaan:**  
-1. Pilih fail atau folder yang ingin dipindahkan dalam akaun semasa;  
-2. Klik butang **“Pemindahan Data”** di bahagian bawah;  
-3. Skrip akan membungkus data secara terenkripsi dan log keluar daripada akaun semasa secara automatik;  
-4. Selepas itu, log masuk ke akaun sasaran seperti biasa;  
-5. Selepas log masuk berjaya, skrip akan mengesan pakej pemindahan dalam cache tempatan secara automatik dan memaparkan tetingkap untuk anda menerimanya dengan satu klik.
+Apabila fail dipadam secara kelompok daripada **paparan agregat atau laluan maya** seperti Semak Pendua Fail, Tinjauan Fail, Tinjauan Folder, Terbaharu atau Kegemaran, fail tersebut mungkin berasal daripada beberapa folder asal yang berbeza. Selepas dipadam lalu dipulihkan daripada tong kitar semula, mekanisme pemulihan rasmi kadangkala tidak memulihkan setiap item ke direktori induk asalnya, sebaliknya mungkin memulihkan banyak fail ke satu direktori terpadu, menyebabkan struktur direktori berbilang lapisan asal rosak.
+
+Sebelum memadam secara kelompok daripada hasil agregat seperti Semak Pendua Fail, Tinjauan Fail, Tinjauan Folder, Terbaharu atau Kegemaran, pastikan dahulu fail tersebut memang tidak lagi diperlukan. Terutama apabila fail berasal daripada beberapa direktori berbeza, cuba elakkan bergantung pada pemulihan kelompok tong kitar semula selepas pemadaman.
+
+**Q: Mengapa sebahagian fail dipaparkan sebagai dilindungi atau tidak dapat dipadam semasa padam kelompok?**  
+**A:** Sila semak dahulu sama ada fail tersebut sudah direkodkan dalam **Senarai Pembersihan**. Jika anda mengaktifkan "Langkau item manager saat padam" dalam tetapan, skrip akan menganggap fail yang sepadan sebagai item dilindungi untuk mengelakkan salah padam.
+
+**Penyelesaian:**
+
+1. Pergi ke tetapan dan nyahpilih peraturan perlindungan tersebut, kemudian jalankan padam semula;
+2. Atau klik entri **"Senarai Pembersihan"** dalam toolbar / sidebar, pilih **"Bersihkan Sekarang"**, dan lakukan pembersihan fizikal paksa pada item yang direkodkan tersebut.
+
+**Q: Mengapa selepas saya menjalankan operasi "Tampal", fail tidak dipaparkan dalam senarai?**  
+**A:** Sila semak dahulu sama ada ruang baki pemacu awan anda mencukupi. PikPak rasmi buat masa ini biasanya menggunakan strategi **pintasan senyap** untuk "ruang tidak mencukupi", iaitu apabila kapasiti melebihi had, prompt jelas tidak semestinya dipaparkan, tetapi operasi terus dihentikan di latar belakang.
+
+Oleh itu, jika fail tidak muncul selepas tampal, sebab paling biasa ialah had kapasiti telah dicetuskan. Disarankan kosongkan ruang dahulu, kemudian cuba semula.
+
+**Q: Apakah itu "Migrasi Data berbilang akaun"? Bagaimana cara menggunakannya?**  
+**A:** Ciri ini boleh memindahkan fail atau folder dalam akaun semasa dengan cepat ke akaun PikPak anda yang lain.
+
+**Langkah operasi adalah seperti berikut:**
+
+1. Pilih fail atau folder yang ingin dimigrasikan dalam akaun semasa;
+2. Klik butang **"Migrasi Data"** di bahagian bawah;
+3. Skrip akan menyulitkan dan membungkus data secara automatik, kemudian log keluar daripada akaun semasa;
+4. Selepas itu, anda hanya perlu log masuk seperti biasa ke akaun sasaran;
+5. Selepas log masuk berjaya, skrip akan mengesan pakej migrasi dalam cache tempatan secara automatik dan memaparkan popup untuk menerima dengan sekali klik.
 
 ---
 
-## 🛡️ Pernyataan Privasi & Keselamatan (Privacy & Security)
+## 🛡️ Kenyataan Privasi dan Keselamatan
 
-* **Tempatan diutamakan**: Semua keupayaan teras skrip ini berinteraksi terus dengan API rasmi PikPak melalui pelayar. Token akaun, vault kata laluan serta sebahagian besar data konfigurasi tempatan anda disimpan dalam persekitaran pelayar tempatan secara lalai.
-* **Tiada pengumpulan**: Skrip ini **tidak akan mengumpul secara aktif** data privasi pengguna, dan **sama sekali tidak akan** memuat naik maklumat fail atau kelayakan akaun anda ke mana-mana pelayan pihak ketiga.
-* **Antaramuka pihak ketiga**: Hanya apabila menggunakan fungsi lanjutan seperti “carian sari kata dalam talian” atau “carian imej melalui imej”, skrip akan menghantar kata kunci carian atau parameter ciri imej yang diperlukan ke perkhidmatan awam berkaitan, tanpa melibatkan maklumat identiti peribadi anda.
+* **Tempatan dahulu**: Semua keupayaan teras skrip ini berinteraksi terus dengan API rasmi PikPak melalui pelayar. Token akaun, Bilik Simpanan Kata Sandi, dan kebanyakan data konfigurasi tempatan anda disimpan secara lalai dalam persekitaran pelayar tempatan.
+* **Sifar pengumpulan**: Skrip **tidak akan mengumpul** data privasi pengguna secara aktif, dan **tidak akan sekali-kali** memuat naik maklumat fail atau kelayakan akaun anda ke mana-mana pelayan pihak ketiga.
+* **Antara muka pihak ketiga**: Hanya apabila menggunakan ciri lanjutan seperti "carian sari kata dalam talian" atau "Cari dengan Imej", skrip akan menghantar kata kunci carian atau parameter ciri imej yang diperlukan kepada perkhidmatan awam berkaitan, tanpa melibatkan maklumat identiti peribadi anda.
 
 ---
 
 ## 🚀 Log Kemas Kini
 
+### V2.5.1
+
+* Menambah tetapan **Aria2 kekalkan struktur dalaman folder semasa memuat turun**.
+* Mengoptimumkan **Hurai Perkongsian Tinjauan Fail**, membaiki isu seperti status butang Folder di Atas yang tidak normal selepas kembali.
+* Membaiki kelakuan tidak normal suis skrip yang menyekat popup web rasmi.
+* Mengalih keluar logik lama yang memaksa antara muka skrip disembunyikan dalam tetingkap kecil, diganti dengan penyembunyian teks butang secara adaptif.
+
+<details>
+<summary>Lihat log kemas kini lama</summary>
+
 ### V2.5.0
-* Menambah **Mod Penghuraian Perkongsian**, menyokong penghuraian pautan perkongsian, pengecaman papan klip, imbasan insight rekursif, penyimpanan fail, pratonton media serta pratonton/nyahmampat arkib.
-* Menambah **tetapan domain pecutan pautan muat turun terus**, menyokong mod awalan dan mod parameter pertanyaan untuk menulis semula pautan muat turun pelayar serta tolakan Aria2 / Motrix.
-* Menambah **kawalan kelantangan pemain menggunakan roda tetikus**, menyokong paparan tindanan kelantangan dan status ikon senyap.
-* Mengoptimumkan **pemain skrin penuh web**, membetulkan masalah pergerakan ke atas yang tidak segerak dan gegaran pada senarai main, bar kawalan, bar kemajuan dan butang sisi.
-* Mengoptimumkan **penyesuaian skrin sempit dan penskalaan tetingkap**, menukar logik penskalaan lama kepada penyembunyian teks butang secara adaptif bagi memastikan teks jelas pada skrin kecil.
-* Mengoptimumkan **susunan grid sejarah main balik**, membetulkan masalah ikon dan teks butang susunan tidak dikemas kini serta-merta selepas memilih daripada dropdown.
-* Mengoptimumkan **serlahan kata kunci carian**, supaya nama fail panjang mengutamakan paparan kandungan berhampiran kata kunci yang dipadankan.
-* Mengoptimumkan **pratonton arkib**, menambah menu susunan dan dropdown laluan, serta menyokong nyahmampat sebahagian fail yang dipilih.
-* Mengoptimumkan **peringatan simpan tetapan**, supaya tiada peringatan dipaparkan apabila tiada perubahan, dan tetapan biasa tidak lagi tersilap memaklumkan muat semula halaman.
-* Membetulkan masalah **tolakan fail 0KB ke Aria2 / Motrix**, dengan melangkau fail kosong yang tidak sah secara automatik.
-* Membetulkan beberapa butiran UI, termasuk keabnormalan tinggi baris, penyatuan ikon, lebar lajur bahasa Inggeris dan saiz fon dropdown laluan ketika dimaksimumkan.
+
+* Menambah **mod Hurai Perkongsian**, menyokong penghuraian pautan perkongsian, pengecaman clipboard, tinjauan rekursif, simpanan fail, pratonton media dan pemprosesan arkib.
+* Menambah **tetapan domain pecutan pautan terus muat turun**, menyokong mod prefiks dan mod parameter kueri, boleh digunakan untuk tulis semula pautan muat turun pelayar dan push Aria2 / Motrix.
+* Menambah pelarasan volum dengan roda tetikus dalam pemain, menyokong prompt lapisan volum dan status ikon senyap.
+* Mengoptimumkan pemain Skrin Penuh Web, penyesuaian skrin sempit, sorotan carian, pratonton arkib dan prompt simpan tetapan.
+* Membaiki isu push fail 0KB pada Aria2 / Motrix, tinggi baris tidak normal, penyatuan ikon, lebar lajur bahasa Inggeris dan fon drop-down laluan.
 
 ### V2.4.0
-* Menambahkan **semakan versi dan pemberitahuan kemas kini**.
-* Menambahkan **tetapan main balik video**, termasuk membaca kemajuan main balik semasa membuka video dan memilih kualiti lalai.
-* Menambahkan fungsi **skrin penuh web untuk main balik video**.
-* Menambahkan tetapan **sembunyikan teks butang**, membolehkan hanya ikon dan tooltip hover dikekalkan.
-* Meningkatkan pengalaman paparan grid dan main balik video.
-* Meningkatkan lebar tetingkap Tetapan dan dialog Vault Kata Laluan.
-* Mengoptimumkan pengambilan data untuk mod Baru Ditambah dan Sejarah Main Balik.
-* Meningkatkan sebahagian logik interaksi.
+
+* Menambah semakan versi dan prompt kemas kini.
+* Menambah tetapan main video, menyokong bacaan kemajuan main dan pemilihan kejelasan lalai.
+* Menambah fungsi Skrin Penuh Web untuk main video.
+* Menambah tetapan Sembunyikan Teks Butang, boleh mengekalkan ikon dan tooltip terapung sahaja.
+* Mengoptimumkan paparan grid, pengalaman main video, tetingkap tetapan, popup Bilik Simpanan Kata Sandi, pengambilan data Terbaharu dan Sejarah Main.
 * Membersihkan output debug, konfigurasi berlebihan dan kod mati berisiko rendah untuk mengurangkan saiz skrip.
 
-### V2.3.0 
-* Menambahkan **Pembantu Pembaikan Protokol PotPlayer**.
+### V2.3.0
+
+* Menambah **pembantu baiki protokol PotPlayer**.
 
 ### V2.2.3
-* Membetulkan kegagalan muat naik.
-* Meningkatkan kestabilan UI.
+
+* Membaiki kegagalan muat naik.
+* Mengoptimumkan kestabilan UI.
 
 ### V2.2.2
-* Memperbaiki konflik hierarki kekunci pintasan.
+
+* Membaiki isu konflik hierarki kekunci pintas.
 
 ### V2.2.1
-* Memperbaiki masalah muat turun Aria2 / Motrix.
+
+* Membaiki isu muat turun Aria2 / Motrix.
 
 ### V2.2.0
-* Menambah ciri **pemantauan pautan magnet daripada papan klip** dan **pratonton pautan magnet**.
+
+* Menambah ciri **pemantauan pautan magnet clipboard** dan **pratonton magnet**.
 * Meningkatkan kestabilan UI.
 
 ### V2.1.1
-* Membetulkan kegagalan sambungan Aria2 / Motrix dalam persekitaran proksi songsang yang hanya menyokong RPC `ws://` / `wss://` atau menggunakan port bukan standard.
+
+* Membaiki isu sambungan Aria2 / Motrix yang gagal dalam persekitaran proksi songsang yang hanya menyokong RPC ws:// / wss:// atau port bukan standard.
 
 ### V2.1.0
-* Menyokong **pengesanan butang sisi tetikus** untuk navigasi peringkat direktori.
-* Penambahbaikan kestabilan.
+
+* Menyokong pemantauan butang sisi tetikus untuk melompat tahap direktori.
+* Mengoptimumkan kestabilan.
 
 ### V2.0.0
-* Sokongan bahasa diperluas kepada **简体中文 / 繁體中文 / English / 한국어 / 日本語 / Indonesia / Bahasa Melayu**.
-* Naik taraf UI dan seni bina, butang carian imej melalui imej diletakkan di luar, serta ditambah **paparan grid**.
+
+* Bahasa disokong diperluas kepada **简体中文 / 繁體中文 / English / 한국어 / 日本語 / Indonesia / Bahasa Melayu**.
+* UI dan seni bina dinaik taraf, butang Cari dengan Imej diletakkan di luar, dan paparan grid ditambah.
 
 ### V1.3.2
-* Logik muat naik tempatan diperkukuh, dan sambungan terus IP tanah besar China ditambah.
-* Ambang keserupaan tempoh dalam semakan pendua fail dilaraskan untuk meningkatkan ketepatan pengesanan.
+
+* Mengukuhkan logik muat naik tempatan dan menambah sambungan terus IP tanah besar China.
+* Melaraskan ambang Tempoh Serupa dalam Semak Pendua Fail dan mengoptimumkan ketepatan pengesanan.
 
 ### V1.3.1
-* Masalah kelipan log masuk dioptimumkan lagi.
+
+* Mengoptimumkan lagi isu kerlipan log masuk.
 
 ### V1.3.0
-* Menambah fungsi **pemindahan data berbilang akaun**, menyokong pembungkusan terenkripsi satu klik untuk sejumlah besar fail dan pemindahan lancar ke akaun anda yang lain.
-* Menambah mekanisme **padam kekal**, yang membolehkan anda melangkau tong kitar semula semasa pemadaman dan membebaskan ruang awan serta-merta.
+
+* Menambah ciri Migrasi Data berbilang akaun.
+* Menambah mekanisme padam kekal, menyokong melangkau tong kitar semula untuk membebaskan ruang.
 
 ### V1.2.0
-* Enjin sniffing tempoh video dibina semula.
+
+* Memfaktorkan semula enjin hidu tempoh video.
 
 ### V1.1.0
-* Aria2 kini menyokong **mengekalkan struktur laluan folder**, serta menambah amaran kehilangan penghantaran dan eksport senarai ralat dengan satu klik.
-* Muat turun awan menyokong penghantaran kelompok dan pembuangan pendua pintar, serta **membersihkan magnet tercemar anti-sekatan secara automatik** (menyokong penyahkodan automatik Base32).
-* Antaramuka pratonton penamaan semula kelompok menambah **paparan ikon dan kulit hadapan**, serta menyokong pratonton imej besar melayang untuk folder.
-* Fungsi import dinaik taraf kepada mod **“gabung pintar”**, dan tidak lagi menindih senarai atau rekod sedia ada semasa mengimport sandaran.
+
+* Aria2 menyokong pengekalan struktur laluan folder, menambah peringatan kehilangan penghantaran dan eksport senarai ralat.
+* Muat turun awan menyokong penghantaran kelompok dan nyahpendua pintar, menyokong pembersihan automatik magnet tercemar serta nyahkod automatik Base32.
+* Antara muka pratonton Ubah Nama Kelompok menambah ikon dan paparan kulit, menyokong pratonton gambar besar apabila hover folder.
+* Ciri import dinaik taraf kepada mod gabung pintar, jadi import sandaran tidak lagi menimpa senarai dan rekod tempatan yang sudah ada.
+
+</details>
 
 ---
 
-## 🤝 Penghargaan (Acknowledgements)
+## 🤝 Penghargaan
 
-Projek ini banyak menerima ilham daripada [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (oleh 브랜뉴) dari segi bahasa reka bentuk UI dan sebahagian logik panggilan API web. Dengan ini, kami merakamkan penghargaan.
+Projek ini banyak diilhamkan oleh [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴) dari segi bahasa reka bentuk UI dan sebahagian logik panggilan API web. Dengan ini kami menyampaikan penghormatan.
 
 ---
 
-## ⚖️ Pernyataan Lesen
+## ⚖️ Kenyataan License
 
-Projek ini menggunakan lesen **CC-BY-NC-SA-4.0**:
+Projek ini mengikuti lesen **CC-BY-NC-SA-4.0**:
 
-* 🚫 Dilarang untuk sebarang kegunaan komersial
+* 🚫 Dilarang digunakan untuk sebarang tujuan komersial
 * 🧪 Hanya untuk pembelajaran peribadi, penyelidikan dan pertukaran teknikal
-* 📢 Sebarang pengedaran semula mesti mengekalkan atribusi dan menggunakan lesen yang sama
+* 📢 Pengedaran semula mesti mengekalkan atribusi dan menggunakan lesen yang sama
