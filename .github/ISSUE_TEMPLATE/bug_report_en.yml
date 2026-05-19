@@ -26,7 +26,7 @@ body:
     attributes:
       label: "Script manager and version"
       description: "Please enter your userscript manager name and version."
-      placeholder: "Example: Violentmonkey 2.31.0 / Tampermonkey 5.3.3"
+      placeholder: "Example: Violentmonkey 2.31.0 / Tampermonkey 5.3.3 / ScriptCat 0.17.0"
     validations:
       required: true
 
