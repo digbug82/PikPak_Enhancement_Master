@@ -22,6 +22,15 @@ body:
       required: true
 
   - type: input
+    id: script-manager-version
+    attributes:
+      label: "脚本管理器及版本"
+      description: "请填写你使用的脚本管理器名称和版本号。"
+      placeholder: "例如：Violentmonkey 2.31.0 / Tampermonkey 5.3.3 / ScriptCat 0.17.0"
+    validations:
+      required: true
+
+  - type: input
     id: script-version
     attributes:
       label: "脚本版本"
