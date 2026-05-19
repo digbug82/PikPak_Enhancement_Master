@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            2.5.0
+// @version            2.5.1
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @match              https://mypikpak.com/drive/*
