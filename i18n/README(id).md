@@ -4,112 +4,102 @@
 
 # 📦 PikPak Enhancement Master
 
-[![Pasang / Perbarui Terbaru](https://img.shields.io/badge/Pasang%20/%20Perbarui%20Terbaru-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
+[![Instal Sekarang / Perbarui ke Versi Terbaru](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
-[![Version](https://img.shields.io/badge/Version-2.5.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-2.5.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
 
-⭐ Jika skrip ini membantu Anda, silakan beri Star pada proyek ini
-
-> Paket peningkatan tingkat desktop untuk PikPak Web.  
-> Dari penjelajahan, pencarian, analisis, penataan, hingga pemutaran, unduhan, dan migrasi, membuat pengelolaan cloud drive benar-benar mendekati efisiensi dan kelancaran pengelola file lokal.
+⭐ Jika skrip ini membantu Anda, silakan beri Star untuk proyek ini
 
 ---
 
-## 🌍 Bahasa yang Didukung (Languages)
+## 🌍 Bahasa yang Didukung
 
 [Indonesia](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(id).md) | [简体中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/README.md) | [繁體中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(tc).md) | [English](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(en).md) | [한국어](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ko).md) | [日本語](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ja).md) | [Bahasa Melayu](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ms).md)
 
 ---
 
-## ✨ Fitur Utama (Features)
+## ✨ Fitur Utama
 
-### ✨ Pengalaman & Mesin Navigasi
+### ✨ Mesin Pengalaman dan Navigasi
 
-* **Rekonstruksi Interaksi**: Di atas fitur resmi, antarmuka secara keseluruhan dibangun ulang dengan mengacu pada kebiasaan penggunaan **Windows File Explorer**, sehingga alur operasi menjadi lebih intuitif.
-* **Mode Turbo**: Setelah diaktifkan, mode ini mengambil alih logika web secara mendalam dan secara signifikan mengurangi lag, crash, serta beban memori pada skenario dengan file dalam jumlah sangat besar.
-* **Navigasi Tombol Samping**: Mendukung tombol samping mouse untuk maju / mundur, sehingga Anda dapat berpindah tingkat direktori dengan cepat di berbagai tampilan.
-* **Bilah Path Lanjutan**: Mendukung scroll roda mouse, pergantian folder setingkat melalui dropdown, tampilan ulang path, serta lompatan pelacakan sumber; pencarian global dan paket analisis juga telah terintegrasi ke sistem path yang seragam.
-* **Peningkatan Pengalaman**: Mendukung pengurutan multi-dimensi seperti bintang dan tipe, mode malam, **buramkan sampul** sekali klik, serta meningkatkan pengalaman pembaruan tampilan dengan **strategi refresh senyap SWR**.
-* **Pengindeksan Latar Belakang & Perlindungan**: Titik biru bernapas di beranda menunjukkan status sinkronisasi pohon direktori di latar belakang; sistem juga memiliki perlindungan operasi konkurensi untuk sebisa mungkin menghindari data kotor dan penulisan yang saling bertabrakan.
+* **Navigasi tombol samping**: Mendukung tombol samping mouse untuk maju / mundur, sehingga Anda dapat berpindah cepat antarlevel direktori.
+* **Bilah path lanjutan**: Mendukung geser roda mouse, perpindahan drop-down direktori setingkat, tampilan path, dan lompatan penelusuran asal.
+* **Pencarian seluruh drive yang ditingkatkan**: Mendukung pencarian berdasarkan nama file dan path file, menandai bagian kata kunci yang cocok dengan warna merah, dan memprioritaskan tampilan konten di sekitar kata kunci pada nama file yang panjang.
+* **Preferensi penelusuran**: Mendukung preferensi urutan, preferensi tampilan, mempertahankan posisi penelusuran, Mode Media, Sembunyikan Teks Tombol, thumbnail sampul media buram, dan mode malam.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_id.gif" width="1100" alt="Path">
 </p>
 
-> 📌 Folder default **My Pack** dilindungi oleh sistem resmi. Skrip tidak akan menjalankan operasi berisiko tinggi yang berpotensi menyebabkan salah hapus pada folder ini.
-
 ---
 
-### 📂 Operasi Massal & Manajemen Ruang
+### 📂 Manajemen Massal dan Ruang
 
-* **Ganti Nama Massal**: Mendukung **penggantian / penghapusan regex**, **nomor episode berurutan**, **pemformatan** teks, **penamaan FC2 standar**, **penghapusan iklan pada awalan**, serta **perbaikan ekstensi cerdas** berbasis MIME.
+* **Ubah Nama Massal**: Mendukung ganti / hapus dengan regex, nomor urut episode, pemformatan teks, penamaan standar FC2, penghapusan prefiks iklan, serta perbaikan ekstensi cerdas berbasis MIME.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/rename/rename_id.gif" width="550" alt="Ganti Nama Massal">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/rename/rename_id.gif" width="550" alt="Ubah Nama Massal">
 </p>
 
-* **Analisis File**: Menggabungkan kemampuan filter dan pencarian duplikat; pencarian duplikat mendukung tiga mode analisis: **hash / durasi / nama**.
+* **Analisis file**: Menggabungkan pemfilteran file dan kemampuan Cari Duplikat File. Pencarian duplikat mendukung tiga jenis analisis: **hash Cocok Presisi / Durasi Mirip video / Nama Mirip**.
+* **Pemfilteran yang ditingkatkan**: Mendukung pemfilteran berdasarkan ukuran, tipe, path, kata kunci, dan kondisi lain, serta menyediakan bantuan massal seperti Centang Sekali Klik, Balik Pilihan, dan Pilih berdasarkan Folder.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_scan/file_scan_id.gif" alt="Analisis File">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_scan/file_scan_id.gif" alt="Tinjau File">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_dup/file_dup_id.gif" alt="Cari Duplikat File">
 </p>
 
-* **Analisis Folder**: Menggabungkan kemampuan filter dan pencarian duplikat folder; pencarian duplikat mendukung tiga mode analisis: **nama / kemiripan / tingkat cakupan**.
+* **Analisis folder**: Menggabungkan Tinjau Folder dan Cari Duplikat Folder. Pencarian duplikat mendukung tiga mode analisis: **nama / kemiripan / tingkat cakupan**, cocok untuk menangani episode duplikat, paket gambar, direktori dokumen, dan lainnya.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder_scan/folder_scan_id.gif" alt="Analisis Folder">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder_scan/folder_scan_id.gif" alt="Tinjau Folder">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder_dup/folder_dup_id.gif" alt="Cari Duplikat Folder">
 </p>
 
-* **Ekspor Direktori**: Mendukung ekspor **daftar pohon direktori** dari direktori saat ini.
+* **Ekspor Direktori**: Mendukung ekspor direktori saat ini sebagai pohon direktori atau daftar direktori, sehingga mudah untuk arsip, pemeriksaan, dan berbagi struktur file.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_id.png" width="350" alt="Ekspor Direktori">
 </p>
 
-* **Penataan Cerdas**: Mendukung **hapus permanen** (melewati tempat sampah), pembersihan folder kosong sekali klik, ekstraksi massal, serta mengintegrasikan logika **ingat sandi otomatis** dan **isi otomatis cerdas**.
+* **Pengaturan cerdas**: Mendukung hapus permanen, pembersihan folder kosong, Ekstrak Massal, dan pembersihan otomatis untuk file yang sudah diekstrak.
+* **Resource Manager**: Mendukung daftar resource khusus yang dapat digunakan sebagai blacklist untuk pembersihan, atau sebagai daftar perlindungan yang otomatis melewati item yang cocok saat penghapusan massal.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/archive/archive_id.png" width="250" alt="Brankas Kata Sandi">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/manager/manager_id.gif" width="550" alt="Resource Manager">
 </p>
 
-* **Manajer File**: Mendukung **daftar hitam file** kustom untuk membersihkan resource sampah dengan sekali klik; juga dapat digunakan sebagai **daftar putih file** untuk melindungi item yang cocok saat penghapusan massal.
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/manager/manager_id.gif" width="550" alt="Manajer File">
-</p>
-
-> ⚠️ Untuk menghindari konflik sinkronisasi data, tidak disarankan mengubah batch file yang sama di klien lain saat menjalankan operasi berat seperti analisis, penataan, atau penghapusan massal.
+> ⚠️ Saat menjalankan operasi berat seperti analisis, pengaturan, hapus massal, pindah massal, atau Ekstrak Massal, tidak disarankan mengubah kumpulan file yang sama dari klien lain secara bersamaan agar tidak terjadi konflik sinkronisasi.
 
 ---
 
-### 🌐 Pusat Transfer & Berbagi
+### 🌐 Transfer, Unduhan Cloud, dan Parser Berbagi
 
-* **Manajemen Berbagi**: Mendukung pengaturan batas jumlah pengambilan; setelah batas tercapai, berbagi akan otomatis dibatalkan sehingga tautan menjadi tidak valid.
-* **Unggah Turbo**: Mendukung drag-and-drop file / folder lokal langsung ke halaman web untuk diunggah, sekaligus mengurangi tingkat gangguan transfer dan meningkatkan pengalaman transfer secara keseluruhan, terutama pada skenario banyak file kecil.
-* **Peningkatan Unduhan Cloud**: Mendukung **penghapusan duplikat otomatis** untuk tautan offline massal; dilengkapi **mesin pembersih magnet cerdas** yang dapat mengekstrak hash Base32 / Hex secara otomatis dan menghapus teks pengganggu.
-* **Torrent & Cadangan**: Mendukung parsing file torrent **.torrent**; untuk sebagian tautan yang dibatasi, tersedia **solusi penyimpanan snapshot halaman web** sebagai cadangan.
+* **Tinjauan File Berbagi**: Mendukung pemindaian dan pemfilteran rekursif pada konten berbagi, sehingga mudah mempratinjau struktur internal berbagi sebelum menyimpan.
+* **Manajemen berbagi**: Mendukung pengaturan batas jumlah ekstraksi berbagi. Setelah kondisi terpenuhi, berbagi dapat otomatis dibatalkan sehingga tautan menjadi tidak valid.
+* **Perlindungan unggahan**: Menyertakan pengingat keluar saat unggahan berlangsung, serta perlindungan dan pembersihan untuk unggahan terputus, tugas tersisa, dan file abnormal.
+* **Peningkatan unduhan cloud**: Mendukung deduplikasi otomatis untuk tautan offline massal. Pembersihan magnet cerdas bawaan dapat mengekstrak hash Base32 / Hex dan menghapus teks pengganggu.
+* **Pratinjau magnet**: Jika konten magnet memiliki beberapa gambar pratinjau, pratinjau multi-gambar didukung.
+* **Fallback torrent dan snapshot**: Mendukung parsing file `.torrent`. Untuk beberapa tautan yang medianya tidak dapat dikumpulkan langsung, tersedia solusi penyimpanan snapshot web sebagai fallback.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_id.png" height="320" alt="Magnet">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_id.gif" height="320" alt="Berbagi">
 </p>
 
-> ⚠️ Intersepsi otomatis batas jumlah pengambilan hanya berlaku saat halaman web tetap terbuka dan perangkat tidak dalam keadaan tidur.
+> ⚠️ Pencegatan otomatis untuk batas jumlah ekstraksi berbagi hanya berlaku saat halaman web tetap terbuka dan perangkat tidak tidur. 
 
 ---
 
 ### 🎬 Peningkatan Media Imersif
 
-* **Mesin Pemutar**: Mendukung kecepatan **0.5x - 3.0x**, rotasi dan pembalikan, rasio paksa, lewati intro dan outro secara otomatis, mode **putar beruntun / putar ulang**, serta **pratinjau thumbnail** pada progress bar.
-* **Fallback Kompatibilitas**: Dilengkapi watchdog dan logika kompatibilitas bawaan; saat terjadi layar hitam, kualitas tidak tersedia, atau anomali kompatibilitas codec, sistem dapat otomatis fallback ke kualitas yang dapat diputar.
-* **Sistem Subtitle**: Mendukung **subtitle cloud dengan nama sama**, **impor file subtitle lokal**, dan **pencarian subtitle online**; juga mendukung offset subtitle hingga tingkat milidetik, pergantian posisi tampilan, penyesuaian ukuran, serta mount teks lokal dengan drag-and-drop.
-* **Bantuan Visual**: Mendukung **pencarian gambar dengan gambar** untuk gambar atau frame video saat ini, memudahkan pencarian balik cover, aktor, anime, atau sumber materi.
-* **Mode Media**: Dapat mengaktifkan mode media di pengaturan agar direktori serial / komik diprioritaskan untuk diurutkan berdasarkan nama **A-Z**, sehingga pengalaman menjelajah lebih berkesinambungan.
+* **Peningkatan mesin pemutar**: Mendukung kecepatan 0.5x - 3.0x, rotasi dan flip, rasio paksa, lewati intro/outro otomatis, putar beruntun / loop, dan pratinjau thumbnail pada bilah progres.
+* **Sistem subtitle**: Mendukung pemuatan subtitle cloud dengan nama sama, impor subtitle lokal, dan pencarian subtitle online. Juga mendukung penyesuaian offset waktu subtitle, posisi subtitle, ukuran font, dan transparansi latar.
+* **Bantuan visual**: Mendukung pencarian gambar dari gambar atau frame video saat ini, sehingga mudah menelusuri sampul, aktor, anime, atau sumber materi.
+* **Mode Media**: Dapat diaktifkan di pengaturan agar direktori yang hanya berisi video atau hanya berisi gambar secara default diurutkan berdasarkan nama A-Z, meningkatkan kesinambungan penelusuran episode / komik.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/video/video_id.gif" alt="Video">
@@ -117,260 +107,268 @@
 
 ---
 
-### ⚡ Unduhan & Distribusi
+### ⚡ Unduhan, Pemutaran Eksternal, dan Distribusi
 
-* **Tautan Langsung Eksternal**: Mendukung pengambilan tautan langsung video sekali klik, atau memanggil **PotPlayer** untuk pemutaran eksternal.
-* **Distribusi RPC**: Mendukung pengiriman file ke node unduhan seperti **Aria2 / Motrix** melalui protokol RPC dengan sekali klik.
-* **Pemulihan Struktur Direktori**: Saat mengirim seluruh folder, sistem dapat otomatis memulihkan **struktur direktori pohon** yang ada di cloud drive agar folder tidak menjadi datar setelah diunduh.
-* **Peningkatan Distribusi**: Mendukung pemantauan status koneksi panjang, ekspor otomatis daftar error jika gagal, serta **filter unduhan folder**.
+* **Asisten perbaikan protokol PotPlayer**: Menyertakan deteksi dan bantuan perbaikan protokol PotPlayer untuk mengurangi masalah browser yang tidak dapat memanggil pemutar eksternal.
+* **Distribusi RPC**: Mendukung pengiriman file melalui protokol RPC ke node unduhan seperti Aria2 / Motrix.
+* **Pemulihan struktur direktori**: Saat mengirim seluruh folder, struktur direktori pohon di cloud drive dapat dipulihkan otomatis agar direktori tidak menjadi rata setelah diunduh.
+* **Filter Unduhan**: Mendukung pemfilteran file berdasarkan ukuran file, ekstensi, dan kata kunci nama, berlaku untuk unduhan browser dan push Aria2 / Motrix.
+* **Domain akselerasi direct link unduhan**: Mendukung domain akselerasi unduhan khusus, dengan dua mode rewrite reverse proxy: prefiks tautan asli lengkap dan penerusan parameter URL.
+* **Penanganan pengecualian**: Secara otomatis melewati file tidak valid 0KB saat push, dan mendukung ekspor daftar kegagalan.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_id.png" height="290" alt="Filter Unduhan">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_id.gif" height="290" alt="aria2">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_id.gif" height="290" alt="Aria2">
 </p>
 
 ---
 
-### ⚙️ Konfigurasi & Manajemen Data
+### ⚙️ Konfigurasi dan Manajemen Data
 
-* **Cadangan Konfigurasi**: Mendukung ekspor preferensi, aturan manajemen, brankas kata sandi, dan lainnya ke file cadangan JSON dengan sidik jari digital.
-* **Impor Cerdas**: Mendukung **penggabungan cerdas dan deduplikasi** saat impor, sehingga tidak menyebabkan hilangnya aturan historis akibat penimpaan sederhana.
-* **Pembersihan Data**: Mendukung penghapusan sesuai kebutuhan terhadap **indeks penuh**, **preferensi**, **aturan manajemen**, **brankas kata sandi**, dan **cache**, untuk membebaskan ruang lokal sekaligus meningkatkan privasi dan keamanan.
-* **Brankas Kata Sandi**: Dilengkapi manajemen terpusat untuk kata sandi ekstraksi yang umum digunakan, agar bisa dipanggil otomatis dan diisi cepat saat ekstraksi massal.
-* **Migrasi Data**: Mendukung pengemasan item terpilih secara terenkripsi, lalu setelah login ke akun lain, sistem dapat otomatis mengenali dan mengambil alih, sehingga mewujudkan **transfer mulus antar akun**.
+* **Cadangan konfigurasi**: Mendukung ekspor preferensi, aturan manajemen, Brankas Kata Sandi, catatan riwayat, dan sebagian konfigurasi fitur sebagai file cadangan JSON dengan verifikasi sidik jari.
+* **Impor cerdas**: Saat impor, data berbentuk daftar seperti daftar dan catatan akan digabung dan dideduplikasi. Item pengaturan dasar diperbarui sesuai file impor.
+* **Pembersihan data lokal**: Mendukung pembersihan indeks seluruh drive, preferensi, aturan manajemen, Brankas Kata Sandi, cache video, dan cache runtime berdasarkan kategori.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/cache/cache_id.png" width="350" alt="Cache">
 </p>
 
+* **Brankas Kata Sandi**: Mengelola kata sandi ekstraksi yang sering digunakan secara terpusat untuk percobaan otomatis Ekstrak Massal dan pengisian cepat.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/archive/archive_id.png" width="250" alt="Brankas Kata Sandi">
+</p>
+
+* **Migrasi Data multi-akun**: Mendukung enkripsi dan pengemasan item terpilih, lalu otomatis dikenali dan diambil alih setelah akun lain login, sehingga transfer lintas akun dapat dilakukan.
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/migrate/migrate_id.gif" alt="Migrasi Data">
 </p>
 
-> 📌 Indeks penuh akan dibersihkan setelah halaman web ditutup; sedangkan preferensi, aturan manajemen, brankas kata sandi, dan data sejenis akan disimpan secara persisten di lingkungan skrip lokal.
+> 📌 Preferensi, aturan manajemen, Brankas Kata Sandi, cache, dan data riwayat semuanya disimpan di lingkungan lokal.
 
 ---
 
-## 💻 Kompatibilitas (Compatibility)
+## 📥 Panduan Instalasi
 
-* **Browser yang Direkomendasikan**: Chrome / Edge (versi terbaru)
-* **Manajer Skrip Utama yang Direkomendasikan**: Violentmonkey (teruji lebih lancar pada skenario scroll, unggah, dan daftar besar)
-* **Manajer Skrip yang Kompatibel**: Tampermonkey
-* **Platform yang Didukung**: PikPak Web
-* *Catatan: Safari / Firefox dan manajer skrip lainnya belum menjalani pengujian mendalam secara lengkap. Disarankan menggunakan lingkungan yang direkomendasikan di atas untuk pengalaman terbaik.*
-
----
-
-## 📥 Panduan Instalasi (Installation)
-
-1. **Pasang manajer skrip**: Disarankan memasang [Violentmonkey](https://violentmonkey.github.io/get-it/) terlebih dahulu; [Tampermonkey](https://www.tampermonkey.net/) juga dapat digunakan.
-2. **Pasang skrip**: Klik **[Instal Sekarang](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**.
-3. **Buka PikPak Web**: Kunjungi [PikPak](https://mypikpak.com/drive) lalu login ke akun Anda.
+1. **Instal script manager**: Disarankan memasang [Violentmonkey](https://violentmonkey.github.io/get-it/) terlebih dahulu, atau gunakan [Tampermonkey](https://www.tampermonkey.net/).
+2. **Instal skrip**: Klik **[Instal Sekarang](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**.
+3. **Buka PikPak Web**: Kunjungi [PikPak](https://mypikpak.com/drive) dan login ke akun Anda.
 4. **Jalankan Enhancement Master**:
-   * Dalam mode normal: setelah login, klik **bola logo PikPak** biru yang melayang di sidebar untuk masuk.
-   * Dalam Mode Turbo: setelah login, skrip dapat aktif otomatis dan mengambil alih halaman web.
+   * Dalam mode normal: setelah login, klik **bola PikPak Logo** biru yang mengambang di sidebar.
+   * Dalam Mode Turbo: setelah login, skrip dapat otomatis aktif dan mengambil alih web client.
 
 ---
 
-## ❓ FAQ
+## ❓ Tanya Jawab Umum
 
-**Q: Mengapa setelah memasang skrip, bola biru melayang tidak muncul?**  
-**A: Silakan periksa sesuai urutan berikut:**
+**Q: Mengapa bola mengambang biru tidak muncul setelah skrip diinstal?**  
+**A:** Periksa dengan urutan berikut:
 
-1. Pastikan **PikPak Enhancement Master** dalam keadaan aktif di manajer skrip.
+1. Pastikan **PikPak Enhancement Master** dalam keadaan aktif di script manager.
 2. Pastikan Anda sudah login ke akun PikPak Web.
-3. Jika menggunakan **Tampermonkey**, pastikan **“Allow user scripts”** sudah diaktifkan pada halaman detail ekstensi browser.
+3. Jika menggunakan **Tampermonkey**, pastikan **"Allow user scripts"** di halaman detail ekstensi browser sudah dicentang.
 4. Disarankan menggunakan browser **Edge / Chrome** versi terbaru.
-5. Jika bola melayang tetap tidak muncul setelah semua langkah di atas, nonaktifkan sementara semua ekstensi browser lainnya, lalu refresh halaman (F5) dan coba lagi.
+5. Jika bola mengambang tetap tidak muncul setelah semua langkah di atas selesai, nonaktifkan sementara semua ekstensi browser lainnya, lalu refresh halaman (F5) dan coba lagi.
 
-**Q: Apa itu “Mode Turbo” dan mengapa disarankan untuk diaktifkan?**  
-**A:** Setelah diaktifkan, skrip akan mengambil alih logika halaman web asli secara mendalam dan menutupi antarmuka utama dalam mode layar penuh. Mode ini secara aktif memblokir proses sinkronisasi bawaan web yang memakan memori tinggi, sehingga dapat secara signifikan memperbaiki masalah lag, crash, dan lambat memuat pada skenario dengan jumlah file besar.  
-**Catatan:** Setelah Mode Turbo diaktifkan, tombol minimalkan dan tutup akan otomatis disembunyikan; jika ingin kembali ke halaman asli, buka pengaturan lalu hapus centangnya.  
-**Saran:** Jika file di cloud drive Anda cukup banyak, sangat disarankan mengaktifkannya untuk pengalaman yang lebih lancar dan stabil.
+**Q: Kembali ke level sebelumnya di folder bertingkat cukup merepotkan. Apakah harus masuk ulang dari halaman utama?**  
+**A:** Tidak perlu. Semua halaman dalam skrip yang memiliki bilah path mendukung **scroll horizontal dengan roda mouse**.
 
-**Q: Mengapa My Pack di beranda menampilkan label “Default”, dan tidak bisa diberi bintang, disalin, dipindahkan, diganti nama, atau dihapus?**  
-**A:** Itu adalah mekanisme perlindungan keamanan resmi PikPak untuk direktori default. Skrip mengikuti dan mempertahankan lapisan perlindungan ini, tetapi di atas itu, membebaskan batas berbagi untuk folder default **My Pack**.
+Saat level direktori cukup dalam dan path folder induk di depan tersembunyi, pindahkan mouse ke area bilah path bagian atas, lalu gulir roda mouse. Bilah path akan bergulir horizontal dan menampilkan path induk yang tersembunyi.
 
-**Q: Apa perbedaan mendasar antara “Cari Duplikat File” dan “Cari Duplikat Folder”? Bagaimana memilihnya saat digunakan?**  
-**A:**  
-**Cari Duplikat File:** Ditujukan untuk level **file tunggal**, menggunakan algoritma tiga mode: **pencocokan hash presisi, kemiripan durasi video, dan kemiripan nama**. Cocok untuk membersihkan file duplikat yang tersebar di cloud drive, seperti episode video tunggal yang tersimpan ganda, satu gambar, atau arsip terpisah.  
+Setelah terlihat, klik langsung nama folder induk yang sesuai untuk kembali cepat ke level sebelumnya, atau lompat ke direktori induk mana pun.
 
-**Cari Duplikat Folder:** Ditujukan untuk level **struktur folder secara keseluruhan**, menggunakan algoritma tiga mode: **pencocokan nama, tingkat tumpang tindih file internal (kemiripan), dan redundansi subset (tingkat cakupan)**. Ini lebih cocok untuk membersihkan drama lengkap, paket gambar utuh, atau direktori materi bertingkat yang tersimpan berulang. Bahkan jika nama dua folder berbeda, selama isi internalnya sangat mirip atau memiliki hubungan cakupan yang jelas, sistem tetap dapat mengenalinya.
+**Q: Saat Cari Duplikat File / Cari Duplikat Folder, apakah file yang dicentang otomatis menyisakan satu file asli, atau saya perlu memfilter lagi di daftar?**  
+**A:** Item yang dicentang di Cari Duplikat File dan Cari Duplikat Folder pada dasarnya adalah **item operasi nyata**. Mode pencarian duplikat tidak langsung menghapus file; mode ini hanya menampilkan item yang mungkin duplikat. Anda perlu memastikan dan mencentangnya, lalu klik hapus agar pembersihan benar-benar dilakukan.
 
-> **Saran:**  
-> “Pencarian duplikat presisi” pada cari duplikat file berbasis hash, sehingga hasilnya paling andal dan relatif aman untuk dicentang lalu dihapus sekaligus.  
-> “Pencocokan durasi”, “pencocokan nama”, serta tiga mode pada cari duplikat folder pada dasarnya semuanya termasuk pencocokan kemiripan. Disarankan melakukan pemeriksaan manual sebelum centang massal agar terhindar dari salah hapus.
+Dalam hasil pencarian duplikat:
 
-**Q: Mengapa hasil cari duplikat file semakin lama semakin banyak? Apakah indeks penuh kehilangan data?**  
-**A:** Bukan karena indeks kehilangan paket, juga bukan karena data salah. Jumlah pada bagian “pencocokan presisi” dalam hasil duplikat biasanya stabil. Alasan mengapa setelah itu terdeteksi semakin banyak file duplikat terutama karena pencocokan kemiripan berbasis **durasi video** secara bertahap menjadi lebih lengkap.  
+* Kotak centang pada header tiap grup berarti memilih seluruh grup tersebut;
+* Pengurutan dalam grup hanya mengatur ulang tampilan berdasarkan waktu, ukuran, path, nama, dan aturan lain. Pengurutan tidak otomatis menentukan mana yang dihapus dan mana yang disimpan;
+* Hanya saat Anda mengklik **Centang Sekali Klik**, skrip akan memproses otomatis berdasarkan aturan: tiap grup menyimpan 1 item, sedangkan item lainnya dicentang.
 
-Karena sebagian antarmuka asli PikPak tidak langsung mengembalikan durasi video, banyak video duplikat pada analisis pertama akan dilewati sementara karena belum memiliki informasi durasi. Untuk mengatasi hal ini, skrip memiliki mekanisme sniffing asinkron di latar belakang yang otomatis membaca metadata video, melengkapi durasi yang presisi, dan menyimpannya secara persisten di browser lokal. Seiring waktu penggunaan bertambah, basis data durasi lokal akan semakin lengkap, sehingga mesin duplikat dapat mengenali lebih banyak resource duplikat tersembunyi yang “nama filenya berbeda, tetapi durasinya sama”, sehingga hasil terlihat semakin banyak sekaligus semakin akurat.
+Selain itu, **Pilih berdasarkan Folder** di Cari Duplikat File akan mencentang file dalam folder tertentu pada daftar duplikat; **Balik Pilihan** akan mencentang file dalam daftar duplikat selain folder tersebut.
 
-**Q: Mengapa “pencarian gambar dengan gambar” kadang tidak bisa langsung mengunggah gambar, melainkan meminta saya menempel?**  
-**A:** Hal ini disebabkan oleh kebijakan keamanan browser, terutama terkait **pembatasan lintas domain CORS**. Saat skrip tidak bisa langsung mengirim gambar dari cloud drive ke layanan pencarian target, skrip akan otomatis menyalin screenshot gambar saat ini ke clipboard Anda. Pada saat itu, Anda hanya perlu menekan `Ctrl + V` di halaman pencarian yang terbuka untuk menyelesaikan pengiriman gambar.
+Perlu diperhatikan bahwa **Cocok Presisi** di Cari Duplikat File menggunakan pencocokan hash, sehingga biasanya lebih cocok dipakai bersama Centang Sekali Klik untuk pembersihan. Sedangkan **Durasi Mirip / Nama Mirip** di Cari Duplikat File, serta Cari Duplikat Folder, semuanya merupakan pencocokan algoritme kemiripan. Disarankan memeriksa secara manual sebelum menghapus agar tidak salah hapus.
 
-**Q: Mengapa saat memutar video dengan skrip, hanya ada suara tetapi tidak ada gambar?**  
-**A:** Biasanya ini karena video tersebut adalah **streaming multi-audio / multi-track m3u8**. Setelah transkode di cloud, track audio dan video mungkin terpisah, sementara pemutar web saat ini tidak mendukung parsing penuh untuk jenis stream video khusus seperti ini.  
-Dalam situasi seperti ini, disarankan klik tombol **“Pemutaran Eksternal”** di kanan bawah untuk langsung memanggil pemutar profesional lokal seperti PotPlayer untuk melakukan streaming.
+**Q: Mengapa "Cocok Presisi" skrip mengatakan tidak ada file duplikat, tetapi di client terlihat file duplikat? Refresh halaman atau ganti browser juga tidak dapat memindainya, apa yang harus dilakukan?**  
+**A:** "Cocok Presisi" di skrip menilai berdasarkan **hash konten file**, bukan berdasarkan nama file. Hanya jika nilai hash file dan ukuran file sama, file akan dianggap duplikat presisi.
 
-**Q: Apa perbedaan antara “Asli (Cepat)” dan “Asli” biasa di menu kualitas?**  
-**A:** Keduanya biasanya hampir tidak berbeda dalam kualitas gambar. Perbedaannya terutama terletak pada jalur transmisi dan strategi decoding di lapisan bawah.  
-Di antaranya, “**Asli (Cepat)**” menggunakan jalur yang telah dioptimalkan secara resmi untuk streaming, sehingga biasanya saat dipanggil oleh pemutar eksternal seperti PotPlayer, proses loading lebih cepat, seek lebih mulus, dan respons lebih stabil.  
-**Saran:** Baik untuk pemutaran di web maupun streaming eksternal, biasanya lebih disarankan memilih “Asli (Cepat)”.
+"File duplikat" yang ditampilkan client belum tentu sama dengan file yang kontennya benar-benar identik. Itu bisa mencakup file dengan nama sama, file dengan akhiran nama `(1)` / `(2)`, atau file dengan ukuran dan durasi yang cukup dekat. Selama konten sebenarnya berbeda, "Cocok Presisi" skrip tidak akan mengelompokkannya sebagai duplikat.
 
-**Q: Mengapa operasi yang baru saya lakukan di aplikasi ponsel atau web resmi PikPak, seperti unggah, hapus, atau pindah, tidak langsung sinkron di daftar analisis atau duplikat skrip?**  
-**A:** Ini adalah strategi desain skrip untuk menjamin kecepatan pencarian, analisis, dan filter. Agar tidak perlu menarik ulang puluhan ribu informasi file setiap kali ada operasi, skrip sangat bergantung pada snapshot memori lokal dan cache indeks.  
-Jika Anda baru saja melakukan banyak perubahan di aplikasi ponsel atau halaman web resmi, disarankan untuk me-refresh halaman agar indeks penuh diambil ulang.  
-**Saran:** Saat skrip sedang menjalankan analisis, pencarian duplikat, atau penataan, sebisa mungkin hindari mengubah batch data yang sama dari banyak perangkat secara bersamaan.
+Jika Anda ingin mencari file yang "terlihat duplikat" seperti ini, gunakan mode **Nama Mirip** di Cari Duplikat File atau Cari Duplikat Folder.
 
-**Q: Saat ekstraksi massal, apakah bisa memberikan kata sandi yang berbeda untuk banyak file sekaligus?**  
-**A:** Bisa. Ekstraksi massal pada skrip menggunakan mekanisme **pencocokan cerdas brankas kata sandi**: selama Anda sudah menyimpan kata sandi yang diketahui ke dalam brankas, saat memproses setiap arsip, skrip akan otomatis mencoba semua kata sandi di dalam brankas; setelah cocok, ekstraksi akan dimulai otomatis tanpa perlu memasukkan satu per satu secara manual.
+**Q: Mengapa beberapa video menampilkan pesan tidak dapat diputar saat pertama kali dibuka atau saat mengganti kualitas, tetapi dapat diputar lagi setelah beberapa saat?**  
+**A:** Situasi ini biasanya terkait dengan status persiapan stream video resmi PikPak atau status decoding browser, dan belum tentu merupakan kesalahan penilaian dari skrip.
 
-**Q: Saat ekstraksi massal muncul “sistem sibuk / tunggu untuk coba lagi”, apakah itu bug skrip?**  
-**A:** Bukan. Ini biasanya karena server cloud PikPak memicu batas frekuensi konkurensi, yaitu antarmuka resmi sedang sibuk, bukan karena skrip bermasalah.  
-Jika suatu file masih gagal setelah dicoba berkali-kali, biasanya berarti resource tersebut mungkin sudah rusak di cloud, dibatasi, atau kondisi server saat ini kurang baik. Disarankan coba lagi nanti, atau unduh file ke lokal lalu proses secara lokal.
+Beberapa video di web resmi juga mungkin gagal dibuka pertama kali, gagal sebentar saat mengganti kualitas, lalu dapat diputar setelah dibuka ulang beberapa saat kemudian. Error lapisan bawah yang diterima skrip umumnya mirip seperti:
 
-**Q: Informasi apa saja yang termasuk dalam file JSON konfigurasi yang diekspor?**  
-**A:** File JSON yang diekspor hanya berisi data konfigurasi lokal Anda di Enhancement Master, misalnya preferensi pencarian duplikat, aturan daftar hitam/putih, brankas kata sandi, sebagian riwayat, dan pengaturan fungsi lainnya.  
-**Tidak akan berisi** kata sandi akun PikPak Anda, sehingga aman digunakan untuk cadangan dan migrasi lintas perangkat.
+```text
+[VideoError] Code: 4, Msg: PipelineStatus::DEMUXER_ERROR_COULD_NOT_OPEN: FFmpegDemuxer: open context failed
+```
 
-**Q: Apakah impor cadangan akan menimpa konfigurasi atau daftar saya yang sekarang?**  
-**A:** Umumnya tidak. Skrip telah ditingkatkan ke logika **penggabungan cerdas**: saat impor, data berbentuk daftar seperti manajer file dan riwayat akan dideduplikasi lalu digabungkan terlebih dahulu, bukan langsung menimpa isi lokal.  
-Hanya sebagian kecil item pengaturan dasar, seperti mesin pencarian gambar atau alamat Aria2, yang akan mengikuti nilai dalam file impor. Karena itu, daftar dan catatan lokal yang Anda kumpulkan dalam jangka panjang biasanya tidak akan hilang.
+Error ini tidak dapat secara stabil membedakan apakah "resource resmi masih disiapkan" atau "kualitas saat ini memang tidak dapat diputar". Jika skrip memaksanya sebagai "sedang disiapkan" dan terus mencoba ulang, video yang benar-benar tidak dapat diputar juga bisa salah dinilai sebagai dapat diputar, sehingga pengalaman menjadi lebih buruk.
 
-**Q: Mengapa saat menghapus file secara massal, sebagian file ditandai dilindungi atau tidak bisa dihapus?**  
-**A:** Periksa dulu apakah file-file tersebut sudah tercatat di **Manajer File**. Jika Anda mengaktifkan aturan “lewati resource yang tercatat di manajer saat menghapus”, skrip akan memperlakukan file yang cocok sebagai item terlindungi agar tidak terhapus secara keliru.  
-**Cara mengatasinya:**  
-1. Buka pengaturan lalu hilangkan centang aturan perlindungan tersebut, kemudian jalankan ulang penghapusan;  
-2. Atau klik pintu masuk **“Manajer File”** pada toolbar / sidebar, lalu pilih **“Jalankan Pembersihan Sekarang”** untuk melakukan pembersihan fisik paksa pada item yang tercatat.
+Karena itu, skrip saat ini mempertahankan prompt "kualitas saat ini tidak tersedia" untuk menghindari penyesatan pengguna.
 
-**Q: Mengapa setelah saya menjalankan operasi “Tempel”, file tidak muncul di daftar?**  
-**A:** Periksa dulu apakah ruang tersisa di cloud drive Anda masih cukup. Saat ini PikPak resmi biasanya menggunakan strategi **intersepsi diam-diam** untuk kondisi “ruang tidak cukup”, yaitu ketika kapasitas melebihi batas, belum tentu muncul notifikasi yang jelas, melainkan operasi langsung dihentikan di latar belakang.  
-Karena itu, jika setelah tempel file tidak muncul, penyebab paling umum adalah batas kapasitas telah terpicu. Disarankan kosongkan ruang terlebih dahulu lalu coba lagi.
+Saat menemui situasi ini, Anda dapat mencoba:
 
-**Q: Apa fungsi “perbaiki otomatis magnet yang diblok” di dialog unduhan cloud? Kapan sebaiknya diaktifkan?**  
-**A:** Fitur ini akan otomatis membersihkan karakter Cina, emoji, simbol, dan konten pengganggu lain yang tercampur dalam magnet link, lalu secara cerdas mengekstrak kode ciri dan mengembalikan tautan ke format standar.  
-**Saran:** Biarkan tetap aktif secara default. Fitur ini sangat cocok untuk menangani magnet dari platform sosial, forum, atau aplikasi chat yang disisipi teks asing, dipotong kepalanya, atau sengaja dicemari.  
-Untuk magnet link yang sudah standar dan diawali `magnet:?`, skrip akan otomatis melewati perbaikan dan tidak memengaruhi unduhan normal.
+* Tunggu beberapa detik lalu buka ulang video;
+* Ganti ke kualitas lain;
+* Coba putar menggunakan pemutar eksternal.
 
-**Q: Apa itu “filter unduhan folder”? Jenis unduhan apa saja yang terpengaruh?**  
-**A:** Fitur ini digunakan untuk **secara otomatis mengecualikan file yang cocok berdasarkan ekstensi atau aturan nama** saat mengunduh seluruh folder. Misalnya, Anda dapat mengecualikan `.txt`, `.jpg`, atau file yang namanya mengandung kata kunci tertentu. Fitur ini tidak hanya berlaku untuk unduhan folder biasa, tetapi juga pada skenario **pengiriman folder ke Aria2 / Motrix**.
+Jika nanti ditemukan field status resmi yang lebih andal, masalah salah deteksi seperti ini dapat terus dioptimalkan.
 
-**Q: Saat menggunakan Aria2 / Motrix atau unduhan browser untuk folder cloud drive, apakah struktur level folder akan dipertahankan?**  
-**A:**  
-**Aria2 / Motrix: struktur level akan dipertahankan.**  
-Skrip akan otomatis mengkloning dan memulihkan struktur pohon direktori cloud drive selama proses pengiriman. Setelah unduhan selesai, struktur folder di disk lokal akan sebisa mungkin tetap konsisten dengan cloud drive. Pada saat yang sama, skrip juga akan otomatis membersihkan karakter khusus yang tidak didukung Windows (seperti `:` `*` `?` dan lainnya), serta sebisa mungkin memendekkan path yang terlalu panjang untuk mengurangi error unduhan.  
+**Q: Saat Ekstrak Massal muncul pesan "sistem sibuk / menunggu coba ulang", apakah ini Bug skrip?**  
+**A:** Bukan. Ini biasanya terjadi karena server cloud PikPak memicu batas concurrency atau frekuensi. Artinya interface resmi sedang sibuk, bukan skrip yang abnormal.
 
-**Unduhan browser bawaan: struktur level tidak akan dipertahankan.**  
-Karena keterbatasan protokol unduhan browser itu sendiri, file di dalam folder biasanya akan “diratakan” ke dalam satu direktori yang sama.  
+Jika file tertentu tetap gagal setelah beberapa kali dicoba ulang, biasanya resource tersebut mungkin sudah rusak di cloud, dibatasi, atau status server saat ini kurang baik. Disarankan mencoba lagi nanti, atau mengunduh file ke lokal sebelum diproses.
 
-**Saran:** Jika Anda ingin mempertahankan struktur direktori yang kompleks secara utuh, prioritaskan **pengiriman unduhan melalui Aria2 / Motrix**.
+**Q: Setelah hapus massal lalu restore, jumlah file normal, tetapi file tidak kembali ke folder asal dan struktur direktori terlihat kacau. Bisakah dipulihkan sekali klik?**  
+**A:** Situasi ini biasanya bukan kesalahan operasi dan bukan berarti logika skrip kehilangan file. Ini lebih mirip perilaku recycle bin resmi PikPak saat memulihkan dari **path virtual / hasil agregasi**.
 
-**Q: Apa itu “migrasi data multi-akun”? Bagaimana langkah penggunaannya?**  
-**A:** Fitur ini memungkinkan file atau folder dari akun saat ini dipindahkan dengan cepat dan mulus ke akun PikPak Anda yang lain.  
-**Langkah-langkahnya:**  
-1. Pilih file atau folder yang ingin dimigrasikan di akun saat ini;  
-2. Klik tombol **“Migrasi Data”** di bagian bawah;  
-3. Skrip akan otomatis mengenkripsi dan mengemas data, lalu otomatis keluar dari akun saat ini;  
-4. Setelah itu, Anda hanya perlu login seperti biasa ke akun tujuan;  
-5. Setelah login berhasil, skrip akan otomatis mendeteksi paket migrasi di cache lokal dan menampilkan prompt untuk menerima dengan sekali klik.
+Saat file dihapus massal dari **tampilan agregasi atau path virtual** seperti Cari Duplikat File, Tinjau File, Tinjau Folder, Terbaru, atau Favorit, file tersebut mungkin berasal dari beberapa folder asli yang berbeda. Setelah dihapus lalu dipulihkan dari recycle bin, mekanisme restore resmi terkadang tidak memulihkan setiap item ke direktori induk asalnya, tetapi memulihkan banyak file ke satu direktori terpadu, sehingga struktur direktori bertingkat asli menjadi rusak.
+
+Sebelum menghapus massal dari hasil agregasi seperti Cari Duplikat File, Tinjau File, Tinjau Folder, Terbaru, atau Favorit, pastikan dulu file tersebut memang tidak diperlukan lagi. Terutama saat file berasal dari beberapa direktori berbeda, sebisa mungkin hindari mengandalkan restore massal recycle bin setelah penghapusan.
+
+**Q: Mengapa sebagian file menampilkan status terlindungi atau tidak dapat dihapus saat hapus massal?**  
+**A:** Periksa dulu apakah file tersebut sudah dicatat di **Resource Manager**. Jika Anda mengaktifkan "Lewati item manager saat hapus" di pengaturan, skrip akan memperlakukan file yang cocok sebagai item terlindungi untuk mencegah salah hapus.
+
+**Solusi:**
+
+1. Buka pengaturan dan hapus centang aturan perlindungan tersebut, lalu jalankan penghapusan lagi;
+2. Atau klik entri **"Resource Manager"** di toolbar / sidebar, pilih **"Bersihkan Sekarang"**, lalu lakukan pembersihan fisik paksa pada item yang tercatat tersebut.
+
+**Q: Mengapa setelah saya menjalankan operasi "Tempel", file tidak muncul di daftar?**  
+**A:** Periksa dulu apakah sisa ruang cloud drive Anda cukup. PikPak resmi saat ini biasanya menggunakan strategi **pencegatan diam-diam** untuk "ruang tidak cukup", yaitu saat kapasitas melewati batas, belum tentu muncul prompt jelas, tetapi operasi langsung dihentikan di background.
+
+Karena itu, jika file tidak muncul setelah tempel, penyebab paling umum adalah batas kapasitas terpicu. Disarankan membersihkan ruang terlebih dahulu, lalu coba lagi.
+
+**Q: Apa itu "Migrasi Data multi-akun"? Bagaimana cara menggunakannya?**  
+**A:** Fitur ini dapat memindahkan file atau folder dari akun saat ini ke akun PikPak Anda yang lain dengan cepat.
+
+**Langkah-langkahnya:**
+
+1. Pilih file atau folder yang ingin dimigrasikan di akun saat ini;
+2. Klik tombol **"Migrasi Data"** di bagian bawah;
+3. Skrip akan otomatis mengenkripsi dan mengemas data, lalu logout dari akun saat ini;
+4. Setelah itu, Anda hanya perlu login normal ke akun target;
+5. Setelah login berhasil, skrip akan otomatis mendeteksi paket migrasi di cache lokal dan menampilkan popup untuk menerima dengan sekali klik.
 
 ---
 
-## 🛡️ Pernyataan Privasi & Keamanan (Privacy & Security)
+## 🛡️ Pernyataan Privasi dan Keamanan
 
-* **Lokal sebagai Prioritas**: Semua kemampuan inti skrip ini berinteraksi langsung dengan API resmi PikPak melalui browser. Token akun, brankas kata sandi, dan sebagian besar data konfigurasi lokal Anda secara default disimpan di lingkungan browser lokal.
-* **Tanpa Pengumpulan**: Skrip ini **tidak akan secara aktif mengumpulkan** data privasi pengguna, dan **tidak akan pernah** mengunggah informasi file atau kredensial akun Anda ke server pihak ketiga mana pun.
-* **Antarmuka Pihak Ketiga**: Hanya saat menggunakan fungsi tambahan seperti “pencarian subtitle online” atau “pencarian gambar dengan gambar”, skrip akan mengirimkan kata kunci pencarian atau parameter ciri gambar yang diperlukan ke layanan publik terkait, tanpa melibatkan informasi identitas pribadi Anda.
+* **Lokal dahulu**: Semua kemampuan inti skrip ini berinteraksi langsung dengan API resmi PikPak melalui browser. Token akun, Brankas Kata Sandi, dan sebagian besar data konfigurasi lokal Anda secara default disimpan di lingkungan browser lokal.
+* **Nol pengumpulan**: Skrip **tidak akan secara aktif mengumpulkan** data privasi pengguna, dan **tidak akan pernah** mengunggah informasi file atau kredensial akun Anda ke server pihak ketiga mana pun.
+* **Interface pihak ketiga**: Hanya saat menggunakan fitur tambahan seperti "pencarian subtitle online" atau "Cari dengan Gambar", skrip akan mengirim kata kunci pencarian atau parameter fitur gambar yang diperlukan ke layanan publik terkait, tanpa melibatkan informasi identitas pribadi Anda.
 
 ---
 
-## 🚀 Changelog
+## 🚀 Catatan Perubahan
+
+### V2.5.1
+
+* Menambahkan pengaturan **Pertahankan struktur internal folder saat mengunduh dengan Aria2**.
+* Mengoptimalkan **Parser Berbagi Tinjau File**, memperbaiki masalah seperti status tombol Folder di Atas yang abnormal setelah kembali.
+* Memperbaiki perilaku abnormal sakelar skrip untuk memblokir popup web resmi.
+* Menghapus logika lama yang memaksa antarmuka skrip disembunyikan pada jendela kecil, diganti menjadi penyembunyian teks tombol yang adaptif.
+
+<details>
+<summary>Lihat catatan perubahan lama</summary>
 
 ### V2.5.0
-* Menambahkan **Mode Parsing Berbagi**, mendukung parsing tautan berbagi, deteksi clipboard, pemindaian insight rekursif, penyimpanan file, pratinjau media, serta pratinjau/ekstraksi arsip.
-* Menambahkan **pengaturan domain akselerasi tautan unduhan langsung**, mendukung mode prefiks dan mode parameter kueri untuk menulis ulang tautan unduhan browser serta push Aria2 / Motrix.
-* Menambahkan **kontrol volume pemutar dengan roda mouse**, mendukung tampilan overlay volume dan status ikon bisu.
-* Mengoptimalkan **pemutar layar penuh web**, memperbaiki masalah pergeseran ke atas yang tidak sinkron dan getaran pada daftar putar, bilah kontrol, bilah progres, dan tombol samping.
-* Mengoptimalkan **adaptasi layar sempit dan penskalaan jendela**, merapikan logika penskalaan lama menjadi penyembunyian teks tombol secara adaptif agar teks tetap jelas di layar kecil.
-* Mengoptimalkan **penyortiran grid riwayat pemutaran**, memperbaiki masalah ikon dan teks tombol sortir yang tidak langsung diperbarui setelah memilih dari dropdown.
-* Mengoptimalkan **sorotan kata kunci pencarian**, sehingga nama file panjang akan memprioritaskan tampilan konten di sekitar kata kunci yang cocok.
-* Mengoptimalkan **pratinjau arsip**, menambahkan menu sortir dan dropdown jalur, serta mendukung ekstraksi sebagian file yang dipilih.
-* Mengoptimalkan **notifikasi penyimpanan pengaturan**, sehingga tidak ada notifikasi saat tidak ada perubahan, dan pengaturan biasa tidak lagi keliru meminta penyegaran halaman.
-* Memperbaiki masalah **push file 0KB ke Aria2 / Motrix**, dengan otomatis melewati file kosong yang tidak valid.
-* Memperbaiki beberapa detail UI, termasuk anomali tinggi baris, penyatuan ikon, lebar kolom bahasa Inggris, dan ukuran font dropdown jalur saat dimaksimalkan.
+
+* Menambahkan **mode Parser Berbagi**, mendukung parsing tautan berbagi, pengenalan clipboard, tinjauan rekursif, penyimpanan file, pratinjau media, dan pemrosesan arsip.
+* Menambahkan **pengaturan domain akselerasi direct link unduhan**, mendukung mode prefiks dan mode parameter kueri, dapat digunakan untuk rewrite tautan unduhan browser dan push Aria2 / Motrix.
+* Menambahkan pengaturan volume dengan roda mouse di pemutar, mendukung prompt overlay volume dan status ikon mute.
+* Mengoptimalkan pemutar Layar Penuh Web, adaptasi layar sempit, highlight pencarian, pratinjau arsip, dan prompt penyimpanan pengaturan.
+* Memperbaiki masalah push file 0KB di Aria2 / Motrix, tinggi baris abnormal, penyatuan ikon, lebar kolom bahasa Inggris, dan font drop-down path.
 
 ### V2.4.0
-* Menambahkan **pemeriksaan versi dan notifikasi pembaruan**.
-* Menambahkan **pengaturan pemutaran video**, termasuk membaca progres pemutaran saat membuka video dan memilih kualitas default.
-* Menambahkan fitur **layar penuh web untuk pemutaran video**.
-* Menambahkan pengaturan **sembunyikan teks tombol**, sehingga hanya ikon dan tooltip saat hover yang ditampilkan.
-* Meningkatkan pengalaman Tampilan Grid dan pemutaran video.
-* Meningkatkan lebar jendela Pengaturan dan dialog Brankas Kata Sandi.
-* Mengoptimalkan pengambilan data untuk mode Baru Ditambahkan dan Riwayat Pemutaran.
-* Meningkatkan sebagian logika interaksi.
+
+* Menambahkan pemeriksaan versi dan prompt pembaruan.
+* Menambahkan pengaturan pemutaran video, mendukung pembacaan progres pemutaran dan pemilihan kualitas default.
+* Menambahkan fungsi Layar Penuh Web untuk pemutaran video.
+* Menambahkan pengaturan Sembunyikan Teks Tombol, sehingga hanya ikon dan tooltip mengambang yang dapat dipertahankan.
+* Mengoptimalkan tampilan grid, pengalaman pemutaran video, jendela pengaturan, popup Brankas Kata Sandi, pengambilan data Terbaru dan Riwayat Putar.
 * Membersihkan output debug, konfigurasi redundan, dan kode mati berisiko rendah untuk mengurangi ukuran skrip.
 
-### V2.3.0 
-* Menambahkan **Asisten Perbaikan Protokol PotPlayer**.
+### V2.3.0
+
+* Menambahkan **asisten perbaikan protokol PotPlayer**.
 
 ### V2.2.3
+
 * Memperbaiki kegagalan unggahan.
-* Meningkatkan stabilitas UI.
+* Mengoptimalkan stabilitas UI.
 
 ### V2.2.2
-* Memperbaiki konflik hierarki tombol pintasan.
+
+* Memperbaiki konflik hierarki shortcut.
 
 ### V2.2.1
+
 * Memperbaiki masalah unduhan Aria2 / Motrix.
 
 ### V2.2.0
-* Menambahkan fitur **pemantauan magnet link dari clipboard** dan **pratinjau magnet link**.
+
+* Menambahkan fitur **pemantauan magnet link clipboard** dan **pratinjau magnet**.
 * Meningkatkan stabilitas UI.
 
 ### V2.1.1
-* Memperbaiki kegagalan koneksi Aria2 / Motrix pada lingkungan reverse proxy yang hanya mendukung RPC `ws://` / `wss://` atau menggunakan port nonstandar.
+
+* Memperbaiki masalah koneksi Aria2 / Motrix yang gagal pada lingkungan reverse proxy yang hanya mendukung RPC ws:// / wss:// atau port nonstandar.
 
 ### V2.1.0
-* Mendukung **deteksi tombol samping mouse** untuk navigasi tingkat direktori.
-* Peningkatan stabilitas.
+
+* Mendukung pemantauan tombol samping mouse untuk lompatan level direktori.
+* Mengoptimalkan stabilitas.
 
 ### V2.0.0
+
 * Bahasa yang didukung diperluas menjadi **简体中文 / 繁體中文 / English / 한국어 / 日本語 / Indonesia / Bahasa Melayu**.
-* UI dan arsitektur ditingkatkan, tombol pencarian gambar dipindahkan ke luar, serta ditambahkan **tampilan grid**.
+* UI dan arsitektur ditingkatkan, tombol Cari dengan Gambar dipindahkan keluar, dan tampilan grid ditambahkan.
 
 ### V1.3.2
-* Logika unggahan lokal diperkuat, ditambahkan direct-connect untuk IP Tiongkok Daratan.
-* Ambang kemiripan durasi pada pencarian duplikat file disesuaikan untuk mengoptimalkan akurasi deteksi.
+
+* Memperkuat logika unggahan lokal dan menambahkan koneksi langsung IP Tiongkok daratan.
+* Menyesuaikan ambang Durasi Mirip pada Cari Duplikat File dan mengoptimalkan akurasi deteksi.
 
 ### V1.3.1
-* Lebih lanjut mengoptimalkan masalah kedipan saat login.
+
+* Mengoptimalkan lebih lanjut masalah kedipan login.
 
 ### V1.3.0
-* Menambahkan fitur **migrasi data multi-akun**, mendukung pengemasan terenkripsi satu klik untuk file dalam jumlah besar dan transfer mulus ke akun lain.
-* Menambahkan mekanisme **hapus permanen**, yang dapat melewati tempat sampah saat menghapus untuk langsung membebaskan ruang cloud drive.
+
+* Menambahkan fitur Migrasi Data multi-akun.
+* Menambahkan mekanisme hapus permanen, mendukung melewati recycle bin untuk membebaskan ruang.
 
 ### V1.2.0
-* Mesin sniffing durasi video direstrukturisasi.
+
+* Merefactor mesin sniffing durasi video.
 
 ### V1.1.0
-* Aria2 kini mendukung **mempertahankan struktur path folder**, serta menambahkan pengingat kehilangan paket saat pengiriman dan ekspor daftar error sekali klik.
-* Unduhan cloud mendukung pengiriman massal dan deduplikasi cerdas, serta **pembersihan otomatis magnet link yang tercemar / diblok** (mendukung decoding otomatis Base32).
-* Antarmuka pratinjau ganti nama massal kini menambahkan **ikon dan tampilan sampul**, serta mendukung pratinjau gambar besar saat hover pada folder.
-* Fungsi impor ditingkatkan menjadi mode **“penggabungan cerdas”**, sehingga saat mengimpor cadangan tidak lagi menimpa daftar dan catatan lokal yang sudah ada.
+
+* Aria2 mendukung penyimpanan struktur path folder, menambahkan pengingat paket pengiriman hilang dan ekspor daftar error.
+* Unduhan cloud mendukung pengiriman massal dan deduplikasi cerdas, mendukung pembersihan otomatis magnet tercemar dan decoding otomatis Base32.
+* Antarmuka pratinjau Ubah Nama Massal menambahkan ikon dan tampilan sampul, mendukung pratinjau gambar besar saat hover folder.
+* Fitur impor ditingkatkan menjadi mode merge cerdas, sehingga impor cadangan tidak lagi menimpa daftar dan catatan lokal yang sudah ada.
+
+</details>
 
 ---
 
-## 🤝 Ucapan Terima Kasih (Acknowledgements)
+## 🤝 Terima Kasih
 
-Dalam bahasa desain UI dan sebagian logika pemanggilan API web, proyek ini banyak terinspirasi oleh [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴). Dengan hormat kami sampaikan penghargaan khusus.
+Proyek ini sangat terinspirasi oleh [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴) dalam bahasa desain UI dan sebagian logika pemanggilan API web. Hormat dan terima kasih.
 
 ---
 
-## ⚖️ Pernyataan Lisensi
+## ⚖️ Pernyataan License
 
 Proyek ini mengikuti lisensi **CC-BY-NC-SA-4.0**:
 
 * 🚫 Dilarang digunakan untuk tujuan komersial apa pun
 * 🧪 Hanya untuk pembelajaran pribadi, penelitian, dan pertukaran teknis
-* 📢 Redistribusi harus tetap mencantumkan atribusi dan menggunakan lisensi yang sama
+* 📢 Distribusi ulang wajib mempertahankan atribusi dan menggunakan lisensi yang sama
