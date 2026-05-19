@@ -12536,7 +12536,7 @@ const targetDesc = shareTargets.length > 0 ? L.lbl_scan_selected.replace('{n}', 
 const inputNonce = `${Date.now()}_${Math.random().toString(36).slice(2)}`;
 const m = showModal(`
     <div class="pk-share-modal-root" style="width:480px; max-width:90vw; display:flex; flex-direction:column; overflow:visible;">
-        <div style="padding:26px 30px 10px 30px; flex-shrink:0;">
+        <div style="padding:26px 30px 30px 30px; flex-shrink:0;">
             <h3 style="margin:0; font-size:18px; font-weight:700; border:none; line-height:1.2; color:var(--pk-fg);">${L.btn_share_parse_insight}</h3>
         </div>
         <div style="padding:0 30px 20px 30px; flex-shrink:0;">
