@@ -6,7 +6,7 @@
 
 [![今すぐインストール / 最新版に更新](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
-[![Version](https://img.shields.io/badge/Version-2.5.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-3.0.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
@@ -267,15 +267,26 @@
 
 ## 🚀 更新履歴
 
+### V3.0.0
+
+* **音楽プレイヤー**を追加し、音声ファイルのオンライン再生、プレイリスト、順次再生、シャッフル再生、1曲リピート、ポップアップモード、カバー表示、音量調整に対応しました。
+* **TXT プレビュー**を追加し、テキスト内のダウンロードリンクを識別してクラウドダウンロードへ送信できるようにしました。
+* **M3U プレイリスト出力**を追加し、選択した動画を M3U ファイルとして出力して外部プレイヤーで一括再生できるようにしました。
+* **既定の開き方**設定を追加し、スクリプトプレイヤーと PotPlayer のどちらを既定の再生経路にするか選択できるようにしました。
+* **共有解析モード**を最適化し、ページ読み込み、ディレクトリキャッシュ、再帰透視、共有プレビュー制限の案内、共有ファイルのオープン処理を強化しました。
+* **並び替えと表示設定**を最適化し、ホーム、ゴミ箱、再生履歴、ファイル透視、共有解析などの場面で並び替えと表示状態を統一しました。
+* **ゴミ箱**を最適化し、グリッド表示を追加しました。
+* **ローカルアップロードとログイン復元**を最適化し、公式アップロードのフォールバック案内、直接アップロード署名エラーの案内、公式ログイン状態の復元判定を追加しました。
+
+<details>
+<summary>過去の更新履歴を見る</summary>
+
 ### V2.5.1
 
 * **Aria2 ダウンロード時にフォルダ内部構造を保持** 設定を追加しました。
 * **共有解析ファイル透視** を最適化し、戻った後にフォルダを先頭に表示ボタンの状態が異常になる問題などを修正しました。
 * スクリプトが公式 Web 版ポップアップをブロックするスイッチの異常を修正しました。
 * 小さいウィンドウでスクリプト画面を強制非表示にする旧ロジックを削除し、ボタン文字を適応的に非表示にする方式へ変更しました。
-
-<details>
-<summary>過去の更新履歴を見る</summary>
 
 ### V2.5.0
 
