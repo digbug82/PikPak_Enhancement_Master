@@ -6,7 +6,7 @@
 
 [![Pasang Sekarang / Kemas Kini Versi Terkini](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
-[![Version](https://img.shields.io/badge/Version-2.5.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-3.0.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
@@ -267,15 +267,26 @@ Oleh itu, jika fail tidak muncul selepas tampal, sebab paling biasa ialah had ka
 
 ## 🚀 Log Kemas Kini
 
+### V3.0.0
+
+* Menambah **Pemain Muzik**, menyokong main balik audio dalam talian, senarai main, main ikut turutan, rawak, ulang satu lagu, mod popup, paparan kulit dan kawalan kelantangan.
+* Menambah **Pratonton TXT**, menyokong pengecaman pautan muat turun daripada teks dan penghantaran ke muat turun awan.
+* Menambah **Eksport Senarai Main M3U**, menyokong eksport video terpilih sebagai fail M3U untuk main balik pukal dalam pemain luaran.
+* Menambah tetapan **Kaedah Buka Lalai**, membolehkan laluan main balik lalai dipilih antara pemain skrip dan PotPlayer.
+* Mengoptimumkan **Mod Huraian Perkongsian**, meningkatkan pemuatan halaman, cache direktori, tinjauan rekursif, pemberitahuan had pratonton perkongsian dan pengendalian pembukaan fail perkongsian.
+* Mengoptimumkan **Keutamaan Susunan dan Paparan**, menyatukan status susunan dan paparan dalam Laman Utama, Tong Sampah, Sejarah Main Balik, Tinjauan Fail dan Huraian Perkongsian.
+* Mengoptimumkan **Tong Sampah**, menambah paparan grid.
+* Mengoptimumkan **Muat Naik Tempatan dan Pemulihan Log Masuk**, menambah pemberitahuan sandaran muat naik rasmi, pemberitahuan ralat tandatangan muat naik terus dan pengesanan pemulihan status log masuk rasmi.
+
+<details>
+<summary>Lihat log kemas kini lama</summary>
+
 ### V2.5.1
 
 * Menambah tetapan **Aria2 kekalkan struktur dalaman folder semasa memuat turun**.
 * Mengoptimumkan **Hurai Perkongsian Tinjauan Fail**, membaiki isu seperti status butang Folder di Atas yang tidak normal selepas kembali.
 * Membaiki kelakuan tidak normal suis skrip yang menyekat popup web rasmi.
 * Mengalih keluar logik lama yang memaksa antara muka skrip disembunyikan dalam tetingkap kecil, diganti dengan penyembunyian teks butang secara adaptif.
-
-<details>
-<summary>Lihat log kemas kini lama</summary>
 
 ### V2.5.0
 
