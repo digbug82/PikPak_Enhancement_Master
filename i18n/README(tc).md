@@ -6,7 +6,7 @@
 
 [![立即安裝 / 更新最新版](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
-[![Version](https://img.shields.io/badge/Version-2.5.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-3.0.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
@@ -267,15 +267,26 @@
 
 ## 🚀 更新日誌
 
+### V3.0.0
+
+* 新增 **音樂播放器**，支援音訊檔案線上播放、播放清單、順序播放、隨機播放、單曲循環、彈窗模式、封面顯示與音量控制。
+* 新增 **TXT 預覽**，支援從文字中識別下載連結並提交雲端下載。
+* 新增 **M3U 播放清單匯出**，支援將選取的影片匯出為 M3U 檔案，方便外部播放器批次播放。
+* 新增 **預設開啟方式** 設定，可在腳本播放器與 PotPlayer 之間選擇預設播放路徑。
+* 優化 **分享解析模式**，增強分頁載入、目錄快取、遞迴透視、分享預覽限制提示與分享檔案開啟處理。
+* 優化 **排序與檢視偏好**，統一首頁、回收站、播放歷史、檔案透視、分享解析等場景的排序和檢視狀態。
+* 優化 **回收站**，新增網格檢視。
+* 優化 **本機上傳與登入恢復**，增加官方上傳兜底提示、直傳簽名錯誤提示與官方登入狀態恢復判斷。
+
+<details>
+<summary>查看歷史更新日誌</summary>
+
 ### V2.5.1
 
 * 新增 **Aria2 下載保存資料夾內部結構** 設定。
 * 優化 **分享解析文件透視**，修復返回後資料夾置頂按鈕狀態異常等問題。
 * 修復腳本遮蔽官方網頁端彈窗開關異常。
 * 移除小視窗下強制隱藏腳本介面的舊邏輯，改為按鈕文字自適應隱藏。
-
-<details>
-<summary>查看歷史更新日誌</summary>
 
 ### V2.5.0
 
