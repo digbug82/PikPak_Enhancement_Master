@@ -6,7 +6,7 @@
 
 [![Instal Sekarang / Perbarui ke Versi Terbaru](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
-[![Version](https://img.shields.io/badge/Version-2.5.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-3.0.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
@@ -267,15 +267,26 @@ Karena itu, jika file tidak muncul setelah tempel, penyebab paling umum adalah b
 
 ## 🚀 Catatan Perubahan
 
+### V3.0.0
+
+* Menambahkan **Pemutar Musik**, mendukung pemutaran audio online, daftar putar, putar berurutan, acak, ulang satu lagu, mode popup, tampilan sampul, dan kontrol volume.
+* Menambahkan **Pratinjau TXT**, mendukung deteksi tautan unduhan dari teks dan pengiriman ke unduhan cloud.
+* Menambahkan **Ekspor Daftar Putar M3U**, mendukung ekspor video terpilih sebagai file M3U untuk pemutaran massal di pemutar eksternal.
+* Menambahkan pengaturan **Metode Buka Default**, memungkinkan pemilihan jalur pemutaran default antara pemutar skrip dan PotPlayer.
+* Mengoptimalkan **Mode Parsing Berbagi**, meningkatkan pemuatan halaman, cache direktori, insight rekursif,提示 batas pratinjau berbagi, dan penanganan pembukaan file berbagi.
+* Mengoptimalkan **Preferensi Pengurutan dan Tampilan**, menyatukan status pengurutan dan tampilan di Beranda, Sampah, Riwayat Pemutaran, Insight File, dan Parsing Berbagi.
+* Mengoptimalkan **Sampah**, menambahkan tampilan grid.
+* Mengoptimalkan **Unggahan Lokal dan Pemulihan Login**, menambahkan提示 fallback unggahan resmi,提示 kesalahan tanda tangan unggahan langsung, dan deteksi pemulihan status login resmi.
+
+<details>
+<summary>Lihat catatan perubahan lama</summary>
+
 ### V2.5.1
 
 * Menambahkan pengaturan **Pertahankan struktur internal folder saat mengunduh dengan Aria2**.
 * Mengoptimalkan **Parser Berbagi Tinjau File**, memperbaiki masalah seperti status tombol Folder di Atas yang abnormal setelah kembali.
 * Memperbaiki perilaku abnormal sakelar skrip untuk memblokir popup web resmi.
 * Menghapus logika lama yang memaksa antarmuka skrip disembunyikan pada jendela kecil, diganti menjadi penyembunyian teks tombol yang adaptif.
-
-<details>
-<summary>Lihat catatan perubahan lama</summary>
 
 ### V2.5.0
 
