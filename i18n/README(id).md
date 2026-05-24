@@ -273,10 +273,10 @@ Karena itu, jika file tidak muncul setelah tempel, penyebab paling umum adalah b
 * Menambahkan **Pratinjau TXT**, mendukung deteksi tautan unduhan dari teks dan pengiriman ke unduhan cloud.
 * Menambahkan **Ekspor Daftar Putar M3U**, mendukung ekspor video terpilih sebagai file M3U untuk pemutaran massal di pemutar eksternal.
 * Menambahkan pengaturan **Metode Buka Default**, memungkinkan pemilihan jalur pemutaran default antara pemutar skrip dan PotPlayer.
-* Mengoptimalkan **Mode Parsing Berbagi**, meningkatkan pemuatan halaman, cache direktori, insight rekursif,提示 batas pratinjau berbagi, dan penanganan pembukaan file berbagi.
+* Mengoptimalkan **Mode Parsing Berbagi**, meningkatkan pemuatan halaman, cache direktori, insight rekursif, pemberitahuan batas pratinjau berbagi, dan penanganan pembukaan file berbagi.
 * Mengoptimalkan **Preferensi Pengurutan dan Tampilan**, menyatukan status pengurutan dan tampilan di Beranda, Sampah, Riwayat Pemutaran, Insight File, dan Parsing Berbagi.
 * Mengoptimalkan **Sampah**, menambahkan tampilan grid.
-* Mengoptimalkan **Unggahan Lokal dan Pemulihan Login**, menambahkan提示 fallback unggahan resmi,提示 kesalahan tanda tangan unggahan langsung, dan deteksi pemulihan status login resmi.
+* Mengoptimalkan **Unggahan Lokal dan Pemulihan Login**, menambahkan pemberitahuan fallback unggahan resmi, pemberitahuan kesalahan tanda tangan unggahan langsung, dan deteksi pemulihan status login resmi.
 
 <details>
 <summary>Lihat catatan perubahan lama</summary>
