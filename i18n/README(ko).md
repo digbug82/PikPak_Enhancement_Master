@@ -6,7 +6,7 @@
 
 [![지금 설치 / 최신 버전 업데이트](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
-[![Version](https://img.shields.io/badge/Version-2.5.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-3.0.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
@@ -267,15 +267,26 @@
 
 ## 🚀 업데이트 로그
 
+### V3.0.0
+
+* **음악 플레이어**를 추가하여 오디오 파일 온라인 재생, 재생 목록, 순차 재생, 랜덤 재생, 단일 곡 반복, 팝업 모드, 커버 표시 및 볼륨 제어를 지원합니다.
+* **TXT 미리보기**를 추가하여 텍스트에서 다운로드 링크를 인식하고 클라우드 다운로드로 제출할 수 있습니다.
+* **M3U 재생 목록 내보내기**를 추가하여 선택한 동영상을 M3U 파일로 내보내고 외부 플레이어에서 일괄 재생할 수 있습니다.
+* **기본 열기 방식** 설정을 추가하여 스크립트 플레이어와 PotPlayer 중 기본 재생 경로를 선택할 수 있습니다.
+* **공유 분석 모드**를 최적화하여 페이지 로딩, 디렉터리 캐시, 재귀 투시, 공유 미리보기 제한 안내 및 공유 파일 열기 처리를 강화했습니다.
+* **정렬 및 보기 설정**을 최적화하여 홈, 휴지통, 재생 기록, 파일 투시, 공유 분석 등에서 정렬 및 보기 상태를 통일했습니다.
+* **휴지통**을 최적화하고 그리드 보기를 추가했습니다.
+* **로컬 업로드 및 로그인 복구**를 최적화하여 공식 업로드 폴백 안내, 직접 업로드 서명 오류 안내 및 공식 로그인 상태 복구 판단을 추가했습니다.
+
+<details>
+<summary>이전 업데이트 로그 보기</summary>
+
 ### V2.5.1
 
 * **Aria2 다운로드 시 폴더 내부 구조 유지** 설정을 추가했습니다.
 * **공유 분석 파일 투시**를 최적화하고, 돌아온 뒤 폴더 상단 고정 버튼 상태가 비정상인 문제 등을 수정했습니다.
 * 스크립트가 공식 웹 팝업을 차단하는 스위치의 이상 동작을 수정했습니다.
 * 작은 창에서 스크립트 인터페이스를 강제로 숨기던 기존 로직을 제거하고, 버튼 텍스트가 적응형으로 숨겨지도록 변경했습니다.
-
-<details>
-<summary>이전 업데이트 로그 보기</summary>
 
 ### V2.5.0
 
