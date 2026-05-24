@@ -6,7 +6,7 @@
 
 [![Install / Update Latest](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
-[![Version](https://img.shields.io/badge/Version-2.5.1-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
+[![Version](https://img.shields.io/badge/Version-3.0.0-0067C0?style=flat-square)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
@@ -267,6 +267,20 @@ Therefore, if files do not appear after paste, the most common reason is that th
 
 ## 🚀 Changelog
 
+### V3.0.0
+
+* Added **Music Player**, supporting online audio playback, playlists, sequential play, shuffle, single-track repeat, popup mode, cover display, and volume control.
+* Added **TXT Preview**, supporting download link detection from text and submission to cloud downloads.
+* Added **M3U Playlist Export**, allowing selected videos to be exported as M3U files for batch playback in external players.
+* Added **Default Open Method** setting, allowing the default playback path to be selected between the script player and PotPlayer.
+* Optimized **Share Parsing Mode**, improving paged loading, directory cache, recursive insight, share preview limitation prompts, and shared file opening.
+* Optimized **Sorting and View Preferences**, unifying sorting and view states across Home, Trash, Playback History, File Insight, and Share Parsing.
+* Optimized **Trash**, adding grid view support.
+* Optimized **Local Upload and Login Recovery**, adding official upload fallback prompts, direct-upload signature error prompts, and official login state recovery detection.
+
+<details>
+<summary>View historical changelog</summary>
+
 ### V2.5.1
 
 * Added the **Preserve folder structure when downloading with Aria2** setting.
@@ -274,16 +288,13 @@ Therefore, if files do not appear after paste, the most common reason is that th
 * Fixed abnormal behavior of the switch that blocks official web pop-ups.
 * Removed the old logic that forcibly hid the script interface in small windows, changing it to adaptive hiding of button text.
 
-<details>
-<summary>View historical changelog</summary>
-
 ### V2.5.0
 
 * Added **Share Parser mode**, supporting share link parsing, clipboard recognition, recursive perspective, file saving, media preview, and archive handling.
 * Added **direct download acceleration domain setting**, supporting prefix mode and query-parameter mode, usable for browser downloads and Aria2 / Motrix push link rewriting.
 * Added mouse-wheel volume adjustment in the player, with volume overlay prompts and mute icon status.
 * Optimized the Web Fullscreen player, narrow-screen adaptation, search highlighting, archive preview, and settings-save prompts.
-* Fixed issues with Aria2 / Motrix pushing 0KB files, abnormal row height, icon consistency, English column widths, and path drop-down fonts.
+* Fixed issues with Aria2 / Motrix pushing 0KB files, abnormal row height, icon consistency, English column widths, 和 path drop-down fonts.
 
 ### V2.4.0
 
