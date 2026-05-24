@@ -22805,7 +22805,7 @@ audioFailNextTimer = setTimeout(() => {
 if (destroyed || token !== loadToken) return;
 audioFailNextTimer = null;
 audioFailAutoSkipCount++;
-switchAudio(audioPlayMode === 'shuffle' ? getShuffleIndex() : curIdx + 1);
+switchAudio(audioPlayMode === 'shuffle' ? getAudioShuffleNextIndex() : curIdx + 1);
 }, 3000);
 };
 const markAudioFinalFailure = (text) => {
