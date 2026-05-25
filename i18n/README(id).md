@@ -25,10 +25,10 @@
 
 ### ✨ Mesin Pengalaman dan Navigasi
 
-* **Navigasi tombol samping**: Mendukung tombol samping mouse untuk maju / mundur, sehingga Anda dapat berpindah cepat antarlevel direktori.
-* **Bilah path lanjutan**: Mendukung geser roda mouse, perpindahan drop-down direktori setingkat, tampilan path, dan lompatan penelusuran asal.
-* **Pencarian seluruh drive yang ditingkatkan**: Mendukung pencarian berdasarkan nama file dan path file, menandai bagian kata kunci yang cocok dengan warna merah, dan memprioritaskan tampilan konten di sekitar kata kunci pada nama file yang panjang.
-* **Preferensi penelusuran**: Mendukung preferensi urutan, preferensi tampilan, mempertahankan posisi penelusuran, Mode Media, Sembunyikan Teks Tombol, thumbnail sampul media buram, dan mode malam.
+* **Navigasi tombol samping**: Mendukung tombol samping mouse untuk maju / mundur, sehingga Anda dapat berpindah cepat antar tingkat direktori.
+* **Bilah path lanjutan**: Mendukung gulir roda mouse, perpindahan dropdown direktori sejajar, pantulan path, dan lompatan telusur balik.
+* **Peningkatan pencarian seluruh drive**: Mendukung pencarian berdasarkan nama file dan path file, menandai bagian kata kunci dengan warna merah, dan memprioritaskan tampilan di sekitar kata kunci pada nama file panjang.
+* **Preferensi penelusuran**: Mendukung preferensi pengurutan, preferensi tampilan, mempertahankan posisi penelusuran, mode media, menyembunyikan teks tombol, memburamkan thumbnail sampul media, dan mode malam.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_id.gif" width="1100" alt="Path">
@@ -38,68 +38,71 @@
 
 ### 📂 Manajemen Massal dan Ruang
 
-* **Ubah Nama Massal**: Mendukung ganti / hapus dengan regex, nomor urut episode, pemformatan teks, penamaan standar FC2, penghapusan prefiks iklan, serta perbaikan ekstensi cerdas berbasis MIME.
+* **Ubah Nama Massal**: Mendukung penggantian / penghapusan regex, nomor urut episode, pemformatan teks, penamaan standar FC2, penghapusan prefiks iklan, serta perbaikan ekstensi cerdas berbasis MIME.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/rename/rename_id.gif" width="550" alt="Ubah Nama Massal">
 </p>
 
-* **Analisis file**: Menggabungkan pemfilteran file dan kemampuan Cari Duplikat File. Pencarian duplikat mendukung tiga jenis analisis: **hash Cocok Presisi / Durasi Mirip video / Nama Mirip**.
-* **Pemfilteran yang ditingkatkan**: Mendukung pemfilteran berdasarkan ukuran, tipe, path, kata kunci, dan kondisi lain, serta menyediakan bantuan massal seperti Centang Sekali Klik, Balik Pilihan, dan Pilih berdasarkan Folder.
+* **Analisis File**: Menggabungkan Filter File dan Cari Duplikat File, dengan analisis duplikasi **kecocokan hash presisi / kemiripan durasi video / kemiripan nama**.
+* **Peningkatan filter**: Mendukung filter berdasarkan ukuran, jenis, path, kata kunci, dan kondisi lainnya, serta menyediakan bantuan massal seperti pilih semua, balik pilihan, dan pilih berdasarkan folder.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_scan/file_scan_id.gif" alt="Tinjau File">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_dup/file_dup_id.gif" alt="Cari Duplikat File">
 </p>
 
-* **Analisis folder**: Menggabungkan Tinjau Folder dan Cari Duplikat Folder. Pencarian duplikat mendukung tiga mode analisis: **nama / kemiripan / tingkat cakupan**, cocok untuk menangani episode duplikat, paket gambar, direktori dokumen, dan lainnya.
+* **Analisis Folder**: Menggabungkan Tinjau Folder dan Cari Duplikat Folder, dengan tiga mode analisis **nama / kemiripan / rasio kandungan**, cocok untuk menangani episode duplikat, paket gambar, direktori materi, dan lainnya.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder_scan/folder_scan_id.gif" alt="Tinjau Folder">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder_dup/folder_dup_id.gif" alt="Cari Duplikat Folder">
 </p>
 
-* **Ekspor Direktori**: Mendukung ekspor direktori saat ini sebagai pohon direktori atau daftar direktori, sehingga mudah untuk arsip, pemeriksaan, dan berbagi struktur file.
+* **Ekspor playlist M3U**: Mendukung ekspor video yang dipilih sebagai file M3U agar mudah diputar massal di pemutar eksternal.
+* **Ekspor Direktori**: Mendukung ekspor pohon direktori atau daftar direktori saat ini untuk pengarsipan, pemeriksaan, dan berbagi struktur file.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_id.png" width="350" alt="Ekspor Direktori">
 </p>
 
-* **Pengaturan cerdas**: Mendukung hapus permanen, pembersihan folder kosong, Ekstrak Massal, dan pembersihan otomatis untuk file yang sudah diekstrak.
-* **Resource Manager**: Mendukung daftar resource khusus yang dapat digunakan sebagai blacklist untuk pembersihan, atau sebagai daftar perlindungan yang otomatis melewati item yang cocok saat penghapusan massal.
+* **Perapian cerdas**: Mendukung penghapusan permanen, pembersihan folder kosong, Ekstrak Massal, serta pembersihan otomatis untuk file yang sudah diekstrak.
+* **Resource Manager**: Mendukung daftar sumber daya kustom yang dapat dipakai sebagai blacklist pembersihan, atau sebagai daftar perlindungan yang otomatis melewati item cocok saat penghapusan massal.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/manager/manager_id.gif" width="550" alt="Resource Manager">
 </p>
 
-> ⚠️ Saat menjalankan operasi berat seperti analisis, pengaturan, hapus massal, pindah massal, atau Ekstrak Massal, tidak disarankan mengubah kumpulan file yang sama dari klien lain secara bersamaan agar tidak terjadi konflik sinkronisasi.
+> ⚠️ Saat menjalankan operasi berat seperti analisis, perapian, penghapusan massal, pemindahan massal, atau Ekstrak Massal, tidak disarankan mengubah kumpulan file yang sama dari klien lain secara bersamaan agar tidak terjadi konflik sinkronisasi.
 
 ---
 
 ### 🌐 Transfer, Unduhan Cloud, dan Parser Berbagi
 
-* **Tinjauan File Berbagi**: Mendukung pemindaian dan pemfilteran rekursif pada konten berbagi, sehingga mudah mempratinjau struktur internal berbagi sebelum menyimpan.
-* **Manajemen berbagi**: Mendukung pengaturan batas jumlah ekstraksi berbagi. Setelah kondisi terpenuhi, berbagi dapat otomatis dibatalkan sehingga tautan menjadi tidak valid.
-* **Perlindungan unggahan**: Menyertakan pengingat keluar saat unggahan berlangsung, serta perlindungan dan pembersihan untuk unggahan terputus, tugas tersisa, dan file abnormal.
-* **Peningkatan unduhan cloud**: Mendukung deduplikasi otomatis untuk tautan offline massal. Pembersihan magnet cerdas bawaan dapat mengekstrak hash Base32 / Hex dan menghapus teks pengganggu.
+* **Tinjau file berbagi**: Mendukung pemindaian dan pemfilteran rekursif pada konten berbagi, sehingga Anda dapat melihat struktur internalnya sebelum menyimpan.
+* **Manajemen berbagi**: Mendukung pengaturan batas jumlah ekstraksi berbagi; setelah kondisi tercapai, berbagi dapat otomatis dibatalkan agar link menjadi tidak valid.
+* **Perlindungan unggahan**: Menyediakan pengingat keluar saat unggahan berlangsung, serta perlindungan dan pembersihan untuk unggahan terputus, tugas sisa, dan file abnormal.
+* **Peningkatan unduhan cloud**: Mendukung deduplikasi otomatis link offline massal; pembersihan magnet cerdas bawaan dapat mengekstrak hash Base32 / Hex dan menghapus teks pengganggu.
+* **Ekstraksi magnet TXT**: Mendukung pratinjau teks TXT dan mengenali link unduhan magnet, HTTP, FTP, ed2k, thunder, dan lainnya dari teks untuk dikirim ke unduhan cloud.
 * **Pratinjau magnet**: Jika konten magnet memiliki beberapa gambar pratinjau, pratinjau multi-gambar didukung.
-* **Fallback torrent dan snapshot**: Mendukung parsing file `.torrent`. Untuk beberapa tautan yang medianya tidak dapat dikumpulkan langsung, tersedia solusi penyimpanan snapshot web sebagai fallback.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_id.png" height="320" alt="Magnet">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_id.gif" height="320" alt="Berbagi">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_id.gif" height="320" alt="Bagikan">
 </p>
 
-> ⚠️ Pencegatan otomatis untuk batas jumlah ekstraksi berbagi hanya berlaku saat halaman web tetap terbuka dan perangkat tidak tidur. 
+> ⚠️ Pemblokiran otomatis berdasarkan batas jumlah ekstraksi berbagi hanya berlaku saat halaman web tetap terbuka dan perangkat tidak tidur.
 
 ---
 
 ### 🎬 Peningkatan Media Imersif
 
-* **Peningkatan mesin pemutar**: Mendukung kecepatan 0.5x - 3.0x, rotasi dan flip, rasio paksa, lewati intro/outro otomatis, putar beruntun / loop, dan pratinjau thumbnail pada bilah progres.
-* **Sistem subtitle**: Mendukung pemuatan subtitle cloud dengan nama sama, impor subtitle lokal, dan pencarian subtitle online. Juga mendukung penyesuaian offset waktu subtitle, posisi subtitle, ukuran font, dan transparansi latar.
-* **Bantuan visual**: Mendukung pencarian gambar dari gambar atau frame video saat ini, sehingga mudah menelusuri sampul, aktor, anime, atau sumber materi.
-* **Mode Media**: Dapat diaktifkan di pengaturan agar direktori yang hanya berisi video atau hanya berisi gambar secara default diurutkan berdasarkan nama A-Z, meningkatkan kesinambungan penelusuran episode / komik.
+* **Peningkatan mesin pemutaran**: Mendukung kecepatan 0.5x - 3.0x, rotasi dan flip, rasio paksa, lewati intro / outro otomatis, putar lanjut / loop, serta pratinjau thumbnail pada bilah progres.
+* **Pemutar musik**: Mendukung pemutaran file audio online, playlist, pemutaran berurutan, acak, loop satu lagu, mode popup, tampilan sampul, dan kontrol volume.
+* **Mode popup audio**: Mendukung pemutar musik sebagai jendela kecil terpisah, sambil mempertahankan kontrol pemutaran, tampilan sampul, dan adaptasi tema.
+* **Sistem subtitle**: Mendukung pemuatan subtitle cloud bernama sama, impor subtitle lokal, dan pencarian subtitle online; mendukung penyesuaian offset subtitle, posisi, ukuran font, dan transparansi latar.
+* **Bantuan visual**: Mendukung pencarian gambar dari gambar atau frame video saat ini, untuk membantu menelusuri sampul, aktor, anime, atau sumber materi.
+* **Mode media**: Dapat diaktifkan di pengaturan, sehingga direktori khusus video atau khusus gambar secara default diurutkan berdasarkan nama A-Z untuk meningkatkan kelanjutan penelusuran episode / komik.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/video/video_id.gif" alt="Video">
@@ -109,37 +112,38 @@
 
 ### ⚡ Unduhan, Pemutaran Eksternal, dan Distribusi
 
-* **Asisten perbaikan protokol PotPlayer**: Menyertakan deteksi dan bantuan perbaikan protokol PotPlayer untuk mengurangi masalah browser yang tidak dapat memanggil pemutar eksternal.
-* **Distribusi RPC**: Mendukung pengiriman file melalui protokol RPC ke node unduhan seperti Aria2 / Motrix.
-* **Pemulihan struktur direktori**: Saat mengirim seluruh folder, struktur direktori pohon di cloud drive dapat dipulihkan otomatis agar direktori tidak menjadi rata setelah diunduh.
-* **Filter Unduhan**: Mendukung pemfilteran file berdasarkan ukuran file, ekstensi, dan kata kunci nama, berlaku untuk unduhan browser dan push Aria2 / Motrix.
-* **Domain akselerasi direct link unduhan**: Mendukung domain akselerasi unduhan khusus, dengan dua mode rewrite reverse proxy: prefiks tautan asli lengkap dan penerusan parameter URL.
-* **Penanganan pengecualian**: Secara otomatis melewati file tidak valid 0KB saat push, dan mendukung ekspor daftar kegagalan.
+* **Metode buka default**: Anda dapat memilih metode pemutaran default antara pemutar skrip dan PotPlayer.
+* **Asisten perbaikan protokol PotPlayer**: Deteksi dan bantuan perbaikan protokol PotPlayer bawaan mengurangi masalah saat browser tidak dapat memanggil pemutar eksternal.
+* **Distribusi RPC**: Mendukung pengiriman file ke node unduhan seperti Aria2 / Motrix melalui protokol RPC.
+* **Pemulihan struktur direktori**: Saat mendorong seluruh folder, struktur pohon di cloud drive dapat dipulihkan otomatis agar direktori tidak menjadi rata setelah diunduh.
+* **Filter Unduhan**: Mendukung filter file berdasarkan ukuran file, ekstensi, dan kata kunci nama, berlaku untuk unduhan browser serta push Aria2 / Motrix.
+* **Domain akselerasi direct link unduhan**: Mendukung domain akselerasi unduhan kustom, dengan dua mode rewrite reverse proxy: prefiks link asli lengkap dan penerusan parameter URL.
+* **Penanganan pengecualian**: Otomatis melewati file tidak valid 0KB saat push dan mendukung ekspor daftar gagal.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_id.png" height="290" alt="Filter Unduhan">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_id.gif" height="290" alt="Aria2">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_id.gif" height="290" alt="aria2">
 </p>
 
 ---
 
 ### ⚙️ Konfigurasi dan Manajemen Data
 
-* **Cadangan konfigurasi**: Mendukung ekspor preferensi, aturan manajemen, Brankas Kata Sandi, catatan riwayat, dan sebagian konfigurasi fitur sebagai file cadangan JSON dengan verifikasi sidik jari.
-* **Impor cerdas**: Saat impor, data berbentuk daftar seperti daftar dan catatan akan digabung dan dideduplikasi. Item pengaturan dasar diperbarui sesuai file impor.
+* **Backup konfigurasi**: Mendukung ekspor preferensi, aturan manajemen, Brankas Kata Sandi, riwayat, dan sebagian konfigurasi fitur sebagai file backup JSON dengan verifikasi sidik jari.
+* **Impor cerdas**: Saat impor, data berbentuk daftar seperti daftar dan catatan akan digabung dan dideduplikasi; pengaturan dasar diperbarui sesuai file impor.
 * **Pembersihan data lokal**: Mendukung pembersihan indeks seluruh drive, preferensi, aturan manajemen, Brankas Kata Sandi, cache video, dan cache runtime berdasarkan kategori.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/cache/cache_id.png" width="350" alt="Cache">
 </p>
 
-* **Brankas Kata Sandi**: Mengelola kata sandi ekstraksi yang sering digunakan secara terpusat untuk percobaan otomatis Ekstrak Massal dan pengisian cepat.
+* **Brankas Kata Sandi**: Mengelola kata sandi ekstraksi umum secara terpusat untuk percobaan otomatis Ekstrak Massal dan pengisian cepat.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/archive/archive_id.png" width="250" alt="Brankas Kata Sandi">
 </p>
 
-* **Migrasi Data multi-akun**: Mendukung enkripsi dan pengemasan item terpilih, lalu otomatis dikenali dan diambil alih setelah akun lain login, sehingga transfer lintas akun dapat dilakukan.
+* **Migrasi Data multi-akun**: Mendukung pengemasan terenkripsi untuk item yang dipilih, lalu otomatis mengenali dan mengambil alih setelah login dengan akun lain untuk transfer lintas akun.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/migrate/migrate_id.gif" alt="Migrasi Data">
