@@ -25,10 +25,10 @@
 
 ### ✨ Enjin Pengalaman dan Navigasi
 
-* **Navigasi butang sisi**: Menyokong butang sisi tetikus untuk maju / undur, supaya anda boleh bertukar pantas antara tahap direktori.
-* **Bar laluan lanjutan**: Menyokong gelongsor roda tetikus, pertukaran drop-down direktori setara, paparan laluan, dan lompatan jejakan asal.
-* **Carian seluruh pemacu dipertingkat**: Menyokong carian mengikut nama fail dan laluan fail, menandakan bahagian kata kunci yang sepadan dengan warna merah, dan mengutamakan paparan kandungan berhampiran kata kunci untuk nama fail panjang.
-* **Keutamaan pelayaran**: Menyokong keutamaan susunan, keutamaan paparan, mengekalkan posisi pelayaran, Mod Media, Sembunyikan Teks Butang, lakaran kecil kulit media kabur, dan mod malam.
+* **Navigasi butang sisi**: Menyokong butang sisi tetikus untuk maju / undur, supaya anda boleh bertukar pantas antara aras direktori.
+* **Bar laluan lanjutan**: Menyokong tatal roda, pertukaran dropdown direktori searas, paparan semula laluan, dan lompat jejak balik.
+* **Peningkatan carian seluruh pemacu**: Menyokong carian mengikut nama fail dan laluan fail, menyerlahkan bahagian kata kunci dengan merah, dan mengutamakan kandungan sekitar kata kunci dalam nama fail panjang.
+* **Keutamaan pelayaran**: Menyokong keutamaan susunan, keutamaan paparan, mengekalkan posisi pelayaran, mod media, menyembunyikan teks butang, mengaburkan imej kecil kulit media, dan mod malam.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_ms.gif" width="1100" alt="Laluan">
@@ -38,68 +38,71 @@
 
 ### 📂 Pengurusan Kelompok dan Ruang
 
-* **Ubah Nama Kelompok**: Menyokong ganti / padam dengan regex, nombor siri episod, pemformatan teks, penamaan piawai FC2, pembuangan prefiks iklan, serta pembaikan sambungan pintar berasaskan MIME.
+* **Ubah Nama Kelompok**: Menyokong ganti / padam regex, nombor siri episod, pemformatan teks, penamaan piawai FC2, pembuangan awalan iklan, serta pembaikan sambungan pintar berasaskan MIME.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/rename/rename_ms.gif" width="550" alt="Ubah Nama Kelompok">
 </p>
 
-* **Analisis fail**: Menggabungkan penapisan fail dan keupayaan Semak Pendua Fail. Semakan pendua menyokong tiga jenis analisis: **hash Padanan Tepat / Tempoh Serupa video / Nama Serupa**.
-* **Penapisan dipertingkat**: Menyokong penapisan mengikut saiz, jenis, laluan, kata kunci dan syarat lain, serta menyediakan bantuan kelompok seperti Tanda Sekali Klik, Songsang Pilihan, dan Pilih mengikut Folder.
+* **Analisis Fail**: Menggabungkan Tapis Fail dan Semak Pendua Fail, dengan analisis pendua **padanan hash tepat / tempoh video serupa / nama serupa**.
+* **Peningkatan tapis**: Menyokong penapisan mengikut saiz, jenis, laluan, kata kunci dan syarat lain, serta menyediakan bantuan kelompok seperti pilih semua, songsangkan pilihan dan pilih mengikut folder.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_scan/file_scan_ms.gif" alt="Tinjauan Fail">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_dup/file_dup_ms.gif" alt="Semak Pendua Fail">
 </p>
 
-* **Analisis folder**: Menggabungkan Tinjauan Folder dan Semak Pendua Folder. Semakan pendua menyokong tiga mod analisis: **nama / keserupaan / kadar liputan**, sesuai untuk mengendalikan episod pendua, pek gambar, direktori bahan dan sebagainya.
+* **Analisis Folder**: Menggabungkan Tinjauan Folder dan Semak Pendua Folder, dengan tiga mod analisis **nama / keserupaan / kadar kandungan**, sesuai untuk menangani episod pendua, pek imej, direktori bahan dan sebagainya.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder_scan/folder_scan_ms.gif" alt="Tinjauan Folder">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder_dup/folder_dup_ms.gif" alt="Semak Pendua Folder">
 </p>
 
-* **Eksport Direktori**: Menyokong eksport direktori semasa sebagai pokok direktori atau senarai direktori, memudahkan pengarkiban, semakan dan perkongsian struktur fail.
+* **Eksport senarai main M3U**: Menyokong eksport video terpilih sebagai fail M3U untuk mainan kelompok dalam pemain luaran.
+* **Eksport Direktori**: Menyokong eksport pokok direktori atau senarai direktori semasa untuk arkib, semakan dan perkongsian struktur fail.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_ms.png" width="350" alt="Eksport Direktori">
 </p>
 
-* **Penyusunan pintar**: Menyokong padam kekal, pembersihan folder kosong, Nyahmampat, dan pembersihan automatik untuk fail yang sudah dinyahmampat.
-* **Senarai Pembersihan**: Menyokong senarai sumber tersuai yang boleh digunakan sebagai senarai hitam untuk pembersihan, atau sebagai senarai perlindungan yang melangkau item sepadan secara automatik semasa padam kelompok.
+* **Pengemasan pintar**: Menyokong pemadaman kekal, pembersihan folder kosong, Nyahmampat, serta pembersihan automatik untuk fail yang telah dinyahmampat.
+* **Senarai Pembersihan**: Menyokong senarai sumber tersuai yang boleh digunakan sebagai senarai hitam pembersihan, atau sebagai senarai perlindungan yang melangkau item sepadan secara automatik semasa pemadaman kelompok.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/manager/manager_ms.gif" width="550" alt="Senarai Pembersihan">
 </p>
 
-> ⚠️ Semasa menjalankan operasi berat seperti analisis, penyusunan, padam kelompok, pindah kelompok atau Nyahmampat, tidak disarankan mengubah kumpulan fail yang sama daripada klien lain pada masa yang sama bagi mengelakkan konflik penyegerakan.
+> ⚠️ Semasa menjalankan operasi berat seperti analisis, pengemasan, pemadaman kelompok, pemindahan kelompok atau Nyahmampat, tidak disarankan mengubah kumpulan fail yang sama daripada klien lain pada masa yang sama bagi mengelakkan konflik penyegerakan.
 
 ---
 
 ### 🌐 Pemindahan, Muat Turun Awan dan Hurai Perkongsian
 
-* **Tinjauan Fail Perkongsian**: Menyokong imbasan dan penapisan rekursif pada kandungan perkongsian, memudahkan pratonton struktur dalaman perkongsian sebelum menyimpan.
-* **Pengurusan perkongsian**: Menyokong tetapan had jumlah ekstraksi perkongsian. Selepas syarat dicapai, perkongsian boleh dibatalkan secara automatik supaya pautan menjadi tidak sah.
-* **Perlindungan muat naik**: Menyertakan peringatan keluar semasa muat naik, serta perlindungan dan pembersihan untuk muat naik terganggu, tugas tertinggal, dan fail tidak normal.
-* **Peningkatan muat turun awan**: Menyokong nyahpenduaan automatik untuk pautan luar talian kelompok. Pembersihan magnet pintar terbina dalam boleh mengekstrak hash Base32 / Hex dan membuang teks gangguan.
-* **Pratonton magnet**: Jika kandungan magnet mempunyai beberapa gambar pratonton, pratonton berbilang gambar disokong.
-* **Sandaran torrent dan snapshot**: Menyokong penghuraian fail `.torrent`. Untuk sesetengah pautan yang medianya tidak dapat dikumpulkan secara langsung, penyelesaian simpanan snapshot web disediakan sebagai sandaran.
+* **Tinjauan fail perkongsian**: Menyokong imbasan dan penapisan rekursif kandungan perkongsian, supaya anda boleh pratonton struktur dalaman sebelum menyimpan.
+* **Pengurusan perkongsian**: Menyokong penetapan had bilangan ekstrak perkongsian; setelah syarat dicapai, perkongsian boleh dibatalkan secara automatik supaya pautan menjadi tidak sah.
+* **Perlindungan muat naik**: Terbina dengan peringatan keluar semasa muat naik, serta perlindungan dan pembersihan untuk muat naik terputus, tugasan tertinggal dan fail abnormal.
+* **Peningkatan muat turun awan**: Menyokong nyahpenduaan automatik pautan luar talian kelompok; pembersihan magnet pintar terbina boleh mengekstrak hash Base32 / Hex dan membuang teks gangguan.
+* **Ekstrak magnet TXT**: Menyokong pratonton teks TXT dan mengenal pasti pautan muat turun magnet, HTTP, FTP, ed2k, thunder dan lain-lain daripada teks untuk dihantar ke muat turun awan.
+* **Pratonton magnet**: Apabila kandungan magnet mempunyai beberapa imej pratonton, pratonton berbilang imej disokong.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_ms.png" height="320" alt="Magnet">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_ms.gif" height="320" alt="Perkongsian">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_ms.gif" height="320" alt="Kongsi">
 </p>
 
-> ⚠️ Pintasan automatik untuk had jumlah ekstraksi perkongsian hanya berkesan apabila halaman web kekal terbuka dan peranti tidak tidur. 
+> ⚠️ Sekatan automatik berdasarkan had bilangan ekstrak perkongsian hanya berfungsi apabila halaman web kekal dibuka dan peranti tidak tidur.
 
 ---
 
 ### 🎬 Peningkatan Media Imersif
 
-* **Peningkatan enjin main**: Menyokong kelajuan 0.5x - 3.0x, putar dan flip, nisbah paksa, langkau intro/outro automatik, main berterusan / gelung, dan pratonton lakaran kecil pada bar kemajuan.
-* **Sistem sari kata**: Menyokong pemuatan sari kata awan dengan nama sama, import sari kata tempatan, dan carian sari kata dalam talian. Juga menyokong pelarasan offset masa sari kata, posisi sari kata, saiz fon, dan ketelusan latar.
-* **Bantuan visual**: Menyokong carian imej daripada gambar atau bingkai video semasa, memudahkan semakan balik kulit, pelakon, anime atau sumber bahan.
-* **Mod Media**: Boleh diaktifkan dalam tetapan supaya direktori yang hanya mengandungi video atau hanya mengandungi gambar disusun secara lalai mengikut nama A-Z, meningkatkan kesinambungan pelayaran episod / komik.
+* **Peningkatan enjin main balik**: Menyokong kelajuan 0.5x - 3.0x, putar dan balik, nisbah paksa, langkau intro / outro automatik, main berterusan / gelung dan pratonton imej kecil pada bar kemajuan.
+* **Pemain muzik**: Menyokong main balik fail audio dalam talian, senarai main, main mengikut turutan, rawak, gelung satu lagu, mod popup, paparan kulit dan kawalan volum.
+* **Mod popup audio**: Menyokong pemain muzik sebagai tetingkap kecil berasingan sambil mengekalkan kawalan main balik, paparan kulit dan penyesuaian tema.
+* **Sistem sari kata**: Menyokong pemuatan sari kata awan bernama sama, import sari kata tempatan dan carian sari kata dalam talian; menyokong pelarasan offset sari kata, posisi, saiz fon dan ketelusan latar.
+* **Bantuan visual**: Menyokong carian imej daripada imej atau bingkai video semasa untuk membantu menjejak kulit, pelakon, anime atau sumber bahan.
+* **Mod media**: Boleh didayakan dalam tetapan supaya direktori video sahaja atau imej sahaja disusun mengikut nama A-Z secara lalai, meningkatkan kesinambungan pelayaran episod / komik.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/video/video_ms.gif" alt="Video">
@@ -107,39 +110,40 @@
 
 ---
 
-### ⚡ Muat Turun, Main Luaran dan Pengedaran
+### ⚡ Muat Turun, Main Balik Luaran dan Pengedaran
 
-* **Pembantu baiki protokol PotPlayer**: Menyertakan pengesanan dan bantuan pembaikan protokol PotPlayer untuk mengurangkan masalah pelayar yang tidak dapat memanggil pemain luaran.
-* **Pengedaran RPC**: Menyokong penghantaran fail melalui protokol RPC ke nod muat turun seperti Aria2 / Motrix.
-* **Pemulihan struktur direktori**: Semasa menghantar seluruh folder, struktur direktori pokok dalam pemacu awan boleh dipulihkan secara automatik agar direktori tidak menjadi rata selepas dimuat turun.
-* **Tapis Muat Turun**: Menyokong penapisan fail mengikut saiz fail, sambungan, dan kata kunci nama, digunakan pada muat turun pelayar dan push Aria2 / Motrix.
-* **Domain pecutan pautan terus muat turun**: Menyokong domain pecutan muat turun tersuai, dengan dua mod tulis semula proksi songsang: prefiks pautan asal lengkap dan penghantaran parameter URL.
-* **Pengendalian pengecualian**: Melangkau fail tidak sah 0KB secara automatik semasa push, dan menyokong eksport senarai kegagalan.
+* **Kaedah buka lalai**: Anda boleh memilih kaedah main balik lalai antara pemain skrip dan PotPlayer.
+* **Pembantu pembaikan protokol PotPlayer**: Terbina dengan pengesanan dan bantuan pembaikan protokol PotPlayer untuk mengurangkan masalah pelayar tidak dapat memanggil pemain luaran.
+* **Pengedaran RPC**: Menyokong penghantaran fail ke nod muat turun seperti Aria2 / Motrix melalui protokol RPC.
+* **Pemulihan struktur direktori**: Apabila menolak keseluruhan folder, struktur pokok dalam pemacu awan boleh dipulihkan secara automatik untuk mengelakkan direktori menjadi rata selepas dimuat turun.
+* **Tapis Muat Turun**: Menyokong penapisan fail mengikut saiz fail, sambungan dan kata kunci nama, digunakan pada muat turun pelayar dan tolakan Aria2 / Motrix.
+* **Domain pecutan pautan terus muat turun**: Menyokong domain pecutan muat turun tersuai, menyediakan dua mod tulis semula proksi songsang: pautan asal penuh berawalan dan hantaran parameter URL.
+* **Pengendalian pengecualian**: Melangkau fail tidak sah 0KB secara automatik semasa tolakan dan menyokong eksport senarai gagal.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_ms.png" height="290" alt="Tapis Muat Turun">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_ms.gif" height="290" alt="Aria2">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_ms.gif" height="290" alt="aria2">
 </p>
 
 ---
 
 ### ⚙️ Konfigurasi dan Pengurusan Data
 
-* **Sandaran konfigurasi**: Menyokong eksport keutamaan, peraturan pengurusan, Bilik Simpanan Kata Sandi, rekod sejarah, dan sebahagian konfigurasi ciri sebagai fail sandaran JSON dengan pengesahan cap jari.
-* **Import pintar**: Semasa import, data berbentuk senarai seperti senarai dan rekod akan digabung serta dinyahpendua. Item tetapan asas dikemas kini mengikut fail import.
-* **Pembersihan data tempatan**: Menyokong pembersihan indeks seluruh pemacu, keutamaan, peraturan pengurusan, Bilik Simpanan Kata Sandi, cache video, dan cache jalan mengikut kategori.
+* **Sandaran konfigurasi**: Menyokong eksport keutamaan, peraturan pengurusan, Bilik Simpanan Kata Sandi, sejarah dan sebahagian konfigurasi fungsi sebagai fail sandaran JSON dengan pengesahan cap jari.
+* **Import pintar**: Semasa import, data jenis senarai seperti senarai dan rekod akan digabung serta dinyahpendua; item tetapan asas dikemas kini mengikut fail import.
+* **Pembersihan data tempatan**: Menyokong pembersihan indeks seluruh pemacu, keutamaan, peraturan pengurusan, Bilik Simpanan Kata Sandi, cache video dan cache runtime mengikut kategori.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/cache/cache_ms.png" width="350" alt="Cache">
 </p>
 
-* **Bilik Simpanan Kata Sandi**: Mengurus kata laluan nyahmampat yang kerap digunakan secara berpusat untuk percubaan automatik Nyahmampat dan pengisian pantas.
+* **Bilik Simpanan Kata Sandi**: Mengurus kata sandi nyahmampat yang biasa digunakan secara berpusat untuk percubaan automatik Nyahmampat dan pengisian pantas.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/archive/archive_ms.png" width="250" alt="Bilik Simpanan Kata Sandi">
 </p>
 
-* **Migrasi Data berbilang akaun**: Menyokong penyulitan dan pembungkusan item terpilih, kemudian dikenal pasti dan diambil alih secara automatik selepas akaun lain log masuk, membolehkan pemindahan merentas akaun.
+* **Migrasi Data berbilang akaun**: Menyokong pembungkusan disulitkan untuk item terpilih, kemudian mengenal pasti dan mengambil alih secara automatik selepas log masuk dengan akaun lain untuk pemindahan merentas akaun.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/migrate/migrate_ms.gif" alt="Migrasi Data">
