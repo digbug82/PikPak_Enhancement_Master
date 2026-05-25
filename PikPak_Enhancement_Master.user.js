@@ -673,7 +673,7 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-dup-lbl, .pk-dup-chk { white-space: nowrap !important; font-weight: 500; color: var(--pk-fg); font-size: 13px; margin-right: 6px; opacity: 0.8; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; }
 .pk-dup-chk input { margin: 0 4px 0 0; vertical-align: middle; accent-color: var(--pk-pri); width: 16px; height: 16px; }
 #pk-upload-tools { min-width: 0; flex-shrink: 0 !important; }
-.pk-upload-tip { display:none;align-items:center;height:100%;margin-left:0;margin-right:auto;max-width:min(42vw,560px);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;line-height:1;color:var(--pk-icon-c);opacity:.86;cursor:default;flex-shrink:1; }
+.pk-upload-tip { display:none;align-items:center;height:100%;margin-left:0;margin-right:auto;max-width:min(42vw,560px);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px !important;line-height:normal !important;color:#888 !important;font-weight:normal !important;opacity:.8 !important;cursor:default;flex-shrink:1; }
 .pk-txt-short { display: none; }
 .pk-txt-long { display: inline; }
 #pk-search-path-con .pk-txt-short { font-weight: 500; color: var(--pk-fg); }
@@ -5497,7 +5497,7 @@ el.innerHTML = `
             <span style="font-size:13px;color:#52c41a;">${L.lbl_up_done}</span>
         </label>
     </div>
-    <span class="pk-upload-tip" id="pk-upload-tip">${L.tip_upload_official_fallback}</span>
+    <span class="pk-upload-tip" id="pk-upload-tip" style="font-size:13px !important;line-height:normal !important;color:#888 !important;font-weight:normal !important;opacity:.8 !important;">${L.tip_upload_official_fallback}</span>
 
     <div class="pk-dup-toolbar" id="pk-dup-filters" style="margin-left:10px; padding-right:2px;">
         ${mkLbl('pk-chk-hash', L.tag_hash, L.tag_hash_short)}
@@ -37328,6 +37328,7 @@ const upSep = document.getElementById('pk-up-sep');
 
 upBtns.forEach(b => { if(b) b.style.display = 'none'; });
 if(upSep) upSep.style.display = 'none';
+if (UI.upTip) UI.upTip.style.display = 'none';
 if (UI.btnClearHistoryAll) UI.btnClearHistoryAll.style.display = 'none';
 if (UI.btnShareParseSave) UI.btnShareParseSave.style.display = 'none';
 if (UI.btnShareParseInsight) UI.btnShareParseInsight.style.display = 'none';
@@ -37463,6 +37464,7 @@ if(UI.btnAnalyze) UI.btnAnalyze.style.display = 'none';
 if(UI.scan) UI.scan.style.display = 'none';
 if(UI.cntFolderFirst) UI.cntFolderFirst.style.display = 'none';
 if(UI.uploadWrap) UI.uploadWrap.style.display = 'none';
+if(UI.upTip) UI.upTip.style.display = 'flex';
 
 if(UI.bottomGrp) UI.bottomGrp.style.display = 'flex';
 [UI.btnAria2, UI.btnDown].forEach(b => { if(b) b.style.display = 'none'; });
@@ -44187,6 +44189,7 @@ const downBtns = [UI.btnAria2, UI.btnDown, UI.btnExt, UI.btnExportM3U, UI.btnImg
 
 upBtns.forEach(b => { if(b) b.style.display = 'none'; });
 if(upSep) upSep.style.display = 'none';
+if (UI.upTip) UI.upTip.style.display = 'none';
 if (UI.btnClearHistoryAll) UI.btnClearHistoryAll.style.display = 'none';
 if (UI.btnShareParseSave) UI.btnShareParseSave.style.display = 'none';
 if (UI.btnShareParseInsight) UI.btnShareParseInsight.style.display = 'none';
@@ -44277,6 +44280,7 @@ shareBtns.forEach(b => { if(b) b.style.display = 'none'; });
 upBtns.forEach(b => { if(b) b.style.display = 'inline-flex'; });
 if(upSep) upSep.style.display = 'block';
 if(UI.uploadWrap) UI.uploadWrap.style.display = 'none';
+if(UI.upTip) UI.upTip.style.display = 'flex';
 }
 else if (S.historyMode) {
 if(UI.btnNavHistory) UI.btnNavHistory.classList.add('act');
