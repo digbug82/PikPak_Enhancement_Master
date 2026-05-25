@@ -218,6 +218,7 @@
 "transfer_quota_cloud_download": "Trafik Muat Turun Awan",
 "transfer_quota_download": "Trafik Muat Turun",
 "transfer_quota_upload": "Trafik Muat Naik",
+"transfer_quota_daily_non_vip": "Had harian · Bukan ahli",
 "transfer_quota_download_note": "Termasuk main dalam talian, pratonton dan muat turun",
 "transfer_quota_used_total": "Digunakan {u} / Jumlah {t}",
 "err_transfer_quota_fetch": "Gagal mendapatkan butiran kuota pemindahan.",
