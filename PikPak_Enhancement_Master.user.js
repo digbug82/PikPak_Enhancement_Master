@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            3.0.1
+// @version            3.0.0
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        PikPak 网盘增强：集成 Aria2 下载、下载直链加速、下载过滤、分享链接解析增强、文件/文件夹查重、批量重命名、资源清理、批量解压、M3U 导出、PotPlayer 直达、污染磁链识别、TXT 磁链提取、排序与搜索增强、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -20018,6 +20018,7 @@ const oldMainCrumbPop = document.getElementById('pk-main-crumb-pop');
 if (oldMainCrumbPop) oldMainCrumbPop.remove();
 UI.crumb.innerHTML = '';
 UI.crumb.style.display = '';
+const pathModeTipFontSize = '13px';
 
 if (S.offlineMode) {
 UI.crumb.style.pointerEvents = 'none';
@@ -20055,7 +20056,7 @@ UI.crumb.style.pointerEvents = 'none';
 UI.crumb.innerHTML = `
     <div style="display:flex; align-items:baseline; color:var(--pk-fg); margin-left: -6px;">
         <span style="font-weight:bold; font-size:15px; cursor:default;">${L.title_share_parse}</span>
-        <span style="color:#888; font-size:11px; margin-left:10px; cursor:default; font-weight:normal; opacity:0.8;">${L.desc_share_parse_space_notice}</span>
+        <span style="color:#888; font-size:${pathModeTipFontSize} !important; line-height:normal !important; margin-left:10px; cursor:default; font-weight:normal; opacity:0.8;">${L.desc_share_parse_space_notice}</span>
     </div>
 `;
 return;
@@ -20227,7 +20228,7 @@ UI.crumb.style.pointerEvents = 'none';
 UI.crumb.innerHTML = `
 <div style="display:flex; align-items:baseline; color:var(--pk-fg); margin-left: -6px;">
     <span style="font-weight:bold; font-size:15px; cursor:default;">${L.trash_title}</span>
-    <span style="color:#888; font-size:11px; margin-left:10px; cursor:default; font-weight:normal; opacity:0.8;">${L.trash_notice}</span>
+    <span style="color:#888; font-size:${pathModeTipFontSize} !important; line-height:normal !important; margin-left:10px; cursor:default; font-weight:normal; opacity:0.8;">${L.trash_notice}</span>
 </div>
 `;
 return;
