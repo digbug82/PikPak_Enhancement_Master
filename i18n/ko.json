@@ -218,6 +218,7 @@
 "transfer_quota_cloud_download": "클라우드 다운로드 트래픽",
 "transfer_quota_download": "다운로드 트래픽",
 "transfer_quota_upload": "업로드 트래픽",
+"transfer_quota_daily_non_vip": "일일 한도 · 비회원",
 "transfer_quota_download_note": "온라인 재생, 보기 및 다운로드 전송 포함",
 "transfer_quota_used_total": "{u} 사용 / 총 {t}",
 "err_transfer_quota_fetch": "전송 할당량 상세 정보를 가져오지 못했습니다.",
