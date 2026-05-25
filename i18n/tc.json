@@ -218,6 +218,7 @@
 "transfer_quota_cloud_download": "雲下載流量",
 "transfer_quota_download": "下行流量",
 "transfer_quota_upload": "上傳流量",
+"transfer_quota_daily_non_vip": "每日限額 · 非會員",
 "transfer_quota_download_note": "包括線上播放、查看和下載的傳輸",
 "transfer_quota_used_total": "已用 {u} / 共 {t}",
 "err_transfer_quota_fetch": "取得傳輸配額詳情失敗。",
