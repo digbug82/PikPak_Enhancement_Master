@@ -218,6 +218,7 @@
 "transfer_quota_cloud_download": "クラウドダウンロード通信量",
 "transfer_quota_download": "ダウンロード通信量",
 "transfer_quota_upload": "アップロード通信量",
+"transfer_quota_daily_non_vip": "1日の上限 · 非会員",
 "transfer_quota_download_note": "オンライン再生、閲覧、ダウンロードによる転送を含みます",
 "transfer_quota_used_total": "{u} 使用済み / 合計 {t}",
 "err_transfer_quota_fetch": "転送クォータ詳細の取得に失敗しました。",
