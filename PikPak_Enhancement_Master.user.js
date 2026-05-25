@@ -39813,9 +39813,11 @@ for (const [k, v] of globalCache.entries()) {
 
 const getCat = (k) => {
 if (!k.startsWith('pk_')) return null;
-if (k.startsWith('pk_archive_pwd_') || k === 'pk_pwd_vault') return 'vault';
+if (k.startsWith('pk_archive_pwd_') || k === 'pk_pwd_vault' || k === 'pk_pwd_try_count') return 'vault';
 if (k.startsWith('pk_duration_')) return 'history';
-if (k.startsWith('pk_fmod_') || k === 'pk_captured_captcha') return 'cache';
+
+const cacheKeys = ['pk_captured_captcha', 'pk_i18n_manifest', 'pk_script_update_cache', 'pk_potplayer_launch_state', 'pk_potplayer_protocol_state'];
+if (k.startsWith('pk_fmod_') || k.startsWith('pk_i18n_') || k.startsWith(CONF.scriptUpdateDismissPrefix) || k.startsWith('pk_vm_perf_tip_seen_') || cacheKeys.includes(k)) return 'cache';
 
 const ruleKeys =['pk_blacklist', 'pk_blacklist_folders', 'pk_aria2_url', 'pk_aria2_token', 'pk_download_accel_enable', 'pk_download_accel_domain', 'pk_download_accel_mode', 'pk_download_accel_query_param', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_bn_find_hist', 'pk_bn_rep_hist'];
 if (ruleKeys.includes(k) || k.startsWith('pk_scan_last_') || k.startsWith('pk_analyze_last_') || k === 'pk_dup_strictness') return 'rules';
@@ -39834,7 +39836,7 @@ if (cat) {
 
 const renderLbl = (cat, txt, isChecked = false, isMandatory = false) => {
 const sz = sizes[cat];
-if (sz === 0 && cat !== 'index') return '';
+if (sz === 0 && cat !== 'index' && cat !== 'cache') return '';
 const szStr = fmtSize(sz);
 const checkAttr = (isChecked || isMandatory) ? 'checked' : '';
 const disAttr = isMandatory ? 'disabled' : '';
@@ -39881,7 +39883,19 @@ if (selected.includes('index')) {
     if (typeof S !== 'undefined' && S.cache) S.cache.clear();
     if (typeof globalLineageMap !== 'undefined') globalLineageMap.clear();
     if (typeof globalParentIndex !== 'undefined') globalParentIndex.clear();
+    if (typeof globalDirtyFolders !== 'undefined') globalDirtyFolders.clear();
     if (typeof scannedFolderIds !== 'undefined') scannedFolderIds.clear();
+    if (typeof backgroundQueue !== 'undefined') backgroundQueue.length = 0;
+    if (typeof isBackgroundRunning !== 'undefined') isBackgroundRunning = false;
+    if (typeof DurationProber !== 'undefined') DurationProber.reset();
+}
+
+if (selected.includes('cache') && window.localforage) {
+    try {
+        await window.localforage.dropInstance({ name: 'pk_thumbs', storeName: 'snapshots' });
+    } catch (e) {
+        console.warn("Clear thumb cache error:", e);
+    }
 }
 
 keys.forEach(k => {
@@ -39935,6 +39949,11 @@ const exportExactKeys = new Set([
 'pk_hide_button_text',
 'pk_comic_mode',
 'pk_clipboard_magnet_focus',
+'pk_clipboard_magnet_paste',
+'pk_audio_play_mode',
+'pk_audio_vol_level',
+'pk_audio_vol_muted',
+'pk_audio_mini_pos',
 'pk_sort_independent',
 'pk_folder_first',
 'pk_folder_sort_prefs',
@@ -40067,6 +40086,11 @@ try {
         'pk_hide_button_text',
         'pk_comic_mode',
         'pk_clipboard_magnet_focus',
+        'pk_clipboard_magnet_paste',
+        'pk_audio_play_mode',
+        'pk_audio_vol_level',
+        'pk_audio_vol_muted',
+        'pk_audio_mini_pos',
         'pk_sort_independent',
         'pk_folder_first',
         'pk_folder_sort_prefs',
