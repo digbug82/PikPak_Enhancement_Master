@@ -25,10 +25,10 @@
 
 ### ✨ Experience and Navigation Engine
 
-* **Side-button navigation**: Supports mouse side buttons for forward / back navigation, letting you switch quickly between directory levels.
-* **Advanced path bar**: Supports mouse-wheel sliding, sibling folder drop-down switching, path display, and jump-back tracing.
-* **Enhanced global search**: Supports searching by file name and file path, highlights matched keyword segments in red, and prioritizes content near the hit for long file names.
-* **Browsing preferences**: Supports sort preferences, view preferences, retaining browsing position, Media Mode, Hide Button Text, blurred media cover thumbnails, and night mode.
+* **Side-button navigation**: Use mouse side buttons for forward / back navigation and switch quickly between directory levels.
+* **Advanced path bar**: Supports wheel scrolling, sibling-folder dropdown switching, path echoing, and trace-back jumps.
+* **Enhanced global search**: Search by file name and file path, highlight matched keywords in red, and prioritize the area around the hit in long file names.
+* **Browsing preferences**: Supports sorting preferences, view preferences, keeping browse position, media mode, hiding button text, blurring media cover thumbnails, and night mode.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/table/table_en.gif" width="1100" alt="Path">
@@ -38,108 +38,112 @@
 
 ### 📂 Batch and Space Management
 
-* **Bulk Rename**: Supports regex replace / delete, episode serial numbers, text formatting, FC2 naming conventions, ad-prefix removal, and MIME-based smart extension repair.
+* **Bulk Rename**: Supports regex replace / delete, episode sequence numbers, text formatting, FC2 naming rules, ad-prefix removal, and MIME-based smart extension repair.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/rename/rename_en.gif" width="550" alt="Bulk Rename">
 </p>
 
-* **File analysis**: Combines file filtering and Deduplicate Files capabilities. Deduplication supports three analysis types: **hash Exact Match / video Duration Sim / Name Sim**.
-* **Enhanced filtering**: Supports filtering by size, type, path, keywords, and more, with batch helpers such as Smart Select, Invert Selection, and Select by Folder.
+* **File Analysis**: Combines File Filter and Deduplicate Files, with deduplication analysis by **exact hash match / similar video duration / similar name**.
+* **Filter enhancements**: Filter by size, type, path, keywords, and more, with batch helpers such as select all, invert selection, and select by folder.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_scan/file_scan_en.gif" alt="File Perspective">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_dup/file_dup_en.gif" alt="Deduplicate Files">
 </p>
 
-* **Folder analysis**: Combines Folder Perspective and Folder Deduplication capabilities. Deduplication supports three modes: **name / similarity / inclusion rate**, suitable for handling duplicate episodes, image packs, document folders, and more.
+* **Folder Analysis**: Combines Folder Perspective and Folder Deduplication, with three analysis modes: **name / similarity / containment rate**, ideal for duplicate episodes, image packs, document directories, and more.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder_scan/folder_scan_en.gif" alt="Folder Perspective">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder_dup/folder_dup_en.gif" alt="Folder Deduplication">
 </p>
 
-* **Export Directory**: Supports exporting the current directory as a folder tree or directory list, making it easier to archive, verify, and share file structures.
+* **M3U playlist export**: Export selected videos as an M3U file for batch playback in external players.
+* **Export Directory**: Export the current directory as a tree or list for archiving, checking, and sharing file structures.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_en.png" width="350" alt="Export Directory">
 </p>
 
-* **Smart organization**: Supports permanent deletion, Prune Empty Folders, Bulk Extract, and automatic cleanup of extracted files.
-* **Resource Manager**: Supports custom resource lists that can be used as a blacklist for cleanup or as a protected list that automatically skips matched items during batch deletion.
+* **Smart cleanup**: Supports permanent deletion, empty-folder cleanup, Bulk Extract, and automatic cleanup of extracted files.
+* **Resource Manager**: Supports custom resource lists that can be used as a cleanup blacklist, or as a protected list that is automatically skipped during batch deletion.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/manager/manager_en.gif" width="550" alt="Resource Manager">
 </p>
 
-> ⚠️ During heavy operations such as analysis, organization, batch deletion, batch moving, or Bulk Extract, avoid modifying the same batch of files from other clients at the same time to prevent sync conflicts.
+> ⚠️ During heavy operations such as analysis, cleanup, batch deletion, batch move, or Bulk Extract, avoid modifying the same files from other clients at the same time to prevent sync conflicts.
 
 ---
 
 ### 🌐 Transfer, Cloud Download, and Share Parser
 
-* **Shared File Insight**: Supports recursive scanning and filtering of shared content, making it easy to preview the internal structure before saving.
-* **Share management**: Supports setting a maximum number of share extractions. Once the condition is met, the share can be automatically canceled to invalidate the link.
-* **Upload protection**: Includes upload-leave reminders, plus protection and cleanup for interrupted uploads, residual tasks, and abnormal files.
-* **Cloud download enhancement**: Supports automatic deduplication for batched offline links. Built-in smart magnet cleaning can extract Base32 / Hex hashes and remove noisy text.
+* **Shared file perspective**: Recursively scan and filter shared content so you can preview its internal structure before saving.
+* **Share management**: Set a maximum number of share extractions; when the limit is reached, the share can be canceled automatically so the link becomes invalid.
+* **Upload protection**: Built-in upload-leave reminder, with protection and cleanup for interrupted uploads, leftover tasks, and abnormal files.
+* **Cloud download enhancements**: Automatically deduplicate batch offline links; built-in smart magnet cleanup extracts Base32 / Hex hashes and removes noisy text.
+* **TXT magnet extraction**: Preview TXT text and detect magnet, HTTP, FTP, ed2k, thunder, and other download links for cloud download submission.
 * **Magnet preview**: Supports multi-image preview when magnet content includes multiple preview images.
-* **Torrent and snapshot fallback**: Supports parsing `.torrent` files. For some links whose media cannot be collected directly, it provides a web snapshot saving plan as a fallback.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_en.png" height="320" alt="Magnet">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_en.gif" height="320" alt="Share">
 </p>
 
-> ⚠️ Automatic interception for the share extraction limit only works while the web page remains open and the device is not asleep. 
+> ⚠️ Automatic blocking by the share extraction limit only works while the web page stays open and the device is not sleeping.
 
 ---
 
-### 🎬 Immersive Media Enhancement
+### 🎬 Immersive Media Enhancements
 
-* **Playback engine enhancement**: Supports 0.5x - 3.0x speed, rotate and flip, forced aspect ratio, automatic intro/outro skipping, continuous playback / loop, and progress-bar thumbnail previews.
-* **Subtitle system**: Supports loading same-name cloud subtitles, importing local subtitles, and online subtitle search. It also supports subtitle time offset, position, font size, and background opacity adjustment.
-* **Visual assistance**: Supports Image Search from an image or the current video frame, making it easier to trace covers, actors, anime, or source material.
-* **Media Mode**: Can be enabled in settings so folders containing only videos or only images default to A-Z name sorting, improving episode / comic browsing continuity.
+* **Playback engine enhancements**: Supports 0.5x - 3.0x speed, rotate and flip, forced aspect ratio, automatic intro / outro skipping, continuous play / loop, and progress-bar thumbnail previews.
+* **Music player**: Supports online audio playback, playlists, sequential playback, shuffle, single-track loop, popup mode, cover display, and volume control.
+* **Audio popup mode**: Detach the music player into a small window while preserving playback controls, cover display, and theme adaptation.
+* **Subtitle system**: Supports loading same-name cloud subtitles, importing local subtitles, and online subtitle search; adjust subtitle offset, position, font size, and background opacity.
+* **Visual assist**: Search by image from the current image or video frame to help trace covers, actors, anime titles, or material sources.
+* **Media mode**: Enable media mode in settings so video-only or image-only directories are sorted by name A-Z by default, improving episode / comic browsing continuity.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/video/video_en.gif" alt="Video">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/video/video_en.gif" alt="Videos">
 </p>
 
 ---
 
 ### ⚡ Download, External Playback, and Distribution
 
-* **PotPlayer protocol repair assistant**: Includes PotPlayer protocol detection and repair assistance to reduce cases where the browser cannot wake the external player.
-* **RPC distribution**: Supports pushing files through the RPC protocol to download nodes such as Aria2 / Motrix.
-* **Directory structure restoration**: When pushing an entire folder, it can automatically restore the tree structure from the cloud drive and avoid flattening directories after download.
-* **Download Filter**: Supports filtering files by size, extension, and name keywords, applying to browser downloads and Aria2 / Motrix pushes.
-* **Direct download acceleration domain**: Supports custom download acceleration domains, with two reverse-proxy rewrite modes: prefixing the full original link and passing URL parameters.
-* **Exception handling**: Automatically skips invalid 0KB files during pushes and supports exporting a failure list.
+* **Default open method**: Choose the default playback method between the script player and PotPlayer.
+* **PotPlayer protocol repair assistant**: Built-in PotPlayer protocol detection and repair helper to reduce cases where the browser cannot launch the external player.
+* **RPC distribution**: Push files to Aria2 / Motrix and other download nodes through the RPC protocol.
+* **Directory structure restoration**: When pushing an entire folder, automatically restore the cloud drive's tree structure to avoid flattened directories after download.
+* **Download Filter**: Filter files by size, extension, and name keywords for browser downloads and Aria2 / Motrix pushes.
+* **Download direct-link acceleration domain**: Customize the download acceleration domain, with two reverse-proxy rewrite modes: prefixed full original link and URL parameter passthrough.
+* **Exception handling**: Automatically skip invalid 0KB files during push and support failed-list export.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_en.png" height="290" alt="Download Filter">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_en.gif" height="290" alt="Aria2">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_en.gif" height="290" alt="aria2">
 </p>
 
 ---
 
-### ⚙️ Config Management and Data Management
+### ⚙️ Config and Data Management
 
-* **Configuration backup**: Supports exporting preferences, management rules, Password Vault, history records, and some feature configuration as JSON backup files with fingerprint verification.
-* **Smart import**: During import, list-like data such as lists and records are merged and deduplicated. Basic settings are updated according to the imported file.
-* **Local data cleanup**: Supports cleaning the global index, preferences, management rules, Password Vault, video cache, and runtime cache by category.
+* **Config backup**: Export preferences, management rules, Password Vault, history, and selected feature configurations as JSON backup files with fingerprint verification.
+* **Smart import**: Merges and deduplicates list data such as lists and records during import; basic settings are updated from the imported file.
+* **Local data cleanup**: Clean global indexes, preferences, management rules, Password Vault, video cache, and runtime cache by category.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/cache/cache_en.png" width="350" alt="Cache">
 </p>
 
-* **Password Vault**: Centrally manages common extraction passwords for automatic Bulk Extract attempts and quick filling.
+* **Password Vault**: Centrally manage common extraction passwords for automatic Bulk Extract attempts and quick filling.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/archive/archive_en.png" width="250" alt="Password Vault">
 </p>
 
-* **Multi-account Data Migration**: Supports encrypting and packaging selected items, then automatically recognizing and taking over after another account logs in, enabling cross-account transfer.
+* **Multi-account Data Migration**: Encrypt and package selected items, then automatically recognize and take them over after logging in with another account for cross-account transfer.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/migrate/migrate_en.gif" alt="Data Migration">
