@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            3.0.0
+// @version            3.0.1
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        PikPak 网盘增强：集成 Aria2 下载、下载直链加速、下载过滤、分享链接解析增强、文件/文件夹查重、批量重命名、资源清理、批量解压、M3U 导出、PotPlayer 直达、污染磁链识别、TXT 磁链提取、排序与搜索增强、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -527,14 +527,15 @@ const CSS = `
 .pk-magnet-source a:hover { text-decoration:underline; }
 .pk-magnet-warn { font-size:12px; line-height:1.45; color:#d93025; background:rgba(217,48,37,0.08); border:1px solid rgba(217,48,37,0.16); border-radius:8px; padding:8px 10px; }
 .pk-magnet-shots { display:flex; gap:7px; overflow-x:auto; padding-bottom:2px; }
-.pk-magnet-thumb-wrap { width:68px; height:42px; border-radius:7px; overflow:hidden; flex:0 0 auto; position:relative; border:1px solid var(--pk-bd); cursor:pointer; user-select:none; transition:border-color .16s ease, box-shadow .16s ease; }
+.pk-magnet-thumb-wrap { width:68px; height:42px; border-radius:7px; overflow:hidden; flex:0 0 auto; position:relative; border:1px solid var(--pk-bd); box-sizing:border-box; cursor:pointer; user-select:none; transition:border-color .16s ease; }
 .pk-magnet-thumb-wrap:hover { }
-.pk-magnet-thumb-wrap.active { border-color:var(--pk-pri); box-shadow:0 0 0 2px rgba(0,103,192,18); }
+.pk-magnet-thumb-wrap.active { border-color:transparent; }
+.pk-magnet-thumb-wrap.active::after { content:""; position:absolute; inset:0; border:2px solid var(--pk-pri); border-radius:7px; box-sizing:border-box; pointer-events:none; z-index:2; }
 .pk-magnet-thumb-wrap .pk-magnet-thumb { width:100%; height:100%; border:none; border-radius:0; display:block; object-fit:cover; }
-.pk-magnet-shot-time { position:absolute; right:3px; bottom:3px; padding:1px 4px; border-radius:4px; background:rgba(0,0,0,.62); color:#fff; font-size:10px; line-height:1.25; pointer-events:none; }
-.pk-magnet-thumb { width:68px; height:42px; border-radius:7px; object-fit:cover; flex:0 0 auto; border:1px solid var(--pk-bd); cursor:pointer; user-select:none; -webkit-user-drag:none; transition:border-color .16s ease, box-shadow .16s ease; }
+.pk-magnet-shot-time { position:absolute; right:3px; bottom:3px; padding:1px 4px; border-radius:4px; background:rgba(0,0,0,.62); color:#fff; font-size:10px; line-height:1.25; pointer-events:none; z-index:3; }
+.pk-magnet-thumb { width:68px; height:42px; border-radius:7px; object-fit:cover; flex:0 0 auto; border:1px solid var(--pk-bd); box-sizing:border-box; cursor:pointer; user-select:none; -webkit-user-drag:none; transition:border-color .16s ease, border-width .16s ease; }
 .pk-magnet-thumb:hover { }
-.pk-magnet-thumb.active { border-color:var(--pk-pri); box-shadow:0 0 0 2px rgba(0,103,192,18); }
+.pk-magnet-thumb.active { border:2px solid var(--pk-pri); }
 .pk-magnet-hero img { user-select:none; -webkit-user-drag:none; }
 .pk-magnet-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:2px; }
 html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overflow:hidden !important; }
@@ -2140,6 +2141,7 @@ transfer_quota_monthly: "每月传输配额",
 transfer_quota_cloud_download: "云下载流量",
 transfer_quota_download: "下行流量",
 transfer_quota_upload: "上传流量",
+transfer_quota_daily_non_vip: "每日限额 · 非会员",
 transfer_quota_download_note: "包括在线播放、查看和下载的传输",
 transfer_quota_used_total: "已用 {u} / 共 {t}",
 err_transfer_quota_fetch: "获取传输配额详情失败。",
@@ -22363,26 +22365,56 @@ return !!((pkAudioMiniSession && typeof pkAudioMiniSession.isMiniActive === 'fun
 function getAudioMiniSavedPosition() {
 try {
 const pos = JSON.parse(gmGet(CONF.audioMiniPosKey, '') || 'null');
-if (!pos || !Number.isFinite(Number(pos.left)) || !Number.isFinite(Number(pos.top))) return null;
-return { left: Number(pos.left), top: Number(pos.top) };
+if (!pos) return null;
+const x = pos.x === 'right' ? 'right' : 'left';
+const y = pos.y === 'bottom' ? 'bottom' : 'top';
+const hx = Number(pos[x]);
+const vy = Number(pos[y]);
+if (Number.isFinite(hx) && Number.isFinite(vy)) return { x, y, [x]: hx, [y]: vy };
+if (Number.isFinite(Number(pos.left)) && Number.isFinite(Number(pos.top))) return { x:'left', y:'top', left:Number(pos.left), top:Number(pos.top) };
+return null;
 } catch (e) { return null; }
+}
+function applyAudioMiniPositionState(mini, pos) {
+if (!mini || !pos) return false;
+const x = pos.x === 'right' ? 'right' : 'left';
+const y = pos.y === 'bottom' ? 'bottom' : 'top';
+const hx = Number(pos[x]);
+const vy = Number(pos[y]);
+if (!Number.isFinite(hx) || !Number.isFinite(vy)) return false;
+if (x === 'right') {
+mini.style.right = `${Math.max(0, Math.round(hx))}px`;
+mini.style.left = 'auto';
+} else {
+mini.style.left = `${Math.max(0, Math.round(hx))}px`;
+mini.style.right = 'auto';
+}
+if (y === 'bottom') {
+mini.style.bottom = `${Math.max(0, Math.round(vy))}px`;
+mini.style.top = 'auto';
+} else {
+mini.style.top = `${Math.max(0, Math.round(vy))}px`;
+mini.style.bottom = 'auto';
+}
+return true;
 }
 function saveAudioMiniPosition(mini = document.getElementById('pk-audio-mini')) {
 if (!mini) return;
 const rect = mini.getBoundingClientRect();
-const left = Number.isFinite(rect.left) ? rect.left : Number.parseFloat(mini.style.left);
-const top = Number.isFinite(rect.top) ? rect.top : Number.parseFloat(mini.style.top);
-if (Number.isFinite(left) && Number.isFinite(top)) gmSet(CONF.audioMiniPosKey, JSON.stringify({ left: Math.round(left), top: Math.round(top) }));
+if (!rect || !Number.isFinite(rect.left) || !Number.isFinite(rect.top) || !Number.isFinite(rect.right) || !Number.isFinite(rect.bottom)) return;
+const left = Math.max(0, rect.left);
+const right = Math.max(0, window.innerWidth - rect.right);
+const top = Math.max(0, rect.top);
+const bottom = Math.max(0, window.innerHeight - rect.bottom);
+const x = right <= left ? 'right' : 'left';
+const y = bottom <= top ? 'bottom' : 'top';
+const pos = { x, y, left: Math.round(left), right: Math.round(right), top: Math.round(top), bottom: Math.round(bottom) };
+gmSet(CONF.audioMiniPosKey, JSON.stringify(pos));
+applyAudioMiniPositionState(mini, pos);
 }
 function applyAudioMiniSavedPosition(mini = document.getElementById('pk-audio-mini')) {
 if (!mini) return false;
-const pos = getAudioMiniSavedPosition();
-if (!pos) return false;
-mini.style.left = `${pos.left}px`;
-mini.style.top = `${pos.top}px`;
-mini.style.right = 'auto';
-mini.style.bottom = 'auto';
-return true;
+return applyAudioMiniPositionState(mini, getAudioMiniSavedPosition());
 }
 function getAudioMiniThemeSource() {
 return document.querySelector('.pk-ov') || ((typeof UI !== 'undefined' && UI.win && UI.win.isConnected) ? (UI.win.closest && UI.win.closest('.pk-ov')) || UI.win : null) || document.querySelector('#pk-audio-ov') || document.querySelector('.pk-win') || document.documentElement;
@@ -22481,18 +22513,26 @@ sync();
 function clampAudioMiniPosition(mini = document.getElementById('pk-audio-mini')) {
 if (!mini) return;
 const rect = mini.getBoundingClientRect();
+const cs = getComputedStyle(mini);
 const w = rect.width || mini.offsetWidth || 300;
 const h = rect.height || mini.offsetHeight || 120;
-let left = Number.parseFloat(mini.style.left);
-let top = Number.parseFloat(mini.style.top);
-if (!Number.isFinite(left)) left = Number.isFinite(rect.left) ? rect.left : Math.max(0, window.innerWidth - w - 24);
-if (!Number.isFinite(top)) top = Number.isFinite(rect.top) ? rect.top : Math.max(0, window.innerHeight - h - 24);
-left = Math.max(0, Math.min(left, Math.max(0, window.innerWidth - w)));
-top = Math.max(0, Math.min(top, Math.max(0, window.innerHeight - h)));
-mini.style.left = `${left}px`;
-mini.style.top = `${top}px`;
-mini.style.right = 'auto';
-mini.style.bottom = 'auto';
+const inlineLeft = Number.parseFloat(mini.style.left);
+const inlineRight = Number.parseFloat(mini.style.right);
+const inlineTop = Number.parseFloat(mini.style.top);
+const inlineBottom = Number.parseFloat(mini.style.bottom);
+const cssLeft = Number.parseFloat(cs.left);
+const cssRight = Number.parseFloat(cs.right);
+const cssTop = Number.parseFloat(cs.top);
+const cssBottom = Number.parseFloat(cs.bottom);
+const useRight = Number.isFinite(inlineRight) || (!Number.isFinite(inlineLeft) && Number.isFinite(cssRight) && (!Number.isFinite(cssLeft) || cssRight <= cssLeft));
+const useBottom = Number.isFinite(inlineBottom) || (!Number.isFinite(inlineTop) && Number.isFinite(cssBottom) && (!Number.isFinite(cssTop) || cssBottom <= cssTop));
+const maxX = Math.max(0, window.innerWidth - w);
+const maxY = Math.max(0, window.innerHeight - h);
+let hx = useRight ? (Number.isFinite(inlineRight) ? inlineRight : (Number.isFinite(cssRight) ? cssRight : Math.max(0, window.innerWidth - rect.right))) : (Number.isFinite(inlineLeft) ? inlineLeft : (Number.isFinite(rect.left) ? rect.left : maxX));
+let vy = useBottom ? (Number.isFinite(inlineBottom) ? inlineBottom : (Number.isFinite(cssBottom) ? cssBottom : Math.max(0, window.innerHeight - rect.bottom))) : (Number.isFinite(inlineTop) ? inlineTop : (Number.isFinite(rect.top) ? rect.top : maxY));
+hx = Math.max(0, Math.min(hx, maxX));
+vy = Math.max(0, Math.min(vy, maxY));
+applyAudioMiniPositionState(mini, useRight ? { x:'right', y: useBottom ? 'bottom' : 'top', right:hx, [useBottom ? 'bottom' : 'top']:vy } : { x:'left', y: useBottom ? 'bottom' : 'top', left:hx, [useBottom ? 'bottom' : 'top']:vy });
 }
 function makeAudioMiniDraggable(mini, handle) {
 if (!mini || !handle) return;
@@ -35609,10 +35649,25 @@ return;
 
 ensureItemMap();
 
-setLoad(true);
 const totalCount = selectedIds.length;
-updateLoadTxt(`${L.str_checking_bl}\n0 / ${totalCount}`);
-await sleep(16);
+let deleteCheckLoadTimer = null;
+let deleteCheckLoadShown = false;
+const clearDeleteCheckLoad = () => {
+if (deleteCheckLoadTimer) {
+clearTimeout(deleteCheckLoadTimer);
+deleteCheckLoadTimer = null;
+}
+if (deleteCheckLoadShown) {
+setLoad(false);
+deleteCheckLoadShown = false;
+}
+};
+deleteCheckLoadTimer = setTimeout(() => {
+deleteCheckLoadTimer = null;
+deleteCheckLoadShown = true;
+setLoad(true);
+updateLoadTxt(`${L.str_checking_bl}\n${processed} / ${totalCount}`);
+}, 120);
 const blSet = S.blSet;
 const blFolderSet = S.blFolderSet;
 const toDeleteIds = [];
@@ -35642,14 +35697,14 @@ processed++;
 if ((processed % 500) === 0) {
 const now = performance.now();
 if (now - lastYieldTime > 12) {
-    updateLoadTxt(`${L.str_checking_bl}\n${processed} / ${totalCount}`);
+    if (deleteCheckLoadShown) updateLoadTxt(`${L.str_checking_bl}\n${processed} / ${totalCount}`);
     await sleep(0);
     lastYieldTime = performance.now();
 }
 }
 }
 
-setLoad(false);
+clearDeleteCheckLoad();
 
 if (blacklistedCount > 0) {
 showToast(L.msg_del_protected.replace('{n}', blacklistedCount));
@@ -45035,6 +45090,9 @@ const data = await res.json();
 const base = data && data.base;
 if (!base) throw new Error('base missing');
 
+const isTransferQuotaNonVip = base.sub_status === false || String(base.vip_status || '').toLowerCase() !== 'valid';
+const hasTransferQuotaDailyDownload = base.download_daily && Number(base.download_daily.total_assets || 0) > 0;
+
 const m = showModal(`
 <h3 style="border:none; margin-bottom:18px; font-size:18px; font-weight:700; color:var(--pk-fg);">${L.modal_transfer_quota_title}</h3>
 <div style="font-size:14px; line-height:1.75; color:var(--pk-fg); opacity:0.72;">${L.transfer_quota_desc}</div>
@@ -45042,6 +45100,7 @@ const m = showModal(`
 ${buildTransferQuotaRowHtml(L.transfer_quota_cloud_download, base.offline)}
 ${buildTransferQuotaRowHtml(L.transfer_quota_download, base.download, L.transfer_quota_download_note)}
 ${buildTransferQuotaRowHtml(L.transfer_quota_upload, base.upload)}
+${isTransferQuotaNonVip && hasTransferQuotaDailyDownload ? buildTransferQuotaRowHtml(L.transfer_quota_daily_non_vip, base.download_daily) : ''}
 <div style="height:28px; flex:0 0 28px;"></div>
 `);
 
