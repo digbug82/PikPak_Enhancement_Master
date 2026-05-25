@@ -218,6 +218,7 @@
 "transfer_quota_cloud_download": "Lalu Lintas Unduhan Cloud",
 "transfer_quota_download": "Lalu Lintas Unduhan",
 "transfer_quota_upload": "Lalu Lintas Unggahan",
+"transfer_quota_daily_non_vip": "Batas harian · Non-anggota",
 "transfer_quota_download_note": "Termasuk transfer dari pemutaran online, pratinjau, dan unduhan",
 "transfer_quota_used_total": "Terpakai {u} / Total {t}",
 "err_transfer_quota_fetch": "Gagal mengambil detail kuota transfer.",
