@@ -27,7 +27,7 @@
 
 * **側鍵導航**：支援滑鼠側鍵前進 / 後退，在不同目錄層級間快速切換。
 * **進階路徑列**：支援滾輪滑動、同層目錄下拉切換、路徑回顯與溯源跳轉。
-* **全盤搜尋增強**：支援依檔案名稱與檔案路徑搜尋，關鍵字部分以紅色標示，長檔名會優先顯示命中關鍵字附近內容。
+* **全盤搜尋增強**：支援依檔案名稱與檔案路徑搜尋，關鍵字部分標紅，長檔名會優先顯示命中關鍵字附近內容。
 * **瀏覽偏好**：支援排序偏好、檢視偏好、保持瀏覽位置、媒體模式、隱藏按鈕文字、模糊媒體封面縮圖與夜間模式。
 
 <p align="center">
@@ -44,8 +44,8 @@
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/rename/rename_tc.gif" width="550" alt="批次重新命名">
 </p>
 
-* **檔案分析**：整合檔案篩選與檔案查重能力，查重支援 **雜湊精準比對 / 影片時長相似 / 名稱相似** 三類分析。
-* **篩選增強**：支援依大小、類型、路徑、關鍵字等條件篩選，並提供一鍵勾選、反向選取、依資料夾選擇等批次輔助能力。
+* **檔案分析**：整合檔案篩選與檔案查重能力，查重支援 **雜湊精準匹配 / 影片時長相似 / 名稱相似** 三類分析。
+* **篩選增強**：支援依大小、類型、路徑、關鍵字等條件篩選，並提供一鍵勾選、反選、依資料夾選擇等批次輔助能力。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_scan/file_scan_tc.gif" alt="文件透視">
@@ -59,20 +59,21 @@
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/folder_dup/folder_dup_tc.gif" alt="資料夾查重">
 </p>
 
+* **M3U 播放清單匯出**：支援將選取的影片匯出為 M3U 檔案，便於在外部播放器中批次播放。
 * **匯出目錄**：支援匯出目前目錄的目錄樹或目錄清單，便於歸檔、核對和分享檔案結構。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/tree/tree_tc.png" width="350" alt="匯出目錄">
 </p>
 
-* **智慧整理**：支援徹底刪除、清理空資料夾、批次解壓縮，並可對已解壓縮檔案自動清理。
-* **資源管理器**：支援自訂資源名單，可作為黑名單執行清理，也可在批次刪除時作為保護名單自動跳過命中項。
+* **智慧整理**：支援徹底刪除、清理空資料夾、批次解壓縮，並可對已解壓檔案自動清理。
+* **資源管理器**：支援自訂資源名單，可作為黑名單執行清理，也可在批次刪除時作為保護名單自動略過命中項。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/manager/manager_tc.gif" width="550" alt="資源管理器">
 </p>
 
-> ⚠️ 執行分析、整理、批次刪除、批次移動、批次解壓縮等重操作期間，不建議在其他客戶端同時修改同一批檔案，以免產生同步衝突。
+> ⚠️ 執行分析、整理、批次刪除、批次移動、批次解壓縮等重操作期間，不建議在其他用戶端同時修改同一批檔案，以免產生同步衝突。
 
 ---
 
@@ -82,22 +83,24 @@
 * **分享管理**：支援設定分享提取次數上限；達到條件後可自動取消分享，使連結失效。
 * **上傳保護**：內建上傳離開提醒，並針對上傳中斷、殘留任務和異常檔案進行保護與清理。
 * **雲端下載增強**：支援批次離線連結自動去重；內建磁鏈智慧清洗，可提取 Base32 / Hex 雜湊並剔除干擾文字。
+* **TXT 磁鏈提取**：支援預覽 TXT 文字，並從文字中識別磁鏈、HTTP、FTP、ed2k、thunder 等下載連結提交雲端下載。
 * **磁鏈預覽**：當磁鏈內容存在多張預覽圖時，支援多圖預覽。
-* **種子與快照兜底**：支援解析 `.torrent` 種子檔案；對部分無法直接採集媒體的連結，提供網頁快照儲存方案作為兜底。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/torrent/torrent_tc.png" height="320" alt="磁鏈">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/share/share_tc.gif" height="320" alt="分享">
 </p>
 
-> ⚠️ 分享提取次數上限的自動攔截，僅在網頁保持開啟且裝置未休眠時生效。 
+> ⚠️ 分享提取次數上限的自動攔截，僅在網頁保持開啟且裝置未休眠時生效。
 
 ---
 
 ### 🎬 沉浸式媒體增強
 
-* **播放引擎增強**：支援 0.5x - 3.0x 倍速、旋轉翻轉、強制比例、自動跳過片頭片尾、連播 / 循環與進度條縮圖預覽。
-* **字幕系統**：支援雲端同名字幕載入、本地字幕匯入、線上字幕搜尋；支援字幕軸偏移、字幕位置、字號和背景透明度調整。
+* **播放引擎增強**：支援 0.5x - 3.0x 倍速、旋轉翻轉、強制比例、自動跳過片頭片尾、連播 / 循環與進度列縮圖預覽。
+* **音樂播放器**：支援音訊檔案線上播放、播放清單、順序播放、隨機播放、單曲循環、彈窗模式、封面顯示與音量控制。
+* **音訊彈窗模式**：支援將音樂播放器獨立為小窗，並保持播放控制、封面展示和主題適配。
+* **字幕系統**：支援雲端同名字幕載入、本機字幕匯入、線上字幕搜尋；支援字幕軸偏移、字幕位置、字號和背景透明度調整。
 * **視覺輔助**：支援圖片或影片目前影格以圖搜圖，便於反查封面、演員、番劇或素材來源。
 * **媒體模式**：可在設定中啟用媒體模式，使純影片或純圖片目錄預設依名稱 A-Z 排序，提升劇集 / 漫畫瀏覽連續性。
 
@@ -109,43 +112,44 @@
 
 ### ⚡ 下載、外部播放與分發
 
-* **PotPlayer 協議修復助手**：內建 PotPlayer 協議檢測與修復輔助，減少瀏覽器無法喚起外部播放器的問題。
+* **預設開啟方式**：可在腳本播放器與 PotPlayer 之間選擇預設播放方式。
+* **PotPlayer 協議修復助手**：內建 PotPlayer 協議偵測與修復輔助，減少瀏覽器無法喚起外部播放器的問題。
 * **RPC 分發**：支援透過 RPC 協議將檔案推送至 Aria2 / Motrix 等下載節點。
-* **目錄結構還原**：推送整個資料夾時可自動恢復雲端硬碟中的樹狀目錄結構，避免下載後目錄被打平。
+* **目錄結構還原**：推送整個資料夾時可自動還原雲端硬碟中的樹狀目錄結構，避免下載後目錄被攤平。
 * **下載過濾**：支援依檔案大小、副檔名、名稱關鍵字過濾檔案，作用於瀏覽器下載和 Aria2 / Motrix 推送。
 * **下載直連加速網域**：支援自訂下載加速網域，提供前綴完整原始連結與 URL 參數傳遞兩種反代改寫模式。
-* **異常處理**：推送時自動跳過 0KB 無效檔案，並支援失敗清單匯出。
+* **異常處理**：推送時自動略過 0KB 無效檔案，並支援失敗清單匯出。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/filter/filter_tc.png" height="290" alt="下載過濾">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_tc.gif" height="290" alt="Aria2">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/aria2/aria2_tc.gif" height="290" alt="aria2">
 </p>
 
 ---
 
-### ⚙️ 配置管理與數據管理
+### ⚙️ 配置與資料管理
 
-* **配置備份**：支援將偏好設定、管理規則、密碼金庫、歷史紀錄和部分功能配置匯出為帶指紋校驗的 JSON 備份檔案。
-* **智慧匯入**：匯入時會對名單、紀錄等列表型數據進行合併去重；基礎設定項依匯入檔案進行更新。
-* **本地數據清理**：支援依類別清理全盤索引、偏好設定、管理規則、密碼金庫、影片快取與運行快取。
+* **配置備份**：支援將偏好設定、管理規則、密碼金庫、歷史記錄和部分功能配置匯出為帶指紋校驗的 JSON 備份檔。
+* **智慧匯入**：匯入時會對名單、記錄等列表型資料進行合併去重；基礎設定項依匯入檔案進行更新。
+* **本機資料清理**：支援依類別清理全盤索引、偏好設定、管理規則、密碼金庫、影片快取與執行快取。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/cache/cache_tc.png" width="350" alt="快取">
 </p>
 
-* **密碼金庫**：集中管理常用解壓縮密碼，供批次解壓縮自動嘗試與快速填入使用。
+* **密碼金庫**：集中管理常用解壓密碼，供批次解壓縮自動嘗試與快速填入使用。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/archive/archive_tc.png" width="250" alt="密碼金庫">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/archive/archive_tc.png" width="250" alt="密碼庫">
 </p>
 
-* **多帳號數據遷移**：支援將選中項目加密打包，並在另一個帳號登入後自動識別接管，實現跨帳號轉存。
+* **多帳號數據遷移**：支援將選取項目加密打包，並在另一個帳號登入後自動識別接管，實現跨帳號轉存。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/migrate/migrate_tc.gif" alt="數據遷移">
 </p>
 
-> 📌 偏好設定、管理規則、密碼金庫、快取和歷史類數據均保存在本地環境中。
+> 📌 偏好設定、管理規則、密碼金庫、快取和歷史類資料均儲存在本機環境中。
 
 ---
 
