@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            3.0.0
+// @version            3.0.1
 // @author             digbug82
 // @license            CC-BY-NC-SA-4.0
 // @description        PikPak 网盘增强：集成 Aria2 下载、下载直链加速、下载过滤、分享链接解析增强、文件/文件夹查重、批量重命名、资源清理、批量解压、M3U 导出、PotPlayer 直达、污染磁链识别、TXT 磁链提取、排序与搜索增强、数据迁移、目录树导出、以图搜图、视音频播放增强等。
