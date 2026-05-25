@@ -218,6 +218,7 @@
 "transfer_quota_cloud_download": "Cloud Download Traffic",
 "transfer_quota_download": "Download Traffic",
 "transfer_quota_upload": "Upload Traffic",
+"transfer_quota_daily_non_vip": "Daily limit · Non-member",
 "transfer_quota_download_note": "Includes transfers from online playback, viewing, and downloading",
 "transfer_quota_used_total": "Used {u} / Total {t}",
 "err_transfer_quota_fetch": "Failed to fetch transfer quota details.",
