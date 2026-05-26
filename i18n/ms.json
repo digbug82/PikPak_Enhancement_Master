@@ -906,8 +906,6 @@
 "msg_unzip_fail": "Permintaan nyahmampat gagal",
 "msg_jszip_fail": "JSZip gagal dimuatkan, sila semak rangkaian.",
 "msg_turbo_activated": "Mod Turbo telah diaktifkan: skrip telah mengambil alih logik halaman web secara mendalam untuk memastikan kestabilan dan kelancaran.",
-"msg_script_manager_vm_tip": "Jika terasa tersangkut, disarankan menjalankan skrip dengan Violentmonkey; klik untuk membuka halaman pemasangan.",
-"msg_console_legal": "Penggunaan komersial dilarang sama sekali: projek ini hanya untuk pembelajaran dan pertukaran peribadi.",
 "msg_ana_warn": "Amaran semakan pendua folder: keputusan berdasarkan algoritma. Sila semak manual sebelum memadam bagi elak salah padam.",
 "err_migrate_too_many": "⚠️ Terlalu banyak item dipilih\n\nJumlah data permintaan semasa ({s}MB) telah melebihi had keras 4MB pelayan.\n\n【Penyelesaian】:\nSila pilih terus【folder】dalam direktori biasa untuk migrasi, bukannya memilih sejumlah besar fail bebas dalam mod tinjauan seluruh cakera.",
 "msg_migrate_quota_err": "⚠️ Ruang akaun sasaran tidak mencukupi!\n\nPetunjuk sistem: {d}\n\nMahu kekalkan rekod migrasi?\n(pilih \"Ya\" untuk kekalkan rekod, segar semula halaman selepas membersihkan ruang untuk cuba lagi; pilih \"Tidak\" untuk menamatkan migrasi ini)",
