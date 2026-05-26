@@ -8,9 +8,9 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            3.0.1
+// @version            3.0.2
 // @author             digbug82
-// @license            CC-BY-NC-SA-4.0
+// @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2 下载、下载直链加速、下载过滤、分享链接解析增强、文件/文件夹查重、批量重命名、资源清理、批量解压、M3U 导出、PotPlayer 直达、污染磁链识别、TXT 磁链提取、排序与搜索增强、数据迁移、目录树导出、以图搜图、视音频播放增强等。
 // @description:zh-CN  PikPak 网盘增强：集成 Aria2 下载、下载直链加速、下载过滤、分享链接解析增强、文件/文件夹查重、批量重命名、资源清理、批量解压、M3U 导出、PotPlayer 直达、污染磁链识别、TXT 磁链提取、排序与搜索增强、数据迁移、目录树导出、以图搜图、视音频播放增强等。
 // @description:zh-TW  PikPak 網盤增強：整合 Aria2 下載、下載直鏈加速、下載過濾、分享連結解析增強、檔案/資料夾查重、批次重新命名、資源清理、批次解壓縮、M3U 匯出、PotPlayer 直達、污染磁鏈識別、TXT 磁鏈提取、排序與搜尋增強、資料遷移、目錄樹匯出、以圖搜圖、視音訊播放增強等。
@@ -57,21 +57,34 @@
 * ============================================================================
 * PikPak Enhancement Master
 *
-* Copyright (c) 2025-2026 digbug82.
+* Copyright (C) 2025-2026 digbug82.
 *
-* This project, including its new features, refactoring, UI design, enhancement
-* logic, media tools, management suites, and related documentation, is licensed
-* under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0
-* International License (CC-BY-NC-SA-4.0).
+* This program is free software: you can redistribute it and/or modify it
+* under the terms of the GNU Affero General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
 *
-* You may use, modify, and share this project for personal learning and
-* non-commercial purposes only, provided that proper attribution is given and
-* derivative works are distributed under the same license.
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+* for more details.
 *
-* Commercial use, resale, paid redistribution, or use in commercial services is
-* strictly prohibited without explicit permission from the author.
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 *
-* License: https://creativecommons.org/licenses/by-nc-sa/4.0/
+* Source code: https://github.com/digbug82/PikPak_Enhancement_Master
+*
+* Acknowledgements:
+* This project is inspired in part by the UI design language, file-management
+* structure, and some web-side API interaction ideas of PikPak File Manager
+* v1.2.0 by 브랜뉴:
+* https://github.com/poihoii/PikPak_FileManager
+*
+* PikPak File Manager is licensed under the MIT License. Its original
+* copyright and license notice are preserved in THIRD_PARTY_NOTICES.md:
+* https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/THIRD_PARTY_NOTICES.md
+*
+* Special thanks and respect to the original project and its author.
 * ============================================================================
 */
 
@@ -383,9 +396,6 @@ scriptUpdateCheckTTL: 24 * 60 * 60 * 1000,
 scriptUpdateCacheKey: 'pk_script_update_cache',
 scriptUpdateDismissPrefix: 'pk_script_update_dismiss_',
 scriptUpdateProjectUrl: 'https://github.com/digbug82/PikPak_Enhancement_Master',
-scriptManagerTipVersion: (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) ? GM_info.script.version : '0',
-scriptManagerTipDelay: 1600,
-violentmonkeyInstallUrl: 'https://violentmonkey.github.io/get-it/',
 logoSVG: `<svg viewBox="0 0 238 200" style="width:24px;height:24px;border-radius:4px;flex-shrink:0;"><path d="M0 0 C1.82724609 0.01353516 1.82724609 0.01353516 3.69140625 0.02734375 C4.59761719 0.03894531 5.50382812 0.05054688 6.4375 0.0625 C5.95097979 7.11704304 4.33696858 12.90149479 1.6875 19.4375 C1.35234375 20.32566406 1.0171875 21.21382812 0.671875 22.12890625 C0.3315625 22.98097656 -0.00875 23.83304688 -0.359375 24.7109375 C-0.66198242 25.47583496 -0.96458984 26.24073242 -1.27636719 27.02880859 C-3.01571023 29.77913653 -4.60880008 30.70366989 -7.5625 32.0625 C-10.93383789 32.72265625 -10.93383789 32.72265625 -14.78515625 33.125 C-15.47874237 33.20142731 -16.17232849 33.27785461 -16.88693237 33.3565979 C-18.36660067 33.51855298 -19.84685768 33.67520381 -21.3276062 33.82696533 C-25.19232303 34.22318595 -29.05286739 34.65697538 -32.9140625 35.0859375 C-33.67180466 35.16903168 -34.42954681 35.25212585 -35.21025085 35.33773804 C-40.99791882 35.97875931 -46.74864414 36.77615252 -52.5 37.6875 C-61.81496788 39.10080547 -71.19269316 40.07620454 -80.5625 41.0625 C-19.8425 41.0625 40.8775 41.0625 103.4375 41.0625 C91.8875 39.7425 80.3375 38.4225 68.4375 37.0625 C63.8175 36.4025 59.1975 35.7425 54.4375 35.0625 C49.17221542 34.42736314 43.90722683 33.79696512 38.63671875 33.20703125 C37.62996094 33.08714844 36.62320313 32.96726563 35.5859375 32.84375 C34.69052246 32.74126953 33.79510742 32.63878906 32.87255859 32.53320312 C30.35601376 32.0467485 28.59527547 31.44037784 26.4375 30.0625 C23.38532266 24.97553776 21.3341425 19.45473677 19.1875 13.9375 C18.91695801 13.25671387 18.64641602 12.57592773 18.36767578 11.87451172 C16.82394482 7.78804812 16.13851057 4.42502757 16.4375 0.0625 C33.20320897 -0.76054389 50.04132 2.04640823 66.578125 4.53515625 C70.96365446 5.13439358 75.35589707 5.627565 79.75488281 6.11669922 C97.85972043 8.13836316 97.85972043 8.13836316 106.6875 9.4375 C107.39487305 9.52700928 108.10224609 9.61651855 108.83105469 9.70874023 C113.96714941 10.51808328 116.87598017 12.31623275 120.4375 16.0625 C121.69830294 18.53927732 122.67025259 20.7202309 123.5625 23.3125 C124.02136126 24.56846882 124.48232815 25.8236702 124.9453125 27.078125 C125.27250149 28.00288179 125.27250149 28.00288179 125.60630035 28.94632053 C126.38750394 31.05750635 126.38750394 31.05750635 127.44002533 32.93062496 C131.07482517 39.83448151 131.00351579 46.31795394 130.95507812 53.99243164 C130.96050802 55.37978344 130.96763552 56.76712947 130.97631836 58.15446472 C130.99445028 61.89829685 130.98752708 65.6416848 130.97480202 69.38552403 C130.96462344 73.31622656 130.97408092 77.24689291 130.98034668 81.17759705 C130.98760817 87.77544941 130.97807403 94.37312221 130.95898438 100.97094727 C130.93720936 108.58452515 130.94427739 116.19767461 130.96629 123.81124216 C130.98447611 130.36524706 130.98698696 136.91912344 130.97653532 143.47314543 C130.97031913 147.38014362 130.96941296 151.2869408 130.98268127 155.19392586 C130.99428653 158.8672447 130.9861299 162.54001414 130.96310425 166.213274 C130.95534421 168.19404482 130.96713242 170.17486244 130.97961426 172.15560913 C130.90049754 180.52230774 129.95755225 186.09535704 124.25390625 192.5234375 C123.51011719 193.15507812 122.76632813 193.78671875 122 194.4375 C121.25878906 195.08460938 120.51757812 195.73171875 119.75390625 196.3984375 C114.7661098 199.98157627 110.22842399 200.35421576 104.22135925 200.32992554 C103.39785408 200.33445665 102.5743489 200.33898776 101.72588903 200.34365618 C98.968488 200.35630894 96.21128426 200.35467924 93.45385742 200.35302734 C91.475975 200.35901206 89.49809491 200.36581748 87.5202179 200.37338257 C82.14823484 200.39105594 76.77631549 200.39573853 71.40430617 200.39701414 C66.91878502 200.39891354 62.4332787 200.40627158 57.94776326 200.41335833 C47.36384951 200.42964512 36.77996977 200.43452703 26.19604492 200.43310547 C15.28118177 200.43190408 4.36651636 200.45300486 -6.54829675 200.4845928 C-15.92170288 200.51075235 -25.29504442 200.52147289 -34.66848677 200.52019465 C-40.26569836 200.51968491 -45.86273424 200.52537507 -51.45990944 200.54655075 C-56.725388 200.56592749 -61.99052314 200.5660613 -67.25601387 200.55151749 C-69.1861191 200.54942757 -71.11624579 200.55414114 -73.04631424 200.5662384 C-75.68641426 200.58171127 -78.32533312 200.57236959 -80.96540833 200.55697632 C-81.72466655 200.56726344 -82.48392478 200.57755057 -83.26619083 200.58814943 C-90.327556 200.49750269 -96.39704041 197.82485418 -101.375 192.75 C-102.18904297 191.95142578 -102.18904297 191.95142578 -103.01953125 191.13671875 C-108.29053612 184.05088689 -108.01804154 177.09915158 -108.0300293 168.55004883 C-108.04229625 167.18245883 -108.05575106 165.81487905 -108.07029724 164.4473114 C-108.10523797 160.74401042 -108.12059214 157.04088761 -108.13013434 153.33744264 C-108.13673436 151.01403475 -108.14708893 148.69067299 -108.15863991 146.36728477 C-108.19836069 138.23287671 -108.22038571 130.09860956 -108.22827148 121.96411133 C-108.23610728 114.43116961 -108.28516577 106.89925647 -108.35333699 99.36664182 C-108.41007964 92.86514961 -108.43519788 86.36399446 -108.43721896 79.86225718 C-108.43904166 75.9947118 -108.45309089 72.1282487 -108.50003624 68.26096535 C-108.72797687 48.29049317 -107.52961567 30.83210742 -95.5625 14.0625 C-92.23797604 10.732487 -88.44904231 10.20048941 -83.953125 9.5 C-83.20613342 9.37633057 -82.45914185 9.25266113 -81.68951416 9.12524414 C-74.04584045 7.901492 -66.3645662 7.06662299 -58.66394043 6.29776001 C-54.62860447 5.8940274 -50.59547976 5.46951727 -46.5625 5.04296875 C-45.77776306 4.96008102 -44.99302612 4.8771933 -44.18450928 4.79179382 C-36.33754684 3.9513441 -28.53467892 2.87051571 -20.734375 1.67578125 C-13.79617508 0.63078847 -7.03103815 -0.06826251 0 0 Z M-47 131 L-15 106 L-47 81 L-47 91 L-27 106 L-47 121 Z M45.4375 89.0625 C43.16309531 93.61130937 44.11732026 99.81887268 44.0625 104.8125 C44.02511719 106.08867188 43.98773438 107.36484375 43.94921875 108.6796875 C43.6563417 116.25277258 43.6563417 116.25277258 46.7109375 122.91015625 C50.0632924 125.55649945 51.41007501 125.90713502 55.50390625 125.58984375 C58.83921214 124.68021487 60.4149221 122.75927054 62.4375 120.0625 C64.03299443 115.26404894 63.62174204 110.1852134 63.625 105.1875 C63.64336914 103.71603516 63.64336914 103.71603516 63.66210938 102.21484375 C63.77173933 93.57358621 63.77173933 93.57358621 59.75 86.1875 C54.01325068 83.39664894 49.78182352 84.71817648 45.4375 89.0625 Z M-18.5625 155.0625 C-20.89546251 157.88967213 -20.89546251 157.88967213 -20.3125 161.125 C-19.8031756 164.161959 -19.8031756 164.161959 -17.5625 166.0625 C-15.5023267 166.81656896 -13.41368556 167.49416461 -11.3125 168.125 C-10.19359375 168.46660156 -9.0746875 168.80820313 -7.921875 169.16015625 C-1.62436639 170.85169635 4.26860909 171.24487637 10.75 171.25 C11.9555957 171.26836914 11.9555957 171.26836914 13.18554688 171.28710938 C21.14907742 171.30632948 28.31945463 169.57146397 35.875 167.125 C36.88433594 166.80660156 37.89367187 166.48820313 38.93359375 166.16015625 C41.73511224 165.200361 41.73511224 165.200361 43.4375 162.0625 C43.1133631 158.74009676 42.82973697 157.45473697 40.4375 155.0625 C35.63637087 154.61062902 31.50016124 155.74460874 26.9375 157.0625 C14.69655136 160.31686985 0.09246916 160.8899845 -11.5625 155.0625 C-15.0625 154.72916667 -15.0625 154.72916667 -18.5625 155.0625 Z " fill="currentColor" transform="translate(107.5625,-0.0625)"/></svg>`,
 emptySVG: `<svg viewBox="-2 -2 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 10L7 5H17L19 10H5Z" fill="#E2E8F0" stroke="#94A3B8" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 10V18C4 19.1 4.9 20 6 20H18C19.1 20 20 19.1 20 18V10" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10L1 6.5" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 10L23 6.5" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><g stroke="#64748B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 13L10 14L9 15"/><path d="M15 13L14 14L15 15"/><path d="M11 17.5H13"/></g>`,
 dupHashSVG: `<svg style="width:24px;height:24px;margin-right:8px;flex-shrink:0;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M798 322.42A308.78 308.78 0 0 0 676.73 211.1a17.5 17.5 0 1 0-15.94 31.16 272.73 272.73 0 0 1 148.71 243v63.83c0 25.58-3.14 134.1-8.62 159.68a17.5 17.5 0 0 0 13.44 20.78 17.94 17.94 0 0 0 3.69 0.39 17.5 17.5 0 0 0 17.09-13.83c6.81-31.76 9.4-148.75 9.4-167v-63.88A307 307 0 0 0 798 322.42zM365.68 272.82a273.38 273.38 0 0 1 231.18-53.68 17.5 17.5 0 1 0 7.68-34.14 307.93 307.93 0 0 0-367.72 231.18 17.5 17.5 0 1 0 34.11 7.82 273.89 273.89 0 0 1 94.75-151.18zM246.54 467.73a17.49 17.49 0 0 0-17.5 17.5v69c0 50.29-14.45 87.61-44.18 114.11a17.5 17.5 0 0 0 23.28 26.13c22.56-20.11 38.52-45.63 47.43-75.85 5.7-19.34 8.47-40.4 8.47-64.39v-69a17.5 17.5 0 0 0-17.5-17.5zM743.42 636.35v-0.17l-0.5-52.83a17.5 17.5 0 1 0-35 0.34l0.5 52.74c0 4.2 0 8.79 0.05 13.68 0.21 34.94 0.53 87.74-9.16 116.81a17.5 17.5 0 1 0 33.2 11.08c11.52-34.56 11.2-88.62 11-128.09-0.07-4.85-0.09-9.4-0.09-13.56z" fill="currentColor"></path><path d="M707.92 527.26a17.5 17.5 0 0 0 35 0v-45c0-114.17-92.89-207-207.06-207a207.35 207.35 0 0 0-58.49 8.38 17.5 17.5 0 0 0 9.87 33.58 172.24 172.24 0 0 1 48.62-7c94.87 0 172.06 77.18 172.06 172.05zM363.81 482.22A172.4 172.4 0 0 1 437 341.4a17.5 17.5 0 1 0-20.14-28.62 207.45 207.45 0 0 0-88 169.44v108.39a203 203 0 0 1-6.86 55.17 162.05 162.05 0 0 1-47.22 77.75 17.5 17.5 0 1 0 23.65 25.8c27.84-25.53 47.13-57.24 57.32-94.26a236.32 236.32 0 0 0 8.09-64.46zM440.83 566a17.5 17.5 0 0 0-17.5 17.47l-0.11 56.86c0 12.5-2.7 77.59-56 131.85a17.5 17.5 0 1 0 25 24.53 229.06 229.06 0 0 0 56.17-94.59c8.93-29.25 9.89-53 9.89-61.75l0.11-56.84A17.5 17.5 0 0 0 440.83 566z" fill="currentColor"></path><path d="M604.17 419.76a17.5 17.5 0 0 0-4.71-24.3 113 113 0 0 0-176.16 93.68v38.12a17.5 17.5 0 0 0 35 0v-38.12a78 78 0 0 1 121.57-64.68 17.49 17.49 0 0 0 24.3-4.7zM618.85 438.05a17.51 17.51 0 0 0-9.92 22.68 77.55 77.55 0 0 1 5.33 28.41v206.29c0 33.49-6.45 66.07-19.71 99.61a17.5 17.5 0 1 0 32.55 12.87c14.9-37.71 22.16-74.51 22.16-112.48V489.14a112.38 112.38 0 0 0-7.74-41.14 17.5 17.5 0 0 0-22.67-9.95z" fill="currentColor"></path><path d="M549.91 488a17.5 17.5 0 0 0-35 0v174.37c0 0.51 0 1 0.06 1.52 0.08 0.88 7 89.15-51.16 152.8a17.5 17.5 0 0 0 25.83 23.62c66-72.15 61-168 60.27-178.62z" fill="currentColor"></path></svg>`,
@@ -1456,12 +1466,6 @@ const mmss = String(m).padStart(2, '0') + ':' + String(sc).padStart(2, '0');
 return h > 0 ? String(h).padStart(2, '0') + ':' + mmss : mmss;
 };
 
-function isViolentmonkeyManager(){return getScriptManagerName().toLowerCase().includes('violentmonkey');}
-function getVmPerfTipSeenKey(){return `pk_vm_perf_tip_seen_${CONF.scriptManagerTipVersion}_${getLang()}`;}
-function isVmPerfTipShownInPage(){return window.__pkVmPerfTipShownKey===getVmPerfTipSeenKey();}
-function markVmPerfTipShownInPage(){window.__pkVmPerfTipShownKey=getVmPerfTipSeenKey();}
-function shouldShowVmPerfTip(){const name=getScriptManagerName();if(!name||isViolentmonkeyManager()||isVmPerfTipShownInPage())return false;return !gmGet(getVmPerfTipSeenKey(),false);}
-function markVmPerfTipShown(){markVmPerfTipShownInPage();gmSet(getVmPerfTipSeenKey(),true);}
 function gmGet(key, def) { if (typeof GM_getValue !== 'undefined') { let v = GM_getValue(key, def); return (v === null) ? def : v; } return def; }
 function gmSet(key, val) { if (typeof GM_setValue !== 'undefined') return GM_setValue(key, val); }
 async function gmSetAsync(key, val) { const r = gmSet(key, val); if (r && typeof r.then === 'function') await r; }
@@ -1477,7 +1481,6 @@ function isScriptUpdateDismissed(version){try{return localStorage.getItem(getScr
 function markScriptUpdateDismissed(version){try{localStorage.setItem(getScriptUpdateDismissKey(version),'1');}catch(e){}}
 function formatScriptUpdateCheckedAt(ts){const n=Number(ts)||0;if(!n)return L.str_script_update_not_checked;const d=new Date(n);if(!Number.isFinite(d.getTime()))return L.str_script_update_not_checked;const p=x=>String(x).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
 function getScriptUpdateLatestText(info){if(info&&info.ok&&info.latestVersion)return info.latestVersion;if(info&&info.checkedAt)return L.str_script_update_failed;return L.str_script_update_not_checked;}
-function getScriptManagerName(){try{const info=typeof GM_info!=='undefined'?GM_info:null;return String((info&&(info.scriptHandler||info.scriptHandlerName||info.handler))||'').trim();}catch(e){return '';}}
 function getDefaultPotPlayerProtocolState() {
 return {
 schemaVersion: CONF.potplayerProtocolStateSchemaVersion,
@@ -2829,8 +2832,6 @@ str_jav_no_match: "(未匹配到番号)",
 msg_unzip_fail: "解压请求失败",
 msg_jszip_fail: "JSZip 加载失败，请检查网络。",
 msg_turbo_activated: "极速模式已激活：脚本已深度接管网页逻辑，确保稳定流畅。",
-msg_script_manager_vm_tip: "如遇卡顿，建议使用 Violentmonkey 运行脚本；点击打开安装页。",
-msg_console_legal: "严禁商业用途：本项目仅供个人学习与交流使用。",
 msg_ana_warn: "文件夹查重提示：判定基于算法推测，删除前请务必人工核对，以防误删。",
 err_migrate_too_many: "⚠️ 选中项过多\n\n当前请求数据量 ({s}MB) 已超过服务器 4MB 的硬性限制。\n\n【解决方案】：\n请在常规目录中直接选中【文件夹】进行迁移，而不是在全盘透视模式下选中海量独立文件。",
 msg_migrate_quota_err: "⚠️ 目标账号空间不足！\n\n系统提示：{d}\n\n是否保留迁移记录？\n(选\"是\"保留记录，清理空间后刷新页面可重试；选\"否\"则终止本次迁移)",
@@ -3813,12 +3814,11 @@ await sleep(100);
 
 const version = (typeof GM_info !== 'undefined' && GM_info.script) ? GM_info.script.version : "1.0.0";
 
-console.log("%c PikPak Enhancement Master %c v" + version + " %c digbug82 %c CC-BY-NC-SA-4.0 ",
+console.log("%c PikPak Enhancement Master %c v" + version + " %c digbug82 %c AGPL-3.0-or-later ",
 "color:#fff; background:#1a5eff; padding:3px 0; border-radius:4px 0 0 4px; font-weight:bold;",
 "color:#fff; background:#333; padding:3px 8px;",
 "color:#fff; background:#f57c00; padding:3px 8px; font-weight:bold;",
 "color:#fff; background:#d93025; padding:3px 8px; border-radius:0 4px 4px 0; font-weight:bold;");
-pkI18nBootReady.finally(() => console.log("%c" + getStrings().msg_console_legal + "%c", "color:#d93025; font-weight:bold;", ""));
 
 function getIcon(item) {
 const isFolder = item.kind === 'drive#folder' ||
@@ -8319,7 +8319,7 @@ if (uploadMenu) uploadMenu.classList.toggle('pk-dark', !wasDark);
 const crumbPop = document.getElementById('pk-main-crumb-pop');
 if (crumbPop) crumbPop.classList.toggle('pk-dark', !wasDark);
 
-document.querySelectorAll('#pk-toast-container,.pk-msg-toast,.pk-float-bar-item,#pk-vm-perf-tip-toast,#pk-script-update-toast,.pk-script-update-toast,#pk-audio-mini,#pk-audio-ov').forEach(n => n.classList.toggle('pk-dark', !wasDark));
+document.querySelectorAll('#pk-toast-container,.pk-msg-toast,.pk-float-bar-item,#pk-script-update-toast,.pk-script-update-toast,#pk-audio-mini,#pk-audio-ov').forEach(n => n.classList.toggle('pk-dark', !wasDark));
 const audioMiniNow = document.getElementById('pk-audio-mini');
 const audioFullNow = document.getElementById('pk-audio-ov');
 if (audioMiniNow && typeof syncAudioMiniTheme === 'function') requestAnimationFrame(() => syncAudioMiniTheme(audioMiniNow));
@@ -8800,9 +8800,6 @@ t.textContent = msg;
 }
 
 container.prepend(t);
-const vmTipToast = document.getElementById('pk-vm-perf-tip-toast');
-if (vmTipToast && container.firstElementChild !== vmTipToast) container.prepend(vmTipToast);
-
 requestAnimationFrame(() => {
 t.style.transform = 'translateY(0) scale(1)';
 t.style.opacity = '1';
@@ -8815,44 +8812,6 @@ t.style.opacity = '0';
 t.style.transform = 'translateY(-15px) scale(0.95)';
 setTimeout(() => { if(t.parentNode) t.remove(); }, 300);
 }, displayTime);
-}
-
-function showVmPerfTipToast(msg) {
-if (document.getElementById('pk-vm-perf-tip-toast')) return;
-markVmPerfTipShownInPage();
-
-let container = ensurePkToastContainer();
-
-const t = document.createElement('div');
-t.id = 'pk-vm-perf-tip-toast';
-t.className = 'pk-msg-toast warning';
-const ov = document.querySelector('.pk-ov');
-const savedThemeNow = gmGet('pk_theme', 'auto');
-const sysDarkNow = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-const isDark = ov ? ov.classList.contains('pk-dark') : (savedThemeNow === 'dark' || (savedThemeNow === 'auto' && sysDarkNow));
-if (isDark) t.classList.add('pk-dark');
-
-const icon = CONF.icons.warning.replace('style="', 'style="flex-shrink: 0; ');
-t.innerHTML = `${icon}<span style="flex:1;line-height:1.4;">${esc(msg)}</span><button type="button" data-pk-vm-tip-close="1" style="width:22px;height:22px;border:0;border-radius:50%;background:rgba(255,255,255,.22);color:#fff;cursor:pointer;font-size:16px;line-height:22px;padding:0;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>`;
-t.style.cssText = 'position:relative;top:auto;left:auto;transform:translateY(-15px) scale(0.95);opacity:0;transition:all 0.3s cubic-bezier(0.23, 1, 0.32, 1);max-width:80vw;pointer-events:auto;cursor:pointer;background-color:rgba(250, 173, 20, 0.95);color:#ffffff;border:1px solid rgba(250, 173, 20, 0.2);';
-
-t.onclick = (e) => {
-if (e.target && e.target.closest('[data-pk-vm-tip-close="1"]')) {
-e.stopPropagation();
-markVmPerfTipShown();
-t.style.opacity = '0';
-t.style.transform = 'translateY(-15px) scale(0.95)';
-setTimeout(() => { if (t.parentNode) t.remove(); }, 300);
-return;
-}
-window.open(CONF.violentmonkeyInstallUrl, '_blank', 'noopener,noreferrer');
-};
-
-container.prepend(t);
-requestAnimationFrame(() => {
-t.style.transform = 'translateY(0) scale(1)';
-t.style.opacity = '1';
-});
 }
 
 function showScriptUpdateToast(info) {
@@ -8898,9 +8857,6 @@ setTimeout(() => { if (t.parentNode) t.remove(); }, 300);
 };
 
 container.prepend(t);
-const vmTipToast = document.getElementById('pk-vm-perf-tip-toast');
-if (vmTipToast && container.firstElementChild !== vmTipToast) container.prepend(vmTipToast);
-
 requestAnimationFrame(() => {
 t.style.transform = 'translateY(0) scale(1)';
 t.style.opacity = '1';
@@ -39875,7 +39831,7 @@ if (k.startsWith('pk_archive_pwd_') || k === 'pk_pwd_vault' || k === 'pk_pwd_try
 if (k.startsWith('pk_duration_')) return 'history';
 
 const cacheKeys = ['pk_captured_captcha', 'pk_i18n_manifest', 'pk_script_update_cache', 'pk_potplayer_launch_state', 'pk_potplayer_protocol_state'];
-if (k.startsWith('pk_fmod_') || k.startsWith('pk_i18n_') || k.startsWith(CONF.scriptUpdateDismissPrefix) || k.startsWith('pk_vm_perf_tip_seen_') || cacheKeys.includes(k)) return 'cache';
+if (k.startsWith('pk_fmod_') || k.startsWith('pk_i18n_') || k.startsWith(CONF.scriptUpdateDismissPrefix) || cacheKeys.includes(k)) return 'cache';
 
 const ruleKeys =['pk_blacklist', 'pk_blacklist_folders', 'pk_aria2_url', 'pk_aria2_token', 'pk_download_accel_enable', 'pk_download_accel_domain', 'pk_download_accel_mode', 'pk_download_accel_query_param', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_bn_find_hist', 'pk_bn_rep_hist'];
 if (ruleKeys.includes(k) || k.startsWith('pk_scan_last_') || k.startsWith('pk_analyze_last_') || k === 'pk_dup_strictness') return 'rules';
@@ -45202,13 +45158,6 @@ delete globalSavedState.scrollTop;
 }
 
 syncGlobalStarredStatus();
-
-if (shouldShowVmPerfTip()) {
-setTimeout(() => {
-if (location.href.includes('/login') || location.pathname.includes('login')) return;
-if (typeof showVmPerfTipToast === 'function') showVmPerfTipToast(getStrings().msg_script_manager_vm_tip);
-}, CONF.scriptManagerTipDelay);
-}
 
 if (gmGet('pk_turbo_mode', false)) {
 setTimeout(() => {
