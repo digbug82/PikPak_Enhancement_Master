@@ -906,8 +906,6 @@
 "msg_unzip_fail": "Extraction request failed.",
 "msg_jszip_fail": "JSZip failed to load. Check your network.",
 "msg_turbo_activated": "Turbo Mode Active: Script has taken over web logic for peak performance.",
-"msg_script_manager_vm_tip": "If you experience lag, it is recommended to run the script with Violentmonkey; click to open the install page.",
-"msg_console_legal": "Strictly Non-Commercial: This project is strictly for personal study and communication only.",
 "msg_ana_warn": "Folder Deduplication Hint: Based on algorithmic inference. Please double-check manually before deleting.",
 "err_migrate_too_many": "⚠️ Too many items selected\n\nThe current request payload ({s}MB) exceeds the server's 4MB gRPC limit.\n\n[Solution]:\nPlease select [Folders] in a standard directory instead of selecting massive individual files in the Perspective/Flat view.",
 "msg_migrate_quota_err": "⚠️ Insufficient storage in target account!\n\nSystem message: {d}\n\nKeep migration record?\n(Select 'Yes' to keep; you can retry after freeing up space and refreshing. Select 'No' to cancel.)",
