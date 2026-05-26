@@ -2830,7 +2830,6 @@ err_official_history_clear: "播放历史清空失败",
 msg_aria2_not_set: "检测到您尚未配置 Aria2，请填写后继续：",
 str_jav_no_match: "(未匹配到番号)",
 msg_unzip_fail: "解压请求失败",
-msg_jszip_fail: "JSZip 加载失败，请检查网络。",
 msg_turbo_activated: "极速模式已激活：脚本已深度接管网页逻辑，确保稳定流畅。",
 msg_ana_warn: "文件夹查重提示：判定基于算法推测，删除前请务必人工核对，以防误删。",
 err_migrate_too_many: "⚠️ 选中项过多\n\n当前请求数据量 ({s}MB) 已超过服务器 4MB 的硬性限制。\n\n【解决方案】：\n请在常规目录中直接选中【文件夹】进行迁移，而不是在全盘透视模式下选中海量独立文件。",
@@ -27045,18 +27044,6 @@ L.title_sel_sub
 );
 };
 
-const loadJSZip = () => {
-if (window.JSZip) return Promise.resolve(window.JSZip);
-return new Promise((resolve, reject) => {
-const script = document.createElement('script');
-script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-script.onload = () => resolve(window.JSZip);
-script.onerror = () => reject(new Error(L.msg_jszip_fail));
-
-document.head.appendChild(script);
-});
-};
-
 const cleanFilename = (name) => {
 let n = name.toLowerCase();
 n = n.replace(/\.[^/.]+$/, "");
@@ -27208,12 +27195,7 @@ html += `
 resultList.innerHTML = html;
 };
 
-try {
-await loadJSZip();
 doSearch(input.value);
-} catch (err) {
-resultList.innerHTML = `<div style="color:#d93025;">${L.msg_jszip_fail}</div>`;
-}
 
 input.oninput = () => doSearch(input.value);
 
