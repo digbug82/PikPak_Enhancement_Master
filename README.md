@@ -155,7 +155,7 @@
 
 ## 📥 安装指南
 
-1. **安装脚本管理器**：建议优先安装 [Violentmonkey](https://violentmonkey.github.io/get-it/)，也可使用 [Tampermonkey](https://www.tampermonkey.net/)。
+1. **安装脚本管理器**：推荐使用 [ScriptCat](https://scriptcat.org/)、[Violentmonkey](https://violentmonkey.github.io/get-it/) 或 [Tampermonkey](https://www.tampermonkey.net/)。
 2. **安装脚本**：点击 **[立即安装](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**。
 3. **打开 PikPak 网页端**：访问 [PikPak](https://mypikpak.com/drive) 并登录账号。
 4. **启动增强大师**：
@@ -381,13 +381,3 @@
 ## 🤝 致谢
 
 本项目在 UI 设计语言及部分网页端 API 调用逻辑上，深受 [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴) 的启发，特此致敬。
-
----
-
-## ⚖️ License 声明
-
-本项目遵循 **CC-BY-NC-SA-4.0** 协议：
-
-* 🚫 禁止用于任何商业用途
-* 🧪 仅供个人学习、研究与技术交流使用
-* 📢 二次分发必须保留署名并沿用相同协议
