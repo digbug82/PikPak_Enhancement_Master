@@ -906,8 +906,6 @@
 "msg_unzip_fail": "Permintaan ekstraksi gagal",
 "msg_jszip_fail": "Gagal memuat JSZip, silakan periksa jaringan.",
 "msg_turbo_activated": "Mode Turbo telah diaktifkan: skrip telah mengambil alih logika halaman web secara mendalam untuk memastikan stabilitas dan kelancaran.",
-"msg_script_manager_vm_tip": "Jika terasa lag, disarankan menjalankan skrip dengan Violentmonkey; klik untuk membuka halaman instalasi.",
-"msg_console_legal": "Penggunaan komersial dilarang keras: proyek ini hanya untuk pembelajaran dan pertukaran pribadi.",
 "msg_ana_warn": "Peringatan: hasil duplikat folder adalah estimasi. Periksa manual sebelum menghapus.",
 "err_migrate_too_many": "⚠️ Terlalu banyak item terpilih\n\nUkuran data permintaan saat ini ({s}MB) telah melebihi batas keras 4MB dari server.\n\n【Solusi】:\nSilakan pilih langsung【folder】di direktori normal untuk migrasi, bukan memilih banyak file independen dalam mode tinjauan seluruh drive.",
 "msg_migrate_quota_err": "⚠️ Ruang akun tujuan tidak cukup!\n\nPesan sistem: {d}\n\nSimpan catatan migrasi?\n(pilih \"Ya\" untuk menyimpan catatan, setelah membersihkan ruang segarkan halaman lalu coba lagi; pilih \"Tidak\" untuk mengakhiri migrasi ini)",
