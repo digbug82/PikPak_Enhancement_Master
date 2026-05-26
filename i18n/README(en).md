@@ -7,7 +7,7 @@
 [![Install / Update Latest Version](https://img.shields.io/badge/Install%20/%20Update%20Latest%20Version-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
 [![Version](https://img.shields.io/badge/dynamic/json?style=flat-square&label=Version&color=0067C0&query=%24.version&url=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fversion.json)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
-[![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
+[![License](https://img.shields.io/badge/License-AGPL--3.0--or--later-red?style=flat-square)](https://spdx.org/licenses/AGPL-3.0-or-later.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
 
@@ -155,7 +155,7 @@
 
 ## 📥 Installation Guide
 
-1. **Install a script manager**: [Violentmonkey](https://violentmonkey.github.io/get-it/) is recommended first, and [Tampermonkey](https://www.tampermonkey.net/) can also be used.
+1. **Install a userscript manager**: We recommend using [ScriptCat](https://scriptcat.org/), [Violentmonkey](https://violentmonkey.github.io/get-it/), or [Tampermonkey](https://www.tampermonkey.net/).
 2. **Install the script**: Click **[Install Now](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**.
 3. **Open PikPak Web**: Visit [PikPak](https://mypikpak.com/drive) and log in to your account.
 4. **Launch Enhancement Master**:
@@ -270,6 +270,11 @@ Therefore, if files do not appear after paste, the most common reason is that th
 ---
 
 ## 🚀 Changelog
+
+### V3.0.2
+
+* Changed the project license to **AGPL-3.0-or-later**, removing the non-commercial use restriction while retaining the open-source requirements for modified versions.
+* Added third-party MIT License notice and acknowledgements for the original project.
 
 ### V3.0.1
 
