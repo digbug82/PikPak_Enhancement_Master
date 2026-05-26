@@ -155,7 +155,7 @@
 
 ## 📥 Panduan Pemasangan
 
-1. **Pasang pengurus skrip**: Disarankan memasang [Violentmonkey](https://violentmonkey.github.io/get-it/) terlebih dahulu, atau gunakan [Tampermonkey](https://www.tampermonkey.net/).
+1. **Pasang pengurus userscript**: Disyorkan menggunakan [ScriptCat](https://scriptcat.org/), [Violentmonkey](https://violentmonkey.github.io/get-it/) atau [Tampermonkey](https://www.tampermonkey.net/).
 2. **Pasang skrip**: Klik **[Pasang Sekarang](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**.
 3. **Buka PikPak Web**: Lawati [PikPak](https://mypikpak.com/drive) dan log masuk ke akaun anda.
 4. **Lancarkan Enhancement Master**:
@@ -271,6 +271,11 @@ Oleh itu, jika fail tidak muncul selepas tampal, sebab paling biasa ialah had ka
 
 ## 🚀 Log Kemas Kini
 
+### V3.0.2
+
+* Menukar lesen projek kepada **AGPL-3.0-or-later**, membuang sekatan penggunaan bukan komersial, sambil mengekalkan keperluan sumber terbuka untuk versi yang diubah suai.
+* Menambah notis MIT License pihak ketiga dan penghargaan kepada projek asal.
+
 ### V3.0.1
 
 * Mengoptimumkan kestabilan dan menambah baik fail konfigurasi.
@@ -381,13 +386,3 @@ Oleh itu, jika fail tidak muncul selepas tampal, sebab paling biasa ialah had ka
 ## 🤝 Penghargaan
 
 Projek ini banyak diilhamkan oleh [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴) dari segi bahasa reka bentuk UI dan sebahagian logik panggilan API web. Dengan ini kami menyampaikan penghormatan.
-
----
-
-## ⚖️ Kenyataan License
-
-Projek ini mengikuti lesen **CC-BY-NC-SA-4.0**:
-
-* 🚫 Dilarang digunakan untuk sebarang tujuan komersial
-* 🧪 Hanya untuk pembelajaran peribadi, penyelidikan dan pertukaran teknikal
-* 📢 Pengedaran semula mesti mengekalkan atribusi dan menggunakan lesen yang sama
