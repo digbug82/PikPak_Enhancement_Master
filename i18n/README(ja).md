@@ -7,7 +7,7 @@
 [![最新版をインストール / 更新](https://img.shields.io/badge/最新版をインストール%20/%20更新-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
 [![Version](https://img.shields.io/badge/dynamic/json?style=flat-square&label=Version&color=0067C0&query=%24.version&url=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fversion.json)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
-[![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
+[![License](https://img.shields.io/badge/License-AGPL--3.0--or--later-red?style=flat-square)](https://spdx.org/licenses/AGPL-3.0-or-later.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
 
@@ -155,7 +155,7 @@
 
 ## 📥 インストールガイド
 
-1. **スクリプトマネージャーをインストール**：[Violentmonkey](https://violentmonkey.github.io/get-it/) を優先しておすすめします。[Tampermonkey](https://www.tampermonkey.net/) も使用できます。
+1. **ユーザースクリプトマネージャーをインストール**：[ScriptCat](https://scriptcat.org/)、[Violentmonkey](https://violentmonkey.github.io/get-it/)、または [Tampermonkey](https://www.tampermonkey.net/) の使用を推奨します。
 2. **スクリプトをインストール**：**[今すぐインストール](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)** をクリックします。
 3. **PikPak Web を開く**：[PikPak](https://mypikpak.com/drive) にアクセスし、アカウントにログインします。
 4. **Enhancement Master を起動**：
@@ -271,6 +271,11 @@
 
 ## 🚀 更新履歴
 
+### V3.0.2
+
+* プロジェクトのライセンスを **AGPL-3.0-or-later** に変更し、非商用利用の制限を削除しつつ、改変版に対するオープンソース要件を維持しました。
+* 第三者の MIT License 表記と元プロジェクトへの謝辞を追加しました。
+
 ### V3.0.1
 
 * 安定性を最適化し、設定ファイルを改善しました。
@@ -381,13 +386,3 @@
 ## 🤝 謝辞
 
 本プロジェクトは、UI デザイン言語および一部の Web API 呼び出しロジックにおいて、[PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴) から大きな影響を受けています。ここに敬意を表します。
-
----
-
-## ⚖️ License 声明
-
-本プロジェクトは **CC-BY-NC-SA-4.0** ライセンスに従います：
-
-* 🚫 いかなる商用利用も禁止
-* 🧪 個人の学習、研究、技術交流目的に限ります
-* 📢 二次配布では署名を保持し、同一ライセンスを継承する必要があります
