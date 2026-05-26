@@ -386,13 +386,3 @@ Therefore, if files do not appear after paste, the most common reason is that th
 ## 🤝 Acknowledgements
 
 This project is deeply inspired by [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴) in its UI design language and parts of its web API calling logic. Respect and thanks.
-
----
-
-## ⚖️ License Statement
-
-This project follows the **CC-BY-NC-SA-4.0** license:
-
-* 🚫 Prohibited for any commercial use
-* 🧪 For personal learning, research, and technical exchange only
-* 📢 Redistribution must retain attribution and use the same license
