@@ -7,7 +7,7 @@
 [![立即安裝 / 更新最新版](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
 [![Version](https://img.shields.io/badge/dynamic/json?style=flat-square&label=Version&color=0067C0&query=%24.version&url=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fversion.json)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
-[![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-red?style=flat-square)](https://spdx.org/licenses/CC-BY-NC-SA-4.0.html)
+[![License](https://img.shields.io/badge/License-AGPL--3.0--or--later-red?style=flat-square)](https://spdx.org/licenses/AGPL-3.0-or-later.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 [![GitHub Stars](https://img.shields.io/github/stars/digbug82/PikPak_Enhancement_Master?style=flat-square&logo=github&label=Star)](https://github.com/digbug82/PikPak_Enhancement_Master/stargazers)
 
@@ -155,7 +155,7 @@
 
 ## 📥 安裝指南
 
-1. **安裝腳本管理器**：建議優先安裝 [Violentmonkey](https://violentmonkey.github.io/get-it/)，也可使用 [Tampermonkey](https://www.tampermonkey.net/)。
+1. **安裝腳本管理器**：推薦使用 [ScriptCat](https://scriptcat.org/)、[Violentmonkey](https://violentmonkey.github.io/get-it/) 或 [Tampermonkey](https://www.tampermonkey.net/)。
 2. **安裝腳本**：點擊 **[立即安裝](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**。
 3. **開啟 PikPak 網頁端**：造訪 [PikPak](https://mypikpak.com/drive) 並登入帳號。
 4. **啟動增強大師**：
@@ -271,6 +271,11 @@
 
 ## 🚀 更新日誌
 
+### V3.0.2
+
+* 將專案授權協議調整為 **AGPL-3.0-or-later**，移除非商業使用限制，並保留修改版開源要求。
+* 補充第三方 MIT License 聲明與原專案致謝。
+
 ### V3.0.1
 
 * 穩定性優化，完善設定檔。
@@ -381,13 +386,3 @@
 ## 🤝 致謝
 
 本專案在 UI 設計語言及部分網頁端 API 呼叫邏輯上，深受 [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴) 的啟發，特此致敬。
-
----
-
-## ⚖️ License 聲明
-
-本專案遵循 **CC-BY-NC-SA-4.0** 協議：
-
-* 🚫 禁止用於任何商業用途
-* 🧪 僅供個人學習、研究與技術交流使用
-* 📢 二次分發必須保留署名並沿用相同協議
