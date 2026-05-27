@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            3.0.2
+// @version            3.0.3
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2 下载、下载直链加速、下载过滤、分享链接解析增强、文件/文件夹查重、批量重命名、资源清理、批量解压、M3U 导出、PotPlayer 直达、污染磁链识别、TXT 磁链提取、排序与搜索增强、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -354,6 +354,7 @@ downloadAccelDomain: '',
 downloadAccelMode: 'prefix',
 downloadAccelQueryParam: 'url',
 aria2KeepFolderStructure: true,
+aria2DownloadDir: '',
 uploadPartSizeOfficial: 1 * 1024 * 1024,
 uploadPartMaxCount: 10000,
 uploadPartConcurrencyOfficial: 5,
@@ -556,9 +557,15 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-modal-ov .pk-txt-preview-title { border:none; margin:0; padding:0 112px 0 0; font-size:18px; font-weight:700; color:var(--pk-fg); line-height:1.45; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; box-sizing:border-box; flex:0 0 auto; min-height:28px; position:relative; z-index:2; }
 .pk-modal-ov .pk-txt-preview-head-actions { position:absolute; top:15px; right:50px; display:flex; align-items:center; gap:6px; z-index:11; }
 .pk-modal-ov .pk-modal.pk-txt-preview-modal.pk-txt-preview-fullscreen .pk-txt-preview-head-actions { top:14px; right:50px; }
-.pk-modal-ov .pk-txt-preview-icon-btn { width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:6px; background:transparent; color:var(--pk-icon-c); cursor:pointer; padding:0; transition:background .1s,color .1s,opacity .1s; box-sizing:border-box; }
-.pk-modal-ov .pk-txt-preview-icon-btn:hover:not(:disabled) { background:var(--pk-hl); color:var(--pk-fg); }
-.pk-modal-ov .pk-txt-preview-icon-btn:disabled { opacity:.38; cursor:not-allowed; pointer-events:none; }
+.pk-modal-ov .pk-txt-preview-icon-btn { width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:6px; background:transparent; color:#000; cursor:pointer; padding:0; transition:background .1s,color .1s,opacity .1s; box-sizing:border-box; }
+.pk-modal-ov.pk-dark .pk-txt-preview-icon-btn { color:#fff; }
+.pk-modal-ov .pk-txt-preview-icon-btn:hover:not(:disabled) { background:var(--pk-hl); color:#000; }
+.pk-modal-ov.pk-dark .pk-txt-preview-icon-btn:hover:not(:disabled) { color:#fff; }
+.pk-modal-ov .pk-txt-preview-icon-btn:disabled { opacity:1; cursor:not-allowed; pointer-events:none; }
+.pk-modal-ov.pk-txt-preview-ov .pk-modal-close { color:#000 !important; }
+.pk-modal-ov.pk-txt-preview-ov.pk-dark .pk-modal-close { color:#fff !important; }
+.pk-modal-ov.pk-txt-preview-ov .pk-modal-close:hover { color:#000 !important; }
+.pk-modal-ov.pk-txt-preview-ov.pk-dark .pk-modal-close:hover { color:#fff !important; }
 .pk-modal-ov .pk-txt-preview-icon-btn svg { width:16px !important; height:16px !important; display:block; pointer-events:none; }
 .pk-modal-ov .pk-txt-preview-link-btn svg { width:18px !important; height:18px !important; transform:scale(1.08); }
 .pk-modal-ov .pk-txt-preview { width:min(760px,86vw); max-width:86vw; height:auto; flex:1 1 0; min-height:0; display:flex; flex-direction:column; gap:12px; color:var(--pk-fg); overflow:hidden; min-width:0; }
@@ -2532,6 +2539,8 @@ label_aria2_url: "Aria2 地址",
 label_aria2_token: "Aria2 密钥",
 label_aria2_config: "Aria2 配置",
 label_aria2_keep_structure: "下载保存文件夹内部结构",
+label_aria2_dir: "Aria2 下载路径",
+ph_aria2_dir: "留空使用默认路径",
 label_download_accel_enable: "自定义下载加速域名",
 label_download_accel_domain: "下载加速域名",
 desc_download_accel_domain: "下载直链使用自定义加速域名",
@@ -3897,6 +3906,10 @@ if (!u.includes('/jsonrpc') && !u.includes('?')) {
 u = u.endsWith('/') ? u + 'jsonrpc' : u + '/jsonrpc';
 }
 return u;
+}
+
+function normalizeAriaDownloadDir(dir) {
+return String(dir || '').trim().replace(/^["']|["']$/g, '');
 }
 
 function buildAriaRpcParams(token, params = []) {
@@ -8465,8 +8478,9 @@ el.classList.remove('pk-no-transition');
 
 let modalZIndexCounter = 2147483640;
 function showModal(html) {
+const modalHost = getPkToastHost();
 let container = document.getElementById('pk-toast-container');
-if (container) document.body.appendChild(container);
+if (container && modalHost) modalHost.appendChild(container);
 const m = document.createElement('div'); m.className = 'pk-modal-ov';
 
 const isPlayerWebFullscreen = !!document.querySelector('.pk-web-fullscreen-ov');
@@ -8520,7 +8534,8 @@ btns.forEach(btn => {
 }
 });
 
-document.body.appendChild(m);
+(modalHost || document.body).appendChild(m);
+if (document.getElementById('pk-toast-container')) ensurePkToastContainer();
 
 m.querySelector('.pk-modal-close').addEventListener('click', () => m.remove());
 return m;
@@ -8762,6 +8777,15 @@ function getPkToastHost() {
 return document.fullscreenElement || document.webkitFullscreenElement || document.body;
 }
 
+function getPkTopModalZIndex() {
+let top = 0;
+document.querySelectorAll('.pk-modal-ov').forEach(el => {
+const z = Number(getComputedStyle(el).zIndex);
+if (Number.isFinite(z)) top = Math.max(top, z);
+});
+return top;
+}
+
 function ensurePkToastContainer() {
 let container = document.getElementById('pk-toast-container');
 const host = getPkToastHost();
@@ -8770,7 +8794,9 @@ container = document.createElement('div');
 container.id = 'pk-toast-container';
 container.style.cssText = 'position:fixed; top:80px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; gap:12px; z-index:2147483647; pointer-events:none; align-items:center';
 }
-if (host && container.parentNode !== host) host.appendChild(container);
+const topModalZ = getPkTopModalZIndex();
+container.style.zIndex = String(topModalZ >= 2147483647 ? 2147483647 : Math.max(2147483647, topModalZ + 1));
+if (host) host.appendChild(container);
 return container;
 }
 
@@ -14506,7 +14532,7 @@ if (key === 'f' && !e.ctrlKey && !e.altKey && !e.metaKey) {
 }
 if (e.key === 'Enter' && e.ctrlKey && !e.altKey && !e.metaKey) {
     const parseBtn = modal.querySelector('#pk_txt_preview_parse_links');
-    if (parseBtn && !parseBtn.disabled) {
+    if (parseBtn && parseBtn.style.display !== 'none' && !parseBtn.disabled) {
         e.preventDefault();
         e.stopPropagation();
         parseBtn.click();
@@ -14735,7 +14761,9 @@ if (!state) return;
 const parseBtn = modal.querySelector('#pk_txt_preview_parse_links');
 const maxBtn = modal.querySelector('#pk_txt_preview_fullscreen');
 if (parseBtn) {
-const canParse = !state.loading && !state.error && !state.empty && !!state.text && !state.parsingLinks;
+const canShowParse = !state.loading && !state.error && !state.empty && !!state.text;
+const canParse = canShowParse && !state.parsingLinks;
+parseBtn.style.display = canShowParse ? '' : 'none';
 const baseLabel = state.parsingLinks ? (L.txt_preview_parse_links_working || L.txt_preview_parse_links) : L.txt_preview_parse_links;
 const label = formatTextPreviewShortcutLabel(baseLabel, CONF.txtPreviewHotkeys.parse);
 parseBtn.disabled = !canParse;
@@ -14814,7 +14842,7 @@ fullscreen: false
 };
 const m = showModal(`
 <div class="pk-txt-preview-head-actions">
-<button type="button" class="pk-txt-preview-icon-btn pk-txt-preview-link-btn" id="pk_txt_preview_parse_links" data-pk-tip="${esc(parseLabel)}" aria-label="${esc(parseLabel)}" disabled>${CONF.icons.txtPreviewParseLinksSVG}</button>
+<button type="button" class="pk-txt-preview-icon-btn pk-txt-preview-link-btn" id="pk_txt_preview_parse_links" data-pk-tip="${esc(parseLabel)}" aria-label="${esc(parseLabel)}" style="display:none;" disabled>${CONF.icons.txtPreviewParseLinksSVG}</button>
 <button type="button" class="pk-txt-preview-icon-btn pk-txt-preview-max-btn" id="pk_txt_preview_fullscreen" data-pk-tip="${esc(fullLabel)}" aria-label="${esc(fullLabel)}" aria-pressed="false">${CONF.icons.txtPreviewFullscreenSVG}</button>
 </div>
 <h3 class="pk-txt-preview-title">${esc(title)}</h3>
@@ -34735,6 +34763,7 @@ return;
 }
 let ariaUrl = gmGet('pk_aria2_url', '');
 let ariaToken = gmGet('pk_aria2_token', '');
+let ariaDir = normalizeAriaDownloadDir(gmGet('pk_aria2_dir', CONF.aria2DownloadDir));
 
 if (!ariaUrl) {
 const result = await new Promise((resolve) => {
@@ -34771,6 +34800,15 @@ const m = showModal(`
             <button type="button" id="btn_pop_aria_token_eye" class="pk-token-eye">${CONF.icons.eye}</button>
             <div class="pk-select-label">${L.label_aria2_token}</div>
         </div>
+
+        <div style="position:relative; transform: translateZ(0);">
+            <input type="text" id="pop_aria_dir" value="${esc(ariaDir)}" placeholder="${L.ph_aria2_dir}"
+                    autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
+                    oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
+                    style="width:100%; height:44px; padding:0 58px 0 12px; border:2px solid ${ariaDir ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+            <button type="button" id="btn_pop_aria_dir_clear" style="position:absolute; right:10px; top:22px; transform:translateY(-50%); height:26px; min-width:38px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:0 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2); line-height:1;" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_clear_hist}</button>
+            <div class="pk-select-label">${L.label_aria2_dir}</div>
+        </div>
     </div>
 
     <div class="pk-modal-act" style="margin-top:30px; display:flex; justify-content:flex-end; gap:12px;">
@@ -34787,6 +34825,7 @@ if (closeBtn) Object.assign(closeBtn.style, { top: '26px', right: '26px' });
 
 const inpU = m.querySelector('#pop_aria_url');
 const inpT = m.querySelector('#pop_aria_token');
+const inpD = m.querySelector('#pop_aria_dir');
 const inpTEye = m.querySelector('#btn_pop_aria_token_eye');
 const dot = m.querySelector('#pop_aria_test_dot');
 const txt = m.querySelector('#pop_aria_test_txt');
@@ -34835,6 +34874,16 @@ inpT.oninput = (e) => {
     e.target.style.borderColor = e.target.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
     triggerTest();
 };
+inpD.oninput = (e) => {
+    e.target.value = normalizeAriaDownloadDir(e.target.value);
+    e.target.style.borderColor = e.target.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
+};
+m.querySelector('#btn_pop_aria_dir_clear').onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    inpD.value = '';
+    inpD.style.borderColor = 'var(--pk-bd)';
+};
 if (inpTEye) {
     inpTEye.onclick = (e) => {
         e.preventDefault();
@@ -34859,6 +34908,7 @@ m.querySelector('.pk-modal-close').onclick = () => { m.remove(); resolve(null); 
 m.querySelector('#pop_aria_save').onclick = async () => {
     let u = inpU.value.trim();
     let t = inpT.value.trim();
+    let d = normalizeAriaDownloadDir(inpD.value);
     if (!u) { inpU.style.borderColor = '#d93025'; return; }
     if (!/^https?:\/\/|^wss?:\/\//i.test(u)) u = 'http://' + u;
 
@@ -34873,9 +34923,9 @@ m.querySelector('#pop_aria_save').onclick = async () => {
         const payload = { jsonrpc: '2.0', method: 'aria2.getVersion', id: 'pk_quick_test', params: buildAriaRpcParams(t) };
         await aria2RpcRequest(u, payload, 5000);
 
-        gmSet('pk_aria2_url', u); gmSet('pk_aria2_token', t);
+        gmSet('pk_aria2_url', u); gmSet('pk_aria2_token', t); gmSet('pk_aria2_dir', d);
         m.remove();
-        resolve({ url: u, token: t });
+        resolve({ url: u, token: t, dir: d });
 
     } catch (err) {
         const confirmed = await showConfirm(
@@ -34884,9 +34934,9 @@ m.querySelector('#pop_aria_save').onclick = async () => {
         );
 
         if (confirmed) {
-            gmSet('pk_aria2_url', u); gmSet('pk_aria2_token', t);
+            gmSet('pk_aria2_url', u); gmSet('pk_aria2_token', t); gmSet('pk_aria2_dir', d);
             m.remove();
-            resolve({ url: u, token: t });
+            resolve({ url: u, token: t, dir: d });
         } else {
             saveBtn.disabled = false;
             saveBtn.textContent = originalTxt;
@@ -34907,6 +34957,7 @@ m.addEventListener('keydown', (e) => {
 if (!result) return;
 ariaUrl = result.url;
 ariaToken = result.token;
+ariaDir = result.dir || '';
 }
 
 setLoad(true);
@@ -34919,6 +34970,7 @@ UI.stopBtn.onclick = () => { isRunning = false; abortCtrl.abort(); updateLoadTxt
 
 ariaUrl = normalizeAriaRpcUrl(ariaUrl);
 const keepAria2Structure = getBoolPref('pk_aria2_keep_structure', CONF.aria2KeepFolderStructure);
+const ariaDownloadDir = normalizeAriaDownloadDir(ariaDir || gmGet('pk_aria2_dir', CONF.aria2DownloadDir));
 
 const allFiles = [];
 const rootNodes = [];
@@ -35060,14 +35112,16 @@ for (let i = 0; i < readyFiles.length; i += BATCH_SIZE) {
             relativePrefix = f._lineage.map(n => sanitize(n.name)).join('/') + '/';
         }
         const outPath = relativePrefix + sanitize(f.name);
+        const rpcOptions = {
+            out: outPath,
+            header: [`User-Agent: ${navigator.userAgent}`, `Referer: https://mypikpak.com/`]
+        };
+        if (ariaDownloadDir) rpcOptions.dir = ariaDownloadDir;
 
         return {
             jsonrpc: '2.0', method: 'aria2.addUri',
             id: `pk_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-            params: buildAriaRpcParams(ariaToken, [[rewriteDownloadLinkForAccel(f.web_content_link, 'aria2')], {
-                out: outPath,
-                header: [`User-Agent: ${navigator.userAgent}`, `Referer: https://mypikpak.com/`]
-            }])
+            params: buildAriaRpcParams(ariaToken, [[rewriteDownloadLinkForAccel(f.web_content_link, 'aria2')], rpcOptions])
         };
     });
 
@@ -38513,17 +38567,17 @@ const m = showModal(`
         <div id="pk_cloud_error" style="display:none; color:#d93025; font-size:13px; font-weight:600;">${L.err_invalid_links}</div>
     </div>
 
-    <div id="pk_cloud_dest_row" style="display:flex; align-items:flex-end; gap:8px; font-size:14px; color:var(--pk-fg); line-height:1;">
-        <span style="opacity:0.9; margin-bottom:1px;">${L.lbl_save_to}</span>
-        <div style="display:flex; align-items:flex-end; gap:5px;">
-            <div style="line-height:0; transform:translateY(2px);">
+    <div id="pk_cloud_dest_row" style="display:flex; align-items:center; gap:8px; font-size:14px; color:var(--pk-fg); line-height:20px;">
+        <span style="opacity:0.9; display:inline-flex; align-items:center; height:20px;">${L.lbl_save_to}</span>
+        <div style="display:flex; align-items:center; gap:5px; min-width:0;">
+            <div style="line-height:0; display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; flex-shrink:0;">
                 ${CONF.typeIcons.folder.replace('width="30"', 'width="20"').replace('height="30"', 'height="20"')}
             </div>
-            <span id="pk_cloud_dir_name" style="font-weight:600; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-bottom:1px;">${saveToName}</span>
-            <div style="display:flex; color:#aaa; transition:color 0.2s; margin-bottom:1px;" data-pk-tip="${L.tip_cloud_save_path}" onmouseover="this.style.color=document.querySelector('.pk-ov').classList.contains('pk-dark')?'#ddd':'#666'" onmouseout="this.style.color='#aaa'">
+            <span id="pk_cloud_dir_name" style="font-weight:600; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-flex; align-items:center; height:20px; min-width:0;">${saveToName}</span>
+            <div style="display:inline-flex; align-items:center; justify-content:center; width:16px; height:20px; color:#aaa; transition:color 0.2s; flex-shrink:0;" data-pk-tip="${L.tip_cloud_save_path}" onmouseover="this.style.color=document.querySelector('.pk-ov').classList.contains('pk-dark')?'#ddd':'#666'" onmouseout="this.style.color='#aaa'">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             </div>
-            <span id="pk_cloud_change_dir" style="color:var(--pk-pri); cursor:pointer; font-size:14px; margin-left:2px; margin-bottom:1px; display:inline-block;">${L.btn_modify}</span>
+            <span id="pk_cloud_change_dir" style="color:var(--pk-pri); cursor:pointer; font-size:14px; margin-left:2px; display:inline-flex; align-items:center; height:20px;">${L.btn_modify}</span>
         </div>
     </div>
 
@@ -38998,9 +39052,68 @@ S._isEmptyingTrash = false;
 }
 };
 
-const openSettingsModal = () => {
+const openSettingsModal = async () => {
+if (openSettingsModal._active) return;
+openSettingsModal._active = true;
 const inputStyle = `width:100%; height:44px; padding:0 15px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box;`;
 const areaStyle = `width:100%; min-height:60px; max-height:120px; padding:12px 15px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:13px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; resize:vertical; line-height:1.5; font-family:inherit; cursor:auto;`;        const labelStyle = `position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; line-height:1; font-size:11px; color:var(--pk-pri); font-weight:bold; pointer-events:none; z-index:1;`;
+const calcLocalforageStoreSize = async (name, storeName) => {
+if (!window.localforage) return 0;
+try {
+    const store = window.localforage.createInstance({ name, storeName });
+    let total = 0;
+    await store.iterate((v, k) => {
+        total += String(k || '').length;
+        if (v instanceof Blob) total += v.size;
+        else if (v instanceof ArrayBuffer) total += v.byteLength;
+        else if (ArrayBuffer.isView(v)) total += v.byteLength;
+        else {
+            try { total += JSON.stringify(v || '').length; } catch (e) {}
+        }
+    });
+    return total;
+} catch (e) { return 0; }
+};
+const calcLocalDataStats = async () => {
+const gmKeys = typeof GM_listValues !== 'undefined' ? GM_listValues() : [];
+const lsKeys = Object.keys(localStorage).filter(k => typeof k === 'string' && k.startsWith('pk_'));
+const keys = Array.from(new Set([...(Array.isArray(gmKeys) ? gmKeys : []), ...lsKeys]));
+const sizes = { index: 0, pref: 0, rules: 0, vault: 0, history: 0, cache: 0 };
+
+if (typeof globalCache !== 'undefined') {
+for (const [k, v] of globalCache.entries()) {
+    try { sizes.index += k.toString().length + JSON.stringify(v).length; } catch(e){}
+}
+}
+
+sizes.cache += await calcLocalforageStoreSize('pk_thumbs', 'snapshots');
+
+const getCat = (k) => {
+if (!k.startsWith('pk_')) return null;
+if (k.startsWith('pk_archive_pwd_') || k === 'pk_pwd_vault' || k === 'pk_pwd_try_count') return 'vault';
+if (k.startsWith('pk_duration_')) return 'history';
+
+const cacheKeys = ['pk_captured_captcha', 'pk_i18n_manifest', 'pk_script_update_cache', 'pk_potplayer_launch_state', 'pk_potplayer_protocol_state'];
+if (k.startsWith('pk_fmod_') || k.startsWith('pk_i18n_') || k.startsWith(CONF.scriptUpdateDismissPrefix) || cacheKeys.includes(k)) return 'cache';
+
+const ruleKeys =['pk_blacklist', 'pk_blacklist_folders', 'pk_aria2_url', 'pk_aria2_token', 'pk_aria2_dir', 'pk_download_accel_enable', 'pk_download_accel_domain', 'pk_download_accel_mode', 'pk_download_accel_query_param', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_bn_find_hist', 'pk_bn_rep_hist'];
+if (ruleKeys.includes(k) || k.startsWith('pk_scan_last_') || k.startsWith('pk_analyze_last_') || k === 'pk_dup_strictness') return 'rules';
+
+return 'pref';
+};
+
+keys.forEach(k => {
+const cat = getCat(k);
+if (cat) {
+    let val = typeof GM_getValue !== 'undefined' ? GM_getValue(k) : undefined;
+    if (val === undefined || val === null) val = localStorage.getItem(k);
+    sizes[cat] += (k.length + (val ? JSON.stringify(val).length : 0));
+}
+});
+
+const total = Object.values(sizes).reduce((sum, n) => sum + n, 0);
+return { keys, sizes, getCat, total };
+};
 const curLang = gmGet('pk_lang', lang);
 const curEngine = gmGet('pk_search_engine', 'google');
 const curDefaultVideoQuality = getDefaultVideoQualityPref();
@@ -39008,6 +39121,7 @@ const curDefaultOpenPlayer = getDefaultOpenPlayerPref();
 const curVideoLoadProgressCache = shouldLoadVideoProgressCache();
 const curAriaUrl = gmGet('pk_aria2_url', '');
 const curAriaToken = gmGet('pk_aria2_token', '');
+const curAriaDir = normalizeAriaDownloadDir(gmGet('pk_aria2_dir', CONF.aria2DownloadDir));
 const curAriaKeepStructure = getBoolPref('pk_aria2_keep_structure', CONF.aria2KeepFolderStructure);
 const curDownloadAccelEnable = getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable);
 const curDownloadAccelDomain = gmGet('pk_download_accel_domain', CONF.downloadAccelDomain);
@@ -39023,22 +39137,8 @@ let selectedDefaultVideoQuality = curDefaultVideoQuality;
 let selectedDefaultOpenPlayer = curDefaultOpenPlayer;
 let selectedDownloadAccelMode = curDownloadAccelMode;
 
-let totalStorageBytes = 0;
-const keys = typeof GM_listValues !== 'undefined' ? GM_listValues() : Object.keys(localStorage);
-keys.forEach(k => {
-if (k.startsWith('pk_')) {
-const val = typeof GM_getValue !== 'undefined' ? GM_getValue(k) : localStorage.getItem(k);
-totalStorageBytes += (k.length + JSON.stringify(val || '').length);
-}
-});
-
-if (typeof globalCache !== 'undefined') {
-for (const [k, v] of globalCache.entries()) {
-try { totalStorageBytes += k.toString().length + JSON.stringify(v).length; } catch(e){}
-}
-}
-
-const storageDisplay = fmtSize(totalStorageBytes);
+const storageStats = await calcLocalDataStats();
+const storageDisplay = fmtSize(storageStats.total);
 
 const m = showModal(`
 <div style="display:flex; flex-direction:column; height:580px; max-height:75vh; width:520px; max-width:95vw; overflow:hidden; overscroll-behavior:none; position:relative;">
@@ -39324,7 +39424,7 @@ const m = showModal(`
             </div>
         </div>
 
-        <div id="pk_aria2_group" class="pk-setting-fieldset ${(curAriaUrl || curAriaToken) ? 'pk-inner-active' : ''}">
+        <div id="pk_aria2_group" class="pk-setting-fieldset ${(curAriaUrl || curAriaToken || curAriaDir) ? 'pk-inner-active' : ''}">
             <div class="pk-select-label">${L.label_aria2_config}</div>
             <div class="pk-setting-stack">
                 <label for="set_aria_keep_structure" class="pk-setting-checkrow">
@@ -39354,6 +39454,15 @@ const m = showModal(`
                     <button type="button" id="btn_aria_token_eye" class="pk-token-eye">${CONF.icons.eye}</button>
                     <div class="pk-select-label">${L.label_aria2_token}</div>
                 </div>
+
+                <div style="position:relative; transform: translateZ(0); -webkit-transform: translateZ(0);">
+                    <input type="text" id="set_aria_dir" value="${esc(curAriaDir)}" placeholder="${L.ph_aria2_dir}"
+                            autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
+                            oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
+                            style="width:100%; height:44px; padding:0 58px 0 12px; border:2px solid ${curAriaDir ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+                    <button type="button" id="btn_aria_dir_clear" style="position:absolute; right:10px; top:22px; transform:translateY(-50%); height:26px; min-width:38px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:0 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2); line-height:1;" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_clear_hist}</button>
+                    <div class="pk-select-label">${L.label_aria2_dir}</div>
+                </div>
             </div>
         </div>
 
@@ -39372,7 +39481,7 @@ const m = showModal(`
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px; flex-shrink:0;"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                 <div style="display:flex; align-items:baseline;">
                     <span style="display:inline !important; font-size:13px; font-weight:600;">${L.btn_clean_data}</span>
-                    <span style="display:inline !important; font-size:13px; font-weight:600; margin-left:6px; opacity:0.8;">( ${storageDisplay} )</span>
+                    <span id="txt_cfg_clean_size" style="display:inline !important; font-size:13px; font-weight:600; margin-left:6px; opacity:0.8;">( ${storageDisplay} )</span>
                 </div>
             </button>
 
@@ -39467,12 +39576,14 @@ bindSelect('cs_download_accel_mode', curDownloadAccelMode, (val) => { selectedDo
 
 const ariaInp = m.querySelector('#set_aria_url');
 const ariaTok = m.querySelector('#set_aria_token');
+const ariaDir = m.querySelector('#set_aria_dir');
+const ariaDirClear = m.querySelector('#btn_aria_dir_clear');
 const ariaEye = m.querySelector('#btn_aria_token_eye');
 const ariaDot = m.querySelector('#aria_test_dot');
 const ariaTxt = m.querySelector('#aria_test_txt');
 const ariaBox = m.querySelector('#aria_test_res');
 const ariaGroup = m.querySelector('#pk_aria2_group');
-const updateAriaGroupBorder = () => { if (ariaGroup) ariaGroup.classList.toggle('pk-inner-active', !!(ariaInp.value.trim() || ariaTok.value.trim())); };
+const updateAriaGroupBorder = () => { if (ariaGroup) ariaGroup.classList.toggle('pk-inner-active', !!(ariaInp.value.trim() || ariaTok.value.trim() || ariaDir.value.trim())); };
 let ariaTimer = null;
 let ariaTokenVisible = false;
 
@@ -39526,6 +39637,20 @@ if (e.target.oninput) e.target.style.borderColor = e.target.value.trim() ? 'var(
 updateAriaGroupBorder();
 debouncedTest();
 };
+ariaDir.oninput = (e) => {
+e.target.value = normalizeAriaDownloadDir(e.target.value);
+e.target.style.borderColor = e.target.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)';
+updateAriaGroupBorder();
+};
+if (ariaDirClear) {
+ariaDirClear.onclick = (e) => {
+e.preventDefault();
+e.stopPropagation();
+ariaDir.value = '';
+ariaDir.style.borderColor = 'var(--pk-bd)';
+updateAriaGroupBorder();
+};
+}
 if (ariaEye) {
 ariaEye.onclick = (e) => {
 e.preventDefault();
@@ -39550,6 +39675,7 @@ setTimeout(() => document.addEventListener('click', clickAway), 0);
 const _orgRemove = m.remove.bind(m);
 m.remove = () => {
 document.removeEventListener('click', clickAway);
+openSettingsModal._active = false;
 _orgRemove();
 };
 
@@ -39795,40 +39921,10 @@ subM.querySelector('.pk-modal-close').onclick = () => subM.remove();
 };
 
 m.querySelector('#btn_cfg_clean').onclick = async () => {
-const gmKeys = typeof GM_listValues !== 'undefined' ? GM_listValues() : [];
-const lsKeys = Object.keys(localStorage).filter(k => typeof k === 'string' && k.startsWith('pk_'));
-const keys = Array.from(new Set([...(Array.isArray(gmKeys) ? gmKeys : []), ...lsKeys]));
-
-const sizes = { index: 0, pref: 0, rules: 0, vault: 0, history: 0, cache: 0 };
-
-if (typeof globalCache !== 'undefined') {
-for (const [k, v] of globalCache.entries()) {
-    try { sizes.index += k.toString().length + JSON.stringify(v).length; } catch(e){}
-}
-}
-
-const getCat = (k) => {
-if (!k.startsWith('pk_')) return null;
-if (k.startsWith('pk_archive_pwd_') || k === 'pk_pwd_vault' || k === 'pk_pwd_try_count') return 'vault';
-if (k.startsWith('pk_duration_')) return 'history';
-
-const cacheKeys = ['pk_captured_captcha', 'pk_i18n_manifest', 'pk_script_update_cache', 'pk_potplayer_launch_state', 'pk_potplayer_protocol_state'];
-if (k.startsWith('pk_fmod_') || k.startsWith('pk_i18n_') || k.startsWith(CONF.scriptUpdateDismissPrefix) || cacheKeys.includes(k)) return 'cache';
-
-const ruleKeys =['pk_blacklist', 'pk_blacklist_folders', 'pk_aria2_url', 'pk_aria2_token', 'pk_download_accel_enable', 'pk_download_accel_domain', 'pk_download_accel_mode', 'pk_download_accel_query_param', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_bn_find_hist', 'pk_bn_rep_hist'];
-if (ruleKeys.includes(k) || k.startsWith('pk_scan_last_') || k.startsWith('pk_analyze_last_') || k === 'pk_dup_strictness') return 'rules';
-
-return 'pref';
-};
-
-keys.forEach(k => {
-const cat = getCat(k);
-if (cat) {
-    let val = typeof GM_getValue !== 'undefined' ? GM_getValue(k) : undefined;
-    if (val === undefined || val === null) val = localStorage.getItem(k);
-    sizes[cat] += (k.length + (val ? JSON.stringify(val).length : 0));
-}
-});
+const cleanStats = await calcLocalDataStats();
+const cleanSizeEl = m.querySelector('#txt_cfg_clean_size');
+if (cleanSizeEl) cleanSizeEl.textContent = `( ${fmtSize(cleanStats.total)} )`;
+const { keys, sizes, getCat } = cleanStats;
 
 const renderLbl = (cat, txt, isChecked = false, isMandatory = false) => {
 const sz = sizes[cat];
@@ -39966,6 +40062,7 @@ const exportExactKeys = new Set([
 'pk_blacklist_folders',
 'pk_aria2_url',
 'pk_aria2_token',
+'pk_aria2_dir',
 'pk_aria2_keep_structure',
 'pk_download_accel_enable',
 'pk_download_accel_domain',
@@ -40103,6 +40200,7 @@ try {
         'pk_blacklist_folders',
         'pk_aria2_url',
         'pk_aria2_token',
+        'pk_aria2_dir',
         'pk_aria2_keep_structure',
         'pk_download_accel_enable',
         'pk_download_accel_domain',
@@ -40316,6 +40414,7 @@ const newTurbo = m.querySelector('#set_turbo').checked;
 const oldTurbo = gmGet('pk_turbo_mode', false);
 const newUrl = m.querySelector('#set_aria_url').value.trim();
 const newToken = m.querySelector('#set_aria_token').value.trim();
+const newAriaDir = normalizeAriaDownloadDir(m.querySelector('#set_aria_dir').value);
 const newAriaKeepStructure = m.querySelector('#set_aria_keep_structure').checked;
 const newDownloadAccelEnable = m.querySelector('#set_download_accel_enable').checked;
 const rawDownloadAccelDomain = m.querySelector('#set_download_accel_domain').value.trim();
@@ -40331,8 +40430,8 @@ const newComicMode = m.querySelector('#set_comic_mode').checked;
 const sortPref = m.querySelector('input[name="set_sort_pref"]:checked').value;
 const viewPref = m.querySelector('input[name="set_view_pref"]:checked').value;
 const saveBtn = m.querySelector('#set_save');
-const oldSig = JSON.stringify([curLang, oldTurbo, gmGet('pk_aria2_url', ''), gmGet('pk_aria2_token', ''), getBoolPref('pk_aria2_keep_structure', CONF.aria2KeepFolderStructure), getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable), normalizeDownloadAccelBase(gmGet('pk_download_accel_domain', CONF.downloadAccelDomain)), normalizeDownloadAccelMode(gmGet('pk_download_accel_mode', CONF.downloadAccelMode)), normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam)), gmGet('pk_blur_scope', gmGet('pk_blur_thumb', false) ? 'list' : 'off'), gmGet('pk_hide_button_text', false), gmGet('pk_keep_pos', true), gmGet('pk_skip_bl_on_del', true), gmGet('pk_clipboard_magnet_focus', true), gmGet('pk_comic_mode', true), gmGet('pk_sort_independent', false) ? 'indep' : 'global', gmGet('pk_view_independent', false) ? 'indep' : 'global', curEngine, curDefaultOpenPlayer, curDefaultVideoQuality, curVideoLoadProgressCache, gmGet('pk_dl_filter_ext', ''), gmGet('pk_dl_filter_size_min', ''), gmGet('pk_dl_filter_size_max', ''), gmGet('pk_dl_filter_size_unit', 'MB'), gmGet('pk_dl_filter_name', '')]);
-const newSig = JSON.stringify([selectedLang, newTurbo, newUrl, newToken, newAriaKeepStructure, newDownloadAccelEnable, newDownloadAccelDomain, newDownloadAccelMode, newDownloadAccelQueryParam, newBlurScope, newHideButtonText, newKeepPos, newSkipBl, newClipboardMagnetFocus, newComicMode, sortPref, viewPref, selectedEngine, normalizeDefaultOpenPlayer(selectedDefaultOpenPlayer), normalizeDefaultVideoQuality(selectedDefaultVideoQuality), !!m.querySelector('#set_video_load_progress_cache').checked, m.querySelector('#set_dl_filter_ext').value.trim(), m.querySelector('#set_dl_filter_size_min').value.trim(), m.querySelector('#set_dl_filter_size_max').value.trim(), m.querySelector('#cs_set_dl_size_unit .pk-select-item.act') ? m.querySelector('#cs_set_dl_size_unit .pk-select-item.act').dataset.val : 'MB', m.querySelector('#set_dl_filter_name').value.trim()]);
+const oldSig = JSON.stringify([curLang, oldTurbo, gmGet('pk_aria2_url', ''), gmGet('pk_aria2_token', ''), normalizeAriaDownloadDir(gmGet('pk_aria2_dir', CONF.aria2DownloadDir)), getBoolPref('pk_aria2_keep_structure', CONF.aria2KeepFolderStructure), getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable), normalizeDownloadAccelBase(gmGet('pk_download_accel_domain', CONF.downloadAccelDomain)), normalizeDownloadAccelMode(gmGet('pk_download_accel_mode', CONF.downloadAccelMode)), normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam)), gmGet('pk_blur_scope', gmGet('pk_blur_thumb', false) ? 'list' : 'off'), gmGet('pk_hide_button_text', false), gmGet('pk_keep_pos', true), gmGet('pk_skip_bl_on_del', true), gmGet('pk_clipboard_magnet_focus', true), gmGet('pk_comic_mode', true), gmGet('pk_sort_independent', false) ? 'indep' : 'global', gmGet('pk_view_independent', false) ? 'indep' : 'global', curEngine, curDefaultOpenPlayer, curDefaultVideoQuality, curVideoLoadProgressCache, gmGet('pk_dl_filter_ext', ''), gmGet('pk_dl_filter_size_min', ''), gmGet('pk_dl_filter_size_max', ''), gmGet('pk_dl_filter_size_unit', 'MB'), gmGet('pk_dl_filter_name', '')]);
+const newSig = JSON.stringify([selectedLang, newTurbo, newUrl, newToken, newAriaDir, newAriaKeepStructure, newDownloadAccelEnable, newDownloadAccelDomain, newDownloadAccelMode, newDownloadAccelQueryParam, newBlurScope, newHideButtonText, newKeepPos, newSkipBl, newClipboardMagnetFocus, newComicMode, sortPref, viewPref, selectedEngine, normalizeDefaultOpenPlayer(selectedDefaultOpenPlayer), normalizeDefaultVideoQuality(selectedDefaultVideoQuality), !!m.querySelector('#set_video_load_progress_cache').checked, m.querySelector('#set_dl_filter_ext').value.trim(), m.querySelector('#set_dl_filter_size_min').value.trim(), m.querySelector('#set_dl_filter_size_max').value.trim(), m.querySelector('#cs_set_dl_size_unit .pk-select-item.act') ? m.querySelector('#cs_set_dl_size_unit .pk-select-item.act').dataset.val : 'MB', m.querySelector('#set_dl_filter_name').value.trim()]);
 const hasSettingsChanged = oldSig !== newSig;
 const reloadSettingsChanged = curLang !== selectedLang || newTurbo !== oldTurbo;
 const ariaChanged = newUrl !== gmGet('pk_aria2_url', '') || newToken !== gmGet('pk_aria2_token', '');
@@ -40391,6 +40490,7 @@ gmSet('pk_download_accel_mode', newDownloadAccelMode);
 gmSet('pk_download_accel_query_param', newDownloadAccelQueryParam);
 gmSet('pk_aria2_url', newUrl);
 gmSet('pk_aria2_token', newToken);
+gmSet('pk_aria2_dir', newAriaDir);
 gmSet('pk_aria2_keep_structure', newAriaKeepStructure);
 
 if (curLang !== selectedLang) {
