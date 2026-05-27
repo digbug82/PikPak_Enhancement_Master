@@ -45,7 +45,7 @@
 </p>
 
 * **File Analysis**: Combines File Filter and Deduplicate Files, with deduplication analysis by **exact hash match / similar video duration / similar name**.
-* **Filter enhancements**: Filter by size, type, path, keywords, and more, with batch helpers such as select all, invert selection, and select by folder.
+* **Filter enhancements**: Filter by size, type, path, keywords, 和 more, with batch helpers such as select all, invert selection, 和 select by folder.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/file_scan/file_scan_en.gif" alt="File Perspective">
@@ -270,6 +270,10 @@ Therefore, if files do not appear after paste, the most common reason is that th
 ---
 
 ## 🚀 Changelog
+
+### V3.0.3
+
+* Added **Aria2 download path**.
 
 ### V3.0.2
 
