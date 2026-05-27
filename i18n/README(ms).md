@@ -271,6 +271,10 @@ Oleh itu, jika fail tidak muncul selepas tampal, sebab paling biasa ialah had ka
 
 ## 🚀 Log Kemas Kini
 
+### V3.0.3
+
+* Menambah **laluan muat turun Aria2**.
+
 ### V3.0.2
 
 * Menukar lesen projek kepada **AGPL-3.0-or-later**, membuang sekatan penggunaan bukan komersial, sambil mengekalkan keperluan sumber terbuka untuk versi yang diubah suai.
