@@ -271,6 +271,10 @@ Karena itu, jika file tidak muncul setelah tempel, penyebab paling umum adalah b
 
 ## 🚀 Catatan Perubahan
 
+### V3.0.3
+
+* Menambahkan **jalur unduhan Aria2**.
+
 ### V3.0.2
 
 * Mengubah lisensi proyek menjadi **AGPL-3.0-or-later**, menghapus pembatasan penggunaan non-komersial, sambil tetap mempertahankan persyaratan sumber terbuka untuk versi yang dimodifikasi.
