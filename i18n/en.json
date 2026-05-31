@@ -669,7 +669,7 @@
   "label_abdm_url": "ABDM API Address",
   "ph_abdm_url": "Default http://localhost:15151",
   "label_abdm_dir": "ABDM Download Path",
-  "ph_abdm_dir": "Leave blank to use the ABDM default download directory",
+  "ph_abdm_dir": "Leave blank to use the ABDM default path",
   "desc_abdm_setup": "1. Start <a href=\"https://abdownloadmanager.com/\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:var(--pk-pri);font-weight:700;text-decoration:underline;\">AB Download Manager</a>.\n2. Confirm that the ABDM local listening service is enabled; the default address is usually http://localhost:15151.\n3. If you changed the port, enter the corresponding address in this script; after making changes, restart ABDM before testing the connection.",
   "label_download_accel_enable": "Download Acceleration",
   "label_download_accel_domain": "Acceleration Address",
