@@ -1,8 +1,12 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_tc.gif" alt="封面">
+  <img src="https://socialify.git.ci/digbug82/PikPak_Enhancement_Master/image?font=Inter&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fimg%2Flogo-socialify.svg&name=1&owner=1&pattern=Plus&stargazers=1&theme=Auto" alt="PikPak Enhancement Master" width="100%" />
 </p>
 
-# 📦 PikPak 增強大師
+<p align="center"><strong>Feature-rich, elegant interface.</strong></p>
+
+---
+
+# PikPak 增強大師
 
 [![立即安裝 / 更新最新版](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
@@ -15,15 +19,15 @@
 
 ---
 
-## 🌍 支援語言
+## 支援語言
 
 [繁體中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(tc).md) | [简体中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/README.md) | [English](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(en).md) | [한국어](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ko).md) | [日本語](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ja).md) | [Indonesia](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(id).md) | [Bahasa Melayu](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ms).md)
 
 ---
 
-## ✨ 主要功能
+## 主要功能
 
-### ✨ 體驗與導覽引擎
+### 體驗與導覽引擎
 
 * **側鍵導覽**：支援滑鼠側鍵前進 / 後退，可在不同目錄層級間快速切換。
 * **進階路徑列**：支援滾輪滑動、同層目錄下拉切換、路徑回顯與溯源跳轉。
@@ -36,7 +40,7 @@
 
 ---
 
-### 📂 批次與空間管理
+### 批次與空間管理
 
 * **批量重命名**：支援正則替換 / 刪除、劇集流水號、文字格式化、FC2 規範命名、前綴去廣告，以及基於 MIME 的後綴智慧修復。
 
@@ -77,7 +81,7 @@
 
 ---
 
-### 🌐 傳輸、雲端下載與分享解析
+### 傳輸、雲端下載與分享解析
 
 * **分享解析**：支援解析分享連結，在儲存前查看分享內容，未儲存前不佔用自己的網盤空間。
 * **分享文件透視**：支援對分享內容進行遞迴掃描、篩選和預覽，適合在儲存前檢查分享內部結構。
@@ -97,7 +101,7 @@
 
 ---
 
-### 🎬 沉浸式媒體增強
+### 沉浸式媒體增強
 
 * **播放引擎增強**：支援 0.5x - 3.0x 倍速、旋轉翻轉、強制比例、自動跳過片頭片尾、連播 / 循環與進度列縮圖預覽。
 * **預設開啟方式**：可在腳本播放器與 PotPlayer 之間選擇預設播放方式，並支援預設影片畫質 / 外部播放畫質設定。
@@ -114,7 +118,7 @@
 
 ---
 
-### ⚡ 下載與分發
+### 下載與分發
 
 * **下載器類型**：支援 Aria2 相容 RPC、Gopeed API、ABDM API 與 IDM 清單匯出，適配不同本機下載工具。
 * **目錄結構還原**：推送整個資料夾時可自動恢復雲端硬碟中的樹狀目錄結構，避免下載後目錄被攤平。
@@ -130,7 +134,7 @@
 
 ---
 
-### ⚙️ 配置與資料管理
+### 配置與資料管理
 
 * **配置管理與清理**：支援將腳本配置匯出跨裝置使用，匯入配置合併去重，並支援根據配置類型清理。
 
@@ -152,7 +156,7 @@
 
 ---
 
-## 📥 安裝指南
+## 安裝指南
 
 1. **安裝腳本管理器**：建議使用 [ScriptCat](https://scriptcat.org/)、[Violentmonkey](https://violentmonkey.github.io/get-it/) 或 [Tampermonkey](https://www.tampermonkey.net/)。
 2. **安裝腳本**：點擊 **[立即安裝](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**。
@@ -161,9 +165,13 @@
    * 普通模式下：登入後點擊側欄浮動的藍色 **PikPak Logo 球** 進入。
    * 極速模式下：登入後腳本可自動開啟，接管網頁端。
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_tc.gif" alt="封面">
+</p>
+
 ---
 
-## ❓ 常見問題解答
+## 常見問題解答
 
 **Q：為什麼安裝了腳本卻沒有顯示藍色懸浮球？**  
 **A：** 請按以下順序檢查：
@@ -260,7 +268,7 @@
 
 ---
 
-## 🛡️ 隱私與安全聲明
+## 隱私與安全聲明
 
 * **本機優先**：本腳本所有核心能力均透過瀏覽器直接與 PikPak 官方 API 互動，您的帳號 Token、解壓密碼庫及大多數本機配置資料預設保存在本機瀏覽器環境中。
 * **零收集**：腳本**不會主動收集**使用者隱私資料，也**絕不會**將您的檔案資訊或帳號憑證上傳至任何第三方伺服器。
@@ -269,7 +277,7 @@
 
 ---
 
-## 🚀 更新日誌
+## 更新日誌
 
 ### V3.1.0
 
@@ -395,6 +403,6 @@
 
 ---
 
-## 🤝 致謝
+## 致謝
 
 本專案在 UI 設計語言及部分網頁端 API 呼叫邏輯上，深受 [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴) 的啟發，特此致敬。
