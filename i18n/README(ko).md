@@ -1,8 +1,12 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_ko.gif" alt="커버">
+  <img src="https://socialify.git.ci/digbug82/PikPak_Enhancement_Master/image?font=Inter&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fimg%2Flogo-socialify.svg&name=1&owner=1&pattern=Plus&stargazers=1&theme=Auto" alt="PikPak Enhancement Master" width="100%" />
 </p>
 
-# 📦 PikPak Enhancement Master
+<p align="center"><strong>Feature-rich, elegant interface.</strong></p>
+
+---
+
+# PikPak Enhancement Master
 
 [![최신 버전 설치 / 업데이트](https://img.shields.io/badge/최신%20버전%20설치%20/%20업데이트-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
@@ -15,15 +19,15 @@
 
 ---
 
-## 🌍 지원 언어
+## 지원 언어
 
 [한국어](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ko).md) | [简体中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/README.md) | [繁體中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(tc).md) | [English](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(en).md) | [日本語](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ja).md) | [Indonesia](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(id).md) | [Bahasa Melayu](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ms).md)
 
 ---
 
-## ✨ 주요 기능
+## 주요 기능
 
-### ✨ 경험 및 탐색 엔진
+### 경험 및 탐색 엔진
 
 * **사이드 버튼 탐색**: 마우스 사이드 버튼의 앞으로 / 뒤로 가기를 지원하여 서로 다른 폴더 계층 사이를 빠르게 전환할 수 있습니다.
 * **고급 경로 표시줄**: 휠 스크롤, 같은 계층 폴더 드롭다운 전환, 경로 표시 및 원본 경로 추적 이동을 지원합니다.
@@ -36,7 +40,7 @@
 
 ---
 
-### 📂 일괄 및 공간 관리
+### 일괄 및 공간 관리
 
 * **일괄 이름 변경**: 정규식 치환 / 삭제, 에피소드 일련번호, 텍스트 형식화, FC2 규칙 이름 지정, 광고 접두어 제거, MIME 기반 확장자 스마트 복구를 지원합니다.
 
@@ -77,7 +81,7 @@
 
 ---
 
-### 🌐 전송, 클라우드 다운로드 및 공유 분석
+### 전송, 클라우드 다운로드 및 공유 분석
 
 * **공유 분석**: 공유 링크를 분석하고 저장 전에 공유 내용을 볼 수 있으며, 저장 전에는 내 클라우드 드라이브 공간을 사용하지 않습니다.
 * **공유 파일 투시**: 공유 내용에 대한 재귀 스캔, 필터링, 미리보기를 지원하여 저장 전에 공유 내부 구조를 확인하기 좋습니다.
@@ -97,7 +101,7 @@
 
 ---
 
-### 🎬 몰입형 미디어 강화
+### 몰입형 미디어 강화
 
 * **재생 엔진 강화**: 0.5x - 3.0x 배속, 회전 / 뒤집기, 강제 비율, 오프닝 / 엔딩 자동 건너뛰기, 연속 재생 / 반복, 진행률 표시줄 썸네일 미리보기를 지원합니다.
 * **기본 열기 방식**: 스크립트 플레이어와 PotPlayer 중 기본 재생 방식을 선택할 수 있으며, 기본 비디오 화질 / 외부 재생 화질 설정을 지원합니다.
@@ -114,7 +118,7 @@
 
 ---
 
-### ⚡ 다운로드 및 배포
+### 다운로드 및 배포
 
 * **다운로더 유형**: Aria2 호환 RPC, Gopeed API, ABDM API 및 IDM 목록 내보내기를 지원하여 다양한 로컬 다운로드 도구에 맞출 수 있습니다.
 * **디렉터리 구조 복원**: 전체 폴더를 보낼 때 클라우드 드라이브의 트리형 디렉터리 구조를 자동으로 복원하여 다운로드 후 폴더가 납작해지는 것을 방지합니다.
@@ -130,7 +134,7 @@
 
 ---
 
-### ⚙️ 설정 및 데이터 관리
+### 설정 및 데이터 관리
 
 * **설정 관리와 정리**: 스크립트 설정을 내보내 여러 장치에서 사용할 수 있고, 설정 가져오기는 병합 및 중복 제거를 수행하며, 설정 유형별 정리도 지원합니다.
 
@@ -152,7 +156,7 @@
 
 ---
 
-## 📥 설치 가이드
+## 설치 가이드
 
 1. **유저스크립트 관리자 설치**: [ScriptCat](https://scriptcat.org/), [Violentmonkey](https://violentmonkey.github.io/get-it/) 또는 [Tampermonkey](https://www.tampermonkey.net/) 사용을 권장합니다.
 2. **스크립트 설치**: **[지금 설치](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**를 클릭합니다.
@@ -161,9 +165,13 @@
    * 일반 모드: 로그인 후 사이드바에 떠 있는 파란색 **PikPak Logo 공**을 클릭해 진입합니다.
    * Turbo Mode: 로그인 후 스크립트가 자동으로 시작되어 웹 클라이언트를 인수할 수 있습니다.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_ko.gif" alt="커버">
+</p>
+
 ---
 
-## ❓ 자주 묻는 질문
+## 자주 묻는 질문
 
 **Q: 스크립트를 설치했는데 파란색 플로팅 공이 보이지 않는 이유는 무엇인가요?**  
 **A:** 다음 순서대로 확인해 주세요.
@@ -260,7 +268,7 @@
 
 ---
 
-## 🛡️ 개인정보 및 보안 안내
+## 개인정보 및 보안 안내
 
 * **로컬 우선**: 이 스크립트의 모든 핵심 기능은 브라우저를 통해 PikPak 공식 API와 직접 상호작용합니다. 계정 Token, 압축 해제 비밀번호 저장소 및 대부분의 로컬 설정 데이터는 기본적으로 로컬 브라우저 환경에 저장됩니다.
 * **수집 없음**: 스크립트는 사용자 개인정보를 **능동적으로 수집하지 않으며**, 파일 정보나 계정 자격 증명을 **절대** 제3자 서버로 업로드하지 않습니다.
@@ -269,7 +277,7 @@
 
 ---
 
-## 🚀 업데이트 로그
+## 업데이트 로그
 
 ### V3.1.0
 
@@ -395,6 +403,6 @@
 
 ---
 
-## 🤝 감사
+## 감사
 
 이 프로젝트의 UI 디자인 언어와 일부 웹 API 호출 로직은 [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴)에서 큰 영감을 받았습니다. 감사의 뜻을 전합니다.
