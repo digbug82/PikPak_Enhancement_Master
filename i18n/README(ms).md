@@ -1,8 +1,12 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_ms.gif" alt="Kulit">
+  <img src="https://socialify.git.ci/digbug82/PikPak_Enhancement_Master/image?font=Inter&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fimg%2Flogo-socialify.svg&name=1&owner=1&pattern=Plus&stargazers=1&theme=Auto" alt="PikPak Enhancement Master" width="100%" />
 </p>
 
-# 📦 PikPak Enhancement Master
+<p align="center"><strong>Feature-rich, elegant interface.</strong></p>
+
+---
+
+# PikPak Enhancement Master
 
 [![Pasang / Kemas Kini Versi Terkini](https://img.shields.io/badge/Pasang%20/%20Kemas%20Kini%20Versi%20Terkini-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
@@ -15,15 +19,15 @@
 
 ---
 
-## 🌍 Bahasa Disokong
+## Bahasa Disokong
 
 [Bahasa Melayu](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ms).md) | [简体中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/README.md) | [繁體中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(tc).md) | [English](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(en).md) | [한국어](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ko).md) | [日本語](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ja).md) | [Indonesia](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(id).md)
 
 ---
 
-## ✨ Ciri Utama
+## Ciri Utama
 
-### ✨ Enjin Pengalaman dan Navigasi
+### Enjin Pengalaman dan Navigasi
 
 * **Navigasi butang sisi**: menyokong butang sisi tetikus untuk maju / undur, memudahkan pertukaran pantas antara aras folder yang berbeza.
 * **Bar laluan lanjutan**: menyokong tatal roda, pertukaran folder searas melalui dropdown, paparan semula laluan, dan lompatan jejak sumber.
@@ -36,7 +40,7 @@
 
 ---
 
-### 📂 Pengurusan Pukal dan Ruang
+### Pengurusan Pukal dan Ruang
 
 * **Nama semula pukal**: menyokong ganti / padam regex, nombor siri episod, format teks, penamaan piawai FC2, buang awalan iklan, serta pembaikan sambungan pintar berasaskan MIME.
 
@@ -77,7 +81,7 @@
 
 ---
 
-### 🌐 Pemindahan, Muat Turun Awan dan Hurai Kongsi
+### Pemindahan, Muat Turun Awan dan Hurai Kongsi
 
 * **Hurai Kongsi**: menyokong penghuraian pautan kongsi dan melihat kandungan kongsi sebelum disimpan, tanpa menggunakan ruang pemacu awan anda sebelum penyimpanan.
 * **Tinjauan fail kongsi**: menyokong imbasan rekursif, tapisan dan pratonton kandungan kongsi, sesuai untuk memeriksa struktur dalaman kongsi sebelum disimpan.
@@ -97,7 +101,7 @@
 
 ---
 
-### 🎬 Peningkatan Media Imersif
+### Peningkatan Media Imersif
 
 * **Peningkatan enjin main balik**: menyokong kelajuan 0.5x - 3.0x, putar / terbalik, nisbah paksa, langkau intro / outro automatik, main berterusan / ulang, dan pratonton lakaran kecil pada bar kemajuan.
 * **Kaedah buka lalai**: boleh memilih kaedah main balik lalai antara pemain skrip dan PotPlayer, serta menyokong tetapan kualiti video lalai / kualiti main balik luaran.
@@ -114,7 +118,7 @@
 
 ---
 
-### ⚡ Muat Turun dan Pengedaran
+### Muat Turun dan Pengedaran
 
 * **Jenis Pemuat Turun**: menyokong RPC serasi Aria2, Gopeed API, ABDM API dan eksport senarai IDM, sesuai untuk pelbagai alat muat turun tempatan.
 * **Pulihkan struktur direktori**: apabila menghantar seluruh folder, struktur pohon direktori dalam pemacu awan boleh dipulihkan secara automatik supaya folder tidak menjadi rata selepas dimuat turun.
@@ -130,7 +134,7 @@
 
 ---
 
-### ⚙️ Konfigurasi dan Pengurusan Data
+### Konfigurasi dan Pengurusan Data
 
 * **Pengurusan Konfigurasi dan pembersihan**: menyokong eksport konfigurasi skrip untuk digunakan merentas peranti, import konfigurasi dengan gabungan dan nyahpendua, serta pembersihan mengikut jenis konfigurasi.
 
@@ -152,7 +156,7 @@
 
 ---
 
-## 📥 Panduan Pemasangan
+## Panduan Pemasangan
 
 1. **Pasang pengurus userscript**: disarankan menggunakan [ScriptCat](https://scriptcat.org/), [Violentmonkey](https://violentmonkey.github.io/get-it/) atau [Tampermonkey](https://www.tampermonkey.net/).
 2. **Pasang skrip**: klik **[Pasang Sekarang](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**.
@@ -161,9 +165,13 @@
    * Dalam mod biasa: selepas log masuk, klik **bola PikPak Logo** biru yang terapung di bar sisi.
    * Dalam Turbo Mode: selepas log masuk, skrip boleh dimulakan secara automatik dan mengambil alih web.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_ms.gif" alt="Kulit">
+</p>
+
 ---
 
-## ❓ Soalan Lazim
+## Soalan Lazim
 
 **Q: Mengapa bola terapung biru tidak dipaparkan selepas skrip dipasang?**  
 **A:** Sila semak mengikut urutan berikut:
@@ -260,7 +268,7 @@ Jadi jika fail tidak muncul selepas tampal, sebab paling biasa ialah had kapasit
 
 ---
 
-## 🛡️ Kenyataan Privasi dan Keselamatan
+## Kenyataan Privasi dan Keselamatan
 
 * **Utamakan tempatan**: semua keupayaan teras skrip ini berinteraksi terus dengan API rasmi PikPak melalui pelayar. Token akaun, Bilik Simpanan Kata Laluan Nyahmampat dan kebanyakan data konfigurasi tempatan anda disimpan dalam persekitaran pelayar tempatan secara lalai.
 * **Tiada pengumpulan**: skrip **tidak mengumpul** data privasi pengguna secara aktif, dan **tidak akan sekali-kali** memuat naik maklumat fail atau kelayakan akaun anda ke mana-mana pelayan pihak ketiga.
@@ -269,7 +277,7 @@ Jadi jika fail tidak muncul selepas tampal, sebab paling biasa ialah had kapasit
 
 ---
 
-## 🚀 Log Kemas Kini
+## Log Kemas Kini
 
 ### V3.1.0
 
@@ -395,6 +403,6 @@ Jadi jika fail tidak muncul selepas tampal, sebab paling biasa ialah had kapasit
 
 ---
 
-## 🤝 Penghargaan
+## Penghargaan
 
 Bahasa reka bentuk UI dan sebahagian logik panggilan API web projek ini banyak diinspirasikan oleh [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴). Terima kasih dan hormat.
