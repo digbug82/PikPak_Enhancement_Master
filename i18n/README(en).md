@@ -6,7 +6,7 @@
 
 ---
 
-# 📦 PikPak Enhancement Master
+# PikPak Enhancement Master
 
 [![Install / Update Latest Version](https://img.shields.io/badge/Install%20/%20Update%20Latest%20Version-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
@@ -19,15 +19,15 @@
 
 ---
 
-## 🌍 Supported Languages
+## Supported Languages
 
 [English](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(en).md) | [简体中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/README.md) | [繁體中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(tc).md) | [한국어](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ko).md) | [日本語](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ja).md) | [Indonesia](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(id).md) | [Bahasa Melayu](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ms).md)
 
 ---
 
-## ✨ Main Features
+## Main Features
 
-### ✨ Experience and Navigation Engine
+### Experience and Navigation Engine
 
 * **Side-button navigation**: supports mouse side buttons for forward / back navigation, making it quick to move across folder levels.
 * **Advanced path bar**: supports wheel scrolling, same-level folder dropdown switching, path echoing, and trace-back jumps.
@@ -40,7 +40,7 @@
 
 ---
 
-### 📂 Bulk and Space Management
+### Bulk and Space Management
 
 * **Bulk Rename**: supports regex replace / delete, episode serial numbers, text formatting, FC2 standard naming, ad-prefix removal, and MIME-based smart extension repair.
 
@@ -81,7 +81,7 @@
 
 ---
 
-### 🌐 Transfer, Cloud Download, and Share Parser
+### Transfer, Cloud Download, 和 Share Parser
 
 * **Share Parser**: supports parsing share links and viewing shared content before saving it, without occupying your own cloud drive space before saving.
 * **Shared File Insight**: supports recursive scanning, filtering, and previewing of shared content, useful for checking internal share structure before saving.
@@ -101,7 +101,7 @@
 
 ---
 
-### 🎬 Immersive Media Enhancement
+### Immersive Media Enhancement
 
 * **Playback engine enhancement**: supports 0.5x - 3.0x speed, rotate / flip, forced aspect ratio, automatic intro / outro skipping, continuous playback / loop, and progress-bar thumbnail preview.
 * **Default opening method**: choose the default playback method between the script player and PotPlayer, with default video quality / external playback quality settings.
@@ -118,7 +118,7 @@
 
 ---
 
-### ⚡ Download and Distribution
+### Download and Distribution
 
 * **Downloader Type**: supports Aria2-compatible RPC, Gopeed API, ABDM API, and IDM list export, adapting to different local download tools.
 * **Directory structure restore**: when pushing a whole folder, it can automatically restore the cloud drive tree structure, avoiding flattened folders after download.
@@ -134,7 +134,7 @@
 
 ---
 
-### ⚙️ Config and Data Management
+### Config and Data Management
 
 * **Config Management and cleanup**: supports exporting script config for cross-device use, importing config with merge and deduplication, and cleaning by config type.
 
@@ -156,7 +156,7 @@
 
 ---
 
-## 📥 Installation Guide
+## Installation Guide
 
 1. **Install a userscript manager**: [ScriptCat](https://scriptcat.org/), [Violentmonkey](https://violentmonkey.github.io/get-it/), or [Tampermonkey](https://www.tampermonkey.net/) is recommended.
 2. **Install the script**: click **[Install Now](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**.
@@ -171,7 +171,7 @@
 
 ---
 
-## ❓ FAQ
+## FAQ
 
 **Q: Why is the blue floating ball not shown after installing the script?**  
 **A:** Please check in this order:
@@ -268,7 +268,7 @@ So if files do not appear after pasting, the most common reason is a capacity li
 
 ---
 
-## 🛡️ Privacy and Security Statement
+## Privacy and Security Statement
 
 * **Local-first**: all core capabilities of this script interact directly with PikPak official APIs through the browser. Your account Token, Extract Password Vault, and most local configuration data are stored in the local browser environment by default.
 * **Zero collection**: the script **does not actively collect** user privacy data and **will never** upload your file information or account credentials to any third-party server.
@@ -277,7 +277,7 @@ So if files do not appear after pasting, the most common reason is a capacity li
 
 ---
 
-## 🚀 Changelog
+## 更新日志
 
 ### V3.1.0
 
@@ -403,6 +403,6 @@ So if files do not appear after pasting, the most common reason is a capacity li
 
 ---
 
-## 🤝 Thanks
+## Thanks
 
 This project's UI design language and some web API call logic are deeply inspired by [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴). Respect and thanks.
