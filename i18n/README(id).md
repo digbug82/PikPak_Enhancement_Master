@@ -1,6 +1,10 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_id.gif" alt="Sampul">
+  <img src="https://socialify.git.ci/digbug82/PikPak_Enhancement_Master/image?font=Inter&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fimg%2Flogo-socialify.svg&name=1&owner=1&pattern=Plus&stargazers=1&theme=Auto" alt="PikPak Enhancement Master" width="100%" />
 </p>
+
+<p align="center"><strong>Feature-rich, elegant interface.</strong></p>
+
+---
 
 # 📦 PikPak Enhancement Master
 
@@ -160,6 +164,10 @@
 4. **Jalankan Enhancement Master**:
    * Dalam mode normal: setelah masuk, klik **bola PikPak Logo** biru yang mengambang di sidebar.
    * Dalam Turbo Mode: setelah masuk, skrip dapat otomatis aktif dan mengambil alih web.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_id.gif" alt="Sampul">
+</p>
 
 ---
 
