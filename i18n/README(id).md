@@ -6,7 +6,7 @@
 
 ---
 
-# 📦 PikPak Enhancement Master
+# PikPak Enhancement Master
 
 [![Instal / Perbarui Versi Terbaru](https://img.shields.io/badge/Instal%20/%20Perbarui%20Versi%20Terbaru-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
@@ -19,15 +19,15 @@
 
 ---
 
-## 🌍 Bahasa yang Didukung
+## Bahasa yang Didukung
 
 [Indonesia](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(id).md) | [简体中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/README.md) | [繁體中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(tc).md) | [English](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(en).md) | [한국어](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ko).md) | [日本語](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ja).md) | [Bahasa Melayu](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ms).md)
 
 ---
 
-## ✨ Fitur Utama
+## Fitur Utama
 
-### ✨ Mesin Pengalaman dan Navigasi
+### Mesin Pengalaman dan Navigasi
 
 * **Navigasi tombol samping**: mendukung tombol samping mouse untuk maju / mundur, sehingga mudah berpindah cepat antar tingkat folder.
 * **Bilah jalur lanjutan**: mendukung gulir roda mouse, perpindahan folder sejajar melalui dropdown, tampilan ulang jalur, dan lompatan penelusuran sumber.
@@ -40,7 +40,7 @@
 
 ---
 
-### 📂 Manajemen Massal dan Ruang
+### Manajemen Massal dan Ruang
 
 * **Ganti nama massal**: mendukung penggantian / penghapusan regex, nomor urut episode, pemformatan teks, penamaan standar FC2, penghapusan awalan iklan, serta perbaikan ekstensi cerdas berbasis MIME.
 
@@ -81,7 +81,7 @@
 
 ---
 
-### 🌐 Transfer, Cloud Download, dan Parser Berbagi
+### Transfer, Cloud Download, dan Parser Berbagi
 
 * **Parser Berbagi**: mendukung parsing tautan berbagi dan melihat isi berbagi sebelum disimpan, tanpa memakai ruang cloud drive Anda sebelum penyimpanan.
 * **Tinjauan file berbagi**: mendukung pemindaian rekursif, filter, dan pratinjau isi berbagi, cocok untuk memeriksa struktur internal berbagi sebelum disimpan.
@@ -101,7 +101,7 @@
 
 ---
 
-### 🎬 Peningkatan Media Imersif
+### Peningkatan Media Imersif
 
 * **Peningkatan mesin pemutar**: mendukung kecepatan 0.5x - 3.0x, rotasi / balik, rasio paksa, lewati intro / outro otomatis, putar beruntun / loop, dan pratinjau thumbnail pada bilah progres.
 * **Metode buka default**: dapat memilih metode pemutaran default antara pemutar skrip dan PotPlayer, serta mendukung pengaturan kualitas video default / kualitas pemutaran eksternal.
@@ -118,7 +118,7 @@
 
 ---
 
-### ⚡ Unduh dan Distribusi
+### Unduh dan Distribusi
 
 * **Jenis Pengunduh**: mendukung RPC kompatibel Aria2, Gopeed API, ABDM API, dan ekspor daftar IDM, sesuai untuk berbagai alat unduhan lokal.
 * **Pemulihan struktur direktori**: saat mengirim seluruh folder, struktur pohon direktori di cloud drive dapat dipulihkan otomatis agar folder tidak menjadi rata setelah diunduh.
@@ -134,7 +134,7 @@
 
 ---
 
-### ⚙️ Konfigurasi dan Manajemen Data
+### Konfigurasi dan Manajemen Data
 
 * **Manajemen Konfigurasi dan pembersihan**: mendukung ekspor konfigurasi skrip untuk digunakan lintas perangkat, impor konfigurasi dengan penggabungan dan deduplikasi, serta pembersihan berdasarkan jenis konfigurasi.
 
@@ -156,7 +156,7 @@
 
 ---
 
-## 📥 Panduan Instalasi
+## Panduan Instalasi
 
 1. **Instal pengelola userscript**: disarankan menggunakan [ScriptCat](https://scriptcat.org/), [Violentmonkey](https://violentmonkey.github.io/get-it/), atau [Tampermonkey](https://www.tampermonkey.net/).
 2. **Instal skrip**: klik **[Instal Sekarang](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**.
@@ -171,7 +171,7 @@
 
 ---
 
-## ❓ Tanya Jawab Umum
+## Tanya Jawab Umum
 
 **Q: Mengapa bola mengambang biru tidak muncul setelah skrip dipasang?**  
 **A:** Periksa dengan urutan berikut:
@@ -268,7 +268,7 @@ Jadi jika file tidak muncul setelah tempel, penyebab paling umum adalah batas ka
 
 ---
 
-## 🛡️ Pernyataan Privasi dan Keamanan
+## Pernyataan Privasi dan Keamanan
 
 * **Utamakan lokal**: semua kemampuan inti skrip ini berinteraksi langsung dengan API resmi PikPak melalui browser. Token akun, Brankas Kata Sandi Ekstraksi, dan sebagian besar data konfigurasi lokal Anda secara default disimpan di lingkungan browser lokal.
 * **Tanpa pengumpulan**: skrip **tidak secara aktif mengumpulkan** data privasi pengguna, dan **tidak akan pernah** mengunggah informasi file atau kredensial akun Anda ke server pihak ketiga mana pun.
@@ -277,7 +277,7 @@ Jadi jika file tidak muncul setelah tempel, penyebab paling umum adalah batas ka
 
 ---
 
-## 🚀 Catatan Perubahan
+## Catatan Perubahan
 
 ### V3.1.0
 
@@ -403,6 +403,6 @@ Jadi jika file tidak muncul setelah tempel, penyebab paling umum adalah batas ka
 
 ---
 
-## 🤝 Terima Kasih
+## Terima Kasih
 
 Bahasa desain UI dan sebagian logika panggilan API web proyek ini sangat terinspirasi oleh [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴). Hormat dan terima kasih.
