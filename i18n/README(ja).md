@@ -1,6 +1,10 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_ja.gif" alt="カバー">
+  <img src="https://socialify.git.ci/digbug82/PikPak_Enhancement_Master/image?font=Inter&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fimg%2Flogo-socialify.svg&name=1&owner=1&pattern=Plus&stargazers=1&theme=Auto" alt="PikPak Enhancement Master" width="100%" />
 </p>
+
+<p align="center"><strong>Feature-rich, elegant interface.</strong></p>
+
+---
 
 # 📦 PikPak Enhancement Master
 
@@ -160,6 +164,10 @@
 4. **Enhancement Master を起動**：
    * 通常モード：ログイン後、サイドバーに浮かぶ青い **PikPak Logo ボール** をクリックして入ります。
    * Turbo Mode：ログイン後、スクリプトが自動的に起動して Web 端を引き継げます。
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_ja.gif" alt="カバー">
+</p>
 
 ---
 
