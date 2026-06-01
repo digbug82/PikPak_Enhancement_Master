@@ -6,7 +6,7 @@
 
 ---
 
-# 📦 PikPak Enhancement Master
+# PikPak Enhancement Master
 
 [![最新版をインストール / 更新](https://img.shields.io/badge/最新版をインストール%20/%20更新-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
@@ -19,15 +19,15 @@
 
 ---
 
-## 🌍 対応言語
+## 対応言語
 
 [日本語](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ja).md) | [简体中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/README.md) | [繁體中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(tc).md) | [English](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(en).md) | [한국어](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ko).md) | [Indonesia](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(id).md) | [Bahasa Melayu](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ms).md)
 
 ---
 
-## ✨ 主な機能
+## 主な機能
 
-### ✨ 体験とナビゲーションエンジン
+### 体験とナビゲーションエンジン
 
 * **サイドボタンナビゲーション**：マウスのサイドボタンによる進む / 戻るをサポートし、異なるフォルダ階層をすばやく切り替えられます。
 * **高度なパスバー**：ホイールスクロール、同階層フォルダのドロップダウン切り替え、パス表示、元パスへのトレースジャンプをサポートします。
@@ -40,7 +40,7 @@
 
 ---
 
-### 📂 一括処理と容量管理
+### 一括処理と容量管理
 
 * **一括リネーム**：正規表現による置換 / 削除、エピソード連番、テキスト整形、FC2 規格命名、広告プレフィックス除去、MIME ベースの拡張子スマート修復をサポートします。
 
@@ -81,7 +81,7 @@
 
 ---
 
-### 🌐 転送、クラウドダウンロード、共有解析
+### 転送、クラウドダウンロード、共有解析
 
 * **共有解析**：共有リンクを解析し、保存前に共有内容を確認できます。保存するまでは自分のクラウド容量を消費しません。
 * **共有ファイル透視**：共有内容の再帰スキャン、フィルタ、プレビューをサポートし、保存前に共有内部の構造を確認するのに適しています。
@@ -101,7 +101,7 @@
 
 ---
 
-### 🎬 没入型メディア強化
+### 没入型メディア強化
 
 * **再生エンジン強化**：0.5x - 3.0x 倍速、回転 / 反転、強制アスペクト比、オープニング / エンディングの自動スキップ、連続再生 / ループ、進捗バーのサムネイルプレビューをサポートします。
 * **デフォルトの開き方**：スクリプトプレイヤーと PotPlayer の間でデフォルト再生方式を選択でき、デフォルト動画品質 / 外部再生品質設定にも対応します。
@@ -118,7 +118,7 @@
 
 ---
 
-### ⚡ ダウンロードと配布
+### ダウンロードと配布
 
 * **ダウンローダーの種類**：Aria2 互換 RPC、Gopeed API、ABDM API、IDM リスト出力に対応し、さまざまなローカルダウンロードツールに適応します。
 * **ディレクトリ構造の復元**：フォルダ全体を送信する際、クラウドドライブ内のツリー構造を自動的に復元し、ダウンロード後にフォルダ構造が平坦化されるのを防ぎます。
@@ -134,7 +134,7 @@
 
 ---
 
-### ⚙️ 設定とデータ管理
+### 設定とデータ管理
 
 * **設定管理と整理**：スクリプト設定をエクスポートして複数端末で使用でき、設定インポートではマージと重複排除を行い、設定タイプ別の整理にも対応します。
 
@@ -156,7 +156,7 @@
 
 ---
 
-## 📥 インストールガイド
+## インストールガイド
 
 1. **ユーザースクリプトマネージャーをインストール**：[ScriptCat](https://scriptcat.org/)、[Violentmonkey](https://violentmonkey.github.io/get-it/)、または [Tampermonkey](https://www.tampermonkey.net/) の使用をおすすめします。
 2. **スクリプトをインストール**：**[今すぐインストール](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)** をクリックします。
@@ -171,7 +171,7 @@
 
 ---
 
-## ❓ よくある質問
+## よくある質問
 
 **Q：スクリプトをインストールしたのに青いフローティングボールが表示されないのはなぜですか？**  
 **A：** 次の順番で確認してください。
@@ -268,7 +268,7 @@
 
 ---
 
-## 🛡️ プライバシーとセキュリティ声明
+## プライバシーとセキュリティ声明
 
 * **ローカル優先**：このスクリプトのすべてのコア機能は、ブラウザを通じて PikPak 公式 API と直接やり取りします。アカウント Token、解凍パスワード庫、多くのローカル設定データは、デフォルトでローカルブラウザ環境に保存されます。
 * **収集ゼロ**：スクリプトはユーザーのプライバシーデータを **能動的に収集せず**、ファイル情報やアカウント認証情報を **決して** 第三者サーバーへアップロードしません。
@@ -277,7 +277,7 @@
 
 ---
 
-## 🚀 更新ログ
+## 更新ログ
 
 ### V3.1.0
 
@@ -403,6 +403,6 @@
 
 ---
 
-## 🤝 謝辞
+## 謝辞
 
 本プロジェクトの UI デザイン言語および一部の Web API 呼び出しロジックは、[PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴) から大きな影響を受けています。ここに敬意を表します。
