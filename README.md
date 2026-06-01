@@ -1,8 +1,12 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_zh.gif" alt="封面">
+  <img src="https://socialify.git.ci/digbug82/PikPak_Enhancement_Master/image?font=Inter&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fimg%2Flogo-socialify.svg&name=1&owner=1&pattern=Plus&stargazers=1&theme=Auto" alt="PikPak Enhancement Master" width="100%" />
 </p>
 
-# 📦 PikPak 增强大师
+<p align="center"><strong>“功能大而全，界面小而美。”</strong></p>
+
+---
+
+# PikPak 增强大师
 
 [![立即安装 / 更新最新版](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
 
@@ -15,15 +19,15 @@
 
 ---
 
-## 🌍 支持语言
+## 支持语言
 
 [简体中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/README.md) | [繁體中文](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(tc).md) | [English](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(en).md) | [한국어](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ko).md) | [日本語](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ja).md) | [Indonesia](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(id).md) | [Bahasa Melayu](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/i18n/README(ms).md)
 
 ---
 
-## ✨ 主要功能
+## 主要功能
 
-### ✨ 体验与导航引擎
+### 体验与导航引擎
 
 * **侧键导航**：支持鼠标侧键前进 / 后退，在不同目录层级间快速切换。
 * **高级路径栏**：支持滚轮滑动、同级目录下拉切换、路径回显与溯源跳转。
@@ -36,7 +40,7 @@
 
 ---
 
-### 📂 批量与空间管理
+### 批量与空间管理
 
 * **批量重命名**：支持正则替换 / 删除、剧集流水号、文本格式化、FC2 规范命名、前缀去广告，以及基于 MIME 的后缀智能修复。
 
@@ -77,7 +81,7 @@
 
 ---
 
-### 🌐 传输、云下载与分享解析
+### 传输、云下载与分享解析
 
 * **分享解析**：支持解析分享链接，在保存前查看分享内容，未保存前不占用自己的网盘空间。
 * **分享文件透视**：支持对分享内容进行递归扫描、筛选和预览，适合在保存前检查分享内部结构。
@@ -97,7 +101,7 @@
 
 ---
 
-### 🎬 沉浸式媒体增强
+### 沉浸式媒体增强
 
 * **播放引擎增强**：支持 0.5x - 3.0x 倍速、旋转翻转、强制比例、自动跳过片头片尾、连播 / 循环与进度条缩略图预览。
 * **默认打开方式**：可在脚本播放器与 PotPlayer 之间选择默认播放方式，并支持默认视频清晰度 / 外部播放清晰度设置。
@@ -114,7 +118,7 @@
 
 ---
 
-### ⚡ 下载与分发
+### 下载与分发
 
 * **下载器类型**：支持 Aria2 兼容 RPC、Gopeed API、ABDM API 与 IDM 清单导出，适配不同本地下载工具。
 * **目录结构还原**：推送整个文件夹时可自动恢复云盘中的树状目录结构，避免下载后目录被打平。
@@ -130,7 +134,7 @@
 
 ---
 
-### ⚙️ 配置与数据管理
+### 配置与数据管理
 
 * **配置管理与清理**：支持将脚本配置导出跨设备使用，导入配置合并去重，并支持根据配置类型清理。
 
@@ -152,7 +156,7 @@
 
 ---
 
-## 📥 安装指南
+## 安装指南
 
 1. **安装脚本管理器**：推荐使用 [ScriptCat](https://scriptcat.org/)、[Violentmonkey](https://violentmonkey.github.io/get-it/) 或 [Tampermonkey](https://www.tampermonkey.net/)。
 2. **安装脚本**：点击 **[立即安装](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**。
@@ -161,9 +165,13 @@
    * 普通模式下：登录后点击侧栏浮动的蓝色 **PikPak Logo 球** 进入。
    * 极速模式下：登录后脚本可自动开启，接管网页端。
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/turbo/turbo_zh.gif" alt="封面">
+</p>
+
 ---
 
-## ❓ 常见问题解答
+## 常见问题解答
 
 **Q：为什么安装了脚本却没有显示蓝色悬浮球？**  
 **A：** 请按以下顺序检查：
@@ -260,7 +268,7 @@
 
 ---
 
-## 🛡️ 隐私与安全声明
+## 隐私与安全声明
 
 * **本地优先**：本脚本所有核心能力均通过浏览器直接与 PikPak 官方 API 交互，您的账号 Token、密码金库及大多数本地配置数据默认保存在本地浏览器环境中。
 * **零收集**：脚本**不会主动收集**用户隐私数据，也**绝不会**将您的文件信息或账号凭证上传至任何第三方服务器。
@@ -269,7 +277,7 @@
 
 ---
 
-## 🚀 更新日志
+## 更新日志
 
 ### V3.1.0
 
@@ -395,6 +403,6 @@
 
 ---
 
-## 🤝 致谢
+## 致谢
 
 本项目在 UI 设计语言及部分网页端 API 调用逻辑上，深受 [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴) 的启发，特此致敬。
