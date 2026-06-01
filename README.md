@@ -2,7 +2,7 @@
   <img src="https://socialify.git.ci/digbug82/PikPak_Enhancement_Master/image?font=Inter&forks=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fimg%2Flogo-socialify.svg&name=1&owner=1&pattern=Plus&stargazers=1&theme=Auto" alt="PikPak Enhancement Master" width="100%" />
 </p>
 
-<p align="center"><strong>“功能大而全，界面小而美。”</strong></p>
+<p align="center"><strong>功能大而全，界面小而美。</strong></p>
 
 ---
 
