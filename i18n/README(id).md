@@ -8,7 +8,7 @@
 
 # PikPak Enhancement Master
 
-[![Instal / Perbarui Versi Terbaru](https://img.shields.io/badge/Instal%20/%20Perbarui%20Versi%20Terbaru-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Enhancement_Master.user.js)
+[![Instal / Perbarui Versi Terbaru](https://img.shields.io/badge/Instal%20/%20Perbarui%20Versi%20Terbaru-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://pem-stats.digbug82.workers.dev/pem/github.user.js?channel=github)
 
 [![Version](https://img.shields.io/badge/dynamic/json?style=flat-square&label=Version&color=0067C0&query=%24.version&url=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fversion.json)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-AGPL--3.0--or--later-red?style=flat-square)](https://spdx.org/licenses/AGPL-3.0-or-later.html)
