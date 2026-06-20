@@ -91,7 +91,7 @@
 
 ---
 
-### Transfer, Cloud Download, 和 Share Parser
+### Transfer, Cloud Download, and Share Parser
 
 * **Share Parser**: supports parsing share links and viewing shared content before saving it, without occupying your own cloud drive space before saving.
 * **Shared File Insight**: supports recursive scanning, filtering, and previewing of shared content, useful for checking internal share structure before saving.
@@ -288,7 +288,7 @@ So if files do not appear after pasting, the most common reason is a capacity li
 
 ---
 
-## 更新日志
+## Changelog
 
 ### V4.0.0
 
