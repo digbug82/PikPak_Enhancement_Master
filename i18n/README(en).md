@@ -27,7 +27,7 @@
 
 ## Main Features
 
-### Experience and Navigation Engine
+### Experience and Navigation Enhancements
 
 * **Side-button navigation**: supports mouse side buttons for forward / back navigation, making it quick to move across folder levels.
 * **Advanced path bar**: supports wheel scrolling, same-level folder dropdown switching, path echoing, and trace-back jumps.
@@ -81,12 +81,23 @@
 
 ---
 
+### Link Bookmarks and Cloud Archive
+
+* **Link Bookmarks**: Link Bookmarks store bookmark links, script sync data, Cloud Archive magnet links, and cloud configuration.
+* **Cloud Archive**: Supports archiving traceable magnet links from selected files to “Link Bookmarks > Cloud Archive”, and allows deleting source files to save space.
+* **Cloud Archive Restore Parsing**: Archived magnet links can be resubmitted as cloud download tasks, with submission status written back.
+* **Cloud Archive Cleanup**: Supports clearing all Cloud Archive links, deleting submitted links, and deleting individual archived links.
+* **Cloud Config Sync**: Supports uploading script configuration to the cloud, pulling it from the cloud, and clearing cloud configuration, making it easier to sync script preferences across devices.
+
+---
+
 ### Transfer, Cloud Download, 和 Share Parser
 
 * **Share Parser**: supports parsing share links and viewing shared content before saving it, without occupying your own cloud drive space before saving.
 * **Shared File Insight**: supports recursive scanning, filtering, and previewing of shared content, useful for checking internal share structure before saving.
 * **Share Parsing History**: can record parsed share links and passwords for quick reopening later.
 * **Share management**: supports setting an access count limit for shares. When the condition is reached, the share can be automatically cancelled to invalidate the link.
+* **Instant File Upload**: If the server already has a record of the same file, the upload can be completed instantly, reducing repeated upload waiting time.
 * **Upload protection**: includes upload leave reminders and protection / cleanup for interrupted uploads, residual tasks, and abnormal files.
 * **Enhanced Cloud Download**: supports automatic deduplication for batch offline links. Built-in smart magnet cleanup can extract Base32 / Hex hashes and remove noisy text.
 * **TXT magnet extraction**: supports previewing TXT text and detecting magnet, HTTP, FTP, ed2k, thunder, and other download links from the text for Cloud Download submission.
@@ -101,7 +112,7 @@
 
 ---
 
-### Immersive Media Enhancement
+### Media Playback Enhancements
 
 * **Playback engine enhancement**: supports 0.5x - 3.0x speed, rotate / flip, forced aspect ratio, automatic intro / outro skipping, continuous playback / loop, and progress-bar thumbnail preview.
 * **Default opening method**: choose the default playback method between the script player and PotPlayer, with default video quality / external playback quality settings.
@@ -279,6 +290,26 @@ So if files do not appear after pasting, the most common reason is a capacity li
 
 ## 更新日志
 
+### V4.0.0
+
+* Added **Link Bookmarks**, supporting management of official PikPak Bookmark data, including folder and link creation, editing, deletion, search, preview, copy, open, pagination, remote change validation, capacity validation, and duplicate folder repair.
+* Added **Cloud Archive**, supporting archiving traceable magnet links from selected files into Link Bookmarks, with archive detection, deduplication, write validation, cloud download resubmission, archive cleanup, source file deletion after archiving, and exception protection.
+* Added **Cloud Config Sync**, supporting script configuration upload to the cloud, pulling from the cloud, and clearing cloud configuration.
+* Added **Configuration Capacity and Input Limit System**, unifying limits for configuration length, item count, capacity, TTL, and LRU, with automatic normalization of abnormal configuration and cleanup of expired cache.
+* Added **Enhanced Share Parsing Downloads**, supporting downloads of files and folders from share parsing. Browser downloads and external downloaders can both preserve the shared path structure, with original direct-link detection, preview restriction prompts, and failure lists.
+* Fixed **Local Upload Task Failures**, improving the stability and error recovery of local file uploads.
+* Improved **Share Parsing History**, adding status, last check time, and abnormal status records.
+* Improved **Download Pipeline**, enhancing Aria2 push fault tolerance.
+* Improved **Recently Added**, allowing recent files to refresh lightly while preserving scroll position.
+* Improved **Playback History**, now loaded from official playback events, with pagination, deduplication, progress records, session cache, and deletion state preservation.
+* Improved **Offline Downloads**, adding lightweight probing and status synchronization for offline tasks. Adding or deleting tasks no longer clears and fully refreshes the list.
+* Improved **Mobile Player Interaction**, adding gesture listener adaptation, supporting progress bar dragging, and improving gesture response when switching directories on mobile.
+* Improved **Refresh and Virtual Scene State Preservation**, enhancing list stability during manual refresh, network recovery, authentication recovery, search results, recent files, history, offline tasks, share parsing, and Link Bookmarks, reducing jumps, blank states, and accidental refreshes.
+* Improved **UI and Stability**, reorganizing the CSS and SVG architecture.
+
+<details>
+<summary>View historical changelog</summary>
+
 ### V3.1.0
 
 * Added **multi-downloader support**, expanding Downloader Type to Aria2, Gopeed, ABDM, and IDM.
@@ -310,9 +341,6 @@ So if files do not appear after pasting, the most common reason is a capacity li
 * Optimized **sorting and view preferences**, unifying sorting and view status for Home, Recycle Bin, Watch History, File Perspective, Share Parser, and other scenarios.
 * Optimized **Recycle Bin**, adding grid view. 
 * Optimized **local upload and login recovery**, adding official upload fallback prompts, direct-upload signature error prompts, and official login-state recovery detection.
-
-<details>
-<summary>View historical changelog</summary>
   
 ### V2.5.1
 
