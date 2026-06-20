@@ -27,7 +27,7 @@
 
 ## Ciri Utama
 
-### Enjin Pengalaman dan Navigasi
+### Peningkatan Pengalaman dan Navigasi
 
 * **Navigasi butang sisi**: menyokong butang sisi tetikus untuk maju / undur, memudahkan pertukaran pantas antara aras folder yang berbeza.
 * **Bar laluan lanjutan**: menyokong tatal roda, pertukaran folder searas melalui dropdown, paparan semula laluan, dan lompatan jejak sumber.
@@ -81,12 +81,23 @@
 
 ---
 
+### Penanda Buku Pautan dan Arkib Awan
+
+* **Penanda Buku Pautan**: Penanda Buku Pautan menyimpan pautan penanda buku, data penyegerakan skrip, pautan magnet Arkib Awan dan konfigurasi awan.
+* **Arkib Awan**: Menyokong pengarkiban pautan magnet yang boleh dijejaki daripada fail terpilih ke “Penanda Buku Pautan > Arkib Awan”, dan boleh memadam fail sumber untuk menjimatkan ruang.
+* **Pemulihan Huraian Arkib Awan**: Pautan magnet yang telah diarkibkan boleh dihantar semula sebagai tugasan muat turun awan, dengan status penghantaran ditulis kembali.
+* **Pembersihan Arkib Awan**: Menyokong mengosongkan semua pautan Arkib Awan, memadam pautan yang telah dihantar dan memadam satu pautan arkib.
+* **Penyegerakan Konfigurasi Awan**: Menyokong muat naik konfigurasi skrip ke awan, menariknya dari awan dan mengosongkan konfigurasi awan, memudahkan penyegerakan keutamaan skrip antara peranti.
+
+---
+
 ### Pemindahan, Muat Turun Awan dan Hurai Kongsi
 
 * **Hurai Kongsi**: menyokong penghuraian pautan kongsi dan melihat kandungan kongsi sebelum disimpan, tanpa menggunakan ruang pemacu awan anda sebelum penyimpanan.
 * **Tinjauan fail kongsi**: menyokong imbasan rekursif, tapisan dan pratonton kandungan kongsi, sesuai untuk memeriksa struktur dalaman kongsi sebelum disimpan.
 * **Sejarah huraian kongsi**: boleh merekod pautan kongsi dan kata laluan yang sudah berjaya dihuraikan, memudahkan pembukaan semula dengan cepat.
 * **Pengurusan kongsi**: menyokong had bilangan capaian kongsi. Selepas syarat dicapai, kongsi boleh dibatalkan secara automatik supaya pautan tidak sah.
+* **Muat Naik Segera**: Semasa memuat naik fail, jika pelayan sudah mempunyai rekod fail yang sama, muat naik boleh diselesaikan serta-merta untuk mengurangkan masa menunggu muat naik berulang.
 * **Perlindungan muat naik**: menyediakan peringatan ketika meninggalkan halaman muat naik, serta perlindungan dan pembersihan untuk muat naik terputus, tugasan tertinggal dan fail luar biasa.
 * **Muat Turun Awan dipertingkat**: menyokong nyahpendua automatik untuk pautan luar talian pukal. Pembersih magnet pintar terbina boleh mengekstrak hash Base32 / Hex dan membuang teks gangguan.
 * **Ekstrak magnet TXT**: menyokong pratonton teks TXT dan mengenal pasti pautan magnet, HTTP, FTP, ed2k, thunder dan pautan muat turun lain daripada teks untuk dihantar ke Muat Turun Awan.
@@ -101,7 +112,7 @@
 
 ---
 
-### Peningkatan Media Imersif
+### Peningkatan Main Balik Media
 
 * **Peningkatan enjin main balik**: menyokong kelajuan 0.5x - 3.0x, putar / terbalik, nisbah paksa, langkau intro / outro automatik, main berterusan / ulang, dan pratonton lakaran kecil pada bar kemajuan.
 * **Kaedah buka lalai**: boleh memilih kaedah main balik lalai antara pemain skrip dan PotPlayer, serta menyokong tetapan kualiti video lalai / kualiti main balik luaran.
@@ -279,6 +290,26 @@ Jadi jika fail tidak muncul selepas tampal, sebab paling biasa ialah had kapasit
 
 ## Log Kemas Kini
 
+### V4.0.0 
+
+* Menambah **Penanda Halaman Pautan**, menyokong pengurusan data Bookmark rasmi PikPak, termasuk penciptaan, penyuntingan, pemadaman, carian, pratonton, salinan, pembukaan dan pengurusan halaman untuk folder serta pautan, dengan semakan perubahan jauh, semakan kapasiti dan pembaikan folder bernama sama.
+* Menambah **Arkib Awan**, menyokong pengarkiban pautan magnet yang boleh dijejaki daripada fail terpilih ke Penanda Halaman Pautan, dengan pengesanan arkib, penyahduaan, semakan penulisan, penghantaran semula muat turun awan, pembersihan arkib, pemadaman fail sumber selepas diarkibkan dan mekanisme perlindungan ralat.
+* Menambah **Penyegerakan Konfigurasi Awan**, menyokong muat naik konfigurasi skrip ke awan, menarik konfigurasi dari awan dan mengosongkan konfigurasi awan.
+* Menambah **Sistem Had Kapasiti dan Input Konfigurasi**, menyeragamkan had panjang, bilangan, kapasiti, TTL dan LRU bagi item konfigurasi, serta menormalkan konfigurasi tidak normal dan membersihkan cache tamat tempoh secara automatik.
+* Menambah **Peningkatan Muat Turun Huraian Perkongsian**, menyokong muat turun fail dan folder daripada huraian perkongsian. Muat turun pelayar dan pemuat turun luaran boleh mengekalkan struktur laluan perkongsian, serta menyokong pengecaman pautan muat turun terus asal, amaran had pratonton dan senarai kegagalan.
+* Membaiki **Masalah Kegagalan Tugasan Muat Naik Tempatan**, meningkatkan kestabilan dan keupayaan pemulihan ralat dalam proses muat naik fail tempatan.
+* Mengoptimumkan **Sejarah Huraian Perkongsian**, menambah status, masa semakan terkini dan rekod status tidak normal.
+* Mengoptimumkan **Rangkaian Muat Turun**, meningkatkan toleransi ralat semasa menghantar tugasan ke Aria2.
+* Mengoptimumkan **Terbaru Ditambah**, fail terbaru kini menyokong refresh ringan sambil mengekalkan kedudukan skrol.
+* Mengoptimumkan **Sejarah Main Balik**, kini dimuat berdasarkan acara main balik rasmi, dengan sokongan halaman, penyahduaan, rekod kemajuan, cache sesi dan pengekalan status pemadaman.
+* Mengoptimumkan **Muat Turun Luar Talian**, menambah pengesanan ringan dan penyegerakan status untuk tugasan luar talian. Penambahan dan pemadaman tugasan tidak lagi mengosongkan senarai untuk refresh penuh.
+* Mengoptimumkan **Interaksi Pemain Mudah Alih**, menambah penyesuaian pendengar gestur, menyokong seretan bar kemajuan pemain dan memperbaik pengalaman tindak balas gestur ketika menukar direktori pada mudah alih.
+* Mengoptimumkan **Refresh dan Pengekalan Status Senario Maya**, meningkatkan kestabilan senarai semasa refresh manual, pemulihan rangkaian, pemulihan pengesahan, hasil carian, terbaru, sejarah, luar talian, huraian perkongsian dan Penanda Halaman Pautan, sekali gus mengurangkan lonjakan kedudukan, paparan kosong dan refresh tersalah.
+* Mengoptimumkan **UI dan Kestabilan**, menyusun semula seni bina CSS dan SVG.
+
+<details>
+<summary>Lihat log kemas kini lama</summary>
+
 ### V3.1.0
 
 * Menambah **sokongan berbilang pemuat turun**, memperluas Jenis Pemuat Turun kepada Aria2, Gopeed, ABDM dan IDM.
@@ -310,10 +341,7 @@ Jadi jika fail tidak muncul selepas tampal, sebab paling biasa ialah had kapasit
 * Mengoptimumkan **keutamaan susunan dan paparan**, menyatukan status susunan dan paparan untuk Laman Utama, Tong Kitar Semula, Sejarah Main, Tinjauan Fail, Hurai Kongsi dan senario lain.
 * Mengoptimumkan **Tong Kitar Semula**, menambah paparan grid. 
 * Mengoptimumkan **muat naik tempatan dan pemulihan log masuk**, menambah mesej fallback muat naik rasmi, mesej ralat tandatangan muat naik terus dan penilaian pemulihan status log masuk rasmi.
-
-<details>
-<summary>Lihat log kemas kini lama</summary>
-  
+ 
 ### V2.5.1
 
 * Menambah tetapan **struktur dalaman folder simpan muat turun Aria2**.
