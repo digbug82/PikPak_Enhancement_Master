@@ -27,7 +27,7 @@
 
 ## Fitur Utama
 
-### Mesin Pengalaman dan Navigasi
+### Peningkatan Pengalaman dan Navigasi
 
 * **Navigasi tombol samping**: mendukung tombol samping mouse untuk maju / mundur, sehingga mudah berpindah cepat antar tingkat folder.
 * **Bilah jalur lanjutan**: mendukung gulir roda mouse, perpindahan folder sejajar melalui dropdown, tampilan ulang jalur, dan lompatan penelusuran sumber.
@@ -81,12 +81,23 @@
 
 ---
 
+### Bookmark Tautan dan Arsip Cloud
+
+* **Bookmark Tautan**: Bookmark Tautan menyimpan tautan bookmark, data sinkronisasi skrip, tautan magnet Arsip Cloud, dan konfigurasi cloud.
+* **Arsip Cloud**: Mendukung pengarsipan tautan magnet yang dapat dilacak dari file terpilih ke “Bookmark Tautan > Arsip Cloud”, serta dapat menghapus file sumber untuk menghemat ruang.
+* **Pemulihan Parsing Arsip Cloud**: Tautan magnet yang diarsipkan dapat dikirim ulang sebagai tugas unduhan cloud, dan status pengiriman akan ditulis kembali.
+* **Pembersihan Arsip Cloud**: Mendukung mengosongkan semua tautan Arsip Cloud, menghapus tautan yang telah dikirim, dan menghapus satu tautan arsip.
+* **Sinkronisasi Konfigurasi Cloud**: Mendukung unggah konfigurasi skrip ke cloud, tarik dari cloud, dan hapus konfigurasi cloud, memudahkan sinkronisasi preferensi skrip antar perangkat.
+
+---
+
 ### Transfer, Cloud Download, dan Parser Berbagi
 
 * **Parser Berbagi**: mendukung parsing tautan berbagi dan melihat isi berbagi sebelum disimpan, tanpa memakai ruang cloud drive Anda sebelum penyimpanan.
 * **Tinjauan file berbagi**: mendukung pemindaian rekursif, filter, dan pratinjau isi berbagi, cocok untuk memeriksa struktur internal berbagi sebelum disimpan.
 * **Riwayat parsing berbagi**: dapat mencatat tautan berbagi dan sandi yang sudah berhasil diparse, sehingga mudah dibuka ulang dengan cepat.
 * **Manajemen berbagi**: mendukung batas jumlah pengambilan berbagi. Setelah kondisi terpenuhi, berbagi dapat dibatalkan otomatis agar tautan tidak berlaku.
+* **Unggah Instan**: Saat mengunggah file, jika server sudah memiliki catatan file yang sama, unggahan dapat langsung selesai untuk mengurangi waktu tunggu unggah berulang.
 * **Perlindungan unggahan**: menyediakan pengingat saat meninggalkan halaman unggahan, serta perlindungan dan pembersihan untuk unggahan terputus, tugas tersisa, dan file abnormal.
 * **Peningkatan Cloud Download**: mendukung deduplikasi otomatis untuk tautan offline massal. Pembersih magnet cerdas bawaan dapat mengekstrak hash Base32 / Hex dan menghapus teks pengganggu.
 * **Ekstraksi magnet TXT**: mendukung pratinjau teks TXT dan mengenali tautan magnet, HTTP, FTP, ed2k, thunder, dan tautan unduhan lain dari teks untuk dikirim ke Cloud Download.
@@ -101,7 +112,7 @@
 
 ---
 
-### Peningkatan Media Imersif
+### Peningkatan Pemutaran Media
 
 * **Peningkatan mesin pemutar**: mendukung kecepatan 0.5x - 3.0x, rotasi / balik, rasio paksa, lewati intro / outro otomatis, putar beruntun / loop, dan pratinjau thumbnail pada bilah progres.
 * **Metode buka default**: dapat memilih metode pemutaran default antara pemutar skrip dan PotPlayer, serta mendukung pengaturan kualitas video default / kualitas pemutaran eksternal.
@@ -279,6 +290,26 @@ Jadi jika file tidak muncul setelah tempel, penyebab paling umum adalah batas ka
 
 ## Catatan Perubahan
 
+### V4.0.0 
+
+* Menambahkan **Bookmark Tautan**, mendukung pengelolaan data Bookmark resmi PikPak, termasuk pembuatan, pengeditan, penghapusan, pencarian, pratinjau, penyalinan, pembukaan, dan pagination folder serta tautan, dengan validasi perubahan jarak jauh, validasi kapasitas, dan perbaikan folder duplikat.
+* Menambahkan **Arsip Cloud**, mendukung pengarsipan tautan magnet yang dapat dilacak dari file terpilih ke Bookmark Tautan, dengan deteksi arsip, deduplikasi, validasi penulisan, pengiriman ulang unduhan cloud, pembersihan arsip, penghapusan file sumber setelah pengarsipan, dan mekanisme perlindungan kesalahan.
+* Menambahkan **Sinkronisasi Konfigurasi Cloud**, mendukung unggah konfigurasi skrip ke cloud, tarik konfigurasi dari cloud, dan hapus konfigurasi cloud.
+* Menambahkan **Sistem Batas Kapasitas dan Input Konfigurasi**, menyatukan batas panjang, jumlah, kapasitas, TTL, dan LRU untuk item konfigurasi, serta secara otomatis menormalkan konfigurasi abnormal dan membersihkan cache kedaluwarsa.
+* Menambahkan **Peningkatan Unduhan Parsing Berbagi**, mendukung unduhan file dan folder dari hasil parsing berbagi. Unduhan browser dan pengunduh eksternal dapat mempertahankan struktur jalur berbagi, serta mendukung identifikasi tautan unduhan langsung asli, peringatan batas pratinjau, dan daftar kegagalan.
+* Memperbaiki **Kegagalan Tugas Unggah Lokal**, meningkatkan stabilitas dan kemampuan pemulihan kesalahan dalam proses unggah file lokal.
+* Mengoptimalkan **Riwayat Parsing Berbagi**, menambahkan status, waktu pemeriksaan terakhir, dan catatan status abnormal.
+* Mengoptimalkan **Alur Unduhan**, meningkatkan toleransi kesalahan saat mengirim tugas ke Aria2.
+* Mengoptimalkan **Baru Ditambahkan**, file terbaru kini mendukung refresh ringan sambil mempertahankan posisi gulir.
+* Mengoptimalkan **Riwayat Pemutaran**, kini dimuat berdasarkan peristiwa pemutaran resmi, dengan dukungan pagination, deduplikasi, catatan progres, cache sesi, dan pelestarian status penghapusan.
+* Mengoptimalkan **Unduhan Offline**, menambahkan deteksi ringan dan sinkronisasi status untuk tugas offline. Penambahan dan penghapusan tugas tidak lagi mengosongkan daftar untuk refresh penuh.
+* Mengoptimalkan **Interaksi Pemutar Mobile**, menambahkan adaptasi pendengar gestur, mendukung drag pada progress bar pemutar, dan meningkatkan respons gestur saat berpindah direktori di perangkat mobile.
+* Mengoptimalkan **Refresh dan Pelestarian Status Skenario Virtual**, meningkatkan stabilitas daftar pada refresh manual, pemulihan jaringan, pemulihan autentikasi, hasil pencarian, terbaru, riwayat, offline, parsing berbagi, dan Bookmark Tautan, sehingga mengurangi lompatan posisi, layar kosong, dan refresh yang tidak disengaja.
+* Mengoptimalkan **UI dan Stabilitas**, merapikan arsitektur CSS dan SVG.
+
+<details>
+<summary>Lihat catatan perubahan lama</summary>
+
 ### V3.1.0
 
 * Menambahkan **dukungan multi-pengunduh**, memperluas Jenis Pengunduh menjadi Aria2, Gopeed, ABDM, dan IDM.
@@ -310,10 +341,7 @@ Jadi jika file tidak muncul setelah tempel, penyebab paling umum adalah batas ka
 * Mengoptimalkan **preferensi pengurutan dan tampilan**, menyatukan status pengurutan dan tampilan untuk Beranda, Recycle Bin, Riwayat Putar, Tinjau File, Parser Berbagi, dan skenario lain.
 * Mengoptimalkan **Recycle Bin**, menambahkan tampilan grid. 
 * Mengoptimalkan **unggahan lokal dan pemulihan login**, menambahkan pesan fallback unggahan resmi, pesan error tanda tangan unggahan langsung, dan penilaian pemulihan status login resmi.
-
-<details>
-<summary>Lihat catatan perubahan lama</summary>
-  
+ 
 ### V2.5.1
 
 * Menambahkan pengaturan **struktur internal folder simpan unduhan Aria2**.
