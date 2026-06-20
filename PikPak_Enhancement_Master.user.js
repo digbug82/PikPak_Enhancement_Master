@@ -6844,6 +6844,9 @@ sort: (globalSavedState && globalSavedState.sort) ? globalSavedState.sort : 'mod
 dir: (globalSavedState && globalSavedState.dir !== undefined) ? globalSavedState.dir : 1,
 
 scanning: false, dupMode: false, dupRunning: false,
+dupResultSig: '',
+virtualSortMaskSig: '',
+resumeQuietUntil: 0,
 folderFirst: false,
 dupReasons: new Map(),
 dupGroups: new Map(),
@@ -7786,6 +7789,8 @@ const shouldSyncGroupedGridExit = (S.dupMode && S.viewMode === 'grid') || isAnal
 
 S.scanning = false;
 S.dupMode = false;
+S.dupResultSig = '';
+S.virtualSortMaskSig = '';
 S.suppressClearConfirm = false;
 S.isFlattened = false;
 S.scanFilter = null;
@@ -18346,7 +18351,28 @@ if (S.renderFolderFirst) S.renderFolderFirst();
 
 if (typeof applyResolvedSortState === 'function') applyResolvedSortState();
 
+const makeDupResultSig = () => {
+const buckets = S.dupBuckets && Array.isArray(S.dupBuckets.all) ? S.dupBuckets.all : [];
+const first = buckets[0] && (buckets[0].id || buckets[0].name || buckets[0].path || '');
+const last = buckets[buckets.length - 1] && (buckets[buckets.length - 1].id || buckets[buckets.length - 1].name || buckets[buckets.length - 1].path || '');
+return ['dup', S.scanId || 0, S.items.length || 0, buckets.length || 0, S.dupRawGroups && S.dupRawGroups.length || 0, first, last, S.dupConfig && S.dupConfig.video ? 1 : 0, S.dupConfig && S.dupConfig.image ? 1 : 0, S.dupConfig && S.dupConfig.other ? 1 : 0].join('|');
+};
+
 if (S.dupMode) {
+const dupResumeSig = makeDupResultSig();
+const canReuseDupResult = !S._precomputedDupBuckets && !S.scanning && !S.dupRunning && S.dupBuckets && Array.isArray(S.dupBuckets.all) && S.dupBuckets.all.length > 0 && S.dupItemMap && Array.isArray(S.items) && S.items.length > 0 && S.dupResultSig === dupResumeSig;
+if (canReuseDupResult) {
+setLoad(false);
+if (UI.dupTools) UI.dupTools.style.display = 'flex';
+if (UI.dupFilters) {
+UI.dupFilters.style.display = 'flex';
+const simChkWrapper = UI.dupFilters.querySelector('#pk-chk-sim')?.closest('.pk-dup-chk');
+if (simChkWrapper) simChkWrapper.style.display = S.dupConfig.video ? 'flex' : 'none';
+}
+renderDupView();
+updateStat();
+return;
+}
 setLoad(true);
 S.dupRunning = true;
 UI.stopBtn.onclick = () => { S.dupRunning = false; };
@@ -18556,6 +18582,7 @@ simChkWrapper.style.display = S.dupConfig.video ? 'flex' : 'none';
 }
 }
 renderDupView();
+S.dupResultSig = makeDupResultSig();
 
 } else {
 if (UI.dupTools) UI.dupTools.style.display = 'none';
@@ -18578,7 +18605,15 @@ return;
 }
 
 const suppressSortMaskForPaging = S._suppressSortMaskForPaging === true;
-const showLargeSortMask = S.display.length > 5000 && !S.offlineMode && !S.historyMode && !suppressSortMaskForPaging;
+const makeVirtualSortMaskSig = (list = S.display) => {
+if (!(S.isFlattened && !S.dupMode && !S.analyzeMode && !S.scanning) || !Array.isArray(list) || !list.length) return '';
+const first = list[0] && list[0].id || '';
+const last = list[list.length - 1] && list[list.length - 1].id || '';
+return ['flat', S.scanId || 0, S.sort || '', S.dir || 1, S.folderFirst ? 1 : 0, S.search || '', UI.chkSearchPath && UI.chkSearchPath.checked ? 1 : 0, JSON.stringify(S.filterState || {}), list.length, first, last].join('|');
+};
+const currentVirtualSortMaskSig = makeVirtualSortMaskSig(S.display);
+const suppressSortMaskForVirtualResume = !!(currentVirtualSortMaskSig && S.virtualSortMaskSig === currentVirtualSortMaskSig);
+const showLargeSortMask = S.display.length > 5000 && !S.offlineMode && !S.historyMode && !suppressSortMaskForPaging && !suppressSortMaskForVirtualResume;
 if (showLargeSortMask) {
 setLoad(true);
 updateLoadTxt(L.str_sorting);
@@ -18834,6 +18869,8 @@ sortWorker.postMessage({ proxy: proxyList, sort: S.sort, dir: S.dir, reqId: curr
 if (showLargeSortMask) setLoad(false);
 if (sortedList === null) return;
 S.display = sortedList;
+const finalVirtualSortMaskSig = makeVirtualSortMaskSig(S.display);
+if (finalVirtualSortMaskSig) S.virtualSortMaskSig = finalVirtualSortMaskSig;
 }
 
 if (currentReqId !== S.sortId) return;
@@ -41057,6 +41094,10 @@ refresh();
 const runFlattenScanOperation = async (isSyncOnly = false, specificTargets =[], isSilent = false) => {
 S.scanId = (S.scanId || 0) + 1;
 const myScanId = S.scanId;
+if (!isSyncOnly) {
+S.virtualSortMaskSig = '';
+S.dupResultSig = '';
+}
 
 let fileMap = new Map();
 let processedFolders = 0;
@@ -41601,6 +41642,9 @@ video: m.querySelector('#scan_video').checked,
 image: m.querySelector('#scan_image').checked,
 other: m.querySelector('#scan_other').checked
 };
+
+S.dupResultSig = '';
+S.virtualSortMaskSig = '';
 
 if (!S.dupConfig.video && !S.dupConfig.image && !S.dupConfig.other) return;
 
@@ -59664,18 +59708,19 @@ requestAnimationFrame(() => {
     const scrollTop = UI.vp ? UI.vp.scrollTop : 0;
     const sameOrder = S.items.length === allFetchedItems.length && S.items.every((oldItem, idx) => oldItem && allFetchedItems[idx] && oldItem.id === allFetchedItems[idx].id);
     const canPatchVisible = sameOrder && !S.search && !S.dupMode && !S.isFlattened && !S.analyzeMode;
+    const isResumeQuietPatch = Date.now() < Number(S.resumeQuietUntil || 0);
 
     S.items.splice(0, S.items.length, ...allFetchedItems);
     S.itemMap = newItemMap;
     S.starredSet = newStarredSet;
 
     if (canPatchVisible) {
-        const updateDisplayItem = (item) => item && !item.isHeader && item.id ? (newItemMap.get(item.id) || item) : item;
-        S.display = Array.isArray(S.display) ? S.display.map(updateDisplayItem) : [];
-        if (typeof renderVisible === 'function') renderVisible();
-        if (typeof updateStat === 'function') updateStat();
-        if (UI.vp) UI.vp.scrollTop = scrollTop;
-        return;
+    const updateDisplayItem = (item) => item && !item.isHeader && item.id ? (newItemMap.get(item.id) || item) : item;
+    S.display = Array.isArray(S.display) ? S.display.map(updateDisplayItem) : [];
+    if (!isResumeQuietPatch && typeof renderVisible === 'function') renderVisible();
+    if (typeof updateStat === 'function') updateStat();
+    if (UI.vp) UI.vp.scrollTop = scrollTop;
+    return;
     }
 
     refresh();
@@ -59746,6 +59791,8 @@ checkAndRefresh(false, isForce);
 
 const onVisibilityChange = () => {
 if (retryTimer) clearTimeout(retryTimer);
+if (document.hidden) return;
+S.resumeQuietUntil = Date.now() + 2000;
 checkAndRefresh(false, false);
 runWatchdogAudit();
 };
@@ -60986,6 +61033,7 @@ inject();
 
 window.pkScheduleResumeTasks = (reason = 'visibility') => {
 if (window.__pkResumeTaskTimer) clearTimeout(window.__pkResumeTaskTimer);
+try { if (typeof pkState !== 'undefined' && pkState) pkState.resumeQuietUntil = Date.now() + 2000; } catch (e) {}
 const waitMs = (typeof window.pkIsAuthRecoveryActive === 'function' && window.pkIsAuthRecoveryActive()) ? 900 : 120;
 window.__pkResumeTaskTimer = setTimeout(() => {
 if (typeof window.pkIsAuthRecoveryActive === 'function' && window.pkIsAuthRecoveryActive()) {
