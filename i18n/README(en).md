@@ -290,6 +290,11 @@ So if files do not appear after pasting, the most common reason is a capacity li
 
 ## Changelog
 
+### V4.0.1
+
+* Fixed **mobile browser dark mode compatibility issues**, reducing secondary color changes applied by the browser’s dark mode to the script interface.
+* Improved **auto-hide button text boundary detection**, reducing the risk of button text repeatedly showing and hiding near layout limits.
+
 ### V4.0.0
 
 * Added **Link Bookmarks**, supporting management of official PikPak Bookmark data, including folder and link creation, editing, deletion, search, preview, copy, open, pagination, remote change validation, capacity validation, and duplicate folder repair.
