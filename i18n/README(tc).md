@@ -8,7 +8,7 @@
 
 # PikPak 增強大師
 
-[![立即安裝 / 更新最新版](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://pem-stats.digbug82.workers.dev/pem/github.user.js?channel=github)
+[![立即安裝 / 更新最新版](https://img.shields.io/badge/立即安装%20/%20更新最新版-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://pem-stats.digbug82.workers.dev/pem/github.user.js)
 
 [![Version](https://img.shields.io/badge/dynamic/json?style=flat-square&label=Version&color=0067C0&query=%24.version&url=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fversion.json)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-AGPL--3.0--or--later-red?style=flat-square)](https://spdx.org/licenses/AGPL-3.0-or-later.html)
@@ -170,7 +170,7 @@
 ## 安裝指南
 
 1. **安裝腳本管理器**：建議使用 [ScriptCat](https://scriptcat.org/)、[Violentmonkey](https://violentmonkey.github.io/get-it/) 或 [Tampermonkey](https://www.tampermonkey.net/)。
-2. **安裝腳本**：點擊 **[立即安裝](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**。
+2. **安裝腳本**：點擊 **[立即安裝](https://pem-stats.digbug82.workers.dev/pem/github.user.js)**。
 3. **開啟 PikPak 網頁端**：造訪 [PikPak](https://mypikpak.com/drive) 並登入帳號。
 4. **啟動增強大師**：
    * 普通模式下：登入後點擊側欄浮動的藍色 **PikPak Logo 球** 進入。
