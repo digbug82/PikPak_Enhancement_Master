@@ -8,7 +8,7 @@
 
 # PikPak Enhancement Master
 
-[![最新版をインストール / 更新](https://img.shields.io/badge/最新版をインストール%20/%20更新-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://pem-stats.digbug82.workers.dev/pem/github.user.js?channel=github)
+[![最新版をインストール / 更新](https://img.shields.io/badge/最新版をインストール%20/%20更新-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://pem-stats.digbug82.workers.dev/pem/github.user.js)
 
 [![Version](https://img.shields.io/badge/dynamic/json?style=flat-square&label=Version&color=0067C0&query=%24.version&url=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fversion.json)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-AGPL--3.0--or--later-red?style=flat-square)](https://spdx.org/licenses/AGPL-3.0-or-later.html)
@@ -170,7 +170,7 @@
 ## インストールガイド
 
 1. **ユーザースクリプトマネージャーをインストール**：[ScriptCat](https://scriptcat.org/)、[Violentmonkey](https://violentmonkey.github.io/get-it/)、または [Tampermonkey](https://www.tampermonkey.net/) の使用をおすすめします。
-2. **スクリプトをインストール**：**[今すぐインストール](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)** をクリックします。
+2. **スクリプトをインストール**：**[今すぐインストール](https://pem-stats.digbug82.workers.dev/pem/github.user.js)** をクリックします。
 3. **PikPak Web を開く**：[PikPak](https://mypikpak.com/drive) にアクセスしてアカウントにログインします。
 4. **Enhancement Master を起動**：
    * 通常モード：ログイン後、サイドバーに浮かぶ青い **PikPak Logo ボール** をクリックして入ります。
