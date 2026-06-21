@@ -8,7 +8,7 @@
 
 # PikPak Enhancement Master
 
-[![최신 버전 설치 / 업데이트](https://img.shields.io/badge/최신%20버전%20설치%20/%20업데이트-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://pem-stats.digbug82.workers.dev/pem/github.user.js?channel=github)
+[![최신 버전 설치 / 업데이트](https://img.shields.io/badge/최신%20버전%20설치%20/%20업데이트-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://pem-stats.digbug82.workers.dev/pem/github.user.js)
 
 [![Version](https://img.shields.io/badge/dynamic/json?style=flat-square&label=Version&color=0067C0&query=%24.version&url=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fversion.json)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-AGPL--3.0--or--later-red?style=flat-square)](https://spdx.org/licenses/AGPL-3.0-or-later.html)
@@ -170,7 +170,7 @@
 ## 설치 가이드
 
 1. **유저스크립트 관리자 설치**: [ScriptCat](https://scriptcat.org/), [Violentmonkey](https://violentmonkey.github.io/get-it/) 또는 [Tampermonkey](https://www.tampermonkey.net/) 사용을 권장합니다.
-2. **스크립트 설치**: **[지금 설치](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**를 클릭합니다.
+2. **스크립트 설치**: **[지금 설치](https://pem-stats.digbug82.workers.dev/pem/github.user.js)**를 클릭합니다.
 3. **PikPak 웹 열기**: [PikPak](https://mypikpak.com/drive)에 접속하고 계정으로 로그인합니다.
 4. **Enhancement Master 시작**:
    * 일반 모드: 로그인 후 사이드바에 떠 있는 파란색 **PikPak Logo 공**을 클릭해 진입합니다.
