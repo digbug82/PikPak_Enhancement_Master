@@ -290,6 +290,11 @@ Jadi jika fail tidak muncul selepas tampal, sebab paling biasa ialah had kapasit
 
 ## Log Kemas Kini
 
+### V4.0.1
+
+* Membetulkan **isu keserasian mod gelap pada pelayar mudah alih**, sekali gus mengurangkan kesan perubahan warna tambahan oleh mod gelap pelayar terhadap antara muka skrip.
+* Mengoptimumkan **pengesanan sempadan untuk penyembunyian automatik teks butang**, sekali gus mengurangkan risiko teks butang berulang kali dipaparkan dan disembunyikan.
+
 ### V4.0.0 
 
 * Menambah **Penanda Halaman Pautan**, menyokong pengurusan data Bookmark rasmi PikPak, termasuk penciptaan, penyuntingan, pemadaman, carian, pratonton, salinan, pembukaan dan pengurusan halaman untuk folder serta pautan, dengan semakan perubahan jauh, semakan kapasiti dan pembaikan folder bernama sama.
