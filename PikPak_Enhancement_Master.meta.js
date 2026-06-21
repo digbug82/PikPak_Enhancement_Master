@@ -14,6 +14,6 @@
 // @match              https://mypikpak.com/drive/*
 // @match              https://app.mypikpak.com/*
 // @match              https://drive.mypikpak.com/*
-// @downloadURL        https://pem-stats.digbug82.workers.dev/pem/github.user.js?channel=github
-// @updateURL          https://pem-stats.digbug82.workers.dev/pem/github.meta.js?channel=github
+// @downloadURL        https://pem-stats.digbug82.workers.dev/pem/github.user.js
+// @updateURL          https://pem-stats.digbug82.workers.dev/pem/github.meta.js
 // ==/UserScript==
