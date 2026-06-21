@@ -47,8 +47,8 @@
 // @run-at             document-start
 // @require            https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js
 // @require            https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js
-// @downloadURL        https://pem-stats.digbug82.workers.dev/pem/github.user.js?channel=github
-// @updateURL          https://pem-stats.digbug82.workers.dev/pem/github.meta.js?channel=github
+// @downloadURL        https://pem-stats.digbug82.workers.dev/pem/github.user.js
+// @updateURL          https://pem-stats.digbug82.workers.dev/pem/github.meta.js
 // ==/UserScript==
 
 /*
