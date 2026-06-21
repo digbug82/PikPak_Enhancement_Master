@@ -290,6 +290,11 @@ Jadi jika file tidak muncul setelah tempel, penyebab paling umum adalah batas ka
 
 ## Catatan Perubahan
 
+### V4.0.1
+
+* Memperbaiki **masalah kompatibilitas mode gelap pada browser seluler**, sehingga mengurangi pengaruh perubahan warna tambahan dari mode gelap browser terhadap antarmuka skrip.
+* Mengoptimalkan **deteksi batas untuk penyembunyian otomatis teks tombol**, sehingga mengurangi risiko teks tombol berulang kali muncul dan tersembunyi.
+
 ### V4.0.0 
 
 * Menambahkan **Bookmark Tautan**, mendukung pengelolaan data Bookmark resmi PikPak, termasuk pembuatan, pengeditan, penghapusan, pencarian, pratinjau, penyalinan, pembukaan, dan pagination folder serta tautan, dengan validasi perubahan jarak jauh, validasi kapasitas, dan perbaikan folder duplikat.
