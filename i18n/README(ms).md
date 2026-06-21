@@ -8,7 +8,7 @@
 
 # PikPak Enhancement Master
 
-[![Pasang / Kemas Kini Versi Terkini](https://img.shields.io/badge/Pasang%20/%20Kemas%20Kini%20Versi%20Terkini-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://pem-stats.digbug82.workers.dev/pem/github.user.js?channel=github)
+[![Pasang / Kemas Kini Versi Terkini](https://img.shields.io/badge/Pasang%20/%20Kemas%20Kini%20Versi%20Terkini-GitHub%20Latest-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://pem-stats.digbug82.workers.dev/pem/github.user.js)
 
 [![Version](https://img.shields.io/badge/dynamic/json?style=flat-square&label=Version&color=0067C0&query=%24.version&url=https%3A%2F%2Fraw.githubusercontent.com%2Fdigbug82%2FPikPak_Enhancement_Master%2Fmain%2Fversion.json)](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js)
 [![License](https://img.shields.io/badge/License-AGPL--3.0--or--later-red?style=flat-square)](https://spdx.org/licenses/AGPL-3.0-or-later.html)
@@ -170,7 +170,7 @@
 ## Panduan Pemasangan
 
 1. **Pasang pengurus userscript**: disarankan menggunakan [ScriptCat](https://scriptcat.org/), [Violentmonkey](https://violentmonkey.github.io/get-it/) atau [Tampermonkey](https://www.tampermonkey.net/).
-2. **Pasang skrip**: klik **[Pasang Sekarang](https://github.com/digbug82/PikPak_Enhancement_Master/raw/main/PikPak_Enhancement_Master.user.js)**.
+2. **Pasang skrip**: klik **[Pasang Sekarang](https://pem-stats.digbug82.workers.dev/pem/github.user.js)**.
 3. **Buka PikPak Web**: lawati [PikPak](https://mypikpak.com/drive) dan log masuk ke akaun anda.
 4. **Mulakan Enhancement Master**:
    * Dalam mod biasa: selepas log masuk, klik **bola PikPak Logo** biru yang terapung di bar sisi.
