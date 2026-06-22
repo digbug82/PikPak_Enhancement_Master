@@ -91,6 +91,10 @@
 * **雲歸檔清理**：支援清空全部雲歸檔連結、刪除已提交連結、刪除單條歸檔連結。
 * **設定雲同步**：支援將腳本設定上傳到雲端、從雲端拉取、清空雲端設定，便於多裝置同步腳本偏好。
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/bookmark/bookmark_tc.png" alt="bookmark">
+</p>
+
 ---
 
 ### 傳輸、雲端下載與分享解析
