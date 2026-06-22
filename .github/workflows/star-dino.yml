@@ -1,0 +1,47 @@
+name: Star Dino
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 17 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: star-dino
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Generate Star Dino SVG
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Generate assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/build_star_dino.py \
+            --repo digbug82/PikPak_Enhancement_Master \
+            --out-dir assets \
+            --theme both
+
+      - name: Commit generated assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/star-dino.svg assets/star-dino-dark.svg assets/star-history.json
+          if git diff --cached --quiet; then
+            echo "No Star Dino changes to commit."
+          else
+            git commit -m "chore: update star dino"
+            git push
+          fi
