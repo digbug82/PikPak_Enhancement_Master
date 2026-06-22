@@ -14,8 +14,8 @@
 [![License](https://img.shields.io/badge/License-AGPL--3.0--or--later-red?style=flat-square)](https://spdx.org/licenses/AGPL-3.0-or-later.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
-![GitHub Update Checks](https://pem-stats.digbug82.workers.dev/badge/checks.svg?channel=github)
 ![GitHub Downloads](https://pem-stats.digbug82.workers.dev/badge/downloads.svg?channel=github)
+![GitHub Update Checks](https://pem-stats.digbug82.workers.dev/badge/checks.svg?channel=github)
 
 ⭐ 이 스크립트가 도움이 되었다면 프로젝트에 Star를 눌러 주세요
 
