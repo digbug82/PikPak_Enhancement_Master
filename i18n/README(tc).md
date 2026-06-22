@@ -442,6 +442,18 @@
 
 ---
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=digbug82%2FPikPak_Enhancement_Master&type=date&legend=bottom-right">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=digbug82/PikPak_Enhancement_Master&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=digbug82/PikPak_Enhancement_Master&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=digbug82/PikPak_Enhancement_Master&type=date&legend=top-left" />
+ </picture>
+</a>
+
+---
+
 ## 致謝
 
 本專案在 UI 設計語言及部分網頁端 API 呼叫邏輯上，深受 [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴) 的啟發，特此致敬。
