@@ -91,6 +91,10 @@
 * **Pembersihan Arkib Awan**: Menyokong mengosongkan semua pautan Arkib Awan, memadam pautan yang telah dihantar dan memadam satu pautan arkib.
 * **Penyegerakan Konfigurasi Awan**: Menyokong muat naik konfigurasi skrip ke awan, menariknya dari awan dan mengosongkan konfigurasi awan, memudahkan penyegerakan keutamaan skrip antara peranti.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/bookmark/bookmark_ms.png" alt="bookmark">
+</p>
+
 ---
 
 ### Pemindahan, Muat Turun Awan dan Hurai Kongsi
