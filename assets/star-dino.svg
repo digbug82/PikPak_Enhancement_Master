@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="640" viewBox="0 0 1000 640" role="img" aria-label="Star Dino chart for digbug82/PikPak_Enhancement_Master">
+<title>Star Dino</title>
+<desc>The upper outline is the real cumulative GitHub star curve for digbug82/PikPak_Enhancement_Master. The lower outline is a decorative dinosaur silhouette.</desc>
+<style>text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,"Noto Sans",sans-serif}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}</style>
+<rect width="100%" height="100%" rx="16" fill="#ffffff"/>
+<text x="38" y="48" font-size="27" font-weight="700" fill="#24292f">Star Dino</text>
+<text x="38" y="78" font-size="13" fill="#57606a">Real star curve + generated dinosaur silhouette · digbug82/PikPak_Enhancement_Master</text>
+<line x1="92.0" y1="480.5" x2="900.0" y2="480.5" stroke="#d0d7de" stroke-width="1" opacity="0.55"/>
+<text x="78.0" y="485.5" font-size="15" text-anchor="end" fill="#24292f">20</text>
+<line x1="92.0" y1="406.0" x2="900.0" y2="406.0" stroke="#d0d7de" stroke-width="1" opacity="0.55"/>
+<text x="78.0" y="411.0" font-size="15" text-anchor="end" fill="#24292f">40</text>
+<line x1="92.0" y1="331.5" x2="900.0" y2="331.5" stroke="#d0d7de" stroke-width="1" opacity="0.55"/>
+<text x="78.0" y="336.5" font-size="15" text-anchor="end" fill="#24292f">60</text>
+<line x1="92.0" y1="257.0" x2="900.0" y2="257.0" stroke="#d0d7de" stroke-width="1" opacity="0.55"/>
+<text x="78.0" y="262.0" font-size="15" text-anchor="end" fill="#24292f">80</text>
+<line x1="92.0" y1="182.5" x2="900.0" y2="182.5" stroke="#d0d7de" stroke-width="1" opacity="0.55"/>
+<text x="78.0" y="187.5" font-size="15" text-anchor="end" fill="#24292f">100</text>
+<line x1="92.0" y1="108.0" x2="900.0" y2="108.0" stroke="#d0d7de" stroke-width="1" opacity="0.55"/>
+<text x="78.0" y="113.0" font-size="15" text-anchor="end" fill="#24292f">120</text>
+<line x1="92.0" y1="108.0" x2="92.0" y2="555.0" stroke="#24292f" stroke-width="2"/>
+<line x1="92.0" y1="555.0" x2="900.0" y2="555.0" stroke="#24292f" stroke-width="2"/>
+<line x1="92.0" y1="555.0" x2="92.0" y2="560.0" stroke="#24292f" stroke-width="1.5"/>
+<text x="92.0" y="580.0" font-size="15" text-anchor="middle" fill="#24292f">Mar 19</text>
+<line x1="211.1" y1="555.0" x2="211.1" y2="560.0" stroke="#24292f" stroke-width="1.5"/>
+<text x="211.1" y="580.0" font-size="15" text-anchor="middle" fill="#24292f">Apr 2</text>
+<line x1="321.6" y1="555.0" x2="321.6" y2="560.0" stroke="#24292f" stroke-width="1.5"/>
+<text x="321.6" y="580.0" font-size="15" text-anchor="middle" fill="#24292f">Apr 15</text>
+<line x1="440.7" y1="555.0" x2="440.7" y2="560.0" stroke="#24292f" stroke-width="1.5"/>
+<text x="440.7" y="580.0" font-size="15" text-anchor="middle" fill="#24292f">Apr 29</text>
+<line x1="551.3" y1="555.0" x2="551.3" y2="560.0" stroke="#24292f" stroke-width="1.5"/>
+<text x="551.3" y="580.0" font-size="15" text-anchor="middle" fill="#24292f">May 12</text>
+<line x1="670.4" y1="555.0" x2="670.4" y2="560.0" stroke="#24292f" stroke-width="1.5"/>
+<text x="670.4" y="580.0" font-size="15" text-anchor="middle" fill="#24292f">May 26</text>
+<line x1="780.9" y1="555.0" x2="780.9" y2="560.0" stroke="#24292f" stroke-width="1.5"/>
+<text x="780.9" y="580.0" font-size="15" text-anchor="middle" fill="#24292f">Jun 8</text>
+<line x1="900.0" y1="555.0" x2="900.0" y2="560.0" stroke="#24292f" stroke-width="1.5"/>
+<text x="900.0" y="580.0" font-size="15" text-anchor="middle" fill="#24292f">Jun 22</text>
+<text x="496.0" y="618" font-size="15" text-anchor="middle" fill="#24292f">Date</text>
+<g transform="translate(29 331.5) rotate(-90)"><text font-size="15" text-anchor="middle" fill="#24292f">GitHub Stars</text></g>
+<path d="M 92.0 551.3 L 100.5 551.3 L 109.0 547.5 L 117.5 547.5 L 126.0 547.5 L 134.5 547.5 L 143.0 547.5 L 151.5 547.5 L 160.0 547.5 L 168.5 543.8 L 177.1 543.8 L 185.6 543.8 L 194.1 543.8 L 202.6 543.8 L 211.1 543.8 L 219.6 543.8 L 228.1 543.8 L 236.6 540.1 L 245.1 540.1 L 253.6 540.1 L 262.1 540.1 L 270.6 540.1 L 279.1 540.1 L 287.6 540.1 L 296.1 540.1 L 304.6 532.6 L 313.1 532.6 L 321.6 532.6 L 330.1 510.3 L 338.7 510.3 L 347.2 510.3 L 355.7 465.6 L 364.2 465.6 L 372.7 465.6 L 381.2 398.6 L 389.7 398.6 L 398.2 398.6 L 406.7 365.0 L 415.2 365.0 L 423.7 365.0 L 432.2 365.0 L 440.7 335.2 L 449.2 335.2 L 457.7 335.2 L 466.2 335.2 L 474.7 335.2 L 483.2 309.1 L 491.7 309.1 L 500.3 309.1 L 508.8 309.1 L 517.3 309.1 L 525.8 309.1 L 534.3 279.3 L 542.8 279.3 L 551.3 279.3 L 559.8 279.3 L 568.3 279.3 L 576.8 279.3 L 585.3 257.0 L 593.8 257.0 L 602.3 257.0 L 610.8 257.0 L 619.3 257.0 L 627.8 257.0 L 636.3 238.4 L 644.8 238.4 L 653.3 238.4 L 661.9 238.4 L 670.4 238.4 L 678.9 238.4 L 687.4 238.4 L 695.9 238.4 L 704.4 204.9 L 712.9 204.9 L 721.4 204.9 L 729.9 204.9 L 738.4 204.9 L 746.9 204.9 L 755.4 204.9 L 763.9 175.1 L 772.4 175.1 L 780.9 175.1 L 789.4 175.1 L 797.9 175.1 L 806.4 175.1 L 814.9 175.1 L 823.5 149.0 L 832.0 149.0 L 840.5 149.0 L 849.0 149.0 L 857.5 149.0 L 866.0 149.0 L 874.5 126.6 L 883.0 126.6 L 891.5 126.6 L 900.0 126.6 C 942.0 144.6 958.0 184.0 918.0 210.8 C 867.7 260.0 803.0 304.7 762.6 358.3 L 689.9 358.3 C 722.2 376.2 730.3 412.0 698.0 416.4 C 657.6 420.9 641.4 380.7 576.8 376.2 C 536.4 376.2 520.2 403.0 536.4 443.2 C 552.6 483.5 479.8 501.4 463.7 456.7 C 439.4 412.0 391.0 407.5 358.6 438.8 C 334.4 465.6 358.6 501.4 294.0 519.2 C 269.8 474.5 221.3 447.7 172.8 456.7 C 237.4 501.4 156.6 546.1 92.0 551.3 Z" fill="rgba(229,83,61,0.16)" stroke="#e5533d" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 92.0 551.3 L 100.5 551.3 L 109.0 547.5 L 117.5 547.5 L 126.0 547.5 L 134.5 547.5 L 143.0 547.5 L 151.5 547.5 L 160.0 547.5 L 168.5 543.8 L 177.1 543.8 L 185.6 543.8 L 194.1 543.8 L 202.6 543.8 L 211.1 543.8 L 219.6 543.8 L 228.1 543.8 L 236.6 540.1 L 245.1 540.1 L 253.6 540.1 L 262.1 540.1 L 270.6 540.1 L 279.1 540.1 L 287.6 540.1 L 296.1 540.1 L 304.6 532.6 L 313.1 532.6 L 321.6 532.6 L 330.1 510.3 L 338.7 510.3 L 347.2 510.3 L 355.7 465.6 L 364.2 465.6 L 372.7 465.6 L 381.2 398.6 L 389.7 398.6 L 398.2 398.6 L 406.7 365.0 L 415.2 365.0 L 423.7 365.0 L 432.2 365.0 L 440.7 335.2 L 449.2 335.2 L 457.7 335.2 L 466.2 335.2 L 474.7 335.2 L 483.2 309.1 L 491.7 309.1 L 500.3 309.1 L 508.8 309.1 L 517.3 309.1 L 525.8 309.1 L 534.3 279.3 L 542.8 279.3 L 551.3 279.3 L 559.8 279.3 L 568.3 279.3 L 576.8 279.3 L 585.3 257.0 L 593.8 257.0 L 602.3 257.0 L 610.8 257.0 L 619.3 257.0 L 627.8 257.0 L 636.3 238.4 L 644.8 238.4 L 653.3 238.4 L 661.9 238.4 L 670.4 238.4 L 678.9 238.4 L 687.4 238.4 L 695.9 238.4 L 704.4 204.9 L 712.9 204.9 L 721.4 204.9 L 729.9 204.9 L 738.4 204.9 L 746.9 204.9 L 755.4 204.9 L 763.9 175.1 L 772.4 175.1 L 780.9 175.1 L 789.4 175.1 L 797.9 175.1 L 806.4 175.1 L 814.9 175.1 L 823.5 149.0 L 832.0 149.0 L 840.5 149.0 L 849.0 149.0 L 857.5 149.0 L 866.0 149.0 L 874.5 126.6 L 883.0 126.6 L 891.5 126.6 L 900.0 126.6" fill="none" stroke="#e5533d" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="92.0" cy="551.3" r="2.6" fill="#e5533d"/>
+<circle cx="134.5" cy="547.5" r="2.6" fill="#e5533d"/>
+<circle cx="177.1" cy="543.8" r="2.6" fill="#e5533d"/>
+<circle cx="219.6" cy="543.8" r="2.6" fill="#e5533d"/>
+<circle cx="262.1" cy="540.1" r="2.6" fill="#e5533d"/>
+<circle cx="304.6" cy="532.6" r="2.6" fill="#e5533d"/>
+<circle cx="347.2" cy="510.3" r="2.6" fill="#e5533d"/>
+<circle cx="389.7" cy="398.6" r="2.6" fill="#e5533d"/>
+<circle cx="432.2" cy="365.0" r="2.6" fill="#e5533d"/>
+<circle cx="474.7" cy="335.2" r="2.6" fill="#e5533d"/>
+<circle cx="517.3" cy="309.1" r="2.6" fill="#e5533d"/>
+<circle cx="559.8" cy="279.3" r="2.6" fill="#e5533d"/>
+<circle cx="602.3" cy="257.0" r="2.6" fill="#e5533d"/>
+<circle cx="644.8" cy="238.4" r="2.6" fill="#e5533d"/>
+<circle cx="687.4" cy="238.4" r="2.6" fill="#e5533d"/>
+<circle cx="729.9" cy="204.9" r="2.6" fill="#e5533d"/>
+<circle cx="772.4" cy="175.1" r="2.6" fill="#e5533d"/>
+<circle cx="814.9" cy="175.1" r="2.6" fill="#e5533d"/>
+<circle cx="857.5" cy="149.0" r="2.6" fill="#e5533d"/>
+<circle cx="900.0" cy="126.6" r="2.6" fill="#e5533d"/>
+<circle cx="912.0" cy="160.6" r="2.2" fill="#e5533d"/>
+<rect x="104.0" y="118.0" width="350" height="38" rx="8" fill="#ffffff" stroke="#24292f" stroke-width="1.4"/>
+<circle cx="123.0" cy="137.0" r="4.5" fill="#e5533d"/>
+<text class="mono" x="137.0" y="142.0" font-size="15" font-weight="600" fill="#24292f">digbug82/PikPak_Enhancement_Master</text>
+<text x="900.0" y="88.0" font-size="18" text-anchor="end" font-weight="700" fill="#24292f">115 stars</text>
+<text x="900.0" y="107.0" font-size="12" text-anchor="end" fill="#57606a">generated 2026-06-22 12:12 UTC</text>
+<text x="900.0" y="618" font-size="12" text-anchor="end" fill="#57606a">upper curve is real · lower outline is generated art</text>
+</svg>
