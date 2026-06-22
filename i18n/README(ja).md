@@ -91,6 +91,10 @@
 * **クラウドアーカイブ整理**：すべてのクラウドアーカイブリンクのクリア、送信済みリンクの削除、個別アーカイブリンクの削除に対応します。
 * **設定クラウド同期**：スクリプト設定のクラウドへのアップロード、クラウドからの取得、クラウド設定のクリアに対応し、複数デバイス間でスクリプト設定を同期しやすくします。
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/bookmark/bookmark_ja.png" alt="bookmark">
+</p>
+
 ---
 
 ### 転送、クラウドダウンロード、共有解析
