@@ -14,8 +14,8 @@
 [![License](https://img.shields.io/badge/License-AGPL--3.0--or--later-red?style=flat-square)](https://spdx.org/licenses/AGPL-3.0-or-later.html)
 [![Platform](https://img.shields.io/badge/Platform-PikPak%20Web-orange?style=flat-square)](https://mypikpak.com/drive/all)
 
-![GitHub Update Checks](https://pem-stats.digbug82.workers.dev/badge/checks.svg?channel=github)
 ![GitHub Downloads](https://pem-stats.digbug82.workers.dev/badge/downloads.svg?channel=github)
+![GitHub Update Checks](https://pem-stats.digbug82.workers.dev/badge/checks.svg?channel=github)
 
 ⭐ 如果這個腳本幫到了你，歡迎給專案點一個 Star
 
