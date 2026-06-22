@@ -91,6 +91,10 @@
 * **Cloud Archive Cleanup**: Supports clearing all Cloud Archive links, deleting submitted links, and deleting individual archived links.
 * **Cloud Config Sync**: Supports uploading script configuration to the cloud, pulling it from the cloud, and clearing cloud configuration, making it easier to sync script preferences across devices.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/bookmark/bookmark_en.png" alt="bookmark">
+</p>
+
 ---
 
 ### Transfer, Cloud Download, and Share Parser
