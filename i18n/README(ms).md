@@ -442,6 +442,18 @@ Jadi jika fail tidak muncul selepas tampal, sebab paling biasa ialah had kapasit
 
 ---
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=digbug82%2FPikPak_Enhancement_Master&type=date&legend=bottom-right">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=digbug82/PikPak_Enhancement_Master&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=digbug82/PikPak_Enhancement_Master&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=digbug82/PikPak_Enhancement_Master&type=date&legend=top-left" />
+ </picture>
+</a>
+
+---
+
 ## Penghargaan
 
 Bahasa reka bentuk UI dan sebahagian logik panggilan API web projek ini banyak diinspirasikan oleh [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴). Terima kasih dan hormat.
