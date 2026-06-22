@@ -442,6 +442,18 @@ So if files do not appear after pasting, the most common reason is a capacity li
 
 ---
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=digbug82%2FPikPak_Enhancement_Master&type=date&legend=bottom-right">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=digbug82/PikPak_Enhancement_Master&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=digbug82/PikPak_Enhancement_Master&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=digbug82/PikPak_Enhancement_Master&type=date&legend=top-left" />
+ </picture>
+</a>
+
+---
+
 ## Thanks
 
 This project's UI design language and some web API call logic are deeply inspired by [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴). Respect and thanks.
