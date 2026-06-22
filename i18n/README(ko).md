@@ -91,6 +91,10 @@
 * **클라우드 아카이브 정리**: 모든 클라우드 아카이브 링크 비우기, 제출된 링크 삭제, 개별 아카이브 링크 삭제를 지원합니다.
 * **설정 클라우드 동기화**: 스크립트 설정을 클라우드에 업로드하고, 클라우드에서 가져오며, 클라우드 설정을 비울 수 있어 여러 기기 간 스크립트 환경 설정 동기화에 편리합니다.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/bookmark/bookmark_ko.png" alt="bookmark">
+</p>
+
 ---
 
 ### 전송, 클라우드 다운로드 및 공유 분석
