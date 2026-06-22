@@ -91,6 +91,10 @@
 * **Pembersihan Arsip Cloud**: Mendukung mengosongkan semua tautan Arsip Cloud, menghapus tautan yang telah dikirim, dan menghapus satu tautan arsip.
 * **Sinkronisasi Konfigurasi Cloud**: Mendukung unggah konfigurasi skrip ke cloud, tarik dari cloud, dan hapus konfigurasi cloud, memudahkan sinkronisasi preferensi skrip antar perangkat.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/bookmark/bookmark_id.png" alt="bookmark">
+</p>
+
 ---
 
 ### Transfer, Cloud Download, dan Parser Berbagi
