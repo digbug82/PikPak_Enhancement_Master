@@ -91,6 +91,10 @@
 * **云归档清理**：支持清空全部云归档链接、删除已提交链接、删除单条归档链接。
 * **配置云同步**：支持将脚本配置上传到云端、从云端拉取、清空云端配置，便于多设备同步脚本偏好。
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/bookmark/bookmark_zh.png" alt="bookmark">
+</p>
+
 ---
 
 ### 传输、云下载与分享解析
