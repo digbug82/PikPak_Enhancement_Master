@@ -102,7 +102,6 @@
 * **Parser Berbagi**: mendukung parsing tautan berbagi dan melihat isi berbagi sebelum disimpan, tanpa memakai ruang cloud drive Anda sebelum penyimpanan.
 * **Tinjauan file berbagi**: mendukung pemindaian rekursif, filter, dan pratinjau isi berbagi, cocok untuk memeriksa struktur internal berbagi sebelum disimpan.
 * **Riwayat parsing berbagi**: dapat mencatat tautan berbagi dan sandi yang sudah berhasil diparse, sehingga mudah dibuka ulang dengan cepat.
-* **Manajemen berbagi**: mendukung batas jumlah pengambilan berbagi. Setelah kondisi terpenuhi, berbagi dapat dibatalkan otomatis agar tautan tidak berlaku.
 * **Unggah Instan**: Saat mengunggah file, jika server sudah memiliki catatan file yang sama, unggahan dapat langsung selesai untuk mengurangi waktu tunggu unggah berulang.
 * **Perlindungan unggahan**: menyediakan pengingat saat meninggalkan halaman unggahan, serta perlindungan dan pembersihan untuk unggahan terputus, tugas tersisa, dan file abnormal.
 * **Peningkatan Cloud Download**: mendukung deduplikasi otomatis untuk tautan offline massal. Pembersih magnet cerdas bawaan dapat mengekstrak hash Base32 / Hex dan menghapus teks pengganggu.
