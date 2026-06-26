@@ -123,7 +123,6 @@
 * **Playback engine enhancement**: supports 0.5x - 3.0x speed, rotate / flip, forced aspect ratio, automatic intro / outro skipping, continuous playback / loop, and progress-bar thumbnail preview.
 * **Default opening method**: choose the default playback method between the script player and PotPlayer, with default video quality / external playback quality settings.
 * **Music Player**: supports online audio playback, playlists, sequential playback, shuffle, single-track loop, mini-window mode, cover display, and volume control.
-* **Audio mini-window mode**: supports detaching the Music Player into a small window while keeping playback controls, cover display, and theme adaptation.
 * **Subtitle system**: supports cloud same-name subtitle loading, local subtitle import, and online subtitle search. It also supports subtitle offset, position, font size, and background opacity adjustment.
 * **Visual assistance**: supports image search from an image or the current video frame. Choose Google Lens, Yandex, SauceNAO, or trace.moe to look up covers, actors, anime, or source material.
 * **Media mode**: can be enabled in Settings so pure video or pure image directories default to A-Z sorting, improving continuity when browsing episodes or comics.
