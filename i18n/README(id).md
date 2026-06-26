@@ -102,6 +102,7 @@
 * **Parser Berbagi**: mendukung parsing tautan berbagi dan melihat isi berbagi sebelum disimpan, tanpa memakai ruang cloud drive Anda sebelum penyimpanan.
 * **Tinjauan file berbagi**: mendukung pemindaian rekursif, filter, dan pratinjau isi berbagi, cocok untuk memeriksa struktur internal berbagi sebelum disimpan.
 * **Riwayat parsing berbagi**: dapat mencatat tautan berbagi dan sandi yang sudah berhasil diparse, sehingga mudah dibuka ulang dengan cepat.
+* **Manajemen berbagi**: mendukung batas jumlah pengambilan berbagi. Setelah kondisi terpenuhi, berbagi dapat dibatalkan otomatis agar tautan tidak berlaku.
 * **Unggah Instan**: Saat mengunggah file, jika server sudah memiliki catatan file yang sama, unggahan dapat langsung selesai untuk mengurangi waktu tunggu unggah berulang.
 * **Perlindungan unggahan**: menyediakan pengingat saat meninggalkan halaman unggahan, serta perlindungan dan pembersihan untuk unggahan terputus, tugas tersisa, dan file abnormal.
 * **Peningkatan Cloud Download**: mendukung deduplikasi otomatis untuk tautan offline massal. Pembersih magnet cerdas bawaan dapat mengekstrak hash Base32 / Hex dan menghapus teks pengganggu.
@@ -122,7 +123,6 @@
 * **Peningkatan mesin pemutar**: mendukung kecepatan 0.5x - 3.0x, rotasi / balik, rasio paksa, lewati intro / outro otomatis, putar beruntun / loop, dan pratinjau thumbnail pada bilah progres.
 * **Metode buka default**: dapat memilih metode pemutaran default antara pemutar skrip dan PotPlayer, serta mendukung pengaturan kualitas video default / kualitas pemutaran eksternal.
 * **Pemutar musik**: mendukung pemutaran audio online, playlist, putar berurutan, acak, loop satu lagu, mode jendela kecil, tampilan sampul, dan kontrol volume.
-* **Mode popup audio**: mendukung pemisahan Pemutar musik menjadi jendela kecil sambil mempertahankan kontrol pemutaran, tampilan sampul, dan penyesuaian tema.
 * **Sistem subtitle**: mendukung pemuatan subtitle bernama sama dari cloud, impor subtitle lokal, dan pencarian subtitle online; juga mendukung offset subtitle, posisi, ukuran font, dan transparansi latar.
 * **Bantuan visual**: mendukung pencarian gambar dari gambar atau frame video saat ini. Anda dapat memilih Google Lens, Yandex, SauceNAO, atau trace.moe untuk menelusuri balik sampul, aktor, anime, atau sumber materi.
 * **Mode media**: dapat diaktifkan di Pengaturan agar direktori yang hanya berisi video atau gambar otomatis diurutkan nama A-Z, meningkatkan kontinuitas saat menjelajahi episode / komik.
