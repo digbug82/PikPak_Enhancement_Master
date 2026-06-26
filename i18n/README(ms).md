@@ -123,7 +123,6 @@
 * **Peningkatan enjin main balik**: menyokong kelajuan 0.5x - 3.0x, putar / terbalik, nisbah paksa, langkau intro / outro automatik, main berterusan / ulang, dan pratonton lakaran kecil pada bar kemajuan.
 * **Kaedah buka lalai**: boleh memilih kaedah main balik lalai antara pemain skrip dan PotPlayer, serta menyokong tetapan kualiti video lalai / kualiti main balik luaran.
 * **Pemain muzik**: menyokong main balik audio dalam talian, senarai main, main mengikut turutan, rawak, ulang satu lagu, mod tetingkap kecil, paparan kulit dan kawalan kelantangan.
-* **Mod popup audio**: menyokong pemisahan Pemain muzik ke tetingkap kecil sambil mengekalkan kawalan main balik, paparan kulit dan penyesuaian tema.
 * **Sistem sari kata**: menyokong pemuatan sari kata sepadan nama dari awan, import sari kata tempatan dan carian sari kata dalam talian; juga menyokong offset sari kata, posisi, saiz fon dan ketelusan latar.
 * **Bantuan visual**: menyokong carian imej daripada imej atau bingkai video semasa. Anda boleh memilih Google Lens, Yandex, SauceNAO atau trace.moe untuk menjejak semula kulit, pelakon, anime atau sumber bahan.
 * **Mod media**: boleh diaktifkan dalam Tetapan supaya direktori yang hanya mengandungi video atau imej disusun mengikut nama A-Z secara lalai, meningkatkan kesinambungan ketika melayari episod / komik.
