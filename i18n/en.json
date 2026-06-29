@@ -1176,7 +1176,7 @@
   "msg_bl_run_limit": "⚠️ Mode Restriction\n\nCleanup requires physical recursive scanning.\n\nPlease run from Home or a standard folder.",
   "msg_del_protected": "{n} recorded files in Resource Manager were protected and skipped.",
   "msg_del_none": "No files to delete.",
-  "msg_offline_reference_missing": "Cloud drive file has been deleted",
+  "msg_offline_reference_missing": "File or folder not found. Please check and confirm.",
   "rn_tip_wait": "Please set rules",
   "rn_tip_jav": "Click the button above to start matching",
   "rn_tip_none": "No matching items",
