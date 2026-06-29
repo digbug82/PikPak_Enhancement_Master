@@ -1176,7 +1176,7 @@
   "msg_bl_run_limit": "⚠️ Batasan Mode\n\nOperasi pembersihan melibatkan operasi fisik file secara rekursif. Saat ini Anda berada di direktori non-standar sehingga lingkup pemindaian fisik tidak dapat ditentukan secara akurat.\n\nSilakan kembali ke folder biasa di beranda lalu jalankan pembersihan.",
   "msg_del_protected": "{n} file yang tercatat di Pengelola Sumber telah dilindungi dan dilewati dari penghapusan.",
   "msg_del_none": "Tidak ada file yang dapat dihapus.",
-  "msg_offline_reference_missing": "File drive cloud telah dihapus",
+  "msg_offline_reference_missing": "File atau folder tidak ditemukan. Silakan periksa kembali.",
   "rn_tip_wait": "Silakan atur aturan",
   "rn_tip_jav": "Klik tombol di atas untuk memulai pencocokan cerdas",
   "rn_tip_none": "Tidak ada item atau nama yang cocok",
