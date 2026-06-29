@@ -1176,7 +1176,7 @@
   "msg_bl_run_limit": "⚠️ 模式限制\n\n清理操作涉及物理文件遞歸操作。目前處於非標準目錄，無法準確定位物理掃描範圍。\n\n請返回主頁常規文件夾後再執行清理。",
   "msg_del_protected": "資源管理器中已記錄的 {n} 個檔案，已保護並跳過刪除。",
   "msg_del_none": "沒有可刪除的檔案。",
-  "msg_offline_reference_missing": "雲端硬碟檔案已刪除",
+  "msg_offline_reference_missing": "檔案或資料夾不存在，請檢查確認",
   "rn_tip_wait": "請設定規則",
   "rn_tip_jav": "點擊上方按鈕開始智慧匹配",
   "rn_tip_none": "沒有符合的項目或名稱",
