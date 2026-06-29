@@ -1176,7 +1176,7 @@
   "msg_bl_run_limit": "⚠️ Had Mod\n\nOperasi pembersihan melibatkan operasi fizikal fail secara rekursif. Pada masa ini anda berada dalam direktori tidak standard, maka julat imbasan fizikal tidak dapat ditentukan dengan tepat.\n\nSila kembali ke folder biasa di laman utama sebelum menjalankan pembersihan.",
   "msg_del_protected": "{n} fail yang direkod dalam Pengurus Sumber telah dilindungi dan dilangkau daripada pemadaman.",
   "msg_del_none": "Tiada fail yang boleh dipadam.",
-  "msg_offline_reference_missing": "Fail pemacu awan telah dipadam",
+  "msg_offline_reference_missing": "Fail atau folder tidak ditemui. Sila semak semula.",
   "rn_tip_wait": "Sila tetapkan peraturan",
   "rn_tip_jav": "Klik butang di atas untuk memulakan padanan pintar",
   "rn_tip_none": "Tiada item atau nama yang sepadan",
