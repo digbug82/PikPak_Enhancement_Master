@@ -1176,7 +1176,7 @@
   "msg_bl_run_limit": "⚠️ 모드 제한\n\n정리 작업은 실제 파일 재귀 작업이 필요합니다.\n\n홈 폴더의 일반 폴더로 돌아가서 실행해 주세요.",
   "msg_del_protected": "리소스 관리자에 기록된 파일 {n}개는 보호되어 삭제에서 건너뛰었습니다.",
   "msg_del_none": "삭제할 파일이 없습니다.",
-  "msg_offline_reference_missing": "클라우드 드라이브 파일이 삭제되었습니다",
+  "msg_offline_reference_missing": "파일 또는 폴더를 찾을 수 없습니다. 확인해 주세요.",
   "rn_tip_wait": "규칙을 설정해 주세요",
   "rn_tip_jav": "위 버튼을 클릭하여 매칭을 시작하세요",
   "rn_tip_none": "일치하는 항목이나 이름이 없습니다",
