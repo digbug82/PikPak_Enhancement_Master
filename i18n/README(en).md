@@ -297,18 +297,18 @@ So if files do not appear after pasting, the most common reason is a capacity li
 
 ### V4.1.0
 
-* Fixed **invalid source file issues during copy / cut / paste**. Source files are now checked before pasting to detect whether they have been deleted, moved to the recycle bin, or no longer exist. Invalid items will be skipped or cleared automatically.
-* Improved the **browser download flow**, fixing the issue where a download was reported as completed but the browser did not actually start downloading.
-* Improved **video quality detection and prompts for non-members**, avoiding misleading prompts that present member-only quality options as available to regular users and cause playback stuttering.
-* Improved **download acceleration**, adding a custom template mode, preview and validation, and direct-link retry range control.
-* Improved **conflict handling between browser downloads and upload tasks**, reducing the risk of accidentally triggering page-leave prompts, refresh blocking, or upload interruption warnings when starting downloads.
-* Improved the **PotPlayer flow**, reducing the risk of PotPlayer Pin rendering failures on some devices.
-* Improved **image search**, allowing folders with real cover images to be selected and searched directly by their covers.
-* Improved **cloud-side error messages** with more accurate prompts.
-* Improved **shared preview playback stability** by adding freeze detection. When shared video previews are restricted, the script can now enter the fallback failure prompt faster, avoiding long loading loops.
-* Improved **upload task protection**. Paused uploads are now also treated as active upload tasks, reducing the risk of abnormal task states caused by accidental closing or refreshing while uploads are paused.
-* Improved **input length limits**, further standardizing text upper-bound handling for input fields.
-* UI and stability improvements.
+* Fixed **copy / cut / paste issues caused by invalid source files**. Before pasting, the script now checks whether source files have been deleted, moved to Trash, or no longer exist, and automatically skips or clears invalid items.
+* Improved **browser download handling**, fixing cases where a download was reported as started but the browser did not actually download the file.
+* Improved **video quality detection and prompts for non-premium users**, preventing premium-only quality options from being misleadingly shown as playable for regular users and causing playback stutter.
+* Enhanced **download acceleration** with custom template mode, preview and validation, plus per-scenario control over direct-link rewriting scope.
+* Improved **conflict handling between browser downloads and upload tasks**, reducing the risk of accidental page-leave prompts, refresh interception, or upload interruption warnings when starting downloads.
+* Improved **PotPlayer workflow**, reducing the risk of renderer Pin failures on some devices when using PotPlayer.
+* Improved **reverse image search**, allowing folders with real cover thumbnails to be searched directly by their cover image.
+* Improved **cloud/API error prompts**, providing more accurate messages for files that do not exist, have been deleted, moved to Trash, or are unavailable.
+* Improved **shared preview playback stability** with stuck-playback detection, allowing restricted shared video previews to fall back faster instead of spinning for a long time.
+* Improved **upload task protection** by treating paused uploads as active tasks, reducing the risk of abnormal task states caused by accidental closing or refreshing while uploads are paused.
+* Improved **input length limits**, further standardizing text length limits for input fields.
+* Improved **UI and stability**.
 
 ### V4.0.1
 
