@@ -295,6 +295,21 @@ So if files do not appear after pasting, the most common reason is a capacity li
 
 ## Changelog
 
+### V4.1.0
+
+* Fixed **invalid source file issues during copy / cut / paste**. Source files are now checked before pasting to detect whether they have been deleted, moved to the recycle bin, or no longer exist. Invalid items will be skipped or cleared automatically.
+* Improved the **browser download flow**, fixing the issue where a download was reported as completed but the browser did not actually start downloading.
+* Improved **video quality detection and prompts for non-members**, avoiding misleading prompts that present member-only quality options as available to regular users and cause playback stuttering.
+* Improved **download acceleration**, adding a custom template mode, preview and validation, and direct-link retry range control.
+* Improved **conflict handling between browser downloads and upload tasks**, reducing the risk of accidentally triggering page-leave prompts, refresh blocking, or upload interruption warnings when starting downloads.
+* Improved the **PotPlayer flow**, reducing the risk of PotPlayer Pin rendering failures on some devices.
+* Improved **image search**, allowing folders with real cover images to be selected and searched directly by their covers.
+* Improved **cloud-side error messages** with more accurate prompts.
+* Improved **shared preview playback stability** by adding freeze detection. When shared video previews are restricted, the script can now enter the fallback failure prompt faster, avoiding long loading loops.
+* Improved **upload task protection**. Paused uploads are now also treated as active upload tasks, reducing the risk of abnormal task states caused by accidental closing or refreshing while uploads are paused.
+* Improved **input length limits**, further standardizing text upper-bound handling for input fields.
+* UI and stability improvements.
+
 ### V4.0.1
 
 * Fixed **mobile browser dark mode compatibility issues**, reducing secondary color changes applied by the browser’s dark mode to the script interface.
