@@ -297,18 +297,18 @@ Jadi jika file tidak muncul setelah tempel, penyebab paling umum adalah batas ka
 
 ### V4.1.0
 
-* Memperbaiki **masalah file sumber tidak valid saat salin / potong / tempel**. Sebelum menempel, file sumber akan diperiksa apakah sudah dihapus, masuk ke recycle bin, atau tidak lagi ada. Item yang tidak valid akan otomatis dilewati atau dibersihkan.
-* Mengoptimalkan **alur unduhan browser**, memperbaiki masalah ketika unduhan ditampilkan sebagai selesai tetapi browser tidak benar-benar mengunduh file.
-* Mengoptimalkan **deteksi dan pemberitahuan kualitas video untuk non-member**, agar kualitas khusus member tidak disalahartikan sebagai kualitas yang tersedia untuk pengguna biasa dan menyebabkan pemutaran tersendat.
-* Mengoptimalkan **akselerasi unduhan** dengan menambahkan mode template kustom, pratinjau dan validasi, serta kontrol rentang percobaan ulang direct link.
-* Mengoptimalkan **penanganan konflik antara unduhan browser dan tugas unggahan**, mengurangi risiko munculnya peringatan keluar halaman, pemblokiran refresh, atau gangguan unggahan secara tidak sengaja saat memulai unduhan.
-* Mengoptimalkan **alur PotPlayer**, mengurangi risiko kegagalan rendering Pin PotPlayer pada beberapa perangkat.
-* Mengoptimalkan **pencarian gambar**, mendukung pencarian langsung menggunakan cover ketika folder dengan cover asli dipilih.
-* Mengoptimalkan **pesan kesalahan cloud** agar memberikan petunjuk yang lebih akurat.
-* Mengoptimalkan **stabilitas pemutaran pratinjau berbagi** dengan menambahkan deteksi macet. Saat pratinjau video berbagi dibatasi, skrip dapat lebih cepat masuk ke pesan fallback kegagalan dan menghindari loading terlalu lama.
-* Mengoptimalkan **perlindungan tugas unggahan**. Status jeda kini juga dianggap sebagai tugas unggahan aktif, mengurangi risiko status tugas menjadi tidak normal akibat halaman tertutup atau disegarkan secara tidak sengaja saat unggahan dijeda.
-* Mengoptimalkan **batas panjang input**, dengan lebih menstandarkan batas maksimum teks pada kolom input.
-* Peningkatan UI dan stabilitas.
+* Memperbaiki **masalah sumber file tidak valid saat salin / potong / tempel**. Sebelum menempel, skrip kini memeriksa apakah file sumber telah dihapus, dipindahkan ke Trash, atau sudah tidak ada, lalu secara otomatis melewati atau mengosongkan item yang tidak valid.
+* Mengoptimalkan **alur unduhan browser**, memperbaiki masalah ketika skrip menampilkan bahwa unduhan telah dimulai tetapi browser tidak benar-benar mengunduh file.
+* Mengoptimalkan **deteksi dan petunjuk kualitas pemutaran video untuk pengguna non-premium**, agar kualitas khusus premium tidak disalahartikan sebagai kualitas yang dapat diputar oleh pengguna biasa hingga menyebabkan pemutaran tersendat.
+* Mengoptimalkan **akselerasi unduhan** dengan mode templat kustom, pratinjau dan validasi, serta dukungan untuk mengontrol cakupan penulisan ulang tautan langsung berdasarkan skenario penggunaan.
+* Mengoptimalkan **penanganan konflik antara unduhan browser dan tugas unggahan**, mengurangi risiko munculnya peringatan keluar halaman, pencegatan penyegaran, atau peringatan gangguan unggahan saat memulai unduhan.
+* Mengoptimalkan **alur PotPlayer**, mengurangi risiko kegagalan renderer Pin pada sebagian perangkat saat menggunakan PotPlayer.
+* Mengoptimalkan **pencarian gambar terbalik**, mendukung pencarian langsung menggunakan gambar sampul folder yang memiliki thumbnail sampul asli.
+* Mengoptimalkan **pesan kesalahan cloud/API**, memberikan pesan yang lebih akurat untuk file yang tidak ada, telah dihapus, berada di Trash, atau sumber daya yang tidak tersedia.
+* Mengoptimalkan **stabilitas pemutaran pratinjau berbagi** dengan deteksi pemutaran macet. Jika pratinjau video berbagi dibatasi, skrip dapat lebih cepat masuk ke pesan fallback kegagalan dan menghindari loading terlalu lama.
+* Mengoptimalkan **perlindungan tugas unggahan** dengan memperlakukan unggahan yang dijeda sebagai tugas aktif, sehingga mengurangi risiko status tugas menjadi tidak normal akibat penutupan atau penyegaran halaman saat unggahan dijeda.
+* Mengoptimalkan **batas panjang input**, semakin menstandarkan batas teks pada kolom input.
+* Mengoptimalkan **UI dan stabilitas**.
 
 ### V4.0.1
 
