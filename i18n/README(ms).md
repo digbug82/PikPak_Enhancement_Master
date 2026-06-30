@@ -297,18 +297,18 @@ Jadi jika fail tidak muncul selepas tampal, sebab paling biasa ialah had kapasit
 
 ### V4.1.0
 
-* Membetulkan **isu fail sumber tidak sah semasa salin / potong / tampal**. Sebelum menampal, fail sumber akan disemak sama ada telah dipadam, dipindahkan ke tong kitar semula, atau tidak lagi wujud. Item yang tidak sah akan dilangkau atau dikosongkan secara automatik.
-* Mengoptimumkan **alur muat turun pelayar**, membetulkan isu apabila muat turun dipaparkan sebagai selesai tetapi pelayar tidak benar-benar memuat turun fail.
-* Mengoptimumkan **pengesanan dan pemberitahuan kualiti video untuk bukan ahli**, bagi mengelakkan kualiti khas ahli disalah anggap sebagai kualiti yang tersedia untuk pengguna biasa sehingga menyebabkan main balik tersekat.
-* Mengoptimumkan **pecutan muat turun** dengan menambah mod templat tersuai, pratonton dan pengesahan, serta kawalan julat percubaan semula pautan terus.
-* Mengoptimumkan **pengendalian konflik antara muat turun pelayar dan tugasan muat naik**, mengurangkan risiko tercetusnya amaran keluar halaman, sekatan segar semula, atau gangguan muat naik secara tidak sengaja ketika memulakan muat turun.
-* Mengoptimumkan **alur PotPlayer**, mengurangkan risiko kegagalan rendering Pin PotPlayer pada sesetengah peranti.
-* Mengoptimumkan **carian imej**, menyokong carian terus menggunakan kulit hadapan apabila folder dengan kulit hadapan sebenar dipilih.
-* Mengoptimumkan **mesej ralat awan** dengan petunjuk yang lebih tepat.
-* Mengoptimumkan **kestabilan main balik pratonton perkongsian** dengan menambah pengesanan tersekat. Apabila pratonton video perkongsian dihadkan, skrip boleh lebih cepat masuk ke mesej sandaran kegagalan dan mengelakkan putaran pemuatan yang terlalu lama.
-* Mengoptimumkan **perlindungan tugasan muat naik**. Status dijeda kini turut dianggap sebagai tugasan muat naik aktif, mengurangkan risiko keadaan tugasan menjadi tidak normal akibat halaman tertutup atau disegar semula secara tidak sengaja semasa muat naik dijeda.
-* Mengoptimumkan **had panjang input**, dengan menyeragamkan lagi sempadan had maksimum teks pada medan input.
-* Penambahbaikan UI dan kestabilan.
+* Membetulkan **isu fail sumber tidak sah semasa salin / potong / tampal**. Sebelum menampal, skrip kini menyemak sama ada fail sumber telah dipadam, dipindahkan ke Trash, atau tidak lagi wujud, lalu item tidak sah akan dilangkau atau dikosongkan secara automatik.
+* Mengoptimumkan **alur muat turun pelayar**, membetulkan isu apabila skrip memaparkan muat turun telah bermula tetapi pelayar sebenarnya tidak memuat turun fail.
+* Mengoptimumkan **pengesanan dan petunjuk kualiti main balik video untuk pengguna bukan premium**, bagi mengelakkan kualiti khusus premium disalah anggap sebagai kualiti yang boleh dimainkan oleh pengguna biasa sehingga menyebabkan main balik tersekat-sekat.
+* Mengoptimumkan **pecutan muat turun** dengan mod templat tersuai, pratonton dan pengesahan, serta sokongan untuk mengawal skop penulisan semula pautan langsung mengikut senario penggunaan.
+* Mengoptimumkan **pengendalian konflik antara muat turun pelayar dan tugasan muat naik**, mengurangkan risiko amaran keluar halaman, sekatan muat semula, atau amaran gangguan muat naik tersalah muncul semasa memulakan muat turun.
+* Mengoptimumkan **alur PotPlayer**, mengurangkan risiko kegagalan renderer Pin pada sesetengah peranti semasa menggunakan PotPlayer.
+* Mengoptimumkan **carian imej songsang**, menyokong carian terus menggunakan imej kulit folder yang mempunyai lakaran kecil kulit sebenar.
+* Mengoptimumkan **mesej ralat awan/API**, memberikan mesej yang lebih tepat untuk fail yang tidak wujud, telah dipadam, berada dalam Trash, atau sumber yang tidak tersedia.
+* Mengoptimumkan **kestabilan main balik pratonton perkongsian** dengan pengesanan main balik tersekat. Apabila pratonton video perkongsian terhad, skrip boleh lebih cepat masuk ke petunjuk sandaran kegagalan dan mengelakkan loading terlalu lama.
+* Mengoptimumkan **perlindungan tugasan muat naik** dengan menganggap muat naik yang dijeda sebagai tugasan aktif, mengurangkan risiko status tugasan menjadi tidak normal akibat tersalah tutup atau muat semula ketika muat naik dijeda.
+* Mengoptimumkan **had panjang input**, seterusnya menyeragamkan had teks pada medan input.
+* Mengoptimumkan **UI dan kestabilan**.
 
 ### V4.0.1
 
