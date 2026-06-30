@@ -295,6 +295,21 @@ Jadi jika file tidak muncul setelah tempel, penyebab paling umum adalah batas ka
 
 ## Catatan Perubahan
 
+### V4.1.0
+
+* Memperbaiki **masalah file sumber tidak valid saat salin / potong / tempel**. Sebelum menempel, file sumber akan diperiksa apakah sudah dihapus, masuk ke recycle bin, atau tidak lagi ada. Item yang tidak valid akan otomatis dilewati atau dibersihkan.
+* Mengoptimalkan **alur unduhan browser**, memperbaiki masalah ketika unduhan ditampilkan sebagai selesai tetapi browser tidak benar-benar mengunduh file.
+* Mengoptimalkan **deteksi dan pemberitahuan kualitas video untuk non-member**, agar kualitas khusus member tidak disalahartikan sebagai kualitas yang tersedia untuk pengguna biasa dan menyebabkan pemutaran tersendat.
+* Mengoptimalkan **akselerasi unduhan** dengan menambahkan mode template kustom, pratinjau dan validasi, serta kontrol rentang percobaan ulang direct link.
+* Mengoptimalkan **penanganan konflik antara unduhan browser dan tugas unggahan**, mengurangi risiko munculnya peringatan keluar halaman, pemblokiran refresh, atau gangguan unggahan secara tidak sengaja saat memulai unduhan.
+* Mengoptimalkan **alur PotPlayer**, mengurangi risiko kegagalan rendering Pin PotPlayer pada beberapa perangkat.
+* Mengoptimalkan **pencarian gambar**, mendukung pencarian langsung menggunakan cover ketika folder dengan cover asli dipilih.
+* Mengoptimalkan **pesan kesalahan cloud** agar memberikan petunjuk yang lebih akurat.
+* Mengoptimalkan **stabilitas pemutaran pratinjau berbagi** dengan menambahkan deteksi macet. Saat pratinjau video berbagi dibatasi, skrip dapat lebih cepat masuk ke pesan fallback kegagalan dan menghindari loading terlalu lama.
+* Mengoptimalkan **perlindungan tugas unggahan**. Status jeda kini juga dianggap sebagai tugas unggahan aktif, mengurangi risiko status tugas menjadi tidak normal akibat halaman tertutup atau disegarkan secara tidak sengaja saat unggahan dijeda.
+* Mengoptimalkan **batas panjang input**, dengan lebih menstandarkan batas maksimum teks pada kolom input.
+* Peningkatan UI dan stabilitas.
+
 ### V4.0.1
 
 * Memperbaiki **masalah kompatibilitas mode gelap pada browser seluler**, sehingga mengurangi pengaruh perubahan warna tambahan dari mode gelap browser terhadap antarmuka skrip.
