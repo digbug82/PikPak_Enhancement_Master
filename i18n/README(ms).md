@@ -295,6 +295,21 @@ Jadi jika fail tidak muncul selepas tampal, sebab paling biasa ialah had kapasit
 
 ## Log Kemas Kini
 
+### V4.1.0
+
+* Membetulkan **isu fail sumber tidak sah semasa salin / potong / tampal**. Sebelum menampal, fail sumber akan disemak sama ada telah dipadam, dipindahkan ke tong kitar semula, atau tidak lagi wujud. Item yang tidak sah akan dilangkau atau dikosongkan secara automatik.
+* Mengoptimumkan **alur muat turun pelayar**, membetulkan isu apabila muat turun dipaparkan sebagai selesai tetapi pelayar tidak benar-benar memuat turun fail.
+* Mengoptimumkan **pengesanan dan pemberitahuan kualiti video untuk bukan ahli**, bagi mengelakkan kualiti khas ahli disalah anggap sebagai kualiti yang tersedia untuk pengguna biasa sehingga menyebabkan main balik tersekat.
+* Mengoptimumkan **pecutan muat turun** dengan menambah mod templat tersuai, pratonton dan pengesahan, serta kawalan julat percubaan semula pautan terus.
+* Mengoptimumkan **pengendalian konflik antara muat turun pelayar dan tugasan muat naik**, mengurangkan risiko tercetusnya amaran keluar halaman, sekatan segar semula, atau gangguan muat naik secara tidak sengaja ketika memulakan muat turun.
+* Mengoptimumkan **alur PotPlayer**, mengurangkan risiko kegagalan rendering Pin PotPlayer pada sesetengah peranti.
+* Mengoptimumkan **carian imej**, menyokong carian terus menggunakan kulit hadapan apabila folder dengan kulit hadapan sebenar dipilih.
+* Mengoptimumkan **mesej ralat awan** dengan petunjuk yang lebih tepat.
+* Mengoptimumkan **kestabilan main balik pratonton perkongsian** dengan menambah pengesanan tersekat. Apabila pratonton video perkongsian dihadkan, skrip boleh lebih cepat masuk ke mesej sandaran kegagalan dan mengelakkan putaran pemuatan yang terlalu lama.
+* Mengoptimumkan **perlindungan tugasan muat naik**. Status dijeda kini turut dianggap sebagai tugasan muat naik aktif, mengurangkan risiko keadaan tugasan menjadi tidak normal akibat halaman tertutup atau disegar semula secara tidak sengaja semasa muat naik dijeda.
+* Mengoptimumkan **had panjang input**, dengan menyeragamkan lagi sempadan had maksimum teks pada medan input.
+* Penambahbaikan UI dan kestabilan.
+
 ### V4.0.1
 
 * Membetulkan **isu keserasian mod gelap pada pelayar mudah alih**, sekali gus mengurangkan kesan perubahan warna tambahan oleh mod gelap pelayar terhadap antara muka skrip.
