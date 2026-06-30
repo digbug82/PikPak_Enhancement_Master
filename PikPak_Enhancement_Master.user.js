@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            4.0.1
+// @version            4.1.0
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -33,7 +33,6 @@
 // @grant              GM_info
 // @grant              unsafeWindow
 // @grant              GM_xmlhttpRequest
-// @grant              GM_download
 // @connect            catbox.moe
 // @connect            litterbox.catbox.moe
 // @connect            uguu.se
@@ -128,8 +127,12 @@ entries: [
 { key: 'pk_downloader_prefer_original_video_link', type: 'boolean', defaultValue: true, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_download_accel_enable', type: 'boolean', defaultValue: false, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_download_accel_domain', type: 'string', defaultValue: '', localLimit: { maxLen: 2048 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'groupLocalDefaultOnly' },
-{ key: 'pk_download_accel_mode', type: 'enum', defaultValue: 'prefix', localLimit: { allowed: ['prefix', 'query'], maxLen: 16 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'groupLocalDefaultOnly' },
+{ key: 'pk_download_accel_mode', type: 'enum', defaultValue: 'prefix', localLimit: { allowed: ['prefix', 'query', 'template'], maxLen: 16 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'groupLocalDefaultOnly' },
 { key: 'pk_download_accel_query_param', type: 'queryParam', defaultValue: 'url', localLimit: { maxLen: 64 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'groupLocalDefaultOnly' },
+{ key: 'pk_download_accel_apply_browser', type: 'boolean', defaultValue: true, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'groupLocalDefaultOnly' },
+{ key: 'pk_download_accel_apply_downloader', type: 'boolean', defaultValue: true, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'groupLocalDefaultOnly' },
+{ key: 'pk_download_accel_apply_potplayer', type: 'boolean', defaultValue: true, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'groupLocalDefaultOnly' },
+{ key: 'pk_download_accel_apply_m3u', type: 'boolean', defaultValue: true, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'groupLocalDefaultOnly' },
 { key: 'pk_dl_filter_ext', type: 'arrayList', defaultValue: '', localLimit: { maxItems: 512, maxItemLen: 32, maxSize: 16 * CONFIG_SIZE.KB, split: 'commaLine', stripLeadingDot: true, lowercase: true }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'dedupeUnion' },
 { key: 'pk_dl_filter_name', type: 'arrayList', defaultValue: '', localLimit: { maxItems: 1000, maxItemLen: 256, maxSize: 256 * CONFIG_SIZE.KB, split: 'commaLine' }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'dedupeUnion' },
 { key: 'pk_dl_filter_size_min', type: 'numberOrEmpty', defaultValue: '', localLimit: { min: 0, max: Number.MAX_SAFE_INTEGER }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'groupLocalDefaultOnly' },
@@ -139,6 +142,7 @@ entries: [
 { key: 'pk_dup_strictness', type: 'enum', defaultValue: 'strict', localLimit: { allowed: ['strict', 'normal', 'loose'], maxLen: 32 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_expired_shares', type: 'jsonArray', defaultValue: '[]', localLimit: { maxItems: 500, preferredItems: 50, maxFieldLen: 512, maxSize: 64 * CONFIG_SIZE.KB, keepRecent: true }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'dedupeByShare' },
 { key: 'pk_share_limits', type: 'shareLimits', defaultValue: '{}', localLimit: { maxItems: 500, maxKeyLen: 128, maxSize: 128 * CONFIG_SIZE.KB }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'mapLocalFirst' },
+{ key: 'pk_share_update_times', type: 'jsonMap', defaultValue: '{}', localLimit: { maxItems: 500, maxKeyLen: 128, maxFieldLen: 64, maxSize: 64 * CONFIG_SIZE.KB }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'mapLocalFirst' },
 { key: 'pk_share_parse_history', type: 'shareParseHistory', defaultValue: '[]', localLimit: { maxItems: 3000, maxTextLen: 512, maxIdLen: 256, maxPassLen: 10, maxSize: 2 * CONFIG_SIZE.MB }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'shareHistoryLocalFirst' },
 { key: 'pk_pwd_vault', type: 'pwdVault', defaultValue: '[]', localLimit: { maxItems: 50, maxItemLen: 512, maxSize: 32 * CONFIG_SIZE.KB }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'dedupeByPassword' },
 { key: 'pk_pwd_try_count', type: 'number', defaultValue: 10, localLimit: { min: 10, max: 50, integer: true }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
@@ -732,6 +736,33 @@ el.addEventListener('blur', applyLimit);
 });
 }
 
+function bindNumericMaxLengthLimits(root, pairs = []) {
+if (!root || !Array.isArray(pairs)) return;
+pairs.forEach(pair => {
+const [selector, maxLen] = pair || [];
+const el = root.querySelector(selector);
+const limit = Math.max(0, Number(maxLen) || 0);
+if (!el || !limit || el.dataset.pkNumericLimitBound === '1') return;
+el.dataset.pkNumericLimitBound = '1';
+const oldInput = typeof el.oninput === 'function' ? el.oninput : null;
+const applyLimit = () => {
+const raw = String(el.value ?? '');
+const next = raw.replace(/[^\d]/g, '').slice(0, limit);
+if (next === raw) return false;
+const pos = typeof el.selectionStart === 'number' ? el.selectionStart : next.length;
+el.value = next;
+try { el.setSelectionRange(Math.min(pos, next.length), Math.min(pos, next.length)); } catch (e) {}
+if (raw.length > limit) showConfigInputLimitTip(el);
+return true;
+};
+el.oninput = e => {
+applyLimit();
+if (oldInput) oldInput.call(el, e);
+};
+el.addEventListener('blur', applyLimit);
+});
+}
+
 function getConfigListTextareaLimitedValue(key, value, full = false) {
 const schema = getConfigLimitSchema(key);
 if (!schema || !['arrayList', 'lineList'].includes(schema.type)) return null;
@@ -1130,7 +1161,7 @@ inject();
 })();
 
 window.addEventListener('beforeunload', (e) => {
-const activeStatus = ['UPLOADING', 'HASHING', 'WAITING', 'RUNNING'];
+const activeStatus = ['UPLOADING', 'HASHING', 'WAITING', 'RUNNING', 'PAUSED'];
 const tasks = pkState?.uploadTasks || [];
 if (tasks.some(t => activeStatus.includes(t.status))) {
 e.preventDefault();
@@ -1229,6 +1260,19 @@ dupGridSectionGap: { normal: 14, max: 18 },
 dupGridBodyGapY: { normal: 16, max: 20 },
 SYSTEM_FOLDER_NAME: 'My Pack',
 fileNameMaxLen: 1024,
+cloudTaskInputMaxChars: 262144,
+renamePatternMaxLen: 512,
+subtitleSearchInputMaxLen: 512,
+archivePasswordInputMaxLen: 512,
+sharePassCodeInputMaxLen: 10,
+sharePhraseInputMaxLen: 18,
+shareCountInputMaxLen: 9,
+numericFilterInputMaxLen: 16,
+playerInlineInputMaxLen: 8,
+sharePreviewSeekStallTimeoutMs: 10000,
+sharePreviewPlaybackStallTimeoutMs: 12000,
+sharePreviewStallErrorLimit: 3,
+sharePreviewStallProgressEpsilon: 0.8,
 officialDirFileFallbackIcon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0wIDQuOEMwIDIuMTQ5MDMgMi4xNDkwMyAwIDQuOCAwSDE5LjJDMjEuODUxIDAgMjQgMi4xNDkwMyAyNCA0LjhWMTkuMkMyNCAyMS44NTEgMjEuODUxIDI0IDE5LjIgMjRINC44QzIuMTQ5MDMgMjQgMCAyMS44NTEgMCAxOS4yVjQuOFoiIGZpbGw9IiNBOUJBRDIiLz4KPHBhdGggb3BhY2l0eT0iMC40IiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTUuMzk5OSA2LjA0MDAzQzUuMzk5OSA0LjgyNSA2LjM4ODQ2IDMuODQwMDMgNy42MDc5IDMuODQwMDNIMTIuMDIzOUwxOS4xOTk5IDEwLjk5VjE4LjE0QzE5LjE5OTkgMTkuMzU1MSAxOC4yMTEzIDIwLjM0IDE2Ljk5MTkgMjAuMzRINy42MDc5QzYuMzg4NDYgMjAuMzQgNS4zOTk5IDE5LjM1NTEgNS4zOTk5IDE4LjE0VjYuMDQwMDNaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTEyLjAyMzkgMy44NDAwM0wxOS4xOTk5IDEwLjk5SDE0LjIzMTlDMTMuMDEyNSAxMC45OSAxMi4wMjM5IDEwLjAwNTEgMTIuMDIzOSA4Ljc5MDAzVjMuODQwMDNaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K',
 officialDirFolderFallbackIcon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0wLjI1IDQuMTg3MjNDMC4yNSAyLjAxMjc2IDIuMDEyNzYgMC4yNSA0LjE4NzIzIDAuMjVIOC40NDM2MkM5LjQ2NzEyIDAuMjUgMTAuNDc2NiAwLjQ4ODQ0NSAxMS4zOTE5IDAuOTQ2NDI5VjAuOTQ2NDI5QzEyLjMwNzIgMS40MDQ0MSAxMy4zMTY2IDEuNjQyODYgMTQuMzQwMSAxLjY0Mjg2SDE2LjkzNjlDMTguNDkwNSAxLjY0Mjg2IDE5Ljc1IDIuOTAyMzMgMTkuNzUgNC40NTU5NlYxNC41NUMxOS43NSAxNy40MjE5IDE3LjQyMTkgMTkuNzUgMTQuNTUgMTkuNzVINS40NUMyLjU3ODEyIDE5Ljc1IDAuMjUgMTcuNDIxOSAwLjI1IDE0LjU1VjQuMTg3MjNaIiBmaWxsPSIjRURBODMzIi8+CjxyZWN0IHg9IjIuMzM4ODciIHk9IjMuMDM1MTYiIHdpZHRoPSIxNS42IiBoZWlnaHQ9IjExLjciIHJ4PSIwLjk3NSIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTAuMjUgNi41ODc4OUgxOS43NVYxNS44NTA0QzE5Ljc1IDE4LjAwNDMgMTguMDAzOSAxOS43NTA0IDE1Ljg1IDE5Ljc1MDRINC4xNUMxLjk5NjA5IDE5Ljc1MDQgMC4yNSAxOC4wMDQzIDAuMjUgMTUuODUwNFY2LjU4Nzg5WiIgZmlsbD0iI0ZGQkI0NyIvPgo8L3N2Zz4K',
 linkBookmarkFolderNameMaxLen: 1024,
@@ -1240,10 +1284,14 @@ linkBookmarkConfigCloudReserveBytes: 11 * 1024 * 1024,
 browserDownloadConfirmFileCount: 10,
 browserDownloadConfirmTotalBytes: 10 * 1024 * 1024 * 1024,
 downloadAccelEnable: false,
-offlineReferenceMissingCodes:['404','not_found','not found','file_not_found','item_not_found','resource_not_found','file deleted','resource deleted','already_deleted','deleted'],
+offlineReferenceMissingCodes:['404','not_found','not found','file_not_found','item_not_found','resource_not_found','file deleted','resource deleted','already_deleted','deleted','trash','trashed','recycle','recycled','in_trash'],
 downloadAccelDomain: '',
 downloadAccelMode: 'prefix',
 downloadAccelQueryParam: 'url',
+downloadAccelApplyBrowser: true,
+downloadAccelApplyDownloader: true,
+downloadAccelApplyPotPlayer: true,
+downloadAccelApplyM3U: true,
 downloaderType: 'aria2',
 downloaderPreferOriginalVideoLink: true,
 aria2KeepFolderStructure: true,
@@ -1309,7 +1357,6 @@ potplayerProtocolStateSchemaVersion: 1,
 potplayerProtocolRepairVersion: '20260501',
 potplayerRegDeleteFileName: 'pikpak-potplayer-delete.reg',
 potplayerRegCustomInstallFileName: 'pikpak-potplayer-install-custom.reg',
-potplayerBrowserPolicyRegFileName: 'pikpak-potplayer-browser-policy.reg',
 potplayerAutoRepairFailThreshold: 2,
 potplayerPromptCooldown: 10 * 60 * 1000,
 potplayerLikelyOpenTrustTTL: 24 * 60 * 60 * 1000,
@@ -1731,7 +1778,7 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-potfix-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:0; }
 .pk-potfix-actions .pk-btn, .pk-potfix-repair-actions .pk-btn { height:40px; justify-content:center; border-radius:6px; border:1px solid var(--pk-bd); background:var(--pk-bg); color:var(--pk-fg); box-shadow:0 1px 4px rgba(0,0,0,.06); }
 .pk-potfix-repair-panel { border:1px solid var(--pk-bd); border-radius:6px; background:rgba(var(--pk-bg-rgb),0.76); padding:12px; display:flex; flex-direction:column; gap:10px; flex:0 0 auto; }
-.pk-potfix-repair-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.pk-potfix-repair-actions { display:grid; grid-template-columns:1fr; gap:8px; }
 .pk-potfix-secondary { grid-column:1 / -1; position:static; display:flex; justify-content:flex-start; gap:8px; flex-wrap:wrap; margin:0; min-width:0; background:transparent; padding-right:0; }
 .pk-potfix-secondary .pk-btn { height:30px; padding:0 12px; border:1px solid var(--pk-bd); border-radius:6px; background:var(--pk-bg); color:var(--pk-fg); opacity:.72; font-size:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
 .pk-potfix-secondary .pk-btn:hover:not(:disabled) { opacity:1; color:var(--pk-pri); border-color:var(--pk-pri); background:var(--pk-hl) !important; }
@@ -1847,6 +1894,7 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-grid-hd, .pk-row { display: grid; column-gap: 10px; align-items: center; font-size: 14px; color: var(--pk-fg); box-sizing: border-box; width: 100%; }
 .pk-grid-hd > div, .pk-row > div { display: flex; align-items: center; justify-content: flex-start !important; overflow: hidden; white-space: nowrap; text-align: left; }
 .pk-grid-hd > div:first-child, .pk-row > div:first-child { justify-content: center !important; overflow: visible !important; }
+.pk-grid-hd:not(.pk-grid-view-hd) .pk-col[data-k="name"] #pk-name-text-wrap > span { display:inline-block; min-width:18px; width:18px; flex:0 0 18px; text-align:center; }
 .pk-grid-hd { height: 36px; border-bottom: 1px solid var(--pk-bd); font-size: 13px; color: #666; user-select: none; padding: 0 22px 0 16px; }
 .pk-row { padding: 0 16px; }
 .pk-col { cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: flex-start; }
@@ -2159,13 +2207,13 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-player-controls { position: absolute; bottom: 0; left: 0; right: 0; height: 64px; background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.35) 60%, transparent 100%); display: flex; align-items: center; padding: 0 16px; z-index: 80 !important; gap: 4px; opacity: 0; transition: opacity 0.3s; }
 .pk-player-box:hover .pk-player-controls, .pk-player-box.paused .pk-player-controls { opacity: 1; }
 .pk-player-progress-container { position: absolute; bottom: 64px; left: 12px; right: 12px; height: 14px; cursor: pointer; z-index: 11; display: flex; align-items: center; }
-.pk-player-progress-bg { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.25); position: relative; border-radius: 2px; transition: height 0.1s, transform 0.1s; backdrop-filter: blur(2px); }
-.pk-player-progress-container:hover .pk-player-progress-bg { height: 6px; transform: scaleY(1.1); }
+.pk-player-progress-bg { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.25); position: relative; border-radius: 2px; transition: height 0.1s; transform: translateZ(0); backface-visibility: hidden; backdrop-filter: blur(2px); }
+.pk-player-progress-container:hover .pk-player-progress-bg { height: 6px; transform: translateZ(0); }
 .pk-player-progress-filled { height: 100%; background: var(--pk-pri); width: 0; position: relative; border-radius: 2px; transition: none !important; will-change: width; }
 .pk-player-progress-thumb { position: absolute; right: -7px; top: 50%; transform: translateY(-50%) scale(0); width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .pk-player-progress-container:hover .pk-player-progress-thumb { transform: translateY(-50%) scale(1); }
 .pk-share-preview-limit-marker { position: absolute; top: 50%; width: 2px; height: 14px; transform: translate(-50%, -50%); background: rgba(255,255,255,0.95); border-radius: 2px; box-shadow: 0 0 6px rgba(0,0,0,0.65); z-index: 4; pointer-events: auto; }
-.pk-share-preview-limit-label { position: absolute; left: 50%; bottom: 15px; transform: translateX(-50%); white-space: nowrap; background: rgba(0,0,0,0.65); color: #fff; font-size: 12px; line-height: 1; padding: 5px 8px; border-radius: 12px; opacity: 0; pointer-events: none; transition: opacity .15s ease; text-shadow: none; }
+.pk-share-preview-limit-label { position: absolute; left: 50%; bottom: 15px; transform: translate3d(-50%,0,0); white-space: nowrap; background: rgba(0,0,0,0.65); color: #fff; font-size: 12px; line-height: 1; padding: 5px 8px; border-radius: 12px; opacity: 0; pointer-events: none; transition: opacity .15s ease; text-shadow: none; backface-visibility: hidden; -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; }
 #pk_p_prog_area:hover .pk-share-preview-limit-label, .pk-share-preview-limit-marker:hover .pk-share-preview-limit-label { opacity: 1; }
 .pk-p-btn { color: #eee; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 50px; height: 40px; border-radius: 4px; transition: all 0.2s ease; position: relative; flex-shrink: 0; }
 .pk-p-btn:hover { color: var(--pk-pri); background: transparent; transform: scale(1.05); }
@@ -2556,6 +2604,10 @@ body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:1
 .pk-cal-td.selected { background: var(--pk-pri); color: #fff; font-weight: bold; }
 .pk-cal-td.disabled { color: #888; cursor: not-allowed; opacity: 0.7; }
 .pk-share-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding: 16px 24px 24px 24px; border-top: 1px solid var(--pk-bd); background: transparent; }
+.pk-share-footer.pk-share-detail-footer { border-top: none !important; width:100% !important; box-sizing:border-box !important; justify-items:stretch !important; align-items:center !important; }
+.pk-share-footer.pk-share-detail-footer .pk-btn-quiet-red { background: transparent !important; color: var(--pk-fg) !important; border: none !important; }
+.pk-share-footer.pk-share-detail-footer .pk-btn-quiet-red:hover { background: var(--pk-hl) !important; color: var(--pk-fg) !important; }
+.pk-share-footer.pk-share-detail-footer .pk-btn-quiet-red,.pk-share-footer.pk-share-detail-footer .pk-btn-primary-action { width:100% !important; min-width:0 !important; height:48px !important; display:flex !important; align-items:center !important; justify-content:center !important; border-radius:8px !important; box-sizing:border-box !important; }
 .pk-btn-quiet-red { color: #d93025; font-size: 14px; font-weight: 500; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: background 0.2s; margin-left: -8px; }
 .pk-btn-quiet-red:hover { background: rgba(217, 48, 37, 0.08); }
 .pk-btn-primary-action { background: var(--pk-pri); color: #fff; border: none; height: 38px; padding: 0 20px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
@@ -2574,6 +2626,12 @@ body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:1
 .pk-select-item:hover { background: var(--pk-hl); color: var(--pk-pri); }
 .pk-select-item.act { background: rgba(0, 103, 192, 0.1); color: var(--pk-pri); font-weight: 700; }
 .pk-select-label { position: absolute; top: 0; transform: translate3d(0, -50%, 0); -webkit-transform: translate3d(0, -50%, 0); backface-visibility: hidden; -webkit-backface-visibility: hidden; will-change: transform; left: 10px; background: var(--pk-bg); padding: 0 5px; font-size: 11px; color: var(--pk-pri); font-weight: bold; pointer-events: none; z-index: 10; line-height: 1; pointer-events: none; }
+.pk-err-dialog .pk-err-field-select{position:relative;width:100%;min-width:0;margin:0;padding:0;border:2px solid var(--pk-bd);border-radius:8px;background:var(--pk-bg);box-sizing:border-box;overflow:visible;transition:border-color .2s;}
+.pk-err-dialog .pk-err-field-select:hover,.pk-err-dialog .pk-err-field-select.pk-select-open{border-color:var(--pk-pri);}
+.pk-err-dialog .pk-err-field-select .pk-select-label{position:static;display:inline-block;transform:none;-webkit-transform:none;background:transparent;padding:0 4px;margin:0 0 0 8px;font-size:11px;color:var(--pk-pri);font-weight:700;line-height:1;pointer-events:none;}
+.pk-err-dialog .pk-err-field-select .pk-select-trigger{height:40px;margin-top:-7px;border:none!important;border-radius:6px;background:transparent;padding:0 13px 0 12px;display:flex;align-items:center;box-sizing:border-box;}
+.pk-err-dialog .pk-err-field-select .pk-select-trigger:hover{border-color:transparent;}
+.pk-err-dialog .pk-err-field-select .pk-select-menu{top:calc(100% + 6px);margin-top:0;}
 .pk-field input, .pk-field select, .pk-share-modal input, .pk-ov input { transform: translateZ(0); will-change: transform; }
 .pk-maximized { position: fixed !important; width: 100% !important; height: 100% !important; max-width: none !important; top: 0 !important; left: 0 !important; border-radius: 0 !important; border: none !important; z-index: 2147483647 !important; }
 .pk-maximized .pk-sidebar { width: 190px !important; align-items: flex-start !important; padding: 20px 10px !important; overflow-x: hidden !important; box-sizing: border-box !important; }
@@ -2746,6 +2804,8 @@ body:has(.pk-ov:not([style*="display: none"])), body:has(.pk-img-ov), body:has(#
 .pk-maximized:not(.pk-grid-view) .pk-share-icon-wrap > svg { width:100% !important; height:100% !important; min-width:100% !important; min-height:100% !important; margin:0 !important; transform:scale(1.16) !important; transform-origin:center center !important; }
 .pk-maximized:not(.pk-grid-view) .pk-share-icon-wrap > div:not(.pk-share-lock) { width:100% !important; height:100% !important; display:flex !important; align-items:center !important; justify-content:center !important; transform:none !important; margin:0 !important; }
 .pk-maximized:not(.pk-grid-view) .pk-share-icon-wrap > div:not(.pk-share-lock) > svg { width:100% !important; height:100% !important; min-width:100% !important; min-height:100% !important; transform:scale(1.16) !important; transform-origin:center center !important; margin:0 !important; }
+.pk-maximized:not(.pk-grid-view) .pk-share-icon-wrap .pk-dir-list-icon-slot { width:50px !important; height:50px !important; min-width:50px !important; min-height:50px !important; flex:0 0 50px !important; }
+.pk-maximized:not(.pk-grid-view) .pk-share-icon-wrap .pk-dir-list-icon-fallback { width:100% !important; height:100% !important; }
 .pk-maximized:not(.pk-grid-view) .pk-share-icon-wrap img { width:100% !important; height:100% !important; min-width:100% !important; min-height:100% !important; object-fit:contain !important; margin:0 !important; transform:none !important; }
 .pk-maximized:not(.pk-grid-view) .pk-share-lock { width:18px !important; height:18px !important; bottom:-2px !important; right:-6px !important; z-index:15 !important; }
 .pk-maximized:not(.pk-grid-view) .pk-share-lock svg { width:100% !important; height:100% !important; min-width:100% !important; min-height:100% !important; margin:0 !important; transform:none !important; display:block !important; color:#fff !important; }
@@ -2803,7 +2863,7 @@ body:has(.pk-ov:not([style*="display: none"])), body:has(.pk-img-ov), body:has(#
 .pk-min-ph { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:1; transition:opacity 0.2s; }
 .pk-min-ph-img { width:100%; height:100%; object-fit:contain; border-radius:4px; pointer-events:none; }
 .pk-min-thumb { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:2; transition:opacity 0.2s; }
-.pk-active-border { border-color: var(--pk-pri) !important; } #pk_dl_group { transform: translateZ(0); backface-visibility: hidden; will-change: border-color; } #pk_video_playback_group:hover, #pk_dl_group:hover, #pk_download_accel_group:hover { border-color: var(--pk-pri) !important; } #pk_dl_group.pk-typing-active:hover, #pk_download_accel_group.pk-typing-active:hover { border-color: var(--pk-bd) !important; }
+.pk-active-border { border-color: var(--pk-pri) !important; } #pk_dl_group { transform: translateZ(0); backface-visibility: hidden; will-change: border-color; } #pk_video_playback_group:hover, #pk_dl_group:hover, #pk_download_accel_group:hover { border-color: var(--pk-pri) !important; } #pk_dl_group.pk-typing-active:hover, #pk_download_accel_group.pk-typing-active:hover { border-color: var(--pk-bd) !important; } .pk-download-accel-subgroup:hover { border-color: var(--pk-pri) !important; } .pk-download-accel-subgroup:hover > legend { color: var(--pk-pri) !important; }
 .pk-row > div.pk-name, .pk-min-icon, .pk-max-icon-box, .pk-min-media-box { overflow: visible !important; }
 .pk-maximized .pk-row .pk-name>img[style*="width:24px"] { width: 48px !important; height: 48px !important; margin-right: 20px !important; margin-left: -4px !important; }
 .pk-maximized .pk-row .pk-name>div[style*="width:24px"] { width: 48px !important; height: 48px !important; margin-right: 20px !important; margin-left: -4px !important; }
@@ -2823,16 +2883,17 @@ body.pk-hide-all-ui #pk-launch, body.pk-hide-all-ui .pk-ov, body.pk-hide-all-ui 
 .pk-player-box.ui-hidden .pk-p-center-play { opacity: 1 !important; pointer-events: none; }
 .pk-player-box.ui-hidden { cursor: none; }
 .pk-p-pop { flex-direction: column !important; }
-.pk-p-eye { transition: transform 1.0s cubic-bezier(0.2, 0, 0.2, 1); transform: translate3d(0,0,0); backface-visibility: hidden; image-rendering: -webkit-optimize-contrast; }
-.pk-look-r .pk-p-eye { transform: translate3d(24px,0,0); }
-.pk-look-l .pk-p-eye { transform: translate3d(-24px,0,0); }
+.pk-p-eye { transition: transform 1.0s cubic-bezier(0.2, 0, 0.2, 1); transform: translateX(0); backface-visibility: hidden; image-rendering: -webkit-optimize-contrast; }
+.pk-look-r .pk-p-eye { transform: translateX(24px); }
+.pk-look-l .pk-p-eye { transform: translateX(-24px); }
 .pk-eye-closed { display: none; }
 .pk-player-progress-thumb.pk-blink-anim .pk-eye-open { display: none; }
 .pk-player-progress-thumb.pk-blink-anim .pk-eye-closed { display: block; }
-.pk-player-progress-thumb { position: absolute; top: 50% !important; transform: perspective(1px) translateY(-50%) scale(0) translateZ(0) !important; opacity: 0 !important; will-change: transform, opacity; transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s !important; image-rendering: -webkit-optimize-contrast; }
+.pk-player-progress-thumb { position: absolute; top: 50% !important; transform: translateY(-50%) !important; opacity: 0 !important; visibility: hidden !important; will-change: opacity; transition: opacity 0.18s ease, visibility 0s linear 0.18s !important; image-rendering: -webkit-optimize-contrast; backface-visibility: hidden; transform-origin: center center; filter: none !important; }
+.pk-player-progress-thumb svg { display: block !important; width: 22px !important; height: 22px !important; filter: none !important; transform: none !important; }
 .pk-player-progress-bg { transition: height 0.2s ease !important; transform: translateZ(0); backface-visibility: hidden; -webkit-perspective: 1000; }
-#pk_p_prog_area:hover .pk-player-progress-thumb, .pk-player-box.pk-is-seeking .pk-player-progress-thumb, .pk-player-progress-thumb.pk-blink-hold { transform: perspective(1px) translateY(-50%) scale(1) translateZ(0) !important; opacity: 1 !important; }
-#pk_p_prog_area:hover .pk-player-progress-bg, .pk-player-box.pk-is-seeking .pk-player-progress-bg, .pk-player-progress-bg:has(.pk-blink-hold) { height: 6px !important; }
+#pk_p_prog_area:hover .pk-player-progress-thumb, .pk-player-box.pk-is-seeking .pk-player-progress-thumb, .pk-player-progress-thumb.pk-blink-hold { transform: translateY(-50%) !important; opacity: 1 !important; visibility: visible !important; transition: opacity 0.18s ease, visibility 0s !important; }
+#pk_p_prog_area:hover .pk-player-progress-bg, .pk-player-box.pk-is-seeking .pk-player-progress-bg, .pk-player-progress-bg:has(.pk-blink-hold) { height: 6px !important; transform: translateZ(0) !important; }
 #pk_p_box:not(.pk-is-seeking) #pk_p_plist:hover ~ .pk-player-controls, #pk_p_box:not(.pk-is-seeking) #pk_p_plist:hover ~ .pk-p-prog-wrap { opacity: 0 !important; pointer-events: none !important; }
 .pk-p-side-nav { position: absolute; top: 50%; transform: translateY(-50%) translateZ(0); width: 60px; height: 60px; background: rgba(0, 0, 0, 0.3); display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; z-index: 40; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.18); pointer-events: auto !important; box-shadow: 0 4px 15px rgba(0,0,0,0.15); will-change: transform, opacity; }
 .pk-player-box:hover .pk-p-side-nav { opacity: 1; }
@@ -2876,9 +2937,9 @@ body.pk-hide-all-ui #pk-launch, body.pk-hide-all-ui .pk-ov, body.pk-hide-all-ui 
 .pk-sub-btn:hover { background: #444; }
 .pk-sub-btn:active { background: #555; }
 .pk-sub-ctrl { display: flex; align-items: center; background: #333; border-radius: 4px; border: 1px solid #444; }
-.pk-sub-ctrl-btn { width: 28px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #ddd; }
+.pk-sub-ctrl-btn { width: 28px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #ddd; line-height: 1; }
 .pk-sub-ctrl-btn:hover { background: #444; }
-.pk-sub-val { width: 60px; text-align: center; border-left: 1px solid #444; border-right: 1px solid #444; height: 24px; line-height: 24px; font-variant-numeric: tabular-nums; }
+.pk-sub-val { width: 60px; text-align: center; border-left: 1px solid #444; border-right: 1px solid #444; height: 24px; line-height: 1; font-variant-numeric: tabular-nums; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
 .pk-sub-slider { -webkit-appearance: none; width: 100px; height: 4px; background: #444; border-radius: 2px; outline: none; }
 .pk-sub-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; cursor: pointer; }
 .pk-sub-check { width: 14px; height: 14px; accent-color: #4aa1ff; cursor: pointer; }
@@ -3021,7 +3082,6 @@ repairVersion: "",
 confirmedRepairVersion: "",
 installRegDownloadedAt: 0,
 deleteRegDownloadedAt: 0,
-browserPolicyRegDownloadedAt: 0,
 customPlayerPath: "",
 customPlayerPathUpdatedAt: 0,
 pathBoundRepairVersion: "",
@@ -3051,7 +3111,6 @@ repairVersion: typeof data.repairVersion === 'string' ? data.repairVersion : "",
 confirmedRepairVersion: typeof data.confirmedRepairVersion === 'string' ? data.confirmedRepairVersion : "",
 installRegDownloadedAt: toTime(data.installRegDownloadedAt),
 deleteRegDownloadedAt: toTime(data.deleteRegDownloadedAt),
-browserPolicyRegDownloadedAt: toTime(data.browserPolicyRegDownloadedAt),
 customPlayerPath: typeof data.customPlayerPath === 'string' ? data.customPlayerPath : "",
 customPlayerPathUpdatedAt: toTime(data.customPlayerPathUpdatedAt),
 pathBoundRepairVersion: typeof data.pathBoundRepairVersion === 'string' ? data.pathBoundRepairVersion : "",
@@ -3118,10 +3177,7 @@ return state;
 
 function recordPotPlayerProtocolRegDownload(kind) {
 const now = Date.now();
-let patch;
-if (kind === 'delete') patch = { deleteRegDownloadedAt: now };
-else if (kind === 'browser_policy') patch = { browserPolicyRegDownloadedAt: now };
-else patch = { installRegDownloadedAt: now };
+const patch = kind === 'delete' ? { deleteRegDownloadedAt: now } : { installRegDownloadedAt: now };
 return updatePotPlayerProtocolState(patch);
 }
 
@@ -3278,23 +3334,6 @@ return [
 ].join('\r\n');
 }
 
-function buildPotPlayerBrowserPolicyReg() {
-return [
-'Windows Registry Editor Version 5.00',
-'',
-'; PikPak Enhancement Master - optional browser external protocol helper',
-'; Advanced option only. These HKLM policy keys may require administrator rights.',
-'; Enterprise, school, or company devices may be controlled by existing policies.',
-'',
-'[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Google\\Chrome]',
-'"ExternalProtocolDialogShowAlwaysOpenCheckbox"=dword:00000001',
-'',
-'[HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Edge]',
-'"ExternalProtocolDialogShowAlwaysOpenCheckbox"=dword:00000001',
-''
-].join('\r\n');
-}
-
 function makeUtf16LeBlob(text) {
 const input = String(text || '');
 const buffer = new ArrayBuffer(2 + input.length * 2);
@@ -3308,22 +3347,17 @@ return new Blob([buffer], { type: 'application/octet-stream' });
 
 function downloadPotPlayerRegFile(kind) {
 const isDelete = kind === 'delete';
-const isBrowserPolicy = kind === 'browser_policy';
 const savedPath = getValidSavedPotPlayerPath();
-if (!isDelete && !isBrowserPolicy && !savedPath) return false;
-const content = isBrowserPolicy
-? buildPotPlayerBrowserPolicyReg()
-: (isDelete ? buildPotPlayerDeleteReg() : buildPotPlayerInstallReg(savedPath));
+if (!isDelete && !savedPath) return false;
+const content = isDelete ? buildPotPlayerDeleteReg() : buildPotPlayerInstallReg(savedPath);
 const blob = makeUtf16LeBlob(content);
 const url = URL.createObjectURL(blob);
 const a = document.createElement('a');
 a.href = url;
-a.download = isBrowserPolicy
-? CONF.potplayerBrowserPolicyRegFileName
-: (isDelete ? CONF.potplayerRegDeleteFileName : CONF.potplayerRegCustomInstallFileName);
+a.download = isDelete ? CONF.potplayerRegDeleteFileName : CONF.potplayerRegCustomInstallFileName;
 a.click();
 setTimeout(() => URL.revokeObjectURL(url), 1000);
-recordPotPlayerProtocolRegDownload(isBrowserPolicy ? 'browser_policy' : (isDelete ? 'delete' : 'install'));
+recordPotPlayerProtocolRegDownload(isDelete ? 'delete' : 'install');
 return true;
 }
 
@@ -4300,7 +4334,18 @@ zh: {
   "label_download_accel_mode": "链接传递方式",
   "label_download_accel_mode_prefix": "拼接原始链接",
   "label_download_accel_mode_query": "作为 URL 参数传递",
+  "label_download_accel_mode_template": "自定义模板",
   "label_download_accel_query_param": "URL 参数名",
+  "label_download_accel_apply_scope": "生效范围",
+  "label_download_accel_apply_browser": "浏览器下载",
+  "label_download_accel_apply_downloader": "外部下载器",
+  "label_download_accel_apply_potplayer": "外部播放 / PotPlayer",
+  "label_download_accel_apply_m3u": "M3U 导出",
+  "label_download_accel_preview": "模板预览",
+  "label_download_accel_preview_source": "原始示例",
+  "label_download_accel_preview_result": "重写结果",
+  "msg_download_accel_preview_empty": "填写加速地址后显示预览",
+  "msg_download_accel_preview_invalid": "当前加速地址或模板无效",
   "msg_download_accel_invalid_domain": "加速地址无效",
   "str_aria2_zero_byte_skipped": "0KB 文件已跳过",
   "label_privacy_mode": "隐私图",
@@ -4564,6 +4609,9 @@ zh: {
   "msg_copy_done": "已复制。请选择粘贴位置。",
   "msg_cut_done": "准备移动。请选择粘贴位置。",
   "msg_paste_empty": "没有可粘贴的项目。",
+  "msg_clip_checking": "正在校验剪贴板项目...",
+  "msg_clip_missing_skipped": "剪贴板中 {n} 个项目已不存在，已自动跳过。",
+  "msg_clip_all_missing": "剪贴板中的文件已不存在。",
   "msg_copy_empty": "剪贴板为空或无文本数据。",
   "msg_add_success": "已追加 {n} 行数据。",
   "msg_del_done": "已删除选中行。",
@@ -4665,7 +4713,7 @@ zh: {
   "msg_bl_run_limit": "⚠️ 模式限制\n\n清理操作涉及物理文件递归操作。目前处于非标准目录，无法准确定位物理扫描范围。\n\n请返回主页常规文件夹后再执行清理。",
   "msg_del_protected": "资源管理器中已记录的 {n} 个文件，已保护并跳过删除。",
   "msg_del_none": "没有可删除的文件。",
-  "msg_offline_reference_missing": "云盘文件已删除",
+  "msg_offline_reference_missing": "文件或文件夹不存在，请检查确认",
   "rn_tip_wait": "请设置规则",
   "rn_tip_jav": "点击上方按钮开始智能匹配",
   "rn_tip_none": "没有匹配的项目或名称",
@@ -5303,6 +5351,38 @@ throw new Error(err.error_description || `API Error ${res.status}`);
 return res.json();
 };
 
+function readShareUpdateTimes() {
+try {
+const data = JSON.parse(gmGet('pk_share_update_times', '{}'));
+return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+} catch (e) {
+return {};
+}
+}
+
+function getShareDisplayTime(shareId, fallbackTime = '') {
+const id = String(shareId || '');
+const fallback = String(fallbackTime || '');
+if (!id) return fallback;
+const data = readShareUpdateTimes();
+const localTime = String(data[id] || '');
+return localTime || fallback;
+}
+
+function touchShareUpdateTime(shareId, time = '') {
+const id = String(shareId || '');
+if (!id) return '';
+const data = readShareUpdateTimes();
+const stamp = String(time || new Date(getServerNow()).toISOString());
+data[id] = stamp;
+Object.keys(data)
+.sort((a, b) => Date.parse(data[b] || 0) - Date.parse(data[a] || 0))
+.slice(500)
+.forEach(k => delete data[k]);
+gmSet('pk_share_update_times', JSON.stringify(data));
+return stamp;
+}
+
 async function apiShareList(limit = 100) {
 let all =[], next = null, safe = 50;
 do {
@@ -5316,7 +5396,7 @@ id: item.share_id,
 kind: 'pikpak#share',
 name: item.title,
 size: item.file_size,
-modified_time: item.create_time,
+modified_time: getShareDisplayTime(item.share_id, item.create_time),
 icon_link: item.icon_link,
 view_count: item.view_count,
 save_count: item.restore_count,
@@ -5829,6 +5909,7 @@ console.log("%c PikPak Enhancement Master %c v" + version + " %c digbug82 %c AGP
 "color:#fff; background:#d93025; padding:3px 8px; border-radius:0 4px 4px 0; font-weight:bold;");
 
 function getIcon(item) {
+if (item && (item._isShareItem || item.kind === 'pikpak#share')) return getOfficialDirFallbackIconHtml(item, 'list');
 const isFolder = item.kind === 'drive#folder' ||
 (item.kind === 'drive#task' && (
 (item.mime_type && item.mime_type.includes('folder')) ||
@@ -5868,7 +5949,10 @@ return CONF.typeIcons.file;
 }
 
 function isOfficialDirFallbackFolder(item) {
-return !!(item && item.kind === 'drive#folder');
+if (!item) return false;
+const icon = String(item.icon_link || item.iconLink || '').toLowerCase();
+const mime = String(item.mime_type || item.mimeType || '').toLowerCase();
+return item.kind === 'drive#folder' || !!item._isFolderLike || mime.includes('folder') || icon.includes('folder');
 }
 
 function getOfficialDirFallbackSize(mode = 'list') {
@@ -5907,6 +5991,13 @@ const fallbackStyle = `position:absolute;inset:0;display:flex;align-items:center
 const remoteStyle = `position:absolute;inset:0;width:${size}px;height:${size}px;object-fit:${remoteObjectFit};border-radius:${remoteRadius};margin:0!important;background:transparent;opacity:0;transition:opacity .12s ease;`;
 const remoteHtml = hasRemote ? `<img draggable="false" src="${remoteSrc}" class="${remoteClass}" style="${remoteStyle}" onload="this.style.opacity='1';if(this.previousElementSibling)this.previousElementSibling.style.opacity='0';" onerror="if(this.previousElementSibling)this.previousElementSibling.style.opacity='1';this.remove();">` : '';
 return `<span class="pk-dir-list-icon-slot" style="${slotStyle}"><span class="pk-dir-list-icon-fallback" style="${fallbackStyle}">${fallbackHtml}</span>${remoteHtml}</span>`;
+}
+
+function getShareOfficialListIconHtml(item = null, lockHtml = '', disabled = false) {
+const remoteSrc = String((item && item.icon_link) || '');
+const disabledClass = disabled ? ' pk-share-icon-disabled' : '';
+const disabledStyle = disabled ? 'opacity:0.6;' : '';
+return `<div class="pk-share-icon-wrap${disabledClass}" draggable="false" style="${disabledStyle}display:flex;align-items:center;justify-content:center;position:relative;">${getDirListIconSlotHtml(item, { mode: 'list', size: 24, remoteSrc, remoteClass: 'pk-min-icon-img', remoteObjectFit: 'contain' })}${lockHtml || ''}</div>`;
 }
 
 function getPreviewIconFailCache() {
@@ -6189,12 +6280,37 @@ return '';
 }
 
 function normalizeDownloadAccelMode(input) {
-return String(input || '').trim().toLowerCase() === 'query' ? 'query' : 'prefix';
+const mode = String(input || '').trim().toLowerCase();
+return ['prefix', 'query', 'template'].includes(mode) ? mode : 'prefix';
 }
 
 function normalizeDownloadAccelQueryParam(input) {
 const param = String(input || '').trim();
 return /^[A-Za-z0-9_.~-]+$/.test(param) ? param : 'url';
+}
+
+function normalizeDownloadAccelSetting(input, mode = 'prefix') {
+const raw = String(input || '').trim();
+const normalizedMode = normalizeDownloadAccelMode(mode);
+if (!raw) return '';
+if (normalizedMode !== 'template') return normalizeDownloadAccelBase(raw);
+try {
+const candidate = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`;
+const sampleUrl = 'https://dl-a10b-0000.mypikpak.com/download/?fid=sample&sign=sample';
+const sample = candidate
+.replace(/\{\{\s*url\s*\}\}/g, sampleUrl)
+.replace(/\{\{\s*encoded_url\s*\}\}/g, encodeURIComponent(sampleUrl))
+.replace(/\{\{\s*host\s*\}\}/g, 'dl-a10b-0000.mypikpak.com')
+.replace(/\{\{\s*hostname\s*\}\}/g, 'dl-a10b-0000.mypikpak.com')
+.replace(/\{\{\s*path_query\s*\}\}/g, '/download/?fid=sample&sign=sample')
+.replace(/\{\{\s*protocol\s*\}\}/g, 'https');
+const u = new URL(sample);
+if (!/^https?:$/i.test(u.protocol) || !u.hostname || u.origin === 'null') return '';
+if (!isValidDownloadAccelHost(u.hostname)) return '';
+return candidate;
+} catch (e) {
+return '';
+}
 }
 
 function getDownloadAccelModePref() {
@@ -6205,21 +6321,94 @@ function getDownloadAccelQueryParamPref() {
 return normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam));
 }
 
-function rewriteDownloadLinkForAccel(rawUrl) {
+function normalizeDownloadAccelContext(context) {
+const c = String(context || 'browser').trim().toLowerCase();
+if (['browser', 'download', 'aria2', 'gopeed', 'abdm', 'idm', 'potplayer', 'external', 'm3u'].includes(c)) return c;
+return 'browser';
+}
+
+function shouldApplyDownloadAccelForContext(context) {
+const c = normalizeDownloadAccelContext(context);
+if (c === 'aria2' || c === 'gopeed' || c === 'abdm' || c === 'idm') return getBoolPref('pk_download_accel_apply_downloader', CONF.downloadAccelApplyDownloader);
+if (c === 'm3u') return getBoolPref('pk_download_accel_apply_m3u', CONF.downloadAccelApplyM3U);
+if (c === 'potplayer' || c === 'external') return getBoolPref('pk_download_accel_apply_potplayer', CONF.downloadAccelApplyPotPlayer);
+return getBoolPref('pk_download_accel_apply_browser', CONF.downloadAccelApplyBrowser);
+}
+
+function isPikPakDownloadDlUrlObject(u) {
+try {
+const host = String(u && u.hostname || '').toLowerCase();
+return /^dl-[a-z0-9-]+\.mypikpak\.com$/i.test(host);
+} catch (e) {
+return false;
+}
+}
+
+function buildDownloadAccelTemplateUrl(template, raw, src) {
+const tpl = String(template || '').trim();
+if (!tpl) return raw;
+if (!/\{\{\s*(?:url|encoded_url|host|hostname|path_query|protocol)\s*\}\}/i.test(tpl)) return `${tpl.replace(/\/+$/, '')}/${raw}`;
+const pathQuery = `${src.pathname || '/'}${src.search || ''}`;
+return tpl
+.replace(/\{\{\s*url\s*\}\}/g, raw)
+.replace(/\{\{\s*encoded_url\s*\}\}/g, encodeURIComponent(raw))
+.replace(/\{\{\s*host\s*\}\}/g, src.host)
+.replace(/\{\{\s*hostname\s*\}\}/g, src.hostname)
+.replace(/\{\{\s*path_query\s*\}\}/g, pathQuery)
+.replace(/\{\{\s*protocol\s*\}\}/g, src.protocol.replace(':', ''));
+}
+
+function buildDownloadAccelPreviewUrl(input, mode = 'prefix', queryParam = 'url') {
+const source = 'https://dl-a10b-0000.mypikpak.com/download/?fid=sample&sign=sample';
+try {
+const normalizedMode = normalizeDownloadAccelMode(mode);
+const setting = normalizeDownloadAccelSetting(input, normalizedMode);
+if (!setting) return { source, result: '', ok: false };
+const src = new URL(source);
+let result = source;
+if (normalizedMode === 'query') {
+const sep = setting.includes('?') ? (/[?&]$/.test(setting) ? '' : '&') : '?';
+result = `${setting}${sep}${encodeURIComponent(normalizeDownloadAccelQueryParam(queryParam))}=${encodeURIComponent(source)}`;
+} else if (normalizedMode === 'template') {
+result = buildDownloadAccelTemplateUrl(setting, source, src);
+} else {
+result = `${setting}/${source}`;
+}
+const u = new URL(result);
+return { source, result, ok: /^https?:$/i.test(u.protocol) && !!u.hostname };
+} catch (e) {
+return { source, result: '', ok: false };
+}
+}
+
+function rewriteDownloadLinkForAccel(rawUrl, context = 'browser') {
 try {
 if (!rawUrl) return rawUrl;
 if (!getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable)) return rawUrl;
-const accelBase = normalizeDownloadAccelBase(gmGet('pk_download_accel_domain', CONF.downloadAccelDomain));
-if (!accelBase) return rawUrl;
+const accelContext = normalizeDownloadAccelContext(context);
+if (!shouldApplyDownloadAccelForContext(accelContext)) return rawUrl;
 const raw = String(rawUrl).trim();
 const src = new URL(raw);
 if (!/^https?:$/i.test(src.protocol) || !src.hostname) return rawUrl;
+if (!isPikPakDownloadDlUrlObject(src)) return rawUrl;
 const mode = getDownloadAccelModePref();
+const accelSetting = normalizeDownloadAccelSetting(gmGet('pk_download_accel_domain', CONF.downloadAccelDomain), mode);
+if (!accelSetting) return rawUrl;
+let out = raw;
 if (mode === 'query') {
-const sep = accelBase.includes('?') ? (/[?&]$/.test(accelBase) ? '' : '&') : '?';
-return `${accelBase}${sep}${encodeURIComponent(getDownloadAccelQueryParamPref())}=${encodeURIComponent(raw)}`;
+const sep = accelSetting.includes('?') ? (/[?&]$/.test(accelSetting) ? '' : '&') : '?';
+out = `${accelSetting}${sep}${encodeURIComponent(getDownloadAccelQueryParamPref())}=${encodeURIComponent(raw)}`;
+} else if (mode === 'template') {
+out = buildDownloadAccelTemplateUrl(accelSetting, raw, src);
+} else {
+out = `${accelSetting}/${raw}`;
 }
-return `${accelBase}/${raw}`;
+try {
+const u = new URL(out);
+return /^https?:$/i.test(u.protocol) && u.hostname ? out : rawUrl;
+} catch (e) {
+return rawUrl;
+}
 } catch (e) {
 return rawUrl;
 }
@@ -6627,10 +6816,11 @@ return `${base}/${segments.join('/')}`;
 function buildStandardDownloadTasks(files, options = {}) {
 const keepStructure = !!options.keepStructure;
 const downloadDir = String(options.downloadDir || '');
+const accelContext = normalizeDownloadAccelContext(options.accelContext || options.context || getCurrentDownloaderType());
 const headers = { 'User-Agent': navigator.userAgent, Referer: 'https://mypikpak.com/' };
 return (files || []).map(file => {
 const originalUrl = file && file.web_content_link ? String(file.web_content_link) : '';
-const url = rewriteDownloadLinkForAccel(originalUrl);
+const url = rewriteDownloadLinkForAccel(originalUrl, accelContext);
 const lineage = Array.isArray(file && file._lineage) ? file._lineage : [];
 const relativePath = keepStructure && lineage.length ? lineage.map(n => sanitizeDownloadFileName(n && n.name)).join('/') : '';
 const fileName = sanitizeDownloadFileName(file && file.name);
@@ -10140,17 +10330,6 @@ return { state: 'ok', src: item.thumbnail_link };
 if ((state === 'unknown' || state === 'probing') && cached) return { state: 'ok', src: cached };
 return { state, src: '' };
 };
-const markStableFolderMediaState = (id, state, src = '') => {
-ensureGridMediaStore();
-if (!id) return;
-window.pkThumbTriState.folder[id] = state;
-if (state === 'ok' && src) {
-window.pkGridMediaStore.folder[id] = src;
-window.pkGlobalThumbCache.add(id);
-} else if (state === 'fail' && window.pkGridMediaStore.folder[id]) {
-delete window.pkGridMediaStore.folder[id];
-}
-};
 const getStableFileMediaState = (item) => {
 ensureGridMediaStore();
 const tri = window.pkThumbTriState.file;
@@ -10167,6 +10346,84 @@ return { state: 'ok', src: item.thumbnail_link };
 if ((state === 'unknown' || state === 'probing') && cached) return { state: 'ok', src: cached };
 return { state, src: '' };
 };
+function getDirectSearchableCoverForImageSearch(item) {
+const src = item && item.thumbnail_link && item.thumbnail_link !== item.icon_link ? String(item.thumbnail_link) : '';
+if (!src) return '';
+if (typeof isPreviewIconFailed === 'function' && isPreviewIconFailed(src)) return '';
+return src;
+}
+function getGlobalCacheChildrenForImageSearch(id) {
+if (!id) return [];
+let cache = null;
+try { cache = typeof globalCache !== 'undefined' ? globalCache : null; } catch (e) {}
+if (!cache || typeof cache.get !== 'function') return [];
+const raw = cache.get(id);
+const list = raw && !Array.isArray(raw) && Array.isArray(raw.items) ? raw.items : raw;
+return Array.isArray(list) ? list.filter(Boolean) : [];
+}
+function resolveSearchableCoverForImageSearch(item, depth = 0, seen = new Set()) {
+ensureGridMediaStore();
+if (!item || !item.id || depth > 4) return '';
+const direct = getDirectSearchableCoverForImageSearch(item);
+if (direct) return direct;
+if (item.kind !== 'drive#folder') return '';
+const id = String(item.id);
+if (seen.has(id)) return '';
+seen.add(id);
+const cached = window.pkGridMediaStore && window.pkGridMediaStore.folder ? window.pkGridMediaStore.folder[id] : '';
+if (cached && !(typeof isPreviewIconFailed === 'function' && isPreviewIconFailed(cached))) return cached;
+const children = getGlobalCacheChildrenForImageSearch(id);
+for (const child of children) {
+if (!child) continue;
+if (child.kind === 'drive#folder') {
+const nested = resolveSearchableCoverForImageSearch(child, depth + 1, seen);
+if (nested) return nested;
+continue;
+}
+const src = getDirectSearchableCoverForImageSearch(child);
+if (!src) continue;
+const stable = typeof getStableFileMediaState === 'function' ? getStableFileMediaState(child) : { state: 'unknown', src: '' };
+if (stable.state === 'fail') continue;
+const mime = (child.mime_type || '').toLowerCase();
+const duration = Number((child.params && child.params.duration) || (child.medias && child.medias[0] && child.medias[0].duration) || 0);
+const hasMediaMeta = Array.isArray(child.medias) && child.medias.length > 0;
+if (stable.state === 'ok' || mime.startsWith('video/') || mime.startsWith('image/') || duration > 0 || hasMediaMeta) return stable.src || src;
+}
+return '';
+}
+function refreshSelectedImageSearchToolbar() {
+let canUpdate = false;
+try { canUpdate = typeof updateToolbar === 'function'; } catch (e) { canUpdate = false; }
+if (!canUpdate || !S || typeof S.getSelectedIds !== 'function') return;
+let selected = [];
+try { selected = S.getSelectedIds(); } catch (e) {}
+if (selected.length !== 1) return;
+const item = S.itemMap && S.itemMap.get(selected[0]);
+if (!item) return;
+const cover = resolveSearchableCoverForImageSearch(item);
+if (cover && item.kind === 'drive#folder' && !(item.thumbnail_link && item.thumbnail_link !== item.icon_link)) {
+item.thumbnail_link = cover;
+item._coverResolved = true;
+item._isFolderLike = true;
+}
+if (S._imgSearchToolbarRaf) cancelAnimationFrame(S._imgSearchToolbarRaf);
+S._imgSearchToolbarRaf = requestAnimationFrame(() => {
+S._imgSearchToolbarRaf = 0;
+try { updateToolbar(); } catch (e) {}
+});
+}
+const markStableFolderMediaState = (id, state, src = '') => {
+ensureGridMediaStore();
+if (!id) return;
+window.pkThumbTriState.folder[id] = state;
+if (state === 'ok' && src) {
+window.pkGridMediaStore.folder[id] = src;
+window.pkGlobalThumbCache.add(id);
+} else if (state === 'fail' && window.pkGridMediaStore.folder[id]) {
+delete window.pkGridMediaStore.folder[id];
+}
+refreshSelectedImageSearchToolbar();
+};
 const markStableFileMediaState = (id, state, src = '') => {
 ensureGridMediaStore();
 if (!id) return;
@@ -10177,6 +10434,7 @@ window.pkGlobalThumbCache.add(id);
 } else if (state === 'fail' && window.pkGridMediaStore.file[id]) {
 delete window.pkGridMediaStore.file[id];
 }
+refreshSelectedImageSearchToolbar();
 };
 window.ensureGridMediaStore = ensureGridMediaStore;
 window.getStableFolderMediaState = getStableFolderMediaState;
@@ -11019,7 +11277,7 @@ gmSet('pk_global_sort_pref', JSON.stringify({ sort: state.sort, dir: state.dir }
 }
 return true;
 };
-const applyManualSortSelection = (sort) => {
+const applyManualSortSelection = (sort, keepGridSortMenuOpen = false) => {
 const key = getSortPrefKey();
 const cur = getCurrentPathNode();
 if (!key && (S.dupMode || (S.analyzeMode && cur.id === 'analyze_root' && S.analyzeSimGroups))) return;
@@ -11035,7 +11293,7 @@ S._sortContextSig = sig;
 S._sortManualSig = sig;
 S._mediaSortAutoSig = null;
 }
-S.gridSortMenuOpen = true;
+S.gridSortMenuOpen = !!keepGridSortMenuOpen;
 updateGridSortUIInstant();
 persistSortPreference();
 refresh();
@@ -11152,7 +11410,7 @@ UI.gridSortWrap.classList.remove('open');
 S.gridSortMenuOpen = false;
 };
 const applySortSelection = (sort) => {
-applyManualSortSelection(sort);
+applyManualSortSelection(sort, true);
 };
 const syncFolderFirstFromGlobal = () => {
 const saved = gmGet('pk_folder_first', false);
@@ -11944,7 +12202,7 @@ function showAlert(msg, title = L.title_alert) {
 return new Promise((resolve) => {
 const m = showModal(`
 <h3 style="border:none; margin-bottom:16px; font-size:18px; font-weight:700; color:var(--pk-fg);">${title}</h3>
-<div style="margin-bottom:32px; line-height:1.6; font-size:14px; color:var(--pk-fg); opacity:0.9; word-break:break-all;">${msg.replace(/\n/g, '<br>')}</div>
+<div style="margin-bottom:32px; line-height:1.6; font-size:14px; color:var(--pk-fg); opacity:0.9; word-break:break-all;">${esc(msg).replace(/\n/g, '<br>')}</div>
 <div class="pk-modal-act" style="justify-content: flex-end;">
 <button class="pk-btn pri" id="alert_ok"
     style="height:40px; min-width:86px; padding:0 30px; border-radius:8px; background:var(--pk-pri); color:#fff; font-weight:bold; font-size:14px; justify-content:center;">
@@ -12270,7 +12528,7 @@ if (isDark) t.classList.add('pk-dark');
 
 if (toastType === 'error' || toastType === 'warning') {
 const icon = pkIconHtml('warning', { style: 'flex-shrink: 0;' });
-t.innerHTML = `${icon}<span style="flex: 1; line-height: 1.4;">${msg}</span>`;
+t.innerHTML = `${icon}<span style="flex: 1; line-height: 1.4;">${esc(msg)}</span>`;
 t.style.backgroundColor = toastType === 'warning' ? 'rgba(250, 173, 20, 0.95)' : 'rgba(217, 48, 37, 0.95)';
 t.style.color = '#ffffff';
 if (toastType === 'warning') t.style.border = '1px solid rgba(250, 173, 20, 0.2)';
@@ -12804,7 +13062,7 @@ showPreviewModal(foundMatches);
 } catch (e) {
 if (e.name !== 'AbortError' && myScanId === S.scanId) {
 setLoad(false);
-showAlert(`${L.str_scan_error}: ${e.message}`);
+showAlert(`${L.str_scan_error}: ${formatCloudErrorMessage(e)}`);
 }
 } finally {
 if (myScanId === S.scanId) {
@@ -16994,6 +17252,10 @@ syncHistorySessionCache();
 nextToken = null;
 isResuming = S.items.length > 0;
 S.pagingLoading = false;
+if (isResuming) {
+await refresh();
+updateStat();
+}
 setLoad(false);
 } else if (S.recentMode && realCacheKey === 'recent_root') {
 const session = globalCache.get('recent_session');
@@ -17047,18 +17309,18 @@ globalCache.set('recent_session', { phase: 'active', nextToken: null, completed:
 
 const keepNetworkSafeVisual = !!(forceUpdate && !keepVisualOnThisForceLoad && !isResuming && Array.isArray(S.items) && S.items.length > 0 && isProtectedNetworkResumeTarget(realCacheKey));
 
-if (!keepVisualOnThisForceLoad && !keepNetworkSafeVisual) {
-S.items = [];
-S.display = [];
-S.itemMap.clear();
-refresh();
-}
-
 if (keepNetworkSafeVisual) {
 setLoad(false);
 } else {
 setLoad(true, true);
 updateLoadTxt(L.loading_detail);
+}
+
+if (!keepVisualOnThisForceLoad && !keepNetworkSafeVisual) {
+S.items = [];
+S.display = [];
+S.itemMap.clear();
+refresh();
 }
 }
 
@@ -17862,7 +18124,7 @@ S._isRetrying = false;
 
 if (S.items.length === 0) {
 setLoad(false);
-showAlert(L.str_failed + " " + e.message);
+showAlert(`${L.str_failed} ${formatCloudErrorMessage(e)}`);
 }
 }
 }
@@ -20813,7 +21075,7 @@ const m = showModal(`
 </div>
 <div style="display:flex; align-items:center; gap:10px; margin-bottom:25px;">
 <div style="flex:1; position:relative;">
-    <input type="text" inputmode="numeric" id="spis_val_min" name="spis_val_min_${inputNonce}" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" value="${lastMin === 0 ? '' : lastMin}" placeholder="0" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
+    <input type="text" inputmode="numeric" id="spis_val_min" name="spis_val_min_${inputNonce}" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" value="${lastMin === 0 ? '' : lastMin}" placeholder="0" maxlength="${CONF.numericFilterInputMaxLen}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
     <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L.lbl_ana_min}</div>
     <div class="pk-num-ctrl">
         <div class="pk-num-btn" id="spis_inc_min">${CONF.crumbIcons.down.replace('points="6 9 12 15 18 9"', 'points="18 15 12 9 6 15"')}</div>
@@ -20822,7 +21084,7 @@ const m = showModal(`
 </div>
 <div style="color:#888; font-weight:bold; flex-shrink:0;">-</div>
 <div style="flex:1; position:relative;">
-    <input type="text" inputmode="numeric" id="spis_val_max" name="spis_val_max_${inputNonce}" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" value="${lastMax}" placeholder="∞" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
+    <input type="text" inputmode="numeric" id="spis_val_max" name="spis_val_max_${inputNonce}" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" value="${lastMax}" placeholder="∞" maxlength="${CONF.numericFilterInputMaxLen}" oninput="this.value=this.value.replace(/[^0-9]/g,'')" style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
     <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L.lbl_ana_max}</div>
     <div class="pk-num-ctrl">
         <div class="pk-num-btn" id="spis_inc_max">${CONF.crumbIcons.down.replace('points="6 9 12 15 18 9"', 'points="18 15 12 9 6 15"')}</div>
@@ -21156,7 +21418,7 @@ const officialDesc = String((data && data.error_description) || (raw && raw.erro
 if (officialDesc && !/^msg_/.test(officialDesc)) return officialDesc;
 if (err && err.shareParseKey && L[err.shareParseKey]) return L[err.shareParseKey];
 if (err && (err.name === 'TypeError' || err.name === 'AbortError')) return L.msg_share_parse_save_network_error;
-return (err && err.message && !/^msg_/.test(err.message)) ? `${L.msg_share_parse_save_failed}: ${err.message}` : L.msg_share_parse_save_failed;
+return (err && err.message && !/^msg_/.test(err.message)) ? `${L.msg_share_parse_save_failed}: ${formatCloudErrorMessage(err)}` : L.msg_share_parse_save_failed;
 }
 
 function getShareParseOfficialErrorMessage(err) {
@@ -22188,7 +22450,7 @@ continue;
 }
 console.error(`${options.logPrefix || 'Task Create Failed'}[${item.url}]:`, e);
 failCount++;
-if (e && e.message) lastFailMessage = e.message;
+if (e) lastFailMessage = formatCloudErrorMessage(e);
 }
 await sleep(300);
 }
@@ -22656,39 +22918,30 @@ function triggerAnchorBrowserDownload(file, url) {
 const href = String(url || '');
 const name = sanitizeDownloadFileName(file && file.name);
 if (!href) return false;
+const frameName = `pk_browser_download_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+const frame = document.createElement('iframe');
+frame.name = frameName;
+frame.style.display = 'none';
+frame.style.width = '0';
+frame.style.height = '0';
+frame.style.border = '0';
 const link = document.createElement('a');
 link.href = href;
 link.download = name;
 link.setAttribute('download', name);
+link.target = frameName;
+link.rel = 'noopener noreferrer';
 link.style.display = 'none';
+document.body.appendChild(frame);
 document.body.appendChild(link);
 link.click();
-setTimeout(() => { if (link.parentNode) link.remove(); }, 10000);
+setTimeout(() => { if (link.parentNode) link.remove(); }, 1000);
+setTimeout(() => { if (frame.parentNode) frame.remove(); }, 60000);
 return true;
 }
 
 function triggerNamedBrowserDownload(file, url) {
-const href = String(url || '');
-const name = sanitizeDownloadFileName(file && file.name);
-if (!href) return false;
-if (typeof GM_download === 'function') {
-try {
-GM_download({
-url: href,
-name,
-saveAs: false,
-onerror: e => {
-console.warn('[Browser Download Failed]', name, e);
-triggerAnchorBrowserDownload(file, href);
-}
-});
-return true;
-} catch (e) {
-console.warn('[Browser Download Fallback]', name, e);
-return triggerAnchorBrowserDownload(file, href);
-}
-}
-return triggerAnchorBrowserDownload(file, href);
+return triggerAnchorBrowserDownload(file, url);
 }
 
 async function showBrowserDownloadFailures(list, successCount = 0) {
@@ -22806,7 +23059,7 @@ submitUnzip: (pwd, files) => submitShareArchiveUnzip(item, detail, pwd, files)
 });
 } catch (e) {
 setLoad(false);
-showToast(getShareParseOfficialErrorMessage(e) || ((e && e.message && !/^msg_/.test(e.message) && !e.shareParseKey) ? e.message : '') || L.str_action_failed, 'error');
+showToast(getShareParseOfficialErrorMessage(e) || ((e && e.message && !/^msg_/.test(e.message) && !e.shareParseKey) ? formatCloudErrorMessage(e) : '') || L.str_action_failed, 'error');
 }
 }
 
@@ -22824,7 +23077,7 @@ else if (isImageLikeItem(resolved)) showImage(resolved);
 } catch (e) {
 setLoad(false);
 const key = e && e.shareParseKey;
-showToast((key && L[key]) || getShareParseErrorMessage(e) || e.message || L.str_action_failed, 'error');
+showToast((key && L[key]) || getShareParseErrorMessage(e) || formatCloudErrorMessage(e) || L.str_action_failed, 'error');
 }
 }
 
@@ -24235,7 +24488,7 @@ const validation = validateConfigCloudManifestForPull(manifest, rec);
 if (validation.ok) parsedManifests.push({ rec, manifest, validation });
 else skippedManifests.push({ title: rec.title, syncId: rec.syncId, reason: validation.reason || 'manifest_incompatible' });
 } catch (e) {
-skippedManifests.push({ title: rec.title, syncId: rec.syncId, reason: e && e.message ? e.message : 'manifest_parse_failed' });
+skippedManifests.push({ title: rec.title, syncId: rec.syncId, reason: formatCloudErrorMessage(e, 'manifest_parse_failed') });
 }
 });
 if (!parsedManifests.length) {
@@ -24349,7 +24602,7 @@ return;
 let normalized;
 try { normalized = normalizeConfigValue(key, value, 'cloudMerge'); }
 catch (e) {
-invalid.push({ key, reason: e && e.message ? e.message : 'normalize_failed' });
+invalid.push({ key, reason: formatCloudErrorMessage(e, 'normalize_failed') });
 return;
 }
 if (normalized === undefined || (typeof normalized === 'number' && !Number.isFinite(normalized))) {
@@ -24701,7 +24954,7 @@ return 'pull';
 function writeConfigCloudPullFailureReport(error, extra = {}) {
 const report = makeConfigCloudBaseReport('pull', 'failed', {
 stage: getConfigCloudPullStageFromError(error),
-reason: error && error.message ? error.message : String(error || ''),
+reason: formatCloudErrorMessage(error, String(error || '')),
 writtenRemote: false,
 writtenLocal: false,
 keepBookmarks: true,
@@ -24763,13 +25016,13 @@ if (oldValue === undefined) removeStoredConfigKey(key);
 else setStoredConfigRaw(key, oldValue);
 rolledBack = true;
 } catch (rollbackError) {
-rollbackErrors.push({ key, reason: rollbackError && rollbackError.message ? rollbackError.message : String(rollbackError || '') });
+rollbackErrors.push({ key, reason: formatCloudErrorMessage(rollbackError, String(rollbackError || '')) });
 }
 }
-try { cleanupConfigPrefixKeys(); } catch (cleanupError) { rollbackErrors.push({ key: '*cleanup*', reason: cleanupError && cleanupError.message ? cleanupError.message : String(cleanupError || '') }); }
+try { cleanupConfigPrefixKeys(); } catch (cleanupError) { rollbackErrors.push({ key: '*cleanup*', reason: formatCloudErrorMessage(cleanupError, String(cleanupError || '')) }); }
 writeConfigCloudSyncReport(makeConfigCloudPullReport(preview, 'failed', {
 stage: 'apply',
-reason: e && e.message ? e.message : String(e || ''),
+reason: formatCloudErrorMessage(e, String(e || '')),
 writtenLocal: written.length > 0,
 keepLocalConfig: rollbackErrors.length === 0,
 rollback: true,
@@ -25115,7 +25368,7 @@ return true;
 console.warn('[Config Cloud] Upload failed:', e);
 writeConfigCloudSyncReport(makeConfigCloudBaseReport('upload', 'failed', {
 stage: writtenRemote ? 'verify' : 'write_new',
-reason: e && e.message ? e.message : String(e || ''),
+reason: formatCloudErrorMessage(e, String(e || '')),
 writtenRemote,
 keepOldRemote: true,
 keepLocalConfig: true,
@@ -25182,7 +25435,7 @@ return true;
 console.warn('[Config Cloud] Clear failed:', e);
 writeConfigCloudSyncReport(makeConfigCloudBaseReport('clear', 'failed', {
 stage: 'clear',
-reason: e && e.message ? e.message : String(e || ''),
+reason: formatCloudErrorMessage(e, String(e || '')),
 writtenRemote: false,
 keepOldRemote: true,
 keepLocalConfig: true,
@@ -26924,7 +27177,7 @@ hd.innerHTML = `
     <span></span>
 </div>
 <div class="pk-col" data-k="name" style="justify-content:flex-start;">
-    <div id="pk-name-text-wrap" style="display:flex;align-items:center;">${L.col_name}<span></span></div>
+    <div id="pk-name-text-wrap" style="display:flex;align-items:center;">${L.col_name}<span style="display:inline-block; min-width:18px; text-align:center;"></span></div>
     <div id="pk-btn-invert" class="pk-btn pk-force-tip" data-pk-tip="${L.btn_invert}" style="margin-left:12px; cursor:pointer; display:${(!S.dupMode && S.getSelectedCount() > 0) ? 'flex' : 'none'}; align-items:center; color:var(--pk-fg); padding:0; pointer-events:auto;">
         ${CONF.icons.invert}
         <span style="margin-left:2px; white-space:nowrap;">${L.btn_invert}</span>
@@ -27012,7 +27265,7 @@ hd.innerHTML = `
     <span></span>
 </div>
     <div class="pk-col" data-k="name" style="justify-content:flex-start;">
-        <div id="pk-name-text-wrap" style="display:flex;align-items:center;">${L.col_name}<span></span></div>
+        <div id="pk-name-text-wrap" style="display:flex;align-items:center;">${L.col_name}<span style="display:inline-block; min-width:18px; text-align:center;"></span></div>
     ${(!isAnalyzeRoot && !S.isFlattened && !S.dupMode && !(S.shareParseMode && S.shareParseInsightMode)) ? `
     <div id="pk-btn-folder-first" class="pk-btn pk-force-tip" data-pk-tip="${L.lbl_folder_first}" style="margin-left:8px; cursor:pointer; display:flex; align-items:center; color:#666; font-size:12px; flex-shrink:0; padding:0;">
     ${CONF.icons.folderFirst}
@@ -27154,7 +27407,7 @@ if (S._linkBookmarkGridExitSync) {
 endLinkBookmarkGridExitSync();
 return;
 }
-if (!isGridView()) {
+if (!isGridView() || S.display.length === 0) {
 requestAnimationFrame(() => {
 endFolderViewSync();
 if (UI.win) UI.win.classList.remove('pk-view-switching');
@@ -27210,7 +27463,9 @@ return;
 }
 }
 
-if (S.loading) {
+const keepHistoryFirstPageLoader = !!(S.historyMode && (S.historyLoading || S.historyFirstPageLoading) && (!Array.isArray(S.historyItems) || S.historyItems.length === 0) && !(Number(S.historyLoadedPageCount) > 0));
+
+if (S.loading || keepHistoryFirstPageLoader) {
 const keepProgressiveSearchLoader = !!((S.offlineMode || S.recentMode) && S.search);
 const keepHistoryLoader = !!S.historyMode;
 const shouldKeepExistingLoader = keepProgressiveSearchLoader || keepHistoryLoader;
@@ -28299,13 +28554,12 @@ if (item.status === 'DONE' && item.file && item.mime_type && item.mime_type.star
 
 const hasReadyThumb = item.status === 'DONE' && item.thumbnail_link && item.thumbnail_link !== item.icon_link;
 if (!hasReadyThumb) {
-    const scriptIcon = getIcon(item);
     if (isMax) {
-        const boxStyle = "width:54px; min-width:54px; height:100%; display:flex; align-items:center; justify-content:flex-start !important; margin-right:12px; position:relative;";
-        return `<div class="pk-max-icon-box" style="${boxStyle}"><div style="transform: translateX(-6px); display:flex;">${scriptIcon}</div>${blHtml}</div>`;
+        const boxStyle = "width:54px; min-width:54px; height:100%; display:flex; align-items:center; justify-content:center !important; margin-right:12px; position:relative;";
+        return `<div class="pk-max-icon-box" style="${boxStyle}">${getDirListIconSlotHtml(item, { mode: 'listMax', size: 50, remoteObjectFit: 'contain', remoteRadius: '4px' })}${blHtml}</div>`;
     }
-    return `<div class="pk-min-icon">
-        <div class="pk-min-icon-inner">${scriptIcon}</div>
+    return `<div class="pk-min-icon" style="display:flex;align-items:center;justify-content:center;position:relative;">
+        ${getDirListIconSlotHtml(item, { mode: 'list', size: 24, remoteObjectFit: 'contain' })}
         ${blHtml}
     </div>`;
 }
@@ -28755,10 +29009,10 @@ statusText = L.msg_task_paused;
 }
 
 if (d.phase === 'PHASE_TYPE_ERROR' && d.message) {
-statusText = d.message;
+statusText = formatCloudErrorMessage({ message: d.message, phase: d.phase, data: d }, d.message);
 }
 
-html += `<div style="color:${statusColor}; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${esc(statusText)}">${statusText}</div>`;
+html += `<div style="color:${statusColor}; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${esc(statusText)}">${esc(statusText)}</div>`;
 
 let progressHtml = '';
 if (isOfflineRefMissing) {
@@ -28810,15 +29064,17 @@ if (activeStatus.includes(d.status)) statusColor = 'var(--pk-pri)';
 else if (d.status === 'DONE') statusColor = '#52c41a';
 else if (d.status === 'ERROR') statusColor = '#d93025';
 else if (d.status === 'PAUSED') statusColor = '#faad14';
+const uploadStatusText = String(d.message || '');
+const uploadProgress = Math.max(0, Math.min(100, Math.floor(Number(d.progress) || 0)));
 
 html += `
 <div style="display:flex; flex-direction:column; justify-content:center; gap:4px; width:100%; min-width:0;">
     <div style="display:flex; justify-content:space-between; font-size:12px; min-width:0;">
-        <span class="pk-force-tip" style="color:${statusColor}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-right:8px; display:block;" data-pk-tip="${esc(d.message)}">${esc(d.message)}</span>
-        <span class="pk-up-prog-txt" style="flex-shrink:0;">${Math.floor(d.progress)}%</span>
+        <span class="pk-force-tip" style="color:${statusColor}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-right:8px; display:block;" data-pk-tip="${esc(uploadStatusText)}">${esc(uploadStatusText)}</span>
+        <span class="pk-up-prog-txt" style="flex-shrink:0;">${uploadProgress}%</span>
     </div>
     <div style="width:100%; height:4px; background:var(--pk-bd); border-radius:2px; overflow:hidden; flex-shrink:0;">
-        <div class="pk-up-prog-bar" style="width:${d.progress}%; height:100%; background:${statusColor}; transition:width 0.2s;"></div>
+        <div class="pk-up-prog-bar" style="width:${uploadProgress}%; height:100%; background:${statusColor}; transition:width 0.2s;"></div>
     </div>
 </div>
 `;
@@ -28831,18 +29087,15 @@ const isShareDisabled = (d.share_status === 'DELETED') || (d.limit_count > 0 && 
 const lockHtml = d.pass_code ? `<div class="pk-share-lock">${CONF.icons.lock}</div>` : '';
 
 if (isShareDisabled) {
-iconImg = `<div class="pk-share-icon-wrap pk-share-icon-disabled" draggable="false" style="opacity:0.6;">${CONF.typeIcons.file}</div>`;
+iconImg = getShareOfficialListIconHtml(d, lockHtml, true);
 } else {
 const currentIcon = getDynamicIcon(d);
 const isUsingThumb = currentIcon.includes('pk-max-thumb');
 
 if (isUsingThumb) {
     iconImg = `<div class="pk-share-icon-wrap" style="margin-right:20px !important;">${currentIcon}${lockHtml}</div>`;
-} else if (iconUrl) {
-    iconImg = `<div class="pk-share-icon-wrap" draggable="false" style="display:flex;align-items:center;justify-content:center;"><img draggable="false" src="${iconUrl}" style="width:24px;height:24px;object-fit:contain;flex-shrink:0;">${lockHtml}</div>`;
 } else {
-    const isFolder = d.kind === 'drive#folder';
-    iconImg = `<div class="pk-share-icon-wrap" draggable="false"><div style="width:100%;height:100%;${isFolder?'':'transform:scale(1.08);'}">${getIcon(d)}</div>${lockHtml}</div>`;
+    iconImg = getShareOfficialListIconHtml(d, lockHtml, false);
 }
 }
 
@@ -28880,7 +29133,7 @@ statusText = dayUnit && timeLeft.endsWith(dayUnit) && expireSuffix.startsWith(da
 const isUrgent = hasExpireSeconds && expireSeconds >= 0 && expireSeconds <= 24 * 3600;
 statusColor = isUrgent ? '#ff4d4f' : 'inherit';
 }
-html += `<div style="text-align:center;color:${statusColor};font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${esc(statusText)}">${statusText}</div>`;
+html += `<div style="text-align:center;color:${statusColor};font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${esc(statusText)}">${esc(statusText)}</div>`;
 
 const shareDate = fmtDate(d.modified_time);
 html += `<div style="text-align:right;font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${shareDate}">${shareDate}</div>`;
@@ -29374,6 +29627,23 @@ openMenu();
 };
 }
 
+const prepareFolderNavigationVisual = () => {
+if (typeof S.clearSelection === 'function') S.clearSelection();
+S.activeId = '';
+S.lastSelIdx = -1;
+S.items = [];
+S.display = [];
+S.itemMap.clear();
+S.pagingLoading = false;
+S.offlinePagingPending = false;
+if (UI.win) UI.win.setAttribute('data-cur-pid', S.path[S.path.length - 1]?.id || 'root');
+renderCrumb();
+refresh();
+updateStat();
+setLoad(true, true);
+updateLoadTxt(L.loading_detail);
+};
+
 const triggerOpen = () => {
 if (S.movingIds.has(d.id)) return;
 
@@ -29493,6 +29763,7 @@ if (!S.trashMode) {
             stopLiveManualRefreshBeforePathChange('path_change');
             S.path = [{ id: '', name: L.btn_nav_home }, { id: d.id, name: d.name }];
         }
+        prepareFolderNavigationVisual();
         load();
     } else {
         const lastNode = S.path[S.path.length - 1];
@@ -29501,7 +29772,9 @@ if (!S.trashMode) {
         syncFolderFirstFromGlobal();
         S.saveNavScrollTop(S.getNavBucketKey(), S.path);
         stopLiveManualRefreshBeforePathChange('path_change');
-        S.path.push(d); load();
+        S.path.push(d);
+        prepareFolderNavigationVisual();
+        load();
     }
 }
 } else {
@@ -29719,6 +29992,7 @@ if (isExitMode) {
         S.path = [{ id: '', name: L.btn_nav_home }, { id: d.id, name: d.name }];
     }
 
+    prepareFolderNavigationVisual();
     load();
 
 } else {
@@ -29727,6 +30001,7 @@ if (isExitMode) {
     S.saveNavScrollTop(S.getNavBucketKey(), S.path);
     stopLiveManualRefreshBeforePathChange('path_change');
     S.path.push(d);
+    prepareFolderNavigationVisual();
     load();
 }
 } else {
@@ -30549,6 +30824,220 @@ crumbItem.classList.add('pk-drop-target');
 }
 };
 
+const getCloudErrorText = (e) => {
+let extra = '';
+try { extra = e && e.data ? JSON.stringify(e.data) : ''; } catch (err) {}
+return [
+e?.code,
+e?.error,
+e?.errorCode,
+e?.message,
+e?.data?.code,
+e?.data?.error,
+e?.data?.error_code,
+e?.data?.message,
+e?.data?.msg,
+e?.data?.error_description,
+extra
+].filter(v => v !== undefined && v !== null).map(v => String(v).toLowerCase()).join(' ');
+};
+
+const isMissingCloudFileError = (e) => {
+const status = Number(e?.status || e?.statusCode || e?.response?.status || e?.response?.statusCode || 0);
+const text = getCloudErrorText(e);
+const missingCodes = (CONF.offlineReferenceMissingCodes || []).map(x => String(x).toLowerCase());
+if (status === 404 || Number(e?.errorCode || 0) === 5) return true;
+if (missingCodes.some(k => k && text.includes(k))) return true;
+return /(?:file|item|resource|record)[_ -]?not[_ -]?found|already[_ -]?deleted|resource deleted|file deleted/.test(text);
+};
+
+const getCloudRawErrorMessage = (e) => {
+const values = [
+e?.data?.error_description,
+e?.data?.message,
+e?.data?.msg,
+e?.data?.detail,
+e?.message,
+e?.error_description,
+e?.msg,
+e?.detail,
+e?.error,
+e?.code
+];
+const hit = values.find(v => v !== undefined && v !== null && String(v).trim());
+return hit === undefined ? '' : String(hit).trim();
+};
+
+const stripBackendEnglishTail = (msg) => {
+let text = String(msg || '').trim();
+if (!text) return '';
+if (/[\u4e00-\u9fa5]/.test(text)) {
+text = text.replace(/\s*\/\s*[A-Za-z][A-Za-z0-9_\- .,:;'"()[\]{}]+$/g, '').trim();
+}
+return text;
+};
+
+const formatCloudErrorMessage = (e, fallback = '') => {
+const L = getStrings();
+if (typeof isOfflineReferenceMissingError === 'function' && isOfflineReferenceMissingError(e)) return getOfflineReferenceMissingText() || L.err_item_deleted || L.str_failed;
+if (typeof isMissingCloudFileError === 'function' && isMissingCloudFileError(e)) return getOfflineReferenceMissingText() || L.err_item_deleted || L.str_failed;
+const raw = getCloudRawErrorMessage(e);
+if (raw) return raw;
+return fallback || L.str_failed || L.str_error;
+};
+
+const isClipboardSourceUnavailableError = (e) => isMissingCloudFileError(e);
+
+const isClipboardSourceUnavailableMeta = (meta) => {
+if (!meta || typeof meta !== 'object') return false;
+const boolKeys = ['trashed','deleted','is_deleted','isDeleted','in_trash','inTrash','is_trashed','isTrashed','recycled','is_recycled','isRecycled'];
+if (boolKeys.some(k => meta[k] === true || String(meta[k]).toLowerCase() === 'true')) return true;
+const timeKeys = ['delete_time','deleteTime','deleted_at','deletedAt','trashed_at','trashedAt','recycled_at','recycledAt'];
+if (timeKeys.some(k => meta[k])) return true;
+const statusText = [
+meta.status,
+meta.phase,
+meta.file_status,
+meta.fileStatus,
+meta.state,
+meta.audit_status,
+meta.auditStatus,
+meta.lifecycle,
+meta.parent_id,
+meta.parentId,
+meta.parent && meta.parent.id
+].filter(v => v !== undefined && v !== null).map(v => String(v).toLowerCase()).join(' ');
+const missingCodes = (CONF.offlineReferenceMissingCodes || []).map(x => String(x).toLowerCase());
+return missingCodes.some(k => k && statusText.includes(k));
+};
+
+const pruneClipboardByDeletedIds = (deletedIds) => {
+if (!S.clipItems || S.clipItems.length === 0 || !deletedIds) return 0;
+const idSet = deletedIds instanceof Set ? deletedIds : new Set(Array.from(deletedIds || []));
+if (idSet.size === 0) return 0;
+const before = S.clipItems.length;
+S.clipItems = S.clipItems.filter(it => it && it.id && !idSet.has(it.id));
+const removed = before - S.clipItems.length;
+if (removed > 0 && S.clipItems.length === 0) {
+S.clipType = '';
+S.clipSourceParentId = '';
+}
+if (removed > 0) updateStat();
+return removed;
+};
+
+const validateClipboardItemsBeforePaste = async (items) => {
+const src = Array.isArray(items) ? items.filter(it => it && it.id) : [];
+if (src.length === 0) return { validItems: [], invalidCount: 0 };
+const validItems = [];
+let invalidCount = 0;
+let index = 0;
+let checked = 0;
+const total = src.length;
+let progressTask = null;
+let progressTimer = 0;
+const updateFloat = () => {
+if (progressTask && typeof progressTask.update === 'function') progressTask.update(`${L.msg_clip_checking} ${checked}/${total}`);
+};
+progressTimer = setTimeout(() => {
+progressTask = FloatBarManager.create(L.msg_clip_checking);
+updateFloat();
+}, 1000);
+const workerCount = Math.min(16, total);
+const worker = async () => {
+while (index < total) {
+const currentIndex = index++;
+const item = src[currentIndex];
+try {
+const meta = await apiGet(item.id);
+if (isClipboardSourceUnavailableMeta(meta)) {
+invalidCount++;
+} else {
+validItems.push(meta ? { ...item, ...meta } : item);
+}
+} catch (e) {
+if (isClipboardSourceUnavailableError(e)) invalidCount++;
+else validItems.push(item);
+}
+checked++;
+if (progressTask && (checked % 20 === 0 || checked === total)) updateFloat();
+}
+};
+try {
+await Promise.all(Array.from({ length: workerCount }, worker));
+} finally {
+if (progressTimer) clearTimeout(progressTimer);
+if (progressTask) progressTask.destroy();
+}
+return { validItems, invalidCount };
+};
+
+const waitFileTransferTask = async (data) => {
+if (!data || !data.task_id) return;
+await new Promise(resolve => {
+const checkTask = async () => {
+try {
+const tRes = await fetch(`https://api-drive.mypikpak.com/drive/v1/tasks/${data.task_id}`, { headers: getHeaders() });
+const tData = await tRes.json();
+if (tData.phase === 'PHASE_TYPE_COMPLETE' || tData.phase === 'PHASE_TYPE_ERROR') resolve();
+else setTimeout(checkTask, 800);
+} catch { resolve(); }
+};
+checkTask();
+});
+};
+
+const createFileTransferError = (res, data) => {
+const msg = typeof pickOfficialApiErrorText === 'function'
+? pickOfficialApiErrorText(data, `API ${res.status}`)
+: (data.error_description || data.message || data.msg || data.error || `API ${res.status}`);
+const err = new Error(msg);
+err.status = res.status;
+err.statusCode = res.status;
+err.code = String(data.code || data.error || data.error_code || (res.status === 404 ? 'not_found' : '') || '');
+err.errorCode = Number(data.error_code || 0) || 0;
+err.data = data;
+err.response = { status: res.status, statusCode: res.status, data };
+return err;
+};
+
+const requestFileTransferChunk = async (endpoint, ids, apiTargetPid) => {
+const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/${endpoint}`, {
+method: 'POST',
+headers: getHeaders(),
+body: JSON.stringify({ ids, to: { parent_id: apiTargetPid } })
+});
+const data = await res.json().catch(() => ({}));
+if (!res.ok) throw createFileTransferError(res, data);
+await waitFileTransferTask(data);
+return data;
+};
+
+const submitFileTransferChunk = async (endpoint, chunk, apiTargetPid) => {
+const ids = chunk.map(it => it.id);
+try {
+const data = await requestFileTransferChunk(endpoint, ids, apiTargetPid);
+return { items: chunk, data, skippedItems: [] };
+} catch (e) {
+if (!isClipboardSourceUnavailableError(e)) throw e;
+if (chunk.length === 1) return { items: [], data: { files: [] }, skippedItems: chunk };
+const okItems = [];
+const skipItems = [];
+const files = [];
+for (const item of chunk) {
+try {
+const data = await requestFileTransferChunk(endpoint, [item.id], apiTargetPid);
+okItems.push(item);
+if (Array.isArray(data.files)) files.push(...data.files);
+} catch (err) {
+if (isClipboardSourceUnavailableError(err)) skipItems.push(item);
+else throw err;
+}
+}
+return { items: okItems, data: { files }, skippedItems: skipItems };
+}
+};
+
 const executeFileTransfer = async (items, opType, sourcePid, targetPid, targetNameForLog) => {
 if (!items || items.length === 0) return;
 
@@ -30595,6 +31084,8 @@ const updateFloat = progressTask.update;
 
 const BATCH_SIZE = 500;
 let processedCount = 0;
+let skippedTransferCount = 0;
+const skippedTransferIds = new Set();
 const total = items.length;
 const endpoint = opType === 'move' ? 'files:batchMove' : 'files:batchCopy';
 const actionText = opType === 'move' ? L.str_moving : L.str_copying;
@@ -30604,41 +31095,39 @@ refresh();
 try {
 for (let i = 0; i < total; i += BATCH_SIZE) {
 const chunk = items.slice(i, i + BATCH_SIZE);
-const chunkIds = chunk.map(it => it.id);
+let chunkIds = chunk.map(it => it.id);
 
 updateFloat(`${actionText} ${processedCount}/${total} -> ${targetNameForLog || L.str_target_folder}`);
 
 const apiTargetPid = (targetPid === 'root') ? '' : targetPid;
-
-const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/${endpoint}`, {
-method: 'POST',
-headers: getHeaders(),
-body: JSON.stringify({ ids: chunkIds, to: { parent_id: apiTargetPid } })
-});
-
-const data = await res.json().catch(() => ({}));
-if (!res.ok) throw new Error(data.error_description || `API ${res.status}`);
-
-if (data.task_id) {
-await new Promise(resolve => {
-const checkTask = async () => {
-    try {
-        const tRes = await fetch(`https://api-drive.mypikpak.com/drive/v1/tasks/${data.task_id}`, { headers: getHeaders() });
-        const tData = await tRes.json();
-        if (tData.phase === 'PHASE_TYPE_COMPLETE' || tData.phase === 'PHASE_TYPE_ERROR') resolve();
-        else setTimeout(checkTask, 800);
-    } catch { resolve(); }
-};
-checkTask();
-});
+const transferResult = await submitFileTransferChunk(endpoint, chunk, apiTargetPid);
+const skippedItems = transferResult.skippedItems || [];
+if (skippedItems.length > 0) {
+skippedTransferCount += skippedItems.length;
+skippedItems.forEach(it => {
+if (it && it.id) {
+skippedTransferIds.add(it.id);
+S.movingIds.delete(it.id);
 }
-else if (opType === 'move' && chunkIds.length > 0) {
+});
+if (S.broadcast) S.broadcast.postMessage({ type: 'LOCK_REM', ids: skippedItems.map(it => it.id).filter(Boolean) });
+}
+const successItems = transferResult.items || [];
+const data = transferResult.data || {};
+chunkIds = successItems.map(it => it.id);
+if (chunkIds.length === 0) {
+if (typeof updateGlobalLockCSS === 'function') updateGlobalLockCSS();
+processedCount += chunk.length;
+continue;
+}
+
+if (opType === 'move' && chunkIds.length > 0) {
 const lastId = chunkIds[chunkIds.length - 1];
 let retry = 0;
 while (retry < 20) {
 try {
     const meta = await apiGet(lastId);
-    if (meta.parent_id === targetPid || meta.trashed) break;
+    if (meta.parent_id === targetPid || isClipboardSourceUnavailableMeta(meta)) break;
 } catch(e) { break; }
 await sleep(500); retry++;
 }
@@ -30683,10 +31172,16 @@ refresh();
 processedCount += chunk.length;
 }
 
+const transferItems = skippedTransferIds.size ? items.filter(it => it && !skippedTransferIds.has(it.id)) : items;
+if (!transferItems.length) {
+showToast(L.msg_clip_all_missing, 'error');
+return;
+}
+
 if (targetPid) gmSet('pk_fmod_' + targetPid, new Date(getServerNow()).toISOString());
 
 if (S.analyzeMap) {
-const deltaSize = items.reduce((acc, it) => acc + parseInt(it.size || 0), 0);
+const deltaSize = transferItems.reduce((acc, it) => acc + parseInt(it.size || 0), 0);
 if (deltaSize > 0) {
 const updateAnalyzeChain = (startId, isAdd) => {
 let currId = startId;
@@ -30748,7 +31243,7 @@ if (typeof globalCache !== 'undefined') globalCache.delete(fid);
 if (S.cache) S.cache.delete(fid);
 }
 };
-items.forEach(it => {
+transferItems.forEach(it => {
 if (it.kind === 'drive#folder') purgeMovedDescendants(it.id);
 });
 }
@@ -30758,10 +31253,11 @@ if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
 if (typeof scheduleBackgroundResume === 'function') scheduleBackgroundResume();
 
 if (window.pkSmartRefreshTrigger) window.pkSmartRefreshTrigger(true);
-showToast(opType === 'move' ? L.msg_move_done : L.msg_copy_success);
+if (skippedTransferCount > 0) showToast(L.msg_clip_missing_skipped.replace('{n}', skippedTransferCount), 'warning');
+else showToast(opType === 'move' ? L.msg_move_done : L.msg_copy_success);
 
 } catch (e) {
-showToast(`${L.str_error}: ${e.message}`, 'error');
+showToast(`${L.str_error}: ${formatCloudErrorMessage(e)}`, 'error');
 load(false, true);
 } finally {
 S.movingIds.clear();
@@ -32717,28 +33213,34 @@ let isSingleMediaWithCover = false;
 if (n === 1) {
 const id = selectedIds[0];
 const item = S.itemMap.get(id);
-if (item && item.kind !== 'drive#folder') {
+if (item) {
 const mime = (item.mime_type || '').toLowerCase();
 const ext = (item.name || '').split('.').pop().toLowerCase();
-const isVid = mime.startsWith('video/') || ['mp4','mkv','avi','mov','wmv','flv','webm','ts'].includes(ext);
-const isImg = mime.startsWith('image/') || ['jpg','jpeg','png','gif','bmp','webp','heic'].includes(ext);
+const isFolder = item.kind === 'drive#folder';
+const isVid = !isFolder && (mime.startsWith('video/') || ['mp4','mkv','avi','mov','wmv','flv','webm','ts'].includes(ext));
+const isImg = !isFolder && (mime.startsWith('image/') || ['jpg','jpeg','png','gif','bmp','webp','heic'].includes(ext));
 let isTaskReady = true;
 if (S.offlineMode) isTaskReady = item.phase === 'PHASE_TYPE_COMPLETE';
 if (S.uploadMode) isTaskReady = item.status === 'DONE';
 
+const searchableCover = typeof resolveSearchableCoverForImageSearch === 'function'
+? resolveSearchableCoverForImageSearch(item)
+: getDirectSearchableCoverForImageSearch(item);
+
 if (isVid && isTaskReady) isSingleVideo = true;
-if ((isVid || isImg) && isTaskReady) {
-if (item.thumbnail_link && item.thumbnail_link !== item.icon_link) {
-const isMax = UI.win.classList.contains('pk-maximized');
-const isBlur = typeof isBlurEnabledForView === 'function'
-? isBlurEnabledForView(isGridView() ? 'grid' : 'list')
-: (typeof gmGet !== 'undefined' ? gmGet('pk_blur_thumb', false) : false);
-if (isMax && isBlur) {
+
+if (isFolder && searchableCover) {
     isSingleMediaWithCover = true;
-} else if (window.pkGlobalThumbCache && window.pkGlobalThumbCache.has(item.id)) {
-    isSingleMediaWithCover = true;
-}
-}
+} else if ((isVid || isImg) && isTaskReady && searchableCover) {
+    const isMax = UI.win.classList.contains('pk-maximized');
+    const isBlur = typeof isBlurEnabledForView === 'function'
+    ? isBlurEnabledForView(isGridView() ? 'grid' : 'list')
+    : (typeof gmGet !== 'undefined' ? gmGet('pk_blur_thumb', false) : false);
+    if (isMax && isBlur) {
+        isSingleMediaWithCover = true;
+    } else if (window.pkGlobalThumbCache && window.pkGlobalThumbCache.has(item.id)) {
+        isSingleMediaWithCover = true;
+    }
 }
 }
 }
@@ -33401,12 +33903,11 @@ return !!(m && m.link && m.link.url && isOrigin);
 }) : null;
 const officialOriginVideo = (officialOriginMedia && officialOriginMedia.video) || {};
 const officialOriginUrl = officialOriginMedia && officialOriginMedia.link ? officialOriginMedia.link.url : '';
-const originUrl = officialOriginUrl || data.web_content_link || '';
 
-if (originUrl) {
+if (officialOriginUrl) {
 list.push({
 name: L.str_original,
-url: originUrl,
+url: officialOriginUrl,
 isOriginal: true,
 rawName: (officialOriginMedia && (officialOriginMedia.media_name || officialOriginMedia.resolution_name || officialOriginMedia.video_stream_id)) || L.str_original,
 codecText: officialOriginMedia ? getPikPakMediaCodecText(officialOriginMedia) : '',
@@ -33531,18 +34032,17 @@ bestMatch = originalMatch;
 } else if (list.length > 0) {
 bestMatch = list[0];
 } else {
-bestMatch = { name: L.str_original, link: data.web_content_link, active: true, isOriginal: true };
-list.push(bestMatch);
+bestMatch = { name: '', link: data.web_content_link || '', active: true, isOriginal: false };
 }
 
-bestMatch.active = true;
-return { src: bestMatch.link, name: bestMatch.name, list: list };
+if (bestMatch) bestMatch.active = true;
+return { src: bestMatch ? bestMatch.link : '', name: bestMatch ? bestMatch.name : '', list: list };
 };
 
 const launchPotPlayerWithFallback = (cleanUrl, opts = {}) => {
 const L = getStrings();
 const button = opts.button || null;
-const timeout = opts.timeout || 3500;
+const timeout = opts.timeout || 8000;
 const source = normalizePotPlayerLaunchSource(opts.source);
 const launchAt = Date.now();
 let copiedAt = launchAt;
@@ -33587,9 +34087,7 @@ if (!document.hasFocus()) markOpened();
 }
 
 try {
-const ua = navigator.userAgent.replace(/"/g, '');
-const cmd = `${cleanUrl} /user_agent="${ua}" /referer="https://mypikpak.com/"`;
-window.location.href = `potplayer://${cmd}`;
+window.location.href = `potplayer://${cleanUrl}`;
 } catch (e) {}
 
 const finishLikelyOpen = () => {
@@ -33699,9 +34197,7 @@ ${versionOutdated ? `<div class="pk-potfix-version-note">${L.potplayer_fix_versi
 <div class="pk-potfix-status" id="pk_potfix_path_status">${getPathStatusText()}</div>
 <div class="pk-potfix-repair-actions">
 <button type="button" class="pk-btn" id="pk_potfix_custom_install">${L.potplayer_fix_download_custom_install}</button>
-<button type="button" class="pk-btn" id="pk_potfix_browser_policy">${L.potplayer_fix_browser_policy}</button>
 </div>
-<div class="pk-potfix-adv-desc">${L.potplayer_fix_browser_policy_desc}</div>
 </div>
 <div class="pk-potfix-footer">
 <div class="pk-potfix-secondary">
@@ -33768,11 +34264,6 @@ showToast(L.potplayer_fix_path_invalid, 'warning');
 return;
 }
 showToast(L.potplayer_fix_install_downloaded);
-};
-
-m.querySelector('#pk_potfix_browser_policy').onclick = () => {
-downloadPotPlayerRegFile('browser_policy');
-showToast(L.potplayer_fix_browser_policy_downloaded);
 };
 
 m.querySelector('#pk_potfix_retry').onclick = () => {
@@ -34763,7 +35254,7 @@ if (!destroyed && token === loadToken && !(audio.error && audio.error.code)) set
 }
 } catch (e) {
 if (destroyed || token !== loadToken) return;
-markAudioFinalFailure((e && e.message) || L.audio_link_missing);
+markAudioFinalFailure(formatCloudErrorMessage(e, L.audio_link_missing));
 } finally {
 if (token === loadToken) loadingAudio = false;
 updatePlayButton();
@@ -35231,6 +35722,10 @@ if (handledByExternalPlayer) return;
 const shouldSyncOfficialPlayHistory = (it = item) => !(it && it._isShareItem);
 let sharePreviewLimitTipShown = false;
 let sharePreviewSoftLimitTipShown = false;
+let sharePreviewSoftLimitSuppressed = false;
+let sharePreviewStallWatch = null;
+let sharePreviewStallLatched = false;
+let sharePreviewStallTimer = null;
 const getSharePreviewLimitTip = (it = item) => {
 if (!it || !it._isShareItem) return '';
 const p = it.params || {};
@@ -35244,6 +35739,18 @@ if (!p.anonymous_play_seconds && !p.anonymous_play_range) return '';
 return L.msg_share_ext_preview_limited_save || L.msg_share_preview_limited_save || '';
 };
 const getSharePreviewSoftLimitTip = () => L.msg_share_preview_soft_limit;
+const hideSharePreviewSoftLimitToast = () => {
+try {
+const key = `warning|${normalizePkToastKeyText(getSharePreviewSoftLimitTip())}`;
+document.querySelectorAll('.pk-msg-toast').forEach(n => {
+if (n && n.dataset && n.dataset.pkToastKey === key) {
+n.classList.add('pk-hide');
+n.classList.remove('pk-show');
+setTimeout(() => { try { n.remove(); } catch (e) {} }, 180);
+}
+});
+} catch (e) {}
+};
 const getSharePreviewLimitParams = (it = item, duration = 0) => {
 if (!it || !it._isShareItem) return null;
 const p = it.params || {};
@@ -35259,6 +35766,131 @@ if (range > 0) ratio = Math.max(ratio, range);
 ratio = Math.max(0, Math.min(1, ratio));
 if (!(ratio > 0) || ratio >= 0.995) return null;
 return { ratio, time: dur * ratio, seconds, range };
+};
+
+const getSharePreviewWatchNow = () => {
+try { return performance.now(); } catch (e) { return Date.now(); }
+};
+const isSharePreviewWatchEnabled = () => !!(item && item._isShareItem);
+const resetSharePreviewStallWatch = (keepLatched = false) => {
+sharePreviewStallWatch = null;
+if (!keepLatched) sharePreviewStallLatched = false;
+};
+const startSharePreviewStallWatch = (type = 'playback', targetTime = null, source = '') => {
+if (!isSharePreviewWatchEnabled() || sharePreviewStallLatched) return;
+const cur = Number((v && v.currentTime) || 0);
+const target = Number.isFinite(Number(targetTime)) ? Number(targetTime) : cur;
+if (type !== 'seek' && !(cur > 0.5 || target > 0.5)) return;
+const now = getSharePreviewWatchNow();
+const token = (v && v._pkMediaToken) || mediaSessionToken || 0;
+if (sharePreviewStallWatch && sharePreviewStallWatch.type === 'seek' && type !== 'seek') return;
+if (sharePreviewStallWatch && sharePreviewStallWatch.mediaToken === token && Math.abs((sharePreviewStallWatch.targetTime || 0) - target) < 1) return;
+if (type === 'seek') {
+sharePreviewSoftLimitSuppressed = true;
+hideSharePreviewSoftLimitToast();
+}
+sharePreviewStallWatch = { type, targetTime: target, source, startedAt: now, lastProgressAt: now, lastProgressTime: cur, errorCount: 0, mediaToken: token };
+};
+const abortSharePreviewStallPlayback = (reason = 'stall') => {
+if (!isSharePreviewWatchEnabled()) return false;
+if (sharePreviewStallLatched && box.querySelector('.pk-err-dialog')) return true;
+sharePreviewStallLatched = true;
+sharePreviewSoftLimitSuppressed = true;
+sharePreviewSoftLimitTipShown = true;
+hideSharePreviewSoftLimitToast();
+if (sharePreviewStallWatch) sharePreviewStallWatch.failed = true;
+try { v.pause(); } catch (e) {}
+try {
+if (pkHls) {
+pkHls.stopLoad();
+pkHls.detachMedia();
+pkHls.destroy();
+pkHls = null;
+}
+} catch (e) {}
+box.classList.remove('buffering');
+const loader = d.querySelector('.pk-p-loading');
+if (loader) loader.style.display = 'none';
+const sharePreviewTip = getSharePreviewLimitTip(item);
+if (sharePreviewTip && !sharePreviewLimitTipShown) {
+sharePreviewLimitTipShown = true;
+showToast(sharePreviewTip, 'warning', 7000);
+}
+console.warn('[SharePreview] Playback stalled, abort quality fallback.', {
+reason,
+watch: sharePreviewStallWatch,
+time: v && v.currentTime,
+readyState: v && v.readyState,
+networkState: v && v.networkState,
+currentResName,
+currentLink
+});
+showSadBox(currentResName, 'web_unsupported', {
+url: String(currentLink || ''),
+name: currentResName || ''
+});
+return true;
+};
+const checkSharePreviewStallWatch = (reason = 'timer') => {
+if (!isSharePreviewWatchEnabled() || !sharePreviewStallWatch || sharePreviewStallLatched) return !!sharePreviewStallLatched;
+if (sharePreviewStallWatch.mediaToken && sharePreviewStallWatch.mediaToken !== mediaSessionToken) {
+resetSharePreviewStallWatch();
+return false;
+}
+const now = getSharePreviewWatchNow();
+const cur = Number((v && v.currentTime) || 0);
+const epsilon = Math.max(0.2, Number(CONF.sharePreviewStallProgressEpsilon) || 0.8);
+const moved = Math.abs(cur - Number(sharePreviewStallWatch.lastProgressTime || 0)) >= epsilon;
+if (moved && v && v.readyState >= 2) {
+resetSharePreviewStallWatch();
+return false;
+}
+const timeout = sharePreviewStallWatch.type === 'seek'
+? Math.max(3000, Number(CONF.sharePreviewSeekStallTimeoutMs) || 10000)
+: Math.max(5000, Number(CONF.sharePreviewPlaybackStallTimeoutMs) || 12000);
+const elapsed = now - Number(sharePreviewStallWatch.startedAt || now);
+const errorLimit = Math.max(1, Number(CONF.sharePreviewStallErrorLimit) || 3);
+const stuckByTime = elapsed >= timeout && !moved;
+const stuckByError = Number(sharePreviewStallWatch.errorCount || 0) >= errorLimit && !moved;
+if (!stuckByTime && !stuckByError) return false;
+return abortSharePreviewStallPlayback(reason);
+};
+const markSharePreviewStallError = (err = {}) => {
+if (!isSharePreviewWatchEnabled() || sharePreviewStallLatched) return !!sharePreviewStallLatched;
+if (!sharePreviewStallWatch) {
+if (!box || !box.classList.contains('buffering')) return false;
+startSharePreviewStallWatch('playback', Number((v && v.currentTime) || 0), 'error');
+}
+if (!sharePreviewStallWatch) return false;
+sharePreviewStallWatch.errorCount = Number(sharePreviewStallWatch.errorCount || 0) + 1;
+console.warn('[SharePreview] Stall watch error.', {
+count: sharePreviewStallWatch.errorCount,
+limit: Math.max(1, Number(CONF.sharePreviewStallErrorLimit) || 3),
+type: sharePreviewStallWatch.type,
+time: v && v.currentTime,
+readyState: v && v.readyState,
+networkState: v && v.networkState,
+errCode: v && v.error ? v.error.code : (err && err.force ? 4 : 0),
+currentResName,
+currentLink
+});
+return checkSharePreviewStallWatch('error');
+};
+const markSharePreviewPlaybackProgress = () => {
+if (!isSharePreviewWatchEnabled() || !v) return;
+const cur = Number(v.currentTime || 0);
+if (!(cur > 0)) return;
+if (!sharePreviewStallWatch) return;
+const epsilon = Math.max(0.2, Number(CONF.sharePreviewStallProgressEpsilon) || 0.8);
+if (Math.abs(cur - Number(sharePreviewStallWatch.lastProgressTime || 0)) >= epsilon && v.readyState >= 2) {
+console.warn('[SharePreview] Stall watch recovered.', {
+type: sharePreviewStallWatch.type,
+time: cur,
+watch: sharePreviewStallWatch
+});
+sharePreviewSoftLimitSuppressed = false;
+resetSharePreviewStallWatch();
+}
 };
 
 const isVideoItem = (it) => {
@@ -35322,8 +35954,8 @@ dialog.innerHTML = `
 ${shareExtPreviewTip ? `<div style="width:100%;box-sizing:border-box;font-size:12px;line-height:1.6;color:#f5c26b;background:rgba(245,194,107,.1);border:1px solid rgba(245,194,107,.22);border-radius:8px;padding:9px 11px;margin:-12px 0 22px;text-align:left;">${shareExtPreviewTip}</div>` : ''}
 
 <div style="display:flex;flex-direction:column;gap:25px;width:100%;margin-bottom:25px;text-align:left;">
-<div class="pk-custom-select" id="pk_err_res_cs" style="width:100%;z-index:20;">
-<div class="pk-select-label">${lblRes}</div>
+<fieldset class="pk-custom-select pk-err-field-select" id="pk_err_res_cs" style="width:100%;z-index:20;">
+<legend class="pk-select-label">${lblRes}</legend>
 <div class="pk-select-trigger">
     <span id="txt_err_res">${selectedErrName}</span>
     <div style="display:flex;color:#999;">${CONF.crumbIcons.down}</div>
@@ -35331,10 +35963,10 @@ ${shareExtPreviewTip ? `<div style="width:100%;box-sizing:border-box;font-size:1
 <div class="pk-select-menu pk-scroll">
     ${resOptions}
 </div>
-</div>
+</fieldset>
 
-<div class="pk-custom-select" id="pk_err_player_cs" style="width:100%;z-index:10;">
-<div class="pk-select-label">${L.lbl_player}</div>
+<fieldset class="pk-custom-select pk-err-field-select" id="pk_err_player_cs" style="width:100%;z-index:10;">
+<legend class="pk-select-label">${L.lbl_player}</legend>
 <div class="pk-select-trigger">
     <span id="txt_err_player">${selectedErrPlayer === 'potplayer' ? 'PotPlayer' : L.opt_player_other}</span>
     <div style="display:flex;color:#999;">${CONF.crumbIcons.down}</div>
@@ -35343,7 +35975,7 @@ ${shareExtPreviewTip ? `<div style="width:100%;box-sizing:border-box;font-size:1
     <div class="pk-select-item ${selectedErrPlayer === 'potplayer' ? 'act' : ''}" data-val="potplayer">PotPlayer</div>
     <div class="pk-select-item ${selectedErrPlayer === 'other' ? 'act' : ''}" data-val="other">${L.opt_player_other}</div>
 </div>
-</div>
+</fieldset>
 <button type="button" class="pk-potfix-entry" id="pk_err_potplayer_fix" style="align-self:flex-start;color:#4cc2ff;margin-top:-14px;${selectedErrPlayer === 'potplayer' ? '' : 'display:none;'}">${L.potplayer_fix_entry}</button>
 </div>
 <button id="pk_err_launch_btn" style="background:#fff;color:#000;border:none;padding:10px 40px;border-radius:6px;font-size:14px;font-weight:bold;cursor:pointer;transition:background 0.2s;">${L.btn_start_play}</button>
@@ -35354,7 +35986,10 @@ box.appendChild(dialog);
 const launchBtn = dialog.querySelector('#pk_err_launch_btn');
 const fixBtn = dialog.querySelector('#pk_err_potplayer_fix');
 
-const closeErrMenus = () => dialog.querySelectorAll('.pk-select-menu').forEach(menu => menu.style.display = 'none');
+const closeErrMenus = () => {
+dialog.querySelectorAll('.pk-select-menu').forEach(menu => menu.style.display = 'none');
+dialog.querySelectorAll('.pk-custom-select').forEach(cs => cs.classList.remove('pk-select-open'));
+};
 const removeErrDialog = () => {
 document.removeEventListener('click', closeErrMenus);
 dialog.remove();
@@ -35367,7 +36002,7 @@ const urlParam = new URL(cleanLink).searchParams.get('url');
 if (urlParam) cleanLink = decodeURIComponent(urlParam);
 } catch (e) {}
 }
-return cleanLink;
+return rewriteDownloadLinkForAccel(cleanLink, 'external');
 };
 const updateErrPotPlayerFixEntry = () => {
 if (fixBtn) fixBtn.style.display = selectedErrPlayer === 'potplayer' ? 'inline-flex' : 'none';
@@ -35385,6 +36020,7 @@ e.stopPropagation();
 const isOpen = menu.style.display === 'block';
 closeErrMenus();
 menu.style.display = isOpen ? 'none' : 'block';
+container.classList.toggle('pk-select-open', !isOpen);
 };
 
 container.querySelectorAll('.pk-select-item').forEach(item => {
@@ -35394,6 +36030,7 @@ container.querySelectorAll('.pk-select-item').forEach(i => i.classList.remove('a
 item.classList.add('act');
 txt.textContent = item.textContent;
 menu.style.display = 'none';
+container.classList.remove('pk-select-open');
 onSelect(item.dataset.val, item.textContent);
 };
 });
@@ -35603,6 +36240,7 @@ isSwitching = true;
 lastWorkingLink = null;
 lastWorkingResName = null;
 failedUrls.clear();
+resetSharePreviewStallWatch();
 const v = d.querySelector('#pk_video');
 const loader = d.querySelector('.pk-p-loading');
 const poster = d.querySelector('#pk_p_poster');
@@ -35659,6 +36297,7 @@ v.load();
 
 if (progFilled) progFilled.style.setProperty('width', '0%', 'important');
 sharePreviewSoftLimitTipShown = false;
+sharePreviewSoftLimitSuppressed = false;
 if (sharePreviewLimitMarker) sharePreviewLimitMarker.style.display = 'none';
 const newItem = videoPlaylist[newIdx];
 if (tCur) tCur.textContent = '00:00:00';
@@ -36268,7 +36907,7 @@ const isColdStart = v.currentTime < 1 && !hasHlsPlaybackEvidence();
 if (data.fatal) {
 switch (data.type) {
     case HlsErrorTypes.NETWORK_ERROR:
-        if (data.response && (data.response.code === 403 || data.response.code === 404 || data.response.code === 401)) {
+        if (data.response && (data.response.code === 403 || data.response.code === 404 || data.response.code === 401 || data.response.code === 416)) {
             console.warn(`[Hls] Fatal Network Error (${data.response.code}). Triggering rollback.`);
             handleVideoError({ force: true, target: v, mediaToken: currentMediaToken });
         } else {
@@ -36485,17 +37124,15 @@ ${curListIdx + 1} / ${totalInList}
 <div class="pk-player-progress-container" id="pk_p_prog_area" style="position: relative; flex: 1; height: 16px; cursor: pointer; display: flex; align-items: center; touch-action: none; user-select: none; -webkit-user-select: none;">
 <div class="pk-player-progress-bg" style="width: 100%; height: 4px; background: rgba(255,255,255,0.2); position: relative; border-radius: 2px; backdrop-filter: blur(2px);">
     <div class="pk-player-progress-filled" id="pk_p_filled" style="height: 100%; background: var(--pk-pri); width: 0; position: relative; border-radius: 2px;">
-        <div class="pk-player-progress-thumb" style="position: absolute; right: -11px; width: 22px; height: 22px; background: transparent; display: flex; align-items: center; justify-content: center;">
-            <svg viewBox="0 0 192 192" shape-rendering="geometricPrecision" style="width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));">
+        <div class="pk-player-progress-thumb" style="position: absolute; right: -12px; width: 24px; height: 24px; background: transparent; display: flex; align-items: center; justify-content: center;">
+            <svg viewBox="0 0 192 192" shape-rendering="geometricPrecision" style="width: 22px; height: 22px; display: block; overflow: visible; filter: none;">
                 <path d="M23.3 57.5 82.5 37" fill="none" stroke="#444" stroke-width="12" stroke-linecap="round" stroke-miterlimit="10"/>
                 <path d="m168.7 57.5-59.2-20.5" fill="none" stroke="#444" stroke-width="12" stroke-linecap="round" stroke-miterlimit="10"/>
                 <rect x="22" y="57.5" width="148" height="92.5" rx="18" ry="18" fill="#fff" stroke="#444" stroke-width="12" />
-
                 <g class="pk-eye-open">
                     <path class="pk-p-eye" d="M69.7 118.5c3.8 0 6.9-3.1 6.9-6.9V97.1c0-3.8-3.1-6.9-6.9-6.9-3.8 0-6.9 3.1-6.9 6.9v14.6c0 3.8 3.1 6.8 6.9 6.8z" fill="#444" stroke="#444" stroke-width="5"/>
                     <path class="pk-p-eye" d="M122.3 118.5c-3.8 0-6.9-3.1-6.9-6.9V97.1c0-3.8 3.1-6.9 6.9-6.9 3.8 0 6.9 3.1 6.9 6.9v14.6c0 3.8-3.1 6.8-6.9 6.8z" fill="#444" stroke="#444" stroke-width="5"/>
                 </g>
-
                 <g class="pk-eye-closed">
                     <rect class="pk-p-eye" x="57.7" y="100" width="24" height="8" rx="4" ry="4" fill="#444" />
                     <rect class="pk-p-eye" x="110.3" y="100" width="24" height="8" rx="4" ry="4" fill="#444" />
@@ -36715,7 +37352,8 @@ return limit;
 };
 
 const maybeToastSharePreviewSoftLimit = () => {
-if (sharePreviewSoftLimitTipShown || !v) return;
+if (sharePreviewSoftLimitTipShown || sharePreviewSoftLimitSuppressed || sharePreviewStallLatched || !v) return;
+if (box.querySelector('.pk-err-dialog') || box.classList.contains('buffering')) return;
 const limit = updateSharePreviewSoftLimitMarker();
 if (!limit) return;
 if (Number(v.currentTime || 0) >= Math.max(0, limit.time - 0.25)) {
@@ -37022,7 +37660,12 @@ ui.addEventListener('mouseenter', () => { isMouseOverUI = true; if (hideTimer) c
 ui.addEventListener('mouseleave', () => { isMouseOverUI = false; resetHideTimer(); });
 });
 
-box.addEventListener('mouseleave', () => { if (!isMouseOverUI) box.classList.add('ui-hidden'); });
+box.addEventListener('mouseleave', () => {
+if (hideTimer) clearTimeout(hideTimer);
+hideTimer = setTimeout(() => {
+if (!isMouseOverUI) box.classList.add('ui-hidden');
+}, 500);
+});
 box.addEventListener('mouseenter', resetHideTimer);
 box.addEventListener('mousemove', resetHideTimer);
 box.addEventListener('click', resetHideTimer);
@@ -37060,6 +37703,8 @@ return;
 }
 
 if (currentLink) failedUrls.add(currentLink);
+
+if (markSharePreviewStallError(e)) return;
 
 if (lastWorkingLink && lastWorkingLink !== currentLink && !failedUrls.has(lastWorkingLink)) {
 
@@ -37420,6 +38065,7 @@ document.exitPictureInPicture().catch(() => {});
 window.removeEventListener('resize', onResizeTransform);
 
 if (transcodeTimer) { clearInterval(transcodeTimer); transcodeTimer = null; }
+if (sharePreviewStallTimer) { clearInterval(sharePreviewStallTimer); sharePreviewStallTimer = null; }
 if (activeHealthTimer) { clearInterval(activeHealthTimer); activeHealthTimer = null; }
 if (activeHlsObjectUrl) {
 try { URL.revokeObjectURL(activeHlsObjectUrl); } catch (e) {}
@@ -37537,11 +38183,24 @@ const showSpinner = () => {
 box.classList.add('buffering');
 if (loaderEl) loaderEl.style.display = 'block';
 };
-v.addEventListener('waiting', showSpinner);
-v.addEventListener('stalled', showSpinner);
+const handleSharePreviewPotentialStall = (type = 'playback') => {
+showSpinner();
+startSharePreviewStallWatch(type, Number(v.currentTime || 0), type);
+};
+v.addEventListener('waiting', () => handleSharePreviewPotentialStall('playback'));
+v.addEventListener('stalled', () => handleSharePreviewPotentialStall('playback'));
 v.addEventListener('playing', stopSpinner);
 v.addEventListener('seeked', stopSpinner);
 v.addEventListener('canplaythrough', stopSpinner);
+
+sharePreviewStallTimer = setInterval(() => {
+if (isPlayerDestroyed) {
+if (sharePreviewStallTimer) clearInterval(sharePreviewStallTimer);
+sharePreviewStallTimer = null;
+return;
+}
+checkSharePreviewStallWatch('timer');
+}, 1000);
 
 let lastTextUpdate = 0;
 const updateTimeUI = () => {
@@ -37570,7 +38229,10 @@ lastTextUpdate = now;
 });
 };
 
-v.addEventListener('timeupdate', updateTimeUI);
+v.addEventListener('timeupdate', () => {
+markSharePreviewPlaybackProgress();
+updateTimeUI();
+});
 v.addEventListener('durationchange', updateTimeUI);
 v.addEventListener('timeupdate', () => {
 if (shutterTargetTime > 0) {
@@ -37755,6 +38417,7 @@ progFilled.style.setProperty('width', `${revertPos}%`, 'important');
 } else {
 const finalT = updateVisualOnly(lastMouseX);
 v.currentTime = finalT;
+startSharePreviewStallWatch('seek', finalT, 'dragend');
 if (finalT > 5) {
 syncOfficialPlayProgress(true);
 }
@@ -37867,6 +38530,7 @@ seekIndicator.style.display = 'flex';
 
 const targetT = updateVisualOnly(e.clientX);
 v.currentTime = targetT;
+startSharePreviewStallWatch('seek', targetT, 'pointerdown');
 
 if (e.cancelable) e.preventDefault();
 e.stopPropagation();
@@ -38809,6 +39473,7 @@ resultList.innerHTML = html;
 doSearch(input.value);
 
 input.oninput = () => doSearch(input.value);
+bindPlainTextMaxLengthLimits(searchOv, [['#pk_sub_search_input', CONF.subtitleSearchInputMaxLen, true]]);
 
 input.onkeydown = (ev) => {
 ev.stopPropagation();
@@ -40295,7 +40960,7 @@ window.open(manualUrl, '_blank');
 } catch (e) {
 console.error("Search Error:", e);
 if (progressTask) progressTask.destroy();
-const errorMsg = e.message.includes('Tainted') ? L.err_cors_blocked : e.message;
+const errorMsg = e && e.message && e.message.includes('Tainted') ? L.err_cors_blocked : formatCloudErrorMessage(e, L.str_action_failed || L.str_failed);
 if (typeof showToast !== 'undefined') {
 showToast(`${errorMsg}`, 'error');
 }
@@ -41310,7 +41975,7 @@ if (!isSilent) showToast(msg.replace(/\n+/g, ' '), 'success', 3200);
 
 } catch (e) {
 if (e.name !== 'AbortError' && myScanId === S.scanId) {
-showAlert(`${L.str_error_crit}: ${e.message}`);
+showAlert(`${L.str_error_crit}: ${formatCloudErrorMessage(e)}`);
 }
 if (!isSyncOnly && myScanId === S.scanId) {
 UI.scan.style.display = 'flex';
@@ -41382,7 +42047,7 @@ const m = showModal(`
 
 <div style="display:flex; align-items:center; gap:10px; margin-bottom:25px;">
 <div style="flex:1; position:relative;">
-    <input type="number" id="sc_val_min" value="${lastMin === 0 ? '' : lastMin}" placeholder="0" min="0" step="1"
+    <input type="text" inputmode="numeric" id="sc_val_min" value="${lastMin === 0 ? '' : lastMin}" placeholder="0" maxlength="${CONF.numericFilterInputMaxLen}"
             style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
     <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L_min}</div>
     <div class="pk-num-ctrl">
@@ -41392,7 +42057,7 @@ const m = showModal(`
 </div>
 <div style="color:#888; font-weight:bold; flex-shrink:0;">-</div>
 <div style="flex:1; position:relative;">
-    <input type="number" id="sc_val_max" value="${lastMax}" min="0" step="1" placeholder="∞"
+    <input type="text" inputmode="numeric" id="sc_val_max" value="${lastMax}" placeholder="∞" maxlength="${CONF.numericFilterInputMaxLen}"
             style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
     <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L_max}</div>
     <div class="pk-num-ctrl">
@@ -41830,7 +42495,7 @@ S._enterTopRaf = requestAnimationFrame(() => {
 
 } catch (e) {
 if (e.name !== 'AbortError' && myScanId === S.scanId) {
-showAlert(`${L.str_error_crit}: ${e.message}`);
+showAlert(`${L.str_error_crit}: ${formatCloudErrorMessage(e)}`);
 }
 if (myScanId === S.scanId) {
 UI.scan.style.display = 'flex';
@@ -42540,7 +43205,7 @@ const m = showModal(`
 
 <div style="display:flex; align-items:center; gap:10px; margin-bottom:25px;">
     <div style="flex:1; position:relative;">
-        <input type="number" id="an_val_min" value="${lastMin === 0 ? '' : lastMin}" placeholder="0" min="0" step="1"
+        <input type="text" inputmode="numeric" id="an_val_min" value="${lastMin === 0 ? '' : lastMin}" placeholder="0" maxlength="${CONF.numericFilterInputMaxLen}"
                 style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
         <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L_min}</div>
         <div class="pk-num-ctrl">
@@ -42550,7 +43215,7 @@ const m = showModal(`
     </div>
     <div style="color:#888; font-weight:bold; flex-shrink:0;">-</div>
     <div style="flex:1; position:relative;">
-        <input type="number" id="an_val_max" value="${lastMax}" min="0" step="1" placeholder="∞"
+        <input type="text" inputmode="numeric" id="an_val_max" value="${lastMax}" placeholder="∞" maxlength="${CONF.numericFilterInputMaxLen}"
                 style="width:100%; height:42px; padding:0 30px 0 12px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:16px; font-weight:700; outline:none; transition:border-color 0.2s; box-sizing:border-box; font-family:monospace;">
         <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; line-height:1; white-space:nowrap;">${L_max}</div>
         <div class="pk-num-ctrl">
@@ -42663,6 +43328,7 @@ inp.style.borderColor = active ? 'var(--pk-pri)' : 'var(--pk-bd)';
 syncLimitBorder(inp);
 inp.addEventListener('input', () => syncLimitBorder(inp));
 });
+bindNumericMaxLengthLimits(m, [['#an_val_min', CONF.numericFilterInputMaxLen], ['#an_val_max', CONF.numericFilterInputMaxLen]]);
 
 m.querySelector('#an_inc_min').onclick = (e) => { e.stopPropagation(); inpMin.value = (parseInt(inpMin.value) || 0) + 1; inpMin.dispatchEvent(new Event('input')); };
 m.querySelector('#an_dec_min').onclick = (e) => { e.stopPropagation(); inpMin.value = Math.max(0, (parseInt(inpMin.value) || 1) - 1); inpMin.dispatchEvent(new Event('input')); };
@@ -42965,7 +43631,7 @@ largeFolders.push(node);
 
 } catch (e) {
 if (isRunning && e.message !== 'StoppedByUser' && e.name !== 'AbortError') {
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 setLoad(false);
 }
 } finally {
@@ -43819,7 +44485,7 @@ setTimeout(() => URL.revokeObjectURL(url), 1000);
 
 } catch (e) {
 if (e.name !== 'AbortError' && myScanId === S.scanId) {
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 }
 } finally {
 if (myScanId === S.scanId) {
@@ -43948,7 +44614,7 @@ showToast(L.msg_newfolder_created.replace('{n}', folder.name || name), 'success'
 if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
 if (typeof scheduleBackgroundResume === 'function') scheduleBackgroundResume();
 } catch (e) {
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 } finally {
 isGUISensitive = false;
 scheduleBackgroundResume();
@@ -44036,14 +44702,33 @@ showAlert(L.msg_op_blocked_moving);
 return;
 }
 
-const items = S.clipItems;
+const rawItems = S.clipItems.slice();
 const type = S.clipType;
 const srcId = S.clipSourceParentId;
 const destId = S.path[S.path.length - 1].id || '';
 const normalize = (id) => (!id || id === 'root') ? 'root' : id;
 
+const checked = await validateClipboardItemsBeforePaste(rawItems);
+if (!checked.validItems.length) {
 S.clipItems = [];
 S.clipType = '';
+S.clipSourceParentId = '';
+updateStat();
+showToast(L.msg_clip_all_missing, 'error');
+return;
+}
+
+if (checked.invalidCount > 0) {
+S.clipItems = checked.validItems;
+updateStat();
+showToast(L.msg_clip_missing_skipped.replace('{n}', checked.invalidCount), 'warning');
+}
+
+const items = checked.validItems;
+
+S.clipItems = [];
+S.clipType = '';
+S.clipSourceParentId = '';
 updateStat();
 
 const targetFolderName = S.path[S.path.length - 1].name || L.str_target_folder;
@@ -44147,7 +44832,7 @@ patchStage01RenameVisibleRow(row, newName, nowIso);
 if (S.dupMode) renderDupView(); else refresh();
 
 } catch (e) {
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 } finally {
 if (progressTask) progressTask.destroy();
 }
@@ -44515,7 +45200,8 @@ const findHist = setupInputHistory(inpFind, 'pk_bn_find_hist');
 const repHist = setupInputHistory(inpRep, 'pk_bn_rep_hist');
 bindPlainTextMaxLengthLimits(m, [
 ['#rn_find', ((getConfigLimitSchema('pk_bn_find_hist') || {}).localLimit || {}).maxFieldLen || 1024],
-['#rn_rep', ((getConfigLimitSchema('pk_bn_rep_hist') || {}).localLimit || {}).maxFieldLen || 1024]
+['#rn_rep', ((getConfigLimitSchema('pk_bn_rep_hist') || {}).localLimit || {}).maxFieldLen || 1024],
+['#rn_pattern', CONF.renamePatternMaxLen, true]
 ]);
 
 const RN_ROW_HEIGHT = 40;
@@ -45729,7 +46415,7 @@ progressTask = null;
 }
 if (finalMsg) showToast(finalMsg, stats.fail > 0 ? 'warning' : 'success');
 } catch (e) {
-if (e.message !== 'StoppedByUser') showAlert(`${L.str_error_crit}: ${e.message}`);
+if (e.message !== 'StoppedByUser') showAlert(`${L.str_error_crit}: ${formatCloudErrorMessage(e)}`);
 } finally {
 if (progressTask) progressTask.destroy();
 isGUISensitive = false;
@@ -45897,7 +46583,7 @@ showToast(L.str_cleanup_done);
 } catch (e) {
 if (e.name !== 'AbortError' && myScanId === S.scanId) {
 setLoad(false);
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 }
 } finally {
 if (myScanId === S.scanId) {
@@ -46357,7 +47043,7 @@ onSelect(item.dataset.val, item.textContent);
 const runBtn = m.querySelector('#ext_run');
 const fixBtn = m.querySelector('#ext_potplayer_fix');
 
-const getCleanSelectedUrl = () => cleanExternalPlaybackUrl(selectedUrl);
+const getCleanSelectedUrl = () => rewriteDownloadLinkForAccel(cleanExternalPlaybackUrl(selectedUrl), 'external');
 
 const updatePotPlayerFixEntry = () => {
 if (fixBtn) fixBtn.style.display = selectedPlayer === 'potplayer' ? 'inline-flex' : 'none';
@@ -46453,7 +47139,7 @@ return false;
 }
 setLoad(false);
 const bestSource = getBestSource(detail);
-const cleanUrl = cleanExternalPlaybackUrl(bestSource && bestSource.src);
+const cleanUrl = rewriteDownloadLinkForAccel(cleanExternalPlaybackUrl(bestSource && bestSource.src), 'external');
 if (!cleanUrl) return false;
 launchPotPlayerWithFallback(cleanUrl, {
 source: 'default_open',
@@ -46529,7 +47215,7 @@ for (const item of videos) {
 try {
 const detail = await resolvePlayableDetailForExternal(item);
 const best = getBestSource(detail);
-const url = cleanExternalPlaybackUrl(best && best.src);
+const url = rewriteDownloadLinkForAccel(cleanExternalPlaybackUrl(best && best.src), 'm3u');
 if (!url) {
 skipped++;
 continue;
@@ -46577,9 +47263,12 @@ UI.btnImgSearch.onclick = () => {
 if (UI.btnImgSearch.disabled) return;
 const id = S.getSelectedIds()[0];
 const item = (S.shareParseMode ? ((S.shareParseInsightItemMap && S.shareParseInsightItemMap.get(id)) || (S.shareParseItemMap && S.shareParseItemMap.get(id))) : null) || S.itemMap.get(id);
-if (!item || !item.thumbnail_link) return;
+const coverUrl = typeof resolveSearchableCoverForImageSearch === 'function'
+? resolveSearchableCoverForImageSearch(item)
+: getDirectSearchableCoverForImageSearch(item);
+if (!coverUrl) return;
 
-const thumbUrl = item.thumbnail_link.replace('SIZE_MEDIUM', 'SIZE_LARGE');
+const thumbUrl = coverUrl.replace('SIZE_MEDIUM', 'SIZE_LARGE');
 const thumbImg = new Image();
 thumbImg.crossOrigin = 'anonymous';
 thumbImg.src = thumbUrl;
@@ -46766,7 +47455,7 @@ showToast(L.msg_down_success.replace('{n}', triggeredCount));
 }
 if (isRunning && failedFiles.length > 0) await showBrowserDownloadFailures(failedFiles, triggeredCount);
 } catch (e) {
-if (e.message !== 'StoppedByUser' && e.name !== 'AbortError') showAlert(`${L.str_error}: ${e.message}`);
+if (e.message !== 'StoppedByUser' && e.name !== 'AbortError') showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 } finally {
 setLoad(false);
 isGUISensitive = false;
@@ -47178,9 +47867,9 @@ showToast(formatDownloaderCountText(L.msg_downloader_sent, currentDownloaderType
 } catch (e) {
 if (e.message !== 'StoppedByUser' && e.name !== 'AbortError') {
 const errorDownloaderType = getCurrentDownloaderType();
-if (errorDownloaderType === 'idm') showAlert(`${L.str_error}: ${e.message}`);
+if (errorDownloaderType === 'idm') showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 else if (errorDownloaderType === 'abdm') showAlert(L.desc_abdm_setup, L.lbl_downloader_status);
-else showAlert(`${formatDownloaderText(L.msg_downloader_check_fail, errorDownloaderType)}\n(${e.message})`);
+else showAlert(`${formatDownloaderText(L.msg_downloader_check_fail, errorDownloaderType)}\n(${formatCloudErrorMessage(e)})`);
 }
 } finally {
 setLoad(false);
@@ -47479,6 +48168,7 @@ if (S.broadcast) S.broadcast.postMessage({ type: 'LOCK_REM', ids: chunkLockedIds
 if (typeof updateGlobalLockCSS === 'function') updateGlobalLockCSS();
 
 S.items = S.items.filter(x => !deletedSet.has(x.id));
+pruneClipboardByDeletedIds(deletedSet);
 
 if (typeof pkState !== 'undefined' && pkState && pkState.lastGlobalResults) {
 pkState.lastGlobalResults = pkState.lastGlobalResults.filter(x => !deletedSet.has(x.id));
@@ -47562,7 +48252,7 @@ showToast(isTask ? L.msg_task_deleted : L.msg_del_items_done.replace('{n}', dele
 
 } catch (e) {
 console.error(e);
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 } finally {
 
 if (typeof allLockedIdsArray !== 'undefined' && allLockedIdsArray.length > 0) {
@@ -47679,7 +48369,7 @@ const taskItems = selectedIds.map(id => S.itemMap.get(id) || { id, task_id: id, 
 const result = await handleOfflineTaskDelete(taskItems, { userInitiated: true, source: 'toolbar_delete', batch: selectedIds.length > 1, deleteFiles: isDeleteFile });
 if (result && result.handled) return;
 } catch (e) {
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 return;
 }
 await executeBatchDelete(selectedIds, { isTask: true, deleteFiles: isDeleteFile, forceRefresh: true });
@@ -48873,7 +49563,7 @@ if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
 } catch (e) {
 const isManualAbort = e.message === 'Aborted';
 task.status = isManualAbort ? 'PAUSED' : 'ERROR';
-task.message = isManualAbort ? L.msg_task_paused : (e.message || L.err_unknown);
+task.message = isManualAbort ? L.msg_task_paused : formatCloudErrorMessage(e, L.err_unknown);
 
 if (e.status === 403 && task.file_id) {
 task.message = e.isOssError ? L.msg_oss_upload_forbidden : L.msg_token_expired_retry;
@@ -50135,7 +50825,7 @@ applySort();
 renderList();
 renderCrumb();
 } catch (e) {
-listEl.innerHTML = `<div class="pk-picker-error">${L.str_error}: ${esc(e.message)}</div>`;
+listEl.innerHTML = `<div class="pk-picker-error">${L.str_error}: ${esc(formatCloudErrorMessage(e))}</div>`;
 }
 };
 
@@ -50173,7 +50863,7 @@ globalDirtyFolders.add(parentId);
 gmSet('pk_fmod_' + parentId, new Date(getServerNow()).toISOString());
 if (newFolder && newFolder.id) await loadFolder(newFolder.id, newFolder.name);
 else await loadFolder(cur.id, null, true);
-} catch(e) { showAlert(e.message); }
+} catch(e) { showAlert(formatCloudErrorMessage(e)); }
 }
 };
 }
@@ -50986,7 +51676,7 @@ return;
 }
 appendMagnetArchiveJournal({ action: 'restore_source', status: 'failed', count: 1, keys: [key], message: L.msg_magnet_archive_restore_failed });
 } catch (e) {
-appendMagnetArchiveJournal({ action: 'restore_source', status: 'failed', count: 1, keys: [key], message: e && e.message || L.msg_magnet_archive_restore_failed });
+appendMagnetArchiveJournal({ action: 'restore_source', status: 'failed', count: 1, keys: [key], message: formatCloudErrorMessage(e, L.msg_magnet_archive_restore_failed) });
 }
 }
 
@@ -51100,8 +51790,9 @@ if (!statusSaved) pushMagnetArchiveRowFailures(failures, rows, L.msg_magnet_arch
 return statusSaved;
 } catch (e) {
 closeMagnetArchiveCheckProgress(task);
-const reason = L.msg_magnet_archive_delete_failed + (e && e.message ? ` ${e.message}` : '');
-appendMagnetArchiveJournal({ action: 'trash_source', status: 'failed', count: rows.length, ids: rows.map(x => x.id), keys: getMagnetArchiveDeleteRowKeys(rows), message: e && e.message || L.msg_magnet_archive_delete_failed });
+const detail = e ? formatCloudErrorMessage(e) : '';
+const reason = L.msg_magnet_archive_delete_failed + (detail ? ` ${detail}` : '');
+appendMagnetArchiveJournal({ action: 'trash_source', status: 'failed', count: rows.length, ids: rows.map(x => x.id), keys: getMagnetArchiveDeleteRowKeys(rows), message: detail || L.msg_magnet_archive_delete_failed });
 showToast(reason, 'error');
 pushMagnetArchiveRowFailures(failures, rows, reason);
 return false;
@@ -51139,8 +51830,9 @@ if (!statusSaved) pushMagnetArchiveRowFailures(failures, rows, L.msg_magnet_arch
 return statusSaved;
 } catch (e) {
 closeMagnetArchiveCheckProgress(task);
-const reason = L.msg_magnet_archive_delete_failed + (e && e.message ? ` ${e.message}` : '');
-appendMagnetArchiveJournal({ action: 'trash_duplicate_source', status: 'failed', count: rows.length, ids: rows.map(x => x.id), keys: getMagnetArchiveDeleteRowKeys(rows), message: e && e.message || L.msg_magnet_archive_delete_failed });
+const detail = e ? formatCloudErrorMessage(e) : '';
+const reason = L.msg_magnet_archive_delete_failed + (detail ? ` ${detail}` : '');
+appendMagnetArchiveJournal({ action: 'trash_duplicate_source', status: 'failed', count: rows.length, ids: rows.map(x => x.id), keys: getMagnetArchiveDeleteRowKeys(rows), message: detail || L.msg_magnet_archive_delete_failed });
 showToast(reason, 'error');
 pushMagnetArchiveRowFailures(failures, rows, reason);
 return false;
@@ -51194,7 +51886,7 @@ await handleMagnetArchivePostWriteSoftDelete(result, merged.added, failures);
 if (failures.length) showMagnetArchiveFailureModal(failures);
 return true;
 } catch (e) {
-const errMsg = e && e.message ? String(e.message) : '';
+const errMsg = e ? formatCloudErrorMessage(e, '') : '';
 const reason = errMsg && errMsg !== L.msg_magnet_archive_write_failed ? `${L.msg_magnet_archive_write_failed} ${errMsg}` : L.msg_magnet_archive_write_failed;
 showToast(reason, 'error');
 pushMagnetArchiveEntryFailures(failures, entries, reason);
@@ -51645,7 +52337,7 @@ task = null;
 showMagnetArchiveCheckResultModal(result);
 } catch (e) {
 if (task) closeMagnetArchiveCheckProgress(task);
-showToast((L.str_error) + ': ' + (e && e.message || e), 'error');
+showToast((L.str_error) + ': ' + formatCloudErrorMessage(e), 'error');
 } finally {
 S.magnetArchiveBusy = false;
 }
@@ -52380,7 +53072,18 @@ if (smartFixCheckbox) smartFixCheckbox.onchange = () => input.dispatchEvent(new 
 
 const parseAndCleanLinks = parseCloudLinks;
 
+const clampCloudTaskInput = () => {
+const maxLen = Number(CONF.cloudTaskInputMaxChars) || 262144;
+if (!input || String(input.value || '').length <= maxLen) return false;
+const pos = typeof input.selectionStart === 'number' ? input.selectionStart : maxLen;
+input.value = String(input.value || '').slice(0, maxLen);
+try { input.setSelectionRange(Math.min(pos, input.value.length), Math.min(pos, input.value.length)); } catch (e) {}
+showToast(L.msg_config_input_over_limit, 'warning');
+return true;
+};
+
 input.oninput = () => {
+clampCloudTaskInput();
 const rawVal = input.value.trim();
 const isSmartFix = smartFixCheckbox ? smartFixCheckbox.checked : false;
 
@@ -52508,7 +53211,7 @@ while (retry < 3) {
 } catch (e) {
 console.error(`Torrent parse/upload failed for ${file.name}:`, e);
 failCount++;
-if (e && e.message) lastFailMessage = e.message;
+if (e) lastFailMessage = formatCloudErrorMessage(e);
 }
 }
 
@@ -52539,6 +53242,7 @@ load(false, true);
 submit.onclick = async () => {
 if (submit.disabled) return;
 
+if (clampCloudTaskInput()) return;
 const rawVal = input.value.trim();
 if (!rawVal) return;
 
@@ -52764,7 +53468,7 @@ if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
 showToast(L.msg_restore_done.replace('{n}', total));
 
 } catch(e) {
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 load(false, true);
 } finally {
 if (progressTask) progressTask.destroy();
@@ -52817,7 +53521,7 @@ updateStat();
 showToast(L.msg_trash_emptied);
 
 } catch (e) {
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 } finally {
 setLoad(false);
 S._isEmptyingTrash = false;
@@ -52869,7 +53573,7 @@ if (k.startsWith('pk_duration_')) return 'history';
 const cacheKeys = ['pk_captured_captcha', 'pk_i18n_manifest', 'pk_script_update_cache', 'pk_potplayer_launch_state', 'pk_potplayer_protocol_state', 'pk_ghost_files', 'pk_migration_stub', 'pk_cfg_sync_last_remote_hash', 'pk_cfg_sync_last_local_hash', 'pk_cfg_sync_last_sync_at', 'pk_cfg_sync_last_report'];
 if (k.startsWith('pk_fmod_') || k.startsWith('pk_i18n_') || k.startsWith(CONF.scriptUpdateDismissPrefix) || cacheKeys.includes(k)) return 'cache';
 
-const ruleKeys =['pk_blacklist', 'pk_blacklist_folders', 'pk_downloader_type', 'pk_downloader_prefer_original_video_link', 'pk_idm_export_mode', 'pk_idm_url_export_type', 'pk_idm_exe_path', 'pk_idm_bat_root', 'pk_idm_bat_keep_structure', 'pk_idm_bat_add_queue', 'pk_idm_bat_start_queue', 'pk_aria2_url', 'pk_aria2_token', 'pk_aria2_dir', 'pk_aria2_keep_structure', 'pk_gopeed_url', 'pk_gopeed_token', 'pk_gopeed_dir', 'pk_gopeed_keep_structure', 'pk_abdm_url', 'pk_abdm_dir', 'pk_download_accel_enable', 'pk_download_accel_domain', 'pk_download_accel_mode', 'pk_download_accel_query_param', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_bn_find_hist', 'pk_bn_rep_hist', 'pk_skip_bl_on_del', 'pk_potplayer_custom_path'];
+const ruleKeys =['pk_blacklist', 'pk_blacklist_folders', 'pk_downloader_type', 'pk_downloader_prefer_original_video_link', 'pk_idm_export_mode', 'pk_idm_url_export_type', 'pk_idm_exe_path', 'pk_idm_bat_root', 'pk_idm_bat_keep_structure', 'pk_idm_bat_add_queue', 'pk_idm_bat_start_queue', 'pk_aria2_url', 'pk_aria2_token', 'pk_aria2_dir', 'pk_aria2_keep_structure', 'pk_gopeed_url', 'pk_gopeed_token', 'pk_gopeed_dir', 'pk_gopeed_keep_structure', 'pk_abdm_url', 'pk_abdm_dir', 'pk_download_accel_enable', 'pk_download_accel_domain', 'pk_download_accel_mode', 'pk_download_accel_query_param', 'pk_download_accel_apply_browser', 'pk_download_accel_apply_downloader', 'pk_download_accel_apply_potplayer', 'pk_download_accel_apply_m3u', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_share_update_times', 'pk_bn_find_hist', 'pk_bn_rep_hist', 'pk_skip_bl_on_del', 'pk_potplayer_custom_path'];
 if (ruleKeys.includes(k) || k.startsWith('pk_scan_last_') || k.startsWith('pk_analyze_last_') || k === 'pk_dup_strictness') return 'rules';
 
 return 'pref';
@@ -52915,6 +53619,10 @@ const curDownloadAccelEnable = getBoolPref('pk_download_accel_enable', CONF.down
 const curDownloadAccelDomain = gmGet('pk_download_accel_domain', CONF.downloadAccelDomain);
 const curDownloadAccelMode = normalizeDownloadAccelMode(gmGet('pk_download_accel_mode', CONF.downloadAccelMode));
 const curDownloadAccelQueryParam = normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam));
+const curDownloadAccelApplyBrowser = getBoolPref('pk_download_accel_apply_browser', CONF.downloadAccelApplyBrowser);
+const curDownloadAccelApplyDownloader = getBoolPref('pk_download_accel_apply_downloader', CONF.downloadAccelApplyDownloader);
+const curDownloadAccelApplyPotPlayer = getBoolPref('pk_download_accel_apply_potplayer', CONF.downloadAccelApplyPotPlayer);
+const curDownloadAccelApplyM3U = getBoolPref('pk_download_accel_apply_m3u', CONF.downloadAccelApplyM3U);
 const curBlur = gmGet('pk_blur_thumb', false);
 const curBlurScope = gmGet('pk_blur_scope', curBlur ? 'list' : 'off');
 const curHideButtonText = gmGet('pk_hide_button_text', false);
@@ -52940,7 +53648,7 @@ const settingsModalMaximized = !!(UI.win && UI.win.classList && UI.win.classList
 const settingsModalHeightStyle = settingsModalMaximized ? 'height:min(760px,90vh); max-height:calc(100vh - 56px);' : 'height:min(650px,84vh); max-height:calc(100vh - 80px);';
 
 const m = showModal(`
-<div style="display:flex; flex-direction:column; ${settingsModalHeightStyle} width:640px; max-width:95vw; overflow:hidden; overscroll-behavior:none; position:relative;">
+<div style="display:flex; flex-direction:column; ${settingsModalHeightStyle} width:720px; max-width:96vw; overflow:hidden; overscroll-behavior:none; position:relative;">
 <div style="padding: 30px 30px 15px 30px; flex-shrink:0; transform:translateZ(0);">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; border: none; line-height: 1.2; color: var(--pk-fg);">${L.modal_settings_title}</h3>
 </div>
@@ -53159,10 +53867,11 @@ const m = showModal(`
             <div class="pk-select-menu pk-scroll">
                 <div class="pk-select-item" data-val="prefix">${L.label_download_accel_mode_prefix}</div>
                 <div class="pk-select-item" data-val="query">${L.label_download_accel_mode_query}</div>
+                <div class="pk-select-item" data-val="template">${L.label_download_accel_mode_template}</div>
             </div>
         </div>
         <div style="position:relative;">
-            <input type="text" id="set_download_accel_domain" value="${esc(curDownloadAccelDomain)}" placeholder="${curDownloadAccelMode === 'query' ? 'https://download.example.com/proxy' : 'https://download.example.com'}"
+            <input type="text" id="set_download_accel_domain" value="${esc(curDownloadAccelDomain)}" placeholder="${curDownloadAccelMode === 'template' ? 'https://proxy.example.com/{{url}}' : (curDownloadAccelMode === 'query' ? 'https://download.example.com/proxy' : 'https://download.example.com')}"
                     autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
                     oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
                     style="width:100%; height:44px; padding:0 12px; border:2px solid ${curDownloadAccelDomain ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box;">
@@ -53175,6 +53884,18 @@ const m = showModal(`
                     style="width:100%; height:40px; padding:0 12px; border:2px solid ${curDownloadAccelQueryParam !== 'url' ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:13px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box;">
             <div style="${labelStyle}">${L.label_download_accel_query_param}</div>
         </div>
+        <fieldset class="pk-download-accel-subgroup" style="position:relative; border:2px solid var(--pk-bd); border-radius:8px; padding:13px 11px 11px 11px; margin:0; display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; box-sizing:border-box; transition:border-color 0.2s;">
+            <legend style="padding:0 8px; margin-left:0; font-size:12px; line-height:1.2; color:var(--pk-pri); font-weight:700; background:var(--pk-bg);">${L.label_download_accel_apply_scope}</legend>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--pk-fg); cursor:pointer;"><input type="checkbox" id="set_download_accel_apply_browser" ${curDownloadAccelApplyBrowser ? 'checked' : ''} style="width:16px; height:16px; accent-color:var(--pk-pri);"> ${L.label_download_accel_apply_browser}</label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--pk-fg); cursor:pointer;"><input type="checkbox" id="set_download_accel_apply_downloader" ${curDownloadAccelApplyDownloader ? 'checked' : ''} style="width:16px; height:16px; accent-color:var(--pk-pri);"> ${L.label_download_accel_apply_downloader}</label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--pk-fg); cursor:pointer;"><input type="checkbox" id="set_download_accel_apply_potplayer" ${curDownloadAccelApplyPotPlayer ? 'checked' : ''} style="width:16px; height:16px; accent-color:var(--pk-pri);"> ${L.label_download_accel_apply_potplayer}</label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--pk-fg); cursor:pointer;"><input type="checkbox" id="set_download_accel_apply_m3u" ${curDownloadAccelApplyM3U ? 'checked' : ''} style="width:16px; height:16px; accent-color:var(--pk-pri);"> ${L.label_download_accel_apply_m3u}</label>
+        </fieldset>
+        <fieldset id="pk_download_accel_preview" class="pk-download-accel-subgroup" style="position:relative; border:2px solid var(--pk-bd); border-radius:8px; padding:13px 11px 11px 11px; margin:0; display:flex; flex-direction:column; gap:8px; background:var(--pk-subtle,rgba(128,128,128,0.04)); box-sizing:border-box; transition:border-color 0.2s;">
+            <legend style="padding:0 8px; margin-left:0; font-size:12px; line-height:1.2; color:var(--pk-pri); font-weight:700; background:var(--pk-bg);">${L.label_download_accel_preview}</legend>
+            <div id="pk_download_accel_preview_source" style="font-size:12px; line-height:1.45; color:var(--pk-muted); word-break:break-all;"></div>
+            <div id="pk_download_accel_preview_result" style="font-size:12px; line-height:1.45; color:var(--pk-fg); word-break:break-all;"></div>
+        </fieldset>
     </div>
 </div>
 
@@ -54143,10 +54864,31 @@ const accelDomainInp = m.querySelector('#set_download_accel_domain');
 const accelQueryParamInp = m.querySelector('#set_download_accel_query_param');
 const accelEnableInp = m.querySelector('#set_download_accel_enable');
 const accelGroupEl = m.querySelector('#pk_download_accel_group');
+const accelPreviewSourceEl = m.querySelector('#pk_download_accel_preview_source');
+const accelPreviewResultEl = m.querySelector('#pk_download_accel_preview_result');
+const updateAccelPreview = () => {
+if (!accelPreviewSourceEl || !accelPreviewResultEl) return;
+const rawSetting = accelDomainInp ? accelDomainInp.value.trim() : '';
+const queryParam = accelQueryParamInp ? accelQueryParamInp.value.trim() : '';
+const preview = buildDownloadAccelPreviewUrl(rawSetting, selectedDownloadAccelMode, queryParam);
+accelPreviewSourceEl.textContent = `${L.label_download_accel_preview_source}: ${preview.source}`;
+if (!rawSetting) {
+accelPreviewResultEl.textContent = L.msg_download_accel_preview_empty;
+accelPreviewResultEl.style.color = 'var(--pk-muted)';
+} else if (!preview.ok) {
+accelPreviewResultEl.textContent = L.msg_download_accel_preview_invalid;
+accelPreviewResultEl.style.color = '#d93025';
+} else {
+accelPreviewResultEl.textContent = `${L.label_download_accel_preview_result}: ${preview.result}`;
+accelPreviewResultEl.style.color = 'var(--pk-fg)';
+}
+};
 const updateAccelModeTip = () => {
 const isQuery = selectedDownloadAccelMode === 'query';
+const isTemplate = selectedDownloadAccelMode === 'template';
 if (accelQueryParamInp) accelQueryParamInp.closest('div').style.display = isQuery ? 'block' : 'none';
-if (accelDomainInp) accelDomainInp.placeholder = isQuery ? 'https://download.example.com/proxy' : 'https://download.example.com';
+if (accelDomainInp) accelDomainInp.placeholder = isTemplate ? 'https://proxy.example.com/{{url}}' : (isQuery ? 'https://download.example.com/proxy' : 'https://download.example.com');
+updateAccelPreview();
 };
 const updateAccelBorder = () => {
 const hasDomain = !!(accelDomainInp && accelDomainInp.value.trim());
@@ -54161,6 +54903,7 @@ if (accelQueryParamInp) {
 accelQueryParamInp.classList.toggle('pk-active-border', customParam);
 accelQueryParamInp.style.borderColor = customParam ? 'var(--pk-pri)' : 'var(--pk-bd)';
 }
+updateAccelPreview();
 };
 if (accelDomainInp) accelDomainInp.oninput = updateAccelBorder;
 if (accelQueryParamInp) accelQueryParamInp.oninput = updateAccelBorder;
@@ -54627,6 +55370,10 @@ const exportExactKeys = new Set([
 'pk_download_accel_domain',
 'pk_download_accel_mode',
 'pk_download_accel_query_param',
+'pk_download_accel_apply_browser',
+'pk_download_accel_apply_downloader',
+'pk_download_accel_apply_potplayer',
+'pk_download_accel_apply_m3u',
 'pk_dl_filter_ext',
 'pk_dl_filter_name',
 'pk_dl_filter_size_min',
@@ -54639,6 +55386,7 @@ const exportExactKeys = new Set([
 'pk_expired_shares',
 'pk_share_parse_history',
 'pk_share_limits',
+'pk_share_update_times',
 'pk_bn_find_hist',
 'pk_bn_rep_hist',
 'pk_dup_strictness',
@@ -54674,7 +55422,7 @@ const getCatWeight = (k) => {
 if (k.startsWith('pk_archive_pwd_') || k === 'pk_pwd_vault' || k === 'pk_pwd_try_count' || k === 'pk_share_limits') return 3;
 if (k.startsWith('pk_duration_')) return 4;
 
-const ruleKeys = ['pk_blacklist', 'pk_blacklist_folders', 'pk_downloader_type', 'pk_downloader_prefer_original_video_link', 'pk_idm_export_mode', 'pk_idm_url_export_type', 'pk_idm_exe_path', 'pk_idm_bat_root', 'pk_idm_bat_keep_structure', 'pk_idm_bat_add_queue', 'pk_idm_bat_start_queue', 'pk_aria2_url', 'pk_aria2_token', 'pk_aria2_dir', 'pk_aria2_keep_structure', 'pk_gopeed_url', 'pk_gopeed_token', 'pk_gopeed_dir', 'pk_gopeed_keep_structure', 'pk_abdm_url', 'pk_abdm_dir', 'pk_download_accel_enable', 'pk_download_accel_domain', 'pk_download_accel_mode', 'pk_download_accel_query_param', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_bn_find_hist', 'pk_bn_rep_hist', 'pk_dup_strictness', 'pk_skip_bl_on_del', 'pk_clipboard_magnet_focus', 'pk_potplayer_custom_path'];
+const ruleKeys = ['pk_blacklist', 'pk_blacklist_folders', 'pk_downloader_type', 'pk_downloader_prefer_original_video_link', 'pk_idm_export_mode', 'pk_idm_url_export_type', 'pk_idm_exe_path', 'pk_idm_bat_root', 'pk_idm_bat_keep_structure', 'pk_idm_bat_add_queue', 'pk_idm_bat_start_queue', 'pk_aria2_url', 'pk_aria2_token', 'pk_aria2_dir', 'pk_aria2_keep_structure', 'pk_gopeed_url', 'pk_gopeed_token', 'pk_gopeed_dir', 'pk_gopeed_keep_structure', 'pk_abdm_url', 'pk_abdm_dir', 'pk_download_accel_enable', 'pk_download_accel_domain', 'pk_download_accel_mode', 'pk_download_accel_query_param', 'pk_download_accel_apply_browser', 'pk_download_accel_apply_downloader', 'pk_download_accel_apply_potplayer', 'pk_download_accel_apply_m3u', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_share_update_times', 'pk_bn_find_hist', 'pk_bn_rep_hist', 'pk_dup_strictness', 'pk_skip_bl_on_del', 'pk_clipboard_magnet_focus', 'pk_potplayer_custom_path'];
 if (ruleKeys.includes(k) || k.startsWith('pk_scan_last_') || k.startsWith('pk_analyze_last_')) return 2;
 
 return 1;
@@ -54804,6 +55552,10 @@ const importExactKeys = new Set([
 'pk_download_accel_domain',
 'pk_download_accel_mode',
 'pk_download_accel_query_param',
+'pk_download_accel_apply_browser',
+'pk_download_accel_apply_downloader',
+'pk_download_accel_apply_potplayer',
+'pk_download_accel_apply_m3u',
 'pk_dl_filter_ext',
 'pk_dl_filter_name',
 'pk_dl_filter_size_min',
@@ -54816,6 +55568,7 @@ const importExactKeys = new Set([
 'pk_expired_shares',
 'pk_share_parse_history',
 'pk_share_limits',
+'pk_share_update_times',
 'pk_bn_find_hist',
 'pk_bn_rep_hist',
 'pk_dup_strictness',
@@ -55107,9 +55860,15 @@ const newIdmBatKeepStructure = m.querySelector('#set_idm_bat_keep_structure').ch
 const newDownloaderPreferOriginalVideoLink = getDownloaderPreferOriginalVideoLinkChecked();
 const newDownloadAccelEnable = m.querySelector('#set_download_accel_enable').checked;
 const rawDownloadAccelDomain = m.querySelector('#set_download_accel_domain').value.trim();
-const newDownloadAccelDomain = normalizeDownloadAccelBase(rawDownloadAccelDomain);
 const newDownloadAccelMode = normalizeDownloadAccelMode(selectedDownloadAccelMode);
+const newDownloadAccelDomain = normalizeDownloadAccelSetting(rawDownloadAccelDomain, newDownloadAccelMode);
 const newDownloadAccelQueryParam = normalizeDownloadAccelQueryParam(m.querySelector('#set_download_accel_query_param').value);
+const newDownloadAccelApplyBrowser = !!m.querySelector('#set_download_accel_apply_browser').checked;
+const newDownloadAccelApplyDownloader = !!m.querySelector('#set_download_accel_apply_downloader').checked;
+const newDownloadAccelApplyPotPlayer = !!m.querySelector('#set_download_accel_apply_potplayer').checked;
+const newDownloadAccelApplyM3U = !!m.querySelector('#set_download_accel_apply_m3u').checked;
+const oldDownloadAccelModeForSig = normalizeDownloadAccelMode(gmGet('pk_download_accel_mode', CONF.downloadAccelMode));
+const oldDownloadAccelDomainForSig = normalizeDownloadAccelSetting(gmGet('pk_download_accel_domain', CONF.downloadAccelDomain), oldDownloadAccelModeForSig);
 const newBlurScope = m.querySelector('#set_thumb_scope').value;
 const newHideButtonText = m.querySelector('#set_hide_button_text').checked;
 const newKeepPos = m.querySelector('#set_keep_pos').checked;
@@ -55123,8 +55882,8 @@ const storedDownloaderType = String(gmGet('pk_downloader_type', CONF.downloaderT
 const oldDownloaderType = normalizeDownloaderType(storedDownloaderType);
 const downloaderTypeNeedsNormalize = storedDownloaderType && storedDownloaderType !== oldDownloaderType;
 const oldKeepStructure = getDownloaderKeepStructurePref();
-const oldSig = JSON.stringify([curLang, oldTurbo, oldDownloaderType, gmGet('pk_aria2_url', ''), gmGet('pk_aria2_token', ''), normalizeAriaDownloadDir(gmGet('pk_aria2_dir', CONF.aria2DownloadDir)), oldKeepStructure, curGopeedUrl, gmGet('pk_gopeed_token', ''), normalizeGopeedDownloadDir(gmGet('pk_gopeed_dir', CONF.gopeedDownloadDir)), oldKeepStructure, curAbdmUrl, normalizeAbdmDownloadDir(gmGet('pk_abdm_dir', CONF.abdmDownloadDir)), oldKeepStructure, getBoolPref('pk_downloader_prefer_original_video_link', CONF.downloaderPreferOriginalVideoLink), getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable), normalizeDownloadAccelBase(gmGet('pk_download_accel_domain', CONF.downloadAccelDomain)), normalizeDownloadAccelMode(gmGet('pk_download_accel_mode', CONF.downloadAccelMode)), normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam)), gmGet('pk_blur_scope', gmGet('pk_blur_thumb', false) ? 'list' : 'off'), gmGet('pk_hide_button_text', false), gmGet('pk_keep_pos', true), gmGet('pk_skip_bl_on_del', true), gmGet('pk_clipboard_magnet_focus', true), gmGet('pk_comic_mode', true), gmGet('pk_sort_independent', false) ? 'indep' : 'global', gmGet('pk_view_independent', false) ? 'indep' : 'global', curEngine, curDefaultOpenPlayer, curDefaultVideoQuality, curVideoLoadProgressCache, gmGet('pk_dl_filter_ext', ''), gmGet('pk_dl_filter_size_min', ''), gmGet('pk_dl_filter_size_max', ''), gmGet('pk_dl_filter_size_unit', 'MB'), gmGet('pk_dl_filter_name', '')]);
-const newSig = JSON.stringify([selectedLang, newTurbo, newDownloaderType, newUrl, newToken, newAriaDir, newAriaKeepStructure, newGopeedUrl, newGopeedToken, newGopeedDir, newAriaKeepStructure, newAbdmUrl, newAbdmDir, newAriaKeepStructure, newDownloaderPreferOriginalVideoLink, newDownloadAccelEnable, newDownloadAccelDomain, newDownloadAccelMode, newDownloadAccelQueryParam, newBlurScope, newHideButtonText, newKeepPos, newSkipBl, newClipboardMagnetFocus, newComicMode, sortPref, viewPref, selectedEngine, normalizeDefaultOpenPlayer(selectedDefaultOpenPlayer), normalizeDefaultVideoQuality(selectedDefaultVideoQuality), !!m.querySelector('#set_video_load_progress_cache').checked, m.querySelector('#set_dl_filter_ext').value.trim(), m.querySelector('#set_dl_filter_size_min').value.trim(), m.querySelector('#set_dl_filter_size_max').value.trim(), m.querySelector('#cs_set_dl_size_unit .pk-select-item.act') ? m.querySelector('#cs_set_dl_size_unit .pk-select-item.act').dataset.val : 'MB', m.querySelector('#set_dl_filter_name').value.trim()]);
+const oldSig = JSON.stringify([curLang, oldTurbo, oldDownloaderType, gmGet('pk_aria2_url', ''), gmGet('pk_aria2_token', ''), normalizeAriaDownloadDir(gmGet('pk_aria2_dir', CONF.aria2DownloadDir)), oldKeepStructure, curGopeedUrl, gmGet('pk_gopeed_token', ''), normalizeGopeedDownloadDir(gmGet('pk_gopeed_dir', CONF.gopeedDownloadDir)), oldKeepStructure, curAbdmUrl, normalizeAbdmDownloadDir(gmGet('pk_abdm_dir', CONF.abdmDownloadDir)), oldKeepStructure, getBoolPref('pk_downloader_prefer_original_video_link', CONF.downloaderPreferOriginalVideoLink), getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable), oldDownloadAccelDomainForSig, oldDownloadAccelModeForSig, normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam)), getBoolPref('pk_download_accel_apply_browser', CONF.downloadAccelApplyBrowser), getBoolPref('pk_download_accel_apply_downloader', CONF.downloadAccelApplyDownloader), getBoolPref('pk_download_accel_apply_potplayer', CONF.downloadAccelApplyPotPlayer), getBoolPref('pk_download_accel_apply_m3u', CONF.downloadAccelApplyM3U), gmGet('pk_blur_scope', gmGet('pk_blur_thumb', false) ? 'list' : 'off'), gmGet('pk_hide_button_text', false), gmGet('pk_keep_pos', true), gmGet('pk_skip_bl_on_del', true), gmGet('pk_clipboard_magnet_focus', true), gmGet('pk_comic_mode', true), gmGet('pk_sort_independent', false) ? 'indep' : 'global', gmGet('pk_view_independent', false) ? 'indep' : 'global', curEngine, curDefaultOpenPlayer, curDefaultVideoQuality, curVideoLoadProgressCache, gmGet('pk_dl_filter_ext', ''), gmGet('pk_dl_filter_size_min', ''), gmGet('pk_dl_filter_size_max', ''), gmGet('pk_dl_filter_size_unit', 'MB'), gmGet('pk_dl_filter_name', '')]);
+const newSig = JSON.stringify([selectedLang, newTurbo, newDownloaderType, newUrl, newToken, newAriaDir, newAriaKeepStructure, newGopeedUrl, newGopeedToken, newGopeedDir, newAriaKeepStructure, newAbdmUrl, newAbdmDir, newAriaKeepStructure, newDownloaderPreferOriginalVideoLink, newDownloadAccelEnable, newDownloadAccelDomain, newDownloadAccelMode, newDownloadAccelQueryParam, newDownloadAccelApplyBrowser, newDownloadAccelApplyDownloader, newDownloadAccelApplyPotPlayer, newDownloadAccelApplyM3U, newBlurScope, newHideButtonText, newKeepPos, newSkipBl, newClipboardMagnetFocus, newComicMode, sortPref, viewPref, selectedEngine, normalizeDefaultOpenPlayer(selectedDefaultOpenPlayer), normalizeDefaultVideoQuality(selectedDefaultVideoQuality), !!m.querySelector('#set_video_load_progress_cache').checked, m.querySelector('#set_dl_filter_ext').value.trim(), m.querySelector('#set_dl_filter_size_min').value.trim(), m.querySelector('#set_dl_filter_size_max').value.trim(), m.querySelector('#cs_set_dl_size_unit .pk-select-item.act') ? m.querySelector('#cs_set_dl_size_unit .pk-select-item.act').dataset.val : 'MB', m.querySelector('#set_dl_filter_name').value.trim()]);
 const oldIdmSig = JSON.stringify([normalizeIdmExportMode(gmGet('pk_idm_export_mode', CONF.idmExportMode)), normalizeIdmUrlExportType(gmGet('pk_idm_url_export_type', CONF.idmUrlExportType)), normalizeIdmExePath(gmGet('pk_idm_exe_path', CONF.idmExePath)), normalizeIdmBatDownloadRoot(gmGet('pk_idm_bat_root', CONF.idmBatDownloadRoot)), oldKeepStructure]);
 const newIdmSig = JSON.stringify([newIdmExportMode, newIdmUrlExportType, newIdmExePath, newIdmBatRoot, newAriaKeepStructure]);
 const hasSettingsChanged = oldSig !== newSig || oldIdmSig !== newIdmSig || downloaderTypeNeedsNormalize;
@@ -55183,6 +55942,14 @@ gmSet('pk_download_accel_enable', newDownloadAccelEnable);
 gmSet('pk_download_accel_domain', newDownloadAccelDomain);
 gmSet('pk_download_accel_mode', newDownloadAccelMode);
 gmSet('pk_download_accel_query_param', newDownloadAccelQueryParam);
+gmSet('pk_download_accel_apply_browser', newDownloadAccelApplyBrowser);
+gmSet('pk_download_accel_apply_downloader', newDownloadAccelApplyDownloader);
+gmSet('pk_download_accel_apply_potplayer', newDownloadAccelApplyPotPlayer);
+gmSet('pk_download_accel_apply_m3u', newDownloadAccelApplyM3U);
+['pk_download_accel_apply_aria2','pk_download_accel_apply_gopeed','pk_download_accel_apply_abdm','pk_download_accel_apply_idm','pk_download_accel_restrict_pikpak_domain'].forEach(k => {
+try { if (typeof GM_deleteValue !== 'undefined') GM_deleteValue(k); } catch (e) {}
+try { localStorage.removeItem(k); } catch (e) {}
+});
 gmSet('pk_downloader_type', newDownloaderType);
 gmSet('pk_aria2_url', newUrl);
 gmSet('pk_aria2_token', newToken);
@@ -55463,7 +56230,7 @@ ${pathRowHtml}
 `;
 
 const m = showModal(`
-<h3 style="border-bottom:1px solid var(--pk-bd); padding-bottom:10px; margin-bottom:15px;">${L.title_property}</h3>
+<h3 style="border:none; padding-bottom:0; margin-bottom:8px;">${L.title_property}</h3>
 ${html}
 `);
 
@@ -55573,7 +56340,7 @@ if (markedMissing) {
 } else if (errText.includes('404') || errText.includes('400')) {
     showToast(L.err_item_deleted, 'error');
 } else {
-    showToast(`${L.str_error}: ${e.message}`, 'error');
+    showToast(`${L.str_error}: ${formatCloudErrorMessage(e)}`, 'error');
 }
 setLoad(false); return;
 }
@@ -55824,7 +56591,7 @@ else stopTracking();
 
 } catch (e) {
 console.error(e);
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 if (UI.vp) UI.vp.style.opacity = '1';
 } finally {
 setLoad(false);
@@ -56036,7 +56803,7 @@ if (revertStatus) {
 }
 });
 renderVisible();
-showAlert(err.message);
+showAlert(formatCloudErrorMessage(err));
 }
 };
 }
@@ -56186,6 +56953,7 @@ closeBtn.style.color = "#999";
 
 const inp = m.querySelector('#retry_pwd');
 const clearBtn = m.querySelector('#pwd_clear_btn');
+bindPlainTextMaxLengthLimits(m, [['#retry_pwd', CONF.archivePasswordInputMaxLen, true]]);
 
 setTimeout(() => inp.focus(), 50);
 
@@ -56364,7 +57132,7 @@ handleUnzip([file], result.password, true, result.taskId);
 
 } catch (e) {
 setLoad(false);
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 }
 };
 
@@ -56467,7 +57235,7 @@ scheduleOfflineTaskAddProbe(taskExists ? 'add_exists' : 'add', 1000);
 }
 
 } catch (e) {
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 } finally {
 fb.destroy();
 }
@@ -56568,7 +57336,7 @@ isVerified = true;
 }
 } catch (e) {
 setLoad(false);
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 return { confirm: false };
 } finally {
 setLoad(false);
@@ -56831,7 +57599,7 @@ item.onclick = (ev) => {
 pop.appendChild(item);
 });
 } catch (err) {
-pop.innerHTML = `<div class="pk-crumb-item pk-crumb-empty">${esc(err.message || L.str_load_failed_simple)}</div>`;
+pop.innerHTML = `<div class="pk-crumb-item pk-crumb-empty">${esc(err ? formatCloudErrorMessage(err, L.str_load_failed_simple) : L.str_load_failed_simple)}</div>`;
 }
 };
 
@@ -56964,7 +57732,7 @@ else throw new Error(data.status_text || L.str_load_failed_simple);
 } catch (e) {
 const errDiv = document.createElement('div');
 errDiv.style.cssText = "padding:50px; text-align:center; color:#d93025; font-size:13px;";
-errDiv.textContent = (e.message);
+errDiv.textContent = formatCloudErrorMessage(e);
 listContainer.innerHTML = '';
 listContainer.appendChild(loading);
 listContainer.appendChild(errDiv);
@@ -57140,7 +57908,7 @@ resolvePreview({ confirm: true, password: currentPwd });
 }
 } catch (e) {
 previewSubmitActive = false;
-const errText = getShareParseOfficialErrorMessage(e) || e.msg || ((e && e.message && !/^msg_/.test(e.message) && !e.shareParseKey) ? e.message : '') || L.str_action_failed;
+const errText = getShareParseOfficialErrorMessage(e) || ((e && ((e.msg && !/^msg_/.test(String(e.msg))) || (e.message && !/^msg_/.test(e.message) && !e.shareParseKey))) ? formatCloudErrorMessage(e) : '') || L.str_action_failed;
 if (!document.contains(m)) {
 showAlert(errText);
 resolvePreview({ confirm: false });
@@ -57680,12 +58448,12 @@ const inputStyle = "flex:1; border:none; background:transparent; outline:none; f
 const copyBtnStyle = "margin-left:10px; display:flex; align-items:center; justify-content:center; transition:color 0.2s;";
 
 const m = showModal(`
-<div class="pk-share-modal-root" style="width:420px; max-width:90vw; display:flex; flex-direction:column; overflow:hidden;">
+<div class="pk-share-modal-root" style="width:480px; max-width:92vw; max-height:calc(100vh - 48px); display:flex; flex-direction:column; overflow:hidden;">
 <div style="display: flex; align-items: center; padding: 16px 50px 16px 24px; flex-shrink:0; border-bottom: 1px solid transparent;">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; border: none; padding: 0; line-height: 1.2; color: var(--pk-fg);">${L.title_share_detail}</h3>
 </div>
 
-<div class="pk-scroll" style="flex:1; overflow-y:auto; overflow-x:hidden; padding: 0 24px;">
+<div class="pk-scroll" style="flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden; padding: 0 24px;">
 <div style="margin-bottom:16px; text-align:center; padding: 0 10px;">
 <div style="font-size:15px; font-weight:700; color:var(--pk-fg); word-break:break-all; line-height:1.4; opacity:0.9;">${esc(item.name || item.title)}</div>
 </div>
@@ -57750,11 +58518,11 @@ const m = showModal(`
 </div>
 </div>
 
-<div class="pk-share-footer" style="flex-shrink:0; margin-top:0; padding: 20px 24px 24px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-<button id="pk_detail_cancel" class="pk-btn-quiet-red" style="width: 100%; height: 40px; display: flex; align-items: center; justify-content: center; margin: 0; border: none; background: rgba(217, 48, 37, 0.08); font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+<div class="pk-share-footer pk-share-detail-footer" style="flex-shrink:0; width:100%; margin-top:0; padding: 20px 0 24px 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; justify-items:stretch; align-items:center; box-sizing:border-box;">
+<button id="pk_detail_cancel" class="pk-btn-quiet-red" style="width: 100%; min-width:0; height: 48px; display: flex; align-items: center; justify-content: center; margin: 0; border: none; background: transparent; color:var(--pk-fg); font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background 0.2s; box-sizing:border-box;">
 ${L.btn_cancel_share}
 </button>
-<button id="pk_detail_copy_all" class="pk-btn-primary-action" style="width: 100%; height: 40px; display: flex; align-items: center; justify-content: center; margin: 0; border-radius: 8px;">
+<button id="pk_detail_copy_all" class="pk-btn-primary-action" style="width: 100%; min-width:0; height: 48px; display: flex; align-items: center; justify-content: center; margin: 0; border-radius: 8px; box-sizing:border-box;">
 ${item.pass_code ? L.btn_copy_link_pwd : L.btn_copy_link}
 </button>
 </div>
@@ -57768,7 +58536,8 @@ modalContainer.style.width = 'fit-content';
 modalContainer.style.display = 'flex';
 modalContainer.style.flexDirection = 'column';
 modalContainer.style.overflow = 'hidden';
-modalContainer.style.maxHeight = '600px';
+modalContainer.style.height = 'auto';
+modalContainer.style.maxHeight = 'calc(100vh - 48px)';
 }
 
 m.querySelectorAll('.pk-copy-btn').forEach(btn => {
@@ -57829,6 +58598,7 @@ return isValid;
 };
 
 input.oninput = validate;
+bindPlainTextMaxLengthLimits(subM, [['#pk_new_pwd_input', CONF.sharePassCodeInputMaxLen, true]]);
 validate();
 
 const closeBtn = subM.querySelector('#pk_close_pwd_row');
@@ -57860,7 +58630,7 @@ toast.textContent = L.msg_pwd_updated;
 m.querySelector('.pk-modal').appendChild(toast);
 setTimeout(() => toast.remove(), 1200);
 } catch (err) {
-showAlert(err.message);
+showAlert(formatCloudErrorMessage(err));
 closeBtn.style.pointerEvents = 'auto';
 closeBtn.style.opacity = '1';
 }
@@ -57900,7 +58670,7 @@ toast.textContent = L.msg_pwd_updated;
 m.querySelector('.pk-modal').appendChild(toast);
 setTimeout(() => toast.remove(), 1200);
 } catch (e) {
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 saveBtn.disabled = false;
 saveBtn.style.opacity = '1';
 saveBtn.textContent = L.btn_save;
@@ -57994,6 +58764,7 @@ return isValid;
 };
 
 input.oninput = validate;
+bindPlainTextMaxLengthLimits(subM, [['#pk_new_phrase_input', CONF.sharePhraseInputMaxLen, true]]);
 validate();
 
 const doRequest = async (newVal) => {
@@ -58023,7 +58794,7 @@ m.querySelector('.pk-modal').appendChild(toast);
 setTimeout(() => toast.remove(), 1200);
 
 } catch (err) {
-showAlert(err.message);
+showAlert(formatCloudErrorMessage(err));
 saveBtn.disabled = false;
 saveBtn.style.opacity = '1';
 saveBtn.textContent = L.btn_save;
@@ -58073,7 +58844,7 @@ subM.innerHTML = `
 <div style="display:flex; align-items:center; gap:10px; width:100%;">
     <label class="pk-s-opt" style="flex-shrink:0;"><input type="radio" name="sh_mod_cnt" value="custom" ${![0,100].includes(currentLimit)?'checked':''}> ${L.share_custom}</label>
     <div style="position:relative; flex:1;">
-        <input type="number" id="sh_mod_cnt_val" class="pk-s-input"
+        <input type="text" inputmode="numeric" id="sh_mod_cnt_val" class="pk-s-input" maxlength="${CONF.shareCountInputMaxLen}"
                 value="${currentLimit > 0 ? currentLimit : ''}"
                 placeholder="> ${currentSave}"
                 style="width:100%; height:36px; padding-right:32px;" ${![0,100].includes(currentLimit)?'':'disabled'}>
@@ -58112,6 +58883,12 @@ updateCtrlState();
 });
 
 updateCtrlState();
+
+input.oninput = () => {
+const oldValue = input.value;
+input.value = input.value.replace(/[^\d]/g, '').slice(0, CONF.shareCountInputMaxLen);
+if (oldValue !== input.value && String(oldValue || '').length >= CONF.shareCountInputMaxLen) showConfigInputLimitTip(input);
+};
 
 subM.querySelector('#sh_cnt_inc').onclick = (e) => {
 if (input.disabled) return;
@@ -58227,15 +59004,18 @@ if (res.ts) {
 }
 }
 
-await apiUpdateShare(item.id, payload);
+const updateRes = await apiUpdateShare(item.id, payload);
+const updateData = updateRes && updateRes.data ? updateRes.data : {};
+const shareModifiedTime = touchShareUpdateTime(item.id);
 
 patchLocalShareItem(S, item, {
-expiration_days: selectedDays,
-expiration_at: payload.expiration_at,
-expiration_left: newStatusLeft,
-expiration_left_seconds: newStatusLeftSeconds,
-share_status: 'OK',
-share_status_text: ''
+modified_time: shareModifiedTime,
+expiration_days: updateData.expiration_days !== undefined ? updateData.expiration_days : selectedDays,
+expiration_at: updateData.expiration_at !== undefined ? updateData.expiration_at : payload.expiration_at,
+expiration_left: updateData.expiration_left !== undefined ? updateData.expiration_left : newStatusLeft,
+expiration_left_seconds: updateData.expiration_left_seconds !== undefined ? updateData.expiration_left_seconds : newStatusLeftSeconds,
+share_status: updateData.share_status !== undefined ? updateData.share_status : 'OK',
+share_status_text: updateData.share_status_text !== undefined ? updateData.share_status_text : ''
 });
 
 expInput.value = newText;
@@ -58254,7 +59034,7 @@ toast.textContent = L.msg_exp_updated;
 m.querySelector('.pk-modal').appendChild(toast);
 setTimeout(() => toast.remove(), 1200);
 } catch (err) {
-showAlert(`${L.str_error}: ${err.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(err)}`);
 expInput.value = originalText;
 }
 });
@@ -58270,7 +59050,7 @@ showAlert(L.msg_cancel_share_done.replace('{n}', 1));
 load(false, true);
 } catch (e) {
 setLoad(false);
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 }
 }
 };
@@ -58332,7 +59112,7 @@ await load(false, true);
 
 showToast(L.msg_cancel_share_done.replace('{n}', n));
 } catch (e) {
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 } finally {
 setLoad(false);
 }
@@ -58367,7 +59147,7 @@ updateStat();
 return;
 }
 } catch (e) {
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 return;
 }
 
@@ -58407,7 +59187,7 @@ await load(false, true);
 showToast(L.msg_retry_submitted.replace('{n}', successCount));
 
 } catch (e) {
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 } finally {
 setLoad(false);
 S.clearSelection();
@@ -58522,7 +59302,7 @@ if (!location.href.includes('/login')) window.location.href = 'https://mypikpak.
 
 } catch (e) {
 setLoad(false);
-showAlert(`${L.str_error}: ${e.message}`);
+showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 }
 };
 
@@ -58642,7 +59422,7 @@ const m = showModal(`
 <label class="pk-s-opt"><input type="radio" name="sh_cnt" value="20"> 20${L.share_times}</label>
 <label class="pk-s-opt"><input type="radio" name="sh_cnt" value="-1" checked> ${L.share_unlimit}</label>
 <label class="pk-s-opt"><input type="radio" name="sh_cnt" value="custom"> ${L.share_custom}</label>
-<input type="text" id="sh_cnt_val" class="pk-s-input" placeholder="${L.share_unlimit}"
+<input type="text" id="sh_cnt_val" class="pk-s-input" placeholder="${L.share_unlimit}" maxlength="${CONF.shareCountInputMaxLen}"
         style="width:60px; height:28px; text-align:center;" disabled autocomplete="off">
 </div>
 </div>
@@ -58708,7 +59488,9 @@ validate();
 cntVal.onfocus = () => { if(!cntVal.disabled) cntBox.style.borderColor = 'var(--pk-pri)'; };
 cntVal.onblur = () => { if(cntVal.value === '') cntBox.style.borderColor = 'var(--pk-bd)'; };
 cntVal.oninput = () => {
-cntVal.value = cntVal.value.replace(/[^\d]/g, '');
+const oldValue = cntVal.value;
+cntVal.value = cntVal.value.replace(/[^\d]/g, '').slice(0, CONF.shareCountInputMaxLen);
+if (oldValue !== cntVal.value && String(oldValue || '').length >= CONF.shareCountInputMaxLen) showConfigInputLimitTip(cntVal);
 validate();
 };
 
@@ -58928,7 +59710,7 @@ b.textContent = L.msg_copy_success;
 setTimeout(() => resM.remove(), 1000);
 };
 } catch (e) {
-showAlert(e.message);
+showAlert(formatCloudErrorMessage(e));
 } finally {
 setLoad(false);
 }
@@ -59531,7 +60313,7 @@ return {
     size: t.file_size,
     phase: t.phase,
     progress: parseInt(t.progress || 0),
-    message: t.message,
+    message: t.message ? formatCloudErrorMessage({ message: t.message, phase: t.phase, data: t }, t.message) : '',
     icon_link: t.icon_link,
     thumbnail_link: ref.thumbnail_link ? ref.thumbnail_link : t.icon_link,
     created_time: t.created_time,
@@ -60230,7 +61012,7 @@ gmSet('pk_migration_stub', '');
 }
 } catch(e) {
 setLoad(false);
-const keep = await showConfirm(L.msg_migrate_err_keep.replace('{e}', e.message), L.title_alert);
+const keep = await showConfirm(L.msg_migrate_err_keep.replace('{e}', formatCloudErrorMessage(e)), L.title_alert);
 if (!keep) gmSet('pk_migration_stub', '');
 }
 }, 1500);
