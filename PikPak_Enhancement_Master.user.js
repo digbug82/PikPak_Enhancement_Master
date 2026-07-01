@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            4.1.0
+// @version            4.2.0
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -3722,6 +3722,7 @@ zh: {
   "msg_share_preview_soft_limit": "后续内容无法保证播放，保存到我的 PikPak 后可完整观看",
   "msg_share_ext_preview_limited_save": "外部播放视频可能不完整，保存到我的 PikPak 后可完整播放",
   "msg_share_download_preview_limited": "该分享视频存在下载限制，请先保存到我的 PikPak 后再下载",
+  "msg_share_download_preview_limited_confirm": "选中项目中存在下载限制，直接下载可能导致相关文件不完整或损坏。是否继续下载？",
   "msg_share_download_no_direct_link": "未返回下载直链",
   "ph_share_link": "请输入 PikPak 分享链接",
   "ph_share_pass": "密码（无则留空）",
@@ -7246,6 +7247,7 @@ movingIds: new Set(),
 movingSourceId: null,
 movingDestId: null,
 uploadTasks: (globalSavedState && globalSavedState.uploadTasks) ? globalSavedState.uploadTasks : [],
+lastRealHomePath: (globalSavedState && Array.isArray(globalSavedState.lastRealHomePath)) ? [...globalSavedState.lastRealHomePath] : null,
 broadcast: new BroadcastChannel('pk_act_sync'),
 getNavBucketKey: () => {
 if (S.starredMode) return 'starred';
@@ -9466,6 +9468,73 @@ return pathStartsAtHome &&
 cur.id !== 'virtual_search_root' && cur.id !== 'analyze_root';
 };
 
+const cloneHomeRealPath = (path) => (Array.isArray(path) ? path : []).map(n => ({ ...(n || {}) }));
+const normalizeHomeRealPath = (path) => {
+const list = cloneHomeRealPath(path).filter(Boolean);
+if (!list.length) return null;
+if (String((list[0] && list[0].id) || '') !== '') return null;
+const hasVirtualNode = list.some(n => {
+const id = String((n && n.id) || '');
+return id === 'virtual_search_root' || id === 'analyze_root' || id.startsWith('virtual_') || (id && /_root$/i.test(id));
+});
+if (hasVirtualNode) return null;
+list[0].id = '';
+list[0].name = L.btn_nav_home;
+return list;
+};
+const isRestorableRealHomePathNow = () => {
+if (S.trashMode || S.shareMode || S.shareParseMode || S.linkBookmarkMode || S.offlineMode || S.uploadMode || S.historyMode || S.recentMode || S.starredMode) return false;
+if (S.isFlattened || S.dupMode || S.analyzeMode || S.scanning) return false;
+return !!normalizeHomeRealPath(S.path);
+};
+const rememberLastRealHomePath = () => {
+const currentPath = normalizeHomeRealPath(S.path);
+if (currentPath && isRestorableRealHomePathNow()) {
+S.lastRealHomePath = currentPath;
+return currentPath;
+}
+const sourcePath = normalizeHomeRealPath(S.preSearchPath);
+if (sourcePath) {
+S.lastRealHomePath = sourcePath;
+return sourcePath;
+}
+return normalizeHomeRealPath(S.lastRealHomePath);
+};
+const getLastRealHomePathForRestore = () => normalizeHomeRealPath(S.lastRealHomePath) || [{ id: '', name: L.btn_nav_home }];
+const getHomeRestoreCacheKey = (path) => {
+const list = normalizeHomeRealPath(path);
+const cur = list && list.length ? list[list.length - 1] : null;
+const id = String((cur && cur.id) || '');
+return S.getRealCacheKey ? S.getRealCacheKey(id || 'root') : (id || 'root');
+};
+const getHomeRestoreCachedData = (path) => {
+const key = getHomeRestoreCacheKey(path);
+if (!key) return null;
+if (S.cache && S.cache.has(key)) return { key, data: S.cache.get(key) };
+if (typeof globalCache !== 'undefined') {
+let lookupKey = key;
+if (key === 'root' && globalCache.has('')) lookupKey = '';
+if (globalCache.has(lookupKey)) return { key, data: globalCache.get(lookupKey) };
+}
+return null;
+};
+const hydrateHomeRestoreCachedData = (path) => {
+const hit = getHomeRestoreCachedData(path);
+if (!hit) return false;
+const raw = hit.data;
+const items = raw && !Array.isArray(raw) && Array.isArray(raw.items) ? raw.items : (Array.isArray(raw) ? raw : null);
+if (!items) return false;
+S.items = [...items];
+S.display = [];
+S.itemMap.clear();
+S.items.forEach(item => { if (item && item.id) S.itemMap.set(item.id, item); });
+if (S.cache) S.cache.set(hit.key, raw);
+refresh();
+updateStat();
+return true;
+};
+rememberLastRealHomePath();
+
 const closeLocalUploadMenu = () => {
 if (typeof window.__pkCloseUploadMenu === 'function') {
 try { window.__pkCloseUploadMenu(); } catch(e) {}
@@ -11595,8 +11664,10 @@ const detectAutoHideButtonTextOverflow = () => {
 if (!el || !UI || !UI.win || el.style.display === 'none' || !isAutoHideVisibleEl(UI.win)) return false;
 const tol = 4;
 const floatingSelectors = '.pk-hist-pop,.pk-dup-folder-pop,.pk-select-pop,.pk-dropdown-menu,.pk-modal-ov,.pk-img-ov,#pk-player-ov,#pk-audio-ov';
+const ignoreOverflowSelectors = '#pk-crumb,.pk-nav,.pk-picker-crumb,.pk-path';
 const hasVisibleFloatingDesc = node => !!(node && Array.from(node.querySelectorAll(floatingSelectors)).some(isAutoHideVisibleEl));
 const isInFloatingDesc = node => !!(node && node.closest && node.closest(floatingSelectors));
+const isAutoHideOverflowIgnored = node => !!(node && node.closest && node.closest(ignoreOverflowSelectors));
 const isShareParseRootActionsOverflow = () => {
 if (!S.shareParseMode || S.shareParseListActive) return false;
 const actions = el.querySelector('.pk-share-parse-root-mode .pk-share-parse-actions');
@@ -11622,13 +11693,13 @@ const shareParseRootActions = S.shareParseMode && !S.shareParseListActive ? el.q
 const bars = [el.querySelector('#pk-top-bar'), UI.actionBar, UI.trashBar, shareParseBottomBar, shareParseRootActions, el.querySelector('.pk-link-bookmark-mode .pk-lbm-toolbar')].filter(isAutoHideVisibleEl);
 for (const bar of bars) {
 const br = bar.getBoundingClientRect();
-const children = Array.from(bar.children).filter(isAutoHideVisibleEl);
+const children = Array.from(bar.children).filter(child => isAutoHideVisibleEl(child) && !isAutoHideOverflowIgnored(child));
 for (const child of children) {
 const cr = child.getBoundingClientRect();
 if (cr.right > br.right + tol || cr.left < br.left - tol) return true;
 const hasFloating = hasVisibleFloatingDesc(child);
 if (!hasFloating && child.scrollWidth > child.clientWidth + tol) return true;
-const spans = Array.from(child.querySelectorAll('span')).filter(span => isAutoHideVisibleEl(span) && !isInFloatingDesc(span));
+const spans = Array.from(child.querySelectorAll('span')).filter(span => isAutoHideVisibleEl(span) && !isInFloatingDesc(span) && !isAutoHideOverflowIgnored(span));
 for (const span of spans) {
 if (span.scrollWidth > span.clientWidth + tol) return true;
 }
@@ -11642,27 +11713,12 @@ autoHideBtnTextRaf = 0;
 if (!el || !UI || !UI.win) return;
 const syncQuotaText = () => { try { if (typeof refreshQuotaText === 'function') refreshQuotaText(); } catch(e) {} };
 if (el.style.display === 'none') { el.classList.remove('pk-auto-hide-btn-text'); autoHideBtnTextLockWidth = 0; syncQuotaText(); return; }
-const width = window.innerWidth || 0;
-const unlockGap = 96;
-const wasAuto = el.classList.contains('pk-auto-hide-btn-text');
-if (wasAuto) {
-if (!autoHideBtnTextLockWidth) autoHideBtnTextLockWidth = width;
-if (width < autoHideBtnTextLockWidth + unlockGap) return;
+if (gmGet('pk_hide_button_text', false)) { el.classList.remove('pk-auto-hide-btn-text'); autoHideBtnTextLockWidth = 0; syncQuotaText(); return; }
 el.classList.remove('pk-auto-hide-btn-text');
-if (detectAutoHideButtonTextOverflow()) {
-el.classList.add('pk-auto-hide-btn-text');
-autoHideBtnTextLockWidth = width;
-} else {
+const shouldHide = detectAutoHideButtonTextOverflow();
+el.classList.toggle('pk-auto-hide-btn-text', shouldHide);
 autoHideBtnTextLockWidth = 0;
-}
 syncQuotaText();
-} else if (detectAutoHideButtonTextOverflow()) {
-el.classList.add('pk-auto-hide-btn-text');
-autoHideBtnTextLockWidth = width;
-syncQuotaText();
-} else {
-autoHideBtnTextLockWidth = 0;
-}
 };
 
 const requestAutoHideButtonTextCheck = () => {
@@ -18077,6 +18133,7 @@ if (isNotFoundError) {
     if (S.path.length > 1 || S.path[0].id !== '') {
         stopLiveManualRefreshBeforePathChange('path_change');
         S.path = [{ id: '', name: L.btn_nav_home }];
+        S.lastRealHomePath = [{ id: '', name: L.btn_nav_home }];
         load(false, true).finally(() => { S._isRetrying = false; });
         return;
     }
@@ -22843,13 +22900,34 @@ return duration > limitSeconds + 1;
 return true;
 }
 
+async function confirmShareDownloadPreviewLimited(options = {}) {
+if (options.allowPreviewLimitedDownload || options.previewLimitedConfirmed) return true;
+if (options.previewLimitedConfirmPromise) {
+const ok = await options.previewLimitedConfirmPromise;
+if (ok) options.previewLimitedConfirmed = true;
+return ok;
+}
+const L = getStrings();
+options.previewLimitedConfirmPromise = showConfirm(L.msg_share_download_preview_limited_confirm, L.title_confirm, { enterAction: 'no' });
+try {
+const ok = await options.previewLimitedConfirmPromise;
+if (ok) options.previewLimitedConfirmed = true;
+return ok;
+} finally {
+delete options.previewLimitedConfirmPromise;
+}
+}
+
 async function resolveShareDownloadTask(item, options = {}) {
 if (!item || !item._isShareItem || item.kind === 'drive#folder') return null;
 let detail = null;
 let directUrl = '';
 for (let attempt = 0; attempt < 2; attempt++) {
 detail = await fetchShareFileInfo(item, { signal: options.signal });
-if (isShareDownloadPreviewLimited(detail)) throw makeShareParseError('msg_share_download_preview_limited');
+if (isShareDownloadPreviewLimited(detail)) {
+const confirmed = await confirmShareDownloadPreviewLimited(options);
+if (!confirmed) throw makeShareParseError('msg_share_download_preview_limited');
+}
 directUrl = getShareDownloadDirectUrl(detail);
 if (directUrl) break;
 }
@@ -41289,6 +41367,7 @@ if (!isGlobal) S.lastGlobalResults = [];
 if (isGlobal && !S.preSearchPath) {
 S.preSearchPath = [...S.path];
 }
+if (isGlobal) rememberLastRealHomePath();
 
 if (isGlobal) {
 S.sort = 'modified_time'; S.dir = 1;
@@ -41944,6 +42023,7 @@ if (UI.chkSearchPath) UI.chkSearchPath.checked = false;
 }
 
 rememberFolderFirstBeforeStrictMode();
+rememberLastRealHomePath();
 
 S.isFlattened = true;
 if (typeof applyResolvedViewMode === 'function') applyResolvedViewMode('file_insight');
@@ -42463,6 +42543,7 @@ for (let i = 0; i < total; i++) {
 }
 
 rememberFolderFirstBeforeStrictMode();
+rememberLastRealHomePath();
 
 S.dupMode = true;
 if (typeof applyResolvedViewMode === 'function') applyResolvedViewMode('file_dup');
@@ -44244,6 +44325,7 @@ if (UI.searchInput) UI.searchInput.value = '';
 if (UI.searchClear) UI.searchClear.style.display = 'none';
 
 rememberFolderFirstBeforeStrictMode();
+rememberLastRealHomePath();
 
 stopLiveManualRefreshBeforePathChange('mode_change');
 S.analyzeMode = true;
@@ -47386,8 +47468,9 @@ progressTask = FloatBarManager.create(L.msg_batch_hydrating);
 const readyFiles = [];
 const hydrateQueue = [...allFiles];
 const activeTasks = new Set();
+const shareDownloadOptions = { signal };
 const hydrateWithRetry = async (file, maxRetries = 3) => {
-if (file._isShareItem) return await resolveShareDownloadTask(file, { signal });
+if (file._isShareItem) return await resolveShareDownloadTask(file, shareDownloadOptions);
 if (file.web_content_link) return file;
 if (file.phase === "PHASE_TYPE_PENDING" || file.phase === "PHASE_TYPE_RUNNING" || file.trashed) return null;
 let lastErr = null;
@@ -47590,9 +47673,10 @@ progressTask = FloatBarManager.create(L.msg_batch_hydrating);
 const readyFiles =[];
 const hydrateQueue = [...allFiles];
 const activeTasks = new Set();
+const shareDownloadOptions = { signal };
 
 const hydrateWithRetry = async (file, maxRetries = 3) => {
-if (file._isShareItem) return await resolveShareDownloadTask(file, { signal });
+if (file._isShareItem) return await resolveShareDownloadTask(file, shareDownloadOptions);
 if (file.web_content_link) return file;
 if (file.phase === "PHASE_TYPE_PENDING" || file.phase === "PHASE_TYPE_RUNNING" || file.trashed) return null;
 let lastErr = null;
@@ -49626,107 +49710,206 @@ if (S.uploadMode && !skipRender) { refresh(); }
 
 S.upMng.initStore();
 
-const handleUploadInput = async (files) => {
-if (!files || files.length === 0) return;
+const normalizeUploadParentId = (id) => {
+const value = String(id || '');
+return (!value || value === 'root' || value === 'upload_root') ? '' : value;
+};
 
-if (S.upMng && S.upMng._syncLocks) S.upMng._syncLocks.clear();
+const getUploadSafeParentId = () => {
+const curPath = S.path[S.path.length - 1] || {};
+const id = String(curPath.id || '');
+const isVirtual = id.startsWith('virtual_') || id.includes('_root') || id === 'upload_root';
+return (id && !isVirtual) ? id : '';
+};
 
-const curPath = S.path[S.path.length - 1];
-const isVirtual = curPath.id.startsWith('virtual_') || curPath.id.includes('_root') || curPath.id === 'upload_root';
-const safeParentId = (curPath.id && !isVirtual) ? curPath.id : '';
-
-let fileList = Array.from(files);
-
-let existingFiles = [];
-if (typeof globalCache !== 'undefined' && globalCache.has(safeParentId)) {
-const raw = globalCache.get(safeParentId);
-existingFiles = Array.isArray(raw) ? raw : (raw.items || []);
-} else if (!isVirtual && S.items && S.items.length > 0) {
-existingFiles = S.items;
+const getUploadRelativeFolder = (file) => {
+let relativeFolder = "";
+if (file && file.webkitRelativePath) {
+const parts = String(file.webkitRelativePath || '').split('/').filter(Boolean);
+if (parts.length > 1) {
+parts.pop();
+relativeFolder = parts.join('/');
 }
-
-if (existingFiles.length > 0) {
-const existingMap = new Set();
-existingFiles.forEach(f => {
-if (f.kind !== 'drive#folder') {
-existingMap.add(`${f.name}_${f.size}`);
 }
-});
+return relativeFolder;
+};
 
-let dupCount = 0;
+const getUploadChildrenForDuplicateCheck = async (parentId) => {
+const pid = normalizeUploadParentId(parentId);
+if (typeof globalCache !== 'undefined' && globalCache.has(pid)) {
+const raw = globalCache.get(pid);
+return Array.isArray(raw) ? raw : (raw && raw.items || []);
+}
+const curPath = S.path[S.path.length - 1] || {};
+if (normalizeUploadParentId(curPath.id) === pid && Array.isArray(S.items) && S.items.length > 0) return S.items;
+try {
+const list = await apiList(pid, 1000, null, null, false, true);
+return Array.isArray(list) ? list : (list && list.items || []);
+} catch (e) {
+return [];
+}
+};
+
+const buildUploadDuplicateIndexSet = async (rows, safeParentId) => {
 const duplicateIndices = new Set();
-fileList.forEach((file, index) => {
-if (file.name.startsWith('.')) return;
-let relativeFolder = "";
-if (file.webkitRelativePath) {
-const parts = file.webkitRelativePath.split('/');
-if (parts.length > 1) {
-    parts.pop();
-    relativeFolder = parts.join('/');
-}
-}
-if (!relativeFolder) {
-const key = `${file.name}_${file.size}`;
-if (existingMap.has(key)) {
-    dupCount++;
-    duplicateIndices.add(index);
-}
-}
+const baseParentId = normalizeUploadParentId(safeParentId);
+const childrenCache = new Map();
+const fileSetCache = new Map();
+const folderPathCache = new Map();
+const getChildren = async (pid) => {
+const key = normalizeUploadParentId(pid);
+if (!childrenCache.has(key)) childrenCache.set(key, await getUploadChildrenForDuplicateCheck(key));
+return childrenCache.get(key) || [];
+};
+const getFileSet = async (pid) => {
+const key = normalizeUploadParentId(pid);
+if (!fileSetCache.has(key)) {
+const set = new Set();
+(await getChildren(key)).forEach(item => {
+if (item && item.kind !== 'drive#folder') set.add(`${item.name}_${item.size}`);
 });
+fileSetCache.set(key, set);
+}
+return fileSetCache.get(key);
+};
+const resolveTargetParent = async (relativeFolder) => {
+const rel = String(relativeFolder || '').split('/').map(s => s.trim()).filter(Boolean);
+if (!rel.length) return baseParentId;
+const relKey = `${baseParentId}\n${rel.join('/')}`;
+if (folderPathCache.has(relKey)) return folderPathCache.get(relKey);
+let currentPid = baseParentId;
+for (const name of rel) {
+const lockKey = `${currentPid}\n${name}`;
+if (folderPathCache.has(lockKey)) {
+currentPid = folderPathCache.get(lockKey);
+if (currentPid === null) {
+folderPathCache.set(relKey, null);
+return null;
+}
+continue;
+}
+const children = await getChildren(currentPid);
+const folder = children.find(item => item && item.kind === 'drive#folder' && item.name === name);
+const nextPid = folder && folder.id ? folder.id : null;
+folderPathCache.set(lockKey, nextPid);
+if (!nextPid) {
+folderPathCache.set(relKey, null);
+return null;
+}
+currentPid = nextPid;
+}
+folderPathCache.set(relKey, currentPid);
+return currentPid;
+};
+for (const row of rows) {
+const file = row && row.file;
+if (!file || String(file.name || '').startsWith('.')) continue;
+const targetParentId = await resolveTargetParent(row.relativeFolder);
+if (targetParentId === null) continue;
+const existingSet = await getFileSet(targetParentId);
+if (existingSet.has(`${file.name}_${file.size}`)) duplicateIndices.add(row.index);
+}
+return duplicateIndices;
+};
 
-if (dupCount > 0) {
-const skipDups = await showConfirm(L.msg_upload_dup_confirm.replace('{n}', dupCount));
-if (skipDups) {
-fileList = fileList.filter((_, idx) => !duplicateIndices.has(idx));
-}
-}
-}
+const applyUploadDuplicateSkipConfirm = async (rows, safeParentId) => {
+const list = Array.isArray(rows) ? rows : [];
+if (!list.length) return list;
+const duplicateIndices = await buildUploadDuplicateIndexSet(list, safeParentId);
+if (!duplicateIndices.size) return list;
+const skipDups = await showConfirm(L.msg_upload_dup_confirm.replace('{n}', duplicateIndices.size));
+return skipDups ? list.filter(row => !duplicateIndices.has(row.index)) : list;
+};
 
-if (fileList.length === 0) {
-UI.inpFile.value = '';
-UI.inpFolder.value = '';
-return;
-}
-
+const enqueueUploadRows = async (rows, safeParentId, batchSize = 50) => {
 let addedCount = 0;
-const BATCH_SIZE = 50;
-
-if (fileList.length > BATCH_SIZE) {
-showToast(L.msg_parsing_files, 'info', 2000);
-}
-
-for (let i = 0; i < fileList.length; i += BATCH_SIZE) {
-const batch = fileList.slice(i, i + BATCH_SIZE);
-
+const list = Array.isArray(rows) ? rows : [];
+for (let i = 0; i < list.length; i += batchSize) {
+const batch = list.slice(i, i + batchSize);
 await new Promise(resolve => setTimeout(resolve, 0));
-
-for (const file of batch) {
-if (file.name.startsWith('.')) continue;
-
-let relativeFolder = "";
-if (file.webkitRelativePath) {
-const parts = file.webkitRelativePath.split('/');
-if (parts.length > 1) {
-    parts.pop();
-    relativeFolder = parts.join('/');
-}
-}
-
+for (const row of batch) {
+const file = row && row.file;
+if (!file || String(file.name || '').startsWith('.')) continue;
 if (S.upMng) {
 const task = S.upMng.createTask(file, safeParentId);
-task.relativeFolder = relativeFolder;
+task.relativeFolder = row.relativeFolder || "";
 S.uploadTasks.unshift(task);
 addedCount++;
 }
 }
 }
+return addedCount;
+};
+
+const collectUploadEntryFiles = async (entries, relPath = "", rows = []) => {
+const BATCH_SIZE = 10;
+for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+const batch = entries.slice(i, i + BATCH_SIZE);
+await Promise.all(batch.map(async (entry) => {
+if (entry.isFile) {
+await new Promise((res) => {
+entry.file(file => {
+if (file && !file.name.startsWith('.')) rows.push({ file, relativeFolder: relPath });
+res();
+}, () => res());
+});
+} else if (entry.isDirectory) {
+await new Promise((res) => {
+const reader = entry.createReader();
+const readAllEntries = async () => {
+let allSubEntries = [];
+const readBatch = async () => new Promise((r) => {
+reader.readEntries((sub) => {
+if (sub.length > 0) {
+allSubEntries = allSubEntries.concat(sub);
+readBatch().then(r);
+} else {
+r();
+}
+}, () => r());
+});
+await readBatch();
+await collectUploadEntryFiles(allSubEntries, (relPath ? relPath + "/" : "") + entry.name, rows);
+res();
+};
+readAllEntries();
+});
+}
+}));
+}
+return rows;
+};
+
+const handleUploadInput = async (files) => {
+if (!files || files.length === 0) return;
+
+if (S.upMng && S.upMng._syncLocks) S.upMng._syncLocks.clear();
+
+const safeParentId = getUploadSafeParentId();
+
+let uploadRows = Array.from(files).map((file, index) => ({ file, index, relativeFolder: getUploadRelativeFolder(file) }));
+uploadRows = await applyUploadDuplicateSkipConfirm(uploadRows, safeParentId);
+
+if (uploadRows.length === 0) {
+UI.inpFile.value = '';
+UI.inpFolder.value = '';
+return;
+}
+
+const BATCH_SIZE = 50;
+
+if (uploadRows.length > BATCH_SIZE) {
+showToast(L.msg_parsing_files, 'info', 2000);
+}
+
+const addedCount = await enqueueUploadRows(uploadRows, safeParentId, BATCH_SIZE);
 
 showToast(L.msg_task_added.replace('{n}', addedCount));
 
-if (!S.uploadMode) {
-switchTab('upload');
-} else {
+if (S.uploadMode) {
 renderVisible();
+updateStat();
+} else {
 updateStat();
 }
 
@@ -49742,52 +49925,6 @@ UI.inpFolder.onchange = (e) => handleUploadInput(e.target.files);
 const dragMask = document.createElement('div');
 dragMask.className = 'pk-drag-mask';
 UI.win.appendChild(dragMask);
-
-const parseEntries = async (entries, relPath = "") => {
-const BATCH_SIZE = 10;
-for (let i = 0; i < entries.length; i += BATCH_SIZE) {
-const batch = entries.slice(i, i + BATCH_SIZE);
-await Promise.all(batch.map(async (entry) => {
-if (entry.isFile) {
-return new Promise((res) => {
-    entry.file(file => {
-        if (!file.name.startsWith('.')) {
-            const curPath = S.path[S.path.length - 1];
-            const safeParentId = (curPath.id && !curPath.id.includes('_root')) ? curPath.id : '';
-            const task = S.upMng.createTask(file, safeParentId);
-            task.relativeFolder = relPath;
-            S.uploadTasks.unshift(task);
-        }
-        res();
-    }, () => res());
-});
-} else if (entry.isDirectory) {
-return new Promise((res) => {
-    const reader = entry.createReader();
-    const readAllEntries = async () => {
-        let allSubEntries = [];
-        let readBatch = async () => {
-            return new Promise((r) => {
-                reader.readEntries((sub) => {
-                    if (sub.length > 0) {
-                        allSubEntries = allSubEntries.concat(sub);
-                        readBatch().then(r);
-                    } else {
-                        r();
-                    }
-                }, () => r());
-            });
-        };
-        await readBatch();
-        await parseEntries(allSubEntries, (relPath ? relPath + "/" : "") + entry.name);
-        res();
-    };
-    readAllEntries();
-});
-}
-}));
-}
-};
 
 const canDragUpload = () => {
 return !S.trashMode && !S.shareMode && !S.shareParseMode && !S.linkBookmarkMode && !S.offlineMode && !S.starredMode &&
@@ -49863,65 +50000,17 @@ if (entry) entries.push(entry);
 }
 
 if (entries.length > 0) {
-const curPath = S.path[S.path.length - 1];
-const isVirtual = curPath.id.startsWith('virtual_') || curPath.id.includes('_root') || curPath.id === 'upload_root';
-const safeParentId = (curPath.id && !isVirtual) ? curPath.id : '';
+const safeParentId = getUploadSafeParentId();
+let uploadRows = await collectUploadEntryFiles(entries);
+uploadRows = uploadRows.map((row, index) => ({ file: row.file, relativeFolder: row.relativeFolder || "", index }));
+uploadRows = await applyUploadDuplicateSkipConfirm(uploadRows, safeParentId);
 
-let existingFiles = [];
-if (typeof globalCache !== 'undefined' && globalCache.has(safeParentId)) {
-const raw = globalCache.get(safeParentId);
-existingFiles = Array.isArray(raw) ? raw : (raw.items || []);
-} else if (!isVirtual && S.items && S.items.length > 0) {
-existingFiles = S.items;
-}
+if (uploadRows.length === 0) return;
 
-if (existingFiles.length > 0) {
-const existingMap = new Set();
-existingFiles.forEach(f => {
-if (f.kind !== 'drive#folder') {
-    existingMap.add(`${f.name}_${f.size}`);
-}
-});
-
-let dupCount = 0;
-const duplicateIndices = new Set();
-
-const topLevelFiles = [];
-for (let i = 0; i < entries.length; i++) {
-const entry = entries[i];
-if (entry.isFile) {
-    const file = await new Promise((res) => entry.file(res, () => res(null)));
-    if (file && !file.name.startsWith('.')) {
-        topLevelFiles.push({ file, index: i });
-    }
-}
-}
-
-topLevelFiles.forEach(tf => {
-const key = `${tf.file.name}_${tf.file.size}`;
-if (existingMap.has(key)) {
-    dupCount++;
-    duplicateIndices.add(tf.index);
-}
-});
-
-if (dupCount > 0) {
-const skipDups = await showConfirm(L.msg_upload_dup_confirm.replace('{n}', dupCount));
-if (skipDups) {
-    for (let i = entries.length - 1; i >= 0; i--) {
-        if (duplicateIndices.has(i)) {
-            entries.splice(i, 1);
-        }
-    }
-}
-}
-}
-
-if (entries.length === 0) return;
-
-await parseEntries(entries);
-if (!S.uploadMode) switchTab('upload');
-else { refresh(); updateStat(); }
+const addedCount = await enqueueUploadRows(uploadRows, safeParentId, 10);
+showToast(L.msg_task_added.replace('{n}', addedCount));
+if (S.uploadMode) { refresh(); updateStat(); }
+else updateStat();
 if (S.upMng) S.upMng.scheduler();
 }
 });
@@ -49935,6 +50024,8 @@ UI.uploadWrap.classList.remove('active');
 }
 
 const switchTab = (mode) => {
+rememberLastRealHomePath();
+const restoreHomePath = mode === 'home' ? getLastRealHomePathForRestore() : null;
 stopLiveManualRefreshBeforePathChange('mode_change');
 const leavingShareParseMode = !!(S.shareParseMode && mode !== 'shareParse');
 const leavingLinkBookmarkMode = !!(S.linkBookmarkMode && mode !== 'linkBookmark');
@@ -50114,7 +50205,7 @@ S.path = [{ id: 'recent_root', name: rootName }];
 } else if (S.historyMode) {
 S.path = [{ id: 'history_root', name: rootName }];
 } else {
-S.path = [{ id: '', name: rootName }];
+S.path = mode === 'home' ? restoreHomePath : [{ id: '', name: rootName }];
 }
 
 if (mode === 'home') {
@@ -50398,6 +50489,9 @@ return;
 const isOffline = mode === 'offline';
 const isRecent = mode === 'recent';
 const isHistory = mode === 'history';
+const isHome = mode === 'home';
+const homeRestoreHydrated = isHome ? hydrateHomeRestoreCachedData(restoreHomePath) : false;
+if (homeRestoreHydrated && canUseLiveManualRefresh()) S.keepVisualOnNextForceLoad = true;
 
 const realKey = S.getRealCacheKey(isOffline ? 'offline_root' : (isRecent ? 'recent_root' : (isHistory ? 'history_root' : '')));
 const hasCache = typeof globalCache !== 'undefined' && globalCache.has(realKey);
@@ -50417,16 +50511,16 @@ if (isOffline && isResumingOffline) {
 S.offlinePagingPending = true;
 S.pagingLoading = true;
 updateStat();
-} else if (!((isOffline && hasCache) || (isRecent && (hasCache || isResumingRecent)) || (isHistory && (hasCache || isResumingHistory)))) {
+} else if (!homeRestoreHydrated && !((isOffline && hasCache) || (isRecent && (hasCache || isResumingRecent)) || (isHistory && (hasCache || isResumingHistory)))) {
 setLoad(true, true);
 }
 
-load(false, !(isOffline || isRecent || isHistory));
+load(false, isHome ? true : !(isOffline || isRecent || isHistory));
 
 if (isOffline) scheduleOfflineLightProbe('enter', 1200);
 if (isRecent) scheduleRecentLightProbe('enter', 1200);
 
-if (window.pkSmartRefreshTrigger) {
+if (window.pkSmartRefreshTrigger && !isHome) {
 setTimeout(() => window.pkSmartRefreshTrigger(isOffline || isRecent), 100);
 }
 };
