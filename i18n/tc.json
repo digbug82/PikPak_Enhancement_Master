@@ -196,6 +196,7 @@
   "msg_share_preview_soft_limit": "後續內容無法保證播放，儲存到我的 PikPak 後可完整觀看",
   "msg_share_ext_preview_limited_save": "外部播放影片可能不完整，儲存到我的 PikPak 後可完整播放",
   "msg_share_download_preview_limited": "該分享影片存在下載限制，請先保存到我的 PikPak 後再下載",
+  "msg_share_download_preview_limited_confirm": "選中項目中存在下載限制，直接下載可能導致相關檔案不完整或損壞。是否繼續下載？",
   "msg_share_download_no_direct_link": "未返回下載直鏈",
   "ph_share_link": "請輸入 PikPak 分享連結",
   "ph_share_pass": "密碼（無則留空）",
