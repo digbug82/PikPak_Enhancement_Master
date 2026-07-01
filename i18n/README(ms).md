@@ -286,7 +286,7 @@ Jadi jika fail tidak muncul selepas tampal, sebab paling biasa ialah had kapasit
 
 ## Kenyataan Privasi dan Keselamatan
 
-* **Utamakan tempatan**: semua keupayaan teras skrip ini berinteraksi terus dengan API rasmi PikPak melalui pelayar. Token akaun, Bilik Simpanan Kata Laluan Nyahmampat dan kebanyakan data konfigurasi tempatan anda disimpan dalam persekitaran pelayar tempatan secara lalai.
+* **Mengutamakan setempat**: Semua keupayaan teras skrip ini berinteraksi terus dengan API rasmi PikPak melalui pelayar. Token akaun anda, pustaka kata laluan penyahmampatan, dan kebanyakan data konfigurasi setempat disimpan secara lalai dalam persekitaran pelayar setempat anda.
 * **Tiada pengumpulan**: skrip **tidak mengumpul** data privasi pengguna secara aktif, dan **tidak akan sekali-kali** memuat naik maklumat fail atau kelayakan akaun anda ke mana-mana pelayan pihak ketiga.
 * **Antara muka pihak ketiga**: hanya apabila menggunakan ciri tambahan seperti "carian sari kata dalam talian", "carian imej" atau "pratonton magnet", skrip akan menghantar kata kunci carian, parameter ciri imej atau maklumat ciri magnet yang diperlukan kepada perkhidmatan awam berkaitan. Ini tidak melibatkan maklumat identiti peribadi anda.
 * **Sempadan hak keahlian**: skrip ini hanya digunakan untuk meningkatkan pengalaman operasi PikPak Web. Ia **tidak mempunyai keupayaan untuk memecah, memintas atau memalsukan hak keahlian PikPak**, dan tidak menyediakan sebarang fungsi buka kunci keahlian yang melanggar peraturan perkhidmatan rasmi.
