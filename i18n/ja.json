@@ -196,6 +196,7 @@
   "msg_share_preview_soft_limit": "以降のコンテンツは再生を保証できません。マイ PikPak に保存すると最後まで視聴できます",
   "msg_share_ext_preview_limited_save": "外部再生の動画は完全ではない可能性があります。マイ PikPak に保存すると完全に再生できます",
   "msg_share_download_preview_limited": "この共有動画にはダウンロード制限があります。マイ PikPak に保存してからダウンロードしてください。",
+  "msg_share_download_preview_limited_confirm": "選択した項目の中にダウンロード制限があります。直接ダウンロードすると、関連ファイルが不完全または破損する可能性があります。ダウンロードを続行しますか？",
   "msg_share_download_no_direct_link": "直接ダウンロードリンクが返されませんでした",
   "ph_share_link": "PikPak 共有リンクを入力してください",
   "ph_share_pass": "パスワード（ない場合は空欄）",
