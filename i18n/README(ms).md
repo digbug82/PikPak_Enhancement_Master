@@ -295,6 +295,16 @@ Jadi jika fail tidak muncul selepas tampal, sebab paling biasa ialah had kapasit
 
 ## Log Kemas Kini
 
+### V4.2.0
+
+* Membetulkan **isu penyembunyian automatik teks butang tercetus secara tidak sengaja**.
+* Membetulkan **isu semakan nama sama yang terlepas semasa memuat naik folder**. Apabila memuat naik folder dengan nama yang sama, fail di dalamnya akan disemak mengikut laluan awan akhir untuk mengelakkan fail dengan nama dan saiz yang sama dimuat naik berulang.
+* Mengoptimumkan **muat turun video terhad dalam penghuraian perkongsian**. Apabila item yang dipilih mempunyai sekatan muat turun, muat turun tidak lagi disekat terus; pengesahan risiko akan dipaparkan supaya pengguna boleh menentukan sama ada mahu meneruskan.
+* Mengoptimumkan **interaksi muat naik setempat**. Selepas memuat naik fail, memuat naik folder atau menyeret fail untuk dimuat naik, halaman tidak lagi dipaksa bertukar ke “Muat Naik Saya”.
+* Mengoptimumkan **ingatan laluan halaman utama**. Selepas bertukar daripada halaman utama ke mod lain, kembali ke halaman utama akan memulihkan laluan sebenar sebelum pertukaran; laluan maya akan kembali ke laluan sebenar sebelum memasuki mod maya.
+* Mengoptimumkan **strategi segar semula apabila kembali ke halaman utama**. Apabila kembali ke halaman utama, cache akan dipaparkan terlebih dahulu, kemudian segar semula dipertingkat akan dijalankan pada laluan sebenar terakhir yang direkodkan untuk mengurangkan segar semula kosong, penantian kosong dan kelipan.
+* Pengoptimuman UI dan kestabilan.
+
 ### V4.1.0
 
 * Membetulkan **isu fail sumber tidak sah semasa salin / potong / tampal**. Sebelum menampal, skrip kini menyemak sama ada fail sumber telah dipadam, dipindahkan ke Trash, atau tidak lagi wujud, lalu item tidak sah akan dilangkau atau dikosongkan secara automatik.
