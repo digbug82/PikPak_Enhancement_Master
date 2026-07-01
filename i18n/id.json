@@ -196,7 +196,7 @@
   "msg_share_preview_soft_limit": "Pemutaran konten berikutnya tidak dapat dijamin. Simpan ke PikPak Saya agar dapat ditonton penuh",
   "msg_share_ext_preview_limited_save": "Pemutaran video eksternal mungkin tidak lengkap. Simpan ke PikPak Saya agar dapat diputar penuh",
   "msg_share_download_preview_limited": "Video yang dibagikan ini memiliki batasan unduhan. Simpan ke PikPak Saya sebelum mengunduh.",
-  "msg_share_download_preview_limited_confirm": "Beberapa item yang dipilih memiliki batasan unduhan. Mengunduh secara langsung dapat menyebabkan file terkait tidak lengkap atau rusak. Lanjutkan mengunduh?"
+  "msg_share_download_preview_limited_confirm": "Beberapa item yang dipilih memiliki batasan unduhan. Mengunduh secara langsung dapat menyebabkan file terkait tidak lengkap atau rusak. Lanjutkan mengunduh?",
   "msg_share_download_no_direct_link": "Tidak ada tautan unduhan langsung yang dikembalikan",
   "ph_share_link": "Masukkan tautan berbagi PikPak",
   "ph_share_pass": "Kata sandi (kosongkan jika tidak ada)",
