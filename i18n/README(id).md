@@ -286,7 +286,7 @@ Jadi jika file tidak muncul setelah tempel, penyebab paling umum adalah batas ka
 
 ## Pernyataan Privasi dan Keamanan
 
-* **Utamakan lokal**: semua kemampuan inti skrip ini berinteraksi langsung dengan API resmi PikPak melalui browser. Token akun, Brankas Kata Sandi Ekstraksi, dan sebagian besar data konfigurasi lokal Anda secara default disimpan di lingkungan browser lokal.
+* **Mengutamakan lokal**: Semua kemampuan inti skrip ini berinteraksi langsung dengan API resmi PikPak melalui browser. Token akun Anda, pustaka kata sandi ekstraksi, dan sebagian besar data konfigurasi lokal disimpan secara default di lingkungan browser lokal Anda.
 * **Tanpa pengumpulan**: skrip **tidak secara aktif mengumpulkan** data privasi pengguna, dan **tidak akan pernah** mengunggah informasi file atau kredensial akun Anda ke server pihak ketiga mana pun.
 * **Antarmuka pihak ketiga**: hanya saat menggunakan fitur tambahan seperti "pencarian subtitle online", "pencarian gambar", atau "pratinjau magnet", skrip akan mengirim kata kunci pencarian, parameter fitur gambar, atau informasi fitur magnet yang diperlukan ke layanan publik terkait. Ini tidak melibatkan informasi identitas pribadi Anda.
 * **Batas hak membership**: skrip ini hanya untuk meningkatkan pengalaman penggunaan PikPak Web. Skrip ini **tidak memiliki kemampuan membobol, melewati, atau memalsukan hak membership PikPak**, dan tidak menyediakan fitur unlock membership apa pun yang melanggar aturan layanan resmi.
