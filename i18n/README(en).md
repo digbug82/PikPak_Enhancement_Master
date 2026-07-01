@@ -295,6 +295,16 @@ So if files do not appear after pasting, the most common reason is a capacity li
 
 ## Changelog
 
+### V4.2.0
+
+* Fixed **accidental triggering of automatic button text hiding**.
+* Fixed **missed duplicate-name checks when uploading folders**. When uploading a folder with the same name, internal files are checked by their final cloud path to avoid re-uploading files with the same name and size.
+* Optimized **restricted video downloads in share parsing**. When selected items have download restrictions, downloads are no longer blocked directly; a risk confirmation is shown instead, allowing the user to decide whether to continue.
+* Optimized **local upload interactions**. Uploading files, uploading folders, or dragging files to upload no longer forcibly switches to “My Uploads”.
+* Optimized **home path memory**. After switching from Home to another mode, returning to Home restores the real path before switching; virtual paths return to the real path before entering the virtual mode.
+* Optimized **Home return refresh strategy**. When returning to Home, cached data is rendered first, then an enhanced refresh is performed on the last recorded real path to reduce clearing refreshes, blank waiting, and flickering.
+* UI and stability optimizations.
+
 ### V4.1.0
 
 * Fixed **copy / cut / paste issues caused by invalid source files**. Before pasting, the script now checks whether source files have been deleted, moved to Trash, or no longer exist, and automatically skips or clears invalid items.
