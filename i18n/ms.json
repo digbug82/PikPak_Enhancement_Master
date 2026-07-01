@@ -196,6 +196,7 @@
   "msg_share_preview_soft_limit": "Main balik kandungan seterusnya tidak dapat dijamin. Simpan ke PikPak Saya untuk tontonan penuh",
   "msg_share_ext_preview_limited_save": "Main balik video luaran mungkin tidak lengkap. Simpan ke PikPak Saya untuk main balik penuh",
   "msg_share_download_preview_limited": "Video kongsi ini mempunyai sekatan muat turun. Simpan ke PikPak Saya sebelum memuat turun.",
+  "msg_share_download_preview_limited_confirm": "Sesetengah item yang dipilih mempunyai sekatan muat turun. Muat turun secara terus boleh menyebabkan fail berkaitan tidak lengkap atau rosak. Teruskan muat turun?",
   "msg_share_download_no_direct_link": "Tiada pautan muat turun langsung dikembalikan",
   "ph_share_link": "Masukkan pautan perkongsian PikPak",
   "ph_share_pass": "Kata laluan (biarkan kosong jika tiada)",
