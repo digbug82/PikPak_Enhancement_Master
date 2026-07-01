@@ -196,6 +196,7 @@
   "msg_share_preview_soft_limit": "Playback of the following content cannot be guaranteed. Save it to My PikPak to watch in full.",
   "msg_share_ext_preview_limited_save": "External video playback may be incomplete. Save it to My PikPak for full playback.",
   "msg_share_download_preview_limited": "This shared video has download restrictions. Save it to My PikPak before downloading.",
+  "msg_share_download_preview_limited_confirm": "Some selected items have download restrictions. Direct downloads may result in related files being incomplete or corrupted. Continue downloading?"
   "msg_share_download_no_direct_link": "No direct download link was returned",
   "ph_share_link": "Enter a PikPak share link",
   "ph_share_pass": "Password (leave blank if none)",
