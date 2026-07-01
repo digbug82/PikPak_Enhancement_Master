@@ -295,6 +295,16 @@ Jadi jika file tidak muncul setelah tempel, penyebab paling umum adalah batas ka
 
 ## Catatan Perubahan
 
+### V4.2.0
+
+* Memperbaiki **masalah pemicu keliru pada penyembunyian otomatis teks tombol**.
+* Memperbaiki **pemeriksaan nama duplikat yang terlewat saat mengunggah folder**. Saat mengunggah folder dengan nama yang sama, file di dalamnya akan diperiksa berdasarkan jalur cloud akhir untuk mencegah unggahan ulang file dengan nama dan ukuran yang sama.
+* Mengoptimalkan **unduhan video terbatas pada parsing berbagi**. Jika item yang dipilih memiliki batasan unduhan, unduhan tidak lagi langsung diblokir; konfirmasi risiko akan ditampilkan agar pengguna dapat memutuskan apakah ingin melanjutkan.
+* Mengoptimalkan **interaksi unggahan lokal**. Setelah mengunggah file, mengunggah folder, atau mengunggah dengan seret-lepas, halaman tidak lagi dipaksa berpindah ke “Unggahan Saya”.
+* Mengoptimalkan **memori jalur beranda**. Setelah berpindah dari Beranda ke mode lain, kembali ke Beranda akan memulihkan jalur nyata sebelum perpindahan; jalur virtual akan kembali ke jalur nyata sebelum masuk ke mode virtual.
+* Mengoptimalkan **strategi penyegaran saat kembali ke Beranda**. Saat kembali ke Beranda, cache akan dirender terlebih dahulu, lalu penyegaran yang ditingkatkan dijalankan pada jalur nyata terakhir yang tercatat untuk mengurangi penyegaran kosong, waktu tunggu kosong, dan kedipan.
+* Optimalisasi UI dan stabilitas.
+
 ### V4.1.0
 
 * Memperbaiki **masalah sumber file tidak valid saat salin / potong / tempel**. Sebelum menempel, skrip kini memeriksa apakah file sumber telah dihapus, dipindahkan ke Trash, atau sudah tidak ada, lalu secara otomatis melewati atau mengosongkan item yang tidak valid.
