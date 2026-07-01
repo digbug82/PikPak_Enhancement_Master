@@ -286,7 +286,7 @@ So if files do not appear after pasting, the most common reason is a capacity li
 
 ## Privacy and Security Statement
 
-* **Local-first**: all core capabilities of this script interact directly with PikPak official APIs through the browser. Your account Token, Extract Password Vault, and most local configuration data are stored in the local browser environment by default.
+* **Local-first**: All core features of this script interact directly with the official PikPak API through your browser. Your account token, extraction password library, and most local configuration data are stored in your local browser environment by default.
 * **Zero collection**: the script **does not actively collect** user privacy data and **will never** upload your file information or account credentials to any third-party server.
 * **Third-party APIs**: only when using extension features such as "online subtitle search", "image search", or "magnet preview" will the script send necessary search keywords, image feature parameters, or magnet feature information to related public services. This does not involve your personal identity information.
 * **Membership boundary**: this script is only used to enhance the PikPak web operation experience. It **does not have the ability to crack, bypass, or forge PikPak membership benefits**, and it does not provide any membership-unlocking function that violates official service rules.
