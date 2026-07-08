@@ -52836,7 +52836,7 @@ const m = showModal(`
 <div class="pk-magnet-archive-row pk-magnet-archive-head"><div>${esc(L.label_magnet_archive_reason)}</div><div>${esc(L.label_magnet_archive_source)}</div><div>${esc(L.label_magnet_archive_key)}</div></div>
 ${rowsHtml}
 </div>
-<div class="pk-modal-act${actionClass}"><button class="pk-btn" id="pk_magnet_archive_preview_ok">${esc(L.btn_cancel || L.btn_close || L.btn_ok)}</button>${showExportBtn ? `<button class="pk-btn" id="pk_magnet_archive_export">${esc(L.btn_magnet_archive_export || '导出磁链')}</button>` : ''}${showDupDeleteBtn ? `<button class="pk-btn" id="pk_magnet_archive_delete_dup_source" style="color:#d93025;">${esc(L.btn_magnet_archive_delete_dup_source)}</button>` : ''}${ok ? `<button class="pk-btn pri" id="pk_magnet_archive_write">${esc(L.btn_magnet_archive_write)}</button>` : ''}</div>
+<div class="pk-modal-act${actionClass}"><button class="pk-btn" id="pk_magnet_archive_preview_ok">${esc(L.btn_cancel || L.btn_close || L.btn_ok)}</button>${showExportBtn ? `<button class="pk-btn" id="pk_magnet_archive_export">${esc(L.btn_magnet_archive_export)}</button>` : ''}${showDupDeleteBtn ? `<button class="pk-btn" id="pk_magnet_archive_delete_dup_source" style="color:#d93025;">${esc(L.btn_magnet_archive_delete_dup_source)}</button>` : ''}${ok ? `<button class="pk-btn pri" id="pk_magnet_archive_write">${esc(L.btn_magnet_archive_write)}</button>` : ''}</div>
 </div>`);
 bindMagnetArchiveOverflowTips(m);
 bindPreviewIconFallback(m);
