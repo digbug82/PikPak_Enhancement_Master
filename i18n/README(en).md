@@ -295,6 +295,14 @@ So if files do not appear after pasting, the most common reason is a capacity li
 
 ## Changelog
 
+### V4.3.0
+
+* Added **cloud archive magnet export**, allowing CSV export from the cloud archive dialog with title and magnet link columns, and removed the selected item count limit for cloud archiving.
+* Optimized **direct-link extraction for Aria2 / Gopeed / ABDM / IDM / browser downloads**, reducing batch failures caused by `captcha_invalid` when downloading large numbers of files.
+* Optimized **paste fallback logic**, removing unified pre-validation to reduce the chance of auth errors, black image previews, or videos getting stuck on the cover with a spinner during paste operations.
+* Optimized **folder duplicate similarity algorithm and threshold handling**, consistently fixing mixed strict / loose threshold usage and adding total folder size consistency weighting to similarity matching.
+* UI and stability optimizations.
+
 ### V4.2.0
 
 * Fixed **accidental triggering of automatic button text hiding**.
