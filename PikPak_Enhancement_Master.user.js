@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            4.2.0
+// @version            4.3.0
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -1258,6 +1258,7 @@ buffer: 20,
 dupGridHeaderHeight: { normal: 40, max: 60 },
 dupGridSectionGap: { normal: 14, max: 18 },
 dupGridBodyGapY: { normal: 16, max: 20 },
+folderSimSizeToleranceBytes: 1024,
 SYSTEM_FOLDER_NAME: 'My Pack',
 fileNameMaxLen: 1024,
 cloudTaskInputMaxChars: 262144,
@@ -1302,6 +1303,11 @@ gopeedDownloadDir: '',
 gopeedKeepFolderStructure: true,
 gopeedBatchSize: 10,
 gopeedRequestTimeout: 8000,
+downloadHydrateConcurrencyBrowser: 6,
+downloadHydrateConcurrencyDownloader: 6,
+downloadHydrateRequestDelay: 0,
+downloadHydrateRequestJitter: 0,
+downloadHydrateCaptchaWaitMax: 5 * 60 * 1000,
 abdmApiUrl: '',
 abdmDownloadDir: '',
 abdmRequestTimeout: 8000,
@@ -1330,10 +1336,11 @@ magnetPreviewCircuitTTL: 5 * 60 * 1000,
 magnetPreviewMaxShots: 5,
 magnetArchiveFolderKey: 'folder_magnet_archive',
 magnetArchiveFolderStorageName: 'PEM-CLOUD-ARCHIVE',
-magnetArchiveMaxSelected: 50,
-magnetArchivePreviewMaxRows: 50,
 magnetArchiveJournalMax: 2000,
 magnetArchiveMaxSourceChars: 200000,
+magnetArchiveDetailConcurrency: 3,
+magnetArchiveDetailRequestDelay: 120,
+magnetArchiveDetailRequestJitter: 120,
 magnetArchiveSourceKeys: ['source_url','sourceUrl','original_url','originalUrl','magnet','link','href','url'],
 magnetArchiveFolderHeaderHrefPrefix: 'pem-cloud-archive-folder:',
 magnetArchiveStateHrefPrefix: 'pem-cloud-archive-state:',
@@ -1658,6 +1665,12 @@ const CSS = `
 .pk-magnet-archive-title-icon svg { width:24px!important; height:24px!important; display:block; flex-shrink:0; }
 .pk-magnet-archive-title-name { flex:1 1 auto; min-width:0; }
 .pk-magnet-archive-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.pk-magnet-archive-actions-three { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:15px !important; width:100% !important; margin:20px 0 0 0 !important; }
+.pk-magnet-archive-actions-three .pk-btn { height:46px !important; border-radius:12px !important; font-size:15px !important; font-weight:600 !important; justify-content:center !important; padding:0 !important; margin:0 !important; min-width:0 !important; width:100% !important; }
+.pk-magnet-archive-actions-three .pk-btn.pri { background:var(--pk-pri) !important; color:#fff !important; border:none !important; transition:filter .2s !important; }
+.pk-magnet-archive-actions-three .pk-btn:not(.pri) { background:transparent !important; color:var(--pk-fg) !important; border:1px solid transparent !important; }
+.pk-magnet-archive-actions-three #pk_magnet_archive_delete_dup_source { color:#d93025 !important; }
+.pk-magnet-archive-actions-three .pk-btn:not(.pri):hover:not(:disabled) { background:var(--pk-hl) !important; }
 html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overflow:hidden !important; }
 .pk-modal-ov.pk-txt-preview-ov:not(.pk-modal-over-player-webfullscreen) { position:fixed !important; inset:0 !important; display:block !important; z-index:2147483641 !important; }
 .pk-modal-ov.pk-txt-preview-fullscreen-ov { padding:0 !important; align-items:stretch !important; justify-content:stretch !important; }
@@ -2170,9 +2183,9 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-stop-btn svg { display: block; }
 .pk-stop-btn:hover { background: #b02a20; transform: scale(1.05); }
 .pk-stop-btn:active { transform: scale(0.95); }
-.pk-ft { height: 48px; border-top: 1px solid var(--pk-bd); background: var(--pk-bg); display: flex; align-items: center; padding: 0 16px; justify-content: space-between; font-size: 13px; }
-.pk-stat { color: var(--pk-fg); font-size: 13px; }
-.pk-grp { display: flex; gap: 8px; }
+.pk-ft { height: 48px; border-top: 1px solid var(--pk-bd); background: var(--pk-bg); display: flex; align-items: center; padding: 0 16px; justify-content: space-between; gap:12px; font-size: 13px; overflow:hidden; }
+.pk-stat { color: var(--pk-fg); font-size: 13px; min-width:0; flex:1 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pk-grp { display: flex; gap: 8px; flex:0 0 auto; min-width:0; }
 .pk-pop { position: fixed; pointer-events: none; z-index: 2147483647 !important; background: #000; border: 1px solid #333; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); border-radius: 6px; display: none; overflow: hidden; }
 .pk-pop img { display: block; max-width: 320px; max-height: 240px; object-fit: contain; }
 .pk-ctx { position: fixed; z-index: 2147483647 !important; background: var(--pk-bg); border: 1px solid var(--pk-bd); border-radius: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); min-width: 150px; padding: 4px 0; display: none; }
@@ -3616,14 +3629,18 @@ zh: {
   "btn_link_bookmark_parse": "预览",
   "folder_magnet_archive": "云归档",
   "btn_magnet_archive_check": "云归档",
-  "tip_magnet_archive_check": "归档选中项磁链到链接收藏夹 [Alt] + [Y]",
+  "tip_magnet_archive_check": "将选中项磁链导出或归档到链接收藏夹 [Alt] + [Y]",
   "title_magnet_archive_check": "云归档检测",
   "msg_magnet_archive_check_no_selected": "请先选择要云归档的项目",
   "msg_magnet_archive_check_over_limit": "一次最多选择 {max} 个项目进行云归档。",
   "msg_magnet_archive_checking": "正在检测选中项磁链...",
   "msg_magnet_archive_index_failed": "云归档索引读取失败，无法确认是否已归档，请稍后重试。",
   "btn_magnet_archive_write": "确认归档",
+  "btn_magnet_archive_export": "导出磁链",
   "btn_magnet_archive_delete_dup_source": "删除重复源文件",
+  "msg_magnet_archive_export_no_item": "没有可导出的磁链。",
+  "msg_magnet_archive_export_success": "已导出 {n} 条磁链。",
+  "str_magnet_archive_export_file_name": "cloud_archive_magnets",
   "msg_magnet_archive_write_no_item": "没有可写入的云归档项。",
   "msg_magnet_archive_writing": "正在写入云归档收藏...",
   "msg_magnet_archive_write_success": "已写入云归档 {count} 项。",
@@ -3655,6 +3672,7 @@ zh: {
   "label_magnet_archive_skipped": "跳过",
   "label_magnet_archive_invalid": "异常",
   "label_magnet_archive_source": "标题",
+  "label_magnet_archive_magnet": "磁链",
   "label_magnet_archive_key": "详情",
   "label_magnet_archive_reason": "状态",
   "reason_magnet_archive_ready": "检测到可追溯磁链",
@@ -4670,6 +4688,7 @@ zh: {
   "msg_retry_submitted": "已重试提交 {n} 个任务",
   "msg_aria2_batch_fail_log": "\n\n检测到失败项较多，已为您自动导出完整错误清单 (.txt)",
   "str_aria2_fetch_err": "(获取链接失败)",
+  "str_downloader_no_direct_link": "(云端未返回可用于下载的直链)",
   "str_aria2_rpc_err": "(投递失败)",
   "str_aria2_aborted": "(已取消)",
   "str_downloader_fail_file_name": "{d}_失败清单",
@@ -4761,6 +4780,9 @@ zh: {
   "err_codec_t2": "您的浏览器不支持该视频格式。<br>请点击下方按钮调用外部播放器。",
   "err_web_unsupported_t1": "无法在网页中播放此视频",
   "err_web_unsupported_t2": "当前设备或浏览器可能不支持该视频的网页解码。<br>请点击下方按钮调用外部播放器。",
+  "err_no_playable_source_t1": "播放失败！(1001)",
+  "err_no_playable_source_t2": "云端未返回可用于播放的直链，当前视频无法在线播放。",
+  "btn_retry_playback": "重试",
   "err_pwd_simple": "密码错误",
   "err_task_exists": "任务已存在",
   "err_network_break": "图片节点网络断流，请再次点击重试",
@@ -4770,6 +4792,7 @@ zh: {
   "err_parent_not_found": "文件夹不存在",
   "msg_sys_error": "不允许操作系统文件夹",
   "msg_video_fail": "无法获取视频链接。",
+  "msg_video_no_playable_source": "云端未返回可用于播放的直链。",
   "audio_player_title": "音乐播放器",
   "audio_loading": "正在加载音频...",
   "audio_ready": "音频已就绪",
@@ -4836,6 +4859,11 @@ const pkI18nBootReady = ensureI18nReady();
 let cachedCredKey = null;
 let cachedCaptchaKey = null;
 let memoryCapturedToken = '';
+const downloadHydrateInvalidCaptchaTokens = new Set();
+
+function isDownloadHydrateCaptchaTokenInvalid(token) {
+return !!(token && downloadHydrateInvalidCaptchaTokens.has(String(token)));
+}
 
 document.addEventListener('pk-token-captured', (e) => {
 memoryCapturedToken = e.detail;
@@ -5122,18 +5150,20 @@ break;
 if (cachedCaptchaKey) {
 try {
 const v = JSON.parse(localStorage.getItem(cachedCaptchaKey));
-if (v) captcha = v.captcha_token;
+if (v && v.captcha_token && !isDownloadHydrateCaptchaTokenInvalid(v.captcha_token)) captcha = v.captcha_token;
+else cachedCaptchaKey = null;
 } catch {}
 }
 if (!captcha) {
-captcha = localStorage.getItem('pk_captured_captcha') || '';
+const capturedCaptcha = localStorage.getItem('pk_captured_captcha') || '';
+if (capturedCaptcha && !isDownloadHydrateCaptchaTokenInvalid(capturedCaptcha)) captcha = capturedCaptcha;
 if (!captcha) {
 for (let i = 0; i < localStorage.length; i++) {
 const k = localStorage.key(i);
 if (k && k.startsWith('captcha')) {
 try {
 const v = JSON.parse(localStorage.getItem(k));
-if (v) {
+if (v && v.captcha_token && !isDownloadHydrateCaptchaTokenInvalid(v.captcha_token)) {
     captcha = v.captcha_token;
     cachedCaptchaKey = k;
     break;
@@ -5231,6 +5261,10 @@ let pageSuccess = false;
 
 while (pageRetries < MAX_PAGE_RETRIES && !pageSuccess) {
 if (signal?.aborted) throw new DOMException('Aborted by user', 'AbortError');
+while (typeof isDownloadHydrateCaptchaWaiting === 'function' && isDownloadHydrateCaptchaWaiting()) {
+if (signal?.aborted) throw new DOMException('Aborted by user', 'AbortError');
+await sleep(500);
+}
 
 const url = `https://api-drive.mypikpak.com/drive/v1/files?thumbnail_size=SIZE_MEDIUM&limit=${limit}${filters}&with_audit=true&_t=${Date.now()}${next ? `&page_token=${next}` : ''}`;
 const controller = new AbortController();
@@ -5238,7 +5272,8 @@ const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 if (signal) signal.addEventListener('abort', () => controller.abort(), { once: true });
 
 try {
-const res = await fetch(url, { headers: getHeaders(), signal: controller.signal });
+const headers = getHeaders();
+const res = await fetch(url, { headers, signal: controller.signal });
 clearTimeout(timeoutId);
 
 if (!res.ok) {
@@ -5255,11 +5290,32 @@ throw new Error(`API Error ${res.status}`);
 }
 
 if (res.status === 400) {
+const data = await res.clone().json().catch(() => ({}));
+const msg = typeof pickOfficialApiErrorText === 'function'
+? pickOfficialApiErrorText(data, `API Error ${res.status}`)
+: (data.error_description || data.message || data.msg || data.error || `API Error ${res.status}`);
+const err = new Error(msg);
+err.status = res.status;
+err.statusCode = res.status;
+err.code = String(data.code || data.error || data.error_code || '');
+err.errorCode = Number(data.error_code || 0) || 0;
+err.data = data;
+err.response = { status: res.status, statusCode: res.status, data };
+err.captchaToken = headers['x-captcha-token'] || '';
+if (typeof isDownloadHydrateCaptchaInvalidError === 'function' && isDownloadHydrateCaptchaInvalidError(err)) {
+const recovered = typeof recoverDownloadHydrateCaptcha === 'function' ? await recoverDownloadHydrateCaptcha(err, {
+    isRunning: () => !(signal && signal.aborted)
+}) : false;
+if (recovered && !(signal && signal.aborted)) {
+    pageRetries = 0;
+    continue;
+}
+}
 console.warn(`[API] 400 Error. Possible captcha intercept.`);
 localStorage.removeItem('pk_captured_captcha');
 resetHeaderCache();
 try { if (typeof showToast !== 'undefined') showToast(getStrings().err_captcha_simple, 'error'); } catch(e){}
-throw new Error('CAPTCHA_INTERCEPT');
+throw err;
 }
 if (res.status === 429) {
 await sleep(3000 * (pageRetries + 1));
@@ -5320,7 +5376,8 @@ return all;
 }
 
 async function apiGet(id) {
-const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/files/${id}?thumbnail_size=SIZE_MEDIUM&_t=${Date.now()}`, { headers: getHeaders() });
+const headers = getHeaders();
+const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/files/${id}?thumbnail_size=SIZE_MEDIUM&_t=${Date.now()}`, { headers });
 try { syncTime(res.headers); } catch (e) {}
 if (!res.ok) {
 const data = await res.json().catch(() => ({}));
@@ -5334,6 +5391,7 @@ err.code = String(data.code || data.error || data.error_code || (res.status === 
 err.errorCode = Number(data.error_code || 0) || 0;
 err.data = data;
 err.response = { status: res.status, statusCode: res.status, data };
+err.captchaToken = headers['x-captcha-token'] || '';
 throw err;
 }
 return res.json();
@@ -5785,6 +5843,16 @@ currentConcurrency: 10
 const USER_LIMIT = parseInt(localStorage.getItem('pk_user_limit') || "200");
 const ABSOLUTE_MAX = 128;
 const MIN_CONCURRENCY = 5;
+const isRecursiveCaptchaWaiting = () => typeof isDownloadHydrateCaptchaWaiting === 'function' && isDownloadHydrateCaptchaWaiting();
+const waitForRecursiveCaptchaIdle = async () => {
+while (isRecursiveCaptchaWaiting() && (!signal || !signal.aborted)) {
+stats.currentConcurrency = Math.min(stats.currentConcurrency, MIN_CONCURRENCY);
+stats.isRetrying = true;
+if (onProgress) onProgress(stats);
+await sleep(500);
+}
+stats.isRetrying = false;
+};
 
 const processFolder = async (current) => {
 inFlight.add(current.id);
@@ -5803,10 +5871,14 @@ stats.cacheHits++;
 let isFromNetwork = false;
 let start = 0;
 if (listFolder) {
+if (isRecursiveCaptchaWaiting()) await waitForRecursiveCaptchaIdle();
+if (signal && signal.aborted) return;
 start = performance.now();
 files = await listFolder(current, signal);
 isFromNetwork = true;
 } else if (files.length === 0) {
+if (isRecursiveCaptchaWaiting()) await waitForRecursiveCaptchaIdle();
+if (signal && signal.aborted) return;
 start = performance.now();
 files = await apiList(folderId, 1000, null, signal, false, true);
 isFromNetwork = true;
@@ -5883,7 +5955,7 @@ if (onProgress) onProgress(stats);
 };
 while ((queue.length > 0 || inFlight.size > 0 || pendingRetries > 0) && (!signal || !signal.aborted)) {
 
-while (queue.length > 0 && activeTasks.size < stats.currentConcurrency && (!signal || !signal.aborted)) {
+while (queue.length > 0 && activeTasks.size < stats.currentConcurrency && !isRecursiveCaptchaWaiting() && (!signal || !signal.aborted)) {
 const folder = queue.pop();
 
 if (inFlight.has(folder.id) && folder.retryCount === 0) continue;
@@ -5895,6 +5967,8 @@ activeTasks.add(pWrapper);
 
 if (activeTasks.size > 0) {
 await Promise.race(activeTasks).catch(() => {});
+} else if (isRecursiveCaptchaWaiting()) {
+await waitForRecursiveCaptchaIdle();
 } else if (pendingRetries > 0 || inFlight.size > 0) {
 await sleep(100);
 }
@@ -6492,6 +6566,148 @@ return true;
 } catch (e) {
 return false;
 }
+}
+
+function createDownloadLinkEmptyError() {
+const error = new Error('Download direct link missing');
+error.code = 'DOWNLOAD_LINK_EMPTY';
+return error;
+}
+
+function isDownloadLinkEmptyError(error) {
+return !!(error && error.code === 'DOWNLOAD_LINK_EMPTY');
+}
+
+function getDownloadHydrateFailureReason(error) {
+return isDownloadLinkEmptyError(error) ? L.str_downloader_no_direct_link : L.str_aria2_fetch_err;
+}
+
+let downloadHydrateNextAt = 0;
+let downloadHydrateCaptchaWaitPromise = null;
+
+function getDownloadHydrateConcurrency(kind) {
+const key = kind === 'browser' ? 'downloadHydrateConcurrencyBrowser' : 'downloadHydrateConcurrencyDownloader';
+const fallback = 6;
+const n = Math.floor(Number(CONF[key]) || fallback);
+return Math.max(1, Math.min(8, n || fallback));
+}
+
+async function waitBeforeDownloadHydrate(attempt = 0) {
+const base = Math.max(0, Number(CONF.downloadHydrateRequestDelay) || 0);
+const jitter = Math.max(0, Number(CONF.downloadHydrateRequestJitter) || 0);
+const retryExtra = attempt > 0 ? Math.min(2500, attempt * Math.max(500, base)) : 0;
+const interval = base + retryExtra + (jitter ? Math.floor(Math.random() * jitter) : 0);
+if (interval <= 0) return;
+
+const now = Date.now();
+const scheduledAt = Math.max(now, downloadHydrateNextAt) + interval;
+downloadHydrateNextAt = scheduledAt;
+await sleep(scheduledAt - now);
+}
+
+function isDownloadHydrateCaptchaInvalidError(error) {
+if (!error) return false;
+const data = error.data || (error.response && error.response.data) || {};
+const status = Number(error.status || error.statusCode || (error.response && (error.response.status || error.response.statusCode)) || 0);
+const code = String(error.code || data.code || data.error || '').toLowerCase();
+const errorCode = Number(error.errorCode || data.error_code || 0) || 0;
+let text = '';
+try {
+text = [error.message, data.error_description, data.message, data.msg, data.details ? JSON.stringify(data.details) : ''].filter(Boolean).join(' ').toLowerCase();
+} catch (e) {
+text = String(error.message || '').toLowerCase();
+}
+return status === 400 && (
+code === 'captcha_invalid'
+|| code.includes('captcha_invalid')
+|| text.includes('captcha_invalid')
+|| text.includes('验证码无效')
+|| (errorCode === 9 && (text.includes('captcha') || text.includes('验证码')))
+);
+}
+
+function rememberDownloadHydrateInvalidCaptchaToken(token) {
+const value = String(token || '');
+if (value.length <= 20) return '';
+downloadHydrateInvalidCaptchaTokens.add(value);
+while (downloadHydrateInvalidCaptchaTokens.size > 20) {
+const first = downloadHydrateInvalidCaptchaTokens.values().next().value;
+downloadHydrateInvalidCaptchaTokens.delete(first);
+}
+return value;
+}
+
+function clearStoredDownloadHydrateCaptchaToken(token) {
+const target = String(token || '');
+try {
+const captured = localStorage.getItem('pk_captured_captcha') || '';
+if (!target || captured === target) localStorage.removeItem('pk_captured_captcha');
+} catch (e) {}
+if (!target) return;
+try {
+const keys = [];
+for (let i = 0; i < localStorage.length; i++) {
+const key = localStorage.key(i);
+if (key && key.startsWith('captcha')) keys.push(key);
+}
+keys.forEach(key => {
+try {
+    const value = JSON.parse(localStorage.getItem(key));
+    if (value && value.captcha_token === target) localStorage.removeItem(key);
+} catch (e) {}
+});
+} catch (e) {}
+}
+
+function markDownloadHydrateCaptchaInvalid(error) {
+const invalidToken = rememberDownloadHydrateInvalidCaptchaToken(error && error.captchaToken);
+clearStoredDownloadHydrateCaptchaToken(invalidToken);
+resetHeaderCache();
+return invalidToken;
+}
+
+function isDownloadHydrateCaptchaWaiting() {
+return !!downloadHydrateCaptchaWaitPromise;
+}
+
+async function waitForDownloadHydrateCaptchaRefresh(invalidToken, options = {}) {
+if (downloadHydrateCaptchaWaitPromise) return downloadHydrateCaptchaWaitPromise;
+const maxWait = Math.max(10000, Number(CONF.downloadHydrateCaptchaWaitMax) || 5 * 60 * 1000);
+downloadHydrateCaptchaWaitPromise = (async () => {
+const startedAt = Date.now();
+const waits = [10000, 20000, 30000];
+let waitIndex = 0;
+while (!options.isRunning || options.isRunning()) {
+resetHeaderCache();
+const token = (getHeaders()['x-captcha-token'] || '');
+if (token && token !== invalidToken && !isDownloadHydrateCaptchaTokenInvalid(token)) {
+return true;
+}
+const elapsed = Date.now() - startedAt;
+if (elapsed >= maxWait) return false;
+const waitMs = Math.min(waits[Math.min(waitIndex, waits.length - 1)], maxWait - elapsed);
+if (typeof options.onWait === 'function') options.onWait({ elapsed, waitMs });
+await sleep(waitMs);
+waitIndex++;
+}
+return false;
+})().finally(() => {
+downloadHydrateCaptchaWaitPromise = null;
+});
+return downloadHydrateCaptchaWaitPromise;
+}
+
+async function recoverDownloadHydrateCaptcha(error, options = {}) {
+const invalidToken = markDownloadHydrateCaptchaInvalid(error);
+console.warn('[Hydrate Captcha] captcha_invalid detected, waiting for refreshed token...');
+const ok = await waitForDownloadHydrateCaptchaRefresh(invalidToken, options);
+if (ok) {
+resetHeaderCache();
+console.warn('[Hydrate Captcha] refreshed token detected, resuming hydration.');
+return true;
+}
+console.warn('[Hydrate Captcha] token refresh wait timed out.');
+return false;
 }
 
 function isAriaWsRpcUrl(url) {
@@ -11651,6 +11867,7 @@ let isForcedHidden = false;
 let autoHideBtnTextRaf = 0;
 let autoHideBtnTextBound = false;
 let autoHideBtnTextLockWidth = 0;
+const AUTO_HIDE_BTN_TEXT_RELEASE_GAP = 80;
 
 const isAutoHideVisibleEl = (node) => {
 if (!node || !node.isConnected) return false;
@@ -11668,6 +11885,23 @@ const ignoreOverflowSelectors = '#pk-crumb,.pk-nav,.pk-picker-crumb,.pk-path';
 const hasVisibleFloatingDesc = node => !!(node && Array.from(node.querySelectorAll(floatingSelectors)).some(isAutoHideVisibleEl));
 const isInFloatingDesc = node => !!(node && node.closest && node.closest(floatingSelectors));
 const isAutoHideOverflowIgnored = node => !!(node && node.closest && node.closest(ignoreOverflowSelectors));
+const isFooterStatOverflow = () => {
+const footer = el.querySelector('.pk-ft');
+const stat = UI.stat;
+const group = UI.bottomGrp;
+if (!isAutoHideVisibleEl(footer) || !isAutoHideVisibleEl(stat) || !isAutoHideVisibleEl(group)) return false;
+const fr = footer.getBoundingClientRect();
+const sr = stat.getBoundingClientRect();
+const gr = group.getBoundingClientRect();
+const gap = 8;
+const statStyle = getComputedStyle(stat);
+const lineHeight = parseFloat(statStyle.lineHeight) || ((parseFloat(statStyle.fontSize) || 13) * 1.5);
+if (sr.height > lineHeight + tol || sr.height > fr.height - tol) return true;
+if (sr.right > gr.left - gap || gr.right > fr.right + tol || gr.left < fr.left - tol) return true;
+if (stat.scrollWidth > stat.clientWidth + tol || stat.scrollHeight > stat.clientHeight + tol) return true;
+if (group.scrollWidth > group.clientWidth + tol) return true;
+return false;
+};
 const isShareParseRootActionsOverflow = () => {
 if (!S.shareParseMode || S.shareParseListActive) return false;
 const actions = el.querySelector('.pk-share-parse-root-mode .pk-share-parse-actions');
@@ -11688,6 +11922,7 @@ if (btn.scrollWidth > btn.clientWidth + tol) return true;
 return false;
 };
 if (isShareParseRootActionsOverflow()) return true;
+if (isFooterStatOverflow()) return true;
 const shareParseBottomBar = S.shareParseMode && S.shareParseListActive ? UI.bottomGrp : null;
 const shareParseRootActions = S.shareParseMode && !S.shareParseListActive ? el.querySelector('.pk-share-parse-root-mode .pk-share-parse-actions') : null;
 const bars = [el.querySelector('#pk-top-bar'), UI.actionBar, UI.trashBar, shareParseBottomBar, shareParseRootActions, el.querySelector('.pk-link-bookmark-mode .pk-lbm-toolbar')].filter(isAutoHideVisibleEl);
@@ -11708,16 +11943,28 @@ if (span.scrollWidth > span.clientWidth + tol) return true;
 return false;
 };
 
+const getAutoHideButtonTextLockWidth = () => {
+const footer = el && el.querySelector('.pk-ft');
+const host = isAutoHideVisibleEl(footer) ? footer : (isAutoHideVisibleEl(UI && UI.win) ? UI.win : null);
+const rect = host && host.getBoundingClientRect ? host.getBoundingClientRect() : null;
+return Math.max(0, Math.floor((rect && rect.width) || window.innerWidth || 0));
+};
+
 const updateAutoHideButtonText = () => {
 autoHideBtnTextRaf = 0;
 if (!el || !UI || !UI.win) return;
 const syncQuotaText = () => { try { if (typeof refreshQuotaText === 'function') refreshQuotaText(); } catch(e) {} };
 if (el.style.display === 'none') { el.classList.remove('pk-auto-hide-btn-text'); autoHideBtnTextLockWidth = 0; syncQuotaText(); return; }
 if (gmGet('pk_hide_button_text', false)) { el.classList.remove('pk-auto-hide-btn-text'); autoHideBtnTextLockWidth = 0; syncQuotaText(); return; }
+const currentLockWidth = getAutoHideButtonTextLockWidth();
+if (el.classList.contains('pk-auto-hide-btn-text') && autoHideBtnTextLockWidth > 0 && currentLockWidth > 0 && currentLockWidth <= autoHideBtnTextLockWidth + AUTO_HIDE_BTN_TEXT_RELEASE_GAP) {
+syncQuotaText();
+return;
+}
 el.classList.remove('pk-auto-hide-btn-text');
 const shouldHide = detectAutoHideButtonTextOverflow();
 el.classList.toggle('pk-auto-hide-btn-text', shouldHide);
-autoHideBtnTextLockWidth = 0;
+autoHideBtnTextLockWidth = shouldHide ? (currentLockWidth || autoHideBtnTextLockWidth || 0) : 0;
 syncQuotaText();
 };
 
@@ -11729,14 +11976,14 @@ autoHideBtnTextRaf = requestAnimationFrame(updateAutoHideButtonText);
 const bindAutoHideButtonTextObservers = () => {
 if (autoHideBtnTextBound) return;
 autoHideBtnTextBound = true;
-const targets = [UI.win, el.querySelector('#pk-top-bar'), UI.actionBar, UI.trashBar, UI.bottomGrp, UI.crumb, UI.vp, UI.in].filter(Boolean);
+const targets = [UI.win, el.querySelector('#pk-top-bar'), UI.actionBar, UI.trashBar, el.querySelector('.pk-ft'), UI.stat, UI.bottomGrp, UI.crumb, UI.vp, UI.in].filter(Boolean);
 if (typeof ResizeObserver !== 'undefined') {
 const ro = new ResizeObserver(requestAutoHideButtonTextCheck);
 targets.forEach(t => ro.observe(t));
 }
 if (typeof MutationObserver !== 'undefined') {
 const mo = new MutationObserver(requestAutoHideButtonTextCheck);
-targets.slice(1).forEach(t => mo.observe(t, { attributes: true, childList: true, subtree: true, attributeFilter: ['style', 'class'] }));
+targets.slice(1).forEach(t => mo.observe(t, { attributes: true, childList: true, subtree: true, characterData: true, attributeFilter: ['style', 'class'] }));
 }
 requestAutoHideButtonTextCheck();
 };
@@ -31004,52 +31251,6 @@ if (removed > 0) updateStat();
 return removed;
 };
 
-const validateClipboardItemsBeforePaste = async (items) => {
-const src = Array.isArray(items) ? items.filter(it => it && it.id) : [];
-if (src.length === 0) return { validItems: [], invalidCount: 0 };
-const validItems = [];
-let invalidCount = 0;
-let index = 0;
-let checked = 0;
-const total = src.length;
-let progressTask = null;
-let progressTimer = 0;
-const updateFloat = () => {
-if (progressTask && typeof progressTask.update === 'function') progressTask.update(`${L.msg_clip_checking} ${checked}/${total}`);
-};
-progressTimer = setTimeout(() => {
-progressTask = FloatBarManager.create(L.msg_clip_checking);
-updateFloat();
-}, 1000);
-const workerCount = Math.min(16, total);
-const worker = async () => {
-while (index < total) {
-const currentIndex = index++;
-const item = src[currentIndex];
-try {
-const meta = await apiGet(item.id);
-if (isClipboardSourceUnavailableMeta(meta)) {
-invalidCount++;
-} else {
-validItems.push(meta ? { ...item, ...meta } : item);
-}
-} catch (e) {
-if (isClipboardSourceUnavailableError(e)) invalidCount++;
-else validItems.push(item);
-}
-checked++;
-if (progressTask && (checked % 20 === 0 || checked === total)) updateFloat();
-}
-};
-try {
-await Promise.all(Array.from({ length: workerCount }, worker));
-} finally {
-if (progressTimer) clearTimeout(progressTimer);
-if (progressTask) progressTask.destroy();
-}
-return { validItems, invalidCount };
-};
-
 const waitFileTransferTask = async (data) => {
 if (!data || !data.task_id) return;
 await new Promise(resolve => {
@@ -34082,6 +34283,30 @@ return b.name.localeCompare(a.name, undefined, { numeric: true });
 return list;
 };
 
+const getPlayableSourceUrl = (data) => {
+if (!data) return '';
+const webContentLink = String(data.web_content_link || '').trim();
+if (webContentLink) return webContentLink;
+
+const links = data.links && typeof data.links === 'object' ? data.links : {};
+for (const key of Object.keys(links)) {
+const link = links[key];
+const url = typeof link === 'string' ? link : (link && link.url);
+const value = String(url || '').trim();
+if (value) return value;
+}
+
+const medias = Array.isArray(data.medias) ? data.medias : [];
+for (const media of medias) {
+const value = String((media && media.link && media.link.url) || '').trim();
+if (value) return value;
+}
+
+return '';
+};
+
+const hasPlayableSource = (sourceData) => !!(sourceData && String(sourceData.src || '').trim());
+
 const getBestSource = (data) => {
 const generatedList = generateQualityList(data);
 const list = generatedList.map(item => ({
@@ -34110,7 +34335,7 @@ bestMatch = originalMatch;
 } else if (list.length > 0) {
 bestMatch = list[0];
 } else {
-bestMatch = { name: '', link: data.web_content_link || '', active: true, isOriginal: false };
+bestMatch = { name: '', link: getPlayableSourceUrl(data), active: true, isOriginal: false };
 }
 
 if (bestMatch) bestMatch.active = true;
@@ -35991,6 +36216,99 @@ let mediaSessionToken = 0;
 let activeHealthTimer = null;
 let activeHlsObjectUrl = null;
 const isStaleMediaSession = (token) => token !== mediaSessionToken || isPlayerDestroyed;
+const showNoPlayableSourceBox = (sourceItem = item) => {
+if (!box) return;
+box.querySelectorAll('.pk-err-dialog').forEach(el => el.remove());
+if (posterEl) {
+posterEl.style.transition = 'none';
+posterEl.style.display = 'flex';
+posterEl.style.opacity = '1';
+posterEl.style.pointerEvents = 'auto';
+}
+try { if (v) v.pause(); } catch (e) {}
+try {
+if (pkHls) {
+pkHls.stopLoad();
+pkHls.detachMedia();
+pkHls.destroy();
+pkHls = null;
+}
+} catch (e) {}
+if (activeHlsObjectUrl) {
+try { URL.revokeObjectURL(activeHlsObjectUrl); } catch (e) {}
+activeHlsObjectUrl = null;
+}
+if (v) {
+try {
+v.removeAttribute('src');
+v.load();
+} catch (e) {}
+}
+box.classList.remove('buffering');
+const loader = d.querySelector('.pk-p-loading');
+if (loader) loader.style.display = 'none';
+
+const failSVG = `<svg width="85" height="85" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 45l15-15h30l15 15H20z" fill="#777"/><path d="M20 45L5 30h20l15 15H20z" fill="#999"/><path d="M80 45l15-15H75L60 45h20z" fill="#999"/><path fill-rule="evenodd" d="M20 45h60v35c0 5-5 5-5 5H25c-5 0-5-5-5-5V45zm16.5 14c0 3.3 1.5 6 3.5 6s3.5-2.7 3.5-6-1.5-6-3.5-6-3.5 2.7-3.5 6zm20 0c0 3.3 1.5 6 3.5 6s3.5-2.7 3.5-6-1.5-6-3.5-6-3.5 2.7-3.5 6z" fill="#aaa"/><path d="M38 16a12 8 0 1 0 24 0a12 8 0 1 0-24 0M48 24l2 3.5l2-3.5h-4z" fill="#aaa"/><path d="M47 13l6 6M53 13l-6 6" stroke="#181818" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+const canNext = curListIdx >= 0 && curListIdx < totalInList - 1;
+const nextLabel = String(L.btn_next_video || '').replace(/\s*\[[^\]]+\]\s*/g, '').trim() || L.btn_next_video;
+const dialog = document.createElement('div');
+dialog.className = 'pk-err-dialog pk-no-source-dialog';
+dialog.style.cssText = "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(30,30,30,.88);backdrop-filter:blur(12px);border-radius:12px;padding:40px 50px;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.8);z-index:999;min-width:400px;border:1px solid rgba(255,255,255,.1);";
+dialog.innerHTML = `
+<div class="pk-err-close" style="position:absolute;top:15px;right:15px;cursor:pointer;color:#fff;padding:5px;display:flex;align-items:center;justify-content:center;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+<div style="margin-bottom:20px;">${failSVG}</div>
+<div style="font-size:16px;font-weight:bold;color:#fff;margin-bottom:10px;max-width:420px;line-height:1.4;">${esc(L.err_no_playable_source_t1)}</div>
+<div style="font-size:12px;color:#aaa;margin-bottom:28px;max-width:430px;line-height:1.7;">${esc(L.err_no_playable_source_t2)}</div>
+<div style="display:flex;gap:12px;align-items:center;justify-content:center;width:100%;">
+    <button type="button" id="pk_no_source_retry" style="background:transparent;color:#ddd;border:none;padding:10px 16px;border-radius:6px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;">${CONF.icons.refresh} ${esc(L.btn_retry_playback)}</button>
+    ${canNext ? `<button type="button" id="pk_no_source_next" style="background:rgba(255,255,255,.08);color:#ddd;border:1px solid rgba(255,255,255,.14);padding:10px 34px;border-radius:6px;font-size:14px;cursor:pointer;">${esc(nextLabel)}</button>` : ''}
+</div>`;
+box.appendChild(dialog);
+
+dialog.querySelector('.pk-err-close').onclick = (e) => {
+e.stopPropagation();
+destroyPlayer();
+};
+dialog.onclick = (e) => e.stopPropagation();
+
+const retryBtn = dialog.querySelector('#pk_no_source_retry');
+if (retryBtn) retryBtn.onclick = async (e) => {
+e.stopPropagation();
+dialog.remove();
+box.classList.add('buffering');
+if (loader) loader.style.display = 'block';
+try {
+const targetApiId = getPhysicalId(sourceItem || item);
+const detail = sourceItem && sourceItem._isShareItem ? await resolveSharePlayableFile(sourceItem) : await apiGet(targetApiId);
+if (isPlayerDestroyed || sourceItem !== item) return;
+const freshData = getBestSource(detail);
+qualityList = freshData.list;
+currentLink = freshData.src;
+currentResName = freshData.name;
+if (resTxt) resTxt.textContent = currentResName;
+if (resList) {
+    resList.innerHTML = renderQualityMenu(qualityList, currentResName);
+    bindResEvents();
+}
+if (!hasPlayableSource(freshData)) {
+    showNoPlayableSourceBox(sourceItem);
+    return;
+}
+loadSource(currentLink, null);
+v.play().catch(()=>{});
+} catch (err) {
+await markOfflineReferenceMissingFromError(sourceItem || item, err, { source: 'video_no_source_retry' });
+showNoPlayableSourceBox(sourceItem || item);
+}
+};
+
+const nextBtn = dialog.querySelector('#pk_no_source_next');
+if (nextBtn) nextBtn.onclick = (e) => {
+e.stopPropagation();
+dialog.remove();
+softSwitch(curListIdx + 1, 'smooth');
+};
+};
 const showSadBox = (codecName, reason = 'codec', opts = {}) => {
 if (box.querySelector('.pk-err-dialog')) return;
 if (posterEl) {
@@ -36481,6 +36799,10 @@ if (resList) {
 resList.innerHTML = renderQualityMenu(qualityList, currentResName);
 bindResEvents();
 }
+if (!hasPlayableSource(freshData)) {
+showNoPlayableSourceBox(newItem);
+return;
+}
 loadSource(freshData.src, null);
 if (typeof ThumbnailEngine !== 'undefined') {
 ThumbnailEngine.resetSource(freshData.src);
@@ -36501,6 +36823,7 @@ updateState();
 
 } catch (err) {
 await markOfflineReferenceMissingFromError(newItem, err, { source: 'video_switch' });
+if (myReqId === switchReqId && !currentLink) showNoPlayableSourceBox(newItem);
 if (myReqId === switchReqId) console.error("[SoftSwitch] Critical Error:", err);
 } finally {
 if (myReqId === switchReqId) {
@@ -36548,6 +36871,11 @@ return null;
 };
 
 const loadSource = async (url, customStartTime = null) => {
+url = String(url || '').trim();
+if (!url) {
+showNoPlayableSourceBox(item);
+return;
+}
 sharePreviewSoftLimitTipShown = false;
 if (sharePreviewLimitMarker) sharePreviewLimitMarker.style.display = 'none';
 let startTime = 0;
@@ -37874,6 +38202,13 @@ const freshData = getBestSource(newData);
 qualityList = freshData.list;
 resList.innerHTML = renderQualityMenu(qualityList, currentResName);
 bindResEvents();
+if (!hasPlayableSource(freshData)) {
+currentLink = '';
+currentResName = freshData.name || '';
+if (resTxt) resTxt.textContent = currentResName;
+showNoPlayableSourceBox(initItem);
+return;
+}
 
 const shouldSwitchToFreshOriginal = currentResName === L.str_original && freshData.name === L.str_original && freshData.src && freshData.src !== currentLink;
 if (v.error || !currentLink || shouldSwitchToFreshOriginal || (currentResName === L.str_original && freshData.name !== L.str_original)) {
@@ -37893,6 +38228,7 @@ bindResEvents();
 }
 } catch (e) {
 await markOfflineReferenceMissingFromError(initItem, e, { source: 'video_detail' });
+if (!currentLink) showNoPlayableSourceBox(initItem);
 }
 })();
 
@@ -39943,6 +40279,11 @@ gmGet('pk_duration_' + item.id, 0);
 
 if (tDur && initDur > 0) tDur.textContent = fmtT(initDur);
 
+if (!hasPlayableSource(initialData)) {
+box.classList.add('buffering');
+const initialLoader = d.querySelector('.pk-p-loading');
+if (initialLoader) initialLoader.style.display = 'block';
+} else {
 loadSource(currentLink, null);
 setTimeout(() => {
 if (isPlayerDestroyed) return;
@@ -39960,6 +40301,7 @@ if(btnFull) btnFull.innerHTML = mkSvg(icons.exitFull);
 }
 }
 }, 100);
+}
 
 autoMatchSubtitle(item);
 }
@@ -43257,7 +43599,8 @@ const lastMin = gmGet('pk_analyze_last_min', 0);
 const lastMax = gmGet('pk_analyze_last_max', '');
 const lastUnit = gmGet('pk_analyze_last_unit', 'GB');
 const lastKeyword = gmGet('pk_analyze_last_keyword', '');
-const lastSim = gmGet('pk_analyze_last_sim', 1.0);
+const rawLastSim = Number.parseFloat(gmGet('pk_analyze_last_sim', 1.0));
+const lastSim = Number.isFinite(rawLastSim) && rawLastSim <= 0.5 ? 0.01 : 1.0;
 const lastAlgo = gmGet('pk_analyze_last_algo', 'sim');
 
 const result = await new Promise((resolve) => {
@@ -43504,7 +43847,8 @@ const isSimMode = result.mode === 'similar';
 S.analyzeSimGroups = null;
 const minBytes = result.minBytes || 0;
 const maxBytes = result.maxBytes || 0;
-const simThreshold = result.threshold || 0.9;
+const rawSimThreshold = Number.parseFloat(result.threshold);
+const simThreshold = Number.isFinite(rawSimThreshold) && rawSimThreshold <= 0.5 ? 0.01 : 1.0;
 const simAlgo = result.algo || 'sim';
 
 setLoad(true);
@@ -43746,6 +44090,17 @@ const childNode = nodeMap.get(childId);
 return childNode ? childNode._ancestorSet.has(parentId) : false;
 };
 
+const getFolderSizeSimilarityFactor = (a, b) => {
+const sizeA = Math.max(0, Number(a && a.size) || 0);
+const sizeB = Math.max(0, Number(b && b.size) || 0);
+const maxSize = sizeA > sizeB ? sizeA : sizeB;
+if (maxSize <= 0) return 1;
+const minSize = sizeA < sizeB ? sizeA : sizeB;
+const tolerance = Math.max(0, Number(CONF.folderSimSizeToleranceBytes) || 0);
+if (maxSize - minSize <= tolerance) return 1;
+return Math.max(0, Math.min(1, (minSize + tolerance) / maxSize));
+};
+
 const folderArr = Array.from(nodeMap.values())
 .filter(f => !f.isShell && (f.files.length >= 2 || f.size > 1024 * 1024))
 .map(f => {
@@ -43979,7 +44334,8 @@ for (let i = 0; i < total; i++) {
 
         const minTotal = total1 < total2 ? total1 : total2;
         const union = total1 + total2 - intersect;
-        const sim = simAlgo === 'contain' ? (minTotal > 0 ? (intersect / minTotal) : 0) : (union > 0 ? (intersect / union) : 0);
+        const baseSim = simAlgo === 'contain' ? (minTotal > 0 ? (intersect / minTotal) : 0) : (union > 0 ? (intersect / union) : 0);
+        const sim = simAlgo === 'sim' ? baseSim * getFolderSizeSimilarityFactor(f1, f2) : baseSim;
 
         if (sim >= simThreshold) {
             let isGroupQualified = true;
@@ -44046,7 +44402,8 @@ for (let i = 0; i < total; i++) {
 
                 const minT = tA < tB ? tA : tB;
                 const un = tA + tB - intS;
-                const pairwiseSim = simAlgo === 'contain' ? (minT > 0 ? (intS / minT) : 0) : (un > 0 ? (intS / un) : 0);
+                const pairwiseBaseSim = simAlgo === 'contain' ? (minT > 0 ? (intS / minT) : 0) : (un > 0 ? (intS / un) : 0);
+                const pairwiseSim = simAlgo === 'sim' ? pairwiseBaseSim * getFolderSizeSimilarityFactor(gMember, f2) : pairwiseBaseSim;
 
                 if (pairwiseSim < simThreshold) {
                     isGroupQualified = false;
@@ -44186,7 +44543,8 @@ groups.forEach(g => {
                 }
                 const minT = tA < tB ? tA : tB;
                 const un = tA + tB - intS;
-                const s = simAlgo === 'contain' ? (minT > 0 ? (intS / minT) : 0) : (un > 0 ? (intS / un) : 0);
+                const baseS = simAlgo === 'contain' ? (minT > 0 ? (intS / minT) : 0) : (un > 0 ? (intS / un) : 0);
+                const s = simAlgo === 'sim' ? baseS * getFolderSizeSimilarityFactor(n1, n2) : baseS;
                 simMatrix[i][j] = s;
                 if (s > maxSim) maxSim = s;
                 if (s < minSim) minSim = s;
@@ -44784,36 +45142,19 @@ showAlert(L.msg_op_blocked_moving);
 return;
 }
 
-const rawItems = S.clipItems.slice();
+const items = S.clipItems.slice();
 const type = S.clipType;
 const srcId = S.clipSourceParentId;
-const destId = S.path[S.path.length - 1].id || '';
+const destNode = S.path[S.path.length - 1] || {};
+const destId = destNode.id || '';
+const targetFolderName = destNode.name || L.str_target_folder;
 const normalize = (id) => (!id || id === 'root') ? 'root' : id;
 
-const checked = await validateClipboardItemsBeforePaste(rawItems);
-if (!checked.validItems.length) {
-S.clipItems = [];
-S.clipType = '';
-S.clipSourceParentId = '';
-updateStat();
-showToast(L.msg_clip_all_missing, 'error');
-return;
-}
-
-if (checked.invalidCount > 0) {
-S.clipItems = checked.validItems;
-updateStat();
-showToast(L.msg_clip_missing_skipped.replace('{n}', checked.invalidCount), 'warning');
-}
-
-const items = checked.validItems;
-
 S.clipItems = [];
 S.clipType = '';
 S.clipSourceParentId = '';
 updateStat();
 
-const targetFolderName = S.path[S.path.length - 1].name || L.str_target_folder;
 await executeFileTransfer(items, type, normalize(srcId), normalize(destId), targetFolderName);
 };
 
@@ -47251,13 +47592,22 @@ let detail = item;
 try {
 detail = await resolvePlayableDetailForExternal(item);
 } catch (e) {
-if (!detail.web_content_link && !detail.medias) {
+const fallbackSource = getBestSource(detail);
+if (hasPlayableSource(fallbackSource)) {
+setLoad(false);
+openExternalPlaybackDialog(detail, { source: 'normal' });
+return;
+}
 setLoad(false);
 showToast(L.msg_video_fail, 'error');
 return;
 }
-}
 setLoad(false);
+const bestSource = getBestSource(detail);
+if (!hasPlayableSource(bestSource)) {
+showToast(L.msg_video_no_playable_source || L.msg_video_fail, 'error');
+return;
+}
 openExternalPlaybackDialog(detail, { source: 'normal' });
 };
 
@@ -47383,7 +47733,7 @@ UI.stopBtn.onclick = () => { isRunning = false; abortCtrl.abort(); updateLoadTxt
 const allFiles = [];
 const rootNodes = [];
 const failedFiles = [];
-const HYDRATE_LIMIT = 20;
+const HYDRATE_LIMIT = getDownloadHydrateConcurrency('browser');
 const dlFilterRules = getDownloadFilterRules();
 const hasDownloadFilterRules = dlFilterRules.hasRules;
 const filterStats = { scanned: 0, blocked: 0 };
@@ -47469,6 +47819,7 @@ const readyFiles = [];
 const hydrateQueue = [...allFiles];
 const activeTasks = new Set();
 const shareDownloadOptions = { signal };
+let hydrateFatalError = null;
 const hydrateWithRetry = async (file, maxRetries = 3) => {
 if (file._isShareItem) return await resolveShareDownloadTask(file, shareDownloadOptions);
 if (file.web_content_link) return file;
@@ -47478,12 +47829,30 @@ const lookupId = getOfflineReferenceLookupId(file) || file.id;
 for (let i = 0; i < maxRetries; i++) {
 if (!isRunning) return null;
 try {
+await waitBeforeDownloadHydrate(i);
+if (!isRunning) return null;
 const detail = await apiGet(lookupId);
 if (detail && detail.web_content_link) return detail;
 if (detail && (detail.phase === "PHASE_TYPE_PENDING" || detail.phase === "PHASE_TYPE_RUNNING")) return null;
-throw new Error("Link Empty");
+throw createDownloadLinkEmptyError();
 } catch (e) {
 lastErr = e;
+if (isDownloadHydrateCaptchaInvalidError(e)) {
+const recovered = await recoverDownloadHydrateCaptcha(e, {
+    isRunning: () => isRunning,
+    onWait: () => {
+        if (progressTask) progressTask.update(`${L.msg_batch_hydrating} ${readyFiles.length} / ${allFiles.length}`);
+    }
+});
+if (recovered && isRunning) {
+    i = -1;
+    continue;
+}
+const timeoutErr = new Error(L.err_captcha_simple);
+timeoutErr.code = 'DOWNLOAD_HYDRATE_CAPTCHA_TIMEOUT';
+timeoutErr.cause = e;
+throw timeoutErr;
+}
 if (await markOfflineReferenceMissingFromError(file, e, { source: 'browser_download' })) return null;
 if (i < maxRetries - 1) await sleep(1000 * (i + 1));
 }
@@ -47491,8 +47860,8 @@ if (i < maxRetries - 1) await sleep(1000 * (i + 1));
 throw lastErr;
 };
 
-while ((hydrateQueue.length > 0 || activeTasks.size > 0) && isRunning) {
-while (hydrateQueue.length > 0 && activeTasks.size < HYDRATE_LIMIT && isRunning) {
+while ((hydrateQueue.length > 0 || activeTasks.size > 0) && isRunning && !hydrateFatalError) {
+while (hydrateQueue.length > 0 && activeTasks.size < HYDRATE_LIMIT && isRunning && !hydrateFatalError && !isDownloadHydrateCaptchaWaiting()) {
 const file = hydrateQueue.pop();
 const p = (async () => {
 try {
@@ -47502,7 +47871,8 @@ try {
     }
 } catch (e) {
     console.error(`[Hydrate Failed] ${file.name}:`, e);
-    failedFiles.push(file._isShareItem ? formatShareDownloadFailure(file, e) : `${file.name} ${L.str_aria2_fetch_err}`);
+    if (e && e.code === 'DOWNLOAD_HYDRATE_CAPTCHA_TIMEOUT') hydrateFatalError = e;
+    failedFiles.push(file._isShareItem ? formatShareDownloadFailure(file, e) : `${file.name} ${getDownloadHydrateFailureReason(e)}`);
 }
 })().finally(() => activeTasks.delete(p));
 activeTasks.add(p);
@@ -47510,6 +47880,7 @@ activeTasks.add(p);
 if (activeTasks.size > 0) await Promise.race(activeTasks);
 if (progressTask) progressTask.update(`${L.msg_batch_hydrating} ${readyFiles.length} / ${allFiles.length}`);
 }
+if (hydrateFatalError) throw hydrateFatalError;
 
 let triggeredCount = 0;
 for (let i = 0; i < readyFiles.length; i++) {
@@ -47598,7 +47969,7 @@ const ariaDownloadDir = normalizeAriaDownloadDir(ariaDir || gmGet('pk_aria2_dir'
 const allFiles = [];
 const rootNodes = [];
 const failedFiles = [];
-const HYDRATE_LIMIT = 40;
+const HYDRATE_LIMIT = getDownloadHydrateConcurrency('downloader');
 const dlFilterRules = getDownloadFilterRules();
 const hasDownloadFilterRules = dlFilterRules.hasRules;
 const stats = { hydratedCount: 0, lastUiTime: 0 };
@@ -47674,6 +48045,7 @@ const readyFiles =[];
 const hydrateQueue = [...allFiles];
 const activeTasks = new Set();
 const shareDownloadOptions = { signal };
+let hydrateFatalError = null;
 
 const hydrateWithRetry = async (file, maxRetries = 3) => {
 if (file._isShareItem) return await resolveShareDownloadTask(file, shareDownloadOptions);
@@ -47684,12 +48056,30 @@ const lookupId = getOfflineReferenceLookupId(file) || file.id;
 for (let i = 0; i < maxRetries; i++) {
 if (!isRunning) return null;
 try {
+await waitBeforeDownloadHydrate(i);
+if (!isRunning) return null;
 const detail = await apiGet(lookupId);
 if (detail && detail.web_content_link) return detail;
 if (detail && (detail.phase === "PHASE_TYPE_PENDING" || detail.phase === "PHASE_TYPE_RUNNING")) return null;
-throw new Error("Link Empty");
+throw createDownloadLinkEmptyError();
 } catch (e) {
 lastErr = e;
+if (isDownloadHydrateCaptchaInvalidError(e)) {
+const recovered = await recoverDownloadHydrateCaptcha(e, {
+    isRunning: () => isRunning,
+    onWait: () => {
+        if (progressTask) progressTask.update(`${L.msg_batch_hydrating} ${stats.hydratedCount} / ${allFiles.length}`);
+    }
+});
+if (recovered && isRunning) {
+    i = -1;
+    continue;
+}
+const timeoutErr = new Error(L.err_captcha_simple);
+timeoutErr.code = 'DOWNLOAD_HYDRATE_CAPTCHA_TIMEOUT';
+timeoutErr.cause = e;
+throw timeoutErr;
+}
 if (await markOfflineReferenceMissingFromError(file, e, { source: 'downloader_hydrate' })) return null;
 if (i < maxRetries - 1) await sleep(1000 * (i + 1));
 }
@@ -47697,8 +48087,8 @@ if (i < maxRetries - 1) await sleep(1000 * (i + 1));
 throw lastErr;
 };
 
-while ((hydrateQueue.length > 0 || activeTasks.size > 0) && isRunning) {
-while (hydrateQueue.length > 0 && activeTasks.size < HYDRATE_LIMIT && isRunning) {
+while ((hydrateQueue.length > 0 || activeTasks.size > 0) && isRunning && !hydrateFatalError) {
+while (hydrateQueue.length > 0 && activeTasks.size < HYDRATE_LIMIT && isRunning && !hydrateFatalError && !isDownloadHydrateCaptchaWaiting()) {
 const file = hydrateQueue.pop();
 const p = (async () => {
 try {
@@ -47709,7 +48099,8 @@ try {
     }
 } catch (e) {
     console.error(`[Hydrate Failed] ${file.name}:`, e);
-    failedFiles.push(file._isShareItem ? formatShareDownloadFailure(file, e) : file.name + " " + L.str_aria2_fetch_err);
+    if (e && e.code === 'DOWNLOAD_HYDRATE_CAPTCHA_TIMEOUT') hydrateFatalError = e;
+    failedFiles.push(file._isShareItem ? formatShareDownloadFailure(file, e) : file.name + " " + getDownloadHydrateFailureReason(e));
 }
 })().finally(() => {
 activeTasks.delete(p);
@@ -47721,6 +48112,7 @@ activeTasks.add(p);
 if (activeTasks.size > 0) await Promise.race(activeTasks);
 }
 
+if (hydrateFatalError) throw hydrateFatalError;
 if (!isRunning) throw new Error('StoppedByUser');
 
 if (!readyFiles.length && failedFiles.length) {
@@ -52032,11 +52424,61 @@ if (!selected.length) return result;
 
 const progressTotal = selected.length;
 const progressDoneKeys = new Set();
+let detailRequestNextAt = 0;
 const waitProgressFrame = () => new Promise(resolve => {
 if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => resolve());
 else setTimeout(resolve, 16);
 });
 let progressChain = Promise.resolve();
+
+const waitBeforeMagnetArchiveDetailRequest = async (attempt = 0) => {
+const base = Math.max(0, Number(CONF.magnetArchiveDetailRequestDelay) || 0);
+const jitter = Math.max(0, Number(CONF.magnetArchiveDetailRequestJitter) || 0);
+const retryExtra = attempt > 0 ? Math.min(2500, attempt * Math.max(500, base)) : 0;
+const interval = base + retryExtra + (jitter ? Math.floor(Math.random() * jitter) : 0);
+if (interval <= 0) return;
+const now = Date.now();
+const scheduledAt = Math.max(now, detailRequestNextAt) + interval;
+detailRequestNextAt = scheduledAt;
+await sleep(scheduledAt - now);
+};
+
+const waitForMagnetArchiveCaptchaIdle = async () => {
+while (typeof isDownloadHydrateCaptchaWaiting === 'function' && isDownloadHydrateCaptchaWaiting()) {
+if (progressTask) updateMagnetArchiveCheckProgress(progressTask, Math.min(progressTotal, progressDoneKeys.size), progressTotal, L.msg_magnet_archive_checking);
+await sleep(500);
+}
+};
+
+const fetchMagnetArchiveDetailWithCaptchaRecovery = async (id) => {
+let attempt = 0;
+while (true) {
+await waitForMagnetArchiveCaptchaIdle();
+await waitBeforeMagnetArchiveDetailRequest(attempt);
+try {
+return await apiGet(id);
+} catch (e) {
+if (typeof isDownloadHydrateCaptchaInvalidError === 'function' && isDownloadHydrateCaptchaInvalidError(e)) {
+const recovered = typeof recoverDownloadHydrateCaptcha === 'function' ? await recoverDownloadHydrateCaptcha(e, {
+    isRunning: () => S.magnetArchiveBusy !== false,
+    onWait: () => {
+        if (progressTask) updateMagnetArchiveCheckProgress(progressTask, Math.min(progressTotal, progressDoneKeys.size), progressTotal, L.msg_magnet_archive_checking);
+    }
+}) : false;
+if (recovered && S.magnetArchiveBusy !== false) {
+    attempt = 0;
+    continue;
+}
+const timeoutErr = new Error(L.err_captcha_simple || L.str_error || 'Captcha invalid');
+timeoutErr.code = 'MAGNET_ARCHIVE_CAPTCHA_TIMEOUT';
+timeoutErr.cause = e;
+throw timeoutErr;
+}
+attempt++;
+throw e;
+}
+}
+};
 
 const markProgressDoneNow = (item) => {
 const key = getMagnetArchiveItemId(item);
@@ -52120,9 +52562,13 @@ const taskFallbackItems = [];
 
 if (detailMissing.length && typeof apiGet === 'function') {
 let cursor = 0;
-const workerCount = Math.min(6, detailMissing.length);
+let detailFatalError = null;
+const detailConcurrency = Math.max(1, Number(CONF.magnetArchiveDetailConcurrency) || 3);
+const workerCount = Math.min(detailConcurrency, detailMissing.length);
 const workers = Array.from({ length: workerCount }, async () => {
-while (cursor < detailMissing.length) {
+while (cursor < detailMissing.length && !detailFatalError) {
+await waitForMagnetArchiveCaptchaIdle();
+if (detailFatalError || cursor >= detailMissing.length) break;
 const item = detailMissing[cursor++];
 const bucket = perItem.get(getMagnetArchiveItemId(item));
 if (!bucket || bucket.links.length) {
@@ -52135,12 +52581,17 @@ let detailTried = false;
 for (const id of ids) {
 detailTried = true;
 try {
-const detail = await apiGet(id);
+const detail = await fetchMagnetArchiveDetailWithCaptchaRecovery(id);
 detailResponded = true;
 getTraceableMagnetArchiveLinksFromResource(detail).forEach(link => addLink(item, link));
 const freshBucket = perItem.get(getMagnetArchiveItemId(item));
 if (freshBucket && freshBucket.links.length) break;
-} catch (e) {}
+} catch (e) {
+if (e && e.code === 'MAGNET_ARCHIVE_CAPTCHA_TIMEOUT') {
+    detailFatalError = e;
+    throw e;
+}
+}
 }
 if (detailResponded) queueProgressDone(item);
 else {
@@ -52293,8 +52744,7 @@ push('ok', result.ok, 'ok', L.label_magnet_archive_can_archive);
 push('dup', result.dup, 'dup', L.label_magnet_archive_duplicate);
 push('skip', result.skip, 'skip', L.label_magnet_archive_skipped);
 push('bad', result.bad, 'bad', L.label_magnet_archive_invalid);
-const maxRows = Number(CONF.magnetArchivePreviewMaxRows) || 80;
-return rows.slice(0, maxRows).map(row => {
+return rows.map(row => {
 const title = getMagnetArchiveItemTitle(row.item);
 const safeTitle = esc(title);
 const tipHtml = esc(safeTitle);
@@ -52306,7 +52756,58 @@ return `
 <div class="pk-magnet-archive-title pk-magnet-archive-text" ${tipAttrs}><span class="pk-magnet-archive-title-icon" aria-hidden="true">${getMagnetArchiveOfficialIconHtml(row.item)}</span><span class="pk-magnet-archive-title-name pk-magnet-archive-text" ${tipAttrs}>${safeTitle}</span></div>
 <div class="pk-magnet-archive-text">${esc(row.key || row.reason)}</div>
 </div>`;
-}).join('') + (rows.length > maxRows ? `<div class="pk-magnet-archive-row"><div><span class="pk-magnet-archive-status skip">...</span></div><div class="pk-magnet-archive-text">${esc(L.label_more)}</div><div class="pk-magnet-archive-text">${esc(String(rows.length - maxRows))}</div></div>` : '');
+}).join('');
+}
+
+function getMagnetArchiveExportMagnetRows(result) {
+const map = new Map();
+const pickMagnet = (row) => {
+const existed = row && row.existed && typeof row.existed === 'object' ? row.existed : null;
+const existedLink = existed && existed.link && typeof existed.link === 'object' ? existed.link : null;
+const rowKey = normalizeMagnetArchivePrimaryKey(row && (row.key || row.meta && row.meta.primaryKey || getMagnetArchivePrimaryKeyFromBookmark(existedLink)));
+const keyMagnet = /^(btih|btmh):/i.test(rowKey) ? `magnet:?xt=urn:${rowKey}` : '';
+const candidates = [
+row && row.meta && row.meta.rawMagnet,
+row && row.entry && row.entry.href,
+existedLink && existedLink.href,
+keyMagnet
+].map(x => normalizeLinkBookmarkText(x).trim()).filter(Boolean);
+for (const candidate of candidates) {
+const meta = normalizeMagnetArchiveLink(candidate, getMagnetArchiveItemTitle(row && row.item));
+if (meta.ok) return { magnet: meta.rawMagnet, key: getMagnetArchivePrimaryKeyFromMeta(meta) || meta.rawMagnet.toLowerCase(), meta };
+}
+return null;
+};
+const push = (list, type) => {
+(Array.isArray(list) ? list : []).forEach(row => {
+const picked = pickMagnet(row);
+if (!picked || !picked.magnet || !picked.key || map.has(picked.key)) return;
+map.set(picked.key, { type, item: row && row.item, title: getMagnetArchiveItemTitle(row && row.item), magnet: picked.magnet, key: picked.key, meta: picked.meta });
+});
+};
+push(result && result.ok, 'ok');
+push(result && result.dup, 'dup');
+return Array.from(map.values());
+}
+
+function escapeMagnetArchiveCsvCell(value) {
+return `"${String(value == null ? '' : value).replace(/"/g, '""')}"`;
+}
+
+function exportMagnetArchiveCheckResultMagnets(result) {
+const L = getStrings();
+const rows = getMagnetArchiveExportMagnetRows(result);
+if (!rows.length) {
+showToast(L.msg_magnet_archive_export_no_item || L.msg_magnet_archive_check_no_selected, 'warning');
+return false;
+}
+const ts = formatExportTimestamp();
+const baseName = normalizeLinkBookmarkText(L.str_magnet_archive_export_file_name || 'cloud_archive_magnets').trim() || 'cloud_archive_magnets';
+const header = [L.label_magnet_archive_source || 'Title', L.label_magnet_archive_magnet || 'Magnet'].map(escapeMagnetArchiveCsvCell).join(',');
+const body = rows.map(row => [row.title || '', row.magnet || ''].map(escapeMagnetArchiveCsvCell).join(','));
+downloadTextExport([header, ...body].join('\r\n') + '\r\n', `${baseName}_${ts}.csv`, 'text/csv;charset=utf-8', true);
+showToast((L.msg_magnet_archive_export_success || '').replace('{n}', rows.length) || `Exported ${rows.length} magnet links.`);
+return true;
 }
 
 function showMagnetArchiveCheckResultModal(result) {
@@ -52318,6 +52819,10 @@ const bad = result.bad.length;
 const rowsHtml = renderMagnetArchiveCheckRows(result) || `<div class="pk-magnet-archive-row"><div><span class="pk-magnet-archive-status skip">${esc(L.label_magnet_archive_skipped)}</span></div><div class="pk-magnet-archive-text">${esc(L.msg_magnet_archive_check_no_selected)}</div><div></div></div>`;
 const dupDeleteCount = getMagnetArchiveDuplicateDeleteRows(result).length;
 const showDupDeleteBtn = !ok && dupDeleteCount > 0;
+const exportMagnetCount = getMagnetArchiveExportMagnetRows(result).length;
+const showExportBtn = exportMagnetCount > 0 || ok > 0 || dup > 0;
+const actionCount = 1 + (showExportBtn ? 1 : 0) + (showDupDeleteBtn ? 1 : 0) + (ok ? 1 : 0);
+const actionClass = actionCount === 3 ? ' pk-magnet-archive-actions-three' : '';
 const m = showModal(`
 <div class="pk-magnet-archive-preview">
 <h3 style="border:none;margin:0;font-size:18px;font-weight:800;color:var(--pk-fg);">${esc(L.title_magnet_archive_check)}</h3>
@@ -52331,7 +52836,7 @@ const m = showModal(`
 <div class="pk-magnet-archive-row pk-magnet-archive-head"><div>${esc(L.label_magnet_archive_reason)}</div><div>${esc(L.label_magnet_archive_source)}</div><div>${esc(L.label_magnet_archive_key)}</div></div>
 ${rowsHtml}
 </div>
-<div class="pk-modal-act"><button class="pk-btn" id="pk_magnet_archive_preview_ok">${esc(L.btn_cancel || L.btn_close || L.btn_ok)}</button>${showDupDeleteBtn ? `<button class="pk-btn" id="pk_magnet_archive_delete_dup_source" style="color:#d93025;">${esc(L.btn_magnet_archive_delete_dup_source)}</button>` : ''}${ok ? `<button class="pk-btn pri" id="pk_magnet_archive_write">${esc(L.btn_magnet_archive_write)}</button>` : ''}</div>
+<div class="pk-modal-act${actionClass}"><button class="pk-btn" id="pk_magnet_archive_preview_ok">${esc(L.btn_cancel || L.btn_close || L.btn_ok)}</button>${showExportBtn ? `<button class="pk-btn" id="pk_magnet_archive_export">${esc(L.btn_magnet_archive_export || '导出磁链')}</button>` : ''}${showDupDeleteBtn ? `<button class="pk-btn" id="pk_magnet_archive_delete_dup_source" style="color:#d93025;">${esc(L.btn_magnet_archive_delete_dup_source)}</button>` : ''}${ok ? `<button class="pk-btn pri" id="pk_magnet_archive_write">${esc(L.btn_magnet_archive_write)}</button>` : ''}</div>
 </div>`);
 bindMagnetArchiveOverflowTips(m);
 bindPreviewIconFallback(m);
@@ -52339,6 +52844,7 @@ const box = m.querySelector('.pk-modal');
 if (box) Object.assign(box.style, { width: '820px', padding: '24px', boxSizing: 'border-box' });
 const btn = m.querySelector('#pk_magnet_archive_preview_ok');
 if (btn) btn.onclick = () => m.remove();
+const exportBtn = m.querySelector('#pk_magnet_archive_export');
 const writeBtn = m.querySelector('#pk_magnet_archive_write');
 const dupDeleteBtn = m.querySelector('#pk_magnet_archive_delete_dup_source');
 let dupDeleteDone = false;
@@ -52354,6 +52860,9 @@ const enterBtn = [writeBtn, dupDeleteBtn, btn].find(x => x && !x.disabled);
 enterBtn?.click();
 }
 }, true);
+if (exportBtn) {
+exportBtn.onclick = () => exportMagnetArchiveCheckResultMagnets(result);
+}
 if (dupDeleteBtn) {
 dupDeleteBtn.onclick = async () => {
 dupDeleteBtn.disabled = true;
@@ -52414,11 +52923,6 @@ if (S.magnetArchiveBusy) return;
 const selected = getMagnetBackupSelectedItems();
 if (!selected.length) {
 showToast(L.msg_magnet_archive_check_no_selected, 'warning');
-return;
-}
-const maxSelected = Math.max(1, Number(CONF.magnetArchiveMaxSelected) || 50);
-if (selected.length > maxSelected) {
-showToast((L.msg_magnet_archive_check_over_limit || '').replace('{max}', maxSelected), 'warning');
 return;
 }
 let task = null;
