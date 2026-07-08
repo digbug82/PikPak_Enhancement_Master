@@ -295,6 +295,14 @@ Jadi jika file tidak muncul setelah tempel, penyebab paling umum adalah batas ka
 
 ## Catatan Perubahan
 
+### V4.3.0
+
+* Menambahkan **ekspor tautan magnet arsip cloud**, mendukung ekspor CSV dari popup arsip cloud dengan dua kolom, judul dan tautan magnet, serta menghapus batas jumlah item yang dapat dipilih untuk arsip cloud.
+* Mengoptimalkan **ekstraksi tautan langsung untuk unduhan Aria2 / Gopeed / ABDM / IDM / browser**, mengurangi kegagalan massal akibat `captcha_invalid` saat mengunduh banyak file.
+* Mengoptimalkan **logika fallback tempel**, menghapus pra-validasi terpadu untuk mengurangi kemungkinan error autentikasi, pratinjau gambar menjadi hitam, atau video tersangkut di sampul dan indikator loading selama proses tempel.
+* Mengoptimalkan **algoritma kemiripan deduplikasi folder dan penanganan ambang**, memperbaiki secara konsisten masalah campuran ambang ketat / longgar, dan menambahkan bobot konsistensi total ukuran folder ke pencocokan kemiripan.
+* Optimalisasi UI dan stabilitas.
+
 ### V4.2.0
 
 * Memperbaiki **masalah pemicu keliru pada penyembunyian otomatis teks tombol**.
