@@ -295,6 +295,14 @@ Jadi jika fail tidak muncul selepas tampal, sebab paling biasa ialah had kapasit
 
 ## Log Kemas Kini
 
+### V4.3.0
+
+* Menambah **eksport pautan magnet arkib awan**, menyokong eksport CSV dalam popup arkib awan dengan dua lajur, tajuk dan pautan magnet, serta membuang had bilangan item yang boleh dipilih untuk arkib awan.
+* Mengoptimumkan **pengekstrakan pautan terus untuk muat turun Aria2 / Gopeed / ABDM / IDM / pelayar**, mengurangkan kegagalan pukal akibat `captcha_invalid` semasa memuat turun banyak fail.
+* Mengoptimumkan **logik sandaran tampal**, membuang pra-pengesahan bersatu untuk mengurangkan kemungkinan ralat pengesahan, pratonton imej menjadi hitam, atau video tersekat pada kulit muka dan penunjuk memuat semasa proses tampal.
+* Mengoptimumkan **algoritma persamaan penyahduaan folder dan pengendalian ambang**, membetulkan penggunaan bercampur ambang ketat / longgar secara menyeluruh, dan menambah pemberat konsistensi jumlah saiz folder dalam padanan persamaan.
+* Pengoptimuman UI dan kestabilan.
+
 ### V4.2.0
 
 * Membetulkan **isu penyembunyian automatik teks butang tercetus secara tidak sengaja**.
