@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            4.3.0
+// @version            4.4.0
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -699,7 +699,7 @@ const limit = Math.max(0, Number(maxLen) || 0);
 if (!el || !limit || el.dataset.pkPlainTextLimitBound === '1') return;
 el.dataset.pkPlainTextLimitBound = '1';
 const oldInput = typeof el.oninput === 'function' ? el.oninput : null;
-const applyLimit = () => {
+const applyLimit = (source = '') => {
 if (el.dataset.pkComposing === '1') return false;
 const raw = String(el.value ?? '');
 if (raw.length < limit) {
@@ -707,7 +707,7 @@ if (notifyAtLimit) delete el.dataset.pkPlainTextLimitReached;
 return false;
 }
 if (raw.length === limit) {
-if (notifyAtLimit && el.dataset.pkPlainTextLimitReached !== '1') {
+if (notifyAtLimit && source !== 'blur' && el.dataset.pkPlainTextLimitReached !== '1') {
 el.dataset.pkPlainTextLimitReached = '1';
 showConfigInputLimitTip(el);
 }
@@ -724,15 +724,15 @@ el.addEventListener('compositionstart', () => { el.dataset.pkComposing = '1'; })
 el.addEventListener('compositionend', e => {
 delete el.dataset.pkComposing;
 setTimeout(() => {
-applyLimit();
+applyLimit('compositionend');
 if (oldInput) oldInput.call(el, e);
 }, 0);
 });
 el.oninput = e => {
-applyLimit();
+applyLimit('input');
 if (oldInput) oldInput.call(el, e);
 };
-el.addEventListener('blur', applyLimit);
+el.addEventListener('blur', () => applyLimit('blur'));
 });
 }
 
@@ -1420,7 +1420,7 @@ configCloud: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke
 search: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
 openLink: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>`,
 calendar: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg>`,
-unshare: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M392.2 517.2c0-13.8-2.4-26.9-5.9-39.6l280-168c27.6 34.6 69.6 57.1 117.2 57.1 83.1 0 150.4-67.4 150.4-150.4S866.5 65.8 783.5 65.8s-150.4 67.4-150.4 150.4c0 13.8 2.4 26.9 5.9 39.6l-280 168c-27.6-34.6-69.6-57.1-117.2-57.1-83.1 0-150.4 67.4-150.4 150.4s67.4 150.4 150.4 150.4c47.6 0 89.6-22.6 117.2-57.1l160.2 96.1 30.9-51.6-163.8-98.2c3.5-12.7 5.9-25.8 5.9-39.5z m391.3-391.3c49.8 0 90.3 40.5 90.3 90.3s-40.5 90.3-90.3 90.3-90.3-40.5-90.3-90.3 40.5-90.3 90.3-90.3zM241.8 607.4c-49.8 0-90.3-40.5-90.3-90.3s40.5-90.3 90.3-90.3 90.3 40.5 90.3 90.3c0 49.9-40.5 90.3-90.3 90.3z m640.7 69l-99 99-99.1-99-42.6 42.5 99.1 99.1-99.1 99.1 42.6 42.6 99.1-99.1 99 99.1 42.6-42.6L826 818l99-99.1-42.5-42.5z" fill="currentColor"></path></svg>`,
+unshare: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" style="transform: scale(1.16); transform-origin: center;"><path d="M392.2 517.2c0-13.8-2.4-26.9-5.9-39.6l280-168c27.6 34.6 69.6 57.1 117.2 57.1 83.1 0 150.4-67.4 150.4-150.4S866.5 65.8 783.5 65.8s-150.4 67.4-150.4 150.4c0 13.8 2.4 26.9 5.9 39.6l-280 168c-27.6-34.6-69.6-57.1-117.2-57.1-83.1 0-150.4 67.4-150.4 150.4s67.4 150.4 150.4 150.4c47.6 0 89.6-22.6 117.2-57.1l160.2 96.1 30.9-51.6-163.8-98.2c3.5-12.7 5.9-25.8 5.9-39.5z m391.3-391.3c49.8 0 90.3 40.5 90.3 90.3s-40.5 90.3-90.3 90.3-90.3-40.5-90.3-90.3 40.5-90.3 90.3-90.3zM241.8 607.4c-49.8 0-90.3-40.5-90.3-90.3s40.5-90.3 90.3-90.3 90.3 40.5 90.3 90.3c0 49.9-40.5 90.3-90.3 90.3z m640.7 69l-99 99-99.1-99-42.6 42.5 99.1 99.1-99.1 99.1 42.6 42.6 99.1-99.1 99 99.1 42.6-42.6L826 818l99-99.1-42.5-42.5z" fill="currentColor"></path></svg>`,
 refresh: `<svg width="16" height="16" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform: scale(1.4); transform-origin: center;"><path d="M950.371072 532.795629l-84.398202-84.393085c-6.101975-6.096858-14.093996-9.145287-22.087041-9.143241-7.995091-0.001023-15.988136 3.047406-22.079878 9.148357l-84.519975 84.530209c-12.20088 12.195763-12.20088 31.971156 0 44.171012 6.099928 6.094812 14.09195 9.145287 22.082948 9.145287s15.993253-3.050476 22.082948-9.150404l33.171494-33.175587c-16.019859 175.330214-163.813926 313.145-343.250668 313.145-190.096523 0-344.749812-154.653289-344.749812-344.749812s154.653289-344.754928 344.749812-344.754928c92.084255 0 178.658006 35.859719 243.779166 100.975762 12.20088 12.20088 31.966039 12.20088 44.166919 0 12.20088-12.195763 12.20088-31.971156 0-44.166919-76.914764-76.91988-179.176822-119.27657-287.946085-119.27657-224.543056 0-407.217539 182.679599-407.217539 407.222655 0 224.537939 182.674483 407.217539 407.217539 407.217539 212.604142 0 387.574153-163.800623 405.591505-371.808074l29.239951 29.238928c6.099928 6.094812 14.09195 9.145287 22.082948 9.145287 7.990998 0 15.98302-3.050476 22.082948-9.150404C962.571952 564.770877 962.571952 544.995485 950.371072 532.795629zM411.244248 429.099918l22.082948-22.082948c12.20088-12.195763 12.20088-31.971156 0-44.166919-12.20088-12.20088-31.966039-12.20088-44.166919 0l-22.082948 22.082948c-12.20088 12.195763-12.20088 31.971156 0 44.166919 6.099928 6.099928 14.09195 9.150404 22.082948 9.150404S405.143297 435.199847 411.244248 429.099918zM565.846372 539.536146l-22.082948 22.082948c-12.20088 12.195763-12.20088 31.971156 0 44.166919 6.099928 6.099928 14.09195 9.150404 22.082948 9.150404s15.98302-3.050476 22.082948-9.150404l22.082948-22.082948c12.20088-12.195763 12.20088-31.971156 0-44.165896C597.812411 527.335267 578.047252 527.335267 565.846372 539.536146zM336.453868 521.093099c-4.869914 20.679995-4.809539 63.99757 26.373671 95.175663 22.663162 22.658046 51.944046 29.03222 74.18049 29.03222 8.194636 0 15.433504-0.868787 21.025872-2.104941 16.694217-3.691065 27.115568-20.070104 23.638373-36.810371-3.477194-16.730033-19.968797-27.578102-36.754089-24.258497-0.25378 0.035816-23.5166 4.376681-37.923728-10.030447-14.010085-14.020318-9.953699-35.539424-9.658987-37.003775 3.741207-16.673751-6.639211-33.302477-23.312962-37.231973C357.26587 493.89055 340.408947 504.296551 336.453868 521.093099z" fill="currentColor"/></svg>`,
 retry: `<svg width="18" height="18" viewBox="0 0 1024 1024" fill="currentColor" version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform: scale(1.1); vertical-align: -4px;"><path d="M233.088 189.141333A425.002667 425.002667 0 0 1 512 85.333333c235.648 0 426.666667 191.018667 426.666667 426.666667 0 91.136-28.586667 175.616-77.226667 244.906667L725.333333 512h128A341.333333 341.333333 0 0 0 275.626667 265.728l-42.538667-76.586667z m557.824 645.717334A425.002667 425.002667 0 0 1 512 938.666667C276.352 938.666667 85.333333 747.648 85.333333 512c0-91.136 28.586667-175.616 77.226667-244.906667L298.666667 512H170.666667a341.333333 341.333333 0 0 0 577.706666 246.272l42.538667 76.586667z" /></svg>`,
 settings: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
@@ -1452,6 +1452,7 @@ viewGrid: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="c
 analyze: `<svg width="18" height="18" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M529.664 213.333333H896a42.666667 42.666667 0 0 1 42.666667 42.666667v597.333333a42.666667 42.666667 0 0 1-42.666667 42.666667H128a42.666667 42.666667 0 0 1-42.666667-42.666667V170.666667a42.666667 42.666667 0 0 1 42.666667-42.666667h316.330667zM170.666667 213.333333v597.333334h682.666666V298.666667h-358.997333l-85.333333-85.333334z m341.333333 170.666667v170.666667h170.666667a170.666667 170.666667 0 1 1-170.666667-170.666667z"></path></svg>`,
 scanDup: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" style="transform: scale(1.2); transform-origin: center;"><path d="M200.1408 123.3408A115.2 115.2 0 0 1 281.6 89.6h326.4a38.4 38.4 0 0 1 27.136 11.264l211.2 211.2c7.2192 7.168 11.264 16.9472 11.264 27.136V819.2a115.2 115.2 0 0 1-115.2 115.2H614.4a38.4 38.4 0 0 1 0-76.8h128a38.4 38.4 0 0 0 38.4-38.4V355.1232L592.0768 166.4H281.6a38.4 38.4 0 0 0-38.4 38.4v204.8a38.4 38.4 0 0 1-76.8 0V204.8c0-30.5664 12.1344-59.8528 33.7408-81.4592z" fill="currentColor"></path><path d="M588.8 89.6a38.4 38.4 0 0 1 38.4 38.4v192H819.2a38.4 38.4 0 0 1 0 76.8h-230.4a38.4 38.4 0 0 1-38.4-38.4V128a38.4 38.4 0 0 1 38.4-38.4zM201.0112 537.856a38.4 38.4 0 0 1-3.584 54.2208 166.4 166.4 0 0 0-56.5248 119.04 165.5296 165.5296 0 0 0 48.128 122.6752 167.2704 167.2704 0 0 0 122.88 49.3568 167.936 167.936 0 0 0 120.4224-55.04 38.4 38.4 0 0 1 56.9344 51.456 243.968 243.968 0 0 1-175.5136 80.384 244.7872 244.7872 0 0 1-179.2-72.0384 243.0464 243.0464 0 0 1-70.4-179.4048 242.432 242.432 0 0 1 82.6368-174.1824 38.4 38.4 0 0 1 54.2208 3.584z" fill="currentColor"></path><path d="M280.064 484.864A38.4 38.4 0 0 1 307.2 473.6 243.2 243.2 0 0 1 550.4 716.8a38.4 38.4 0 0 1-38.4 38.4H307.2a38.4 38.4 0 0 1-38.4-38.4v-204.8a38.4 38.4 0 0 1 11.264-27.136z m65.536 70.0416v123.4944h123.4944a166.4 166.4 0 0 0-123.4944-123.4944z" fill="currentColor"></path></svg>`,
 export: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M392.843947 286.762667h508.16a122.538667 122.538667 0 0 0 0-244.096H392.843947a122.538667 122.538667 0 0 0 0 244.096z m0-151.04h508.16a29.098667 29.098667 0 0 1 0 57.984H392.843947a29.098667 29.098667 0 0 1 0-57.984z" fill="currentColor"></path><path d="M425.099947 576.384a112.384 112.384 0 0 0 103.253333 75.52h372.650667a122.538667 122.538667 0 0 0 0-244.138667h-372.650667a112.298667 112.298667 0 0 0-103.253333 75.562667H163.211947v-203.093333a121.088 121.088 0 0 0 77.909333-115.712 117.418667 117.418667 0 0 0-111.786667-122.026667h-17.408A117.418667 117.418667 0 0 0 0.09728 164.522667a121.130667 121.130667 0 0 0 77.909333 115.712v539.050666a117.418667 117.418667 0 0 0 111.658667 122.282667h235.306667a112.341333 112.341333 0 0 0 103.253333 75.52h372.650667a122.538667 122.538667 0 0 0 0-244.138667h-372.650667a112.256 112.256 0 0 0-103.253333 75.52H189.66528a27.904 27.904 0 0 1-26.581333-28.970666v-243.2z m103.253333-75.52h372.650667a29.098667 29.098667 0 0 1 0 57.941333h-372.650667a29.098667 29.098667 0 0 1 0-57.941333z m0 365.098667h372.650667a29.098667 29.098667 0 0 1 0 57.984h-372.650667a29.098667 29.098667 0 0 1 0-57.984zM111.926613 135.722667h17.408a29.098667 29.098667 0 0 1 0 57.984h-17.408a29.098667 29.098667 0 0 1 0-57.984z" fill="currentColor"></path></svg>`,
+shareExportLinks: `<svg t="1783585954281" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2270" width="16" height="16" fill="currentColor" style="transform: scale(1.12); transform-origin: center;"><path d="M759.466667 608c-17.066667-17.066667-42.666667-17.066667-59.733334 0-17.066667 17.066667-17.066667 42.666667 0 59.733333l27.733334 27.733334h-121.6c-23.466667 0-42.666667 19.2-42.666667 42.666666s19.2 42.666667 42.666667 42.666667H725.333333L697.6 810.666667c-17.066667 17.066667-17.066667 42.666667 0 59.733333 8.533333 8.533333 19.2 12.8 29.866667 12.8s21.333333-4.266667 29.866666-12.8l102.4-102.4c17.066667-17.066667 17.066667-42.666667 0-59.733333l-100.266666-100.266667zM435.2 307.2l51.2-51.2c14.933333-14.933333 68.266667-61.866667 145.066667-64 53.333333-2.133333 102.4 17.066667 138.666666 53.333333 64 64 72.533333 164.266667 21.333334 245.333334-12.8 19.2-6.4 46.933333 12.8 59.733333 6.4 4.266667 14.933333 6.4 23.466666 6.4 14.933333 0 27.733333-6.4 36.266667-19.2C936.533333 422.4 923.733333 277.333333 832 185.6c-53.333333-53.333333-123.733333-81.066667-202.666667-78.933333-106.666667 2.133333-177.066667 64-204.8 89.6l-51.2 51.2c-17.066667 17.066667-17.066667 42.666667 0 59.733333s44.8 17.066667 61.866667 0zM475.733333 797.866667c-76.8 38.4-168.533333 25.6-226.133333-32-76.8-76.8-70.4-204.8 10.666667-285.866667l38.4-38.4c17.066667-17.066667 17.066667-42.666667 0-59.733333s-42.666667-17.066667-59.733334 0l-38.4 38.4c-115.2 115.2-119.466667 296.533333-10.666666 405.333333 51.2 51.2 121.6 78.933333 194.133333 78.933333 42.666667 0 87.466667-10.666667 130.133333-29.866666 21.333333-10.666667 29.866667-36.266667 19.2-57.6-10.666667-19.2-36.266667-27.733333-57.6-19.2z" p-id="2271"></path><path d="M556.8 401.066667l-166.4 166.4c-17.066667 17.066667-17.066667 42.666667 0 59.733333 17.066667 17.066667 42.666667 17.066667 59.733333 0l166.4-166.4c17.066667-17.066667 17.066667-42.666667 0-59.733333-17.066667-17.066667-44.8-17.066667-59.733333 0z" p-id="2272"></path></svg>`,
 stop: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></svg>`,
 ext: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform: scale(1.1);"><polygon points="6 3 20 12 6 21 6 3" fill="var(--pk-bg)" stroke="currentColor"></polygon></svg>`,
 download: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>`,
@@ -3775,6 +3776,7 @@ zh: {
   "btn_share_parse_history_reparse": "解析",
   "btn_share_parse_history_delete": "删除记录",
   "btn_share_parse_history_clear": "清空历史",
+  "btn_share_parse_history_export": "导出链接",
   "msg_share_parse_history_clear_confirm": "确认清空分享解析历史？",
   "btn_share_parse_history_pin": "置顶",
   "btn_share_parse_history_unpin": "取消置顶",
@@ -3789,6 +3791,13 @@ zh: {
   "label_share_parse_history_last_check": "最近检测",
   "label_share_parse_history_status_unknown": "异常",
   "msg_share_parse_history_cleared": "分享解析历史已清空",
+  "msg_share_parse_history_export_empty": "没有可导出的分享链接。",
+  "msg_share_parse_history_export_success": "已导出 {n} 条分享链接。",
+  "str_share_parse_history_export_file_name": "share_parse_history",
+  "label_share_parse_history_export_title": "标题",
+  "label_share_parse_history_export_link": "分享链接",
+  "label_share_parse_history_export_password": "密码",
+  "label_share_parse_history_export_note": "备注",
   "msg_share_parse_history_delete_pinned_confirm": "此记录已置顶，确认删除？",
   "label_share_parse_root": "分享根目录",
   "label_share_parse_path_root": "分享解析",
@@ -3961,6 +3970,12 @@ zh: {
   "btn_modify": "修改",
   "str_snap_link_count_suffix": " 等 {n} 个链接",
   "btn_cancel_share": "取消分享",
+  "btn_share_export_links": "导出链接",
+  "tip_share_export_links": "导出选中项或当前列表的分享链接 [Alt] + [L]",
+  "msg_share_export_empty": "没有可导出的分享链接。",
+  "msg_share_export_success": "已导出 {n} 条分享链接。",
+  "msg_share_export_partial_loading": "分享列表仍在加载，已导出当前已加载的 {n} 条记录。",
+  "str_share_export_file_name": "my_shares",
   "share_copy_pwd": "密码",
   "title_share_detail": "分享详情",
   "ctx_share_detail": "查看分享详情",
@@ -5397,6 +5412,27 @@ throw err;
 return res.json();
 }
 
+async function apiGetWithCaptchaRecovery(id, options = {}) {
+const attempts = Math.max(1, Math.min(3, Number(options.attempts) || 2));
+let lastErr = null;
+for (let i = 0; i < attempts; i++) {
+try {
+return await apiGet(id);
+} catch (e) {
+lastErr = e;
+if (typeof isDownloadHydrateCaptchaInvalidError !== 'function' || !isDownloadHydrateCaptchaInvalidError(e) || i >= attempts - 1) throw e;
+const recovered = typeof recoverDownloadHydrateCaptcha === 'function'
+? await recoverDownloadHydrateCaptcha(e, {
+    isRunning: typeof options.isRunning === 'function' ? options.isRunning : (() => true),
+    onWait: typeof options.onWait === 'function' ? options.onWait : null
+})
+: false;
+if (!recovered) throw e;
+}
+}
+throw lastErr;
+}
+
 async function apiAction(action, data) {
 const method = action.includes('batch') ? 'POST' : 'PATCH';
 const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/files${action}`, { method: method, headers: getHeaders(), body: JSON.stringify(data) });
@@ -5442,15 +5478,9 @@ gmSet('pk_share_update_times', JSON.stringify(data));
 return stamp;
 }
 
-async function apiShareList(limit = 100) {
-let all =[], next = null, safe = 50;
-do {
-const url = `https://api-drive.mypikpak.com/drive/v1/share/list?limit=${limit}&thumbnail_size=SIZE_SMALL&_t=${Date.now()}${next ? `&page_token=${next}` : ''}`;
-const res = await fetch(url, { headers: getHeaders() });
-if (!res.ok) throw new Error(`Share API Error ${res.status}`);
-const json = await res.json();
-const list = json.data || [];
-const normalized = list.map(item => ({
+function normalizeShareListItems(list) {
+const store = JSON.parse(gmGet('pk_share_limits', '{}'));
+return (Array.isArray(list) ? list : []).map(item => ({
 id: item.share_id,
 kind: 'pikpak#share',
 name: item.title,
@@ -5459,10 +5489,7 @@ modified_time: getShareDisplayTime(item.share_id, item.create_time),
 icon_link: item.icon_link,
 view_count: item.view_count,
 save_count: item.restore_count,
-limit_count: (function(){
-const store = JSON.parse(gmGet('pk_share_limits', '{}'));
-return store[item.share_id] || parseInt(item.limit_count || 0);
-})(),
+limit_count: store[item.share_id] || parseInt(item.limit_count || 0),
 share_status: item.share_status,
 share_status_text: item.share_status_text,
 expiration_days: item.expiration_days,
@@ -5474,17 +5501,186 @@ share_url: item.share_url,
 pass_code: item.pass_code,
 parent_id: 'share_root'
 }));
-
-all.push(...normalized);
-
-if (!next) {
-const graveyard = JSON.parse(gmGet('pk_expired_shares', '[]'));
-const serverIds = new Set(all.map(x => x.id));
-const phantoms = graveyard.filter(x => !serverIds.has(x.id));
-all.push(...phantoms);
 }
 
-next = json.next_page_token;
+function normalizeKnownShareItem(raw, options = {}) {
+const data = raw && typeof raw === 'object' ? raw : {};
+const source = options.sourceItem && typeof options.sourceItem === 'object' ? options.sourceItem : {};
+const shareId = String(data.share_id || data.id || '').trim();
+if (!shareId) return null;
+const title = String(data.title || options.title || source.name || shareId).trim();
+const createdAt = String(data.create_time || data.created_time || data.modified_time || new Date(getServerNow()).toISOString());
+const limitCount = data.limit_count !== undefined ? data.limit_count : options.limit_count;
+return normalizeShareListItems([{
+share_id: shareId,
+title: title || shareId,
+file_size: data.file_size !== undefined ? data.file_size : (source.size || 0),
+create_time: createdAt,
+icon_link: data.icon_link || source.icon_link || source.thumbnail_link || '',
+view_count: data.view_count || 0,
+restore_count: data.restore_count !== undefined ? data.restore_count : (data.save_count || 0),
+limit_count: limitCount !== undefined ? limitCount : 0,
+share_status: data.share_status || 'OK',
+share_status_text: data.share_status_text || '',
+expiration_days: data.expiration_days !== undefined ? data.expiration_days : options.expiration_days,
+expiration_left: data.expiration_left !== undefined ? data.expiration_left : data.expiration_days,
+expiration_left_seconds: data.expiration_left_seconds !== undefined ? data.expiration_left_seconds : '',
+expiration_at: data.expiration_at || '',
+phrase: data.phrase || '',
+share_url: data.share_url || data.url || '',
+pass_code: data.pass_code || data.passCode || options.pass_code || ''
+}])[0] || null;
+}
+
+function prependKnownShareItem(list, item) {
+if (!item || !item.id || !Array.isArray(list)) return Array.isArray(list) ? list : [];
+return [item, ...list.filter(x => x && String(x.id || x.share_id || '') !== String(item.id))];
+}
+
+function injectKnownShareItemToSnapshot(item) {
+if (!item || !item.id) return false;
+const updateCache = cacheMap => {
+if (!cacheMap || typeof cacheMap.has !== 'function' || typeof cacheMap.get !== 'function' || !cacheMap.has('share_root')) return false;
+const snap = cacheMap.get('share_root');
+if (Array.isArray(snap)) {
+    cacheMap.set('share_root', prependKnownShareItem(snap, item));
+    return true;
+}
+if (snap && typeof snap === 'object' && Array.isArray(snap.items)) {
+    cacheMap.set('share_root', { ...snap, items: prependKnownShareItem(snap.items, item) });
+    return true;
+}
+return false;
+};
+
+let touched = false;
+if (typeof S !== 'undefined' && S && S.cache) touched = updateCache(S.cache) || touched;
+if (typeof globalCache !== 'undefined') touched = updateCache(globalCache) || touched;
+
+const isShareRootVisible = typeof S !== 'undefined' && S && S.shareMode && Array.isArray(S.path) && S.path.length === 1;
+if (isShareRootVisible) {
+S.items = prependKnownShareItem(Array.isArray(S.items) ? S.items : [], item);
+if (S.itemMap) S.itemMap.set(item.id, item);
+if (S.cache && !S.cache.has('share_root')) S.cache.set('share_root', [...S.items]);
+if (typeof globalCache !== 'undefined' && !globalCache.has('share_root')) globalCache.set('share_root', [...S.items]);
+if (typeof refresh === 'function') refresh();
+if (typeof updateStat === 'function') updateStat();
+touched = true;
+}
+
+if (touched && typeof globalCache !== 'undefined') {
+const snap = globalCache.get('share_root');
+const items = Array.isArray(snap) ? snap : (snap && Array.isArray(snap.items) ? snap.items : []);
+const session = globalCache.get('share_session');
+if (session && typeof session === 'object') {
+    globalCache.set('share_session', { ...session, count: items.length });
+} else if (snap && !Array.isArray(snap) && snap.nextToken) {
+    globalCache.set('share_session', { phase: 'active', nextToken: snap.nextToken, completed: false, count: items.length });
+}
+}
+
+return touched;
+}
+
+const SHARE_CANCEL_TOMBSTONE_TTL = 10 * 60 * 1000;
+
+function getRuntimeStateSafe() {
+try {
+if (typeof pkState !== 'undefined' && pkState) return pkState;
+} catch (e) {}
+try {
+return (typeof S !== 'undefined' && S) ? S : null;
+} catch (e) {
+return null;
+}
+}
+
+function getRuntimeUiSafe() {
+try {
+return (typeof UI !== 'undefined' && UI) ? UI : null;
+} catch (e) {
+return null;
+}
+}
+
+function getFloatBarManagerSafe() {
+try {
+return (typeof FloatBarManager !== 'undefined' && FloatBarManager) ? FloatBarManager : null;
+} catch (e) {
+return null;
+}
+}
+
+function forceRenderShareVisibleState(state, ui, ids = []) {
+if (!state || !ui || !ui.in || !state.shareMode || !Array.isArray(state.path) || state.path.length !== 1) return;
+try {
+if (typeof renderList === 'function') renderList();
+else if (typeof renderVisible === 'function') renderVisible();
+} catch (e) {
+try { if (typeof renderVisible === 'function') renderVisible(); } catch (err) {}
+}
+try {
+requestAnimationFrame(() => {
+try { if (typeof renderVisible === 'function') renderVisible(); } catch (e) {}
+});
+} catch (e) {}
+}
+
+function getShareCancelTombstoneStore() {
+const state = getRuntimeStateSafe();
+if (!state) return null;
+if (!state.shareCancelTombstones || !(state.shareCancelTombstones instanceof Map)) state.shareCancelTombstones = new Map();
+return state.shareCancelTombstones;
+}
+
+function cleanupShareCancelTombstones(now = Date.now()) {
+const store = getShareCancelTombstoneStore();
+if (!store) return new Map();
+for (const [id, expiresAt] of store) {
+if (!Number.isFinite(expiresAt) || expiresAt <= now) store.delete(id);
+}
+return store;
+}
+
+function addShareCancelTombstones(ids) {
+const expiresAt = Date.now() + SHARE_CANCEL_TOMBSTONE_TTL;
+const store = cleanupShareCancelTombstones();
+if (!store) return;
+(Array.isArray(ids) ? ids : [ids]).forEach(id => {
+const key = String(id || '').trim();
+if (key) store.set(key, expiresAt);
+});
+}
+
+function isShareCancelledByTombstone(id) {
+const key = String(id || '').trim();
+if (!key) return false;
+return cleanupShareCancelTombstones().has(key);
+}
+
+function filterShareCancelTombstones(items) {
+if (!Array.isArray(items) || items.length === 0) return Array.isArray(items) ? items : [];
+const store = cleanupShareCancelTombstones();
+if (store.size === 0) return items;
+return items.filter(item => !store.has(String((item && (item.id || item.share_id)) || '').trim()));
+}
+
+async function apiShareListPage(pageToken = '', limit = 100, options = {}) {
+const token = String(pageToken || '');
+const url = `https://api-drive.mypikpak.com/drive/v1/share/list?limit=${limit}&thumbnail_size=SIZE_SMALL&_t=${Date.now()}${token ? `&page_token=${encodeURIComponent(token)}` : ''}`;
+const res = await fetch(url, { headers: getHeaders(), signal: options.signal || undefined });
+if (!res.ok) throw new Error(`Share API Error ${res.status}`);
+const json = await res.json();
+const list = json.data || [];
+return { files: filterShareCancelTombstones(normalizeShareListItems(list)), next_page_token: json.next_page_token || '' };
+}
+
+async function apiShareList(limit = 100) {
+let all =[], next = null, safe = 50;
+do {
+const page = await apiShareListPage(next || '', limit);
+all.push(...page.files);
+next = page.next_page_token;
 safe--;
 } while (next && safe > 0);
 const graveyard = JSON.parse(gmGet("pk_expired_shares", "[]"));
@@ -5776,25 +5972,234 @@ throw new Error(err.error_description || `API Error ${res.status}`);
 return await res.json();
 }
 
-async function apiCancelShare(ids) {
+async function apiCancelShare(ids, options = {}) {
+const uniqueIds = Array.from(new Set((Array.isArray(ids) ? ids : [ids]).map(id => String(id || '').trim()).filter(Boolean)));
+const notifySettled = (payload) => {
+if (typeof options.onSettled !== 'function') return;
+try { options.onSettled(payload); } catch (e) {}
+};
+if (uniqueIds.length === 0) {
+const emptyResult = { successIds: [], failed: [] };
+return options.detailed ? emptyResult : true;
+}
+
 const url = `https://api-drive.mypikpak.com/drive/v1/share:batchDelete`;
-const res = await fetch(url, {
+let batchResponse = null;
+try {
+batchResponse = await fetch(url, {
 method: 'POST',
 headers: getHeaders(),
-body: JSON.stringify({ ids: ids })
+body: JSON.stringify({ ids: uniqueIds })
 });
+} catch (e) {
+batchResponse = null;
+}
 
-if (!res.ok) {
+if (batchResponse && batchResponse.ok) {
+uniqueIds.forEach((id, index) => notifySettled({ id, ok: true, completed: index + 1, total: uniqueIds.length }));
+const result = { successIds: uniqueIds, failed: [] };
+return options.detailed ? result : true;
+}
+
 console.warn("[Share] Batch delete failed, trying sequential delete...");
-for (const id of ids) {
-await fetch(`https://api-drive.mypikpak.com/drive/v1/share/${id}`, {
+const successIds = [];
+const failed = [];
+for (let index = 0; index < uniqueIds.length; index++) {
+const id = uniqueIds[index];
+try {
+const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/share/${id}`, {
 method: 'DELETE',
 headers: getHeaders()
 });
+if (!res.ok) throw new Error(`Share API Error ${res.status}`);
+successIds.push(id);
+notifySettled({ id, ok: true, completed: index + 1, total: uniqueIds.length });
+} catch (error) {
+failed.push({ id, error });
+notifySettled({ id, ok: false, error, completed: index + 1, total: uniqueIds.length });
+}
+}
+
+const result = { successIds, failed };
+if (options.detailed) return result;
+if (failed.length) {
+const error = failed[0].error || new Error('Share cancel failed');
+error._shareCancelFailedIds = failed.map(entry => entry.id);
+error._shareCancelSuccessIds = successIds;
+throw error;
 }
 return true;
 }
-return true;
+
+function getShareSnapshotItems(snapshot) {
+if (Array.isArray(snapshot)) return snapshot;
+if (snapshot && typeof snapshot === 'object' && Array.isArray(snapshot.items)) return snapshot.items;
+return [];
+}
+
+function filterShareSnapshotByIds(cacheMap, idSet, fallbackItems = null) {
+if (!cacheMap || typeof cacheMap.get !== 'function' || typeof cacheMap.set !== 'function') return null;
+const hasSnapshot = typeof cacheMap.has === 'function' && cacheMap.has('share_root');
+const snapshot = hasSnapshot ? cacheMap.get('share_root') : null;
+if (!hasSnapshot && !Array.isArray(fallbackItems)) return null;
+
+const sourceItems = hasSnapshot ? getShareSnapshotItems(snapshot) : fallbackItems;
+const nextItems = sourceItems.filter(item => !idSet.has(String((item && (item.id || item.share_id)) || '').trim()));
+if (Array.isArray(snapshot)) {
+cacheMap.set('share_root', nextItems);
+} else if (snapshot && typeof snapshot === 'object') {
+cacheMap.set('share_root', { ...snapshot, items: nextItems });
+} else {
+const session = typeof globalCache !== 'undefined' ? globalCache.get('share_session') : null;
+cacheMap.set('share_root', session && !session.completed
+? { items: nextItems, nextToken: session.nextToken || null }
+: nextItems);
+}
+return nextItems;
+}
+
+async function removeShareItemsLocally(ids, context = {}) {
+const idSet = new Set((Array.isArray(ids) ? ids : [ids]).map(id => String(id || '').trim()).filter(Boolean));
+if (idSet.size === 0) return { changed: false };
+
+const state = context.state || getRuntimeStateSafe();
+if (!state) throw new Error('STATE_NOT_READY');
+const ui = context.ui || getRuntimeUiSafe();
+const isVisibleShareRoot = !!(state.shareMode && Array.isArray(state.path) && state.path.length === 1);
+const oldScrollTop = ui && ui.vp ? ui.vp.scrollTop : 0;
+let changed = false;
+
+if (isVisibleShareRoot) {
+const filterList = list => {
+if (!Array.isArray(list)) return [];
+const next = list.filter(item => !idSet.has(String((item && (item.id || item.share_id)) || '').trim()));
+if (next.length !== list.length) changed = true;
+return next;
+};
+state.items = filterList(state.items);
+state.display = filterList(state.display);
+idSet.forEach(id => {
+if (state.itemMap && state.itemMap.has(id)) changed = true;
+if (state.itemMap) state.itemMap.delete(id);
+if (state.starredSet) state.starredSet.delete(id);
+if (state.sel && state.sel.has(id)) {
+state.sel.delete(id);
+changed = true;
+}
+if (state.selEx && state.selEx.has(id)) {
+state.selEx.delete(id);
+changed = true;
+}
+});
+}
+
+const fallbackItems = isVisibleShareRoot ? state.items : null;
+filterShareSnapshotByIds(state.cache, idSet, fallbackItems);
+let globalItems = null;
+if (typeof globalCache !== 'undefined') {
+globalItems = filterShareSnapshotByIds(globalCache, idSet, fallbackItems);
+const session = globalCache.get('share_session');
+if (session && typeof session === 'object') {
+const count = Array.isArray(globalItems) ? globalItems.length : (isVisibleShareRoot ? state.items.length : Math.max(0, Number(session.count || 0) - idSet.size));
+globalCache.set('share_session', { ...session, count });
+}
+}
+
+if (isVisibleShareRoot) {
+if (typeof refresh === 'function') await refresh();
+if (ui && ui.vp) ui.vp.scrollTop = Number.isFinite(context.scrollTop) ? context.scrollTop : oldScrollTop;
+forceRenderShareVisibleState(state, ui, Array.from(idSet));
+if (typeof updateStat === 'function') updateStat();
+}
+return { changed };
+}
+
+async function handleShareCancel(items, context = {}) {
+const state = context.state || getRuntimeStateSafe();
+if (!state) throw new Error('STATE_NOT_READY');
+const ui = context.ui || getRuntimeUiSafe();
+const rawItems = Array.isArray(items) ? items : [items];
+const pendingIds = state.shareCancelPendingIds instanceof Set ? state.shareCancelPendingIds : (state.shareCancelPendingIds = new Set());
+const seen = new Set();
+const targets = [];
+for (const raw of rawItems) {
+const item = raw && typeof raw === 'object' ? raw : null;
+const id = String((item && (item.id || item.share_id)) || raw || '').trim();
+if (!id || seen.has(id) || pendingIds.has(id)) continue;
+seen.add(id);
+targets.push(item || { id });
+}
+if (targets.length === 0) return { successIds: [], failed: [], total: 0 };
+
+const targetIds = targets.map(item => String(item.id || item.share_id || '').trim());
+targetIds.forEach(id => pendingIds.add(id));
+const total = targetIds.length;
+const oldScrollTop = ui && ui.vp ? ui.vp.scrollTop : 0;
+let settled = 0;
+let progressTask = null;
+let progressTimer = null;
+const progressText = count => `${L.msg_cancel_share_ing} ${Math.min(total, count)} / ${total}`;
+const updateProgress = count => {
+if (progressTask) progressTask.update(progressText(count));
+};
+
+if (context.progress !== false) {
+const floatBarManager = getFloatBarManagerSafe();
+if (floatBarManager && typeof floatBarManager.create === 'function') {
+progressTimer = setTimeout(() => {
+progressTimer = null;
+progressTask = floatBarManager.create(progressText(settled));
+}, Number.isFinite(context.progressDelay) ? context.progressDelay : 180);
+}
+}
+
+const successIds = [];
+const failed = [];
+try {
+const phantomIds = targets.filter(item => item._is_local_phantom).map(item => String(item.id || item.share_id || '').trim());
+if (phantomIds.length) {
+try {
+const phantomSet = new Set(phantomIds);
+const graveyard = JSON.parse(gmGet('pk_expired_shares', '[]'));
+gmSet('pk_expired_shares', JSON.stringify((Array.isArray(graveyard) ? graveyard : []).filter(item => !phantomSet.has(String((item && item.id) || '').trim()))));
+addShareCancelTombstones(phantomIds);
+successIds.push(...phantomIds);
+await removeShareItemsLocally(phantomIds, { scrollTop: oldScrollTop, state, ui });
+} catch (error) {
+phantomIds.forEach(id => failed.push({ id, error }));
+}
+settled += phantomIds.length;
+updateProgress(settled);
+}
+
+const serverIds = targets
+.filter(item => !item._is_local_phantom)
+.map(item => String(item.id || item.share_id || '').trim());
+const batchSize = 100;
+for (let offset = 0; offset < serverIds.length; offset += batchSize) {
+const batch = serverIds.slice(offset, offset + batchSize);
+const settledBeforeBatch = settled;
+const result = await apiCancelShare(batch, {
+detailed: true,
+onSettled: detail => updateProgress(settledBeforeBatch + Number(detail.completed || 0))
+});
+const batchSuccessIds = result.successIds || [];
+if (batchSuccessIds.length) {
+addShareCancelTombstones(batchSuccessIds);
+successIds.push(...batchSuccessIds);
+await removeShareItemsLocally(batchSuccessIds, { scrollTop: oldScrollTop, state, ui });
+}
+if (result.failed && result.failed.length) failed.push(...result.failed);
+settled += batch.length;
+updateProgress(settled);
+}
+
+return { successIds, failed, total };
+} finally {
+targetIds.forEach(id => pendingIds.delete(id));
+if (progressTimer) clearTimeout(progressTimer);
+if (progressTask) progressTask.destroy();
+}
 }
 
 function patchLocalShareItem(state, baseItem, patch = {}) {
@@ -6611,18 +7016,10 @@ const data = error.data || (error.response && error.response.data) || {};
 const status = Number(error.status || error.statusCode || (error.response && (error.response.status || error.response.statusCode)) || 0);
 const code = String(error.code || data.code || data.error || '').toLowerCase();
 const errorCode = Number(error.errorCode || data.error_code || 0) || 0;
-let text = '';
-try {
-text = [error.message, data.error_description, data.message, data.msg, data.details ? JSON.stringify(data.details) : ''].filter(Boolean).join(' ').toLowerCase();
-} catch (e) {
-text = String(error.message || '').toLowerCase();
-}
 return status === 400 && (
 code === 'captcha_invalid'
 || code.includes('captcha_invalid')
-|| text.includes('captcha_invalid')
-|| text.includes('验证码无效')
-|| (errorCode === 9 && (text.includes('captcha') || text.includes('验证码')))
+|| errorCode === 9
 );
 }
 
@@ -7290,6 +7687,8 @@ offlineLightProbeLastAt: 0,
 offlineLightProbeFailCount: 0,
 offlineLightProbePendingWrite: false,
 offlineDeleteTombstones: new Map(),
+shareCancelTombstones: new Map(),
+shareCancelPendingIds: new Set(),
 configCloudBusy: false,
 localCleanBusy: false,
 magnetArchiveBusy: false,
@@ -9185,6 +9584,7 @@ ${CONF.icons.blacklist} <span>${L.title_blacklist}</span>
 <button class="pk-btn" id="pk-prune" data-pk-tip="${L.tip_prune}">${CONF.icons.prune} <span>${L.btn_prune}</span></button>
 <button class="pk-btn" id="pk-unzip" data-pk-tip="${L.tip_unzip}">${CONF.icons.unzip} <span>${L.btn_unzip}</span></button>
 <button class="pk-btn" id="pk-cancel-share" data-pk-tip="${L.btn_cancel_share} [Delete]" style="display:none;">${CONF.icons.unshare} <span>${L.btn_cancel_share}</span></button>
+<button class="pk-btn" id="pk-share-export-links" data-pk-tip="${L.tip_share_export_links}" style="display:none;">${CONF.icons.shareExportLinks} <span>${L.btn_share_export_links}</span></button>
 <div style="flex:1"></div>
 
 <div class="pk-dropdown-wrap" id="pk-upload-wrap">
@@ -9581,6 +9981,7 @@ actUpFolder: el.querySelector('#pk-act-upload-folder'),
 inpFile: el.querySelector('#pk-file-selector'),
 inpFolder: el.querySelector('#pk-folder-selector'),
 btnCancelShare: el.querySelector('#pk-cancel-share'),
+btnShareExportLinks: el.querySelector('#pk-share-export-links'),
 btnRetryTask: el.querySelector('#pk-retry-task'),
 btnCopyLinkOffline: el.querySelector('#pk-off-copy-link'),
 btnShareParseSave: el.querySelector('#pk-share-parse-save'),
@@ -13906,6 +14307,7 @@ function shouldSkipSmartRefreshAfterLoad(realCacheKey) {
 const cacheKey = String(realCacheKey || '');
 return !!(
 (S.recentMode && cacheKey === 'recent_root') ||
+(S.shareMode && cacheKey === 'share_root') ||
 (S.starredMode && cacheKey === 'starred_root') ||
 isCurrentStarredRoot()
 );
@@ -17498,6 +17900,11 @@ if (isResuming) S.items.forEach(it => fetchedIds.add(it.id));
 S.items = Array.isArray(cachedData) ? [...cachedData] : [];
 nextToken = null;
 }
+if (S.shareMode && realCacheKey === 'share_root') {
+S.items = filterShareCancelTombstones(S.items);
+fetchedIds.clear();
+S.items.forEach(it => { if (it && it.id) fetchedIds.add(it.id); });
+}
 if (S.offlineMode && realCacheKey === 'offline_root') {
 S.items = filterOfflineRetryTombstones(S.items);
 fetchedIds.clear();
@@ -17582,6 +17989,22 @@ for (let i = visibleSubFolders.length - 1; i >= 0; i--) {
 runBackgroundCrawler();
 return;
 }
+} else if (S.shareMode && realCacheKey === 'share_root') {
+const session = globalCache.get('share_session');
+const sessionToken = session && session.nextToken && !session.completed ? session.nextToken : null;
+if (!nextToken && sessionToken) nextToken = sessionToken;
+
+if (nextToken) {
+isResuming = true;
+S.items.forEach(it => fetchedIds.add(it.id));
+globalCache.set('share_session', { phase: 'active', nextToken: nextToken || null, completed: false, count: S.items.length });
+} else {
+setLoad(false);
+if (window.pkSmartRefreshTrigger && !shouldSkipSmartRefreshAfterLoad(realCacheKey)) {
+window.pkSmartRefreshTrigger(true);
+}
+return;
+}
 } else if (!nextToken) {
 setLoad(false);
 if (window.pkSmartRefreshTrigger && !shouldSkipSmartRefreshAfterLoad(realCacheKey)) {
@@ -17608,6 +18031,9 @@ globalCache.set('recent_session', { phase: 'active', nextToken: nextToken || nul
 if (!nextToken && !isResuming) {
 if (S.recentMode && realCacheKey === 'recent_root') {
 globalCache.set('recent_session', { phase: 'active', nextToken: null, completed: false, count: 0 });
+}
+if (S.shareMode && realCacheKey === 'share_root') {
+globalCache.set('share_session', { phase: 'active', nextToken: null, completed: false, count: 0 });
 }
 
 const keepNetworkSafeVisual = !!(forceUpdate && !keepVisualOnThisForceLoad && !isResuming && Array.isArray(S.items) && S.items.length > 0 && isProtectedNetworkResumeTarget(realCacheKey));
@@ -17800,9 +18226,31 @@ next_page_token: recentNextToken
 };
 }
 else if (S.shareMode) {
-if (pageCount > 0) break;
-const shares = await apiShareList();
-data = { files: shares, next_page_token: null };
+const page = await apiShareListPage(nextToken || '', 100, { signal });
+let shareFiles = page.files || [];
+const shareNextToken = page.next_page_token || null;
+
+if (!shareNextToken) {
+const graveyard = JSON.parse(gmGet("pk_expired_shares", "[]"));
+const graveyardIds = new Set(graveyard.map(x => x.id));
+if (graveyardIds.size) {
+    S.items = S.items.filter(it => !graveyardIds.has(it.id));
+    S.itemMap.clear();
+    S.items.forEach(it => {
+        if (it && it.id) {
+            S.itemMap.set(it.id, it);
+            fetchedIds.add(it.id);
+        }
+    });
+    graveyardIds.forEach(id => fetchedIds.delete(id));
+    shareFiles = shareFiles.filter(it => !graveyardIds.has(it.id));
+}
+const serverIds = new Set([...S.items, ...shareFiles].map(x => x && x.id).filter(Boolean));
+const phantoms = graveyard.filter(x => x && x.id && !serverIds.has(x.id));
+shareFiles.push(...phantoms);
+}
+
+data = { files: shareFiles, next_page_token: shareNextToken };
 }
 else if (S.uploadMode) {
 if (pageCount > 0) break;
@@ -18042,6 +18490,9 @@ if (S.recentMode && S.path.length === 1) {
 if (S.recentMode && realCacheKey === 'recent_root') {
     globalCache.set('recent_session', { phase: 'active', nextToken: data.next_page_token || null, completed: false, count: S.items.length });
 }
+if (S.shareMode && realCacheKey === 'share_root') {
+    globalCache.set('share_session', { phase: 'active', nextToken: data.next_page_token || null, completed: false, count: S.items.length });
+}
 
 if (S.offlineMode) {
     S.cache.set(realCacheKey, [...S.items]);
@@ -18083,10 +18534,15 @@ if (pageCount === 0 || UI.loader.style.display !== 'none') {
         renderVisible();
     }
 } else {
-    if (pageCount % 4 === 0) await refreshPagingAppendView();
+    if ((S.shareMode && realCacheKey === 'share_root') || pageCount % 4 === 0) await refreshPagingAppendView();
 }
 } else if (S.recentMode && realCacheKey === 'recent_root') {
 globalCache.set('recent_session', { phase: 'active', nextToken: data.next_page_token || null, completed: false, count: S.items.length });
+const tempCache = { items: [...S.items], nextToken: data.next_page_token };
+S.cache.set(realCacheKey, tempCache);
+if (typeof globalCache !== 'undefined') globalCache.set(realCacheKey, tempCache);
+} else if (S.shareMode && realCacheKey === 'share_root') {
+globalCache.set('share_session', { phase: 'active', nextToken: data.next_page_token || null, completed: false, count: S.items.length });
 const tempCache = { items: [...S.items], nextToken: data.next_page_token };
 S.cache.set(realCacheKey, tempCache);
 if (typeof globalCache !== 'undefined') globalCache.set(realCacheKey, tempCache);
@@ -18195,6 +18651,9 @@ if (typeof globalCache !== 'undefined') globalCache.set(realCacheKey, [...S.item
 
 if (S.recentMode && realCacheKey === 'recent_root') {
 globalCache.set('recent_session', { phase: 'done', nextToken: null, completed: true, count: S.items.length });
+}
+if (S.shareMode && realCacheKey === 'share_root') {
+globalCache.set('share_session', { phase: 'done', nextToken: null, completed: true, count: S.items.length });
 }
 
 if (!mergeRefreshCtx && window.pkSmartRefreshTrigger && !shouldSkipSmartRefreshAfterLoad(realCacheKey)) {
@@ -20298,6 +20757,57 @@ const checked = rec.last_check_at ? ` ${L.label_share_parse_history_last_check}:
 return `${L.label_share_parse_history_status}: ${label}${checked}`;
 }
 
+function escapeShareParseHistoryCsvCell(value) {
+return `"${String(value == null ? '' : value).replace(/"/g, '""')}"`;
+}
+
+function getShareParseHistoryExportLink(rec) {
+const shareId = String(rec && rec.share_id || '').trim();
+if (shareId) return `https://mypikpak.com/s/${shareId}`;
+return formatShareParseDisplayLink((rec && rec.raw) || '');
+}
+
+function formatShareParseHistoryRootItemsValue(rec) {
+const L = getStrings();
+const total = Number(rec && rec.root_total_count || 0);
+const folders = Number(rec && rec.root_folder_count || 0);
+const files = Number(rec && rec.root_file_count || 0);
+return `${total} (${L.str_folders}: ${folders}, ${L.str_files}: ${files})`;
+}
+
+function exportShareParseHistoryRecords(records) {
+const L = getStrings();
+const rows = (Array.isArray(records) ? records : []).filter(rec => rec && getShareParseHistoryExportLink(rec));
+if (!rows.length) {
+showToast(L.msg_share_parse_history_export_empty || L.msg_share_parse_history_empty, 'warning');
+return false;
+}
+const headers = [
+L.label_share_parse_history_export_title || 'Title',
+L.label_share_parse_history_export_link || L.lbl_share_link_title || 'Share Link',
+L.label_share_parse_history_export_password || L.str_no_pwd || 'Password',
+L.label_share_parse_history_share_user || 'Share owner',
+L.label_share_parse_history_last_success || 'Last opened',
+L.label_share_parse_history_success_count || 'Open count',
+L.label_share_parse_history_root_items || 'Root items',
+L.label_share_parse_history_export_note || 'Note'
+];
+const body = rows.map(rec => [
+rec.title || rec.share_id || '',
+getShareParseHistoryExportLink(rec),
+rec.pass_code || '',
+rec.share_user || '',
+rec.last_success_at ? fmtDate(rec.last_success_at) : '',
+rec.success_count || 1,
+formatShareParseHistoryRootItemsValue(rec),
+rec.note || ''
+].map(escapeShareParseHistoryCsvCell).join(','));
+const baseName = String(L.str_share_parse_history_export_file_name || 'share_parse_history').trim().replace(/[\\/:*?"<>|\r\n]+/g, '_') || 'share_parse_history';
+downloadTextExport([headers.map(escapeShareParseHistoryCsvCell).join(','), ...body].join('\r\n') + '\r\n', `${baseName}_${formatExportTimestamp()}.csv`, 'text/csv;charset=utf-8', true);
+showToast((L.msg_share_parse_history_export_success || '').replace('{n}', String(rows.length)) || `Exported ${rows.length} share links.`);
+return true;
+}
+
 function markShareParseHistoryRecordError(id, err, msg) {
 if (!id) return null;
 const status = resolveShareParseHistoryErrorStatus(err);
@@ -20584,6 +21094,7 @@ const m = showModal(`
 <div class="pk-share-history-foot">
     <div class="pk-share-history-count" id="pk_share_history_count"></div>
     <div style="display:flex; gap:10px; flex-shrink:0;">
+        <button type="button" class="pk-btn" id="pk_share_history_export">${esc(L.btn_share_parse_history_export)}</button>
         <button type="button" class="pk-btn danger" id="pk_share_history_clear">${esc(L.btn_share_parse_history_clear)}</button>
         <button type="button" class="pk-btn pri pk-share-history-close" id="pk_share_history_close">${esc(L.btn_close)}</button>
     </div>
@@ -20599,9 +21110,11 @@ const searchWrap = m.querySelector('#pk_share_history_search_wrap');
 const searchSubmitBtn = m.querySelector('#pk_share_history_search_submit');
 const searchClearBtn = m.querySelector('#pk_share_history_search_clear');
 const countEl = m.querySelector('#pk_share_history_count');
+const exportBtn = m.querySelector('#pk_share_history_export');
 const clearBtn = m.querySelector('#pk_share_history_clear');
 const updateCount = () => {
 if (countEl) countEl.textContent = `${filtered.length}/${allRecords.length}`;
+if (exportBtn) exportBtn.disabled = filtered.length === 0;
 if (clearBtn) clearBtn.disabled = allRecords.length === 0;
 };
 const renderMore = () => {
@@ -20708,6 +21221,7 @@ if (hadQuery) applyFilter();
 else if (searchEl) searchEl.focus();
 };
 m.querySelector('#pk_share_history_close').onclick = () => m.remove();
+if (exportBtn) exportBtn.onclick = () => exportShareParseHistoryRecords(filtered);
 if (clearBtn) clearBtn.onclick = async () => {
 if (!allRecords.length) return;
 if (!await showConfirm(L.msg_share_parse_history_clear_confirm)) return;
@@ -22973,13 +23487,13 @@ updateTextPreviewModalState(modal, text.length ? 'success' : 'empty', { text });
 try {
 if (!itemUrl) {
 if (!item.id) throw makeTextPreviewError('load_failed');
-detail = await apiGet(item.id);
+detail = await apiGetWithCaptchaRecovery(item.id);
 }
 await readFromDetail(detail);
 } catch(e) {
 if (itemUrl && e && e.code === 'load_failed') {
 if (!item.id) throw makeTextPreviewError('load_failed', e);
-detail = await apiGet(item.id);
+detail = await apiGetWithCaptchaRecovery(item.id);
 await readFromDetail(detail);
 } else {
 throw e;
@@ -23376,6 +23890,7 @@ const gcid = detail.hash || detail.gcid || item.hash || item.gcid || '';
 setLoad(false);
 await showArchivePreview(item, "", {
 title: detail.name || item.name,
+iconItem: Object.assign({}, item, detail || {}),
 gcid,
 fileId: detail.id || item.id,
 listUrl: `https://api-drive.mypikpak.com/decompress/v1/list?access_token=${encodeURIComponent(token)}`,
@@ -28879,12 +29394,13 @@ if (item.status === 'DONE' && item.file && item.mime_type && item.mime_type.star
 
 const hasReadyThumb = item.status === 'DONE' && item.thumbnail_link && item.thumbnail_link !== item.icon_link;
 if (!hasReadyThumb) {
+    const uploadIconSrc = item.icon_link || item.thumbnail_link || '';
     if (isMax) {
         const boxStyle = "width:54px; min-width:54px; height:100%; display:flex; align-items:center; justify-content:center !important; margin-right:12px; position:relative;";
-        return `<div class="pk-max-icon-box" style="${boxStyle}">${getDirListIconSlotHtml(item, { mode: 'listMax', size: 50, remoteObjectFit: 'contain', remoteRadius: '4px' })}${blHtml}</div>`;
+        return `<div class="pk-max-icon-box" style="${boxStyle}">${getDirListIconSlotHtml(item, { mode: 'listMax', size: 50, remoteSrc: uploadIconSrc, remoteObjectFit: 'contain', remoteRadius: '4px' })}${blHtml}</div>`;
     }
     return `<div class="pk-min-icon" style="display:flex;align-items:center;justify-content:center;position:relative;">
-        ${getDirListIconSlotHtml(item, { mode: 'list', size: 24, remoteObjectFit: 'contain' })}
+        ${getDirListIconSlotHtml(item, { mode: 'list', size: 24, remoteSrc: uploadIconSrc, remoteClass: 'pk-min-icon-img', remoteObjectFit: 'contain' })}
         ${blHtml}
     </div>`;
 }
@@ -31048,7 +31564,25 @@ let dropTargetType = null;
 let autoOpenTimer = null;
 let lastHoverSep = null;
 
+const cancelFileDragState = () => {
+if (autoOpenTimer) { clearTimeout(autoOpenTimer); autoOpenTimer = null; }
+lastHoverSep = null;
+window.removeEventListener('mousemove', handleFileDragMove);
+window.removeEventListener('mouseup', stopFileDrag);
+document.body.classList.remove('pk-dragging');
+if (fileDragGhost) fileDragGhost.remove();
+fileDragGhost = null;
+document.querySelectorAll('.pk-drop-target').forEach(t => t.classList.remove('pk-drop-target'));
+dropTargetId = null;
+dropTargetType = null;
+isFileDragging = false;
+};
+
 const handleFileDragMove = (e) => {
+if (S.uploadMode) {
+cancelFileDragState();
+return;
+}
 if (!isFileDragging) {
 const moveX = Math.abs(e.clientX - mqStartX);
 const moveY = Math.abs(e.clientY - mqStartY);
@@ -31691,7 +32225,7 @@ if (e.target.closest('.pk-btn, .pk-star-icon, input')) return;
 const row = e.target.closest('.pk-row');
 const isClickingSelected = row && row.dataset.id && S.isSelected(row.dataset.id);
 
-if (isClickingSelected && !S.trashMode && !S.shareMode && !S.shareParseMode && !S.offlineMode && !S.historyMode && !S.starredMode && !S.recentMode && !S.isFlattened && !S.dupMode && !S.analyzeMode) {
+if (isClickingSelected && !S.trashMode && !S.shareMode && !S.shareParseMode && !S.offlineMode && !S.uploadMode && !S.historyMode && !S.starredMode && !S.recentMode && !S.isFlattened && !S.dupMode && !S.analyzeMode) {
 isFileDragging = false;
 mqStartX = e.clientX;
 mqStartY = e.clientY;
@@ -32847,6 +33381,10 @@ return;
 
 if (e.altKey && (e.key === 'l' || e.key === 'L')) {
 e.preventDefault();
+if (UI.btnShareExportLinks && !UI.btnShareExportLinks.disabled && UI.btnShareExportLinks.style.display !== 'none') {
+UI.btnShareExportLinks.click();
+return;
+}
 if (UI.btnExportM3U && !UI.btnExportM3U.disabled && UI.btnExportM3U.style.display !== 'none') {
 UI.btnExportM3U.click();
 }
@@ -33594,6 +34132,14 @@ UI.btnClearHistoryAll.style.cursor = UI.btnClearHistoryAll.disabled ? 'not-allow
 
 if (isShare && UI.btnCancelShare) {
 UI.btnCancelShare.disabled = !hasSel;
+}
+
+if (UI.btnShareExportLinks) {
+const shareExportCount = isShare ? getMyShareExportRows().length : 0;
+UI.btnShareExportLinks.style.display = isShare ? 'inline-flex' : 'none';
+UI.btnShareExportLinks.disabled = !isShare || shareExportCount === 0;
+UI.btnShareExportLinks.style.cursor = UI.btnShareExportLinks.disabled ? 'not-allowed' : 'pointer';
+UI.btnShareExportLinks.style.opacity = UI.btnShareExportLinks.disabled ? '0.4' : '1';
 }
 
 if (UI.btnMigrate) {
@@ -34645,7 +35191,7 @@ return { item, url };
 }
 const fileId = getAudioPhysicalId(item);
 if (!fileId) throw new Error(L.audio_link_missing);
-const detail = await apiGet(fileId);
+const detail = await apiGetWithCaptchaRecovery(fileId);
 if (detail) {
 if (detail.web_content_link) item.web_content_link = detail.web_content_link;
 if (detail.links) item.links = detail.links;
@@ -36279,7 +36825,7 @@ box.classList.add('buffering');
 if (loader) loader.style.display = 'block';
 try {
 const targetApiId = getPhysicalId(sourceItem || item);
-const detail = sourceItem && sourceItem._isShareItem ? await resolveSharePlayableFile(sourceItem) : await apiGet(targetApiId);
+const detail = sourceItem && sourceItem._isShareItem ? await resolveSharePlayableFile(sourceItem) : await apiGetWithCaptchaRecovery(targetApiId);
 if (isPlayerDestroyed || sourceItem !== item) return;
 const freshData = getBestSource(detail);
 qualityList = freshData.list;
@@ -36781,7 +37327,7 @@ hasUserSeeked = false;
 
 try {
 const targetApiId = getPhysicalId(newItem);
-const newData = newItem._isShareItem ? await resolveSharePlayableFile(newItem) : await apiGet(targetApiId);
+const newData = newItem._isShareItem ? await resolveSharePlayableFile(newItem) : await apiGetWithCaptchaRecovery(targetApiId);
 if (newData) {
 if (newData.thumbnail_link) newItem.thumbnail_link = newData.thumbnail_link;
 if (newData.icon_link) newItem.icon_link = newData.icon_link;
@@ -38196,7 +38742,7 @@ try {
 const initReqId = switchReqId;
 const initItem = item;
 const targetApiId = getPhysicalId(initItem);
-const newData = initItem._isShareItem ? await resolveSharePlayableFile(initItem) : await apiGet(targetApiId);
+const newData = initItem._isShareItem ? await resolveSharePlayableFile(initItem) : await apiGetWithCaptchaRecovery(targetApiId);
 if (isPlayerDestroyed || initReqId !== switchReqId || item !== initItem) return;
 const freshData = getBestSource(newData);
 qualityList = freshData.list;
@@ -39572,7 +40118,7 @@ const realFileId = (item.kind === 'drive#task' || S.offlineMode || S.uploadMode)
 
 if (realFileId) {
 try {
-    targetItem = await apiGet(realFileId);
+    targetItem = await apiGetWithCaptchaRecovery(realFileId);
 } catch(err) {
     console.warn("[CloudSub] Failed to resolve task file:", err);
 }
@@ -39596,7 +40142,7 @@ let safety = 6;
 
 while (curr && curr !== 'root' && safety > 0) {
 try {
-    const f = await apiGet(curr);
+    const f = await apiGetWithCaptchaRecovery(curr);
     trace.unshift({ id: f.id, name: f.name });
     curr = f.parent_id;
 } catch(e) {
@@ -39641,7 +40187,7 @@ box.appendChild(toast);
 try {
 let link = subItem.web_content_link;
 if (!link) {
-    const detail = await apiGet(subItem.id);
+    const detail = await apiGetWithCaptchaRecovery(subItem.id);
     link = detail.web_content_link;
 }
 
@@ -40622,7 +41168,7 @@ let targetUrl = currentItem.web_content_link;
 if (!targetUrl && !currentItem._resolved) {
 try {
 const targetApiId = ((S.offlineMode && currentItem.kind === 'drive#task') || (S.uploadMode && currentItem.file_id)) ? currentItem.file_id : currentItem.id;
-const fullItem = currentItem._isShareItem ? await resolveSharePlayableFile(currentItem) : await apiGet(targetApiId);
+const fullItem = currentItem._isShareItem ? await resolveSharePlayableFile(currentItem) : await apiGetWithCaptchaRecovery(targetApiId);
 if (fullItem) {
 if (fullItem.thumbnail_link) currentItem.thumbnail_link = fullItem.thumbnail_link;
 if (fullItem.icon_link) currentItem.icon_link = fullItem.icon_link;
@@ -43522,6 +44068,39 @@ await p;
 } finally {
 S.recentRefreshFirstPageOnly = false;
 }
+return;
+}
+
+if (S.shareMode && S.path.length === 1) {
+if (S.abortController) S.abortController.abort();
+
+S.clearSelection();
+S.activeId = null;
+if (UI.chkAll) {
+UI.chkAll.checked = false;
+UI.chkAll.indeterminate = false;
+}
+
+S.items = [];
+S.display = [];
+S.itemMap.clear();
+S.cache.delete('share_root');
+if (UI.vp) UI.vp.scrollTop = 0;
+
+if (typeof globalCache !== 'undefined') {
+globalCache.delete('share_root');
+globalCache.delete('share_session');
+}
+
+setLoad(true, true);
+updateLoadTxt(L.loading_detail);
+refresh();
+updateStat();
+
+const p = load(false, true);
+
+if (UI.chkGlobal) UI.chkGlobal.checked = intent;
+await p;
 return;
 }
 
@@ -47222,7 +47801,7 @@ const targetApiId = ((S.offlineMode && item.kind === 'drive#task') || (S.uploadM
 if (item._isShareItem) return await resolveSharePlayableFile(item);
 if (!targetApiId) throw new Error("File ID not ready");
 try {
-return await apiGet(targetApiId);
+return await apiGetWithCaptchaRecovery(targetApiId);
 } catch (e) {
 await markOfflineReferenceMissingFromError(item, e, { source: 'external_detail' });
 throw e;
@@ -49305,6 +49884,15 @@ if (spdTxt) spdTxt.textContent = task.status === 'DONE' ? '-' : S.upMng.fmtSpeed
 }
 };
 
+const scheduleUploadRenderVisible = () => {
+if (!S.uploadMode || document.hidden || S._upRenderScheduled) return;
+S._upRenderScheduled = true;
+requestAnimationFrame(() => {
+S._upRenderScheduled = false;
+if (S.uploadMode && typeof renderVisible === 'function' && !document.hidden) renderVisible();
+});
+};
+
 S.upMng = {
 limit: 3,
 running: 0,
@@ -49593,14 +50181,21 @@ task._initData = data;
 }
 
 let newlyCreatedFileId = null;
+let uploadVisualChanged = false;
 if (data.file) {
 if (data.file.id) {
     task.file_id = data.file.id;
     newlyCreatedFileId = data.file.id;
 }
 if (data.file.name) task.name = data.file.name;
-if (data.file.thumbnail_link) task.thumbnail_link = data.file.thumbnail_link;
-if (data.file.icon_link) task.icon_link = data.file.icon_link;
+if (data.file.thumbnail_link) {
+    task.thumbnail_link = data.file.thumbnail_link;
+    uploadVisualChanged = true;
+}
+if (data.file.icon_link) {
+    task.icon_link = data.file.icon_link;
+    uploadVisualChanged = true;
+}
 } else if (data.task && data.task.file_id) {
 task.file_id = data.task.file_id;
 newlyCreatedFileId = data.task.file_id;
@@ -49619,6 +50214,7 @@ if (typeof window.pkAddGhostFile === 'function') window.pkAddGhostFile(newlyCrea
 task._ghostAdded = true;
 }
 S.upMng.saveTask(task);
+if (uploadVisualChanged) scheduleUploadRenderVisible();
 
 const waitOfficialUploadTaskComplete = async () => {
 if (!task._uploadTaskId) return true;
@@ -49638,10 +50234,18 @@ for (let i = 1; i <= maxPoll; i++) {
             const taskData = await res.json().catch(() => null);
             const phase = (taskData && taskData.phase) || (taskData && taskData.task && taskData.task.phase) || '';
             const ref = (taskData && taskData.reference_resource) || (taskData && taskData.task && taskData.task.reference_resource) || {};
+            let refVisualChanged = false;
             if (ref.name) task.name = ref.name;
             if (ref.mime_type) task.mime_type = ref.mime_type;
-            if (ref.icon_link) task.icon_link = ref.icon_link;
-            if (ref.thumbnail_link) task.thumbnail_link = ref.thumbnail_link;
+            if (ref.icon_link && task.icon_link !== ref.icon_link) {
+                task.icon_link = ref.icon_link;
+                refVisualChanged = true;
+            }
+            if (ref.thumbnail_link && task.thumbnail_link !== ref.thumbnail_link) {
+                task.thumbnail_link = ref.thumbnail_link;
+                refVisualChanged = true;
+            }
+            if (refVisualChanged) scheduleUploadRenderVisible();
             if (phase === 'PHASE_TYPE_COMPLETE') return true;
             if (phase === 'PHASE_TYPE_ERROR') throw new Error((taskData && (taskData.message || taskData.error_description)) || L.err_unknown);
         }
@@ -49937,9 +50541,14 @@ task.message = L.msg_task_init_part;
         try {
             const meta = await apiGet(task.file_id);
             if (meta) {
-                if (meta.icon_link) task.icon_link = meta.icon_link;
+                let metaVisualChanged = false;
+                if (meta.icon_link && task.icon_link !== meta.icon_link) {
+                    task.icon_link = meta.icon_link;
+                    metaVisualChanged = true;
+                }
                 if (meta.mime_type) task.mime_type = meta.mime_type;
                 if (meta.medias) task.medias = meta.medias;
+                if (metaVisualChanged) scheduleUploadRenderVisible();
 
                 const isValidThumb = meta.thumbnail_link && meta.thumbnail_link !== meta.icon_link;
 
@@ -49966,19 +50575,22 @@ task.message = L.msg_task_init_part;
                             }
                         }
 
-                        if (isRetry && S.uploadMode) {
-                            if (!S._upRenderScheduled) {
-                                S._upRenderScheduled = true;
-                                requestAnimationFrame(() => { S._upRenderScheduled = false; if (typeof renderVisible === 'function' && !document.hidden) renderVisible(); });
-                            }
-                        }
+                        scheduleUploadRenderVisible();
                         return true;
                     } else {
                         return false;
                     }
                 }
             }
-        } catch(e) { console.warn("[Upload] Meta fetch warning", e); }
+        } catch(e) {
+            if (typeof isDownloadHydrateCaptchaInvalidError === 'function' && isDownloadHydrateCaptchaInvalidError(e)) {
+                if (typeof markDownloadHydrateCaptchaInvalid === 'function') markDownloadHydrateCaptchaInvalid(e);
+                else if (typeof resetHeaderCache === 'function') resetHeaderCache();
+                console.warn("[Upload] Meta fetch skipped due to captcha_invalid", e);
+                return true;
+            }
+            console.warn("[Upload] Meta fetch warning", e);
+        }
         return false;
     };
 
@@ -50638,7 +51250,7 @@ if (mainHeader.dataset.pkInitialGridHd !== '1') mainHeader.style.visibility = ''
 }
 
 const stdBtns = [UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate, UI.btnBlacklistManager];
-const shareBtns = [document.getElementById('pk-cancel-share')];
+const shareBtns = [UI.btnCancelShare, UI.btnShareExportLinks];
 const upBtns = [UI.btnUpPause, UI.btnUpStart, UI.btnUpDel, UI.btnUpClearAll];
 const upSep = document.getElementById('pk-up-sep');
 
@@ -50881,6 +51493,7 @@ return;
 const isOffline = mode === 'offline';
 const isRecent = mode === 'recent';
 const isHistory = mode === 'history';
+const isShare = mode === 'share';
 const isHome = mode === 'home';
 const homeRestoreHydrated = isHome ? hydrateHomeRestoreCachedData(restoreHomePath) : false;
 if (homeRestoreHydrated && canUseLiveManualRefresh()) S.keepVisualOnNextForceLoad = true;
@@ -50898,16 +51511,18 @@ const isResumingHistory = isHistory && (
     (Array.isArray(S.historyItems) && S.historyItems.length > 0) ||
     (Array.isArray(getHistorySnapshotItems(historyCache)) && getHistorySnapshotItems(historyCache).length > 0)
 );
+const shareCache = isShare && hasCache ? globalCache.get(realKey) : null;
+const isResumingShare = isShare && shareCache && !Array.isArray(shareCache) && shareCache.nextToken;
 
 if (isOffline && isResumingOffline) {
 S.offlinePagingPending = true;
 S.pagingLoading = true;
 updateStat();
-} else if (!homeRestoreHydrated && !((isOffline && hasCache) || (isRecent && (hasCache || isResumingRecent)) || (isHistory && (hasCache || isResumingHistory)))) {
+} else if (!homeRestoreHydrated && !((isOffline && hasCache) || (isRecent && (hasCache || isResumingRecent)) || (isHistory && (hasCache || isResumingHistory)) || (isShare && (hasCache || isResumingShare)))) {
 setLoad(true, true);
 }
 
-load(false, isHome ? true : !(isOffline || isRecent || isHistory));
+load(false, isHome ? true : !(isOffline || isRecent || isHistory || isShare));
 
 if (isOffline) scheduleOfflineLightProbe('enter', 1200);
 if (isRecent) scheduleRecentLightProbe('enter', 1200);
@@ -56732,7 +57347,9 @@ updateLoadTxt(L.loading_detail);
 const isFolder = item.kind === 'drive#folder';
 
 try {
-const freshData = await apiGet(id);
+const freshData = await apiGetWithCaptchaRecovery(id, {
+    onWait: () => updateLoadTxt(L.loading_detail)
+});
 item = { ...item, ...freshData };
 } catch(e) {}
 
@@ -56922,14 +57539,59 @@ updateLoadTxt(L.str_loc_tracing);
 try {
 if (item.kind === 'drive#task' || S.recentMode || S.uploadMode) {
 const lookupId = (item.kind === 'drive#task' || S.uploadMode) ? item.file_id : item.id;
+const isUploadLocate = S.uploadMode && item.file_id;
 
 if (!lookupId) {
 showToast(L.err_folder_not_ready, 'error');
 setLoad(false); return;
 }
 
+if (isUploadLocate) {
+const normalizeUploadLocateParentId = (value) => {
+    const pid = String(value || '').trim();
+    return (!pid || pid === 'root' || pid === 'upload_root') ? '' : pid;
+};
+const findCachedUploadLocateItem = (fileId) => {
+    if (typeof globalCache === 'undefined' || !globalCache || typeof globalCache.values !== 'function') return null;
+    const fid = String(fileId || '');
+    for (const raw of globalCache.values()) {
+        const list = Array.isArray(raw) ? raw : (raw && raw.items || []);
+        if (!Array.isArray(list)) continue;
+        const hit = list.find(f => f && String(f.id || f.file_id || '') === fid);
+        if (hit) return hit;
+    }
+    return null;
+};
+const cachedUploadItem = findCachedUploadLocateItem(lookupId);
+const sourceParentId = item.parent_id !== undefined ? item.parent_id : item.parentId;
+const cachedParentId = cachedUploadItem && cachedUploadItem.parent_id !== undefined ? cachedUploadItem.parent_id : '';
+const cachedParentText = String(cachedParentId || '').trim();
+const rawParentId = (cachedParentText && cachedParentText !== 'root' && cachedParentText !== 'upload_root') ? cachedParentId : sourceParentId;
+const rawParentText = String(rawParentId || '').trim();
+const hasUsableParentId = !!rawParentText && rawParentText !== 'root' && rawParentText !== 'upload_root';
+if (cachedUploadItem || hasUsableParentId) {
+    item = {
+        ...item,
+        ...(cachedUploadItem || {}),
+        id: lookupId,
+        kind: 'drive#file',
+        name: (cachedUploadItem && cachedUploadItem.name) || item.name || '',
+        size: (cachedUploadItem && cachedUploadItem.size) || item.size || (item.file && item.file.size) || 0,
+        parent_id: normalizeUploadLocateParentId(rawParentId),
+        mime_type: (cachedUploadItem && cachedUploadItem.mime_type) || item.mime_type || (item.file && item.file.type) || '',
+        icon_link: (cachedUploadItem && cachedUploadItem.icon_link) || item.icon_link || '',
+        thumbnail_link: (cachedUploadItem && cachedUploadItem.thumbnail_link) || item.thumbnail_link || item.icon_link || '',
+        phase: (cachedUploadItem && cachedUploadItem.phase) || 'PHASE_TYPE_COMPLETE'
+    };
+} else {
+    showToast(L.err_folder_not_ready, 'error');
+    setLoad(false); return;
+}
+} else {
 try {
-item = await apiGet(lookupId);
+item = await apiGetWithCaptchaRecovery(lookupId, {
+    onWait: () => updateLoadTxt(L.str_loc_tracing)
+});
 } catch (e) {
 const errText = e.message || "";
 const markedMissing = await markOfflineReferenceMissingFromError(item, e, { source: 'locate' });
@@ -56941,6 +57603,7 @@ if (markedMissing) {
     showToast(`${L.str_error}: ${formatCloudErrorMessage(e)}`, 'error');
 }
 setLoad(false); return;
+}
 }
 }
 
@@ -56966,7 +57629,9 @@ if (typeof globalLineageMap !== 'undefined' && globalLineageMap.has(currParentId
 }
 
 try {
-    const res = await apiGet(currParentId);
+    const res = await apiGetWithCaptchaRecovery(currParentId, {
+        onWait: () => updateLoadTxt(L.str_loc_tracing)
+    });
     pathChain.unshift({ id: res.id, name: res.name });
     currParentId = res.parent_id;
 } catch (e) {
@@ -57484,10 +58149,25 @@ setTimeout(checkStatus, 8000);
 checkStatus();
 };
 
-const askForPassword = (fileName, errorMsg, isBatch = false) => {
+const getArchivePasswordIconHtml = (fileItem = null) => {
+const fallbackHtml = CONF.typeIcons.archive.replace(/width="\d+"/, 'width="64"').replace(/height="\d+"/, 'height="64"');
+const it = fileItem && typeof fileItem === 'object' ? fileItem : {};
+const officialIcon = String(it.icon_link || it.iconLink || '').trim();
+if (!officialIcon) return fallbackHtml;
+return getDirListIconSlotHtml(it, {
+mode: 'listMax',
+size: 64,
+remoteSrc: officialIcon,
+remoteObjectFit: 'contain',
+fallbackHtml
+});
+};
+
+const askForPassword = (fileName, errorMsg, isBatch = false, fileItem = null) => {
 return new Promise((resolve) => {
 const txtCancel = isBatch ? L.btn_skip : L.btn_cancel;
 const txtConfirm = isBatch ? L.btn_ok : L.btn_view_file;
+const iconHtml = getArchivePasswordIconHtml(fileItem);
 
 const m = showModal(`
 <div style="display:flex; flex-direction:column; height:100%; overflow:hidden;">
@@ -57499,7 +58179,7 @@ const m = showModal(`
 
 <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 0 40px;">
 <div style="margin-bottom:16px; color:#FFC107;">
-    ${CONF.typeIcons.archive.replace(/width="\d+"/, 'width="64"').replace(/height="\d+"/, 'height="64"')}
+    ${iconHtml}
 </div>
 
 <div style="font-size:14px; color:var(--pk-fg); margin-bottom:8px; font-weight:500;">
@@ -57630,7 +58310,7 @@ gmSet('pk_pwd_vault', JSON.stringify(list));
 
 try {
 let detail = file;
-if (!detail.gcid && !detail.hash) detail = await apiGet(file.id);
+if (!detail.gcid && !detail.hash) detail = await apiGetWithCaptchaRecovery(file.id);
 const gcid = detail.gcid || detail.hash || detail.md5_checksum || "";
 
 let currentPwd = "";
@@ -57698,7 +58378,7 @@ if (candidates.length > 0) {
 setLoad(false);
 const promptMsg = currentPwd ? L.err_pwd_simple : "";
 
-const userPwd = await askForPassword(file.name, promptMsg);
+const userPwd = await askForPassword(file.name, promptMsg, false, detail || file);
 if (userPwd === null) { setLoad(false); return; }
 
 currentPwd = userPwd;
@@ -57745,7 +58425,7 @@ try {
 const physicalId = (file.file_id || (file.params && file.params.file_id)) || file.id;
 
 let detail = file;
-if (!detail.web_content_link) detail = await apiGet(physicalId);
+if (!detail.web_content_link) detail = await apiGetWithCaptchaRecovery(physicalId);
 
 const res = await fetch(detail.web_content_link);
 const buffer = await res.arrayBuffer();
@@ -57842,7 +58522,7 @@ fb.destroy();
 const sendUnzipRequest = async (file, password, archiveFiles = []) => {
 let detail = file;
 if (!detail.gcid && !detail.hash) {
-try { detail = await apiGet(file.id); } catch(e) {}
+try { detail = await apiGetWithCaptchaRecovery(file.id); } catch(e) {}
 }
 const gcid = detail.gcid || detail.hash || detail.md5_checksum || "";
 const pickedFiles = Array.isArray(archiveFiles) ? archiveFiles.filter(Boolean).map(f => Object.assign({}, f, { checked: true })) : [];
@@ -57878,11 +58558,12 @@ let currentPath = "";
 let pathNodes = [{ name: L.picker_all, path: '' }];
 let currentPwd = initialPassword;
 const archiveName = archiveOpts.title || file.name || L.str_unknown_name;
+const archiveIconItem = archiveOpts.iconItem || archiveOpts.detail || file;
 const getArchiveGcid = async () => {
 if (archiveOpts.gcid) return archiveOpts.gcid;
 let detail = file;
 if (!detail.gcid && !detail.hash) {
-try { detail = await apiGet(file.id); } catch(e) {}
+try { detail = await apiGetWithCaptchaRecovery(file.id); } catch(e) {}
 }
 return detail.gcid || detail.hash || detail.md5_checksum || "";
 };
@@ -57913,7 +58594,7 @@ const isPwdErr = isArchivePasswordSignal(data, errStr);
 
 if (isPwdErr) {
 setLoad(false);
-const newPwd = await askForPassword(archiveName, isFirstTry ? "" : L.err_pwd_simple);
+const newPwd = await askForPassword(archiveName, isFirstTry ? "" : L.err_pwd_simple, false, archiveIconItem);
 if (newPwd !== null) {
 currentPwd = newPwd;
 isFirstTry = false;
@@ -57977,7 +58658,7 @@ const m = showModal(`
 
 <div style="display:flex; gap:12px; margin-left:auto;">
     <button class="pk-btn" id="unzip_cancel" style="height:36px; padding:0 16px; font-size:14px; color:#666; background:transparent; border:none; font-weight:500;">
-
+        ${L.btn_cancel}
     </button>
     <button class="pk-btn pri" id="unzip_confirm" style="height:36px; padding:0 24px; border-radius:6px; background:var(--pk-pri); color:#fff; font-weight:600; font-size:14px; border:none; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
         ${L.btn_unzip_all}
@@ -58712,7 +59393,7 @@ try {
 
     setLoad(false);
     const errorMsg = isFirstManualInput ? "" : L.err_pwd_simple;
-    const userPwd = await askForPassword(file.name, errorMsg, true);
+    const userPwd = await askForPassword(file.name, errorMsg, true, file);
     isFirstManualInput = false;
     setLoad(true);
 
@@ -59019,6 +59700,18 @@ pop.remove();
 };
 
 setTimeout(() => document.addEventListener('mousedown', onClickOutside), 10);
+};
+
+const getShareCopyTitle = (item) => String(item && (item.name || item.title || item.share_title || item.file_name) || '').trim();
+const buildShareCopyText = (item) => {
+const url = String(item && (item.share_url || item.url || item.href) || '').trim();
+const pwd = String(item && (item.pass_code || item.passCode || item.password) || '').trim();
+const title = getShareCopyTitle(item);
+const lines = [];
+if (url) lines.push(url);
+if (pwd) lines.push(`${L.share_copy_pwd}: ${pwd}`);
+if (title) lines.push(title);
+return lines.join('\n');
 };
 
 const showShareDetail = (item) => {
@@ -59640,28 +60333,24 @@ expInput.value = originalText;
 
 m.querySelector('#pk_detail_cancel').onclick = async () => {
 if (await showConfirm(L.msg_cancel_share_confirm.replace('{n}', 1))) {
-setLoad(true);
 try {
-await apiCancelShare([item.id]);
+const result = await handleShareCancel([item], { state: S, ui: UI });
+if (result.successIds.includes(String(item.id || item.share_id || '').trim())) {
 m.remove();
-showAlert(L.msg_cancel_share_done.replace('{n}', 1));
-load(false, true);
+await finalizeVisibleShareCancelSuccess(result.successIds);
+showToast(L.msg_cancel_share_done.replace('{n}', 1));
+}
+if (result.failed.length) {
+throw result.failed[0].error || new Error(L.str_failed);
+}
 } catch (e) {
-setLoad(false);
 showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 }
 }
 };
 
 m.querySelector('#pk_detail_copy_all').onclick = () => {
-const url = item.share_url;
-const pwd = item.pass_code || '';
-const title = item.name || item.title;
-
-const lines = [url];
-if (pwd) lines.push(`${L.share_copy_pwd}: ${pwd}`);
-if (title) lines.push(title);
-GM_setClipboard(lines.join('\n'));
+GM_setClipboard(buildShareCopyText(item));
 
 const btn = m.querySelector('#pk_detail_copy_all');
 const orgTxt = btn.textContent;
@@ -59679,6 +60368,151 @@ btn.style.borderColor = originalBorder;
 };
 };
 
+function escapeShareExportCsvCell(value) {
+return `"${String(value == null ? '' : value).replace(/"/g, '""')}"`;
+}
+
+function getShareExportStatusText(item) {
+const d = item || {};
+const rawTimeLeft = String(d.expiration_left || "");
+const dayUnit = String(L.share_days || L.unit_days || '').trim();
+const expireSuffix = String(L.str_expire_suffix || '');
+const timeLeft = (/^\d+$/.test(rawTimeLeft.trim()) && dayUnit) ? `${rawTimeLeft.trim()}${dayUnit}` : rawTimeLeft;
+const isPermanentShare = String(d.expiration_days) === "-1" || String(rawTimeLeft) === "-1" || String(d.expiration_left_seconds) === "-1";
+if (d.share_status !== 'OK') {
+return (d.save_count >= d.limit_count && d.limit_count > 0) ? (L.lbl_limit_reached) : (d.share_status_text || d.share_status || '');
+}
+if (isPermanentShare) return L.share_perm || '';
+return dayUnit && timeLeft.endsWith(dayUnit) && expireSuffix.startsWith(dayUnit) ? timeLeft + expireSuffix.slice(dayUnit.length) : timeLeft + expireSuffix;
+}
+
+function getShareExportLink(item) {
+const it = item || {};
+const url = String(it.share_url || it.url || it.href || '').trim();
+if (url) return url;
+const id = String(it.id || it.share_id || '').trim();
+return id ? `https://mypikpak.com/s/${id}` : '';
+}
+
+function getMyShareExportRows() {
+if (!S.shareMode) return [];
+const selectedIds = S.getSelectedIds();
+let source = [];
+if (selectedIds.length) {
+source = selectedIds.map(id => S.itemMap.get(id)).filter(Boolean);
+} else if (String(S.search || '').trim()) {
+source = Array.isArray(S.display) ? S.display : [];
+} else {
+source = Array.isArray(S.items) ? S.items : [];
+}
+const seen = new Set();
+const rows = [];
+source.forEach(item => {
+if (!item || item.isHeader || item.kind !== 'pikpak#share') return;
+const id = String(item.id || item.share_id || getShareExportLink(item));
+if (!id || seen.has(id)) return;
+seen.add(id);
+const link = getShareExportLink(item);
+if (!link) return;
+const saveText = Number(item.limit_count || 0) > 0 ? `${item.save_count || 0}/${item.limit_count}` : String(item.save_count || 0);
+rows.push({
+title: item.name || '',
+link,
+password: item.pass_code || '',
+views: item.view_count || 0,
+saves: saveText,
+status: getShareExportStatusText(item),
+time: item.modified_time ? fmtDate(item.modified_time) : ''
+});
+});
+return rows;
+}
+
+function isMySharePaginationLoading() {
+if (!S.shareMode) return false;
+const session = typeof globalCache !== 'undefined' ? globalCache.get('share_session') : null;
+const cached = typeof globalCache !== 'undefined' ? globalCache.get('share_root') : null;
+return !!(S.loading || S.pagingLoading || (session && !session.completed) || (cached && !Array.isArray(cached) && cached.nextToken));
+}
+
+function exportMyShareLinksCsv() {
+const rows = getMyShareExportRows();
+if (!rows.length) {
+showToast(L.msg_share_export_empty || L.msg_share_parse_history_export_empty || L.msg_share_parse_history_empty, 'warning');
+return false;
+}
+const headers = [
+L.col_name || 'Title',
+L.lbl_share_link_title || 'Share Link',
+L.lbl_share_pwd_title || 'Password',
+L.lbl_share_view || L.col_view || 'Views',
+L.lbl_share_save || L.col_save || 'Saves',
+L.col_share_status || 'Status',
+L.col_share_time || L.col_date || 'Shared on'
+];
+const body = rows.map(row => [
+row.title,
+row.link,
+row.password,
+row.views,
+row.saves,
+row.status,
+row.time
+].map(escapeShareExportCsvCell).join(','));
+const baseName = String(L.str_share_export_file_name || 'my_shares').trim().replace(/[\\/:*?"<>|\r\n]+/g, '_') || 'my_shares';
+downloadTextExport([headers.map(escapeShareExportCsvCell).join(','), ...body].join('\r\n') + '\r\n', `${baseName}_${formatExportTimestamp()}.csv`, 'text/csv;charset=utf-8', true);
+const msg = isMySharePaginationLoading()
+? (L.msg_share_export_partial_loading || L.msg_share_export_success || '').replace('{n}', String(rows.length))
+: (L.msg_share_export_success || '').replace('{n}', String(rows.length));
+showToast(msg || `Exported ${rows.length} share links.`);
+return true;
+}
+
+async function finalizeVisibleShareCancelSuccess(successIds) {
+const idSet = new Set((Array.isArray(successIds) ? successIds : [successIds]).map(id => String(id || '').trim()).filter(Boolean));
+if (!idSet.size || !S.shareMode || !Array.isArray(S.path) || S.path.length !== 1) return { changed: false };
+const oldScrollTop = UI && UI.vp ? UI.vp.scrollTop : 0;
+let changed = false;
+const filterList = list => {
+if (!Array.isArray(list)) return [];
+const next = list.filter(item => !idSet.has(String((item && (item.id || item.share_id)) || '').trim()));
+if (next.length !== list.length) changed = true;
+return next;
+};
+
+S.items = filterList(S.items);
+S.display = filterList(S.display);
+idSet.forEach(id => {
+if (S.itemMap && S.itemMap.has(id)) {
+S.itemMap.delete(id);
+changed = true;
+}
+if (S.starredSet) S.starredSet.delete(id);
+if (S.sel && S.sel.has(id)) {
+S.sel.delete(id);
+changed = true;
+}
+if (S.selEx && S.selEx.has(id)) {
+S.selEx.delete(id);
+changed = true;
+}
+});
+
+filterShareSnapshotByIds(S.cache, idSet, S.items);
+if (typeof globalCache !== 'undefined') {
+const globalItems = filterShareSnapshotByIds(globalCache, idSet, S.items);
+const session = globalCache.get('share_session');
+if (session && typeof session === 'object') {
+globalCache.set('share_session', { ...session, count: Array.isArray(globalItems) ? globalItems.length : S.items.length });
+}
+}
+
+if (typeof refresh === 'function') await refresh();
+if (UI && UI.vp) UI.vp.scrollTop = oldScrollTop;
+if (typeof updateStat === 'function') updateStat();
+return { changed };
+}
+
 UI.btnCancelShare.onclick = async () => {
 const selectedIds = S.getSelectedIds();
 const n = selectedIds.length;
@@ -59686,35 +60520,24 @@ if (n === 0) return;
 
 if (!await showConfirm(L.msg_cancel_share_confirm.replace('{n}', n))) return;
 
-setLoad(true);
-updateLoadTxt(L.msg_cancel_share_ing);
-
 try {
-const selectedItems = selectedIds.map(id => S.itemMap.get(id)).filter(Boolean);
-const serverIds = selectedItems.filter(it => !it._is_local_phantom).map(it => it.id);
-const phantomIds = selectedItems.filter(it => it._is_local_phantom).map(it => it.id);
-
-if (serverIds.length > 0) {
-await apiCancelShare(serverIds);
+const selectedItems = selectedIds.map(id => S.itemMap.get(id) || { id });
+const result = await handleShareCancel(selectedItems, { state: S, ui: UI });
+if (result.successIds.length) {
+await finalizeVisibleShareCancelSuccess(result.successIds);
+showToast(L.msg_cancel_share_done.replace('{n}', result.successIds.length));
 }
-
-if (phantomIds.length > 0) {
-const graveyard = JSON.parse(gmGet('pk_expired_shares', '[]'));
-const newGraveyard = graveyard.filter(x => !phantomIds.includes(x.id));
-gmSet('pk_expired_shares', JSON.stringify(newGraveyard));
+if (result.failed.length) {
+throw result.failed[0].error || new Error(L.str_failed);
 }
-
-S.clearSelection();
-
-await load(false, true);
-
-showToast(L.msg_cancel_share_done.replace('{n}', n));
 } catch (e) {
 showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
-} finally {
-setLoad(false);
 }
 };
+
+if (UI.btnShareExportLinks) {
+UI.btnShareExportLinks.onclick = () => exportMyShareLinksCsv();
+}
 
 if (UI.btnCopyLinkOffline) {
 UI.btnCopyLinkOffline.onclick = () => {
@@ -60265,7 +61088,17 @@ throw new Error(getShareErrorMessage(data, L.err_unknown));
 }
 
 const shareUrl = data.share_url;
-const fullText = shareUrl + (finalPassCode ? ` ${L.lbl_share_code}: ${finalPassCode}` : '');
+const shareTitle = getShareCopyTitle(item) || getShareCopyTitle(data);
+const knownShareItem = normalizeKnownShareItem({
+...data,
+share_url: shareUrl,
+pass_code: finalPassCode,
+title: data.title || shareTitle,
+limit_count: cnt > 0 ? cnt : data.limit_count,
+expiration_days: payload.expiration_days
+}, { sourceItem: item, title: shareTitle, limit_count: cnt > 0 ? cnt : 0, pass_code: finalPassCode });
+injectKnownShareItemToSnapshot(knownShareItem);
+const fullText = buildShareCopyText({ share_url: shareUrl, pass_code: finalPassCode, title: shareTitle });
 
 const resM = showModal(`
 <div style="width: 400px; max-width: 90vw; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 10px 5px 0 5px;">
@@ -60408,14 +61241,7 @@ const id = S.getSelectedIds()[0];
 const item = S.itemMap.get(id);
 if (!item) return;
 
-const url = item.share_url || "";
-const pwd = item.pass_code || "";
-const title = item.name || item.title || "";
-
-const lines = [url];
-if (pwd) lines.push(`${L.share_copy_pwd}: ${pwd}`);
-if (title) lines.push(title);
-GM_setClipboard(lines.join('\n'));
+GM_setClipboard(buildShareCopyText(item));
 showToast(L.msg_copy_success);
 };
 }
@@ -60444,7 +61270,7 @@ navs.forEach(n => { if(n) n.classList.remove('act'); });
 if (UI.win) UI.win.classList.toggle('pk-link-bookmark-mode', !!S.linkBookmarkMode);
 
 const stdBtns =[UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate, UI.btnBlacklistManager];
-const shareBtns =[UI.btnCancelShare];
+const shareBtns =[UI.btnCancelShare, UI.btnShareExportLinks];
 const upBtns =[UI.btnUpPause, UI.btnUpStart, UI.btnUpDel, UI.btnUpClearAll];
 const upSep = el.querySelector('#pk-up-sep');
 const downBtns = [UI.btnAria2, UI.btnDown, UI.btnExt, UI.btnExportM3U, UI.btnImgSearch];
@@ -60793,7 +61619,10 @@ const runWatchdogAudit = async () => {
 if (document.hidden) return;
 if (S.shareParseMode) return;
 try {
-const list = await apiShareList();
+const list = S.shareMode
+? (Array.isArray(S.items) ? S.items.filter(it => it && it.kind === 'pikpak#share') : [])
+: await apiShareList();
+if (!list.length) return;
 const toAutoCancel = list.filter(it => it.kind === 'pikpak#share' && it.limit_count > 0 && it.save_count >= it.limit_count && it.share_status === 'OK');
 if (toAutoCancel.length > 0) {
 const cancelIds = toAutoCancel.map(x => x.id);
@@ -60819,10 +61648,16 @@ if (S.liveRefreshCtx && S.liveRefreshCtx.status === 'refreshing') return;
 const recentSession = globalCache.get('recent_session');
 const recentCached = globalCache.get('recent_root');
 const recentPaginationPending = !!(S.recentMode && ((!recentSession || !recentSession.completed) || (recentCached && !Array.isArray(recentCached) && recentCached.nextToken)));
+const shareSession = globalCache.get('share_session');
+const shareCached = globalCache.get('share_root');
+const sharePaginationPending = !!(S.shareMode && ((shareSession && !shareSession.completed) || (shareCached && !Array.isArray(shareCached) && shareCached.nextToken)));
 const historySession = globalCache.get('history_session');
 const historyCached = globalCache.get('history_root');
 const historyPaginationPending = !!(S.historyMode && ((!historySession || !historySession.completed) || (historyCached && !Array.isArray(historyCached) && historyCached.nextToken)));
 if (recentPaginationPending) {
+return;
+}
+if (sharePaginationPending) {
 return;
 }
 if (historyPaginationPending) {
@@ -60848,8 +61683,12 @@ if (S.historyMode || S.uploadMode || S.shareParseMode || S.linkBookmarkMode) ret
 const cur = S.path[S.path.length - 1];
 const isStarredRoot = S.starredMode && S.path.length === 1;
 const isRecentRoot = S.recentMode && S.path.length === 1 && cur && cur.id === 'recent_root';
+const isShareRoot = S.shareMode && S.path.length === 1;
 
 if (isRecentRoot) {
+return;
+}
+if (isShareRoot) {
 return;
 }
 if (isOfflineLightProbeModeRoot()) {
@@ -61166,7 +62005,11 @@ return;
 
 const cur = S.path[S.path.length - 1];
 const isRecentRoot = S.recentMode && S.path.length === 1 && cur && cur.id === 'recent_root';
+const isShareRoot = S.shareMode && S.path.length === 1;
 if (isRecentRoot) {
+return;
+}
+if (isShareRoot) {
 return;
 }
 if (isOfflineLightProbeModeRoot()) {
