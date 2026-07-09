@@ -295,6 +295,15 @@
 
 ## 更新日志
 
+### V4.4.0
+
+* 新增 **我的分享链接导出**，支持在“我的分享”中按选中项、搜索结果或当前已加载列表导出 CSV 分享链接清单。
+* 新增 **分享解析历史导出**，支持将历史记录中的分享链接导出为 CSV。
+* 优化 **我的分享管理逻辑**，支持分批加载、增量显示与切换模式后断点续载；取消分享后不再清空列表重刷，仅剔除取消成功项。
+* 优化 **上传模式稳定性**，修复验证码状态异常后“在文件夹查看”报错的问题，并改进上传完成后的文件图标显示，禁止拖拽文件。
+* 优化 **压缩包预览弹窗**，使用选中压缩包对应的官方图标，并修复部分文字区域异常隐藏的问题。
+* UI 与稳定性优化。
+
 ### V4.3.0
 
 * 新增 **云归档磁链导出**，支持在云归档弹窗中导出 CSV，包含标题与磁链两列，并取消云归档选中数量限制。
@@ -471,18 +480,6 @@
 * 导入功能升级为智能合并模式，导入备份时不再覆盖本地已有名单和记录。
 
 </details>
-
----
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=digbug82%2FPikPak_Enhancement_Master&type=date&legend=bottom-right">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=digbug82/PikPak_Enhancement_Master&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=digbug82/PikPak_Enhancement_Master&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=digbug82/PikPak_Enhancement_Master&type=date&legend=top-left" />
- </picture>
-</a>
 
 ---
 
