@@ -1610,6 +1610,11 @@ const coarsePointer = !!(window.matchMedia && window.matchMedia('(pointer: coars
 return Number(width || 0) <= 720 || (coarsePointer && Number(height || 0) <= 520);
 }
 
+function isUploadMenuEventInside(target, uploadWrap, uploadMenu) {
+if (!target) return false;
+return !!((uploadWrap && uploadWrap.contains(target)) || (uploadMenu && uploadMenu.contains(target)));
+}
+
 function computeViewportPopupPosition(left, top, popupWidth, popupHeight, viewportWidth, viewportHeight, margin = 8) {
 const gap = Math.max(0, Number(margin) || 0);
 const width = Math.max(0, Number(popupWidth) || 0);
@@ -3118,9 +3123,9 @@ html.pk-player-web-fullscreen-lock, body.pk-player-web-fullscreen-lock { overflo
 .pk-win.pk-upload-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(3),.pk-win.pk-upload-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(4),.pk-win.pk-upload-list:not(.pk-grid-view) .pk-row > :nth-child(3),.pk-win.pk-upload-list:not(.pk-grid-view) .pk-row > :nth-child(4) { display:none!important; }
 .pk-win.pk-share-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(3),.pk-win.pk-share-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(4),.pk-win.pk-share-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(6),.pk-win.pk-share-list:not(.pk-grid-view) .pk-row > :nth-child(3),.pk-win.pk-share-list:not(.pk-grid-view) .pk-row > :nth-child(4),.pk-win.pk-share-list:not(.pk-grid-view) .pk-row > :nth-child(6) { display:none!important; }
 .pk-win.pk-share-parse-list:not(.pk-share-parse-insight-list):not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd),.pk-win.pk-share-parse-list:not(.pk-share-parse-insight-list):not(.pk-grid-view) .pk-row { grid-template-columns:34px minmax(0,1fr)!important; column-gap:6px!important; min-width:0!important; }
-.pk-win.pk-share-parse-list:not(.pk-share-parse-insight-list):not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(n+3),.pk-win.pk-share-parse-list:not(.pk-share-parse-insight-list):not(.pk-grid-view) .pk-row > :nth-child(n+3) { display:none!important; }
+.pk-win.pk-share-parse-list:not(.pk-share-parse-insight-list):not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(n+4),.pk-win.pk-share-parse-list:not(.pk-share-parse-insight-list):not(.pk-grid-view) .pk-row > :nth-child(n+3) { display:none!important; }
 .pk-win.pk-share-parse-list.pk-share-parse-insight-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd),.pk-win.pk-share-parse-list.pk-share-parse-insight-list:not(.pk-grid-view) .pk-row { grid-template-columns:34px minmax(0,1.15fr) minmax(92px,.85fr)!important; column-gap:6px!important; min-width:0!important; }
-.pk-win.pk-share-parse-list.pk-share-parse-insight-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(n+4),.pk-win.pk-share-parse-list.pk-share-parse-insight-list:not(.pk-grid-view) .pk-row > :nth-child(n+4) { display:none!important; }
+.pk-win.pk-share-parse-list.pk-share-parse-insight-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(n+5),.pk-win.pk-share-parse-list.pk-share-parse-insight-list:not(.pk-grid-view) .pk-row > :nth-child(n+4) { display:none!important; }
 .pk-win.pk-offline-list .pk-row > :nth-child(5) > div[style*="width:100px"] { width:52px!important; margin-right:6px!important; }
 .pk-win:not(.pk-grid-view) .pk-row { height:48px!important; padding:0 10px!important; }
 .pk-win:not(.pk-grid-view) .pk-name svg { margin-right:8px; }
@@ -5113,6 +5118,10 @@ if (typeof scannedFolderIds !== 'undefined') scannedFolderIds.clear();
 if (typeof backgroundQueue !== 'undefined') backgroundQueue.length = 0;
 if (typeof isBackgroundRunning !== 'undefined') isBackgroundRunning = false;
 if (typeof DurationProber !== 'undefined') DurationProber.reset();
+
+if (typeof window.__pkDestroyUploadMenuPortal === 'function') {
+try { window.__pkDestroyUploadMenuPortal(); } catch (e) {}
+}
 
 const ui = document.querySelector('.pk-ov');
 if (ui) {
@@ -49985,6 +49994,9 @@ UI.btnBlacklistManager.onclick = showBlacklistModal;
 if (UI.btnTrashBlacklistManager) UI.btnTrashBlacklistManager.onclick = showBlacklistModal;
 
 if (UI.uploadWrap && UI.btnUpload) {
+if (typeof window.__pkDestroyUploadMenuPortal === 'function') {
+try { window.__pkDestroyUploadMenuPortal(); } catch (e) {}
+}
 const uploadMenu = UI.uploadWrap.querySelector('.pk-dropdown-menu');
 
 const restoreUploadMenu = () => {
@@ -50117,34 +50129,23 @@ uploadMenu.addEventListener('click', (e) => e.stopPropagation());
 uploadMenu.dataset.pkBindStop = '1';
 }
 
-if (!window.__pkUploadMenuPortalBound) {
-window.addEventListener('resize', () => {
-requestPlaceUploadMenu();
-}, { passive: true });
-
-document.addEventListener('scroll', () => {
+const handleUploadMenuResize = () => requestPlaceUploadMenu();
+const handleUploadMenuScroll = () => closeUploadMenu();
+const handleUploadMenuViewportScroll = () => requestPlaceUploadMenu();
+const handleUploadMenuOutsideEvent = (e) => {
+if (!uploadMenu || uploadMenu.style.display !== 'flex') return;
+if (isUploadMenuEventInside(e.target, UI.uploadWrap, uploadMenu)) return;
 closeUploadMenu();
-}, true);
+};
+
+window.addEventListener('resize', handleUploadMenuResize, { passive: true });
+document.addEventListener('scroll', handleUploadMenuScroll, true);
+document.addEventListener('pointerdown', handleUploadMenuOutsideEvent, true);
+document.addEventListener('click', handleUploadMenuOutsideEvent, true);
 
 if (window.visualViewport) {
-window.visualViewport.addEventListener('resize', () => {
-requestPlaceUploadMenu();
-}, { passive: true });
-window.visualViewport.addEventListener('scroll', () => {
-requestPlaceUploadMenu();
-}, { passive: true });
-}
-
-document.addEventListener('mousedown', (e) => {
-if (!uploadMenu || uploadMenu.style.display !== 'flex') return;
-const target = e.target;
-if (uploadMenu.contains(target)) return;
-if (UI.btnUpload.contains(target)) return;
-if (UI.uploadWrap.contains(target) && !uploadMenu.dataset.pkPortal) return;
-closeUploadMenu();
-}, true);
-
-window.__pkUploadMenuPortalBound = true;
+window.visualViewport.addEventListener('resize', handleUploadMenuResize, { passive: true });
+window.visualViewport.addEventListener('scroll', handleUploadMenuViewportScroll, { passive: true });
 }
 
 if (window.ResizeObserver && !UI.uploadWrap.__pkUploadMenuRO) {
@@ -50153,6 +50154,26 @@ requestPlaceUploadMenu();
 });
 UI.uploadWrap.__pkUploadMenuRO.observe(UI.uploadWrap);
 }
+
+const destroyUploadMenuPortal = () => {
+closeUploadMenu();
+window.removeEventListener('resize', handleUploadMenuResize);
+document.removeEventListener('scroll', handleUploadMenuScroll, true);
+document.removeEventListener('pointerdown', handleUploadMenuOutsideEvent, true);
+document.removeEventListener('click', handleUploadMenuOutsideEvent, true);
+if (window.visualViewport) {
+window.visualViewport.removeEventListener('resize', handleUploadMenuResize);
+window.visualViewport.removeEventListener('scroll', handleUploadMenuViewportScroll);
+}
+if (UI.uploadWrap.__pkUploadMenuRO) {
+UI.uploadWrap.__pkUploadMenuRO.disconnect();
+delete UI.uploadWrap.__pkUploadMenuRO;
+}
+if (window.__pkCloseUploadMenu === closeUploadMenu) delete window.__pkCloseUploadMenu;
+if (window.__pkRequestPlaceUploadMenu === requestPlaceUploadMenu) delete window.__pkRequestPlaceUploadMenu;
+if (window.__pkDestroyUploadMenuPortal === destroyUploadMenuPortal) delete window.__pkDestroyUploadMenuPortal;
+};
+window.__pkDestroyUploadMenuPortal = destroyUploadMenuPortal;
 
 UI.btnUpload.onclick = (e) => {
 e.stopPropagation();
@@ -51352,12 +51373,6 @@ if (S.upMng) S.upMng.scheduler();
 }
 });
 
-document.addEventListener('click', (e) => {
-if (UI.uploadWrap && !UI.uploadWrap.contains(e.target)) {
-UI.uploadWrap.querySelector('.pk-dropdown-menu').style.display = 'none';
-UI.uploadWrap.classList.remove('active');
-}
-});
 }
 
 const switchTab = (mode) => {
@@ -63590,6 +63605,9 @@ return location.href.includes('/login') || location.pathname.includes('login');
 
 function pkCleanupLoginUI() {
 if (!pkIsLoginPage()) return false;
+if (typeof window.__pkDestroyUploadMenuPortal === 'function') {
+try { window.__pkDestroyUploadMenuPortal(); } catch (e) {}
+}
 document.getElementById('pk-launch')?.remove();
 document.querySelectorAll('.pk-ov').forEach(el => el.remove());
 return true;

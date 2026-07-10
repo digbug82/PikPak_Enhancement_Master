@@ -130,9 +130,46 @@ test('external player and downloader stay directly visible on mobile', () => {
 test('mobile directory list upload menu uses the viewport portal', () => {
   const uploadBindingStart = source.indexOf('if (UI.uploadWrap && UI.btnUpload) {');
   assert.notEqual(uploadBindingStart, -1);
-  const uploadBinding = source.slice(uploadBindingStart, uploadBindingStart + 4500);
+  const uploadBinding = source.slice(uploadBindingStart, uploadBindingStart + 7500);
   assert.match(uploadBinding, /const useUploadMenuPortal = isGridView \|\| isMobileManagerEnvironment\(\);/);
   assert.match(uploadBinding, /if \(!useUploadMenuPortal\) \{/);
+});
+
+test('portaled upload menu is treated as part of the upload control', () => {
+  const functionSource = extractFunction(source, 'isUploadMenuEventInside');
+  assert.notEqual(functionSource, '', 'isUploadMenuEventInside should exist');
+  const context = {};
+  vm.runInNewContext(`${functionSource}; this.isUploadMenuEventInside = isUploadMenuEventInside;`, context);
+
+  const wrapTarget = {};
+  const menuTarget = {};
+  const outsideTarget = {};
+  const wrap = { contains: target => target === wrapTarget };
+  const menu = { contains: target => target === menuTarget };
+
+  assert.equal(context.isUploadMenuEventInside(wrapTarget, wrap, menu), true);
+  assert.equal(context.isUploadMenuEventInside(menuTarget, wrap, menu), true);
+  assert.equal(context.isUploadMenuEventInside(outsideTarget, wrap, menu), false);
+  assert.equal(context.isUploadMenuEventInside(null, wrap, menu), false);
+});
+
+test('upload menu portal listeners are replaceable and removed during auth cleanup', () => {
+  const uploadBindingStart = source.indexOf('if (UI.uploadWrap && UI.btnUpload) {');
+  assert.notEqual(uploadBindingStart, -1);
+  const uploadBinding = source.slice(uploadBindingStart, uploadBindingStart + 9000);
+  assert.match(uploadBinding, /window\.__pkDestroyUploadMenuPortal\(\)/);
+  assert.match(uploadBinding, /addEventListener\('pointerdown', handleUploadMenuOutsideEvent, true\)/);
+  assert.match(uploadBinding, /removeEventListener\('pointerdown', handleUploadMenuOutsideEvent, true\)/);
+  assert.match(uploadBinding, /addEventListener\('click', handleUploadMenuOutsideEvent, true\)/);
+  assert.match(uploadBinding, /removeEventListener\('click', handleUploadMenuOutsideEvent, true\)/);
+  assert.doesNotMatch(uploadBinding, /__pkUploadMenuPortalBound/);
+  assert.doesNotMatch(source, /UI\.uploadWrap\.querySelector\('\.pk-dropdown-menu'\)\.style/);
+
+  for (const functionName of ['purgeAllCachesOnLogout', 'pkCleanupLoginUI']) {
+    const cleanupSource = extractFunction(source, functionName);
+    assert.notEqual(cleanupSource, '', `${functionName} should exist`);
+    assert.match(cleanupSource, /window\.__pkDestroyUploadMenuPortal\(\)/);
+  }
 });
 
 test('launcher supports pointer dragging and no longer rejects narrow screens', () => {
@@ -192,6 +229,13 @@ test('special mobile lists preserve the name and primary task state columns', ()
   }
   assert.match(css, /\.pk-win\.pk-offline-list[^}]*>\s*:nth-child\(3\)[^}]*display:\s*none\s*!important/);
   assert.match(css, /\.pk-win\.pk-upload-list[^}]*>\s*:nth-child\(3\)[^}]*display:\s*none\s*!important/);
+});
+
+test('share parse mobile headers account for their hidden starred column', () => {
+  assert.match(css, /\.pk-win\.pk-share-parse-list:not\(\.pk-share-parse-insight-list\)[^}]*\.pk-grid-hd[^}]*>\s*:nth-child\(n\+4\)/);
+  assert.match(css, /\.pk-win\.pk-share-parse-list:not\(\.pk-share-parse-insight-list\)[^}]*\.pk-row\s*>\s*:nth-child\(n\+3\)/);
+  assert.match(css, /\.pk-win\.pk-share-parse-list\.pk-share-parse-insight-list[^}]*\.pk-grid-hd[^}]*>\s*:nth-child\(n\+5\)/);
+  assert.match(css, /\.pk-win\.pk-share-parse-list\.pk-share-parse-insight-list[^}]*\.pk-row\s*>\s*:nth-child\(n\+4\)/);
 });
 
 test('mobile modal touch sizing excludes compact input controls', () => {
