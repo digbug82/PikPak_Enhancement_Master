@@ -112,6 +112,29 @@ test('advanced actions are available through a mobile overflow proxy', () => {
   }
 });
 
+test('external player and downloader stay directly visible on mobile', () => {
+  const mobileMoreStart = source.indexOf('const MOBILE_ADVANCED_ACTION_IDS = [');
+  assert.notEqual(mobileMoreStart, -1);
+  const mobileMoreEnd = source.indexOf('];', mobileMoreStart);
+  const mobileMoreIds = source.slice(mobileMoreStart, mobileMoreEnd);
+  assert.doesNotMatch(mobileMoreIds, /'pk-ext'/);
+  assert.doesNotMatch(mobileMoreIds, /'pk-aria2'/);
+
+  const mobileStart = css.indexOf('@media (max-width:720px)');
+  assert.notEqual(mobileStart, -1);
+  const mobileCss = css.slice(mobileStart);
+  assert.doesNotMatch(mobileCss, /#pk-ext[^}]*display:\s*none\s*!important/);
+  assert.doesNotMatch(mobileCss, /#pk-aria2[^}]*display:\s*none\s*!important/);
+});
+
+test('mobile directory list upload menu uses the viewport portal', () => {
+  const uploadBindingStart = source.indexOf('if (UI.uploadWrap && UI.btnUpload) {');
+  assert.notEqual(uploadBindingStart, -1);
+  const uploadBinding = source.slice(uploadBindingStart, uploadBindingStart + 4500);
+  assert.match(uploadBinding, /const useUploadMenuPortal = isGridView \|\| isMobileManagerEnvironment\(\);/);
+  assert.match(uploadBinding, /if \(!useUploadMenuPortal\) \{/);
+});
+
 test('launcher supports pointer dragging and no longer rejects narrow screens', () => {
   assert.match(source, /touchAction\s*=\s*['"]none['"]/);
   assert.match(source, /addEventListener\(['"]pointerdown['"]/);

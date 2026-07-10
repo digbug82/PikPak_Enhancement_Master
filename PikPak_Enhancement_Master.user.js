@@ -3151,7 +3151,7 @@ html.pk-player-web-fullscreen-lock, body.pk-player-web-fullscreen-lock { overflo
 .pk-ft .pk-grp > .pk-btn,.pk-maximized .pk-ft .pk-grp > .pk-btn { width:40px!important; min-width:40px!important; height:40px!important; padding:0!important; gap:0!important; border-radius:7px!important; }
 .pk-ft .pk-grp > .pk-btn > span { display:none!important; }
 #pk-mobile-more { display:flex!important; order:-2; }
-#pk-migrate,#pk-magnet-archive-check,#pk-img-search,#pk-export-m3u,#pk-ext,#pk-aria2 { display:none!important; }
+#pk-migrate,#pk-magnet-archive-check,#pk-img-search,#pk-export-m3u { display:none!important; }
 #pk-down { order:-1; }
 .pk-modal-ov { width:100vw; height:100vh; height:100dvh; padding:max(10px,env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px)); align-items:flex-end; box-sizing:border-box; }
 .pk-modal { width:100%!important; max-width:none!important; min-width:0!important; max-height:calc(100dvh - 20px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important; margin:0!important; padding:18px!important; gap:12px!important; border-radius:12px 12px 6px 6px!important; overflow:auto!important; overscroll-behavior:contain; box-sizing:border-box; }
@@ -10271,9 +10271,7 @@ const MOBILE_ADVANCED_ACTION_IDS = [
 'pk-migrate',
 'pk-magnet-archive-check',
 'pk-img-search',
-'pk-export-m3u',
-'pk-ext',
-'pk-aria2'
+'pk-export-m3u'
 ];
 
 const closeMobileMoreMenu = () => {
@@ -50026,8 +50024,9 @@ if (!uploadMenu) return;
 if (!uploadMenu._pkOriginParent) uploadMenu._pkOriginParent = UI.uploadWrap;
 
 const isGridView = !!(UI.win && UI.win.classList.contains('pk-grid-view'));
+const useUploadMenuPortal = isGridView || isMobileManagerEnvironment();
 
-if (!isGridView) {
+if (!useUploadMenuPortal) {
 if (uploadMenu.parentNode !== uploadMenu._pkOriginParent) {
 uploadMenu._pkOriginParent.appendChild(uploadMenu);
 }
