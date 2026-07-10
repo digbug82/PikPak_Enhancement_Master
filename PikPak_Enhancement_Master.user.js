@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            4.4.0
+// @version            4.4.1
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -1604,6 +1604,40 @@ return pkIconHtml(name, opts);
 function pkIconWithClass(name, className, options = {}) {
 return pkIconHtml(name, Object.assign({}, options || {}, { className }));
 }
+
+function isMobileManagerEnvironment(width = window.innerWidth, height = window.innerHeight) {
+const coarsePointer = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+return Number(width || 0) <= 720 || (coarsePointer && Number(height || 0) <= 520);
+}
+
+function computeViewportPopupPosition(left, top, popupWidth, popupHeight, viewportWidth, viewportHeight, margin = 8) {
+const gap = Math.max(0, Number(margin) || 0);
+const width = Math.max(0, Number(popupWidth) || 0);
+const height = Math.max(0, Number(popupHeight) || 0);
+const viewWidth = Math.max(0, Number(viewportWidth) || 0);
+const viewHeight = Math.max(0, Number(viewportHeight) || 0);
+const maxLeft = Math.max(gap, viewWidth - width - gap);
+const maxTop = Math.max(gap, viewHeight - height - gap);
+return {
+left: Math.min(Math.max(Number(left) || 0, gap), maxLeft),
+top: Math.min(Math.max(Number(top) || 0, gap), maxTop)
+};
+}
+
+function computeResponsiveGridLayout(vpWidth, isMax, rowHeight, forceMobile = false) {
+const width = Math.max(0, Number(vpWidth) || 0);
+const mobile = !!forceMobile || width <= 720;
+const padX = mobile ? 10 : (isMax ? 20 : 16);
+const gapX = mobile ? 10 : (isMax ? 18 : 16);
+const gapY = mobile ? 12 : (isMax ? 20 : 16);
+const minCardWidth = mobile ? 152 : (isMax ? 236 : 208);
+const innerWidth = Math.max(minCardWidth, width - padX * 2);
+const cols = Math.max(1, Math.floor((innerWidth + gapX) / (minCardWidth + gapX)));
+const cardWidth = Math.max(mobile ? 144 : 188, Math.floor((innerWidth - gapX * (cols - 1)) / cols));
+const cardHeight = Math.max(mobile ? 208 : 220, (Number(rowHeight) || 0) - gapY);
+return { mobile, padX, gapX, gapY, cols, cardWidth, cardHeight, minCardWidth };
+}
+
 const CSS = `
 :root { --pk-bg: #ffffff; --pk-bg-rgb: 255, 255, 255; --pk-fg: #1a1a1a; --pk-bd: #e5e5e5; --pk-hl: #f0f0f0; --pk-sel-bg: #e6f3ff; --pk-sel-bd: #cce8ff; --pk-pri: #0067c0; --pk-btn-hov: #e0e0e0; --pk-gh: #f5f5f5; --pk-gh-fg: #333; --pk-sb-bg: transparent; --pk-sb-th: #ccc; --pk-sb-hov: #aaa; --pk-icon-c: #888; --pk-tip-bg: rgba(255, 255, 255, 0.95); --pk-tip-fg: #1a1a1a; --pk-tip-bd: rgba(0, 0, 0, 0.06); --pk-tip-sd: rgba(0, 0, 0, 0.12); --pk-toast-bg: rgba(255, 255, 255, 0.95); --pk-toast-fg: #1a1a1a; --pk-toast-bd: rgba(0, 0, 0, 0.08); --pk-match-bg: #fff2cc; --pk-match-fg: #d93025; --pk-v-line: #d1d1d1; }
 .pk-ov,.pk-ov *,.pk-modal-ov,.pk-modal-ov *,#pk-audio-ov,#pk-audio-ov *,#pk-audio-mini,#pk-audio-mini *,#pk-toast-container,#pk-toast-container *,.pk-float-bar-item,.pk-float-bar-item *{color-scheme:only light;forced-color-adjust:none;}.pk-ov svg,.pk-modal-ov svg,#pk-audio-ov svg,#pk-audio-mini svg,.pk-logo-svg{color-scheme:only light;forced-color-adjust:none;filter:none!important;-webkit-filter:none!important;mix-blend-mode:normal!important;isolation:isolate;}
@@ -3024,6 +3058,185 @@ html.pk-player-web-fullscreen-lock, body.pk-player-web-fullscreen-lock { overflo
 .pk-ana-pop-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .pk-ana-opt { padding: 8px 4px; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--pk-fg); transition: background 0.1s; text-align: center; border: 1px solid transparent; background: var(--pk-hl); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pk-ana-opt:hover { background: var(--pk-sel-bg); color: var(--pk-pri); border-color: var(--pk-sel-bd); }
+#pk-mobile-more { display:none; }
+.pk-mobile-more-menu { position:absolute; right:8px; bottom:calc(100% + 8px); z-index:10040; width:min(300px,calc(100vw - 24px)); max-height:min(62dvh,460px); padding:6px; border:1px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); box-shadow:0 16px 40px rgba(0,0,0,.24); overflow-y:auto; display:none; flex-direction:column; gap:2px; box-sizing:border-box; }
+.pk-mobile-more-menu.open { display:flex; }
+.pk-grp[style*="display: none"] + .pk-mobile-more-menu { display:none!important; }
+.pk-mobile-more-item { width:100%; min-height:44px; padding:8px 12px; border:0; border-radius:6px; background:transparent; color:var(--pk-fg); display:flex; align-items:center; gap:10px; text-align:left; font:inherit; font-size:14px; cursor:pointer; box-sizing:border-box; }
+.pk-mobile-more-item:hover,.pk-mobile-more-item:focus-visible { background:var(--pk-hl); color:var(--pk-pri); outline:none; }
+.pk-mobile-more-item:disabled { opacity:.42; cursor:not-allowed; }
+.pk-mobile-more-item svg { width:18px!important; height:18px!important; flex:0 0 18px; }
+.pk-mobile-more-item span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+@media (max-width:720px), (max-height:520px) and (pointer:coarse) {
+.pk-ov { width:100vw; height:100vh; height:100dvh; align-items:stretch; justify-content:stretch; background:var(--pk-bg); backdrop-filter:none; }
+.pk-win { width:100vw!important; max-width:none!important; min-width:0!important; height:100vh!important; height:100dvh!important; max-height:none!important; min-height:0!important; border:0!important; border-radius:0!important; box-shadow:none!important; flex-direction:column!important; }
+.pk-main-col { order:1; min-height:0; }
+.pk-ov .pk-win .pk-sidebar,.pk-ov.pk-hide-btn-text .pk-maximized .pk-sidebar,.pk-ov.pk-auto-hide-btn-text .pk-maximized .pk-sidebar { order:2; width:100%!important; height:calc(58px + env(safe-area-inset-bottom,0px))!important; min-height:calc(58px + env(safe-area-inset-bottom,0px)); border-right:0!important; border-top:1px solid var(--pk-bd); flex-direction:row!important; align-items:flex-start!important; gap:4px!important; padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))!important; overflow-x:auto!important; overflow-y:hidden!important; scroll-snap-type:x proximity; overscroll-behavior-x:contain; scrollbar-width:none; box-sizing:border-box; }
+.pk-sidebar::-webkit-scrollbar,.pk-tb::-webkit-scrollbar,.pk-ft .pk-grp::-webkit-scrollbar { display:none; }
+.pk-ov .pk-sidebar .pk-nav-btn,.pk-ov.pk-hide-btn-text .pk-maximized .pk-nav-btn,.pk-ov.pk-auto-hide-btn-text .pk-maximized .pk-nav-btn { width:46px!important; min-width:46px!important; max-width:46px!important; height:46px!important; min-height:46px!important; padding:0!important; margin:0!important; border-radius:8px!important; flex:0 0 46px!important; scroll-snap-align:center; }
+.pk-ov .pk-sidebar .pk-nav-btn > span { display:none!important; }
+.pk-ov .pk-sidebar .pk-nav-btn svg,.pk-ov .pk-sidebar #pk-settings svg { width:23px!important; height:23px!important; margin:0!important; }
+.pk-ov .pk-sidebar #pk-btn-cloud { width:46px!important; min-width:46px!important; height:46px!important; margin:0!important; border-radius:8px!important; padding:0!important; }
+.pk-sidebar #pk-settings { margin-top:0!important; }
+#pk-quota-wrap { display:none!important; }
+.pk-hd,.pk-maximized .pk-hd { height:50px!important; min-height:50px; padding:0 max(10px,env(safe-area-inset-right,0px)) 0 max(10px,env(safe-area-inset-left,0px))!important; box-sizing:border-box; }
+.pk-tt,.pk-maximized .pk-tt { min-width:0; font-size:16px!important; gap:7px!important; overflow:hidden!important; }
+.pk-tt > svg,.pk-maximized .pk-tt > svg { width:34px!important; height:34px!important; flex:0 0 34px; }
+.pk-tt > div { min-width:0!important; overflow:hidden!important; }
+.pk-tt > div > span:first-child { overflow:hidden; text-overflow:ellipsis; }
+.pk-tt > div > span:last-child { display:none!important; }
+#pk-maximize { display:none!important; }
+.pk-hd .pk-btn { width:40px!important; min-width:40px!important; height:40px!important; padding:0!important; }
+.pk-tb,.pk-maximized .pk-tb { width:100%; height:48px!important; min-height:48px; padding:0 8px!important; gap:6px!important; overflow-x:auto!important; overflow-y:hidden!important; flex-wrap:nowrap!important; overscroll-behavior-x:contain; scrollbar-width:none; box-sizing:border-box; }
+.pk-tb > div[style*="flex:1"] { display:none!important; }
+.pk-tb .pk-btn,.pk-maximized .pk-tb .pk-btn { width:40px!important; min-width:40px!important; height:40px!important; padding:0!important; gap:0!important; border-radius:7px!important; justify-content:center!important; }
+.pk-tb .pk-btn > span,.pk-maximized .pk-tb .pk-btn > span { display:none!important; }
+.pk-tb .pk-btn svg,.pk-maximized .pk-tb .pk-btn svg { width:18px!important; height:18px!important; margin:0!important; }
+.pk-nav { flex:0 0 min(58vw,240px); width:min(58vw,240px); max-width:none; min-width:150px; height:40px; margin:0; padding:0 4px; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; box-sizing:border-box; }
+.pk-nav::-webkit-scrollbar { display:none; }
+.pk-global-chk { flex:0 0 auto; min-height:40px; margin:0!important; }
+.pk-global-chk span { display:none; }
+.pk-search { flex:0 0 168px; width:168px; min-width:150px; max-width:168px; }
+.pk-search input,.pk-maximized .pk-search input { height:40px!important; padding:0 62px 0 12px!important; font-size:14px!important; }
+.pk-dup-toolbar { flex:0 0 auto; white-space:nowrap; }
+#pk-filter-bar,#pk-filter-active-ui { flex:0 0 auto; }
+#pk-filter-exts-wrap { max-width:200px; overflow:hidden; }
+#pk-filter-cat-pop { width:min(420px,calc(100vw - 16px))!important; box-sizing:border-box; }
+#pk-filter-more-pop { max-width:calc(100vw - 16px)!important; box-sizing:border-box; }
+#pk-actionbar,#pk-trash-bar { overflow-x:auto!important; }
+#pk-export,#pk-scan-dup,#pk-analyze,#pk-bulkrename,#pk-prune,#pk-unzip,#pk-blacklist-manager { display:none!important; }
+.pk-grid-hd { min-height:44px; height:44px; padding:0 10px!important; }
+.pk-grid-hd.pk-grid-view-hd,.pk-maximized .pk-grid-hd.pk-grid-view-hd { height:46px!important; min-height:46px; padding:0 10px!important; gap:8px!important; }
+.pk-grid-check-tools { padding-left:0!important; gap:5px!important; }
+.pk-grid-check-tools .pk-btn > span { display:none!important; }
+.pk-grid-sort-trigger,.pk-maximized .pk-grid-sort-trigger { min-width:0!important; max-width:132px; height:34px!important; padding:0 10px!important; }
+.pk-win:not(.pk-grid-view):not(.pk-offline-list):not(.pk-upload-list):not(.pk-share-list):not(.pk-share-parse-list) .pk-grid-hd:not(.pk-grid-view-hd),.pk-win:not(.pk-grid-view):not(.pk-offline-list):not(.pk-upload-list):not(.pk-share-list):not(.pk-share-parse-list) .pk-row { grid-template-columns:34px 28px minmax(0,1fr)!important; column-gap:6px!important; min-width:0!important; }
+.pk-win:not(.pk-grid-view):not(.pk-offline-list):not(.pk-upload-list):not(.pk-share-list):not(.pk-share-parse-list) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(n+4),.pk-win:not(.pk-grid-view):not(.pk-offline-list):not(.pk-upload-list):not(.pk-share-list):not(.pk-share-parse-list) .pk-row > :nth-child(n+4) { display:none!important; }
+.pk-win.pk-offline-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd),.pk-win.pk-offline-list:not(.pk-grid-view) .pk-row,.pk-win.pk-upload-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd),.pk-win.pk-upload-list:not(.pk-grid-view) .pk-row,.pk-win.pk-share-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd),.pk-win.pk-share-list:not(.pk-grid-view) .pk-row { grid-template-columns:34px minmax(0,1fr) minmax(84px,100px)!important; column-gap:6px!important; min-width:0!important; }
+.pk-win.pk-offline-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(3),.pk-win.pk-offline-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(4),.pk-win.pk-offline-list:not(.pk-grid-view) .pk-row > :nth-child(3),.pk-win.pk-offline-list:not(.pk-grid-view) .pk-row > :nth-child(4) { display:none!important; }
+.pk-win.pk-upload-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(3),.pk-win.pk-upload-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(4),.pk-win.pk-upload-list:not(.pk-grid-view) .pk-row > :nth-child(3),.pk-win.pk-upload-list:not(.pk-grid-view) .pk-row > :nth-child(4) { display:none!important; }
+.pk-win.pk-share-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(3),.pk-win.pk-share-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(4),.pk-win.pk-share-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(6),.pk-win.pk-share-list:not(.pk-grid-view) .pk-row > :nth-child(3),.pk-win.pk-share-list:not(.pk-grid-view) .pk-row > :nth-child(4),.pk-win.pk-share-list:not(.pk-grid-view) .pk-row > :nth-child(6) { display:none!important; }
+.pk-win.pk-share-parse-list:not(.pk-share-parse-insight-list):not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd),.pk-win.pk-share-parse-list:not(.pk-share-parse-insight-list):not(.pk-grid-view) .pk-row { grid-template-columns:34px minmax(0,1fr)!important; column-gap:6px!important; min-width:0!important; }
+.pk-win.pk-share-parse-list:not(.pk-share-parse-insight-list):not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(n+3),.pk-win.pk-share-parse-list:not(.pk-share-parse-insight-list):not(.pk-grid-view) .pk-row > :nth-child(n+3) { display:none!important; }
+.pk-win.pk-share-parse-list.pk-share-parse-insight-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd),.pk-win.pk-share-parse-list.pk-share-parse-insight-list:not(.pk-grid-view) .pk-row { grid-template-columns:34px minmax(0,1.15fr) minmax(92px,.85fr)!important; column-gap:6px!important; min-width:0!important; }
+.pk-win.pk-share-parse-list.pk-share-parse-insight-list:not(.pk-grid-view) .pk-grid-hd:not(.pk-grid-view-hd) > :nth-child(n+4),.pk-win.pk-share-parse-list.pk-share-parse-insight-list:not(.pk-grid-view) .pk-row > :nth-child(n+4) { display:none!important; }
+.pk-win.pk-offline-list .pk-row > :nth-child(5) > div[style*="width:100px"] { width:52px!important; margin-right:6px!important; }
+.pk-win:not(.pk-grid-view) .pk-row { height:48px!important; padding:0 10px!important; }
+.pk-win:not(.pk-grid-view) .pk-name svg { margin-right:8px; }
+.pk-grid-view .pk-vp { padding:10px 0 12px; }
+.pk-grid-view .pk-row { border-radius:12px!important; }
+.pk-grid-card-body,.pk-maximized .pk-grid-card-body { padding:8px!important; gap:8px!important; }
+.pk-grid-view .pk-row .pk-gv-more { top:8px!important; right:8px!important; width:30px!important; height:30px!important; opacity:1!important; visibility:visible!important; pointer-events:auto!important; transform:none!important; border-radius:8px!important; }
+.pk-grid-view .pk-row .pk-gv-check { top:8px!important; left:8px!important; width:30px!important; height:30px!important; opacity:1!important; visibility:visible!important; pointer-events:auto!important; transform:none!important; border-radius:8px!important; }
+.pk-gv-check::before { width:20px; height:20px; margin-left:-10px; margin-top:-10px; }
+.pk-gv-cover,.pk-maximized .pk-gv-cover { height:calc(100% - 48px)!important; min-height:100px!important; border-radius:10px!important; }
+.pk-gv-cover .pk-gv-icon svg,.pk-gv-cover .pk-gv-icon img,.pk-maximized .pk-gv-cover .pk-gv-icon svg,.pk-maximized .pk-gv-cover .pk-gv-icon img { width:76px!important; height:76px!important; max-width:76px!important; max-height:76px!important; }
+.pk-gv-folder-shell,.pk-maximized .pk-gv-folder-shell { width:132px!important; max-width:132px!important; height:104px!important; min-height:104px!important; margin:0 auto!important; transform:translateY(6px)!important; }
+.pk-gv-folder-back,.pk-maximized .pk-gv-folder-back { top:16px!important; border-radius:9px!important; }
+.pk-gv-folder-tab,.pk-maximized .pk-gv-folder-tab { top:5px!important; left:12px!important; width:48px!important; height:18px!important; border-radius:7px 7px 0 0!important; }
+.pk-gv-folder-preview,.pk-maximized .pk-gv-folder-preview { left:12px!important; right:12px!important; bottom:18px!important; border-radius:8px!important; }
+.pk-gv-folder-front,.pk-maximized .pk-gv-folder-front { height:62px!important; border-radius:9px!important; }
+.pk-gv-folder-fallback,.pk-gv-folder-fallback svg,.pk-maximized .pk-gv-folder-fallback,.pk-maximized .pk-gv-folder-fallback svg { width:72px!important; height:72px!important; max-width:72px!important; max-height:72px!important; }
+.pk-gv-info,.pk-maximized .pk-gv-info { grid-template-rows:19px 15px!important; row-gap:1px!important; height:35px!important; min-height:35px!important; }
+.pk-grid-view .pk-name,.pk-maximized.pk-grid-view .pk-name { height:19px!important; }
+.pk-grid-view .pk-name .pk-name-txt,.pk-maximized.pk-grid-view .pk-name .pk-name-txt { font-size:12px!important; line-height:19px!important; }
+.pk-gv-meta { height:15px; font-size:10px; line-height:15px; }
+.pk-gv-meta-sep { margin:0 4px; }
+.pk-gv-play { width:38px; height:38px; }
+.pk-gv-play svg { width:22px!important; height:22px!important; }
+.pk-ft,.pk-maximized .pk-ft { position:relative; height:50px!important; min-height:50px; padding:0 8px!important; overflow:visible!important; }
+.pk-ft .pk-stat { display:none!important; }
+.pk-ft .pk-grp { width:100%; overflow-x:auto; overflow-y:visible; gap:6px; scrollbar-width:none; }
+.pk-ft .pk-grp > .pk-btn,.pk-maximized .pk-ft .pk-grp > .pk-btn { width:40px!important; min-width:40px!important; height:40px!important; padding:0!important; gap:0!important; border-radius:7px!important; }
+.pk-ft .pk-grp > .pk-btn > span { display:none!important; }
+#pk-mobile-more { display:flex!important; order:-2; }
+#pk-migrate,#pk-magnet-archive-check,#pk-img-search,#pk-export-m3u,#pk-ext,#pk-aria2 { display:none!important; }
+#pk-down { order:-1; }
+.pk-modal-ov { width:100vw; height:100vh; height:100dvh; padding:max(10px,env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px)); align-items:flex-end; box-sizing:border-box; }
+.pk-modal { width:100%!important; max-width:none!important; min-width:0!important; max-height:calc(100dvh - 20px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important; margin:0!important; padding:18px!important; gap:12px!important; border-radius:12px 12px 6px 6px!important; overflow:auto!important; overscroll-behavior:contain; box-sizing:border-box; }
+.pk-modal h3 { font-size:17px; padding-right:36px; }
+.pk-modal-close { top:12px; right:12px; width:36px; height:36px; }
+.pk-modal input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="file"]),.pk-modal textarea,.pk-modal select,.pk-select-trigger,.pk-setting-checkrow { min-height:44px; }
+.pk-modal [style*="width:720px"],.pk-modal [style*="width: 720px"],.pk-modal [style*="width:760px"],.pk-modal [style*="width: 760px"] { width:100%!important; max-width:100%!important; }
+.pk-modal [style*="grid-template-columns:1fr 1fr"],.pk-modal [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns:1fr!important; }
+.pk-prev-row { grid-template-columns:1fr; }
+.pk-magnet-preview-wrap,.pk-magnet-archive-preview,.pk-share-history-wrap,.pk-share-modal-root { width:100%!important; max-width:100%!important; }
+.pk-magnet-hero { height:160px; }
+.pk-magnet-body { padding:14px; }
+.pk-magnet-meta { grid-template-columns:1fr; }
+.pk-magnet-archive-summary { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.pk-magnet-archive-row,.pk-magnet-archive-fail-row { grid-template-columns:1fr; gap:4px; }
+.pk-magnet-archive-actions-three { grid-template-columns:1fr!important; gap:8px!important; }
+.pk-share-parse-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.pk-share-history-foot { align-items:flex-start; flex-direction:column; }
+.pk-share-history-note-wrap { width:100%; max-width:100%; }
+.pk-lbm,.pk-maximized .pk-lbm { grid-template-columns:1fr; grid-template-rows:minmax(128px,32%) minmax(0,1fr); gap:8px; padding:8px; }
+.pk-lbm-side { padding:10px; gap:6px; }
+.pk-lbm-side-head { margin-bottom:4px; }
+.pk-lbm-folder-list { overflow:auto; gap:6px; padding-right:0; }
+.pk-lbm-folder { min-height:48px; grid-template-columns:24px minmax(0,1fr) auto auto; gap:6px; }
+.pk-lbm-main { padding:10px; gap:10px; }
+.pk-lbm-toolbar { flex-direction:column; align-items:stretch; gap:8px; }
+.pk-lbm-search { width:100%; min-width:0; }
+.pk-lbm-tools { margin-left:0; overflow-x:auto; flex-wrap:nowrap; }
+.pk-lbm-status { margin-left:0; }
+.pk-lbm-grid,.pk-maximized .pk-lbm-grid { grid-template-columns:1fr; gap:10px; }
+.pk-lbm-card { height:148px; padding:14px 12px 10px; }
+.pk-lbm-card-act span { display:none; }
+.pk-lbm-card-act { width:30px; height:30px; padding:0; }
+.pk-dropdown-menu,.pk-select-menu,.pk-ana-pop,.pk-ctx { max-width:calc(100vw - 16px); box-sizing:border-box; }
+.pk-ctx { max-height:calc(100dvh - 16px); overflow-y:auto; overscroll-behavior:contain; }
+.pk-ctx-item,.pk-dropdown-item,.pk-select-item,.pk-crumb-item { min-height:44px; box-sizing:border-box; }
+.pk-cal-pop { max-width:calc(100vw - 16px); max-height:calc(100dvh - 16px); overflow:auto; box-sizing:border-box; }
+.pk-cal-side { width:88px; flex:0 0 88px; box-sizing:border-box; }
+.pk-cal-side-item { padding:8px 10px; }
+.pk-cal-main { width:auto; min-width:0; flex:1; padding:8px; box-sizing:border-box; }
+#pk-player-ov,.pk-img-ov { width:100vw!important; height:100vh!important; height:100dvh!important; padding:0!important; align-items:stretch!important; justify-content:stretch!important; }
+#pk_p_box { top:0!important; left:0!important; transform:none!important; width:100vw!important; max-width:none!important; min-width:0!important; height:100vh!important; height:100dvh!important; border-radius:0!important; overflow:hidden!important; box-shadow:none!important; }
+#pk_p_box.plist-active { height:calc(100dvh - 72px)!important; }
+.pk-err-dialog { min-width:0!important; width:calc(100vw - 32px)!important; max-width:480px; max-height:calc(100dvh - 32px); overflow:auto; padding:28px 18px!important; box-sizing:border-box; }
+.pk-no-source-dialog > div:last-child { flex-wrap:wrap; }
+.pk-sub-search-modal { width:calc(100vw - 24px)!important; height:min(450px,calc(100dvh - 24px))!important; max-width:380px; box-sizing:border-box; }
+.pk-img-box { top:0!important; left:0!important; transform:none!important; width:100vw!important; max-width:none!important; min-width:0!important; height:100vh!important; height:100dvh!important; border-radius:0!important; overflow:hidden!important; box-shadow:none!important; }
+.pk-img-box.plist-active { height:calc(100dvh - 72px)!important; }
+.pk-player-top { height:52px; padding:env(safe-area-inset-top,0px) max(10px,env(safe-area-inset-right,0px)) 0 max(10px,env(safe-area-inset-left,0px)); box-sizing:content-box; }
+.pk-player-title { font-size:14px; }
+.pk-player-controls { height:calc(58px + env(safe-area-inset-bottom,0px)); padding:0 4px env(safe-area-inset-bottom,0px); gap:0; opacity:1; box-sizing:border-box; }
+.pk-p-btn { width:42px; min-width:42px; height:42px; }
+.pk-p-menu-con { min-width:42px; height:42px; font-size:13px; }
+.pk-p-vol-wrap { margin-left:0!important; }
+.pk-p-vol-slider { display:none!important; }
+#pk_p_web_full { display:none!important; }
+.pk-p-prog-wrap { left:10px!important; right:10px!important; bottom:calc(58px + env(safe-area-inset-bottom,0px))!important; gap:8px!important; }
+.pk-p-time-side { display:none!important; }
+.pk-p-side-nav { width:44px; height:44px; opacity:.9; }
+.pk-p-side-nav.L { left:10px; }
+.pk-p-side-nav.R { right:10px; }
+.pk-p-sub-pop { position:fixed!important; left:10px!important; right:10px!important; bottom:calc(62px + env(safe-area-inset-bottom,0px))!important; width:auto!important; height:min(60dvh,380px)!important; }
+.pk-p-plist-strip { height:72px!important; }
+.pk-p-plist-scroll { padding:0 40px; }
+.pk-p-plist-item { width:112px; height:64px; }
+.pk-p-plist-nav { width:40px; }
+.pk-p-plist-tab { opacity:1; }
+.pk-img-bar { height:52px; padding:env(safe-area-inset-top,0px) 10px 0; opacity:1; box-sizing:content-box; }
+.pk-img-actions { gap:2px; }
+.pk-img-btn { width:40px; height:40px; }
+.pk-img-nav { width:44px!important; height:44px!important; opacity:.9!important; }
+.pk-img-prev { left:10px!important; }
+.pk-img-next { right:10px!important; }
+#pk-audio-ov { padding:max(8px,env(safe-area-inset-top,0px)) max(8px,env(safe-area-inset-right,0px)) max(8px,env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px)); }
+#pk-audio-ov .pk-audio-box { width:100%; max-width:none; }
+}
+
+@media (max-height:520px) and (pointer:coarse) {
+.pk-hd { display:flex!important; height:42px!important; min-height:42px!important; justify-content:flex-end!important; }
+.pk-hd .pk-tt { display:none!important; }
+.pk-ov .pk-win .pk-sidebar { height:calc(52px + env(safe-area-inset-bottom,0px))!important; min-height:calc(52px + env(safe-area-inset-bottom,0px)); padding-top:3px!important; }
+.pk-ov .pk-sidebar .pk-nav-btn { width:44px!important; min-width:44px!important; height:44px!important; min-height:44px!important; flex-basis:44px!important; }
+.pk-ft { height:44px!important; min-height:44px; }
+.pk-ft .pk-grp > .pk-btn { height:36px!important; }
+}
 `;
 
 ;
@@ -9645,6 +9858,10 @@ ${CONF.icons.invert}
 <div class="pk-ft">
 <div class="pk-stat" id="pk-stat">${L.status_ready.replace('{n}', 0)}</div>
 <div class="pk-grp">
+<button class="pk-btn" id="pk-mobile-more" type="button" aria-haspopup="menu" aria-expanded="false" data-pk-tip="${L.label_more || 'More'}">
+<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5.5" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="12" cy="18.5" r="1.8"></circle></svg>
+<span>${L.label_more || 'More'}</span>
+</button>
 <button class="pk-btn" id="pk-migrate" data-pk-tip="${L.tip_migrate}" style="color: var(--pk-pri);">${CONF.icons.migrate} <span>${L.btn_migrate}</span></button>
 <button class="pk-btn" id="pk-magnet-archive-check" data-pk-tip="${L.tip_magnet_archive_check}">${CONF.icons.cloudArchive} <span>${L.btn_magnet_archive_check}</span></button>
 <button class="pk-btn" id="pk-img-search" data-pk-tip="${L.btn_img_search}">${pkIconSized('imgSearch', 16)} <span>${L.btn_img_search.replace(' [F]', '')}</span></button>
@@ -9653,6 +9870,7 @@ ${CONF.icons.invert}
 <button class="pk-btn" id="pk-aria2" data-pk-tip="${formatDownloaderText(L.tip_send_downloader, getCurrentDownloaderType())}">${CONF.icons.aria2} <span>${formatDownloaderText(L.btn_send_downloader, getCurrentDownloaderType())}</span></button>
 <button class="pk-btn" id="pk-down" data-pk-tip="${L.tip_down}">${CONF.icons.download} <span>${L.btn_down}</span></button>
 </div>
+<div class="pk-mobile-more-menu" id="pk-mobile-more-menu" role="menu"></div>
 </div>
 
 </div>
@@ -9956,6 +10174,8 @@ btnNavLinkBookmark: el.querySelector('#pk-nav-link-bookmark'),
 trashBar: el.querySelector('#pk-trash-bar'),
 btnTrashRefresh: el.querySelector('#pk-trash-refresh'),
 bottomGrp: el.querySelector('.pk-ft .pk-grp'),
+btnMobileMore: el.querySelector('#pk-mobile-more'),
+mobileMoreMenu: el.querySelector('#pk-mobile-more-menu'),
 actionBar: el.querySelector('#pk-actionbar'),
 btnRestore: el.querySelector('#pk-restore'),
 btnDelForever: el.querySelector('#pk-del-forever'),
@@ -10033,6 +10253,90 @@ filterExtsMain: el.querySelector('#pk-filter-exts-main'),
 filterExtsMoreBtn: el.querySelector('#pk-filter-exts-more-btn'),
 filterExitBtn: el.querySelector('#pk-filter-exit-btn')
 };
+
+el.querySelectorAll('[data-pk-tip]').forEach(node => {
+if (node.hasAttribute('aria-label')) return;
+const label = String(node.getAttribute('data-pk-tip') || '').replace(/<[^>]*>/g, '').trim();
+if (label) node.setAttribute('aria-label', label);
+});
+
+const MOBILE_ADVANCED_ACTION_IDS = [
+'pk-export',
+'pk-scan-dup',
+'pk-analyze',
+'pk-bulkrename',
+'pk-prune',
+'pk-unzip',
+'pk-blacklist-manager',
+'pk-migrate',
+'pk-magnet-archive-check',
+'pk-img-search',
+'pk-export-m3u',
+'pk-ext',
+'pk-aria2'
+];
+
+const closeMobileMoreMenu = () => {
+if (!UI.mobileMoreMenu || !UI.btnMobileMore) return;
+UI.mobileMoreMenu.classList.remove('open');
+UI.btnMobileMore.classList.remove('act');
+UI.btnMobileMore.setAttribute('aria-expanded', 'false');
+};
+
+const buildMobileMoreMenu = () => {
+if (!UI.mobileMoreMenu) return 0;
+UI.mobileMoreMenu.innerHTML = '';
+let count = 0;
+MOBILE_ADVANCED_ACTION_IDS.forEach(id => {
+const target = el.querySelector(`#${id}`);
+if (!target || target.hidden || target.style.display === 'none') return;
+const hostBar = target.closest('.pk-tb,.pk-ft');
+if (hostBar && getComputedStyle(hostBar).display === 'none') return;
+const item = document.createElement('button');
+item.type = 'button';
+item.className = 'pk-mobile-more-item';
+item.setAttribute('role', 'menuitem');
+item.dataset.pkMobileTarget = id;
+item.disabled = !!target.disabled;
+const icon = target.querySelector('svg');
+if (icon) item.appendChild(icon.cloneNode(true));
+const label = document.createElement('span');
+label.textContent = (target.querySelector('span')?.textContent || target.getAttribute('aria-label') || target.dataset.pkTip || id).trim();
+item.appendChild(label);
+item.addEventListener('click', () => {
+if (!item.disabled) target.click();
+closeMobileMoreMenu();
+});
+UI.mobileMoreMenu.appendChild(item);
+count++;
+});
+return count;
+};
+
+if (UI.btnMobileMore && UI.mobileMoreMenu) {
+UI.btnMobileMore.setAttribute('aria-controls', UI.mobileMoreMenu.id);
+UI.btnMobileMore.addEventListener('click', event => {
+event.stopPropagation();
+if (UI.mobileMoreMenu.classList.contains('open')) {
+closeMobileMoreMenu();
+return;
+}
+if (!buildMobileMoreMenu()) return;
+UI.mobileMoreMenu.classList.add('open');
+UI.btnMobileMore.classList.add('act');
+UI.btnMobileMore.setAttribute('aria-expanded', 'true');
+requestAnimationFrame(() => UI.mobileMoreMenu.querySelector('.pk-mobile-more-item:not(:disabled)')?.focus());
+});
+document.addEventListener('pointerdown', event => {
+if (!UI.mobileMoreMenu.classList.contains('open')) return;
+if (UI.mobileMoreMenu.contains(event.target) || UI.btnMobileMore.contains(event.target)) return;
+closeMobileMoreMenu();
+}, true);
+document.addEventListener('keydown', event => {
+if (event.key === 'Escape') closeMobileMoreMenu();
+});
+window.addEventListener('resize', closeMobileMoreMenu, { passive: true });
+}
 
 (() => {
 const searchWrap = el.querySelector('.pk-search');
@@ -10240,22 +10544,14 @@ return !!(S.analyzeMode && cur && cur.id === 'analyze_root' && S.analyzeSimGroup
 const isGroupedResultMode = () => !!(S.dupMode || isAnalyzeGroupedRoot());
 const canUseGridView = () => !S.shareMode && !S.linkBookmarkMode && (!S.shareParseMode || S.shareParseListActive) && !S.offlineMode && !S.uploadMode;
 const isGridView = () => S.viewMode === 'grid' && canUseGridView();
-const getListRowHeight = () => UI.win && UI.win.classList.contains('pk-maximized') ? 60 : 40;
-const getGridCardHeight = () => UI.win && UI.win.classList.contains('pk-maximized') ? 324 : 286;
+const getListRowHeight = () => isMobileManagerEnvironment() ? 48 : (UI.win && UI.win.classList.contains('pk-maximized') ? 60 : 40);
+const getGridCardHeight = () => isMobileManagerEnvironment() ? 228 : (UI.win && UI.win.classList.contains('pk-maximized') ? 324 : 286);
 const getGridCardRadius = () => UI.win && UI.win.classList.contains('pk-maximized') ? 22 : 18;
 const getGridLayout = () => {
 const vpRect = getLogicalRect(UI.vp || UI.in);
 const vpWidth = Math.max(0, Math.floor((vpRect && vpRect.width) || UI.vp?.clientWidth || 0));
 const isMax = UI.win && UI.win.classList.contains('pk-maximized');
-const padX = isMax ? 20 : 16;
-const gapX = isMax ? 18 : 16;
-const gapY = isMax ? 20 : 16;
-const minCardWidth = isMax ? 236 : 208;
-const innerWidth = Math.max(minCardWidth, vpWidth - padX * 2);
-const cols = Math.max(1, Math.floor((innerWidth + gapX) / (minCardWidth + gapX)));
-const cardWidth = Math.max(188, Math.floor((innerWidth - gapX * (cols - 1)) / cols));
-const cardHeight = Math.max(220, CONF.rowHeight - gapY);
-return { padX, gapX, gapY, cols, cardWidth, cardHeight };
+return computeResponsiveGridLayout(vpWidth, isMax, CONF.rowHeight, isMobileManagerEnvironment());
 };
 const isGroupedGridView = () => !!(isGroupedResultMode() && isGridView());
 const getGroupedGridSectionMetrics = () => {
@@ -12391,6 +12687,9 @@ requestAutoHideButtonTextCheck();
 
 const checkGuiResponsiveness = () => {
 const width = window.innerWidth;
+const isMobile = isMobileManagerEnvironment(width, window.innerHeight);
+el.classList.toggle('pk-mobile', isMobile);
+syncLayoutMetrics();
 
 document.body.classList.remove('pk-hide-all-ui');
 if (isForcedHidden) {
@@ -27812,6 +28111,13 @@ window.addEventListener('resize', scheduleLinkBookmarkResizeRender, true);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', scheduleLinkBookmarkResizeRender, { passive: true });
 
 function renderList() {
+if (UI.win) {
+UI.win.classList.toggle('pk-offline-list', !!S.offlineMode);
+UI.win.classList.toggle('pk-upload-list', !!S.uploadMode);
+UI.win.classList.toggle('pk-share-list', !!S.shareMode);
+UI.win.classList.toggle('pk-share-parse-list', !!S.shareParseMode);
+UI.win.classList.toggle('pk-share-parse-insight-list', !!(S.shareParseMode && S.shareParseInsightMode));
+}
 if (S.linkBookmarkMode) {
 if (UI.win) UI.win.classList.remove('pk-share-parse-mode', 'pk-share-parse-root-mode');
 renderLinkBookmarkPanel();
@@ -31350,8 +31656,16 @@ if (useFlexOrder) UI.ctx.style.flexDirection = 'column';
 
 let x = e.clientX, y = e.clientY, w = 160, h = UI.ctx.offsetHeight || 280;
 let winW = window.innerWidth, winH = window.innerHeight;
+if (isMobileManagerEnvironment()) {
+w = UI.ctx.offsetWidth || w;
+UI.ctx.scrollTop = 0;
+const popupPos = computeViewportPopupPosition(x, y, w, h, winW, winH, 8);
+x = popupPos.left;
+y = popupPos.top;
+} else {
 if (x + w > winW) x = winW - w - 10;
 if (y + h > winH) y = winH - h - 10;
+}
 UI.ctx.style.left = x + 'px';
 UI.ctx.style.top = y + 'px';
 };
@@ -42065,6 +42379,16 @@ document.body.appendChild(pop);
 const updatePosition = () => {
 if (!pop.isConnected) return;
 const rect = getLogicalRect(triggerEl);
+if (isMobileManagerEnvironment()) {
+const popupWidth = pop.offsetWidth || Math.min(420, Math.max(0, window.innerWidth - 16));
+const popupHeight = pop.offsetHeight || 180;
+const popupPos = computeViewportPopupPosition(rect.left, rect.bottom + 5, popupWidth, popupHeight, window.innerWidth, window.innerHeight, 8);
+pop.style.position = 'fixed';
+pop.style.top = popupPos.top + 'px';
+pop.style.left = popupPos.left + 'px';
+return;
+}
+pop.style.position = 'absolute';
 let popLeft = rect.left;
 if (popLeft + 420 > window.innerWidth) popLeft = window.innerWidth - 430;
 pop.style.top = (rect.bottom + 5) + 'px';
@@ -42141,6 +42465,16 @@ document.body.appendChild(pop);
 const updatePosition = () => {
 if (!pop.isConnected) return;
 const rect = getLogicalRect(UI.filterExtsWrap);
+if (isMobileManagerEnvironment()) {
+const popupWidth = pop.offsetWidth || Math.min(340, Math.max(0, window.innerWidth - 16));
+const popupHeight = pop.offsetHeight || 120;
+const popupPos = computeViewportPopupPosition(rect.left, rect.bottom + 5, popupWidth, popupHeight, window.innerWidth, window.innerHeight, 8);
+pop.style.position = 'fixed';
+pop.style.top = popupPos.top + 'px';
+pop.style.left = popupPos.left + 'px';
+return;
+}
+pop.style.position = 'absolute';
 let popLeft = rect.left;
 if (popLeft + 340 > window.innerWidth) popLeft = window.innerWidth - 350;
 pop.style.top = (rect.bottom + 5) + 'px';
@@ -43698,7 +44032,7 @@ const btnRect = getLogicalRect(activeTargetBtn);
 let left = btnRect.left - winRect.left;
 const top = btnRect.bottom - winRect.top;
 const winWidth = winRect.width;
-const popWidth = activePop === sortPop ? 200 : 340;
+const popWidth = activePop.offsetWidth || (activePop === sortPop ? 200 : 340);
 
 if (left + popWidth > winWidth - 10) {
 left = btnRect.right - winRect.left - popWidth;
@@ -57279,6 +57613,27 @@ const rect = getLogicalRect(UI.btnSettings);
 const winEl = document.querySelector('.pk-win');
 const isMax = winEl && winEl.classList.contains('pk-maximized');
 
+if (isMobileManagerEnvironment()) {
+const popupWidth = pop.offsetWidth || 140;
+const popupHeight = pop.offsetHeight || 96;
+const popupPos = computeViewportPopupPosition(
+rect.left,
+rect.top - popupHeight - 8,
+popupWidth,
+popupHeight,
+window.innerWidth,
+window.innerHeight,
+8
+);
+pop.style.position = 'fixed';
+pop.style.bottom = 'auto';
+pop.style.top = popupPos.top + 'px';
+pop.style.left = popupPos.left + 'px';
+return;
+}
+
+pop.style.position = 'absolute';
+pop.style.top = 'auto';
 let popLeft, popBottom;
 if (isMax) {
 popLeft = rect.left;
@@ -59666,9 +60021,20 @@ const rect = getLogicalRect(anchorEl);
 let top = rect.bottom + 5;
 let left = rect.left;
 
+if (isMobileManagerEnvironment()) {
+pop.style.position = 'fixed';
+const popupWidth = pop.offsetWidth || Math.min(400, Math.max(0, window.innerWidth - 16));
+const popupHeight = Math.min(pop.offsetHeight || 320, Math.max(0, window.innerHeight - 16));
+if (top + popupHeight > window.innerHeight - 8) top = rect.top - popupHeight - 5;
+const popupPos = computeViewportPopupPosition(left, top, popupWidth, popupHeight, window.innerWidth, window.innerHeight, 8);
+left = popupPos.left;
+top = popupPos.top;
+} else {
+pop.style.position = 'absolute';
 if (top + 320 > window.innerHeight) top = rect.top - 320 - 5;
 if (left + 400 > window.innerWidth) left = window.innerWidth - 400 - 10;
 if (left < 10) left = 10;
+}
 
 pop.style.top = top + 'px';
 pop.style.left = left + 'px';
@@ -63336,6 +63702,8 @@ const displayStyle = isTurbo ? 'none!important' : 'flex!important';
 
 b.style.cssText = `position:fixed;bottom:20px;right:20px;width:64px;height:64px;border-radius:50%;background:#1a5eff;color:#FDFDFD;border:none;cursor:pointer;z-index:2147483647;box-shadow:0 4px 12px rgba(0,0,0,0.3);padding:0;overflow:hidden;transition:transform 0.1s;display:${displayStyle};align-items:center!important;justify-content:center!important;`;
 b.innerHTML = CONF.logoSVG('60px');
+b.style.touchAction = 'none';
+b.setAttribute('aria-label', getStrings().title || 'PikPak Enhancement Master');
 
 const savedLeft = gmGet('pk_pos_left', null);
 const savedTop = gmGet('pk_pos_top', null);
@@ -63354,6 +63722,8 @@ b.style.top = '430px';
 
 let isDragging = false;
 let dragStartX, dragStartY;
+let activePointerId = null;
+let launchBusy = false;
 
 const constrainBall = () => {
 const rect = b.getBoundingClientRect();
@@ -63373,50 +63743,10 @@ b.style.top = newTop + 'px';
 
 window.addEventListener('resize', constrainBall);
 
-const blockNativeDrag = (e) => { e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'copy'; };
-b.addEventListener('dragenter', blockNativeDrag);
-b.addEventListener('dragover', blockNativeDrag);
-b.addEventListener('drop', (e) => {
-blockNativeDrag(e);
-if (!document.querySelector('.pk-ov') || document.querySelector('.pk-ov').style.display === 'none') {
-const clickEvt = new MouseEvent('mousedown', { clientX: e.clientX, clientY: e.clientY });
-b.dispatchEvent(clickEvt);
-const upEvt = new MouseEvent('mouseup', { clientX: e.clientX, clientY: e.clientY });
-document.dispatchEvent(upEvt);
-}
-});
-
-b.onmousedown = (e) => {
-isDragging = false;
-dragStartX = e.clientX;
-dragStartY = e.clientY;
-const rect = b.getBoundingClientRect();
-b.style.bottom = 'auto'; b.style.right = 'auto';
-b.style.left = rect.left + 'px'; b.style.top = rect.top + 'px';
-b.style.transition = 'none';
-const offsetX = e.clientX - rect.left;
-const offsetY = e.clientY - rect.top;
-
-const onMove = (em) => {
-if (!isDragging && (Math.abs(em.clientX - dragStartX) > 3 || Math.abs(em.clientY - dragStartY) > 3)) {
-isDragging = true;
-}
-if (isDragging) {
-b.style.left = (em.clientX - offsetX) + 'px';
-b.style.top = (em.clientY - offsetY) + 'px';
-}
-};
-
-const onUp = async () => {
-document.removeEventListener('mousemove', onMove);
-document.removeEventListener('mouseup', onUp);
-b.style.transition = 'transform 0.1s';
-
-if (!isDragging) {
-if (window.innerWidth < 720 || window.innerHeight < 340) {
-return;
-}
-
+const activateLauncher = async () => {
+if (launchBusy) return;
+launchBusy = true;
+try {
 let currentHeaders = getHeaders();
 if (!currentHeaders.Authorization || currentHeaders.Authorization.length < 10) {
 console.warn("PikPak Master: No auth token on button click. Entering recovery recheck.");
@@ -63428,8 +63758,7 @@ isAuthReady = await waitForAuth(4200);
 }
 if (!isAuthReady) {
 console.warn("PikPak Master: Button click auth wait timeout.");
-const didLogout = await confirmedLogout('button-click-missing-token-final', 4000, 4500);
-if (didLogout) return;
+await confirmedLogout('button-click-missing-token-final', 4000, 4500);
 return;
 }
 currentHeaders = getHeaders();
@@ -63441,37 +63770,89 @@ const existingWin = document.querySelector('.pk-ov');
 if (existingWin) {
 if (existingWin.style.display === 'none') {
 const needGridReopenRelayout = !!existingWin.querySelector('.pk-win.pk-grid-view');
-
-if (existingWin.querySelector('.pk-win.pk-maximized')) {
-    document.body.classList.add('pk-body-max');
-}
-
+if (existingWin.querySelector('.pk-win.pk-maximized')) document.body.classList.add('pk-body-max');
 existingWin.style.display = 'flex';
 existingWin.focus();
-
 if (needGridReopenRelayout) {
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            window.dispatchEvent(new Event('resize'));
-        });
-    });
+requestAnimationFrame(() => {
+requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+});
 }
 } else {
 existingWin.style.display = 'none';
 }
 } else {
 await ensureI18nReadyBeforeOpen();
-openManager(globalCache, globalPreloadPromise);
+await openManager(globalCache, globalPreloadPromise);
 }
-} else {
+} catch (error) {
+console.error('PikPak Master: Failed to toggle manager.', error);
+} finally {
+launchBusy = false;
+}
+};
+
+const blockNativeDrag = (e) => { e.preventDefault(); e.stopPropagation(); if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy'; };
+b.addEventListener('dragenter', blockNativeDrag);
+b.addEventListener('dragover', blockNativeDrag);
+b.addEventListener('drop', (e) => {
+blockNativeDrag(e);
+if (!document.querySelector('.pk-ov') || document.querySelector('.pk-ov').style.display === 'none') {
+void activateLauncher();
+}
+});
+
+b.addEventListener('pointerdown', (e) => {
+if (activePointerId !== null || e.isPrimary === false) return;
+if (e.pointerType === 'mouse' && e.button !== 0) return;
+e.preventDefault();
+activePointerId = e.pointerId;
+isDragging = false;
+dragStartX = e.clientX;
+dragStartY = e.clientY;
+const rect = b.getBoundingClientRect();
+b.style.bottom = 'auto'; b.style.right = 'auto';
+b.style.left = rect.left + 'px'; b.style.top = rect.top + 'px';
+b.style.transition = 'none';
+const offsetX = e.clientX - rect.left;
+const offsetY = e.clientY - rect.top;
+try { b.setPointerCapture(e.pointerId); } catch (error) {}
+
+const onMove = (em) => {
+if (em.pointerId !== activePointerId) return;
+if (em.cancelable) em.preventDefault();
+if (!isDragging && (Math.abs(em.clientX - dragStartX) > 4 || Math.abs(em.clientY - dragStartY) > 4)) {
+isDragging = true;
+}
+if (isDragging) {
+b.style.left = (em.clientX - offsetX) + 'px';
+b.style.top = (em.clientY - offsetY) + 'px';
+}
+};
+
+const finishPointer = (em, cancelled = false) => {
+if (em.pointerId !== activePointerId) return;
+document.removeEventListener('pointermove', onMove);
+document.removeEventListener('pointerup', onUp);
+document.removeEventListener('pointercancel', onCancel);
+try { b.releasePointerCapture(activePointerId); } catch (error) {}
+activePointerId = null;
+b.style.transition = 'transform 0.1s';
+if (isDragging) {
 constrainBall();
 gmSet('pk_pos_left', b.style.left);
 gmSet('pk_pos_top', b.style.top);
+} else if (!cancelled) {
+void activateLauncher();
 }
 };
-document.addEventListener('mousemove', onMove);
-document.addEventListener('mouseup', onUp);
-};
+
+const onUp = (em) => finishPointer(em, false);
+const onCancel = (em) => finishPointer(em, true);
+document.addEventListener('pointermove', onMove, { passive: false });
+document.addEventListener('pointerup', onUp);
+document.addEventListener('pointercancel', onCancel);
+});
 
 document.body.appendChild(b);
 
