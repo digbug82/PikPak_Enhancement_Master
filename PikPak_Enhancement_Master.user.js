@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            4.4.0
+// @version            4.5.0
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -551,6 +551,7 @@ function shouldRemoveCapturedCaptchaValue(value, options = {}) {
 if (value === null || value === undefined || value === '') return false;
 const parsed = parseConfigJson(value, null);
 if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return true;
+if (String(parsed.scope || '').toLowerCase() !== 'drive') return true;
 const now = Date.now();
 const expiresAt = parseConfigTime(parsed.expiresAt || parsed.expireAt || parsed.expire_at);
 if (expiresAt && expiresAt < now) return true;
@@ -1071,9 +1072,349 @@ const inject = () => {
 const s = document.createElement('script');
 s.textContent = `(function(){
 const _f = window.fetch;
+const PK_DOWNLOAD_CAPTCHA_REFRESH_REQUEST = 'pk-download-hydrate-captcha-refresh-request';
+const PK_DOWNLOAD_CAPTCHA_REFRESH_RESULT = 'pk-download-hydrate-captcha-refresh-result';
+const PK_DOWNLOAD_CAPTCHA_INVALID = 'pk-download-hydrate-captcha-invalid';
+let pkDownloadCaptchaInitTemplate = null;
+let pkDownloadCaptchaTemplateLastToken = '';
+let pkDownloadCaptchaRefreshPromise = null;
+let pkDownloadCaptchaRefreshLastAt = 0;
+let pkOfficialDriveHttp = null;
+let pkOfficialDriveHttpSearchPromise = null;
+const pkDownloadInvalidCaptchaTokens = new Set();
+const PK_DRIVE_CAPTCHA_TEMPLATE_MAX_AGE = 4 * 60 * 1000;
+const PK_DRIVE_CAPTCHA_META_KEYS = ['captcha_sign', 'client_version', 'package_name', 'timestamp', 'user_id'];
+
+const isDriveCaptchaPayload = payload => {
+if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
+const meta = payload.meta;
+if (!meta || typeof meta !== 'object' || Array.isArray(meta)) return false;
+return PK_DRIVE_CAPTCHA_META_KEYS.every(key => String(meta[key] || '').trim());
+};
+
+const isReusableDriveCaptchaInitTemplate = template => {
+if (!template || template.scope !== 'drive' || !template.init) return false;
+const capturedAt = Number(template.capturedAt || 0) || 0;
+if (!capturedAt || Date.now() - capturedAt > PK_DRIVE_CAPTCHA_TEMPLATE_MAX_AGE) return false;
+try {
+    return isDriveCaptchaPayload(JSON.parse(String(template.init.body || '{}')));
+} catch (e) {
+    return false;
+}
+};
+
+const rememberInvalidDownloadCaptchaToken = token => {
+const clean = String(token || '');
+if (clean.length <= 20) return '';
+pkDownloadInvalidCaptchaTokens.add(clean);
+while (pkDownloadInvalidCaptchaTokens.size > 20) {
+    const first = pkDownloadInvalidCaptchaTokens.values().next().value;
+    pkDownloadInvalidCaptchaTokens.delete(first);
+}
+return clean;
+};
+
+const emitDownloadCaptchaRefreshResult = (requestId, ok, reason) => {
+try {
+    document.dispatchEvent(new CustomEvent(PK_DOWNLOAD_CAPTCHA_REFRESH_RESULT, {
+        detail: JSON.stringify({ requestId: String(requestId || ''), ok: !!ok, reason: String(reason || '') })
+    }));
+} catch (e) {}
+};
+
+const readCapturedDownloadCaptchaRecord = () => {
+let raw = '';
+try { raw = localStorage.getItem('pk_captured_captcha') || ''; } catch (e) {}
+if (!raw) return { token: '', savedAt: 0, expiresAt: 0 };
+try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        if (String(parsed.scope || '').toLowerCase() !== 'drive') {
+            try { if ((localStorage.getItem('pk_captured_captcha') || '') === raw) localStorage.removeItem('pk_captured_captcha'); } catch (e) {}
+            return { token: '', savedAt: 0, expiresAt: 0 };
+        }
+        const token = String(parsed.captcha_token || parsed.token || '');
+        const savedAt = Number(parsed.savedAt || parsed.saved_at || 0) || 0;
+        const expiresAt = Number(parsed.expiresAt || parsed.expires_at || 0) || 0;
+        if (expiresAt && expiresAt <= Date.now()) {
+            try { if ((localStorage.getItem('pk_captured_captcha') || '') === raw) localStorage.removeItem('pk_captured_captcha'); } catch (e) {}
+            return { token: '', savedAt: 0, expiresAt: 0 };
+        }
+        return { token, savedAt, expiresAt };
+    }
+} catch (e) {}
+try { if ((localStorage.getItem('pk_captured_captcha') || '') === raw) localStorage.removeItem('pk_captured_captcha'); } catch (e) {}
+return { token: '', savedAt: 0, expiresAt: 0 };
+};
+
+const readCapturedDownloadCaptchaToken = () => readCapturedDownloadCaptchaRecord().token;
+
+const storeCapturedDownloadCaptchaToken = (token, expiresInSeconds = 300) => {
+const clean = String(token || '').slice(0, 2048);
+if (clean.length <= 20) return false;
+if (pkDownloadInvalidCaptchaTokens.has(clean)) return false;
+const now = Date.now();
+const current = readCapturedDownloadCaptchaRecord();
+const preserveCurrentTimes = current.token === clean && current.savedAt > 0 && current.expiresAt > now;
+const ttlMs = Math.max(30, Number(expiresInSeconds) || 300) * 1000;
+const payload = {
+    captcha_token: clean,
+    scope: 'drive',
+    savedAt: preserveCurrentTimes ? current.savedAt : now,
+    expiresAt: preserveCurrentTimes ? current.expiresAt : now + ttlMs
+};
+try {
+    localStorage.setItem('pk_captured_captcha', JSON.stringify(payload));
+    return true;
+} catch (e) {
+    return false;
+}
+};
+
+const rememberDownloadCaptchaInitTemplate = async (raw, url, opts) => {
+if (!url || !url.includes('/v1/shield/captcha/init')) return false;
+const method = String((opts && opts.method) || (raw && raw.method) || 'GET').toUpperCase();
+if (method !== 'POST') return false;
+try {
+    let body = opts && opts.body;
+    if (body == null && typeof Request !== 'undefined' && raw instanceof Request) {
+        body = await raw.clone().text();
+    }
+    if (body && typeof body !== 'string') body = JSON.stringify(body);
+    if (!body) return false;
+    let payload = null;
+    try { payload = JSON.parse(body); } catch (e) {}
+    if (!isDriveCaptchaPayload(payload)) return false;
+    delete payload.captcha_token;
+    body = JSON.stringify(payload);
+    const sourceHeaders = (opts && opts.headers) || (raw && raw.headers) || undefined;
+    const headers = Object.fromEntries(new Headers(sourceHeaders).entries());
+    const init = { method: 'POST', headers, body };
+    ['credentials', 'mode', 'referrer', 'referrerPolicy', 'integrity', 'keepalive'].forEach(key => {
+        const value = opts && opts[key] !== undefined ? opts[key] : (raw && raw[key]);
+        if (value !== undefined) init[key] = value;
+    });
+    pkDownloadCaptchaInitTemplate = { url, init, scope: 'drive', capturedAt: Date.now() };
+    return true;
+} catch (e) {}
+return false;
+};
+
+const readAvailableDownloadCaptchaToken = invalidToken => {
+const blocked = String(invalidToken || '');
+try {
+    const captured = readCapturedDownloadCaptchaToken();
+    if (captured.length > 20 && captured !== blocked && !pkDownloadInvalidCaptchaTokens.has(captured)) return captured;
+} catch (e) {}
+return '';
+};
+
+const getPikPakWebpackRequire = () => {
+try {
+    const chunks = window.webpackChunkpikpak_web;
+    if (!chunks || typeof chunks.push !== 'function') return null;
+    let runtimeRequire = null;
+    const chunkId = 'pk_captcha_bridge_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    chunks.push([[chunkId], {}, require => { runtimeRequire = require; }]);
+    return runtimeRequire;
+} catch (e) {
+    return null;
+}
+};
+
+const findOfficialDriveHttp = () => {
+if (pkOfficialDriveHttp) return Promise.resolve(pkOfficialDriveHttp);
+if (pkOfficialDriveHttpSearchPromise) return pkOfficialDriveHttpSearchPromise;
+pkOfficialDriveHttpSearchPromise = new Promise(resolve => {
+    let settled = false;
+    let scanTimer = null;
+    let timeoutTimer = null;
+    const finish = value => {
+        if (settled) return;
+        settled = true;
+        if (scanTimer) clearInterval(scanTimer);
+        if (timeoutTimer) clearTimeout(timeoutTimer);
+        if (typeof value === 'function') pkOfficialDriveHttp = value;
+        resolve(pkOfficialDriveHttp);
+    };
+    const inspect = (value, depth = 0, seen = new WeakSet(), budget = { count: 0 }) => {
+        if (!value || settled || depth > 3 || budget.count >= 5000) return;
+        const type = typeof value;
+        if (type !== 'object' && type !== 'function') return;
+        if (seen.has(value)) return;
+        seen.add(value);
+        budget.count++;
+        try {
+            if (typeof value.$http === 'function') {
+                finish(value.$http.bind(value));
+                return;
+            }
+        } catch (e) {}
+        try {
+            if (typeof value.then === 'function') {
+                Promise.resolve(value).then(resolved => inspect(resolved, depth + 1, seen, budget)).catch(() => {});
+            }
+        } catch (e) {}
+        if (depth >= 3 || settled) return;
+        try {
+            Object.keys(value).slice(0, 80).forEach(key => {
+                if (settled) return;
+                try { inspect(value[key], depth + 1, seen, budget); } catch (e) {}
+            });
+        } catch (e) {}
+    };
+    const scan = () => {
+        const runtimeRequire = getPikPakWebpackRequire();
+        if (!runtimeRequire) return;
+        const scanSeen = new WeakSet();
+        const scanBudget = { count: 0 };
+        const inspectExport = exported => {
+            inspect(exported, 0, scanSeen, scanBudget);
+        };
+        const cache = runtimeRequire.c;
+        if (cache) {
+            Object.keys(cache).forEach(id => {
+                if (settled || scanBudget.count >= 5000) return;
+                const module = cache[id];
+                inspectExport(module && module.exports);
+            });
+        }
+        const factories = runtimeRequire.m;
+        if (!factories || settled) return;
+        const factorySeen = new WeakSet();
+        const factoryBudget = { count: 0 };
+        Object.keys(factories).forEach(id => {
+            if (settled || factoryBudget.count >= 5000) return;
+            let source = '';
+            try { source = Function.prototype.toString.call(factories[id]); } catch (e) {}
+            if (!source.includes('withCaptchaMeta') || !source.includes('captcha_sign') || !source.includes('$http')) return;
+            try { inspect(runtimeRequire(id), 0, factorySeen, factoryBudget); } catch (e) {}
+        });
+    };
+    scan();
+    scanTimer = setInterval(scan, 100);
+    timeoutTimer = setTimeout(() => finish(null), 2500);
+}).finally(() => {
+    pkOfficialDriveHttpSearchPromise = null;
+});
+return pkOfficialDriveHttpSearchPromise;
+};
+
+const replayDownloadCaptchaInitTemplate = async detail => {
+const template = pkDownloadCaptchaInitTemplate;
+if (!isReusableDriveCaptchaInitTemplate(template)) throw new Error('drive_captcha_template_unavailable');
+const init = { ...template.init, headers: { ...(template.init.headers || {}) }, cache: 'no-store' };
+try {
+    const payload = JSON.parse(String(init.body || '{}'));
+    delete payload.captcha_token;
+    if (detail.action) payload.action = String(detail.action);
+    init.body = JSON.stringify(payload);
+} catch (e) {}
+const response = await _f.call(window, template.url, init);
+const data = await response.clone().json().catch(() => null);
+const token = data && (data.captcha_token || (data.data && data.data.captcha_token));
+if (!response.ok || !token || String(token).length <= 20) throw new Error('captcha_refresh_failed');
+if (!storeCapturedDownloadCaptchaToken(token, data && data.expires_in)) throw new Error('captcha_refresh_token_rejected');
+pkDownloadCaptchaTemplateLastToken = String(token);
+return true;
+};
+
+const getOfficialCaptchaRecoveryRequest = detail => {
+try {
+    const method = String(detail && detail.requestMethod || 'GET').toUpperCase();
+    if (method !== 'GET') return null;
+    const target = new URL(String(detail && detail.requestUrl || ''), location.href);
+    if (target.hostname.toLowerCase() !== 'api-drive.mypikpak.com') return null;
+    const prefix = '/drive/v1/files/';
+    if (target.pathname !== '/drive/v1/files') {
+        if (!target.pathname.startsWith(prefix)) return null;
+        const fileId = target.pathname.slice(prefix.length);
+        if (!fileId || fileId.includes('/')) return null;
+    }
+    return { url: target.href, method };
+} catch (e) {
+    return null;
+}
+};
+
+const bootstrapOfficialDownloadCaptcha = async detail => {
+const officialHttp = await findOfficialDriveHttp();
+if (!officialHttp) throw new Error('official_http_unavailable');
+const recoveryRequest = getOfficialCaptchaRecoveryRequest(detail);
+let requestError = null;
+try {
+    const recoveryUrl = recoveryRequest
+        ? recoveryRequest.url
+        : 'https://api-drive.mypikpak.com/drive/v1/about?_t=' + Date.now();
+    await officialHttp(recoveryUrl, {
+        method: recoveryRequest ? recoveryRequest.method : 'GET',
+        cache: 'no-store'
+    });
+} catch (e) {
+    requestError = e;
+}
+await new Promise(resolve => setTimeout(resolve, 100));
+const token = readAvailableDownloadCaptchaToken(detail.invalidToken);
+if (token) {
+    storeCapturedDownloadCaptchaToken(token);
+    return true;
+}
+if (isReusableDriveCaptchaInitTemplate(pkDownloadCaptchaInitTemplate)) return replayDownloadCaptchaInitTemplate(detail);
+if (!recoveryRequest) throw requestError || new Error('captcha_recovery_request_unavailable');
+throw requestError || new Error('captcha_action_refresh_failed');
+};
+
+document.addEventListener(PK_DOWNLOAD_CAPTCHA_REFRESH_REQUEST, event => {
+let detail = {};
+try { detail = JSON.parse(String(event && event.detail || '{}')); } catch (e) {}
+const requestId = String(detail.requestId || '');
+const invalidToken = String(detail.invalidToken || '');
+if (invalidToken) {
+    rememberInvalidDownloadCaptchaToken(invalidToken);
+    try {
+        const stored = readCapturedDownloadCaptchaToken();
+        if (stored === invalidToken) localStorage.removeItem('pk_captured_captcha');
+    } catch (e) {}
+    if (pkDownloadCaptchaTemplateLastToken && invalidToken === pkDownloadCaptchaTemplateLastToken) {
+        pkDownloadCaptchaInitTemplate = null;
+        pkDownloadCaptchaTemplateLastToken = '';
+    }
+}
+if (pkDownloadCaptchaRefreshPromise) return;
+const now = Date.now();
+if (now - pkDownloadCaptchaRefreshLastAt < 1000) {
+    emitDownloadCaptchaRefreshResult(requestId, false, 'refresh_throttled');
+    return;
+}
+pkDownloadCaptchaRefreshLastAt = now;
+pkDownloadCaptchaRefreshPromise = (async () => {
+    if (isReusableDriveCaptchaInitTemplate(pkDownloadCaptchaInitTemplate)) await replayDownloadCaptchaInitTemplate(detail);
+    else await bootstrapOfficialDownloadCaptcha(detail);
+    emitDownloadCaptchaRefreshResult(requestId, true, 'refreshed');
+    return true;
+})().catch(error => {
+    emitDownloadCaptchaRefreshResult(requestId, false, error && error.message ? error.message : 'refresh_failed');
+    return false;
+}).finally(() => {
+    pkDownloadCaptchaRefreshPromise = null;
+});
+});
+
 window.fetch = async function(...args) {
 const raw = args[0];
 const url = raw && raw.url ? raw.url : (raw ? raw.toString() : '');
+const opts = args[1] || {};
+let outgoingCaptchaToken = '';
+let captchaInitIsDrive = false;
+let isDriveApiRequest = false;
+try {
+    const target = new URL(url, location.href);
+    isDriveApiRequest = target.hostname.toLowerCase() === 'api-drive.mypikpak.com' && target.pathname.startsWith('/drive/');
+} catch (e) {}
+
+if (url.includes('/v1/shield/captcha/init')) {
+captchaInitIsDrive = await rememberDownloadCaptchaInitTemplate(raw, url, opts);
+}
 
 if (url.includes('area_accessible')) {
 return new Promise((_, reject) => {
@@ -1082,6 +1423,16 @@ return new Promise((_, reject) => {
 }
 
 const isTurbo = localStorage.getItem('pk_turbo_mode') === 'true';
+
+try {
+const sourceHeaders = opts.headers || (raw && raw.headers) || undefined;
+const pageHeaders = new Headers(sourceHeaders);
+const pageCaptcha = pageHeaders.get('x-captcha-token') || pageHeaders.get('X-Captcha-Token') || '';
+if (isDriveApiRequest && pageCaptcha.length > 20) {
+    outgoingCaptchaToken = String(pageCaptcha);
+    storeCapturedDownloadCaptchaToken(outgoingCaptchaToken);
+}
+} catch (e) {}
 
 if (isTurbo) {
 if (location.href.includes('/login') || location.pathname.includes('login')) {
@@ -1099,7 +1450,6 @@ if (url.includes(':incremental_sync') || url.includes(':sync')) {
 }
 
 try {
-    const opts = args[1] || {};
     let cap = null;
     let auth = null;
     if (opts.headers) {
@@ -1114,7 +1464,10 @@ try {
             if (authKey) auth = opts.headers[authKey];
         }
     }
-    if (cap && cap.length > 20) localStorage.setItem('pk_captured_captcha', String(cap).slice(0, 2048));
+    if (isDriveApiRequest && cap && cap.length > 20) {
+        outgoingCaptchaToken = String(cap);
+        storeCapturedDownloadCaptchaToken(outgoingCaptchaToken);
+    }
 
     if (auth && auth.length > 20) document.dispatchEvent(new CustomEvent('pk-token-captured', { detail: auth }));
 } catch (e) {}
@@ -1124,12 +1477,78 @@ const res = await _f.apply(this, args);
 
 try {
 const u = url.split('?')[0];
+const method = String(opts.method || (raw && raw.method) || 'GET').toUpperCase();
+if (res && res.ok && captchaInitIsDrive && url.includes('/v1/shield/captcha/init')) {
+    const captchaInitData = await res.clone().json().catch(() => null);
+    const captchaInitToken = captchaInitData && (captchaInitData.captcha_token || (captchaInitData.data && captchaInitData.data.captcha_token));
+    if (captchaInitToken) {
+        storeCapturedDownloadCaptchaToken(captchaInitToken, captchaInitData && captchaInitData.expires_in);
+        pkDownloadCaptchaTemplateLastToken = String(captchaInitToken);
+    }
+}
 const authReadyUrl = u.includes('/drive/v1/about') || u.includes('/v1/user/me');
 const authErrorUrl = u.includes('/drive/v1/about') || u.includes('/drive/v1/files') || u.includes('/v1/user/me') || u.includes('/v1/auth/token');
 if (res && res.ok && authReadyUrl) {
     document.dispatchEvent(new CustomEvent('pk-official-auth-ready', { detail: { url: u, status: res.status } }));
-} else if (res && authErrorUrl && (res.status === 401 || res.status === 403 || res.status === 400)) {
+} else if (res && authErrorUrl && (res.status === 401 || res.status === 403)) {
     document.dispatchEvent(new CustomEvent('pk-official-auth-error', { detail: { url: u, status: res.status } }));
+}
+
+if (res && res.status === 400 && url.includes('api-drive.mypikpak.com')) {
+    const captchaData = await res.clone().json().catch(() => null);
+    if (captchaData && String(captchaData.error || '').toLowerCase() === 'captcha_invalid') {
+        rememberInvalidDownloadCaptchaToken(outgoingCaptchaToken);
+        try {
+            const stored = readCapturedDownloadCaptchaToken();
+            if (outgoingCaptchaToken && stored === outgoingCaptchaToken) localStorage.removeItem('pk_captured_captcha');
+        } catch (e) {}
+        let actionPath = '';
+        try { actionPath = new URL(url, location.href).pathname; } catch (e) {}
+        const detailPrefix = '/drive/v1/files/';
+        if (actionPath.startsWith(detailPrefix) && !actionPath.slice(detailPrefix.length).includes('/')) actionPath = '/drive/v1/files';
+        const actionMethod = actionPath === '/drive/v1/events' ? 'GET' : method;
+        const captchaAction = actionMethod + ':' + (actionPath || '/drive/v1/files');
+        document.dispatchEvent(new CustomEvent(PK_DOWNLOAD_CAPTCHA_INVALID, {
+            detail: JSON.stringify({
+                token: outgoingCaptchaToken,
+                action: captchaAction,
+                requestUrl: url,
+                requestMethod: method
+            })
+        }));
+    }
+}
+
+if (res && res.ok && method === 'POST' && u.endsWith('/drive/v1/files')) {
+    let payload = null;
+    try {
+        const body = opts.body;
+        payload = typeof body === 'string' ? JSON.parse(body) : body;
+    } catch (e) {}
+    if (payload && payload.upload_type === 'UPLOAD_TYPE_URL') {
+        res.clone().json().then(data => {
+            const nested = data && data.data && typeof data.data === 'object' ? data.data : null;
+            const file = data && data.file && typeof data.file === 'object' ? data.file : null;
+            const task = (data && data.task) || (file && file.task) || (nested && nested.task) || file || data || {};
+            const detail = {
+                taskId: String(task.id || task.task_id || ''),
+                fileId: String(task.file_id || (task.reference_resource && task.reference_resource.id) || ''),
+                phase: String(task.phase || ''),
+                parentId: String(payload.parent_id || ''),
+                defaultDownload: !payload.parent_id && payload.folder_type === 'DOWNLOAD',
+                createdAt: Date.now()
+            };
+            if (!detail.taskId) return;
+            try {
+                const key = 'pk_cloud_target_events_v1';
+                const old = JSON.parse(sessionStorage.getItem(key) || '[]');
+                const rows = Array.isArray(old) ? old.filter(row => row && Date.now() - Number(row.createdAt || 0) < 86400000) : [];
+                rows.push(detail);
+                sessionStorage.setItem(key, JSON.stringify(rows.slice(-100)));
+            } catch (e) {}
+            document.dispatchEvent(new CustomEvent('pk-cloud-task-created', { detail: JSON.stringify(detail) }));
+        }).catch(() => {});
+    }
 }
 } catch (e) {}
 
@@ -1160,6 +1579,250 @@ return new _W(url, opts);
 inject();
 })();
 
+let downloadHydrateCaptchaWaitPromise = null;
+let downloadHydrateCaptchaLastError = null;
+let downloadHydrateCaptchaWaitScope = '';
+const DOWNLOAD_HYDRATE_CAPTCHA_REFRESH_REQUEST_EVENT = 'pk-download-hydrate-captcha-refresh-request';
+const DOWNLOAD_HYDRATE_CAPTCHA_REFRESH_RESULT_EVENT = 'pk-download-hydrate-captcha-refresh-result';
+const DOWNLOAD_HYDRATE_CAPTCHA_INVALID_EVENT = 'pk-download-hydrate-captcha-invalid';
+let downloadHydrateCaptchaRefreshRequestSeq = 0;
+let downloadHydrateCaptchaRefreshLastResult = null;
+let downloadHydrateCaptchaAutoRefreshLastAt = 0;
+
+document.addEventListener(DOWNLOAD_HYDRATE_CAPTCHA_REFRESH_RESULT_EVENT, event => {
+let detail = null;
+try { detail = JSON.parse(String(event && event.detail || '')); } catch (e) {}
+if (!detail) return;
+downloadHydrateCaptchaRefreshLastResult = {
+requestId: String(detail.requestId || ''),
+ok: detail.ok === true,
+reason: String(detail.reason || ''),
+at: Date.now()
+};
+if (detail.ok === true) resetHeaderCache();
+else console.warn(`[Hydrate Captcha] active refresh did not produce a token: ${String(detail.reason || 'unknown')}`);
+});
+
+document.addEventListener(DOWNLOAD_HYDRATE_CAPTCHA_INVALID_EVENT, event => {
+let detail = null;
+try { detail = JSON.parse(String(event && event.detail || '')); } catch (e) {}
+if (!detail) return;
+const invalidToken = String(detail.token || '');
+if (invalidToken.length > 20) {
+try {
+rememberDownloadHydrateInvalidCaptchaToken(invalidToken);
+clearStoredDownloadHydrateCaptchaToken(invalidToken);
+} catch (e) {}
+}
+try { resetHeaderCache(); } catch (e) {}
+const now = Date.now();
+if (now - downloadHydrateCaptchaAutoRefreshLastAt < 500) return;
+downloadHydrateCaptchaAutoRefreshLastAt = now;
+requestOfficialDownloadHydrateCaptchaRefresh(
+    String(detail.action || 'GET:/drive/v1/files'),
+    invalidToken,
+    String(detail.requestUrl || ''),
+    String(detail.requestMethod || 'GET')
+);
+});
+
+function requestOfficialDownloadHydrateCaptchaRefresh(action = 'GET:/drive/v1/files', invalidToken = '', requestUrl = '', requestMethod = 'GET') {
+const requestId = `hydrate_${Date.now()}_${++downloadHydrateCaptchaRefreshRequestSeq}`;
+try {
+document.dispatchEvent(new CustomEvent(DOWNLOAD_HYDRATE_CAPTCHA_REFRESH_REQUEST_EVENT, {
+    detail: JSON.stringify({
+        requestId,
+        action: String(action || 'GET:/drive/v1/files'),
+        invalidToken: String(invalidToken || ''),
+        requestUrl: String(requestUrl || ''),
+        requestMethod: String(requestMethod || 'GET').toUpperCase()
+    })
+}));
+return requestId;
+} catch (e) {
+return '';
+}
+}
+
+async function waitForActiveDownloadHydrateCaptcha(options = {}) {
+const signal = options.signal || null;
+let waited = false;
+while (downloadHydrateCaptchaWaitPromise) {
+waited = true;
+if (signal && signal.aborted) throw new DOMException('Aborted by user', 'AbortError');
+if (typeof options.isRunning === 'function' && !options.isRunning()) throw new DOMException('Aborted by user', 'AbortError');
+if (typeof options.onWait === 'function') options.onWait({ elapsed: 0, waitMs: 0 });
+
+const activeWait = downloadHydrateCaptchaWaitPromise;
+let abortHandler = null;
+let refreshed = false;
+try {
+refreshed = signal
+    ? await Promise.race([
+        activeWait,
+        new Promise((_, reject) => {
+            abortHandler = () => reject(new DOMException('Aborted by user', 'AbortError'));
+            signal.addEventListener('abort', abortHandler, { once: true });
+        })
+    ])
+    : await activeWait;
+} finally {
+if (signal && abortHandler) signal.removeEventListener('abort', abortHandler);
+}
+if (!refreshed) {
+const sourceError = downloadHydrateCaptchaLastError;
+const waitError = new Error(sourceError && sourceError.message ? sourceError.message : 'captcha_invalid');
+if (sourceError) {
+    ['status', 'statusCode', 'code', 'errorCode', 'captchaToken', 'captchaAction', 'captchaRequestUrl', 'captchaRequestMethod'].forEach(key => {
+        if (sourceError[key] !== undefined) waitError[key] = sourceError[key];
+    });
+    if (sourceError.data !== undefined) waitError.data = sourceError.data;
+    if (sourceError.response !== undefined) waitError.response = sourceError.response;
+    waitError.cause = sourceError;
+} else {
+    waitError.status = 400;
+    waitError.statusCode = 400;
+    waitError.code = 'captcha_invalid';
+    waitError.data = { error: 'captcha_invalid' };
+}
+waitError.captchaRecoveryExhausted = true;
+throw waitError;
+}
+if (downloadHydrateCaptchaWaitPromise === activeWait) return waited;
+}
+return waited;
+}
+
+function clearDownloadHydrateCaptchaLastError() {
+downloadHydrateCaptchaLastError = null;
+}
+
+const pkNativeFetch = window.fetch.bind(window);
+function rebuildDriveApiRequestInit(input, init = {}) {
+const nextInit = { ...(init || {}) };
+const sourceHeaders = nextInit.headers || (input && input.headers) || undefined;
+const headers = new Headers(sourceHeaders);
+const freshHeaders = getHeaders();
+[
+['Authorization', freshHeaders.Authorization],
+['x-device-id', freshHeaders['x-device-id']],
+['x-captcha-token', freshHeaders['x-captcha-token']]
+].forEach(([name, value]) => {
+if (value) headers.set(name, value);
+else headers.delete(name);
+});
+nextInit.headers = Object.fromEntries(headers.entries());
+return nextInit;
+}
+
+async function readDriveApiCaptchaError(response, requestHeaders) {
+if (!response || response.status !== 400) return null;
+const data = await response.clone().json().catch(() => null);
+if (!data || String(data.error || '').trim().toLowerCase() !== 'captcha_invalid') return null;
+const error = new Error('captcha_invalid');
+error.status = response.status;
+error.statusCode = response.status;
+error.code = 'captcha_invalid';
+error.errorCode = Number(data.error_code || 0) || 0;
+error.data = data;
+error.response = { status: response.status, statusCode: response.status, data };
+try {
+if (requestHeaders && typeof requestHeaders.get === 'function') error.captchaToken = requestHeaders.get('x-captcha-token') || '';
+else {
+const captchaKey = Object.keys(requestHeaders || {}).find(key => key.toLowerCase() === 'x-captcha-token');
+error.captchaToken = captchaKey ? String(requestHeaders[captchaKey] || '') : '';
+}
+} catch (e) { error.captchaToken = ''; }
+return error;
+}
+
+function getDriveApiCaptchaAction(input, init = {}) {
+let method = 'GET';
+let pathname = '/drive/v1/files';
+try { method = String((init && init.method) || (input && input.method) || 'GET').toUpperCase(); } catch (e) {}
+try {
+const rawUrl = input && input.url ? input.url : String(input || '');
+pathname = new URL(rawUrl, location.href).pathname || pathname;
+} catch (e) {}
+if (/^\/drive\/v1\/files\/[^/]+$/.test(pathname)) pathname = '/drive/v1/files';
+if (pathname === '/drive/v1/events') method = 'GET';
+return `${method}:${pathname}`;
+}
+
+const fetch = async (input, init = {}) => {
+let hostname = '';
+try {
+const rawUrl = input && input.url ? input.url : String(input || '');
+hostname = new URL(rawUrl, location.href).hostname.toLowerCase();
+} catch (e) {}
+const callerManagedCaptchaRecovery = !!(init && init.pkCallerManagedCaptchaRecovery);
+let nativeInit = init;
+if (callerManagedCaptchaRecovery) {
+nativeInit = { ...(init || {}) };
+delete nativeInit.pkCallerManagedCaptchaRecovery;
+}
+if (hostname !== 'api-drive.mypikpak.com' || callerManagedCaptchaRecovery) return pkNativeFetch(input, nativeInit);
+
+const signal = (init && init.signal) || (input && input.signal) || null;
+const maxWait = Math.max(10000, Number(CONF.downloadHydrateCaptchaWaitMax) || 5 * 60 * 1000);
+let requestTemplate = null;
+try {
+if (typeof Request !== 'undefined' && input instanceof Request) requestTemplate = input.clone();
+} catch (e) {}
+
+try {
+const waited = await waitForActiveDownloadHydrateCaptcha({ signal });
+if (waited) resetHeaderCache();
+} catch (waitError) {
+if (waitError && waitError.name === 'AbortError') throw waitError;
+if (!isDownloadHydrateCaptchaInvalidError(waitError) && !(waitError && waitError.captchaRecoveryExhausted)) throw waitError;
+console.warn('[Hydrate Captcha] inherited recovery exhausted; current drive request will start a fresh recovery scope.');
+resetHeaderCache();
+}
+const deadline = Date.now() + maxWait;
+
+while (true) {
+if (signal && signal.aborted) throw new DOMException('Aborted by user', 'AbortError');
+
+const attemptInput = requestTemplate ? requestTemplate.clone() : input;
+const attemptInit = rebuildDriveApiRequestInit(attemptInput, init);
+const response = await pkNativeFetch(attemptInput, attemptInit);
+const captchaError = await readDriveApiCaptchaError(response, attemptInit.headers);
+if (!captchaError) return response;
+captchaError.captchaAction = getDriveApiCaptchaAction(attemptInput, attemptInit);
+try {
+    captchaError.captchaRequestUrl = attemptInput && attemptInput.url ? String(attemptInput.url) : String(attemptInput || '');
+} catch (e) { captchaError.captchaRequestUrl = ''; }
+captchaError.captchaRequestMethod = String((attemptInit && attemptInit.method) || (attemptInput && attemptInput.method) || 'GET').toUpperCase();
+if (signal && signal.aborted) throw new DOMException('Aborted by user', 'AbortError');
+
+const remaining = deadline - Date.now();
+if (remaining <= 0 || typeof recoverDownloadHydrateCaptcha !== 'function') {
+if (signal && signal.aborted) throw new DOMException('Aborted by user', 'AbortError');
+captchaError.captchaRecoveryExhausted = true;
+throw captchaError;
+}
+const recovered = await recoverDownloadHydrateCaptcha(captchaError, {
+isRunning: () => !(signal && signal.aborted),
+signal,
+maxWait: remaining,
+scope: 'drive_fetch',
+restartAfterForeignWait: true,
+restartAfterExhaustedWait: true,
+action: captchaError.captchaAction,
+requestUrl: captchaError.captchaRequestUrl,
+requestMethod: captchaError.captchaRequestMethod
+});
+if (!recovered) {
+if (signal && signal.aborted) throw new DOMException('Aborted by user', 'AbortError');
+captchaError.captchaRecoveryExhausted = true;
+throw captchaError;
+}
+if (signal && signal.aborted) throw new DOMException('Aborted by user', 'AbortError');
+resetHeaderCache();
+}
+};
+
 window.addEventListener('beforeunload', (e) => {
 const activeStatus = ['UPLOADING', 'HASHING', 'WAITING', 'RUNNING', 'PAUSED'];
 const tasks = pkState?.uploadTasks || [];
@@ -1185,20 +1848,32 @@ const updated = ghosts.filter(x => x !== id);
 localStorage.setItem('pk_ghost_files', normalizeConfigValue('pk_ghost_files', updated, 'localWrite'));
 } catch(e){}
 };
-window.pkCleanupGhostFiles = function() {
-try {
-const ghosts = JSON.parse(localStorage.getItem('pk_ghost_files') || '[]');
-if (ghosts.length > 0) {
-const BATCH_SIZE = 100;
-for (let i = 0; i < ghosts.length; i += BATCH_SIZE) {
-const chunk = ghosts.slice(i, i + BATCH_SIZE);
-fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
+window.pkCleanupGhostFiles = async function() {
+const deleteIds = async (ids, kind) => {
+const uniqueIds = Array.from(new Set((ids || []).map(String).filter(Boolean)));
+if (!uniqueIds.length) return;
+if (typeof window.pkDeleteGhostFilesWithIndexSync === 'function') {
+await window.pkDeleteGhostFilesWithIndexSync(uniqueIds, { kind });
+return;
+}
+for (let i = 0; i < uniqueIds.length; i += 100) {
+const chunk = uniqueIds.slice(i, i + 100);
+const res = await fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
 method: 'POST',
 headers: getHeaders(),
 body: JSON.stringify({ ids: chunk })
-}).catch(()=>{});
+});
+if (!res.ok) throw new Error(`API ${res.status}`);
+chunk.forEach(id => window.pkRemoveGhostFile(id));
 }
-localStorage.setItem('pk_ghost_files', normalizeConfigValue('pk_ghost_files', [], 'localWrite'));
+if (window.pkGlobalIndex && typeof window.pkGlobalIndex.markAllDirty === 'function') {
+window.pkGlobalIndex.markAllDirty();
+}
+};
+try {
+const ghosts = JSON.parse(localStorage.getItem('pk_ghost_files') || '[]');
+if (ghosts.length > 0) {
+await deleteIds(ghosts, 'startup_ghost_cleanup').catch(()=>{});
 }
 } catch(e){}
 
@@ -1206,9 +1881,9 @@ try {
 const phases = "PHASE_TYPE_UNKNOW,PHASE_TYPE_PENDING,PHASE_TYPE_RUNNING,PHASE_TYPE_PAUSED,PHASE_TYPE_ERROR";
 const filters = encodeURIComponent(JSON.stringify({ "phase": { "in": phases } }));
 const url = `https://api-drive.mypikpak.com/drive/v1/tasks?type=upload&limit=100&filters=${filters}&_t=${Date.now()}`;
-fetch(url, { headers: getHeaders() })
+await fetch(url, { headers: getHeaders() })
 .then(res => res.json())
-.then(cloudData => {
+.then(async cloudData => {
 const cloudTasks = cloudData.tasks || [];
 const ghostIds = [];
 cloudTasks.forEach(ct => {
@@ -1221,9 +1896,7 @@ if (taskName === 'upload' || taskName === 'Ghost Task') {
 }
 });
 if (ghostIds.length > 0) {
-fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
-method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: ghostIds })
-}).catch(()=>{});
+await deleteIds(ghostIds, 'cloud_ghost_cleanup').catch(()=>{});
 }
 }).catch(()=>{});
 } catch (e) {}
@@ -1244,9 +1917,6 @@ body: JSON.stringify({ ids: chunk }),
 keepalive: true
 }).catch(()=>{});
 } catch(e) {}
-}
-if (typeof window.pkRemoveGhostFile === 'function') {
-filesToDelete.forEach(id => window.pkRemoveGhostFile(id));
 }
 }
 });
@@ -4639,6 +5309,7 @@ zh: {
   "str_name_conflict": "(可能重名)",
   "msg_newfolder_prompt": "新文件夹名称:",
   "msg_newfolder_created": "已新建文件夹：{n}",
+  "msg_creating_folder": "正在新建文件夹...",
   "msg_rename_prompt": "输入新名称:",
   "msg_copy_done": "已复制。请选择粘贴位置。",
   "msg_cut_done": "准备移动。请选择粘贴位置。",
@@ -4735,6 +5406,7 @@ zh: {
   "msg_abdm_not_http": "ABDM 当前仅支持 HTTP/HTTPS 直链任务",
   "msg_batch_scanning": "🚀 正在高速扫描目录结构...",
   "msg_batch_hydrating": "⚡ 正在并行提取下载链路...",
+  "msg_batch_restoring_access_verification": "正在自动恢复访问验证...",
   "msg_batch_no_files": "未发现可下载的文件。",
   "msg_batch_filtered": "下载过滤规则已跳过 {n} 个文件。",
   "msg_batch_all_filtered": "已全部过滤：{n} 个文件均命中下载过滤规则。",
@@ -4788,7 +5460,7 @@ zh: {
   "err_clipboard_denied": "剪贴板访问被拒绝",
   "err_worker": "工作线程错误",
   "err_capture": "截图失败。",
-  "err_captcha_simple": "验证失败。请在网页列表手动收藏一次文件以完成验证。",
+  "err_captcha_simple": "访问验证暂时无法恢复。请稍后重试；若问题持续，请刷新网页后重新操作。",
   "err_sub_dl_fail": "字幕下载失败: ",
   "err_sub_drop_type": "只解析字幕类型文件",
   "err_codec_t1": "无法播放视频编码 ({c})",
@@ -4876,6 +5548,29 @@ let cachedCaptchaKey = null;
 let memoryCapturedToken = '';
 const downloadHydrateInvalidCaptchaTokens = new Set();
 
+function readStoredCapturedCaptchaToken() {
+let raw = '';
+try { raw = localStorage.getItem('pk_captured_captcha') || ''; } catch (e) {}
+if (!raw) return '';
+try {
+const parsed = JSON.parse(raw);
+if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+    if (String(parsed.scope || '').toLowerCase() !== 'drive') {
+        try { if ((localStorage.getItem('pk_captured_captcha') || '') === raw) localStorage.removeItem('pk_captured_captcha'); } catch (e) {}
+        return '';
+    }
+    const expiresAt = parseConfigTime(parsed.expiresAt || parsed.expires_at);
+    if (expiresAt && expiresAt <= Date.now()) {
+        try { if ((localStorage.getItem('pk_captured_captcha') || '') === raw) localStorage.removeItem('pk_captured_captcha'); } catch (e) {}
+        return '';
+    }
+    return String(parsed.captcha_token || parsed.token || '');
+}
+} catch (e) {}
+try { if ((localStorage.getItem('pk_captured_captcha') || '') === raw) localStorage.removeItem('pk_captured_captcha'); } catch (e) {}
+return '';
+}
+
 function isDownloadHydrateCaptchaTokenInvalid(token) {
 return !!(token && downloadHydrateInvalidCaptchaTokens.has(String(token)));
 }
@@ -4896,9 +5591,11 @@ if (typeof globalCache !== 'undefined') globalCache.clear();
 if (typeof globalLineageMap !== 'undefined') globalLineageMap.clear();
 if (typeof globalParentIndex !== 'undefined') globalParentIndex.clear();
 if (typeof globalDirtyFolders !== 'undefined') globalDirtyFolders.clear();
+if (typeof globalFolderMutationStates !== 'undefined') globalFolderMutationStates.clear();
 if (typeof scannedFolderIds !== 'undefined') scannedFolderIds.clear();
 if (typeof backgroundQueue !== 'undefined') backgroundQueue.length = 0;
 if (typeof isBackgroundRunning !== 'undefined') isBackgroundRunning = false;
+if (window.pkGlobalIndex && typeof window.pkGlobalIndex.reset === 'function') window.pkGlobalIndex.reset();
 if (typeof DurationProber !== 'undefined') DurationProber.reset();
 
 const ui = document.querySelector('.pk-ov');
@@ -5073,7 +5770,8 @@ if (pageHiddenAt) handlePageResume('focus');
 });
 
 window.addEventListener('storage', (e) => {
-if (e.key && (e.key.startsWith('credentials') || e.key.startsWith('captcha') || e.key === 'pk_captured_captcha')) {
+if (!e.key) return;
+if (e.key.startsWith('credentials')) {
 if (!e.newValue) {
 enterAuthRecoveryWindow(`storage-remove:${e.key}`);
 checkAndPurgeAuth(`storage-remove:${e.key}`);
@@ -5081,6 +5779,8 @@ checkAndPurgeAuth(`storage-remove:${e.key}`);
 resetHeaderCache();
 markAuthRecovered();
 }
+} else if (e.key.startsWith('captcha') || e.key === 'pk_captured_captcha') {
+resetHeaderCache();
 }
 });
 
@@ -5096,9 +5796,11 @@ markAuthRecovered();
 const _origRemoveItem = Storage.prototype.removeItem;
 Storage.prototype.removeItem = function(key) {
 _origRemoveItem.apply(this, arguments);
-if (key && (key.startsWith('credentials') || key.startsWith('captcha'))) {
+if (key && key.startsWith('credentials')) {
 enterAuthRecoveryWindow(`remove:${key}`);
 checkAndPurgeAuth(`remove:${key}`);
+} else if (key && (key.startsWith('captcha') || key === 'pk_captured_captcha')) {
+resetHeaderCache();
 }
 };
 
@@ -5162,32 +5864,8 @@ break;
 }
 }
 
-if (cachedCaptchaKey) {
-try {
-const v = JSON.parse(localStorage.getItem(cachedCaptchaKey));
-if (v && v.captcha_token && !isDownloadHydrateCaptchaTokenInvalid(v.captcha_token)) captcha = v.captcha_token;
-else cachedCaptchaKey = null;
-} catch {}
-}
-if (!captcha) {
-const capturedCaptcha = localStorage.getItem('pk_captured_captcha') || '';
+const capturedCaptcha = readStoredCapturedCaptchaToken();
 if (capturedCaptcha && !isDownloadHydrateCaptchaTokenInvalid(capturedCaptcha)) captcha = capturedCaptcha;
-if (!captcha) {
-for (let i = 0; i < localStorage.length; i++) {
-const k = localStorage.key(i);
-if (k && k.startsWith('captcha')) {
-try {
-const v = JSON.parse(localStorage.getItem(k));
-if (v && v.captcha_token && !isDownloadHydrateCaptchaTokenInvalid(v.captcha_token)) {
-    captcha = v.captcha_token;
-    cachedCaptchaKey = k;
-    break;
-}
-} catch {}
-}
-}
-}
-}
 
 const headers = { 'Content-Type': 'application/json', 'Authorization': token, 'x-device-id': localStorage.getItem('deviceid') || '', 'x-captcha-token': captcha };
 
@@ -5294,7 +5972,9 @@ clearTimeout(timeoutId);
 if (!res.ok) {
 if (res.status === 404) {
 if (!isBackground) console.warn(`[API] 404 Not Found (Skipped): ${parentId || 'Root'}`);
-return [];
+const missing = [];
+Object.defineProperty(missing, '_pkNotFound', { value: true, enumerable: false });
+return missing;
 }
 
 if (res.status === 401 || res.status === 403) {
@@ -5317,14 +5997,26 @@ err.errorCode = Number(data.error_code || 0) || 0;
 err.data = data;
 err.response = { status: res.status, statusCode: res.status, data };
 err.captchaToken = headers['x-captcha-token'] || '';
+err.captchaAction = 'GET:/drive/v1/files';
+err.captchaRequestUrl = url;
+err.captchaRequestMethod = 'GET';
 if (typeof isDownloadHydrateCaptchaInvalidError === 'function' && isDownloadHydrateCaptchaInvalidError(err)) {
 const recovered = typeof recoverDownloadHydrateCaptcha === 'function' ? await recoverDownloadHydrateCaptcha(err, {
-    isRunning: () => !(signal && signal.aborted)
+    isRunning: () => !(signal && signal.aborted),
+    signal: signal || null,
+    scope: 'drive_list',
+    restartAfterForeignWait: true,
+    restartAfterExhaustedWait: true,
+    action: err.captchaAction,
+    requestUrl: err.captchaRequestUrl,
+    requestMethod: err.captchaRequestMethod
 }) : false;
 if (recovered && !(signal && signal.aborted)) {
     pageRetries = 0;
     continue;
 }
+err.captchaRecoveryExhausted = true;
+throw err;
 }
 console.warn(`[API] 400 Error. Possible captcha intercept.`);
 localStorage.removeItem('pk_captured_captcha');
@@ -5351,10 +6043,6 @@ if (data.files) {
 const validFiles = data.files.filter(f => trashed ? f.trashed : !f.trashed).map(f => minifyFile(f, isBackground));
 all.push(...validFiles);
 if (onProgress) onProgress(all.length);
-
-if (isBackground && parentId !== undefined && typeof globalCache !== 'undefined') {
-globalCache.set(parentId, { items: [...all], nextToken: data.next_page_token });
-}
 }
 
 next = data.next_page_token;
@@ -5390,9 +6078,15 @@ throw e;
 return all;
 }
 
-async function apiGet(id) {
+async function apiGet(id, options = {}) {
 const headers = getHeaders();
-const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/files/${id}?thumbnail_size=SIZE_MEDIUM&_t=${Date.now()}`, { headers });
+const requestUrl = `https://api-drive.mypikpak.com/drive/v1/files/${id}?thumbnail_size=SIZE_MEDIUM&_t=${Date.now()}`;
+const requestInit = {
+headers,
+signal: options.signal || undefined
+};
+if (options.callerManagedCaptchaRecovery) requestInit.pkCallerManagedCaptchaRecovery = true;
+const res = await fetch(requestUrl, requestInit);
 try { syncTime(res.headers); } catch (e) {}
 if (!res.ok) {
 const data = await res.json().catch(() => ({}));
@@ -5407,6 +6101,9 @@ err.errorCode = Number(data.error_code || 0) || 0;
 err.data = data;
 err.response = { status: res.status, statusCode: res.status, data };
 err.captchaToken = headers['x-captcha-token'] || '';
+err.captchaAction = 'GET:/drive/v1/files';
+err.captchaRequestUrl = requestUrl;
+err.captchaRequestMethod = 'GET';
 throw err;
 }
 return res.json();
@@ -5414,20 +6111,49 @@ return res.json();
 
 async function apiGetWithCaptchaRecovery(id, options = {}) {
 const attempts = Math.max(1, Math.min(3, Number(options.attempts) || 2));
+const recoveryScope = String(options.captchaRecoveryScope || 'api_get_global');
 let lastErr = null;
+if (downloadHydrateCaptchaWaitPromise) {
+try {
+    const waited = await waitForActiveDownloadHydrateCaptcha({
+        isRunning: typeof options.isRunning === 'function' ? options.isRunning : (() => true),
+        onWait: typeof options.onWait === 'function' ? options.onWait : null,
+        signal: options.signal || null
+    });
+    if (waited) resetHeaderCache();
+} catch (waitError) {
+    if (waitError && waitError.name === 'AbortError') throw waitError;
+    if (!isDownloadHydrateCaptchaInvalidError(waitError) && !waitError.captchaRecoveryExhausted) throw waitError;
+    if (downloadHydrateCaptchaWaitPromise) throw waitError;
+    resetHeaderCache();
+}
+}
 for (let i = 0; i < attempts; i++) {
 try {
-return await apiGet(id);
+const result = await apiGet(id, { ...options, callerManagedCaptchaRecovery: true });
+if (typeof clearDownloadHydrateCaptchaLastError === 'function') clearDownloadHydrateCaptchaLastError();
+return result;
 } catch (e) {
 lastErr = e;
-if (typeof isDownloadHydrateCaptchaInvalidError !== 'function' || !isDownloadHydrateCaptchaInvalidError(e) || i >= attempts - 1) throw e;
+if (typeof isDownloadHydrateCaptchaInvalidError !== 'function' || !isDownloadHydrateCaptchaInvalidError(e) || e.captchaRecoveryExhausted || i >= attempts - 1) throw e;
 const recovered = typeof recoverDownloadHydrateCaptcha === 'function'
 ? await recoverDownloadHydrateCaptcha(e, {
     isRunning: typeof options.isRunning === 'function' ? options.isRunning : (() => true),
-    onWait: typeof options.onWait === 'function' ? options.onWait : null
+    onWait: typeof options.onWait === 'function' ? options.onWait : null,
+    signal: options.signal || null,
+    maxWait: options.maxWait,
+    scope: recoveryScope,
+    restartAfterForeignWait: true,
+    restartAfterExhaustedWait: true,
+    action: e.captchaAction || 'GET:/drive/v1/files',
+    requestUrl: e.captchaRequestUrl || '',
+    requestMethod: e.captchaRequestMethod || 'GET'
 })
 : false;
-if (!recovered) throw e;
+if (!recovered) {
+    e.captchaRecoveryExhausted = true;
+    throw e;
+}
 }
 }
 throw lastErr;
@@ -5808,6 +6534,9 @@ try {
 const res = await fetch(url, { method: 'DELETE', headers: getHeaders() });
 if (!res.ok && res.status !== 404) throw new Error(`Task Del Err ${res.status}`);
 if (strict && res.ok && await isTaskDeleteFailedPayload(res, chunk)) throw new Error('Task Del Err failed');
+if ((res.ok || res.status === 404) && typeof window.pkCancelCloudTargetWatch === 'function') {
+chunk.forEach(taskId => window.pkCancelCloudTargetWatch(taskId));
+}
 } catch(e) {
 if (strict) throw e;
 console.warn("Task delete warning:", e);
@@ -5819,13 +6548,14 @@ const trashUrl = `https://api-drive.mypikpak.com/drive/v1/files:batchTrash`;
 for (let i = 0; i < filesToDelete.length; i += 100) {
 const fileChunk = filesToDelete.slice(i, i + 100);
 try {
-await fetch(trashUrl, {
+const res = await fetch(trashUrl, {
 method: 'POST',
 headers: getHeaders(),
 body: JSON.stringify({ ids: fileChunk })
 });
+if (!res.ok) throw new Error(`Task File Trash Err ${res.status}`);
 } catch (e) {
-if (!strict) throw e;
+if (strict) throw e;
 console.warn("Task file delete warning:", e);
 }
 }
@@ -6226,15 +6956,43 @@ if (typeof globalCache !== 'undefined') syncCacheMap(globalCache);
 return (S0.itemMap && S0.itemMap.get(id)) || baseItem || null;
 }
 
+function formatIndexProgress(stats = {}, options = {}) {
+const L = getStrings();
+const toCount = value => {
+const count = Number(value);
+return Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
+};
+const folders = toCount(stats.folders);
+const files = toCount(stats.files);
+const currentConcurrency = toCount(stats.currentConcurrency);
+const folderText = typeof options.folderText === 'function'
+? options.folderText(folders)
+: (options.folderText || `${options.label || L.loading || L.str_scanning} ${folders} ${L.unit_folders}`);
+const parts = [
+folderText,
+`${L.str_files}: ${files}`,
+`${L.str_speed}: ${currentConcurrency}`
+];
+if (options.hits !== undefined) parts.push(`${L.str_hits}: ${toCount(options.hits)}`);
+let text = parts.join(' | ');
+if (options.title) text = `${options.title}\n${text}`;
+if (stats.isRetrying) {
+const retryText = `${L.str_retries} ${toCount(stats.retries)}`;
+text += options.singleLine ? ` | ${retryText}` : `\n[ ${retryText} ]`;
+}
+return text;
+}
+
 // Original author: digbug82. Modified versions must retain this attribution and the AGPL-3.0-or-later license notice.
 async function coreRecursiveEngine(roots, options) {
-const { signal, onFile, onFolder, onFolderError, onProgress, preferFresh = false, listFolder = null, maxRetries = Infinity } = options;
+const { signal, onFile, onFolder, onFolderError, onProgress, preferFresh = false, listFolder = null, maxRetries = Infinity, background = false } = options;
 const L = getStrings();
 
 let queue = [...roots];
 let activeTasks = new Set();
 let inFlight = new Set();
 let pendingRetries = 0;
+let terminalError = null;
 
 const stats = {
 folders: 0,
@@ -6242,7 +7000,27 @@ files: 0,
 retries: 0,
 cacheHits: 0,
 failedFolders: 0,
-currentConcurrency: 10
+currentConcurrency: 10,
+lastDecreaseAt: 0,
+recoveryUntil: 0,
+lastIncreaseAt: 0
+};
+
+let lastProgressEmitAt = 0;
+let lastCooperativeYieldAt = performance.now();
+const emitProgress = (force = false) => {
+if (!onProgress) return;
+const now = performance.now();
+if (!force && now - lastProgressEmitAt < 50) return;
+lastProgressEmitAt = now;
+onProgress(stats);
+};
+const yieldToMainThread = async (force = false) => {
+const now = performance.now();
+if (!force && now - lastCooperativeYieldAt < 12) return;
+lastCooperativeYieldAt = now;
+emitProgress();
+await sleep(0);
 };
 
 const USER_LIMIT = parseInt(localStorage.getItem('pk_user_limit') || "200");
@@ -6252,39 +7030,57 @@ const isRecursiveCaptchaWaiting = () => typeof isDownloadHydrateCaptchaWaiting =
 const waitForRecursiveCaptchaIdle = async () => {
 while (isRecursiveCaptchaWaiting() && (!signal || !signal.aborted)) {
 stats.currentConcurrency = Math.min(stats.currentConcurrency, MIN_CONCURRENCY);
+stats.lastDecreaseAt = performance.now();
+stats.recoveryUntil = stats.lastDecreaseAt + 2000;
 stats.isRetrying = true;
-if (onProgress) onProgress(stats);
+emitProgress(true);
 await sleep(500);
 }
-stats.isRetrying = false;
+stats.isRetrying = pendingRetries > 0;
 };
 
 const processFolder = async (current) => {
 inFlight.add(current.id);
+let requestStartedAt = 0;
 try {
 let files = [];
 const folderId = current.id === 'root' ? '' : (current.id || '');
+let cacheHit = false;
 
-if (!listFolder && !preferFresh && typeof globalCache !== 'undefined' && globalCache.has(folderId)) {
+const canReuseGlobalIndexCache = !window.pkGlobalIndex || window.pkGlobalIndex.isCompleteFolder(folderId);
+if (!listFolder && !preferFresh && canReuseGlobalIndexCache && typeof globalCache !== 'undefined' && globalCache.has(folderId)) {
 const cachedData = globalCache.get(folderId);
 if (Array.isArray(cachedData)) {
 files = cachedData;
+cacheHit = true;
 stats.cacheHits++;
 }
 }
 
 let isFromNetwork = false;
-let start = 0;
 if (listFolder) {
 if (isRecursiveCaptchaWaiting()) await waitForRecursiveCaptchaIdle();
 if (signal && signal.aborted) return;
-start = performance.now();
+requestStartedAt = performance.now();
 files = await listFolder(current, signal);
 isFromNetwork = true;
-} else if (files.length === 0) {
+} else if (window.pkGlobalIndex) {
 if (isRecursiveCaptchaWaiting()) await waitForRecursiveCaptchaIdle();
 if (signal && signal.aborted) return;
-start = performance.now();
+requestStartedAt = performance.now();
+files = await window.pkGlobalIndex.ensureFolder(folderId, {
+signal,
+force: preferFresh,
+background: typeof background === 'function' ? background() : background === true,
+name: current.name,
+lineage: current.lineage || []
+});
+isFromNetwork = preferFresh || !cacheHit;
+if (typeof scannedFolderIds !== 'undefined') scannedFolderIds.add(folderId);
+} else if (!cacheHit) {
+if (isRecursiveCaptchaWaiting()) await waitForRecursiveCaptchaIdle();
+if (signal && signal.aborted) return;
+requestStartedAt = performance.now();
 files = await apiList(folderId, 1000, null, signal, false, true);
 isFromNetwork = true;
 if (typeof globalCache !== 'undefined') globalCache.set(folderId, files);
@@ -6294,6 +7090,7 @@ if (typeof scannedFolderIds !== 'undefined') scannedFolderIds.add(folderId);
 if (signal && signal.aborted) return;
 
 const nextSubFolders = [];
+let processedInFolder = 0;
 for (const f of files) {
 if (f.kind === 'drive#folder') {
 const myLineage = [...(current.lineage || []), { id: f.id, name: f.name }];
@@ -6307,6 +7104,11 @@ retryCount: 0
 stats.files++;
 if (onFile) onFile(f, current);
 }
+processedInFolder++;
+if ((processedInFolder & 255) === 0) {
+await yieldToMainThread();
+if (signal && signal.aborted) return;
+}
 }
 
 if (onFolder) onFolder(current, files, nextSubFolders);
@@ -6314,20 +7116,111 @@ queue.push(...nextSubFolders);
 stats.folders++;
 
 if (isFromNetwork) {
-const rtt = performance.now() - start;
+const now = performance.now();
+const rtt = now - requestStartedAt;
 const DYNAMIC_MAX = Math.min(USER_LIMIT, ABSOLUTE_MAX);
 
-if (rtt < 800) {
-if (stats.currentConcurrency < DYNAMIC_MAX) stats.currentConcurrency += 1;
-} else if (rtt > 3000) {
+if (rtt > 3000 && requestStartedAt >= stats.lastDecreaseAt) {
 stats.currentConcurrency = Math.max(MIN_CONCURRENCY, Math.floor(stats.currentConcurrency * 0.8));
+stats.lastDecreaseAt = now;
+stats.recoveryUntil = now + 1000;
+} else if (
+rtt < 800 &&
+requestStartedAt >= stats.lastDecreaseAt &&
+now >= stats.recoveryUntil &&
+now - stats.lastIncreaseAt >= 20 &&
+stats.currentConcurrency < DYNAMIC_MAX
+) {
+stats.currentConcurrency += 1;
+stats.lastIncreaseAt = now;
 }
 }
 
 } catch (err) {
 if (err.name === 'AbortError' || (signal && signal.aborted)) return;
 
+const errorCode = String((err && err.code) || '');
+const isCaptchaError = typeof isDownloadHydrateCaptchaInvalidError === 'function' && isDownloadHydrateCaptchaInvalidError(err);
+if (isCaptchaError) {
+stats.currentConcurrency = MIN_CONCURRENCY;
+stats.lastDecreaseAt = performance.now();
+stats.recoveryUntil = stats.lastDecreaseAt + 2000;
+stats.retries++;
+pendingRetries++;
+stats.isRetrying = true;
+emitProgress(true);
+try {
+if (terminalError) return;
+let recovered = false;
+if (!err.captchaRecoveryExhausted && typeof recoverDownloadHydrateCaptcha === 'function') {
+    recovered = await recoverDownloadHydrateCaptcha(err, {
+        isRunning: () => !terminalError && !(signal && signal.aborted),
+        signal: signal || null,
+        scope: 'background_scan',
+        restartAfterForeignWait: true,
+        action: err.captchaAction || 'GET:/drive/v1/files'
+    });
+}
+if (recovered && !terminalError && (!signal || !signal.aborted)) {
+    queue.unshift(current);
+} else {
+    terminalError = err;
+}
+} catch (recoveryError) {
+if (recoveryError && recoveryError.name === 'AbortError') return;
+terminalError = recoveryError || err;
+} finally {
+pendingRetries--;
+stats.isRetrying = pendingRetries > 0;
+}
+return;
+}
+
+if (errorCode === 'GLOBAL_INDEX_STALE_RESULT') {
+stats.retries++;
+current.staleRetryCount = (current.staleRetryCount || 0) + 1;
+pendingRetries++;
+stats.isRetrying = true;
+emitProgress(true);
+try {
+const folderId = current.id === 'root' ? '' : (current.id || '');
+while ((!signal || !signal.aborted)) {
+    const mutationState = typeof getFolderMutationState === 'function' ? getFolderMutationState(folderId, false) : null;
+    if (!mutationState || mutationState.pending <= 0) break;
+    await sleep(250);
+}
+const staleBackoff = Math.min(2000, 150 * current.staleRetryCount);
+if (staleBackoff > 0) await sleep(staleBackoff);
+if (!terminalError && (!signal || !signal.aborted)) queue.unshift(current);
+} finally {
+pendingRetries--;
+stats.isRetrying = pendingRetries > 0;
+}
+return;
+}
+
+if (errorCode === 'GLOBAL_INDEX_FOLDER_NOT_FOUND' && current.id && current.id !== 'root') {
+const folderId = current.id === 'root' ? '' : (current.id || '');
+let parentId = '';
+if (folderId && typeof globalParentIndex !== 'undefined') {
+    const parent = globalParentIndex.get(folderId);
+    if (parent && parent.id !== undefined && parent.id !== null) parentId = parent.id;
+}
+if (window.pkGlobalIndex && typeof window.pkGlobalIndex.dropFolders === 'function') {
+    window.pkGlobalIndex.dropFolders([folderId]);
+}
+if (window.pkGlobalIndex && typeof window.pkGlobalIndex.markDirty === 'function') {
+    window.pkGlobalIndex.markDirty(parentId);
+}
+return;
+}
+
+const failureAt = performance.now();
+if (requestStartedAt >= stats.lastDecreaseAt) {
 stats.currentConcurrency = Math.max(MIN_CONCURRENCY, Math.floor(stats.currentConcurrency * 0.5));
+stats.lastDecreaseAt = failureAt;
+stats.recoveryUntil = failureAt + 2000;
+}
 stats.retries++;
 current.retryCount = (current.retryCount || 0) + 1;
 
@@ -6340,27 +7233,34 @@ return;
 pendingRetries++;
 try {
 const backoff = current.retryCount === 1 ? 1000 : Math.min(current.retryCount * 5000, 60000);
+const jitteredBackoff = Math.round(backoff * (0.8 + Math.random() * 0.4));
 const reason = err.message || "Unknown Error";
 console.warn(`[ZeroLoss] Folder: ${current.name} | Reason: ${reason} | Attempt: ${current.retryCount} | Re-queueing...`);
 stats.isRetrying = true;
-if (onProgress) onProgress(stats);
+emitProgress(true);
 
-await sleep(backoff);
-if (signal && !signal.aborted) {
+await sleep(jitteredBackoff);
+if (!signal || !signal.aborted) {
 queue.unshift(current);
 }
 } finally {
-stats.isRetrying = false;
 pendingRetries--;
+stats.isRetrying = pendingRetries > 0;
 }
 } finally {
 inFlight.delete(current.id);
-if (onProgress) onProgress(stats);
+emitProgress();
 }
 };
 while ((queue.length > 0 || inFlight.size > 0 || pendingRetries > 0) && (!signal || !signal.aborted)) {
+if (terminalError && activeTasks.size === 0 && inFlight.size === 0 && pendingRetries === 0) break;
+const isBackgroundRun = typeof background === 'function' ? background() : background === true;
+if (isBackgroundRun && typeof isPkBackgroundPaused === 'function' && isPkBackgroundPaused()) {
+await sleep(1000);
+continue;
+}
 
-while (queue.length > 0 && activeTasks.size < stats.currentConcurrency && !isRecursiveCaptchaWaiting() && (!signal || !signal.aborted)) {
+while (!terminalError && queue.length > 0 && activeTasks.size < stats.currentConcurrency && !isRecursiveCaptchaWaiting() && (!signal || !signal.aborted)) {
 const folder = queue.pop();
 
 if (inFlight.has(folder.id) && folder.retryCount === 0) continue;
@@ -6377,7 +7277,16 @@ await waitForRecursiveCaptchaIdle();
 } else if (pendingRetries > 0 || inFlight.size > 0) {
 await sleep(100);
 }
+await yieldToMainThread();
 }
+
+if (terminalError) throw terminalError;
+
+if ((!signal || !signal.aborted) && !listFolder && window.pkGlobalIndex && roots.some(root => !window.pkGlobalIndex.canonicalId(root && root.id))) {
+window.pkGlobalIndex.certifyFull();
+}
+emitProgress(true);
+return stats;
 }
 
 const version = (typeof GM_info !== 'undefined' && GM_info.script) ? GM_info.script.version : "1.0.0";
@@ -6465,9 +7374,8 @@ const remoteClass = options.remoteClass || '';
 const remoteObjectFit = options.remoteObjectFit || 'contain';
 const remoteRadius = options.remoteRadius || '0';
 const hasRemote = !!remoteSrc;
-const showFallbackFirst = !hasRemote || (typeof navigator !== 'undefined' && navigator.onLine === false);
 const slotStyle = `position:relative;width:${size}px;height:${size}px;min-width:${size}px;display:flex;align-items:center;justify-content:center;line-height:0;flex-shrink:0;overflow:visible;`;
-const fallbackStyle = `position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:${showFallbackFirst ? '1' : '0'};transition:opacity .12s ease;`;
+const fallbackStyle = `position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity .12s ease;`;
 const remoteStyle = `position:absolute;inset:0;width:${size}px;height:${size}px;object-fit:${remoteObjectFit};border-radius:${remoteRadius};margin:0!important;background:transparent;opacity:0;transition:opacity .12s ease;`;
 const remoteHtml = hasRemote ? `<img draggable="false" src="${remoteSrc}" class="${remoteClass}" style="${remoteStyle}" onload="this.style.opacity='1';if(this.previousElementSibling)this.previousElementSibling.style.opacity='0';" onerror="if(this.previousElementSibling)this.previousElementSibling.style.opacity='1';this.remove();">` : '';
 return `<span class="pk-dir-list-icon-slot" style="${slotStyle}"><span class="pk-dir-list-icon-fallback" style="${fallbackStyle}">${fallbackHtml}</span>${remoteHtml}</span>`;
@@ -6988,7 +7896,6 @@ return isDownloadLinkEmptyError(error) ? L.str_downloader_no_direct_link : L.str
 }
 
 let downloadHydrateNextAt = 0;
-let downloadHydrateCaptchaWaitPromise = null;
 
 function getDownloadHydrateConcurrency(kind) {
 const key = kind === 'browser' ? 'downloadHydrateConcurrencyBrowser' : 'downloadHydrateConcurrencyDownloader';
@@ -7014,13 +7921,10 @@ function isDownloadHydrateCaptchaInvalidError(error) {
 if (!error) return false;
 const data = error.data || (error.response && error.response.data) || {};
 const status = Number(error.status || error.statusCode || (error.response && (error.response.status || error.response.statusCode)) || 0);
-const code = String(error.code || data.code || data.error || '').toLowerCase();
-const errorCode = Number(error.errorCode || data.error_code || 0) || 0;
-return status === 400 && (
-code === 'captcha_invalid'
-|| code.includes('captcha_invalid')
-|| errorCode === 9
-);
+const officialTypes = [data.error, data.code, error.code]
+.map(value => String(value || '').trim().toLowerCase())
+.filter(Boolean);
+return status === 400 && officialTypes.includes('captcha_invalid');
 }
 
 function rememberDownloadHydrateInvalidCaptchaToken(token) {
@@ -7037,8 +7941,8 @@ return value;
 function clearStoredDownloadHydrateCaptchaToken(token) {
 const target = String(token || '');
 try {
-const captured = localStorage.getItem('pk_captured_captcha') || '';
-if (!target || captured === target) localStorage.removeItem('pk_captured_captcha');
+const captured = readStoredCapturedCaptchaToken();
+if (target && captured === target) localStorage.removeItem('pk_captured_captcha');
 } catch (e) {}
 if (!target) return;
 try {
@@ -7068,20 +7972,37 @@ return !!downloadHydrateCaptchaWaitPromise;
 }
 
 async function waitForDownloadHydrateCaptchaRefresh(invalidToken, options = {}) {
-if (downloadHydrateCaptchaWaitPromise) return downloadHydrateCaptchaWaitPromise;
-const maxWait = Math.max(10000, Number(CONF.downloadHydrateCaptchaWaitMax) || 5 * 60 * 1000);
-downloadHydrateCaptchaWaitPromise = (async () => {
-const startedAt = Date.now();
-const waits = [10000, 20000, 30000];
-let waitIndex = 0;
-while (!options.isRunning || options.isRunning()) {
-resetHeaderCache();
-const token = (getHeaders()['x-captcha-token'] || '');
-if (token && token !== invalidToken && !isDownloadHydrateCaptchaTokenInvalid(token)) {
+if (downloadHydrateCaptchaWaitPromise) {
+await waitForActiveDownloadHydrateCaptcha(options);
 return true;
 }
+const waitScope = String(options.scope || 'shared');
+const configuredMaxWait = Math.max(10000, Number(CONF.downloadHydrateCaptchaWaitMax) || 5 * 60 * 1000);
+const requestedMaxWait = Number(options.maxWait) || 0;
+const maxWait = requestedMaxWait > 0 ? Math.max(1000, Math.min(configuredMaxWait, requestedMaxWait)) : configuredMaxWait;
+const refreshAction = String(options.action || 'GET:/drive/v1/files');
+const refreshRequestUrl = String(options.requestUrl || '');
+const refreshRequestMethod = String(options.requestMethod || 'GET').toUpperCase();
+downloadHydrateCaptchaWaitScope = waitScope;
+downloadHydrateCaptchaWaitPromise = (async () => {
+const startedAt = Date.now();
+const waits = [250, 500, 1000, 2000, 5000];
+const activeRefreshSchedule = [0, 3000, 10000];
+let waitIndex = 0;
+let activeRefreshAttempt = 0;
+while (true) {
+resetHeaderCache();
 const elapsed = Date.now() - startedAt;
 if (elapsed >= maxWait) return false;
+if (activeRefreshAttempt < activeRefreshSchedule.length && elapsed >= activeRefreshSchedule[activeRefreshAttempt]) {
+requestOfficialDownloadHydrateCaptchaRefresh(refreshAction, invalidToken, refreshRequestUrl, refreshRequestMethod);
+activeRefreshAttempt++;
+}
+const token = (getHeaders()['x-captcha-token'] || '');
+const refreshedByBridge = !!(downloadHydrateCaptchaRefreshLastResult && downloadHydrateCaptchaRefreshLastResult.ok && downloadHydrateCaptchaRefreshLastResult.at >= startedAt);
+if (token && token !== invalidToken && !isDownloadHydrateCaptchaTokenInvalid(token) && (refreshedByBridge || elapsed >= 1000)) {
+return true;
+}
 const waitMs = Math.min(waits[Math.min(waitIndex, waits.length - 1)], maxWait - elapsed);
 if (typeof options.onWait === 'function') options.onWait({ elapsed, waitMs });
 await sleep(waitMs);
@@ -7090,20 +8011,58 @@ waitIndex++;
 return false;
 })().finally(() => {
 downloadHydrateCaptchaWaitPromise = null;
+downloadHydrateCaptchaWaitScope = '';
 });
 return downloadHydrateCaptchaWaitPromise;
 }
 
 async function recoverDownloadHydrateCaptcha(error, options = {}) {
+const requestedScope = String(options.scope || 'shared');
+let restartedAfterExhaustedWait = false;
+while (downloadHydrateCaptchaWaitPromise) {
+const activeScope = String(downloadHydrateCaptchaWaitScope || 'shared');
+try {
+await waitForActiveDownloadHydrateCaptcha(options);
+return true;
+} catch (waitError) {
+if (!isDownloadHydrateCaptchaInvalidError(waitError) && waitError !== downloadHydrateCaptchaLastError) throw waitError;
+const canRestartAfterForeignWait = options.restartAfterForeignWait === true && activeScope !== requestedScope;
+const canRestartAfterExhaustedWait = options.restartAfterExhaustedWait === true && !restartedAfterExhaustedWait;
+if (!canRestartAfterForeignWait && !canRestartAfterExhaustedWait) return false;
+if (canRestartAfterExhaustedWait) restartedAfterExhaustedWait = true;
+console.warn(`[Hydrate Captcha] previous recovery scope ${activeScope} exhausted; starting one fresh ${requestedScope} generation.`);
+}
+}
+downloadHydrateCaptchaLastError = error || downloadHydrateCaptchaLastError;
 const invalidToken = markDownloadHydrateCaptchaInvalid(error);
-console.warn('[Hydrate Captcha] captcha_invalid detected, waiting for refreshed token...');
-const ok = await waitForDownloadHydrateCaptchaRefresh(invalidToken, options);
+if (invalidToken) console.warn('[Hydrate Captcha] captcha_invalid detected, waiting for refreshed token...');
+const sharedWait = waitForDownloadHydrateCaptchaRefresh(invalidToken, {
+maxWait: options.maxWait,
+onWait: options.onWait,
+scope: requestedScope,
+action: options.action || (error && error.captchaAction) || 'GET:/drive/v1/files',
+requestUrl: options.requestUrl || (error && error.captchaRequestUrl) || '',
+requestMethod: options.requestMethod || (error && error.captchaRequestMethod) || 'GET'
+});
+let ok = false;
+if (options.signal || typeof options.isRunning === 'function') {
+try {
+await waitForActiveDownloadHydrateCaptcha(options);
+ok = true;
+} catch (waitError) {
+if (isDownloadHydrateCaptchaInvalidError(waitError) || waitError === downloadHydrateCaptchaLastError) ok = false;
+else throw waitError;
+}
+} else {
+ok = await sharedWait;
+}
 if (ok) {
 resetHeaderCache();
-console.warn('[Hydrate Captcha] refreshed token detected, resuming hydration.');
+downloadHydrateCaptchaLastError = null;
+if (invalidToken) console.warn('[Hydrate Captcha] refreshed token detected, resuming hydration.');
 return true;
 }
-console.warn('[Hydrate Captcha] token refresh wait timed out.');
+if (invalidToken) console.warn('[Hydrate Captcha] token refresh wait timed out.');
 return false;
 }
 
@@ -7673,6 +8632,11 @@ clipItems: [], clipType: '',
 clipSourceParentId: null,
 loading: false,
 firstPageReady: false,
+loadMaskDelayTimer: 0,
+loadMaskHideTimer: 0,
+loadMaskSeq: 0,
+loadMaskShownAt: 0,
+loadMaskDeferred: false,
 pagingLoading: false,
 liveRefreshCtx: null,
 offlinePagingPending: false,
@@ -7687,8 +8651,16 @@ offlineLightProbeLastAt: 0,
 offlineLightProbeFailCount: 0,
 offlineLightProbePendingWrite: false,
 offlineDeleteTombstones: new Map(),
+cloudTargetWatches: new Map(),
+cloudTargetWatchTimer: 0,
+cloudTargetWatchRunning: false,
+cloudTargetWatchClosed: false,
+cloudTargetWatchFailCount: 0,
+unzipTargetWatches: new Map(),
+unzipTargetWatchClosed: false,
 shareCancelTombstones: new Map(),
 shareCancelPendingIds: new Set(),
+starredCancelTombstones: new Set(),
 configCloudBusy: false,
 localCleanBusy: false,
 magnetArchiveBusy: false,
@@ -7721,6 +8693,7 @@ suppressClearConfirm: false,
 preSearchPath: null,
 lastGlobalResults: [],
 lastSearchGlobal: false,
+globalSearchSuspendedForPaste: false,
 folderLineageMap: globalLineageMap,
 strictFolderFirstSnapshot: null,
 trashMode: (globalSavedState && globalSavedState.trashMode) || false,
@@ -8715,6 +9688,11 @@ closeImageOverlay: () => {
 const d = document.querySelector('.pk-img-ov');
 if (!d) return false;
 
+if (typeof d._pkAbortImageDetailRequest === 'function') {
+try { d._pkAbortImageDetailRequest(); } catch (e) {}
+d._pkAbortImageDetailRequest = null;
+}
+
 const pTip = document.getElementById('pk_p_plist_tip_global');
 if (pTip) pTip.style.display = 'none';
 
@@ -8730,7 +9708,7 @@ const currentItem = curIdx >= 0 ? imgList[curIdx] : null;
 
 if (currentItem) {
 const targetId = currentItem.id;
-const targetIdx = S.display.findIndex(x => x.id === targetId);
+const targetIdx = S.display.findIndex(x => x && x.id === targetId);
 if (targetIdx !== -1) {
 S.sel.clear();
 S.sel.add(targetId);
@@ -9097,7 +10075,7 @@ currentBottom += (item.el.offsetHeight || 40) + GAP;
 });
 };
 
-const create = (initialText) => {
+const create = (initialText, options = {}) => {
 const id = 'pk_fb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 const el = document.createElement('div');
 el.className = 'pk-float-bar-item pk-hide';
@@ -9110,6 +10088,19 @@ if (isDark) el.classList.add('pk-dark');
 const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
 if (fsEl) fsEl.appendChild(el);
 else document.body.appendChild(el);
+
+const reservedText = String((options && options.reserveText) || '');
+if (reservedText) {
+const span = el.querySelector('.pk-float-txt');
+if (span) {
+const currentText = span.textContent;
+span.style.display = 'inline-block';
+span.style.textAlign = 'center';
+span.textContent = reservedText;
+span.style.minWidth = `${Math.ceil(span.scrollWidth)}px`;
+span.textContent = currentText;
+}
+}
 
 const entry = { id, el };
 activeBars.push(entry);
@@ -9588,7 +10579,7 @@ ${CONF.icons.blacklist} <span>${L.title_blacklist}</span>
 <div style="flex:1"></div>
 
 <div class="pk-dropdown-wrap" id="pk-upload-wrap">
-<button class="pk-btn pri" id="pk-btn-upload" style="background:var(--pk-pri); color:#fff; border:none; margin-right:8px;">
+<button class="pk-btn pri" id="pk-btn-upload" style="background:var(--pk-pri); color:#fff; border:none; margin-right:8px;" data-pk-tip="${L.btn_upload}">
 ${CONF.icons.uploadBtn} <span>${L.btn_upload}</span>
 <svg class="pk-btn-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;"><polyline points="6 9 12 15 18 9"/></svg>
 </button>
@@ -9797,8 +10788,15 @@ const isOverflowTip = target.dataset.pkTipOverflow === '1';
 const isTooltipTextBlocked = el => !!el && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1);
 if (isOverflowTip && !isTooltipTextBlocked(target)) return;
 if (isShareHistoryTitleTip && target.dataset.pkSmartCut !== '1' && !isTooltipTextBlocked(target)) return;
-const isHeaderActionTip = /^(pk-btn-folder-first|pk-btn-invert|pk-grid-folder-first|pk-grid-invert)$/.test(target.id);
-if (isHeaderActionTip) {
+const isSidebarCompactTip = target.classList.contains('pk-nav-btn') && target.id !== 'pk-settings';
+const isToolbarCompactTip = /^(pk-btn-folder-first|pk-btn-invert|pk-grid-folder-first|pk-grid-invert|pk-btn-upload)$/.test(target.id);
+if (isSidebarCompactTip) {
+const ov = target.closest('.pk-ov');
+const win = target.closest('.pk-win');
+const isButtonTextHidden = !!(ov && (ov.classList.contains('pk-hide-btn-text') || ov.classList.contains('pk-auto-hide-btn-text')));
+const isMaximized = !!(win && win.classList.contains('pk-maximized'));
+if (!ov || (isMaximized && !isButtonTextHidden)) return;
+} else if (isToolbarCompactTip) {
 const ov = target.closest('.pk-ov');
 if (!ov || (!ov.classList.contains('pk-hide-btn-text') && !ov.classList.contains('pk-auto-hide-btn-text'))) return;
 }
@@ -9890,8 +10888,18 @@ if (isShareHistoryTitleTip && target.dataset.pkSmartCut !== '1' && !isTooltipTex
 hideTip();
 return;
 }
-const isHeaderActionTip = /^(pk-btn-folder-first|pk-btn-invert|pk-grid-folder-first|pk-grid-invert)$/.test(target.id);
-if (isHeaderActionTip) {
+const isSidebarCompactTip = target.classList.contains('pk-nav-btn') && target.id !== 'pk-settings';
+const isToolbarCompactTip = /^(pk-btn-folder-first|pk-btn-invert|pk-grid-folder-first|pk-grid-invert|pk-btn-upload)$/.test(target.id);
+if (isSidebarCompactTip) {
+const ov = target.closest('.pk-ov');
+const win = target.closest('.pk-win');
+const isButtonTextHidden = !!(ov && (ov.classList.contains('pk-hide-btn-text') || ov.classList.contains('pk-auto-hide-btn-text')));
+const isMaximized = !!(win && win.classList.contains('pk-maximized'));
+if (!ov || (isMaximized && !isButtonTextHidden)) {
+hideTip();
+return;
+}
+} else if (isToolbarCompactTip) {
 const ov = target.closest('.pk-ov');
 if (!ov || (!ov.classList.contains('pk-hide-btn-text') && !ov.classList.contains('pk-auto-hide-btn-text'))) {
 hideTip();
@@ -10342,7 +11350,8 @@ const displayLen = display.length;
 if (!displayLen) return `${baseKey}::grouped-grid::empty`;
 let firstId = '';
 let lastId = '';
-let runSig = '';
+let runHashA = 2166136261;
+let runHashB = 2654435769;
 let prevRunKey = null;
 let runCount = 0;
 for (let i = 0; i < displayLen; i++) {
@@ -10353,12 +11362,22 @@ if (!firstId) firstId = itemId;
 lastId = itemId || lastId;
 const runKey = item.isHeader ? `h:${itemId || i}` : `i:${S.dupGroups.has(itemId) ? S.dupGroups.get(itemId) : -1}`;
 if (runKey !== prevRunKey) {
-runSig += `${prevRunKey === null ? '' : '|'}${runKey}`;
+if (prevRunKey !== null) {
+runHashA ^= 124;
+runHashA = Math.imul(runHashA, 16777619) >>> 0;
+runHashB = Math.imul(runHashB ^ 124, 2246822519) >>> 0;
+}
+for (let j = 0; j < runKey.length; j++) {
+const code = runKey.charCodeAt(j);
+runHashA ^= code;
+runHashA = Math.imul(runHashA, 16777619) >>> 0;
+runHashB = Math.imul(runHashB ^ code, 2246822519) >>> 0;
+}
 prevRunKey = runKey;
 runCount++;
 }
 }
-return `${baseKey}::grouped-grid::${displayLen}::${runCount}::${firstId}::${lastId}::${runSig}`;
+return `${baseKey}::grouped-grid::${displayLen}::${runCount}::${firstId}::${lastId}::h${runHashA.toString(36)}-${runHashB.toString(36)}`;
 };
 const getDupGridShortStableIdPart = (id) => {
 const raw = String(id || '');
@@ -10775,7 +11794,7 @@ return targetIdx * CONF.rowHeight;
 const getViewportAnchorId = (preferSelection = false) => {
 const selectedIds = S.getSelectedIds();
 const fallbackId = S.activeId || (selectedIds.length ? selectedIds[selectedIds.length - 1] : null);
-if (preferSelection && fallbackId && S.display.some(x => x.id === fallbackId)) return fallbackId;
+if (preferSelection && fallbackId && S.display.some(x => x && x.id === fallbackId)) return fallbackId;
 if (!UI.vp || !S.display.length) return fallbackId;
 const centerY = UI.vp.scrollTop + (UI.vp.clientHeight / 2);
 
@@ -11243,8 +12262,7 @@ try {
 
 requestAnimationFrame(() => {
     try {
-        if (typeof refresh === 'function') Promise.resolve(refresh()).catch(() => {});
-        else if (typeof renderVisible === 'function') renderVisible();
+        if (typeof renderVisible === 'function') renderVisible();
     } catch (e) {}
 });
 }
@@ -12149,7 +13167,7 @@ renderViewSwitch();
 renderList();
 if (anchorId) {
 requestAnimationFrame(() => {
-const targetIdx = S.display.findIndex(x => x.id === anchorId);
+const targetIdx = S.display.findIndex(x => x && x.id === anchorId);
 if (targetIdx !== -1) {
 const rowTop = getItemScrollTopByIndex(targetIdx);
 const vpHeight = UI.vp.clientHeight;
@@ -12175,7 +13193,7 @@ renderViewSwitch();
 renderList();
 if (anchorId) {
 requestAnimationFrame(() => {
-const targetIdx = S.display.findIndex(x => x.id === anchorId);
+const targetIdx = S.display.findIndex(x => x && x.id === anchorId);
 if (targetIdx !== -1) {
 const rowTop = getItemScrollTopByIndex(targetIdx);
 const vpHeight = UI.vp.clientHeight;
@@ -13458,14 +14476,14 @@ placeholder="${L.ph_bl_file}" style="${textareaStyle}"></textarea>
 </div>
 
 <div class="pk-modal-act" style="justify-content: space-between; align-items: center; margin-top:20px; padding-top:15px; border-top:1px solid var(--pk-bd); flex-shrink:0;">
-<button class="pk-bl-btn pk-main-clear" id="bl_clear">
+<button class="pk-bl-btn pk-main-clear" id="bl_clear" disabled>
 ${icons.trash} <span>${L.btn_clear_list}</span>
 </button>
 <div style="display:flex; gap:12px;">
-<button class="pk-bl-btn pk-main-run" id="bl_run"${S.loading || !S.firstPageReady ? ' disabled' : ''}>
+<button class="pk-bl-btn pk-main-run" id="bl_run" disabled>
 ${icons.rocket} <span>${L.btn_blacklist_run}</span>
 </button>
-<button class="pk-bl-btn pk-main-save" id="bl_save">
+<button class="pk-bl-btn pk-main-save" id="bl_save" disabled>
 ${icons.save} <span>${L.btn_save}</span>
 </button>
 </div>
@@ -13480,6 +14498,10 @@ if (closeBtn) Object.assign(closeBtn.style, { top: '26px', right: '26px' });
 
 const areaFolder = m.querySelector('#bl_folder_input');
 const areaFile = m.querySelector('#bl_file_input');
+const initialFolderValue = String(gmGet('pk_blacklist_folders', '') || '');
+const initialFileValue = String(gmGet('pk_blacklist', '') || '');
+let blacklistInputsReady = false;
+m.dataset.blacklistInputsReady = 'false';
 
 const radios = m.querySelectorAll('input[name="bl_mode"]');
 const groupFolder = m.querySelector('#group_bl_folder');
@@ -13494,16 +14516,16 @@ groupFile.style.display = mode === 'file' ? 'flex' : 'none';
 });
 const toast = m.querySelector('#pk_bl_toast');
 
-const showToast = (msg) => {
+const showBlacklistEditorToast = (msg) => {
 toast.textContent = msg;
 toast.style.opacity = '1';
 setTimeout(() => { toast.style.opacity = '0'; }, 2000);
 };
 
-const loadLargeText = async (el, storageKey, originalPlaceholder) => {
+const loadLargeText = async (el, storedValue, originalPlaceholder) => {
 el.placeholder = L.str_loading_placeholder;
 await sleep(350);
-const data = await new Promise(r => setTimeout(() => r(gmGet(storageKey, '')), 0));
+const data = await new Promise(r => setTimeout(() => r(storedValue), 0));
 if (data) {
 const prevDisplay = el.style.display;
 el.style.display = 'none';
@@ -13515,8 +14537,14 @@ el.setSelectionRange(0, 0);
 el.blur();
 };
 
-loadLargeText(areaFolder, 'pk_blacklist_folders', L.ph_bl_file);
-loadLargeText(areaFile, 'pk_blacklist', L.ph_bl_file);
+Promise.all([
+loadLargeText(areaFolder, initialFolderValue, L.ph_bl_file),
+loadLargeText(areaFile, initialFileValue, L.ph_bl_file)
+]).then(() => {
+blacklistInputsReady = true;
+m.dataset.blacklistInputsReady = 'true';
+syncFirstPageHeavyActionButtons();
+});
 
 const highlightLine = (el) => {
 if (el.selectionStart !== el.selectionEnd) return;
@@ -13542,22 +14570,24 @@ enableLineSnap(areaFile);
 
 const setupSafeControls = (el, btnPaste, btnDel, storageKey) => {
 btnPaste.onclick = async () => {
+if (!blacklistInputsReady) return showBlacklistEditorToast(L.str_loading_placeholder);
 try {
 const text = await navigator.clipboard.readText();
-if (!text || !text.trim()) return showToast(L.msg_copy_empty);
+if (!text || !text.trim()) return showBlacklistEditorToast(L.msg_copy_empty);
 
 const cleanText = text.split(/\r?\n/).map(line => line.trim()).filter(line => line).join('\n');
 const stats = getBlacklistAppendStats(storageKey, el.value, cleanText);
 el.value = stats.normalized;
 el.scrollTop = el.scrollHeight;
 
-showToast(stats.clipped ? L.msg_config_input_over_limit : L.msg_add_success.replace('{n}', stats.actualAdded));
+showBlacklistEditorToast(stats.clipped ? L.msg_config_input_over_limit : L.msg_add_success.replace('{n}', stats.actualAdded));
 } catch (err) {
-showToast(L.err_clipboard_denied);
+showBlacklistEditorToast(L.err_clipboard_denied);
 }
 };
 
 btnDel.onclick = () => {
+if (!blacklistInputsReady) return showBlacklistEditorToast(L.str_loading_placeholder);
 const val = el.value;
 if (!val) return;
 
@@ -13565,7 +14595,7 @@ const selStart = el.selectionStart;
 const selEnd = el.selectionEnd;
 
 if (selStart === selEnd) {
-return showToast(L.msg_del_select);
+return showBlacklistEditorToast(L.msg_del_select);
 }
 
 let lineStart = val.lastIndexOf('\n', selStart - 1);
@@ -13582,7 +14612,7 @@ el.setSelectionRange(lineStart, lineStart);
 highlightLine(el);
 el.focus();
 
-showToast(L.msg_del_done);
+showBlacklistEditorToast(L.msg_del_done);
 };
 };
 
@@ -13590,8 +14620,10 @@ setupSafeControls(areaFolder, m.querySelector('#btn_paste_folder'), m.querySelec
 setupSafeControls(areaFile, m.querySelector('#btn_paste_file'), m.querySelector('#btn_del_file'), 'pk_blacklist');
 
 m.querySelector('#bl_save').onclick = async () => {
+if (!blacklistInputsReady) return showBlacklistEditorToast(L.str_loading_placeholder);
 const fDir = areaFolder.value.trim();
 const fFile = areaFile.value.trim();
+if (!fDir && !fFile) return showBlacklistEditorToast(L.msg_bl_empty);
 gmSet('pk_blacklist_folders', fDir);
 gmSet('pk_blacklist', fFile);
 S.updateBlCache();
@@ -13609,7 +14641,9 @@ m.querySelector('#bl_save').click();
 });
 
 m.querySelector('#bl_clear').onclick = async () => {
-if (areaFolder.value.trim() === '' && areaFile.value.trim() === '') return;
+if (!blacklistInputsReady) return showBlacklistEditorToast(L.str_loading_placeholder);
+const hasStoredBlacklist = !!String(gmGet('pk_blacklist_folders', '') || '').trim() || !!String(gmGet('pk_blacklist', '') || '').trim();
+if (areaFolder.value.trim() === '' && areaFile.value.trim() === '' && !hasStoredBlacklist) return;
 if (await showConfirm(L.msg_bl_clear_confirm, L.title_confirm)) {
 areaFolder.value = "";
 areaFile.value = "";
@@ -13617,25 +14651,27 @@ gmSet('pk_blacklist_folders', "");
 gmSet('pk_blacklist', "");
 S.updateBlCache();
 renderVisible();
-showToast(L.str_cleanup_done);
+showBlacklistEditorToast(L.str_cleanup_done);
 }
 };
 
 m.querySelector('#bl_run').onclick = async () => {
+if (!blacklistInputsReady) return showBlacklistEditorToast(L.str_loading_placeholder);
 if (S.movingIds && S.movingIds.size > 0) {
 showAlert(L.msg_op_blocked_moving);
 return;
 }
 const fDir = areaFolder.value.trim();
 const fFile = areaFile.value.trim();
+
+if (!fDir && !fFile) {
+showBlacklistEditorToast(L.msg_bl_empty);
+return;
+}
+
 gmSet('pk_blacklist_folders', fDir);
 gmSet('pk_blacklist', fFile);
 S.updateBlCache();
-
-if (!fDir && !fFile) {
-showToast(L.msg_bl_empty);
-return;
-}
 
 const isGlobalSearch = S.path.some(p => p.id === 'virtual_search_root');
 
@@ -13646,7 +14682,7 @@ return;
 }
 
 m.remove();
-setLoad(true);
+setLoad(true, false, DEFERRED_LOAD_MASK_DELAY);
 isGUISensitive = true;
 S.scanning = true;
 
@@ -13719,9 +14755,24 @@ await sleep(50);
 const foundMatches = [];
 const rootNodes = [{ id: '', name: 'Root', lineage: [], retryCount: 0 }];
 
+if (window.pkGlobalIndex) {
+const indexResult = await window.pkGlobalIndex.ensureFull({
+signal,
+background: false,
+onProgress: progress => {
+updateLoadTxt(formatIndexProgress(progress, { hits: foundMatches.length }));
+}
+});
+if (!indexResult || indexResult.status !== 'ready') {
+const error = new Error('GLOBAL_INDEX_INCOMPLETE');
+error.code = 'GLOBAL_INDEX_INCOMPLETE';
+throw error;
+}
+}
+
 await coreRecursiveEngine(rootNodes, {
 signal: signal,
-preferFresh: true,
+preferFresh: !window.pkGlobalIndex,
 onFile: (f, parent) => {
 const cleanName = f.name.replace(/[\r\n\v\f\u2028\u2029]+/g, ' ').trim().toLowerCase();
 if (S.blSet.has(cleanName)) {
@@ -13742,11 +14793,7 @@ if (S.blFolderSet.has(cleanName) && !isSystemRootFolder) {
 }
 },
 onProgress: (st) => {
-const folderText = `${L.str_scanning} ${st.folders} ${L.unit_folders}`;
-
-const statusInfo = ` | ${L.str_hits}: ${foundMatches.length} | ${L.str_speed}: ${st.currentConcurrency}`;
-
-updateLoadTxt(folderText + statusInfo);
+updateLoadTxt(formatIndexProgress(st, { hits: foundMatches.length }));
 }
 });
 
@@ -13757,7 +14804,7 @@ return;
 
 setLoad(false);
 if (foundMatches.length === 0) {
-showAlert(L.msg_blacklist_run_none);
+showToast(L.msg_blacklist_run_none, 'info');
 return;
 }
 
@@ -14287,14 +15334,16 @@ UI.btnRefresh.disabled = false;
 function isGlobalSearchResultContext() {
 const path = Array.isArray(S.path) ? S.path : [];
 if (!path.length) return false;
-return !!S.lastSearchGlobal && path.some(p => String((p && p.id) || '') === 'virtual_search_root');
+return !S.globalSearchSuspendedForPaste && !!S.lastSearchGlobal && path.some(p => String((p && p.id) || '') === 'virtual_search_root');
 }
 
 function syncGlobalSearchCheckboxState() {
 if (!UI || !UI.chkGlobal) return;
-const locked = isGlobalSearchResultContext();
+const suspended = !!S.globalSearchSuspendedForPaste;
+const locked = suspended || isGlobalSearchResultContext();
 const box = UI.chkGlobal;
-if (locked) box.checked = true;
+if (suspended) box.checked = false;
+else if (locked) box.checked = true;
 box.disabled = !!locked;
 const label = UI.lblGlobal || box.closest('label') || box.parentElement;
 if (label) {
@@ -14316,6 +15365,8 @@ isCurrentStarredRoot()
 function syncFirstPageHeavyActionButtons() {
 const locked = !!S.loading || !S.firstPageReady;
 const blRun = document.querySelector('#bl_run');
+const blacklistModal = blRun?.closest('.pk-modal-ov');
+const blacklistLocked = locked || blacklistModal?.dataset.blacklistInputsReady !== 'true';
 
 if (S.starredMode) {
 if (UI.btnNewFolder) {
@@ -14326,26 +15377,77 @@ if (UI.scan) UI.scan.style.display = 'none';
 if (UI.btnExport) UI.btnExport.style.display = 'none';
 }
 
-[UI.btnExport, UI.btnAnalyze, UI.scan, blRun].forEach(btn => {
+[UI.btnExport, UI.btnAnalyze, UI.scan].forEach(btn => {
 if (!btn) return;
 btn.disabled = locked;
 });
+
+['#bl_run', '#bl_save', '#bl_clear'].forEach(selector => {
+const btn = document.querySelector(selector);
+if (btn) btn.disabled = blacklistLocked;
+});
 }
 
-function setLoad(b, isInline = false) {
+const DEFERRED_LOAD_MASK_DELAY = 500;
+const DEFERRED_LOAD_MASK_MIN_VISIBLE = 200;
+
+function setLoad(b, isInline = false, delayMs = 0) {
+const normalizedDelay = Math.max(0, Number(delayMs) || 0);
+if (b && !isInline && normalizedDelay > 0 && S.loading && S.loadMaskDeferred) {
+S.firstPageReady = false;
+syncFirstPageHeavyActionButtons();
+return;
+}
+
+if (S.loadMaskDelayTimer) {
+clearTimeout(S.loadMaskDelayTimer);
+S.loadMaskDelayTimer = 0;
+}
+if (S.loadMaskHideTimer) {
+clearTimeout(S.loadMaskHideTimer);
+S.loadMaskHideTimer = 0;
+}
+const maskSeq = ++S.loadMaskSeq;
 S.loading = b;
 S.firstPageReady = !b;
 syncFirstPageHeavyActionButtons();
 if (b) {
+S.loadMaskShownAt = 0;
+S.loadMaskDeferred = !isInline && normalizedDelay > 0;
 if (isInline) {
 UI.loader.style.display = 'none';
+} else if (S.loadMaskDeferred) {
+UI.loader.style.display = 'none';
+if (UI.loadTxt) UI.loadTxt.textContent = L.loading_detail;
+updateLoadAction(false);
+S.loadMaskDelayTimer = setTimeout(() => {
+    if (!S.loading || S.loadMaskSeq !== maskSeq) return;
+    S.loadMaskDelayTimer = 0;
+    S.loadMaskShownAt = performance.now();
+    UI.loader.style.display = 'flex';
+}, normalizedDelay);
 } else {
 UI.loader.style.display = 'flex';
+S.loadMaskShownAt = performance.now();
 if (UI.loadTxt) UI.loadTxt.textContent = L.loading_detail;
 updateLoadAction(false);
 }
 } else {
+const shownAt = Number(S.loadMaskShownAt || 0);
+const shouldHoldVisible = S.loadMaskDeferred && shownAt > 0;
+const elapsed = shouldHoldVisible ? Math.max(0, performance.now() - shownAt) : DEFERRED_LOAD_MASK_MIN_VISIBLE;
+const hideDelay = shouldHoldVisible ? Math.max(0, DEFERRED_LOAD_MASK_MIN_VISIBLE - elapsed) : 0;
+S.loadMaskDeferred = false;
+S.loadMaskShownAt = 0;
+if (hideDelay > 0) {
+S.loadMaskHideTimer = setTimeout(() => {
+    if (S.loadMaskSeq !== maskSeq) return;
+    S.loadMaskHideTimer = 0;
+    UI.loader.style.display = 'none';
+}, hideDelay);
+} else {
 UI.loader.style.display = 'none';
+}
 updateLoadAction(false);
 if (typeof consumeOfflineLightProbePendingWrite === 'function') consumeOfflineLightProbePendingWrite('load_done');
 }
@@ -14978,11 +16080,6 @@ window.addEventListener('online', () => {
 if (typeof window.resetDirectoryGridMediaFallbackState === 'function') window.resetDirectoryGridMediaFallbackState('online');
 scheduleRecentLightProbe('online', 0);
 });
-document.addEventListener('visibilitychange', () => {
-if (!document.hidden && (typeof navigator === 'undefined' || navigator.onLine !== false) && typeof window.resetDirectoryGridMediaFallbackState === 'function') {
-    window.resetDirectoryGridMediaFallbackState('visible-online');
-}
-});
 }
 
 const OFFLINE_LIGHT_PROBE_INTERVAL = 30000;
@@ -15308,6 +16405,7 @@ progress: Number.isFinite(progressValue) ? progressValue : 0,
 message: task.message || task.status_text || '',
 size: Number.isFinite(sizeValue) ? sizeValue : 0,
 file_id: task.file_id || (task.params && task.params.file_id) || (ref && ref.id) || '',
+parent_id: (ref && ref.parent_id) || '',
 icon_link: iconLink,
 thumbnail_link: thumbnailLink,
 created_time: task.created_time || '',
@@ -15533,7 +16631,7 @@ if (hasOfflineLightValue(incoming._offlineResourceName) || !hasOfflineLightValue
 ['_offlineDisplayNameSource', '_offlineDisplayNameAuthoritative'].forEach(key => {
 if (!existingNameIsAuthoritative && incoming[key] !== undefined) out[key] = incoming[key];
 });
-['message', 'file_id', 'icon_link', 'thumbnail_link', 'created_time', 'updated_time', 'modified_time', 'completed_time', 'source_url', 'mime_type', '_ref_kind'].forEach(key => {
+['message', 'file_id', 'parent_id', 'icon_link', 'thumbnail_link', 'created_time', 'updated_time', 'modified_time', 'completed_time', 'source_url', 'mime_type', '_ref_kind'].forEach(key => {
 if (hasOfflineLightValue(incoming[key]) || !hasOfflineLightValue(out[key])) out[key] = incoming[key];
 });
 if (Number(incoming.size || 0) > 0 || !Number(out.size || 0)) out.size = incoming.size;
@@ -15750,6 +16848,8 @@ item._offlineMissingMessage || '',
 item._offlineProgressDisplay || '',
 Number(item.size || 0),
 item.file_id || '',
+item.parent_id || '',
+item._ref_kind || '',
 item.thumbnail_link || '',
 item.icon_link || '',
 item.created_time || '',
@@ -16090,6 +17190,573 @@ scheduleOfflineTaskAddProbe((context && context.reason) || 'add_exists', (contex
 return true;
 }
 
+const CLOUD_TARGET_WATCH_SESSION_KEY = 'pk_cloud_target_watches_v1';
+const CLOUD_TARGET_EVENT_SESSION_KEY = 'pk_cloud_target_events_v1';
+
+function normalizeCloudWatchFolderChecks(checks) {
+const merged = new Map();
+(Array.isArray(checks) ? checks : []).forEach(check => {
+if (!check || !Object.prototype.hasOwnProperty.call(check, 'folderId') || !isRealHomeFolderId(check.folderId)) return;
+const folderId = normalizeRealFolderId(check.folderId);
+if (!merged.has(folderId)) merged.set(folderId, {
+folderId,
+presentIds: new Set(),
+absentIds: new Set(),
+baselineSignature: String(check.baselineSignature || ''),
+requireChange: check.requireChange === true
+});
+const target = merged.get(folderId);
+(check.presentIds || []).forEach(id => { if (id) target.presentIds.add(String(id)); });
+(check.absentIds || []).forEach(id => { if (id) target.absentIds.add(String(id)); });
+if (!target.baselineSignature && check.baselineSignature) target.baselineSignature = String(check.baselineSignature);
+if (check.requireChange === true) target.requireChange = true;
+});
+return Array.from(merged.values()).map(check => ({
+folderId: check.folderId,
+presentIds: Array.from(check.presentIds),
+absentIds: Array.from(check.absentIds),
+baselineSignature: check.baselineSignature,
+requireChange: check.requireChange
+}));
+}
+
+function touchCloudWatchFolders(record, delay = 0) {
+if (!record) return;
+const ids = new Set();
+if (!record.defaultDownload || record.targetId) ids.add(normalizeRealFolderId(record.targetId));
+(record.folderChecks || []).forEach(check => {
+if (check && isRealHomeFolderId(check.folderId)) ids.add(normalizeRealFolderId(check.folderId));
+});
+if (!ids.size) {
+invalidateCompleteGlobalIndexForUnknownParents();
+return;
+}
+ids.forEach(folderId => {
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(folderId);
+scheduleRealFolderRevalidation(folderId, delay);
+});
+}
+
+function getCurrentDriveAccountId() {
+try {
+for (let i = 0; i < localStorage.length; i++) {
+const key = localStorage.key(i);
+if (!key || !key.startsWith('credentials')) continue;
+const value = JSON.parse(localStorage.getItem(key) || '{}');
+if (value && value.access_token && value.sub) return String(value.sub);
+}
+} catch (e) {}
+return '';
+}
+
+function resolveCloudTargetFolderId(targetId = '', defaultDownload = false, resourceId = '') {
+const normalized = normalizeRealFolderId(targetId);
+if (normalized) return isRealHomeFolderId(normalized) ? normalized : '';
+
+const resourceParent = resourceId && typeof globalParentIndex !== 'undefined' ? globalParentIndex.get(String(resourceId)) : null;
+if (resourceParent && resourceParent.id !== undefined && resourceParent.id !== null) {
+const parentId = normalizeRealFolderId(resourceParent.id);
+if (parentId) return parentId;
+}
+if (!defaultDownload) return '';
+
+const rootHit = readRealFolderCache('');
+const rootItems = rootHit && Array.isArray(rootHit.items) ? rootHit.items : [];
+const myPack = rootItems.find(item => item && item.kind === 'drive#folder' && item.name === CONF.SYSTEM_FOLDER_NAME);
+return normalizeRealFolderId(myPack && myPack.id);
+}
+
+function persistCloudTargetWatches() {
+try {
+const now = Date.now();
+const rows = Array.from(S.cloudTargetWatches.values()).filter(record => record && !record.finished).map(record => ({
+taskId: record.taskId,
+accountId: record.accountId || getCurrentDriveAccountId(),
+taskType: record.taskType || 'offline',
+targetId: record.targetId || '',
+requestedTargetId: record.requestedTargetId || '',
+defaultDownload: !!record.defaultDownload,
+resourceId: record.resourceId || '',
+resourceKind: record.resourceKind || '',
+resourceBaselineSignature: record.resourceBaselineSignature || '',
+createdAt: Number(record.createdAt || now),
+lastPhase: record.lastPhase || '',
+lastProgress: Number(record.lastProgress || 0),
+baselineSignature: record.baselineSignature || '',
+folderChecks: normalizeCloudWatchFolderChecks(record.folderChecks),
+expectedItemIds: Array.from(new Set((record.expectedItemIds || []).map(String).filter(Boolean))),
+terminalPhase: record.terminalPhase || '',
+reconcileFailures: Number(record.reconcileFailures || 0)
+}));
+sessionStorage.setItem(CLOUD_TARGET_WATCH_SESSION_KEY, JSON.stringify(rows));
+} catch (e) {}
+}
+
+function syncCloudTargetWatchIndex(record, task = null, final = false) {
+if (!record || record.finished) return;
+const ref = task && task.reference_resource && typeof task.reference_resource === 'object' ? task.reference_resource : {};
+const resourceId = String((task && task.file_id) || ref.id || record.resourceId || '');
+const phase = String((task && task.phase) || record.lastPhase || '').toUpperCase();
+const progress = Number((task && task.progress) || record.lastProgress || 0);
+let resourceKind = String(ref.kind || record.resourceKind || '');
+let targetId = resolveCloudTargetFolderId(record.targetId || record.requestedTargetId, record.defaultDownload, resourceId);
+
+if (!targetId && resourceId && typeof globalParentIndex !== 'undefined') {
+const parent = globalParentIndex.get(resourceId);
+if (parent) targetId = normalizeRealFolderId(parent.id);
+}
+if (targetId) {
+record.targetId = targetId;
+if (record.mutation && !record.mutation.finished) attachFolderMutationTarget(record.mutation, targetId);
+if (!record.baselineSignature) record.baselineSignature = getRealFolderCacheSignature(targetId);
+}
+if (resourceId) record.resourceId = resourceId;
+
+if (!resourceKind && targetId && resourceId) {
+const targetHit = readRealFolderCache(targetId);
+const cachedResource = targetHit && targetHit.items.find(item => item && String(item.id || '') === resourceId);
+if (cachedResource) resourceKind = String(cachedResource.kind || '');
+}
+if (resourceKind) record.resourceKind = resourceKind;
+if (resourceId && resourceKind === 'drive#folder' && record.resourceBaselineSignature === undefined) {
+record.resourceBaselineSignature = getRealFolderCacheSignature(resourceId);
+}
+
+if (targetId && resourceId && record.mutation && !record.mutation.finished) {
+const pendingFolders = finishFolderMutation(record.mutation, { success: true, revalidate: true });
+pendingFolders.forEach(folderId => {
+if (normalizeRealFolderId(folderId) === normalizeRealFolderId(targetId)) {
+scheduleRealFolderExpectation(folderId, { presentIds: [resourceId], maxAttempts: 10 }, 0);
+} else {
+scheduleRealFolderRevalidation(folderId, 0);
+}
+});
+}
+
+const changed = final || !record.indexTouched || record.lastPhase !== phase || Number(record.lastProgress || 0) !== progress || record.lastIndexedResourceId !== resourceId;
+record.lastPhase = phase;
+record.lastProgress = progress;
+record.lastIndexedResourceId = resourceId;
+if (!changed) {
+persistCloudTargetWatches();
+return;
+}
+
+const refreshIds = [];
+if (targetId) refreshIds.push(targetId);
+if (resourceId && resourceKind === 'drive#folder') refreshIds.push(resourceId);
+record.indexTouched = refreshIds.length > 0;
+
+refreshIds.forEach((folderId, index) => {
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(folderId);
+const refreshTask = scheduleRealFolderRevalidation(folderId, final ? 0 : (index === 0 ? 800 : 1500));
+if (index !== 0 || !resourceId) return;
+Promise.resolve(refreshTask).then(() => {
+    if (S.cloudTargetWatchClosed) return;
+    if (record.finished && !final) return;
+    const parent = typeof globalParentIndex !== 'undefined' ? globalParentIndex.get(resourceId) : null;
+    if (parent && !record.targetId) record.targetId = normalizeRealFolderId(parent.id);
+    const parentHit = readRealFolderCache(record.targetId || targetId);
+    const cachedResource = parentHit && parentHit.items.find(item => item && String(item.id || '') === resourceId);
+    if (!cachedResource) {
+        record.materializeMisses = Number(record.materializeMisses || 0) + 1;
+        persistCloudTargetWatches();
+        if (!final && !record.finished && !S.cloudTargetWatchClosed && record.materializeMisses <= 20) {
+            const retryDelay = Math.min(30000, 2000 * Math.max(1, record.materializeMisses));
+            setTimeout(() => {
+                if (record.finished || S.cloudTargetWatchClosed) return;
+                record.indexTouched = false;
+                syncCloudTargetWatchIndex(record, task, false);
+            }, retryDelay);
+        }
+        return;
+    }
+    record.materializeMisses = 0;
+    if (cachedResource.kind !== 'drive#folder') {
+        persistCloudTargetWatches();
+        return;
+    }
+    record.resourceKind = 'drive#folder';
+    if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(resourceId);
+    scheduleRealFolderRevalidation(resourceId, final ? 0 : 500);
+    persistCloudTargetWatches();
+}).catch(() => {});
+});
+
+if (!targetId && record.defaultDownload && !record.resolvingTarget) {
+record.resolvingTarget = true;
+const rootRequest = window.pkGlobalIndex
+? window.pkGlobalIndex.ensureFolder('', { background: true, name: 'Root' })
+: apiList('', 1000, null, null, false, true);
+Promise.resolve(rootRequest).then(() => {
+    record.resolvingTarget = false;
+    record.indexTouched = false;
+    syncCloudTargetWatchIndex(record, task, final);
+    if (record.finishRequested && record.targetId) {
+        const finalized = finishCloudTargetWatch(record, record.finishCompleted, task);
+        if (finalized && S.cloudTargetWatches) S.cloudTargetWatches.delete(record.taskId);
+    }
+}).catch(() => { record.resolvingTarget = false; });
+}
+persistCloudTargetWatches();
+}
+
+function finishCloudTargetWatch(record, completed = false, task = null) {
+if (!record || record.finished) return true;
+syncCloudTargetWatchIndex(record, task, true);
+if (record.defaultDownload && !record.targetId) {
+record.finishRequested = true;
+record.finishCompleted = completed;
+persistCloudTargetWatches();
+return false;
+}
+record.finishRequested = false;
+const hasResolvedTarget = !record.defaultDownload || !!record.targetId;
+const pendingFolders = record.mutation && !record.mutation.finished ? finishFolderMutation(record.mutation, { success: completed, revalidate: true }) : [];
+pendingFolders.forEach(folderId => {
+if (!hasResolvedTarget || normalizeRealFolderId(folderId) !== normalizeRealFolderId(record.targetId)) scheduleRealFolderRevalidation(folderId, 0);
+});
+
+if (!completed) {
+record.finished = true;
+record.terminalPhase = 'error';
+touchCloudWatchFolders(record, 0);
+persistCloudTargetWatches();
+return true;
+}
+
+record.terminalPhase = 'complete';
+if (record.reconciling) return false;
+record.reconciling = true;
+persistCloudTargetWatches();
+
+(async () => {
+let checks = normalizeCloudWatchFolderChecks(record.folderChecks);
+if (record.taskType === 'untrash' && record.expectedItemIds && record.expectedItemIds.length) {
+const parentToIds = new Map();
+const unresolved = [];
+for (let i = 0; i < record.expectedItemIds.length; i += 6) {
+await Promise.all(record.expectedItemIds.slice(i, i + 6).map(async itemId => {
+try {
+const meta = await apiGet(itemId);
+const parentId = resolveKnownRealParentId(meta, null);
+if (parentId === null) unresolved.push(itemId);
+else {
+if (!parentToIds.has(parentId)) parentToIds.set(parentId, []);
+parentToIds.get(parentId).push(itemId);
+}
+} catch (e) { unresolved.push(itemId); }
+}));
+}
+parentToIds.forEach((presentIds, folderId) => checks.push({ folderId, presentIds, absentIds: [] }));
+if (unresolved.length) invalidateCompleteGlobalIndexForUnknownParents();
+}
+
+if (hasResolvedTarget) {
+if (record.resourceId) {
+checks.push({ folderId: record.targetId, presentIds: [record.resourceId], absentIds: [] });
+if (record.resourceKind === 'drive#folder') checks.push({
+folderId: record.resourceId,
+presentIds: [],
+absentIds: [],
+baselineSignature: record.resourceBaselineSignature || '',
+requireChange: !!record.resourceBaselineSignature
+});
+} else if (!checks.length) {
+checks.push({
+folderId: record.targetId,
+presentIds: [],
+absentIds: [],
+baselineSignature: record.baselineSignature || '',
+requireChange: true
+});
+}
+}
+
+checks = normalizeCloudWatchFolderChecks(checks);
+const results = await Promise.all(checks.map(check => {
+const relaxExpectations = Number(record.reconcileFailures || 0) >= 5;
+if (!relaxExpectations && ((check.presentIds && check.presentIds.length) || (check.absentIds && check.absentIds.length))) {
+return scheduleRealFolderExpectation(check.folderId, {
+presentIds: check.presentIds || [],
+absentIds: check.absentIds || [],
+maxAttempts: 10
+}, 0);
+}
+return waitForStableRealFolder(check.folderId, {
+baselineSignature: check.baselineSignature || '',
+requireChange: !relaxExpectations && Number(record.reconcileFailures || 0) < 3 && check.requireChange === true,
+maxAttempts: 8
+});
+}));
+
+if (checks.length > 0 && results.every(Boolean)) {
+record.finished = true;
+record.reconciling = false;
+S.cloudTargetWatches.delete(record.taskId);
+persistCloudTargetWatches();
+scheduleBackgroundResume(0);
+return;
+}
+
+record.reconciling = false;
+record.reconcileFailures = Number(record.reconcileFailures || 0) + 1;
+record.folderChecks = checks;
+touchCloudWatchFolders(record, 0);
+persistCloudTargetWatches();
+scheduleCloudTargetWatch(Math.min(60000, 10000 * Math.max(1, record.reconcileFailures)));
+})().catch(() => {
+record.reconciling = false;
+touchCloudWatchFolders(record, 0);
+persistCloudTargetWatches();
+scheduleCloudTargetWatch(30000);
+});
+
+persistCloudTargetWatches();
+return false;
+}
+
+function scheduleCloudTargetWatch(delay = 3000) {
+if (S.cloudTargetWatchClosed) return;
+if (!S.cloudTargetWatches || S.cloudTargetWatches.size === 0) return;
+if (S.cloudTargetWatchTimer || S.cloudTargetWatchRunning) return;
+S.cloudTargetWatchTimer = setTimeout(() => {
+S.cloudTargetWatchTimer = 0;
+runCloudTargetWatch();
+}, Math.max(1000, Number(delay) || 0));
+}
+
+async function fetchCloudTargetWatchTasks(records) {
+const entries = records instanceof Map ? Array.from(records.entries()) : [];
+const directIds = new Set(entries.filter(([, record]) => record && record.taskType !== 'offline').map(([taskId]) => taskId));
+const wanted = new Set(entries.filter(([, record]) => !record || record.taskType === 'offline').map(([taskId]) => taskId));
+const found = new Map();
+const phaseGroups = [
+'PHASE_TYPE_UNKNOW,PHASE_TYPE_PENDING,PHASE_TYPE_RUNNING,PHASE_TYPE_PAUSED,PHASE_TYPE_ERROR',
+'PHASE_TYPE_COMPLETE'
+];
+const limit = 500;
+const maxPages = Math.min(10, Math.max(3, Math.ceil(wanted.size / limit) + 1));
+for (const phases of phaseGroups) {
+if (wanted.size === 0) break;
+if (Array.from(wanted).every(taskId => found.has(taskId))) break;
+let next = '';
+for (let page = 0; page < maxPages; page++) {
+const filters = encodeURIComponent(JSON.stringify({ phase: { in: phases } }));
+const url = `https://api-drive.mypikpak.com/drive/v1/tasks?type=offline&limit=${limit}&filters=${filters}&thumbnail_size=SIZE_SMALL&with_reference_resource=true&_t=${Date.now()}${next ? `&page_token=${encodeURIComponent(next)}` : ''}`;
+const res = await fetch(url, { headers: getHeaders() });
+if (!res.ok) throw new Error(`Cloud target watch API ${res.status}`);
+const data = await res.json();
+(Array.isArray(data.tasks) ? data.tasks : []).forEach(task => {
+const id = getOfflineTaskPrimaryId(task);
+if (id && wanted.has(id)) found.set(id, task);
+});
+if (Array.from(wanted).every(taskId => found.has(taskId))) break;
+next = data.next_page_token || '';
+if (!next) break;
+}
+}
+Array.from(wanted).forEach(taskId => {
+if (!found.has(taskId)) directIds.add(taskId);
+});
+const directList = Array.from(directIds);
+for (let i = 0; i < directList.length; i += 6) {
+const chunk = directList.slice(i, i + 6);
+await Promise.all(chunk.map(async taskId => {
+try {
+const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/tasks/${encodeURIComponent(taskId)}?_t=${Date.now()}`, { headers: getHeaders() });
+if (!res.ok) return;
+const data = await res.json().catch(() => ({}));
+found.set(taskId, data && data.task && typeof data.task === 'object' ? Object.assign({}, data, data.task) : data);
+} catch (e) {}
+}));
+}
+return found;
+}
+
+async function runCloudTargetWatch() {
+if (S.cloudTargetWatchClosed) return;
+if (S.cloudTargetWatchRunning || !S.cloudTargetWatches || S.cloudTargetWatches.size === 0) return;
+S.cloudTargetWatchRunning = true;
+let nextDelay = 10000;
+try {
+const taskMap = await fetchCloudTargetWatchTasks(S.cloudTargetWatches);
+
+for (const [taskId, record] of Array.from(S.cloudTargetWatches.entries())) {
+const task = taskMap.get(taskId);
+if (!task) {
+record.misses = Number(record.misses || 0) + 1;
+touchCloudWatchFolders(record, 0);
+if (record.terminalPhase === 'complete') finishCloudTargetWatch(record, true, null);
+else if (record.misses >= 30) {
+if (finishCloudTargetWatch(record, false, null)) S.cloudTargetWatches.delete(taskId);
+}
+nextDelay = Math.max(nextDelay, Math.min(60000, 10000 * Math.max(1, record.misses)));
+continue;
+}
+record.misses = 0;
+const phase = String(task.phase || '').toUpperCase();
+syncCloudTargetWatchIndex(record, task, false);
+if (record.taskType !== 'offline') touchCloudWatchFolders(record, phase === 'PHASE_TYPE_COMPLETE' ? 0 : 500);
+if (phase === 'PHASE_TYPE_COMPLETE') {
+if (finishCloudTargetWatch(record, true, task)) S.cloudTargetWatches.delete(taskId);
+} else if (phase === 'PHASE_TYPE_ERROR' || phase === 'PHASE_TYPE_FAILED') {
+if (finishCloudTargetWatch(record, false, task)) S.cloudTargetWatches.delete(taskId);
+} else if (phase === 'PHASE_TYPE_PAUSED') {
+nextDelay = Math.max(nextDelay, 30000);
+} else {
+nextDelay = Math.min(nextDelay, 10000);
+}
+}
+S.cloudTargetWatchFailCount = 0;
+} catch (e) {
+S.cloudTargetWatchFailCount = Number(S.cloudTargetWatchFailCount || 0) + 1;
+nextDelay = Math.min(60000, 5000 * Math.pow(2, Math.min(4, S.cloudTargetWatchFailCount)));
+console.warn('[Cloud Task] Target watch failed:', e);
+} finally {
+S.cloudTargetWatchRunning = false;
+persistCloudTargetWatches();
+if (S.cloudTargetWatches && S.cloudTargetWatches.size > 0) scheduleCloudTargetWatch(nextDelay);
+}
+}
+
+function registerCloudTaskTarget(result, targetId = '', options = {}) {
+const task = extractOfflineTaskFromAddResult(result);
+const taskId = getOfflineTaskPrimaryId(task);
+if (!taskId) return false;
+const requestedTargetId = normalizeRealFolderId(targetId);
+if (requestedTargetId && !isRealHomeFolderId(requestedTargetId)) return false;
+const defaultDownload = options.defaultDownload !== undefined ? options.defaultDownload === true : !requestedTargetId;
+const resourceId = String((task && task.file_id) || (task && task.reference_resource && task.reference_resource.id) || options.resourceId || '');
+const folderId = resolveCloudTargetFolderId(requestedTargetId, defaultDownload, resourceId);
+const existing = S.cloudTargetWatches.get(taskId);
+if (existing) {
+if (options.taskType) existing.taskType = options.taskType;
+if (folderId) existing.targetId = folderId;
+if (requestedTargetId) existing.requestedTargetId = requestedTargetId;
+if (resourceId) existing.resourceId = resourceId;
+if (options.resourceKind) existing.resourceKind = options.resourceKind;
+if (options.resourceBaselineSignature !== undefined) existing.resourceBaselineSignature = String(options.resourceBaselineSignature || '');
+if (options.folderChecks) existing.folderChecks = normalizeCloudWatchFolderChecks([...(existing.folderChecks || []), ...options.folderChecks]);
+if (options.expectedItemIds) existing.expectedItemIds = Array.from(new Set([...(existing.expectedItemIds || []), ...options.expectedItemIds].map(String).filter(Boolean)));
+if (!existing.mutation || existing.mutation.finished) existing.mutation = beginFolderMutation([folderId || ''], 'cloud_task');
+else if (folderId) attachFolderMutationTarget(existing.mutation, folderId);
+syncCloudTargetWatchIndex(existing, task, false);
+if (existing.taskType !== 'offline' && existing.mutation && !existing.mutation.finished) {
+const pendingFolders = finishFolderMutation(existing.mutation, { success: true, revalidate: true });
+pendingFolders.forEach(folderId => scheduleRealFolderRevalidation(folderId, 0));
+}
+scheduleCloudTargetWatch(1000);
+return true;
+}
+const record = {
+taskId,
+accountId: getCurrentDriveAccountId(),
+taskType: options.taskType || 'offline',
+targetId: folderId,
+requestedTargetId,
+defaultDownload,
+resourceId,
+resourceKind: String((task && task.reference_resource && task.reference_resource.kind) || options.resourceKind || ''),
+resourceBaselineSignature: String(options.resourceBaselineSignature || ''),
+createdAt: Number(options.createdAt || Date.now()),
+misses: 0,
+finished: false,
+baselineSignature: folderId ? getRealFolderCacheSignature(folderId) : '',
+folderChecks: normalizeCloudWatchFolderChecks(options.folderChecks),
+expectedItemIds: Array.from(new Set((options.expectedItemIds || []).map(String).filter(Boolean))),
+terminalPhase: String(options.terminalPhase || ''),
+reconcileFailures: Number(options.reconcileFailures || 0),
+mutation: beginFolderMutation([folderId || ''], 'cloud_task')
+};
+if (options.baselineSignature) record.baselineSignature = String(options.baselineSignature);
+S.cloudTargetWatches.set(taskId, record);
+syncCloudTargetWatchIndex(record, task, false);
+if (record.taskType !== 'offline' && record.mutation && !record.mutation.finished) {
+const pendingFolders = finishFolderMutation(record.mutation, { success: true, revalidate: true });
+pendingFolders.forEach(folderId => scheduleRealFolderRevalidation(folderId, 0));
+}
+const phase = String((task && task.phase) || '').toUpperCase();
+if (phase === 'PHASE_TYPE_COMPLETE' || phase === 'PHASE_TYPE_ERROR') {
+if (finishCloudTargetWatch(record, phase === 'PHASE_TYPE_COMPLETE', task)) S.cloudTargetWatches.delete(taskId);
+} else {
+scheduleCloudTargetWatch(5000);
+}
+persistCloudTargetWatches();
+return true;
+}
+
+function cancelCloudTargetWatch(taskId) {
+const id = String(taskId || '').trim();
+if (!id || !S.cloudTargetWatches) return false;
+const record = S.cloudTargetWatches.get(id);
+if (!record) return false;
+if (record.mutation && !record.mutation.finished) {
+const pendingFolders = finishFolderMutation(record.mutation, { success: false, revalidate: true });
+pendingFolders.forEach(folderId => scheduleRealFolderRevalidation(folderId, 0));
+}
+record.finished = true;
+record.terminalPhase = 'cancelled';
+touchCloudWatchFolders(record, 0);
+S.cloudTargetWatches.delete(id);
+persistCloudTargetWatches();
+return true;
+}
+
+window.pkCancelCloudTargetWatch = cancelCloudTargetWatch;
+
+function restoreCloudTargetWatches() {
+try {
+const now = Date.now();
+const accountId = getCurrentDriveAccountId();
+const rows = JSON.parse(sessionStorage.getItem(CLOUD_TARGET_WATCH_SESSION_KEY) || '[]');
+(Array.isArray(rows) ? rows : []).filter(row => row && row.taskId && (!row.accountId || !accountId || row.accountId === accountId)).forEach(row => {
+    registerCloudTaskTarget({
+        id: row.taskId,
+        file_id: row.resourceId || '',
+        phase: row.lastPhase || '',
+        progress: Number(row.lastProgress || 0),
+        reference_resource: row.resourceKind ? { id: row.resourceId || '', kind: row.resourceKind } : undefined
+    }, row.requestedTargetId || row.targetId || '', {
+        taskType: row.taskType || 'offline',
+        defaultDownload: !!row.defaultDownload,
+        resourceId: row.resourceId || '',
+resourceKind: row.resourceKind || '',
+resourceBaselineSignature: row.resourceBaselineSignature || '',
+createdAt: Number(row.createdAt || now),
+baselineSignature: row.baselineSignature || '',
+folderChecks: row.folderChecks || [],
+expectedItemIds: row.expectedItemIds || [],
+terminalPhase: row.terminalPhase || '',
+reconcileFailures: Number(row.reconcileFailures || 0)
+});
+});
+} catch (e) {}
+}
+
+function consumeCloudTargetCreationEvents() {
+try {
+const rows = JSON.parse(sessionStorage.getItem(CLOUD_TARGET_EVENT_SESSION_KEY) || '[]');
+sessionStorage.removeItem(CLOUD_TARGET_EVENT_SESSION_KEY);
+(Array.isArray(rows) ? rows : []).forEach(row => {
+    if (!row || !row.taskId) return;
+    registerCloudTaskTarget({ id: row.taskId, file_id: row.fileId || '', phase: row.phase || '' }, row.parentId || '', {
+        defaultDownload: !!row.defaultDownload,
+        resourceId: row.fileId || '',
+        createdAt: Number(row.createdAt || Date.now())
+    });
+});
+} catch (e) {}
+}
+
+S.cloudTaskCreatedHandler = () => consumeCloudTargetCreationEvents();
+document.addEventListener('pk-cloud-task-created', S.cloudTaskCreatedHandler);
+setTimeout(() => {
+if (pkState !== S) return;
+restoreCloudTargetWatches();
+consumeCloudTargetCreationEvents();
+}, 0);
+
 function isOfflineUserDeleteTaskItem(item) {
 if (!item || typeof item !== 'object') return false;
 const id = getOfflineTaskPrimaryId(item);
@@ -16305,6 +17972,17 @@ targets.push(item || { id: taskId, task_id: taskId, kind: 'drive#task' });
 if (!targets.length) return { handled: false };
 
 const ids = targets.map(getOfflineTaskPrimaryId).filter(Boolean);
+const physicalDeleteItems = ctx.deleteFiles ? targets.filter(item => item && item.file_id).map(item => ({
+...item,
+id: item.file_id,
+parent_id: item.reference_resource && Object.prototype.hasOwnProperty.call(item.reference_resource, 'parent_id')
+? item.reference_resource.parent_id
+: item.parent_id
+})) : [];
+const physicalParentResolution = await resolveRealMutationParentMap(physicalDeleteItems, null);
+if (physicalParentResolution.unresolvedIds.length) invalidateCompleteGlobalIndexForUnknownParents();
+const physicalDeleteMutation = beginFolderMutation(Array.from(physicalParentResolution.parentIds), 'offline_delete_files');
+let physicalDeleteCompleted = false;
 const snapshots = targets.map(item => captureOfflineDeleteSnapshot(item));
 const progressTask = ctx.progress === false ? null : FloatBarManager.create(L.str_deleting);
 try {
@@ -16341,6 +18019,7 @@ throw firstError;
 }
 
 ids.forEach(id => markOfflineDeleteTombstone(id, 'confirmed'));
+physicalDeleteCompleted = true;
 scheduleOfflineTaskDeleteProbe(ctx.batch || ids.length > 1 ? 'batch_delete' : 'delete', ctx.delay || 1000);
 if (!ctx.silent) showToast(ids.length > 1 && L.msg_task_del_success_fmt ? L.msg_task_del_success_fmt.replace('{n}', ids.length) : L.msg_task_deleted);
 return { handled: true, success: true, ids };
@@ -16353,6 +18032,22 @@ removeOfflineDeleteTombstone(id);
 await restoreOfflineDeletedSnapshots(snapshots, { error: e });
 throw e;
 } finally {
+const pendingFolders = finishFolderMutation(physicalDeleteMutation, {
+success: physicalDeleteCompleted,
+revalidate: physicalDeleteItems.length > 0
+});
+const physicalIdsByParent = new Map();
+physicalParentResolution.parentByItemId.forEach((parentId, fileId) => {
+if (!physicalIdsByParent.has(parentId)) physicalIdsByParent.set(parentId, []);
+physicalIdsByParent.get(parentId).push(fileId);
+});
+pendingFolders.forEach(folderId => {
+if (physicalDeleteCompleted) {
+scheduleRealFolderExpectation(folderId, { absentIds: physicalIdsByParent.get(normalizeRealFolderId(folderId)) || [], maxAttempts: 8 }, 500);
+} else {
+scheduleRealFolderRevalidation(folderId, 500);
+}
+});
 if (progressTask) progressTask.destroy();
 }
 }
@@ -16547,6 +18242,7 @@ const result = await apiAddOfflineTask(target.sourceUrl);
 const resultExists = isOfflineTaskAlreadyExistsResult(result);
 const newTask = extractOfflineTaskFromAddResult(result);
 const newTaskId = getOfflineTaskPrimaryId(newTask);
+if (newTaskId) registerCloudTaskTarget(newTask, '');
 if (resultExists) existsCount++;
 if (newTaskId && newTaskId !== target.oldTaskId && !isOfflineTaskDeletedByTombstone(newTaskId)) {
 successes.push(Object.assign({}, target, { newTask, newTaskId, exists: resultExists }));
@@ -16558,6 +18254,7 @@ if (isOfflineTaskAlreadyExistsError(e)) {
 existsCount++;
 const newTask = extractOfflineTaskFromAddResult((e && e.data) || e);
 const newTaskId = getOfflineTaskPrimaryId(newTask);
+if (newTaskId) registerCloudTaskTarget(newTask, '');
 if (newTaskId && newTaskId !== target.oldTaskId && !isOfflineTaskDeletedByTombstone(newTaskId)) {
 successes.push(Object.assign({}, target, { newTask, newTaskId, exists: true }));
 } else {
@@ -16587,7 +18284,6 @@ await insertOfflineRetryNewTasksLocally(successes.map(success => success.newTask
 await removeOfflineRetryOldTasksLocally(successes.map(success => success.oldTaskId), { scrollTop: successes[0].snapshot && successes[0].snapshot.oldScrollTop });
 const cancelFailedCount = await cancelOfflineRetryOldTasks(successes);
 if (cancelFailedCount) failedCount += cancelFailedCount;
-if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
 }
 
 if (successes.length || noTaskIdCount || existsCount) {
@@ -16863,6 +18559,571 @@ return pid === 'recent_root' ||
        pid.startsWith('virtual_');
 });
 }
+
+function normalizeRealFolderId(id) {
+const value = String(id === undefined || id === null ? '' : id).trim();
+return !value || value === 'root' ? '' : value;
+}
+
+function getRealFolderCacheKeys(id) {
+const normalized = normalizeRealFolderId(id);
+return normalized ? [normalized] : ['root', ''];
+}
+
+function isRealHomeFolderId(id) {
+const value = normalizeRealFolderId(id);
+if (!value) return true;
+return !value.startsWith('virtual_') && !value.startsWith('__') && !value.startsWith('root_') && !value.includes('_root') &&
+value !== 'analyze_root' && value !== 'global_search' && value !== 'search_result';
+}
+
+function isNormalHomeFolderContext(folderId = null) {
+if (S.trashMode || S.shareMode || S.shareParseMode || S.linkBookmarkMode || S.starredMode ||
+S.recentMode || S.historyMode || S.offlineMode || S.uploadMode || S.isFlattened ||
+S.dupMode || S.analyzeMode) return false;
+const cur = Array.isArray(S.path) && S.path.length ? S.path[S.path.length - 1] : null;
+const curId = normalizeRealFolderId(cur && cur.id);
+if (!isRealHomeFolderId(curId)) return false;
+return folderId === null || curId === normalizeRealFolderId(folderId);
+}
+
+function getFolderCacheItems(raw) {
+if (Array.isArray(raw)) return raw;
+if (raw && Array.isArray(raw.items)) return raw.items;
+return null;
+}
+
+function readRealFolderCache(folderId) {
+const keys = getRealFolderCacheKeys(folderId);
+const stores = [];
+if (S && S.cache) stores.push(S.cache);
+if (typeof globalCache !== 'undefined' && globalCache) stores.push(globalCache);
+let partialHit = null;
+for (const store of stores) {
+for (const key of keys) {
+if (!store.has(key)) continue;
+const raw = store.get(key);
+const items = getFolderCacheItems(raw);
+if (!items) continue;
+const hit = { key, raw, items, store, complete: Array.isArray(raw) || !raw.nextToken };
+if (hit.complete) return hit;
+if (!partialHit) partialHit = hit;
+}
+}
+return partialHit;
+}
+
+function findRealParentIdInFolderCaches(itemId) {
+const targetId = String(itemId || '');
+if (!targetId) return null;
+const stores = [];
+if (typeof globalCache !== 'undefined' && globalCache) stores.push(globalCache);
+if (S && S.cache) stores.push(S.cache);
+for (const store of stores) {
+for (const [rawKey, raw] of store.entries()) {
+const key = String(rawKey === undefined || rawKey === null ? '' : rawKey);
+const folderId = normalizeRealFolderId(key);
+if (!isRealHomeFolderId(folderId)) continue;
+const items = getFolderCacheItems(raw);
+if (!items) continue;
+if (items.some(item => item && String(item.id || '') === targetId)) return folderId;
+}
+}
+return null;
+}
+
+function resolveKnownRealParentId(item, fallbackFolderId = null) {
+if (!item || typeof item !== 'object') return null;
+const candidates = [];
+const push = value => {
+if (value === undefined || value === null) return;
+const id = normalizeRealFolderId(value);
+if (isRealHomeFolderId(id) && !candidates.includes(id)) candidates.push(id);
+};
+
+if (Object.prototype.hasOwnProperty.call(item, 'parent_id')) push(item.parent_id);
+if (Object.prototype.hasOwnProperty.call(item, 'parentId')) push(item.parentId);
+const ref = item.reference_resource || item._offlineTask?.reference_resource || null;
+if (ref && Object.prototype.hasOwnProperty.call(ref, 'parent_id')) push(ref.parent_id);
+
+const lookupIds = [item.file_id, ref && ref.id, item.id].filter(Boolean).map(String);
+if (typeof globalParentIndex !== 'undefined') {
+lookupIds.forEach(id => {
+const parent = globalParentIndex.get(id);
+if (parent && Object.prototype.hasOwnProperty.call(parent, 'id')) push(parent.id);
+});
+}
+
+const lineage = Array.isArray(item._lineage) ? item._lineage : [];
+if (lineage.length) {
+let index = lineage.length - 1;
+if (String(lineage[index]?.id || '') === String(item.id || '')) index--;
+if (index >= 0) push(lineage[index]?.id);
+}
+
+if (candidates.length) return candidates[0];
+
+for (const lookupId of lookupIds) {
+const cachedParent = findRealParentIdInFolderCaches(lookupId);
+if (cachedParent !== null) push(cachedParent);
+}
+
+if (candidates.length) return candidates[0];
+if (fallbackFolderId !== null && fallbackFolderId !== undefined) {
+const fallback = normalizeRealFolderId(fallbackFolderId);
+if (isRealHomeFolderId(fallback)) return fallback;
+}
+return null;
+}
+
+async function resolveRealMutationParentMap(items, fallbackFolderId = null) {
+const list = (Array.isArray(items) ? items : []).filter(item => item && item.id);
+const parentByItemId = new Map();
+const unresolved = [];
+list.forEach(item => {
+const parentId = resolveKnownRealParentId(item, null);
+if (parentId !== null) parentByItemId.set(String(item.id), parentId);
+else unresolved.push(item);
+});
+
+for (let i = 0; i < unresolved.length; i += 6) {
+const chunk = unresolved.slice(i, i + 6);
+await Promise.all(chunk.map(async item => {
+const lookupId = String(item.file_id || item.reference_resource?.id || item.id || '');
+if (!lookupId) return;
+try {
+const meta = await apiGet(lookupId);
+if (meta && typeof meta === 'object') Object.assign(item, meta, { id: item.id });
+const parentId = resolveKnownRealParentId(meta, null);
+if (parentId !== null) parentByItemId.set(String(item.id), parentId);
+} catch (e) {}
+}));
+}
+
+const safeFallback = fallbackFolderId !== null && fallbackFolderId !== undefined && isRealHomeFolderId(fallbackFolderId)
+? normalizeRealFolderId(fallbackFolderId)
+: null;
+if (safeFallback !== null) {
+list.forEach(item => {
+if (!parentByItemId.has(String(item.id))) parentByItemId.set(String(item.id), safeFallback);
+});
+}
+
+const unresolvedIds = list.map(item => String(item.id)).filter(id => !parentByItemId.has(id));
+return { parentByItemId, parentIds: new Set(parentByItemId.values()), unresolvedIds };
+}
+
+function invalidateCompleteGlobalIndexForUnknownParents() {
+if (!window.pkGlobalIndex) return;
+if (typeof window.pkGlobalIndex.markAllDirty === 'function') window.pkGlobalIndex.markAllDirty();
+else {
+const folderIds = window.pkGlobalIndex.getCompleteEntries().map(([folderId]) => folderId);
+if (folderIds.length) window.pkGlobalIndex.markDirty(folderIds);
+}
+if (typeof scheduleBackgroundResume === 'function') scheduleBackgroundResume(0);
+}
+
+function writeRealFolderCacheToStore(store, folderId, items, preservePaging = false) {
+if (!store || !Array.isArray(items)) return;
+const keys = getRealFolderCacheKeys(folderId);
+keys.forEach(key => {
+const old = store.get(key);
+if (old && !Array.isArray(old) && Array.isArray(old.items)) {
+store.set(key, { ...old, items: [...items], nextToken: preservePaging ? old.nextToken : null });
+} else {
+store.set(key, [...items]);
+}
+});
+}
+
+function writeRealFolderCaches(folderId, items, preservePaging = false) {
+if (!Array.isArray(items)) return false;
+if (S && S.cache) writeRealFolderCacheToStore(S.cache, folderId, items, preservePaging);
+if (typeof globalCache !== 'undefined' && globalCache) writeRealFolderCacheToStore(globalCache, folderId, items, preservePaging);
+return true;
+}
+
+function patchRealFolderCaches(folderId, patcher, fallbackItems = null) {
+if (typeof patcher !== 'function') return null;
+const hit = readRealFolderCache(folderId);
+const source = hit && Array.isArray(hit.items)
+? hit.items
+: (Array.isArray(fallbackItems) ? fallbackItems : null);
+if (!source) return null;
+const next = patcher([...source]);
+if (!Array.isArray(next)) return null;
+writeRealFolderCaches(folderId, next, !!(hit && !hit.complete));
+return next;
+}
+
+function hydrateRealFolderCache(folderId, renderNow = false) {
+if (!isNormalHomeFolderContext(folderId)) return false;
+const hit = readRealFolderCache(folderId);
+if (!hit || !Array.isArray(hit.items)) return false;
+if (S && S.cache && hit.store !== S.cache) {
+writeRealFolderCacheToStore(S.cache, folderId, hit.items, !hit.complete);
+}
+S.items = [...hit.items];
+S.display = [];
+S.itemMap.clear();
+S.items.forEach(item => {
+if (!item || !item.id) return;
+S.itemMap.set(item.id, item);
+});
+if (renderNow) {
+refresh();
+updateStat();
+}
+return true;
+}
+
+function getFolderMutationState(folderId, create = false) {
+if (typeof globalFolderMutationStates === 'undefined') return null;
+const id = normalizeRealFolderId(folderId);
+if (!isRealHomeFolderId(id)) return null;
+let state = globalFolderMutationStates.get(id);
+if (!state && create) {
+state = {
+id,
+revision: 0,
+pending: 0,
+needsRevalidate: false,
+trustedEntry: false,
+lastMutationAt: 0,
+revalidatePromise: null,
+revalidateFailCount: 0
+};
+globalFolderMutationStates.set(id, state);
+}
+return state || null;
+}
+
+function hasPendingFolderMutationWork() {
+for (const state of globalFolderMutationStates.values()) {
+if (state && state.pending > 0) return true;
+}
+return false;
+}
+
+function attachFolderMutationTarget(token, folderId) {
+if (!token || token.finished) return false;
+const id = normalizeRealFolderId(folderId);
+if (!isRealHomeFolderId(id) || token.folders.has(id)) return false;
+const state = getFolderMutationState(id, true);
+state.pending++;
+state.revision++;
+state.trustedEntry = false;
+state.lastMutationAt = Date.now();
+token.folders.set(id, state.revision);
+return true;
+}
+
+function beginFolderMutation(folderIds, kind = 'mutation') {
+const token = {
+id: ++globalFolderMutationSeq,
+kind,
+folders: new Map(),
+finished: false
+};
+(Array.isArray(folderIds) ? folderIds : [folderIds]).forEach(id => attachFolderMutationTarget(token, id));
+if (token.folders.size === 0) {
+token.usesRootPlaceholder = true;
+attachFolderMutationTarget(token, '');
+}
+return token;
+}
+
+function finishFolderMutation(token, options = {}) {
+if (!token || token.finished) return [];
+token.finished = true;
+const revalidateIds = new Set((options.revalidateIds || []).map(normalizeRealFolderId));
+const allNeedRevalidate = options.revalidate === true || options.success === false;
+const pendingRevalidations = [];
+const settledFolders = [];
+token.folders.forEach((startRevision, id) => {
+const state = getFolderMutationState(id, true);
+state.pending = Math.max(0, state.pending - 1);
+state.revision++;
+state.lastMutationAt = Date.now();
+if (allNeedRevalidate || revalidateIds.has(id)) {
+state.needsRevalidate = true;
+state.trustedEntry = false;
+} else if (state.pending === 0 && !state.needsRevalidate) {
+const cacheHit = readRealFolderCache(id);
+if (cacheHit && cacheHit.complete) state.trustedEntry = true;
+else {
+state.needsRevalidate = true;
+state.trustedEntry = false;
+}
+}
+if (state.pending === 0 && state.needsRevalidate) pendingRevalidations.push(id);
+if (state.pending === 0) settledFolders.push(id);
+});
+if (window.pkGlobalIndex) {
+settledFolders.forEach(id => {
+const state = getFolderMutationState(id, false);
+if (state && state.needsRevalidate) window.pkGlobalIndex.markDirty(id);
+else window.pkGlobalIndex.adoptFolder(id, {
+name: getKnownRealFolderName(id),
+lineage: id && globalLineageMap.has(id) ? globalLineageMap.get(id) : []
+});
+});
+}
+return pendingRevalidations;
+}
+
+function markFolderMutationRevalidated(folderId, expectedRevision = null) {
+const state = getFolderMutationState(folderId, false);
+if (!state || state.pending > 0) return false;
+if (expectedRevision !== null && state.revision !== expectedRevision) return false;
+state.needsRevalidate = false;
+state.trustedEntry = false;
+state.lastMutationAt = Date.now();
+state.revalidateFailCount = 0;
+return true;
+}
+
+function consumeTrustedFolderCacheEntry(folderId) {
+const state = getFolderMutationState(folderId, false);
+if (!state || !state.trustedEntry || state.pending > 0 || state.needsRevalidate) return false;
+state.trustedEntry = false;
+return true;
+}
+
+function patchFolderRecordInParentCache(folderId, patch) {
+const id = normalizeRealFolderId(folderId);
+if (!id || !patch || typeof globalParentIndex === 'undefined') return false;
+const parent = globalParentIndex.get(id);
+if (!parent) return false;
+const parentId = normalizeRealFolderId(parent.id);
+const currentFallback = isNormalHomeFolderContext(parentId) ? S.items : null;
+const next = patchRealFolderCaches(parentId, list => list.map(item => {
+if (!item || String(item.id || '') !== id) return item;
+return { ...item, ...patch };
+}), currentFallback);
+if (!next) return false;
+if (window.pkGlobalIndex) window.pkGlobalIndex.adoptFolder(parentId, {
+name: getKnownRealFolderName(parentId),
+lineage: parentId && globalLineageMap.has(parentId) ? globalLineageMap.get(parentId) : []
+});
+if (isNormalHomeFolderContext(parentId)) {
+S.items = [...next];
+S.itemMap.clear();
+S.items.forEach(item => { if (item && item.id) S.itemMap.set(item.id, item); });
+refresh();
+updateStat();
+}
+return true;
+}
+
+function syncFolderSummaryCountFromCache(folderId) {
+const id = normalizeRealFolderId(folderId);
+if (!id) return false;
+const hit = readRealFolderCache(id);
+if (!hit || !hit.complete || !Array.isArray(hit.items)) return false;
+return patchFolderRecordInParentCache(id, { file_count: hit.items.length });
+}
+
+function getKnownRealFolderName(folderId) {
+const id = normalizeRealFolderId(folderId);
+if (!id) return 'Root';
+const pathNode = Array.isArray(S.path) ? S.path.find(node => normalizeRealFolderId(node && node.id) === id) : null;
+if (pathNode && pathNode.name) return pathNode.name;
+const parent = typeof globalParentIndex !== 'undefined' ? globalParentIndex.get(id) : null;
+if (parent) {
+const parentHit = readRealFolderCache(parent.id);
+const item = parentHit && parentHit.items.find(row => row && String(row.id || '') === id);
+if (item && item.name) return item.name;
+}
+return '';
+}
+
+function getCurrentFolderMutationSnapshot(folderId) {
+const state = getFolderMutationState(folderId, false);
+return state ? { revision: state.revision, pending: state.pending, needsRevalidate: state.needsRevalidate } : null;
+}
+
+function scheduleRealFolderRevalidation(folderId, delay = 0) {
+const id = normalizeRealFolderId(folderId);
+const state = getFolderMutationState(id, true);
+state.needsRevalidate = true;
+state.trustedEntry = false;
+if (state.pending > 0 || state.revalidatePromise) return state.revalidatePromise || Promise.resolve(false);
+const expectedRevision = state.revision;
+const task = (async () => {
+if (delay > 0) await sleep(delay);
+const latestBefore = getFolderMutationState(id, false);
+if (!latestBefore || latestBefore.pending > 0 || latestBefore.revision !== expectedRevision) return false;
+
+if (isNormalHomeFolderContext(id) && canUseLiveManualRefresh()) {
+S.keepVisualOnNextForceLoad = true;
+await load(false, true);
+return !getFolderMutationState(id, false)?.needsRevalidate;
+}
+
+const files = await apiList(id, 1000, null, null, false, true);
+const latestAfter = getFolderMutationState(id, false);
+if (!latestAfter || latestAfter.pending > 0 || latestAfter.revision !== expectedRevision) return false;
+writeRealFolderCaches(id, files);
+const folderName = getKnownRealFolderName(id);
+if (folderName) indexParents(id || 'root', folderName, files);
+syncFolderSummaryCountFromCache(id);
+markFolderMutationRevalidated(id, expectedRevision);
+globalDirtyFolders.delete(id);
+if (!id) globalDirtyFolders.delete('root');
+if (window.pkGlobalIndex) window.pkGlobalIndex.adoptFolder(id, {
+name: folderName || (id ? '' : 'Root'),
+lineage: id && globalLineageMap.has(id) ? globalLineageMap.get(id) : []
+});
+if (isNormalHomeFolderContext(id)) hydrateRealFolderCache(id, true);
+return true;
+})().catch(e => {
+console.warn('[Folder Cache] Revalidation failed:', id || 'root', e);
+return false;
+}).finally(() => {
+const latest = getFolderMutationState(id, false);
+if (latest && latest.revalidatePromise === task) latest.revalidatePromise = null;
+});
+state.revalidatePromise = task;
+task.then(ok => {
+const latest = getFolderMutationState(id, false);
+if (!latest || ok || latest.pending > 0 || !latest.needsRevalidate) return;
+latest.revalidateFailCount = Number(latest.revalidateFailCount || 0) + 1;
+if (latest.revalidateFailCount > 5) return;
+const retryDelay = Math.min(60000, 3000 * Math.pow(2, Math.min(4, latest.revalidateFailCount)));
+setTimeout(() => scheduleRealFolderRevalidation(id, 0), retryDelay);
+});
+return task;
+}
+
+function scheduleRealFolderExpectation(folderId, options = {}, delay = 0, attempt = 0) {
+const id = normalizeRealFolderId(folderId);
+if (typeof pkState !== 'undefined' && pkState !== S) {
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(id);
+return Promise.resolve(false);
+}
+const presentIds = new Set((options.presentIds || []).map(String).filter(Boolean));
+const absentIds = new Set((options.absentIds || []).map(String).filter(Boolean));
+const maxAttempts = Math.max(1, Number(options.maxAttempts || 8));
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(id);
+return Promise.resolve(scheduleRealFolderRevalidation(id, delay)).then(ok => {
+const hit = readRealFolderCache(id);
+const items = hit && hit.complete ? hit.items : null;
+const itemIds = items ? new Set(items.map(item => String(item && item.id || '')).filter(Boolean)) : null;
+const matched = !!(ok && itemIds &&
+Array.from(presentIds).every(itemId => itemIds.has(itemId)) &&
+Array.from(absentIds).every(itemId => !itemIds.has(itemId)));
+if (matched) return true;
+if (attempt + 1 >= maxAttempts) {
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(id);
+return false;
+}
+// Keep the folder non-certifiable while waiting for delayed cloud materialization.
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(id);
+const retryDelay = Math.min(60000, 1000 * Math.pow(2, Math.min(5, attempt + 1)));
+return new Promise(resolve => {
+setTimeout(() => {
+scheduleRealFolderExpectation(id, { presentIds: Array.from(presentIds), absentIds: Array.from(absentIds), maxAttempts }, 0, attempt + 1).then(resolve);
+}, retryDelay);
+});
+});
+}
+
+function getRealFolderCacheSignature(folderId) {
+const hit = readRealFolderCache(folderId);
+if (!hit || !hit.complete || !Array.isArray(hit.items)) return '';
+let xor = 0;
+let sum = 0;
+let mixed = 0;
+hit.items.forEach(item => {
+const text = [
+String(item && item.id || ''),
+String(item && (item.modified_time || item.updated_time) || ''),
+String(item && item.size || ''),
+String(item && item.file_count || '')
+].join(':');
+let hash = 2166136261;
+for (let i = 0; i < text.length; i++) {
+hash ^= text.charCodeAt(i);
+hash = Math.imul(hash, 16777619);
+}
+hash >>>= 0;
+xor = (xor ^ hash) >>> 0;
+sum = (sum + hash) >>> 0;
+mixed = (mixed + Math.imul(hash ^ 0x9e3779b9, (hash | 1))) >>> 0;
+});
+return `${hit.items.length}:${xor.toString(36)}:${sum.toString(36)}:${mixed.toString(36)}`;
+}
+
+async function waitForStableRealFolder(folderId, options = {}) {
+const id = normalizeRealFolderId(folderId);
+const maxAttempts = Math.max(2, Number(options.maxAttempts || 8));
+const baseline = String(options.baselineSignature || '');
+const requireChange = options.requireChange === true;
+let previous = '';
+let stableCount = 0;
+let changed = false;
+for (let attempt = 0; attempt < maxAttempts; attempt++) {
+if (typeof pkState !== 'undefined' && pkState !== S) {
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(id);
+return false;
+}
+if (attempt > 0) await sleep(Math.min(30000, 500 * Math.pow(2, Math.min(5, attempt))));
+if (typeof pkState !== 'undefined' && pkState !== S) {
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(id);
+return false;
+}
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(id);
+await scheduleRealFolderRevalidation(id, 0);
+const signature = getRealFolderCacheSignature(id);
+if (signature && signature !== baseline) changed = true;
+stableCount = signature && signature === previous ? stableCount + 1 : 0;
+previous = signature;
+if (signature && stableCount >= 1 && (changed || (!requireChange && attempt >= 5))) return true;
+if (attempt + 1 < maxAttempts && window.pkGlobalIndex) window.pkGlobalIndex.markDirty(id);
+}
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(id);
+return false;
+}
+
+async function deleteGhostFilesWithIndexSync(fileIds, options = {}) {
+const ids = Array.from(new Set((Array.isArray(fileIds) ? fileIds : [fileIds]).map(String).filter(Boolean)));
+if (!ids.length) return true;
+const mutation = beginFolderMutation([''], options.kind || 'ghost_delete');
+const resolved = await resolveRealMutationParentMap(ids.map(id => ({ id })), null);
+resolved.parentIds.forEach(parentId => attachFolderMutationTarget(mutation, parentId));
+if (resolved.unresolvedIds.length) invalidateCompleteGlobalIndexForUnknownParents();
+let success = false;
+try {
+for (let i = 0; i < ids.length; i += 100) {
+const chunk = ids.slice(i, i + 100);
+const res = await fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
+method: 'POST',
+headers: getHeaders(),
+body: JSON.stringify({ ids: chunk }),
+keepalive: options.keepalive === true
+});
+if (!res.ok) throw new Error(`API ${res.status}`);
+chunk.forEach(id => {
+if (typeof window.pkRemoveGhostFile === 'function') window.pkRemoveGhostFile(id);
+});
+}
+
+resolved.parentIds.forEach(parentId => {
+patchRealFolderCaches(parentId, list => list.filter(item => item && !ids.includes(String(item.id || ''))));
+});
+success = true;
+return true;
+} finally {
+const pending = finishFolderMutation(mutation, { success, revalidate: true });
+pending.forEach(parentId => {
+scheduleRealFolderExpectation(parentId, { absentIds: ids, maxAttempts: 8 }, 0);
+});
+if (resolved.unresolvedIds.length) scheduleBackgroundResume(0);
+}
+}
+
+window.pkDeleteGhostFilesWithIndexSync = deleteGhostFilesWithIndexSync;
 
 function canUseLiveManualRefresh() {
 const cur = Array.isArray(S.path) && S.path.length ? S.path[S.path.length - 1] : null;
@@ -17643,14 +19904,19 @@ return;
 
 const recentRootNextPageIntent = !!(S.recentLoadNextPageOnly && S.recentMode && S.path.length === 1 && cur && cur.id === 'recent_root' && realCacheKey === 'recent_root');
 
-if (!recentRootNextPageIntent && (globalDirtyFolders.has(folderId) || (folderId === 'root' && globalDirtyFolders.has('')))) {
+const dirtyFolderLoad = !recentRootNextPageIntent && (globalDirtyFolders.has(folderId) || (folderId === 'root' && globalDirtyFolders.has('')));
+const normalHomeFolderLoad = !recentRootNextPageIntent && isNormalHomeFolderContext(folderId);
+const loadMutationSnapshot = normalHomeFolderLoad ? getCurrentFolderMutationSnapshot(folderId) : null;
+const mutationRefreshLoad = !!(loadMutationSnapshot && (loadMutationSnapshot.pending > 0 || loadMutationSnapshot.needsRevalidate));
+let retainedMutationCache = false;
+
+if (dirtyFolderLoad || mutationRefreshLoad) {
 forceUpdate = true;
-globalDirtyFolders.delete(folderId);
-globalDirtyFolders.delete('');
-globalDirtyFolders.delete('root');
+if (canUseLiveManualRefresh()) retainedMutationCache = hydrateRealFolderCache(folderId, true);
 }
 
-const keepVisualOnThisForceLoad = !!(S.keepVisualOnNextForceLoad && forceUpdate && !recentRootNextPageIntent && canUseLiveManualRefresh());
+const trustedCacheEntry = normalHomeFolderLoad && !forceUpdate && !!readRealFolderCache(folderId) && consumeTrustedFolderCacheEntry(folderId);
+const keepVisualOnThisForceLoad = !!(forceUpdate && !recentRootNextPageIntent && canUseLiveManualRefresh() && (S.keepVisualOnNextForceLoad || retainedMutationCache));
 S.keepVisualOnNextForceLoad = false;
 const useLiveManualRefresh = !!(keepVisualOnThisForceLoad && canUseLiveManualRefresh());
 const isNetworkResumeLoad = !!S._networkResumeLoad;
@@ -17857,6 +20123,8 @@ oldIds: new Set(oldItems.map(item => String(item.id || '')).filter(Boolean)),
 seenIds: new Set(),
 liveMap: new Map(oldItems.map(item => [String(item.id || ''), item]).filter(([id]) => !!id)),
 oldOrderIndex: new Map(oldItems.map((item, index) => [String(item.id || ''), index]).filter(([id]) => !!id)),
+mutationRevision: loadMutationSnapshot ? loadMutationSnapshot.revision : null,
+mutationPendingAtStart: loadMutationSnapshot ? loadMutationSnapshot.pending : 0,
 pageTokens: new Set(),
 localRemovedIds: new Set(),
 noLocalMutation: true,
@@ -17902,6 +20170,11 @@ nextToken = null;
 }
 if (S.shareMode && realCacheKey === 'share_root') {
 S.items = filterShareCancelTombstones(S.items);
+fetchedIds.clear();
+S.items.forEach(it => { if (it && it.id) fetchedIds.add(it.id); });
+}
+if (S.starredMode && S.path.length === 1 && S.starredCancelTombstones.size > 0) {
+S.items = S.items.filter(it => it && !S.starredCancelTombstones.has(String(it.id || '')));
 fetchedIds.clear();
 S.items.forEach(it => { if (it && it.id) fetchedIds.add(it.id); });
 }
@@ -18000,14 +20273,14 @@ S.items.forEach(it => fetchedIds.add(it.id));
 globalCache.set('share_session', { phase: 'active', nextToken: nextToken || null, completed: false, count: S.items.length });
 } else {
 setLoad(false);
-if (window.pkSmartRefreshTrigger && !shouldSkipSmartRefreshAfterLoad(realCacheKey)) {
+if (!trustedCacheEntry && window.pkSmartRefreshTrigger && !shouldSkipSmartRefreshAfterLoad(realCacheKey)) {
 window.pkSmartRefreshTrigger(true);
 }
 return;
 }
 } else if (!nextToken) {
 setLoad(false);
-if (window.pkSmartRefreshTrigger && !shouldSkipSmartRefreshAfterLoad(realCacheKey)) {
+if (!trustedCacheEntry && window.pkSmartRefreshTrigger && !shouldSkipSmartRefreshAfterLoad(realCacheKey)) {
 window.pkSmartRefreshTrigger(true);
 }
 const visibleSubFolders = S.items.filter(f => f.kind === 'drive#folder');
@@ -18272,9 +20545,7 @@ if (res.ok) {
         if (lt.status === 'DONE' || (!lt.file_id && !lt._uploadId)) return true;
 
         if ((lt.name === 'upload' || lt.name === 'Ghost Task') && !lt.file && lt.file_id) {
-            fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
-                method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: [lt.file_id] })
-            }).catch(()=>{});
+            deleteGhostFilesWithIndexSync([lt.file_id], { kind: 'upload_sync_ghost_cleanup' }).catch(()=>{});
             if (S.upMng) S.upMng.removeTask(lt.id);
             return false;
         }
@@ -18294,9 +20565,7 @@ if (res.ok) {
             const taskName = ref.name || ct.name || ct.file_name || 'Ghost Task';
 
             if (taskName === 'upload' || taskName === 'Ghost Task') {
-                fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
-                    method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: [ct.file_id] })
-                }).catch(()=>{});
+                deleteGhostFilesWithIndexSync([ct.file_id], { kind: 'upload_sync_ghost_cleanup' }).catch(()=>{});
                 return;
             }
 
@@ -18388,6 +20657,10 @@ if (S.shareMode || S.offlineMode || S.uploadMode) {
 validFiles = data.files;
 } else {
 validFiles = data.files.map(f => minifyFile(f, false));
+}
+
+if (S.starredMode && S.path.length === 1 && S.starredCancelTombstones.size > 0) {
+validFiles = validFiles.filter(f => !S.starredCancelTombstones.has(String((f && f.id) || '')));
 }
 
 const pageUniqueFiles = [];
@@ -18599,13 +20872,19 @@ if (!isMergeRefreshStillCurrent()) {
 
 mergeRefreshCtx.complete = true;
 const missingIds = [];
+const finalMutationState = getFolderMutationState(folderId, false);
+const mutationStableForMissing = !finalMutationState || (
+finalMutationState.pending === 0 &&
+(mergeRefreshCtx.mutationRevision === null || finalMutationState.revision === mergeRefreshCtx.mutationRevision)
+);
 const canConfirmMissing =
     mergeRefreshCtx.status === 'refreshing' &&
     mergeRefreshCtx.complete === true &&
     mergeRefreshCtx.noLocalMutation === true &&
     mergeRefreshCtx.noPageError === true &&
     mergeRefreshCtx.contextStillCurrent === true &&
-    mergeRefreshCtx.tokenLoopSafe === true;
+    mergeRefreshCtx.tokenLoopSafe === true &&
+    mutationStableForMissing;
 
 if (canConfirmMissing) {
     mergeRefreshCtx.oldIds.forEach(id => {
@@ -18649,6 +20928,31 @@ S.cache.set(realCacheKey, [...S.items]);
 }
 if (typeof globalCache !== 'undefined') globalCache.set(realCacheKey, [...S.items]);
 
+const completedMutationState = normalHomeFolderLoad ? getFolderMutationState(folderId, false) : null;
+const mutationStableAfterLoad = !completedMutationState || !!(
+loadMutationSnapshot &&
+completedMutationState.pending === 0 &&
+completedMutationState.revision === loadMutationSnapshot.revision
+);
+if (mutationStableAfterLoad) {
+globalDirtyFolders.delete(folderId);
+if (folderId === 'root') {
+globalDirtyFolders.delete('');
+globalDirtyFolders.delete('root');
+}
+if (completedMutationState) markFolderMutationRevalidated(folderId, completedMutationState.revision);
+if (normalHomeFolderLoad && window.pkGlobalIndex) {
+const currentNode = S.path[S.path.length - 1] || {};
+window.pkGlobalIndex.adoptFolder(folderId, {
+items: S.items,
+name: currentNode.name || (normalizeRealFolderId(folderId) ? '' : 'Root'),
+lineage: normalizeRealFolderId(folderId) && globalLineageMap.has(normalizeRealFolderId(folderId))
+? globalLineageMap.get(normalizeRealFolderId(folderId))
+: []
+});
+}
+}
+
 if (S.recentMode && realCacheKey === 'recent_root') {
 globalCache.set('recent_session', { phase: 'done', nextToken: null, completed: true, count: S.items.length });
 }
@@ -18661,6 +20965,7 @@ window.pkSmartRefreshTrigger();
 }
 
 indexParents(folderId, cur.name, S.items);
+if (isNormalHomeFolderContext(folderId)) syncFolderSummaryCountFromCache(folderId);
 
 S.itemMap.clear();
 for (let k = 0; k < S.items.length; k++) S.itemMap.set(S.items[k].id, S.items[k]);
@@ -18708,7 +21013,7 @@ if (mergeRefreshCtx && S.liveRefreshCtx === mergeRefreshCtx) {
 isGUISensitive = false;
 S.pagingLoading = false;
 if (S.offlineMode) S.offlinePagingPending = false;
-if (e && e.name === 'AbortError') {
+if ((e && e.name === 'AbortError') || signal.aborted || currentId !== activeLoadId) {
     if (mergeRefreshCtx.status === 'refreshing') updateLiveManualRefreshStatus(mergeRefreshCtx, 'abandoned');
     await flushLiveManualRefreshProjection(mergeRefreshCtx, true);
     clearLiveManualRefreshLater(mergeRefreshCtx);
@@ -18728,7 +21033,7 @@ return;
 clearMergeRefreshCtx();
 isGUISensitive = false;
 if (S.recentMode && realCacheKey === 'recent_root') clearRecentRootPagingActive(currentId, 'load_error');
-if (currentId === activeLoadId) {
+if (currentId === activeLoadId && !signal.aborted) {
 S.pagingLoading = false;
 if (S.offlineMode) S.offlinePagingPending = false;
 updateStat();
@@ -18736,13 +21041,22 @@ if (!S._isRetrying) setLoad(false);
 
 if (e.name !== 'AbortError') {
 console.error("API Error encountered:", e);
-if (typeof resetHeaderCache === 'function') resetHeaderCache();
 
-const isAuthError = e.message.includes('401') || e.message.includes('403') || e.message.includes('400') || e.message.includes('CAPTCHA') || e.message.includes('AUTH_RETRY');
-const isNotFoundError = e.message.includes('404');
-const isNetworkError = e.name === 'TypeError' || e.message.includes('Failed to fetch') || e.message.includes('NetworkError');
+const errorMessage = String((e && e.message) || '');
+const isCaptchaError = typeof isDownloadHydrateCaptchaInvalidError === 'function' && isDownloadHydrateCaptchaInvalidError(e);
+const isAuthError = !isCaptchaError && /401|403|auth_retry/i.test(errorMessage);
+const isNotFoundError = errorMessage.includes('404');
+const isNetworkError = (typeof navigator !== 'undefined' && navigator.onLine === false) || /Failed to fetch|NetworkError|fetch failed|Load failed|ERR_NETWORK/i.test(errorMessage);
 
-if (!S._isRetrying || isNetworkError) {
+if (isCaptchaError) {
+S._isRetrying = false;
+setLoad(false);
+console.warn('[Captcha] Directory load stopped after captcha recovery was exhausted; access-token logout recovery is intentionally skipped.');
+if (!Array.isArray(S.items) || S.items.length === 0) showToast(L.err_captcha_simple, 'warning');
+return;
+}
+
+if ((isAuthError || isNotFoundError || isNetworkError) && (!S._isRetrying || isNetworkError)) {
 S._isRetrying = true;
 setLoad(true);
 
@@ -18885,7 +21199,7 @@ if (isNetworkError) {
 S._isRetrying = false;
 }
 
-if (S.items.length === 0) {
+if (S.items.length === 0 && currentId === activeLoadId && !signal.aborted) {
 setLoad(false);
 showAlert(`${L.str_failed} ${formatCloudErrorMessage(e)}`);
 }
@@ -19112,7 +21426,8 @@ if (realMyPackId) seenIds.add(realMyPackId);
 }
 
 if (typeof globalCache !== 'undefined') {
-for (const [key, files] of globalCache) {
+const globalSearchEntries = window.pkGlobalIndex ? window.pkGlobalIndex.getCompleteEntries() : globalCache;
+for (const [key, files] of globalSearchEntries) {
 if (currentReqId !== S.sortId) return;
 if (!Array.isArray(files)) continue;
 if (key && (key.endsWith('_root') || key === 'root_trashed')) continue;
@@ -19338,7 +21653,7 @@ S._autoExitingVirtualEmpty = false;
 return;
 }
 
-const visibleSet = new Set(S.display.map(i => i.id));
+const visibleSet = new Set(S.display.filter(Boolean).map(i => i.id));
 if (S.selMode === 'all') {
 const nextExcluded = new Set();
 for (const id of S.selEx) {
@@ -19622,7 +21937,7 @@ if (UI.dupFilters) UI.dupFilters.style.display = 'none';
 if (S.uploadMode || (S.analyzeMode && S.analyzeSimGroups && cur.id === 'analyze_root')) {
 renderList();
 if (gmGet('pk_keep_pos', true) && S.latestChildId) {
-const targetIdx = S.display.findIndex(x => x.id === S.latestChildId);
+const targetIdx = S.display.findIndex(x => x && x.id === S.latestChildId);
 if (targetIdx !== -1) {
 const targetTop = getItemScrollTopByIndex(targetIdx);
 UI.vp.scrollTop = Math.max(0, targetTop - (UI.vp.clientHeight / 2) + (CONF.rowHeight / 2));
@@ -19657,10 +21972,11 @@ const sortedList = await new Promise(resolve => {
 const isRoot = S.path.length === 1 && S.path[0].id === '';
 const liveStableOrder = canUseLiveManualRefreshStableTie(S.liveRefreshCtx);
 
-const proxyList = new Array(S.display.length);
-const len = S.display.length;
+const sortSource = S.display.filter(Boolean);
+const proxyList = new Array(sortSource.length);
+const len = sortSource.length;
 for (let i = 0; i < len; i++) {
-const item = S.display[i];
+const item = sortSource[i];
 
 const isStarred = S.starredSet.has(item.id) || !!(item.starred || (item.tags && item.tags.some(t => t.name === 'STAR')));
 
@@ -19891,7 +22207,7 @@ const { indices, reqId } = e.data;
 URL.revokeObjectURL(workerUrl);
 sortWorker.terminate();
 if (reqId === S.sortId) {
-resolve(Array.from(indices).map(idx => S.display[idx]));
+resolve(Array.from(indices).map(idx => sortSource[idx]).filter(Boolean));
 } else resolve(null);
 };
 const sortLocale = ({'zh':'zh-CN','tc':'zh-TW','ja':'ja','ko':'ko','en':'en','id':'id','ms':'ms'})[getLang()] || 'en';
@@ -19907,7 +22223,7 @@ if (finalVirtualSortMaskSig) S.virtualSortMaskSig = finalVirtualSortMaskSig;
 
 if (currentReqId !== S.sortId) return;
 
-const currentIds = new Set(S.display.map(i => i.id));
+const currentIds = new Set(S.display.filter(Boolean).map(i => i.id));
 if (S.selMode === 'all') {
 const nextExcluded = new Set();
 for (const id of S.selEx) {
@@ -19932,7 +22248,7 @@ syncLiveManualRefreshStoresFromItems(S.items);
 renderList();
 
 if (gmGet('pk_keep_pos', true) && S.latestChildId) {
-const targetIdx = S.display.findIndex(x => x.id === S.latestChildId);
+const targetIdx = S.display.findIndex(x => x && x.id === S.latestChildId);
 if (targetIdx !== -1) {
 const rowTop = getItemScrollTopByIndex(targetIdx);
 const vpHeight = UI.vp.clientHeight;
@@ -22272,11 +24588,12 @@ return Array.from(new Set(ids));
 }
 
 async function pollShareParseSaveTasks(taskIds, reqId, onProgress) {
+const completedTasks = new Map();
 while (true) {
 await sleep(2000);
 if (S.shareParseSaveReqId !== reqId) return false;
-let complete = 0;
 for (const taskId of taskIds) {
+if (completedTasks.has(taskId)) continue;
 const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/tasks/${encodeURIComponent(taskId)}?_t=${Date.now()}`, { headers: getHeaders() });
 if (!res.ok) continue;
 const data = await res.json().catch(() => ({}));
@@ -22285,11 +24602,89 @@ const key = resolveShareParseSaveErrorKey(0, data);
 if (key || phase === 'PHASE_TYPE_ERROR') {
 throw makeShareParseError(key || 'msg_share_parse_save_task_failed', 200, data);
 }
-if (phase === 'PHASE_TYPE_COMPLETE' || phase === 'PHASE_TYPE_COMPLETED' || phase === 'COMPLETE' || phase === 'SUCCESS') complete++;
+if (phase === 'PHASE_TYPE_COMPLETE' || phase === 'PHASE_TYPE_COMPLETED' || phase === 'COMPLETE' || phase === 'SUCCESS') {
+completedTasks.set(taskId, data);
 }
-if (onProgress) onProgress(complete, taskIds.length);
-if (complete >= taskIds.length) return true;
 }
+if (onProgress) onProgress(completedTasks.size, taskIds.length);
+if (completedTasks.size >= taskIds.length) return Array.from(completedTasks.values());
+}
+}
+
+async function syncShareRestoreGlobalIndex(taskResults, submitResults = [], options = {}) {
+const rawRows = [...(Array.isArray(taskResults) ? taskResults : []), ...(Array.isArray(submitResults) ? submitResults : [])];
+const restoredIds = new Set();
+const pushId = value => {
+if (value === undefined || value === null) return;
+if (Array.isArray(value)) { value.forEach(pushId); return; }
+if (typeof value === 'object') {
+pushId(value.id || value.file_id || value.fileId || value.resource_id || value.resourceId);
+return;
+}
+const id = String(value).trim();
+if (id) restoredIds.add(id);
+};
+rawRows.forEach(raw => {
+const data = getShareParsePayload(raw || {});
+const trace = parseShareRestoreTraceMap(raw || {});
+Object.values(trace || {}).forEach(pushId);
+pushId(data.file_id || data.fileId || raw?.file_id || raw?.fileId);
+pushId(data.reference_resource || raw?.reference_resource);
+pushId(data.files || raw?.files);
+});
+
+const parentToIds = new Map();
+const restoredFolderIds = new Set();
+const ids = Array.from(restoredIds);
+for (let i = 0; i < ids.length; i += 6) {
+await Promise.all(ids.slice(i, i + 6).map(async id => {
+try {
+const meta = await apiGet(id);
+const parentId = resolveKnownRealParentId(meta, null);
+if (parentId !== null) {
+if (!parentToIds.has(parentId)) parentToIds.set(parentId, []);
+parentToIds.get(parentId).push(id);
+}
+if (meta && meta.kind === 'drive#folder') restoredFolderIds.add(id);
+} catch (e) {}
+}));
+}
+
+if (!parentToIds.size) {
+let defaultTarget = normalizeRealFolderId(options.targetId || '') || resolveCloudTargetFolderId('', true, '');
+if (!defaultTarget) {
+try {
+await window.pkGlobalIndex?.ensureFolder('', { background: true, name: 'Root' });
+defaultTarget = resolveCloudTargetFolderId('', true, '');
+} catch (e) {}
+}
+if (defaultTarget && isRealHomeFolderId(defaultTarget)) {
+parentToIds.set(normalizeRealFolderId(defaultTarget), ids);
+}
+}
+
+if (!parentToIds.size) invalidateCompleteGlobalIndexForUnknownParents();
+
+if (options.mutation && !options.mutation.finished) {
+parentToIds.forEach((presentIds, parentId) => attachFolderMutationTarget(options.mutation, parentId));
+const pendingFolders = finishFolderMutation(options.mutation, { success: true, revalidate: true });
+pendingFolders.forEach(folderId => {
+if (!parentToIds.has(normalizeRealFolderId(folderId))) scheduleRealFolderRevalidation(folderId, 0);
+});
+}
+
+const syncTasks = [];
+parentToIds.forEach((presentIds, parentId) => {
+if (presentIds.length) syncTasks.push(scheduleRealFolderExpectation(parentId, { presentIds, maxAttempts: 10 }, 500));
+else syncTasks.push(waitForStableRealFolder(parentId, {
+baselineSignature: options.baselineSignature || '',
+maxAttempts: 8
+}));
+});
+if (restoredFolderIds.size && window.pkGlobalIndex) window.pkGlobalIndex.markDirty(Array.from(restoredFolderIds));
+scheduleBackgroundResume(0);
+if (syncTasks.length) Promise.allSettled(syncTasks).catch(()=>{});
+return parentToIds.size > 0;
 }
 
 async function handleShareParseSaveSelected() {
@@ -22323,14 +24718,26 @@ let savedSubmitCount = 0;
 const formatSaveProgress = (done, total) => (L.msg_share_parse_save_progress || L.btn_share_parse_saving).replace('{done}', done).replace('{total}', total);
 const formatTaskProgress = (done, total) => (L.msg_share_parse_save_task_progress || L.btn_share_parse_saving).replace('{done}', done).replace('{total}', total);
 const progressTask = FloatBarManager.create(formatSaveProgress(0, totalSaveCount));
+let shareRestoreMutation = null;
+let shareRestoreTarget = '';
+let shareRestoreBaseline = '';
+let shareRestoreCompleted = false;
+const submittedShareRestoreResults = [];
 
 try {
 const headers = getHeaders();
 if (!headers.Authorization || headers.Authorization.length < 10) throw makeShareParseError('msg_share_parse_save_auth_error');
+shareRestoreTarget = resolveCloudTargetFolderId('', true, '');
+if (!shareRestoreTarget && window.pkGlobalIndex) {
+await window.pkGlobalIndex.ensureFolder('', { background: true, name: 'Root' }).catch(()=>{});
+shareRestoreTarget = resolveCloudTargetFolderId('', true, '');
+}
+shareRestoreBaseline = shareRestoreTarget ? getRealFolderCacheSignature(shareRestoreTarget) : '';
+shareRestoreMutation = beginFolderMutation([shareRestoreTarget || ''], 'share_restore');
 const groups = groupShareParseRestoreItems(selectedItems);
 if (!groups.length) throw makeShareParseError('msg_share_parse_select_first');
 const allTaskIds = [];
-const results = [];
+const results = submittedShareRestoreResults;
 for (const groupItems of groups) {
 if (S.shareParseSaveReqId !== reqId) return;
 progressTask.update(formatSaveProgress(savedSubmitCount, totalSaveCount));
@@ -22351,13 +24758,25 @@ if (!res.ok) throw makeShareParseError(resolveShareParseSaveErrorKey(res.status,
 const key = resolveShareParseSaveErrorKey(0, data);
 if (key) throw makeShareParseError(key, 200, data);
 
-extractShareParseSaveTaskIds(data).forEach(id => allTaskIds.push(id));
+extractShareParseSaveTaskIds(data).forEach(id => {
+allTaskIds.push(id);
+registerCloudTaskTarget({ id }, shareRestoreTarget, {
+taskType: 'restore',
+defaultDownload: !shareRestoreTarget,
+baselineSignature: shareRestoreBaseline
+});
+});
 results.push(data || {});
 savedSubmitCount += groupItems.length;
 progressTask.update(formatSaveProgress(Math.min(savedSubmitCount, totalSaveCount), totalSaveCount));
 }
 
 const taskIds = Array.from(new Set(allTaskIds));
+if (taskIds.length && shareRestoreMutation && !shareRestoreMutation.finished) {
+const pendingFolders = finishFolderMutation(shareRestoreMutation, { success: true, revalidate: true });
+pendingFolders.forEach(folderId => scheduleRealFolderRevalidation(folderId, 0));
+}
+let completedTaskResults = [];
 if (taskIds.length) {
 progressTask.update(formatTaskProgress(0, taskIds.length));
 const done = await pollShareParseSaveTasks(taskIds, reqId, (doneCount, totalCount) => {
@@ -22365,7 +24784,17 @@ progressTask.update(formatTaskProgress(doneCount, totalCount));
 });
 if (S.shareParseSaveReqId !== reqId) return;
 if (done === false) return;
+completedTaskResults = Array.isArray(done) ? done : [];
 }
+
+await syncShareRestoreGlobalIndex(completedTaskResults, results, {
+mutation: shareRestoreMutation,
+targetId: shareRestoreTarget,
+baselineSignature: shareRestoreBaseline
+}).catch(error => {
+console.warn('[Share Restore] Global index sync failed:', error);
+});
+shareRestoreCompleted = true;
 
 S.shareParseSaveResult = { groups: groups.length, taskIds, results };
 if (S.shareParseMode && S.shareParseListActive) {
@@ -22379,6 +24808,16 @@ const msg = getShareParseSaveErrorMessage(e);
 S.shareParseSaveError = msg;
 showToast(msg, 'error');
 } finally {
+if (shareRestoreMutation && !shareRestoreMutation.finished) {
+const pending = finishFolderMutation(shareRestoreMutation, { success: false, revalidate: true });
+pending.forEach(id => scheduleRealFolderRevalidation(id, 0));
+}
+if (!shareRestoreCompleted && submittedShareRestoreResults.length && shareRestoreTarget) {
+waitForStableRealFolder(shareRestoreTarget, {
+baselineSignature: shareRestoreBaseline,
+maxAttempts: 8
+}).catch(()=>{});
+}
 if (S.shareParseSaveReqId === reqId) {
 S.shareParseSaving = false;
 updateShareParseSaveButton();
@@ -23112,9 +25551,9 @@ if (options.skipOfflineProbe === true) return;
 scheduleOfflineTaskAddProbe(options.reason || 'add', options.delay || 1000);
 return;
 } else if (targetId && curPathId === targetId) {
-load(false, true);
+updateStat();
 } else if (!targetId && path.length === 1) {
-if (window.pkSmartRefreshTrigger) window.pkSmartRefreshTrigger(true);
+updateStat();
 }
 }
 
@@ -23257,13 +25696,12 @@ const extras = item.isSnap ? { save_as: 'snapshot' } : {};
 const created = await apiAddOfflineTaskWithRetry(item.url, pid, extras);
 if (!created) throw new Error('Cloud task create failed after retry');
 addResults.push(created);
+registerCloudTaskTarget(created, pid);
 successCount++;
-if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
 } catch(e) {
 if (isOfflineTaskAlreadyExistsError(e)) {
 addExistsCount++;
 successCount++;
-if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
 continue;
 }
 console.error(`${options.logPrefix || 'Task Create Failed'}[${item.url}]:`, e);
@@ -23815,10 +26253,10 @@ _pkSkipDurationProbe: true
 return item;
 }
 
-async function resolveSharePlayableFile(item) {
+async function resolveSharePlayableFile(item, options = {}) {
 if (!item || !item._isShareItem) return item;
 if (item._shareResolvedDetail && (item.web_content_link || (Array.isArray(item.medias) && item.medias.length) || isArchiveLike(item))) return item;
-const detail = await fetchShareFileInfo(item);
+const detail = await fetchShareFileInfo(item, options);
 return mergeSharePlayableDetail(item, detail);
 }
 
@@ -23843,6 +26281,14 @@ file_ids: [],
 params: { trace_file_ids: sourceId }
 };
 if (ancestorIds.length) payload.ancestor_ids = ancestorIds;
+let targetId = resolveCloudTargetFolderId('', true, '');
+if (!targetId && window.pkGlobalIndex) {
+await window.pkGlobalIndex.ensureFolder('', { background: true, name: 'Root' }).catch(()=>{});
+targetId = resolveCloudTargetFolderId('', true, '');
+}
+const baselineSignature = targetId ? getRealFolderCacheSignature(targetId) : '';
+const mutation = beginFolderMutation([targetId || ''], 'share_restore_for_unzip');
+try {
 const res = await fetch('https://api-drive.mypikpak.com/drive/v1/share/restore', { method: 'POST', headers: getHeaders(), body: JSON.stringify(payload) });
 syncTime(res.headers);
 const data = await res.json().catch(() => ({}));
@@ -23850,7 +26296,20 @@ if (!res.ok) throw makeShareParseError(resolveShareParseSaveErrorKey(res.status,
 const key = resolveShareParseSaveErrorKey(0, data);
 if (key) throw makeShareParseError(key, 200, data);
 const taskIds = extractShareParseSaveTaskIds(data);
-if (!taskIds.length) return data.file_id || data.fileId || '';
+taskIds.forEach(taskId => registerCloudTaskTarget({ id: taskId }, targetId, {
+taskType: 'restore',
+defaultDownload: !targetId,
+baselineSignature
+}));
+if (taskIds.length && !mutation.finished) {
+const pendingFolders = finishFolderMutation(mutation, { success: true, revalidate: true });
+pendingFolders.forEach(folderId => scheduleRealFolderRevalidation(folderId, 0));
+}
+if (!taskIds.length) {
+const restoredId = data.file_id || data.fileId || '';
+await syncShareRestoreGlobalIndex(restoredId ? [{ file_id: restoredId }] : [], [data], { mutation, targetId, baselineSignature });
+return restoredId;
+}
 for (let loop = 0; loop < 60; loop++) {
 await sleep(1000);
 for (const taskId of taskIds) {
@@ -23862,18 +26321,33 @@ const tKey = resolveShareParseSaveErrorKey(0, tData);
 if (tKey || phase === 'PHASE_TYPE_ERROR') throw makeShareParseError(tKey || 'msg_share_parse_save_task_failed', 200, tData);
 if (phase === 'PHASE_TYPE_COMPLETE' || phase === 'PHASE_TYPE_COMPLETED' || phase === 'COMPLETE' || phase === 'SUCCESS') {
 const map = parseShareRestoreTraceMap(tData);
-return map[sourceId] || Object.values(map)[0] || tData.file_id || (tData.task && tData.task.file_id) || '';
+const restoredId = map[sourceId] || Object.values(map)[0] || tData.file_id || (tData.task && tData.task.file_id) || '';
+await syncShareRestoreGlobalIndex([tData], [data], { mutation, targetId, baselineSignature });
+return restoredId;
 }
 }
 }
 throw makeShareParseError('msg_share_parse_save_task_failed');
+} finally {
+if (!mutation.finished) {
+const pending = finishFolderMutation(mutation, { success: false, revalidate: true });
+pending.forEach(id => scheduleRealFolderRevalidation(id, 0));
+}
+}
 }
 
 async function submitShareArchiveUnzip(item, detail, pwdValue, archiveFiles) {
 const restoredId = await restoreShareFileForOpen(item, detail);
 if (!restoredId) throw makeShareParseError('msg_share_parse_save_task_failed');
-const savedFile = Object.assign({}, detail || item, { id: restoredId, _isShareItem: false });
-return sendUnzipRequest(savedFile, pwdValue || "", archiveFiles || []);
+let restoredMeta = null;
+try { restoredMeta = await apiGet(restoredId); } catch (e) {}
+const savedFile = Object.assign({}, detail || item, restoredMeta || {}, { id: restoredId, _isShareItem: false });
+const result = await sendUnzipRequest(savedFile, pwdValue || "", archiveFiles || []);
+if (result && typeof result === 'object') {
+result._pkPhysicalParentId = Object.prototype.hasOwnProperty.call(savedFile, 'parent_id') ? normalizeRealFolderId(savedFile.parent_id) : '';
+result._pkPhysicalFileId = restoredId;
+}
+return result;
 }
 
 async function handleOpenShareArchive(item) {
@@ -28360,6 +30834,7 @@ UI.in.style.height = `${S.display.length * CONF.rowHeight}px`;
 const top = UI.vp.scrollTop;
 const h = UI.vp.clientHeight;
 const buffer = CONF.buffer || 20;
+const gridBufferRows = 3;
 
 let start = 0;
 let end = 0;
@@ -28471,10 +30946,10 @@ appendVisibleDupGridSectionItems(section);
 end = visibleIndices.length;
 } else {
 start = isGridMode && gridLayout
-? Math.max(0, (Math.floor(top / CONF.rowHeight) - Math.ceil(buffer / 2)) * gridLayout.cols)
+? Math.max(0, (Math.floor(top / CONF.rowHeight) - gridBufferRows) * gridLayout.cols)
 : Math.max(0, Math.floor(top / CONF.rowHeight) - buffer);
 end = isGridMode && gridLayout
-? Math.min(S.display.length, (Math.ceil((top + h) / CONF.rowHeight) + Math.ceil(buffer / 2)) * gridLayout.cols)
+? Math.min(S.display.length, (Math.ceil((top + h) / CONF.rowHeight) + gridBufferRows) * gridLayout.cols)
 : Math.min(S.display.length, Math.ceil((top + h) / CONF.rowHeight) + buffer);
 }
 
@@ -29154,7 +31629,7 @@ const curPathKey = getListPathStableKey(d);
 const prevItem = i > firstVisiblePathIndex ? S.display[i - 1] : null;
 const prevPathKey = (prevItem && !prevItem.isHeader) ? getListPathStableKey(prevItem) : '';
 const sameState = (i > firstVisiblePathIndex && curPathKey && prevPathKey && curPathKey === prevPathKey) ? 'same' : 'show';
-return [i, firstVisiblePathIndex, curPathKey, prevPathKey, sameState].join('~');
+return [i, curPathKey, prevPathKey, sameState].join('~');
 })() : '';
 const historyStableSig = useHistoryStableRows ? [
 listStableModeKey,
@@ -30472,17 +32947,21 @@ const prepareFolderNavigationVisual = () => {
 if (typeof S.clearSelection === 'function') S.clearSelection();
 S.activeId = '';
 S.lastSelIdx = -1;
+const targetFolderId = S.path[S.path.length - 1]?.id || 'root';
+const hydrated = hydrateRealFolderCache(targetFolderId, false);
+if (!hydrated) {
 S.items = [];
 S.display = [];
 S.itemMap.clear();
+}
 S.pagingLoading = false;
 S.offlinePagingPending = false;
 if (UI.win) UI.win.setAttribute('data-cur-pid', S.path[S.path.length - 1]?.id || 'root');
 renderCrumb();
 refresh();
 updateStat();
-setLoad(true, true);
-updateLoadTxt(L.loading_detail);
+setLoad(!hydrated, true);
+if (!hydrated) updateLoadTxt(L.loading_detail);
 };
 
 const triggerOpen = () => {
@@ -31738,6 +34217,9 @@ return text;
 
 const formatCloudErrorMessage = (e, fallback = '') => {
 const L = getStrings();
+if (typeof isDownloadHydrateCaptchaInvalidError === 'function' && isDownloadHydrateCaptchaInvalidError(e)) return L.err_captcha_simple || L.str_failed;
+const internalCode = String((e && e.code) || (e && e.message) || '');
+if (internalCode === 'GLOBAL_INDEX_INCOMPLETE' || internalCode === 'GLOBAL_INDEX_STALE_RESULT') return L.str_scan_error || L.str_failed;
 if (typeof isOfflineReferenceMissingError === 'function' && isOfflineReferenceMissingError(e)) return getOfflineReferenceMissingText() || L.err_item_deleted || L.str_failed;
 if (typeof isMissingCloudFileError === 'function' && isMissingCloudFileError(e)) return getOfflineReferenceMissingText() || L.err_item_deleted || L.str_failed;
 const raw = getCloudRawErrorMessage(e);
@@ -31786,15 +34268,42 @@ return removed;
 };
 
 const waitFileTransferTask = async (data) => {
-if (!data || !data.task_id) return;
-await new Promise(resolve => {
+if (!data || !data.task_id) return null;
+return await new Promise((resolve, reject) => {
+let pollErrors = 0;
+const deadline = Date.now() + 5 * 60 * 1000;
 const checkTask = async () => {
+if (Date.now() >= deadline) {
+const err = new Error('FILE_TRANSFER_TASK_TIMEOUT');
+err.code = 'FILE_TRANSFER_TASK_TIMEOUT';
+reject(err);
+return;
+}
 try {
-const tRes = await fetch(`https://api-drive.mypikpak.com/drive/v1/tasks/${data.task_id}`, { headers: getHeaders() });
-const tData = await tRes.json();
-if (tData.phase === 'PHASE_TYPE_COMPLETE' || tData.phase === 'PHASE_TYPE_ERROR') resolve();
+const tRes = await fetch(`https://api-drive.mypikpak.com/drive/v1/tasks/${encodeURIComponent(data.task_id)}?_t=${Date.now()}`, { headers: getHeaders() });
+if (!tRes.ok) throw new Error(`Task API ${tRes.status}`);
+const raw = await tRes.json();
+const tData = raw && raw.task && typeof raw.task === 'object' ? Object.assign({}, raw, raw.task) : raw;
+const phase = String(tData.phase || '').toUpperCase();
+pollErrors = 0;
+if (phase === 'PHASE_TYPE_COMPLETE') resolve(tData);
+else if (phase === 'PHASE_TYPE_ERROR' || phase === 'PHASE_TYPE_FAILED') {
+const msg = String(tData.code || tData.error_code || tData.error || 'FILE_TRANSFER_TASK_ERROR');
+const err = new Error(msg);
+err.code = String(tData.code || tData.error || 'FILE_TRANSFER_TASK_ERROR');
+err.data = tData;
+err.isTerminalTaskError = true;
+reject(err);
+}
 else setTimeout(checkTask, 800);
-} catch { resolve(); }
+} catch (e) {
+if (e && e.isTerminalTaskError) {
+reject(e);
+return;
+}
+pollErrors++;
+setTimeout(checkTask, Math.min(10000, Math.max(1000, pollErrors * 1000)));
+}
 };
 checkTask();
 });
@@ -31814,7 +34323,10 @@ err.response = { status: res.status, statusCode: res.status, data };
 return err;
 };
 
-const requestFileTransferChunk = async (endpoint, ids, apiTargetPid) => {
+const requestFileTransferChunk = async (endpoint, items, apiTargetPid, sourceParentByItemId = null) => {
+const ids = items.map(item => String(item && item.id || '')).filter(Boolean);
+const targetFolderId = normalizeRealFolderId(apiTargetPid);
+const targetBaseline = getRealFolderCacheSignature(targetFolderId);
 const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/${endpoint}`, {
 method: 'POST',
 headers: getHeaders(),
@@ -31822,14 +34334,57 @@ body: JSON.stringify({ ids, to: { parent_id: apiTargetPid } })
 });
 const data = await res.json().catch(() => ({}));
 if (!res.ok) throw createFileTransferError(res, data);
-await waitFileTransferTask(data);
-return data;
+if (data.task_id) {
+const folderChecks = [{
+folderId: targetFolderId,
+baselineSignature: targetBaseline,
+requireChange: true
+}];
+if (endpoint === 'files:batchMove') {
+const sourceParents = new Set();
+items.forEach(item => {
+const itemId = String(item && item.id || '');
+const parentId = sourceParentByItemId instanceof Map
+? sourceParentByItemId.get(itemId)
+: resolveKnownRealParentId(item, null);
+if (parentId === undefined || parentId === null) return;
+sourceParents.add(normalizeRealFolderId(parentId));
+});
+sourceParents.forEach(folderId => folderChecks.push({
+folderId,
+baselineSignature: getRealFolderCacheSignature(folderId),
+requireChange: true
+}));
+}
+registerCloudTaskTarget({ id: data.task_id }, targetFolderId, {
+taskType: 'transfer',
+defaultDownload: false,
+folderChecks
+});
+}
+const finalTask = await waitFileTransferTask(data);
+if (data.task_id && finalTask) {
+const record = S.cloudTargetWatches && S.cloudTargetWatches.get(String(data.task_id));
+if (record) {
+syncCloudTargetWatchIndex(record, finalTask, true);
+const phase = String(finalTask.phase || '').toUpperCase();
+if (phase === 'PHASE_TYPE_COMPLETE') finishCloudTargetWatch(record, true, finalTask);
+else if (phase === 'PHASE_TYPE_ERROR' || phase === 'PHASE_TYPE_FAILED') finishCloudTargetWatch(record, false, finalTask);
+}
+}
+const finalFiles = finalTask && Array.isArray(finalTask.files)
+? finalTask.files
+: (finalTask && finalTask.file ? [finalTask.file] : []);
+return {
+...data,
+files: Array.isArray(data.files) && data.files.length ? data.files : finalFiles,
+_finalTask: finalTask || null
+};
 };
 
-const submitFileTransferChunk = async (endpoint, chunk, apiTargetPid) => {
-const ids = chunk.map(it => it.id);
+const submitFileTransferChunk = async (endpoint, chunk, apiTargetPid, sourceParentByItemId = null) => {
 try {
-const data = await requestFileTransferChunk(endpoint, ids, apiTargetPid);
+const data = await requestFileTransferChunk(endpoint, chunk, apiTargetPid, sourceParentByItemId);
 return { items: chunk, data, skippedItems: [] };
 } catch (e) {
 if (!isClipboardSourceUnavailableError(e)) throw e;
@@ -31839,7 +34394,7 @@ const skipItems = [];
 const files = [];
 for (const item of chunk) {
 try {
-const data = await requestFileTransferChunk(endpoint, [item.id], apiTargetPid);
+const data = await requestFileTransferChunk(endpoint, [item], apiTargetPid, sourceParentByItemId);
 okItems.push(item);
 if (Array.isArray(data.files)) files.push(...data.files);
 } catch (err) {
@@ -31902,6 +34457,17 @@ const skippedTransferIds = new Set();
 const total = items.length;
 const endpoint = opType === 'move' ? 'files:batchMove' : 'files:batchCopy';
 const actionText = opType === 'move' ? L.str_moving : L.str_copying;
+const transferParentResolution = opType === 'move'
+? await resolveRealMutationParentMap(items, null)
+: { parentByItemId: new Map(), parentIds: new Set(), unresolvedIds: [] };
+if (transferParentResolution.unresolvedIds.length) invalidateCompleteGlobalIndexForUnknownParents();
+const transferSourceParentIds = transferParentResolution.parentIds;
+const transferMutation = beginFolderMutation([
+...(opType === 'move' ? Array.from(transferSourceParentIds) : []),
+targetPid
+], opType === 'move' ? 'move' : 'copy');
+const transferRevalidateIds = new Set();
+let transferCompleted = false;
 
 refresh();
 
@@ -31913,7 +34479,7 @@ let chunkIds = chunk.map(it => it.id);
 updateFloat(`${actionText} ${processedCount}/${total} -> ${targetNameForLog || L.str_target_folder}`);
 
 const apiTargetPid = (targetPid === 'root') ? '' : targetPid;
-const transferResult = await submitFileTransferChunk(endpoint, chunk, apiTargetPid);
+const transferResult = await submitFileTransferChunk(endpoint, chunk, apiTargetPid, transferParentResolution.parentByItemId);
 const skippedItems = transferResult.skippedItems || [];
 if (skippedItems.length > 0) {
 skippedTransferCount += skippedItems.length;
@@ -31940,7 +34506,7 @@ let retry = 0;
 while (retry < 20) {
 try {
     const meta = await apiGet(lastId);
-    if (meta.parent_id === targetPid || isClipboardSourceUnavailableMeta(meta)) break;
+    if (normalizeRealFolderId(meta.parent_id) === normalizeRealFolderId(targetPid) || isClipboardSourceUnavailableMeta(meta)) break;
 } catch(e) { break; }
 await sleep(500); retry++;
 }
@@ -31949,38 +34515,61 @@ await sleep(500); retry++;
 chunkIds.forEach(id => S.movingIds.delete(id));
 if (S.broadcast) S.broadcast.postMessage({ type: 'LOCK_REM', ids: chunkIds });
 
-if (opType === 'move') {
-const movedSet = new Set(chunkIds);
-S.items = S.items.filter(it => !movedSet.has(it.id));
+const returnedFiles = (Array.isArray(data.files) ? data.files : []).map(file => minifyFile(file, false)).filter(file => file && file.id);
+const returnedById = new Map(returnedFiles.map(file => [String(file.id), file]));
 
-if (typeof globalCache !== 'undefined') {
-const cleanListChunk = (raw) => {
-    if (Array.isArray(raw)) return raw.filter(f => !movedSet.has(f.id));
-    if (raw && Array.isArray(raw.items)) {
-        raw.items = raw.items.filter(f => !movedSet.has(f.id));
-        return raw;
-    }
-    return raw;
-};
-for (const key of globalCache.keys()) {
-    globalCache.set(key, cleanListChunk(globalCache.get(key)));
-}
-for (const key of S.cache.keys()) {
-    S.cache.set(key, cleanListChunk(S.cache.get(key)));
-}
-}
+if (opType === 'move') {
+const movedSet = new Set(chunkIds.map(id => String(id)));
+const movedIdsByParent = new Map();
+successItems.forEach(item => {
+const itemId = String(item && item.id || '');
+if (!itemId) return;
+const parentId = transferParentResolution.parentByItemId.get(itemId);
+if (parentId === undefined) return;
+if (!movedIdsByParent.has(parentId)) movedIdsByParent.set(parentId, new Set());
+movedIdsByParent.get(parentId).add(itemId);
+});
+movedIdsByParent.forEach((idsInParent, parentId) => {
+const sourceFallback = isNormalHomeFolderContext(parentId) ? S.items : null;
+const patchedSource = patchRealFolderCaches(parentId, list => list.filter(file => !idsInParent.has(String(file.id))), sourceFallback);
+if (!patchedSource) transferRevalidateIds.add(parentId);
+});
+
+const movedTargetItems = successItems.map(item => {
+const returned = returnedById.get(String(item.id));
+if (returned) return { ...returned, parent_id: normalizeRealFolderId(targetPid) };
+return { ...item, parent_id: normalizeRealFolderId(targetPid), modified_time: new Date(getServerNow()).toISOString() };
+});
+const targetFallback = isNormalHomeFolderContext(targetPid) ? S.items : null;
+const patchedTarget = patchRealFolderCaches(targetPid, list => {
+const movedIds = new Set(movedTargetItems.map(file => String(file.id)));
+return [...movedTargetItems, ...list.filter(file => !movedIds.has(String(file.id)))];
+}, targetFallback);
+if (!patchedTarget || returnedFiles.length < successItems.length) transferRevalidateIds.add(normalizeRealFolderId(targetPid));
+
 if (typeof pkState !== 'undefined' && pkState && pkState.lastGlobalResults) {
 pkState.lastGlobalResults = pkState.lastGlobalResults.filter(x => !movedSet.has(x.id));
 }
 } else {
-if (targetPid === (S.path[S.path.length-1].id||'')) {
-const newItems = (data.files || []).map(f => minifyFile(f, false));
-S.items.unshift(...newItems);
-}
+const targetFallback = isNormalHomeFolderContext(targetPid) ? S.items : null;
+const patchedTarget = returnedFiles.length ? patchRealFolderCaches(targetPid, list => {
+const copiedIds = new Set(returnedFiles.map(file => String(file.id)));
+return [...returnedFiles, ...list.filter(file => !copiedIds.has(String(file.id)))];
+}, targetFallback) : null;
+if (!patchedTarget || returnedFiles.length < successItems.length) transferRevalidateIds.add(normalizeRealFolderId(targetPid));
 }
 
 if (typeof updateGlobalLockCSS === 'function') updateGlobalLockCSS();
-refresh();
+let hydratedTransferView = false;
+if (opType === 'move') {
+for (const parentId of transferSourceParentIds) {
+if (!isNormalHomeFolderContext(parentId)) continue;
+hydrateRealFolderCache(parentId, true);
+hydratedTransferView = true;
+break;
+}
+}
+if (!hydratedTransferView && isNormalHomeFolderContext(targetPid)) hydrateRealFolderCache(targetPid, true);
 
 processedCount += chunk.length;
 }
@@ -31988,6 +34577,7 @@ processedCount += chunk.length;
 const transferItems = skippedTransferIds.size ? items.filter(it => it && !skippedTransferIds.has(it.id)) : items;
 if (!transferItems.length) {
 showToast(L.msg_clip_all_missing, 'error');
+transferCompleted = true;
 return;
 }
 
@@ -31995,20 +34585,32 @@ if (targetPid) gmSet('pk_fmod_' + targetPid, new Date(getServerNow()).toISOStrin
 
 if (S.analyzeMap) {
 const deltaSize = transferItems.reduce((acc, it) => acc + parseInt(it.size || 0), 0);
+const sourceSizeByParent = new Map();
+if (opType === 'move') {
+transferItems.forEach(item => {
+const parentId = transferParentResolution.parentByItemId.get(String(item.id || ''));
+if (parentId === undefined) return;
+sourceSizeByParent.set(parentId, (sourceSizeByParent.get(parentId) || 0) + parseInt(item.size || 0));
+});
+}
 if (deltaSize > 0) {
-const updateAnalyzeChain = (startId, isAdd) => {
+const updateAnalyzeChain = (startId, delta) => {
 let currId = startId;
 let safety = 50;
 while (currId && S.analyzeMap.has(currId) && safety > 0) {
     const node = S.analyzeMap.get(currId);
     const oldSize = parseInt(node.size || 0);
-    node.size = isAdd ? (oldSize + deltaSize) : Math.max(0, oldSize - deltaSize);
+    node.size = Math.max(0, oldSize + delta);
     currId = node.parentId;
     safety--;
 }
 };
-if (S.analyzeMap.has(targetPid)) updateAnalyzeChain(targetPid, true);
-if (opType === 'move' && S.analyzeMap.has(sourcePid)) updateAnalyzeChain(sourcePid, false);
+if (S.analyzeMap.has(targetPid)) updateAnalyzeChain(targetPid, deltaSize);
+if (opType === 'move') {
+sourceSizeByParent.forEach((size, parentId) => {
+if (S.analyzeMap.has(parentId)) updateAnalyzeChain(parentId, -size);
+});
+}
 if (S.analyzeResultItems) {
 S.analyzeResultItems.forEach(resItem => {
     if (S.analyzeMap.has(resItem.id)) {
@@ -32019,60 +34621,45 @@ S.analyzeResultItems.forEach(resItem => {
 }
 }
 
-const keysToClear = [sourcePid || 'root', targetPid || 'root'];
-keysToClear.forEach(k => {
-const normalizedK = (k === '' || k === 'root') ? 'root' : k;
-const altK = (normalizedK === 'root') ? '' : normalizedK;
-
-S.cache.delete(normalizedK);
-S.cache.delete(altK);
-
-if (typeof globalCache !== 'undefined') {
-globalCache.delete(normalizedK);
-globalCache.delete(altK);
-if (typeof scannedFolderIds !== 'undefined') {
-scannedFolderIds.delete(altK);
-}
-}
-
-if (typeof globalDirtyFolders !== 'undefined') {
-globalDirtyFolders.add(altK);
-}
-});
-
 if (opType === 'move') {
-const purgeMovedDescendants = (fid) => {
+const clearMovedLineage = (fid) => {
 if (typeof globalLineageMap !== 'undefined') globalLineageMap.delete(fid);
-if (typeof scannedFolderIds !== 'undefined') scannedFolderIds.delete(fid);
 const data = (typeof globalCache !== 'undefined' ? globalCache.get(fid) : null) || (S.cache ? S.cache.get(fid) : null);
 if (data) {
 const list = Array.isArray(data) ? data : (data.items || []);
 list.forEach(child => {
     if (child.kind === 'drive#folder') {
-        purgeMovedDescendants(child.id);
+        clearMovedLineage(child.id);
     }
 });
-if (typeof globalCache !== 'undefined') globalCache.delete(fid);
-if (S.cache) S.cache.delete(fid);
 }
 };
 transferItems.forEach(it => {
-if (it.kind === 'drive#folder') purgeMovedDescendants(it.id);
+if (it.kind === 'drive#folder') {
+clearMovedLineage(it.id);
+globalParentIndex.set(it.id, { id: normalizeRealFolderId(targetPid) || 'root', name: targetNameForLog || 'Root' });
+}
 });
 }
 
-if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
+if (opType === 'move') transferSourceParentIds.forEach(parentId => syncFolderSummaryCountFromCache(parentId));
+syncFolderSummaryCountFromCache(targetPid);
 
 if (typeof scheduleBackgroundResume === 'function') scheduleBackgroundResume();
 
-if (window.pkSmartRefreshTrigger) window.pkSmartRefreshTrigger(true);
 if (skippedTransferCount > 0) showToast(L.msg_clip_missing_skipped.replace('{n}', skippedTransferCount), 'warning');
 else showToast(opType === 'move' ? L.msg_move_done : L.msg_copy_success);
+transferCompleted = true;
 
 } catch (e) {
 showToast(`${L.str_error}: ${formatCloudErrorMessage(e)}`, 'error');
-load(false, true);
 } finally {
+const pending = finishFolderMutation(transferMutation, {
+success: transferCompleted,
+revalidate: !transferCompleted,
+revalidateIds: Array.from(transferRevalidateIds)
+});
+pending.forEach(folderId => scheduleRealFolderRevalidation(folderId, 300));
 S.movingIds.clear();
 S.movingSourceId = null;
 S.movingDestId = null;
@@ -32303,6 +34890,7 @@ window.addEventListener('mouseup', stopMarquee);
 });
 
 let isScrollScheduled = false;
+let normalGridScrollWindow = null;
 let gridScrollEndTimer = 0;
 const markGridScrolling = () => {
 if (!isGridView() || !UI.win) return;
@@ -32403,6 +34991,7 @@ markGridScrolling();
 if (S.historyMode && UI.vp) S.historyScrollTop = Math.max(0, Math.round(UI.vp.scrollTop || 0));
 
 if (scheduleDupGridScrollRender()) {
+normalGridScrollWindow = null;
 tryLoadRecentRootNextPage();
 loadOfficialHistoryNextPage();
 return;
@@ -32410,7 +34999,43 @@ return;
 
 if (!isScrollScheduled) {
 requestAnimationFrame(() => {
-renderVisible();
+let shouldRender = true;
+if (UI.vp && isGridView() && !isGroupedGridView()) {
+const rowHeight = Math.max(1, Number(CONF.rowHeight) || 1);
+const scrollTop = Math.max(0, Number(UI.vp.scrollTop) || 0);
+const viewportHeight = Math.max(0, Number(UI.vp.clientHeight) || 0);
+const firstRow = Math.floor(scrollTop / rowHeight);
+const lastRow = Math.ceil((scrollTop + viewportHeight) / rowHeight);
+const curPath = S.path && S.path.length ? S.path[S.path.length - 1] : null;
+const nextWindow = {
+display: S.display,
+displayLength: S.display.length,
+pathId: curPath && curPath.id || '',
+pathDepth: S.path ? S.path.length : 0,
+layoutKey: S._gridLayoutKey || '',
+viewportWidth: UI.vp.clientWidth,
+viewportHeight,
+rowHeight,
+firstRow,
+lastRow,
+sort: S.sort || '',
+dir: S.dir || 0,
+search: S.search || '',
+folderFirst: !!S.folderFirst
+};
+const prev = normalGridScrollWindow;
+shouldRender = !prev || prev.display !== nextWindow.display || prev.displayLength !== nextWindow.displayLength
+|| prev.pathId !== nextWindow.pathId || prev.pathDepth !== nextWindow.pathDepth
+|| prev.layoutKey !== nextWindow.layoutKey || prev.viewportWidth !== nextWindow.viewportWidth
+|| prev.viewportHeight !== nextWindow.viewportHeight || prev.rowHeight !== nextWindow.rowHeight
+|| prev.firstRow !== nextWindow.firstRow || prev.lastRow !== nextWindow.lastRow
+|| prev.sort !== nextWindow.sort || prev.dir !== nextWindow.dir
+|| prev.search !== nextWindow.search || prev.folderFirst !== nextWindow.folderFirst;
+normalGridScrollWindow = nextWindow;
+} else {
+normalGridScrollWindow = null;
+}
+if (shouldRender) renderVisible();
 if (typeof isMarquee !== 'undefined' && isMarquee && !scrollRaf) {
 updateMarqueeUIAndSelection(lastMouseX, lastMouseY);
 }
@@ -32521,7 +35146,7 @@ let sourceItems = [];
 const isAnalyzeSimMode = targetId === 'analyze_root' && S.analyzeSimGroups;
 
 if (isAnalyzeSimMode) {
-sourceItems = (S.analyzeResultItems && S.analyzeResultItems.length > 0) ? S.analyzeResultItems : S.display.filter(item => !item.isHeader);
+sourceItems = (S.analyzeResultItems && S.analyzeResultItems.length > 0) ? S.analyzeResultItems : S.display.filter(item => item && !item.isHeader);
 } else if (targetId === 'analyze_root') {
 sourceItems = (S.analyzeResultItems && S.analyzeResultItems.length > 0) ? S.analyzeResultItems : S.items;
 } else if (targetId === 'recent_root') {
@@ -32552,11 +35177,14 @@ const rawCached = !isDirty
 const cachedItems = (rawCached && !Array.isArray(rawCached) && rawCached.items) ? rawCached.items : (Array.isArray(rawCached) ? rawCached : null);
 const cachedFolders = cachedItems ? cachedItems.filter(f => f.kind === 'drive#folder') : null;
 
-if (cachedFolders && cachedFolders.length > 0) {
+if (cachedFolders !== null) {
 folders = cachedFolders;
 } else {
 folders = [{ id: 'loading', name: L.loading, kind: 'drive#folder' }];
-apiList(listId, 500, null, null, false, true).then(res => {
+const folderRequest = window.pkGlobalIndex
+? window.pkGlobalIndex.ensureFolder(listId, { force: isDirty, background: false, name: getKnownRealFolderName(listId) })
+: apiList(listId, 500, null, null, false, true);
+folderRequest.then(res => {
 if (typeof globalCache !== 'undefined') globalCache.set(cacheKey, res);
 if (S.cache) S.cache.set(cacheKey, res);
 if (typeof globalDirtyFolders !== 'undefined') globalDirtyFolders.delete(listId);
@@ -35175,7 +37803,7 @@ m.remove();
 return m;
 };
 
-async function resolveAudioPlayableSource(item, force = false) {
+async function resolveAudioPlayableSource(item, force = false, options = {}) {
 const L = getStrings();
 if (!item) throw new Error(L.audio_link_missing);
 const existing = force ? '' : getAudioDirectUrl(item);
@@ -35191,7 +37819,17 @@ return { item, url };
 }
 const fileId = getAudioPhysicalId(item);
 if (!fileId) throw new Error(L.audio_link_missing);
-const detail = await apiGetWithCaptchaRecovery(fileId);
+const signal = options.signal || null;
+const isRunning = typeof options.isRunning === 'function' ? options.isRunning : (() => true);
+const debounceMs = Math.max(0, Math.min(1000, Number(options.debounceMs) || 0));
+if (debounceMs > 0) await sleep(debounceMs);
+if ((signal && signal.aborted) || !isRunning()) throw new DOMException('Aborted by player state change', 'AbortError');
+const detail = await apiGetWithCaptchaRecovery(fileId, {
+    signal,
+    isRunning,
+    attempts: 3,
+    captchaRecoveryScope: 'foreground_audio_detail'
+});
 if (detail) {
 if (detail.web_content_link) item.web_content_link = detail.web_content_link;
 if (detail.links) item.links = detail.links;
@@ -35208,6 +37846,7 @@ return { item, url };
 await markOfflineReferenceMissingFromError(item, e, { source: 'audio_detail' });
 const msg = String((e && e.message) || '');
 if ([L.audio_link_missing, L.audio_share_unsupported, L.audio_link_expired, L.audio_format_unsupported, L.audio_play_failed].includes(msg)) throw e;
+if ((e && e.name === 'AbortError') || (typeof isDownloadHydrateCaptchaInvalidError === 'function' && isDownloadHydrateCaptchaInvalidError(e))) throw e;
 throw new Error(item._isShareItem ? (L.audio_share_unsupported || L.audio_link_missing) : L.audio_link_missing);
 }
 }
@@ -35702,6 +38341,8 @@ const closeBtn = d.querySelector('#pk_audio_close');
 
 let destroyed = false;
 let loadToken = 0;
+let activeAudioDetailController = null;
+const AUDIO_DETAIL_DEBOUNCE_MS = 220;
 let retryUsed = false;
 let seeking = false;
 let loadingAudio = false;
@@ -36077,6 +38718,12 @@ updatePlayButton();
 };
 const loadCurrent = async (autoPlay = true, force = false) => {
 const token = ++loadToken;
+if (activeAudioDetailController) {
+try { activeAudioDetailController.abort(); } catch (e) {}
+}
+const detailController = new AbortController();
+activeAudioDetailController = detailController;
+const isCurrentAudioDetail = () => !destroyed && token === loadToken && !detailController.signal.aborted;
 if (!force) retryUsed = false;
 loadingAudio = true;
 pendingPlayRequested = !!autoPlay;
@@ -36084,7 +38731,11 @@ resetAudioElement();
 updateInfo();
 setStatus(L.audio_loading);
 try {
-const result = await resolveAudioPlayableSource(current(), force);
+const result = await resolveAudioPlayableSource(current(), force, {
+    signal: detailController.signal,
+    isRunning: isCurrentAudioDetail,
+    debounceMs: AUDIO_DETAIL_DEBOUNCE_MS
+});
 if (destroyed || token !== loadToken) return;
 refreshAudioCover(result.url);
 audio.src = result.url;
@@ -36102,9 +38753,10 @@ if (!destroyed && token === loadToken && !(audio.error && audio.error.code)) set
 }
 }
 } catch (e) {
-if (destroyed || token !== loadToken) return;
+if ((e && e.name === 'AbortError') || destroyed || token !== loadToken) return;
 markAudioFinalFailure(formatCloudErrorMessage(e, L.audio_link_missing));
 } finally {
+if (activeAudioDetailController === detailController) activeAudioDetailController = null;
 if (token === loadToken) loadingAudio = false;
 updatePlayButton();
 updateMuteButton();
@@ -36377,6 +39029,10 @@ destroy();
 function destroy() {
 if (destroyed) return;
 destroyed = true;
+if (activeAudioDetailController) {
+try { activeAudioDetailController.abort(); } catch (e) {}
+activeAudioDetailController = null;
+}
 stopAudioDurationPrefetch();
 clearAudioFailNextTimer();
 removeAudioMiniShell();
@@ -36761,8 +39417,41 @@ let switchReqId = 0;
 let mediaSessionToken = 0;
 let activeHealthTimer = null;
 let activeHlsObjectUrl = null;
+let activeVideoDetailController = null;
+const VIDEO_DETAIL_DEBOUNCE_MS = 220;
 const isStaleMediaSession = (token) => token !== mediaSessionToken || isPlayerDestroyed;
-const showNoPlayableSourceBox = (sourceItem = item) => {
+const isVideoDetailAbortError = (error) => !!(error && error.name === 'AbortError');
+const abortActiveVideoDetailRequest = () => {
+if (!activeVideoDetailController) return;
+try { activeVideoDetailController.abort(); } catch (e) {}
+activeVideoDetailController = null;
+};
+const resolveVideoPlayableDetail = async (sourceItem, requestId) => {
+abortActiveVideoDetailRequest();
+const controller = new AbortController();
+activeVideoDetailController = controller;
+const isCurrent = () => !isPlayerDestroyed && item === sourceItem && switchReqId === requestId;
+try {
+if (!isCurrent()) throw new DOMException('Aborted by player state change', 'AbortError');
+await sleep(VIDEO_DETAIL_DEBOUNCE_MS);
+if (!isCurrent()) throw new DOMException('Aborted by player state change', 'AbortError');
+const targetApiId = getPhysicalId(sourceItem);
+if (!sourceItem._isShareItem && !targetApiId) throw new Error('file_id_missing');
+const detail = sourceItem._isShareItem
+? await resolveSharePlayableFile(sourceItem, { signal: controller.signal })
+: await apiGetWithCaptchaRecovery(targetApiId, {
+    attempts: 3,
+    signal: controller.signal,
+    isRunning: isCurrent,
+    captchaRecoveryScope: 'foreground_video_detail'
+});
+if (!isCurrent()) throw new DOMException('Aborted by player state change', 'AbortError');
+return detail;
+} finally {
+if (activeVideoDetailController === controller) activeVideoDetailController = null;
+}
+};
+const showVideoSourceBox = (sourceItem = item, detailError = null) => {
 if (!box) return;
 box.querySelectorAll('.pk-err-dialog').forEach(el => el.remove());
 if (posterEl) {
@@ -36797,14 +39486,19 @@ if (loader) loader.style.display = 'none';
 const failSVG = `<svg width="85" height="85" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 45l15-15h30l15 15H20z" fill="#777"/><path d="M20 45L5 30h20l15 15H20z" fill="#999"/><path d="M80 45l15-15H75L60 45h20z" fill="#999"/><path fill-rule="evenodd" d="M20 45h60v35c0 5-5 5-5 5H25c-5 0-5-5-5-5V45zm16.5 14c0 3.3 1.5 6 3.5 6s3.5-2.7 3.5-6-1.5-6-3.5-6-3.5 2.7-3.5 6zm20 0c0 3.3 1.5 6 3.5 6s3.5-2.7 3.5-6-1.5-6-3.5-6-3.5 2.7-3.5 6z" fill="#aaa"/><path d="M38 16a12 8 0 1 0 24 0a12 8 0 1 0-24 0M48 24l2 3.5l2-3.5h-4z" fill="#aaa"/><path d="M47 13l6 6M53 13l-6 6" stroke="#181818" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 const canNext = curListIdx >= 0 && curListIdx < totalInList - 1;
 const nextLabel = String(L.btn_next_video || '').replace(/\s*\[[^\]]+\]\s*/g, '').trim() || L.btn_next_video;
+const isDetailFailure = !!detailError;
+const errorTitle = isDetailFailure ? L.msg_video_fail : L.err_no_playable_source_t1;
+const errorDescription = isDetailFailure
+? formatCloudErrorMessage(detailError, L.str_action_failed || L.str_failed)
+: L.err_no_playable_source_t2;
 const dialog = document.createElement('div');
-dialog.className = 'pk-err-dialog pk-no-source-dialog';
+dialog.className = `pk-err-dialog ${isDetailFailure ? 'pk-video-detail-error-dialog' : 'pk-no-source-dialog'}`;
 dialog.style.cssText = "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(30,30,30,.88);backdrop-filter:blur(12px);border-radius:12px;padding:40px 50px;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.8);z-index:999;min-width:400px;border:1px solid rgba(255,255,255,.1);";
 dialog.innerHTML = `
 <div class="pk-err-close" style="position:absolute;top:15px;right:15px;cursor:pointer;color:#fff;padding:5px;display:flex;align-items:center;justify-content:center;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
 <div style="margin-bottom:20px;">${failSVG}</div>
-<div style="font-size:16px;font-weight:bold;color:#fff;margin-bottom:10px;max-width:420px;line-height:1.4;">${esc(L.err_no_playable_source_t1)}</div>
-<div style="font-size:12px;color:#aaa;margin-bottom:28px;max-width:430px;line-height:1.7;">${esc(L.err_no_playable_source_t2)}</div>
+<div style="font-size:16px;font-weight:bold;color:#fff;margin-bottom:10px;max-width:420px;line-height:1.4;">${esc(errorTitle)}</div>
+<div style="font-size:12px;color:#aaa;margin-bottom:28px;max-width:430px;line-height:1.7;">${esc(errorDescription)}</div>
 <div style="display:flex;gap:12px;align-items:center;justify-content:center;width:100%;">
     <button type="button" id="pk_no_source_retry" style="background:transparent;color:#ddd;border:none;padding:10px 16px;border-radius:6px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;">${CONF.icons.refresh} ${esc(L.btn_retry_playback)}</button>
     ${canNext ? `<button type="button" id="pk_no_source_next" style="background:rgba(255,255,255,.08);color:#ddd;border:1px solid rgba(255,255,255,.14);padding:10px 34px;border-radius:6px;font-size:14px;cursor:pointer;">${esc(nextLabel)}</button>` : ''}
@@ -36824,9 +39518,10 @@ dialog.remove();
 box.classList.add('buffering');
 if (loader) loader.style.display = 'block';
 try {
-const targetApiId = getPhysicalId(sourceItem || item);
-const detail = sourceItem && sourceItem._isShareItem ? await resolveSharePlayableFile(sourceItem) : await apiGetWithCaptchaRecovery(targetApiId);
-if (isPlayerDestroyed || sourceItem !== item) return;
+const retryItem = sourceItem || item;
+const retryReqId = switchReqId;
+const detail = await resolveVideoPlayableDetail(retryItem, retryReqId);
+if (isPlayerDestroyed || retryReqId !== switchReqId || retryItem !== item) return;
 const freshData = getBestSource(detail);
 qualityList = freshData.list;
 currentLink = freshData.src;
@@ -36843,8 +39538,9 @@ if (!hasPlayableSource(freshData)) {
 loadSource(currentLink, null);
 v.play().catch(()=>{});
 } catch (err) {
+if (isVideoDetailAbortError(err) || isPlayerDestroyed || sourceItem !== item) return;
 await markOfflineReferenceMissingFromError(sourceItem || item, err, { source: 'video_no_source_retry' });
-showNoPlayableSourceBox(sourceItem || item);
+showVideoDetailFailureBox(sourceItem || item, err);
 }
 };
 
@@ -36855,6 +39551,8 @@ dialog.remove();
 softSwitch(curListIdx + 1, 'smooth');
 };
 };
+const showNoPlayableSourceBox = (sourceItem = item) => showVideoSourceBox(sourceItem, null);
+const showVideoDetailFailureBox = (sourceItem = item, error) => showVideoSourceBox(sourceItem, error || new Error('VIDEO_DETAIL_FAILED'));
 const showSadBox = (codecName, reason = 'codec', opts = {}) => {
 if (box.querySelector('.pk-err-dialog')) return;
 if (posterEl) {
@@ -37326,8 +40024,7 @@ if (typeof updatePlistNav === 'function') updatePlistNav();
 hasUserSeeked = false;
 
 try {
-const targetApiId = getPhysicalId(newItem);
-const newData = newItem._isShareItem ? await resolveSharePlayableFile(newItem) : await apiGetWithCaptchaRecovery(targetApiId);
+const newData = await resolveVideoPlayableDetail(newItem, myReqId);
 if (newData) {
 if (newData.thumbnail_link) newItem.thumbnail_link = newData.thumbnail_link;
 if (newData.icon_link) newItem.icon_link = newData.icon_link;
@@ -37368,8 +40065,9 @@ stopSpinner();
 updateState();
 
 } catch (err) {
+if (isVideoDetailAbortError(err) || isPlayerDestroyed || myReqId !== switchReqId || item !== newItem) return;
 await markOfflineReferenceMissingFromError(newItem, err, { source: 'video_switch' });
-if (myReqId === switchReqId && !currentLink) showNoPlayableSourceBox(newItem);
+if (myReqId === switchReqId) showVideoDetailFailureBox(newItem, err);
 if (myReqId === switchReqId) console.error("[SoftSwitch] Critical Error:", err);
 } finally {
 if (myReqId === switchReqId) {
@@ -38738,11 +41436,10 @@ if (loader) loader.style.display = 'block';
 });
 
 (async () => {
-try {
 const initReqId = switchReqId;
 const initItem = item;
-const targetApiId = getPhysicalId(initItem);
-const newData = initItem._isShareItem ? await resolveSharePlayableFile(initItem) : await apiGetWithCaptchaRecovery(targetApiId);
+try {
+const newData = await resolveVideoPlayableDetail(initItem, initReqId);
 if (isPlayerDestroyed || initReqId !== switchReqId || item !== initItem) return;
 const freshData = getBestSource(newData);
 qualityList = freshData.list;
@@ -38773,8 +41470,9 @@ resList.innerHTML = renderQualityMenu(qualityList, currentResName);
 bindResEvents();
 }
 } catch (e) {
+if (isVideoDetailAbortError(e) || isPlayerDestroyed || initReqId !== switchReqId || item !== initItem) return;
 await markOfflineReferenceMissingFromError(initItem, e, { source: 'video_detail' });
-if (!currentLink) showNoPlayableSourceBox(initItem);
+if (!currentLink) showVideoDetailFailureBox(initItem, e);
 }
 })();
 
@@ -38993,6 +41691,7 @@ let transcodeTimer = null;
 const destroyPlayer = () => {
 if (isPlayerDestroyed) return;
 isPlayerDestroyed = true;
+abortActiveVideoDetailRequest();
 
 const pTip = document.getElementById('pk_p_plist_tip_global');
 if (pTip) pTip.style.display = 'none';
@@ -39053,7 +41752,7 @@ pkHls = null;
 }
 
 const targetId = item.id;
-const targetIdx = S.display.findIndex(x => x.id === targetId);
+const targetIdx = S.display.findIndex(x => x && x.id === targetId);
 if (targetIdx !== -1) {
 S.sel.clear();
 S.sel.add(targetId);
@@ -39968,7 +42667,9 @@ if (typeof globalCache !== 'undefined' && globalCache.has(parentId)) {
 files = globalCache.get(parentId);
 } else {
 try {
-files = await apiList(parentId, 100, null, null, false, true);
+files = window.pkGlobalIndex
+? await window.pkGlobalIndex.ensureFolder(parentId, { background: false, name: getKnownRealFolderName(parentId) })
+: await apiList(parentId, 100, null, null, false, true);
 } catch(e) { return; }
 }
 if (!files || files.length === 0) return;
@@ -41096,6 +43797,14 @@ img.style.transition = '';
 };
 
 let imgLoadId = 0;
+let activeImageDetailController = null;
+const IMAGE_DETAIL_DEBOUNCE_MS = 220;
+const abortActiveImageDetailRequest = () => {
+if (!activeImageDetailController) return;
+try { activeImageDetailController.abort(); } catch (e) {}
+activeImageDetailController = null;
+};
+d._pkAbortImageDetailRequest = abortActiveImageDetailRequest;
 
 const loadCurrent = async (scrollMode = 'smooth') => {
 if (typeof updateImgPlistUI === 'function') {
@@ -41104,6 +43813,7 @@ updateImgPlistUI(scrollMode);
 
 imgLoadId++;
 const myId = imgLoadId;
+abortActiveImageDetailRequest();
 
 resetView();
 img.style.opacity = '0';
@@ -41166,9 +43876,20 @@ img.style.opacity = '0';
 
 let targetUrl = currentItem.web_content_link;
 if (!targetUrl && !currentItem._resolved) {
+const detailController = new AbortController();
+activeImageDetailController = detailController;
+const isCurrentImageDetail = () => myId === imgLoadId && d.isConnected && !detailController.signal.aborted;
 try {
+await sleep(IMAGE_DETAIL_DEBOUNCE_MS);
+if (!isCurrentImageDetail()) return;
 const targetApiId = ((S.offlineMode && currentItem.kind === 'drive#task') || (S.uploadMode && currentItem.file_id)) ? currentItem.file_id : currentItem.id;
-const fullItem = currentItem._isShareItem ? await resolveSharePlayableFile(currentItem) : await apiGetWithCaptchaRecovery(targetApiId);
+const fullItem = currentItem._isShareItem
+? await resolveSharePlayableFile(currentItem, { signal: detailController.signal })
+: await apiGetWithCaptchaRecovery(targetApiId, {
+    signal: detailController.signal,
+    isRunning: isCurrentImageDetail,
+    captchaRecoveryScope: 'foreground_image_detail'
+});
 if (fullItem) {
 if (fullItem.thumbnail_link) currentItem.thumbnail_link = fullItem.thumbnail_link;
 if (fullItem.icon_link) currentItem.icon_link = fullItem.icon_link;
@@ -41179,8 +43900,11 @@ targetUrl = fullItem.web_content_link;
 currentItem.web_content_link = targetUrl;
 currentItem._resolved = true;
 } catch (e) {
+if ((e && e.name === 'AbortError') || !isCurrentImageDetail()) return;
 await markOfflineReferenceMissingFromError(currentItem, e, { source: 'image_detail' });
 console.warn("API Error", e);
+} finally {
+if (activeImageDetailController === detailController) activeImageDetailController = null;
 }
 }
 
@@ -41193,7 +43917,7 @@ if (targetUrl && targetUrl !== currentItem.thumbnail_link) {
 img.crossOrigin = 'anonymous';
 img.src = targetUrl;
 } else {
-img.crossOrigin = 'anonymous';
+img.removeAttribute('crossorigin');
 }
 
 if (img.complete && img.naturalWidth > 0) {
@@ -42291,8 +45015,9 @@ renderDupView();
 updateStat();
 }
 else if (isGlobal) {
-if (globalNeedsSync) {
-setLoad(true);
+const needsGlobalIndexSync = window.pkGlobalIndex ? !window.pkGlobalIndex.isReady() : globalNeedsSync;
+if (needsGlobalIndexSync) {
+setLoad(true, false, DEFERRED_LOAD_MASK_DELAY);
 updateLoadTxt(L.str_analyzing);
 
 setTimeout(async () => {
@@ -42701,7 +45426,8 @@ gmSet('pk_suppress_global_warn', true);
 }
 }
 
-if (!isGlobalIndexReady || globalNeedsSync) {
+const needsGlobalIndexSync = window.pkGlobalIndex ? !window.pkGlobalIndex.isReady() : (!isGlobalIndexReady || globalNeedsSync);
+if (needsGlobalIndexSync) {
 S.scanning = true;
 
 UI.stopBtn.onclick = () => {
@@ -42744,13 +45470,16 @@ let processedFolders = 0;
 if (S.scanAbortController) S.scanAbortController.abort();
 S.scanAbortController = new AbortController();
 const signal = S.scanAbortController.signal;
-setLoad(true);
+setLoad(true, false, DEFERRED_LOAD_MASK_DELAY);
 
 const isPartialScan = specificTargets && specificTargets.length > 0;
+const scanIndexProgressOptions = isPartialScan
+? { folderText: count => L.status_scanning_selection.replace('{n}', count + " " + L.unit_folders) }
+: {};
+updateLoadTxt(formatIndexProgress({}, scanIndexProgressOptions));
 
 let rootNodes =[];
 if (isPartialScan) {
-updateLoadTxt(L.msg_init_scan_sel);
 specificTargets.forEach(item => {
 if (item.kind === 'drive#folder') {
 rootNodes.push({
@@ -42764,8 +45493,9 @@ item._lineage =[];
 fileMap.set(item.id, item);
 }
 });
+updateLoadTxt(formatIndexProgress({ files: fileMap.size }, scanIndexProgressOptions));
 } else {
-updateLoadTxt(`${L.str_scanning} 0`);
+updateLoadTxt(formatIndexProgress({}, scanIndexProgressOptions));
 const startNode = isSyncOnly ? { id: '', name: 'Root' } : S.path[S.path.length - 1];
 rootNodes =[{ id: startNode.id || '', name: startNode.name || 'Root', lineage: [], retryCount: 0 }];
 }
@@ -42804,7 +45534,34 @@ S.scanning = true;
 syncLocalUploadVisibility();
 
 try {
-await coreRecursiveEngine(rootNodes, {
+let skipRecursiveWalk = false;
+if (window.pkGlobalIndex) {
+if (isPartialScan) {
+await window.pkGlobalIndex.ensureScope(rootNodes, {
+signal,
+background: false,
+requireComplete: true,
+onProgress: progress => updateLoadTxt(formatIndexProgress({ ...progress, files: fileMap.size + Number(progress.files || 0) }, scanIndexProgressOptions))
+});
+} else {
+const fullIndexResult = await window.pkGlobalIndex.ensureFull({
+signal,
+background: false,
+onProgress: progress => {
+updateLoadTxt(formatIndexProgress({ ...progress, files: fileMap.size + Number(progress.files || 0) }, scanIndexProgressOptions));
+}
+});
+if (!fullIndexResult || fullIndexResult.status !== 'ready') {
+const error = new Error('GLOBAL_INDEX_INCOMPLETE');
+error.code = 'GLOBAL_INDEX_INCOMPLETE';
+throw error;
+}
+processedFolders = fullIndexResult.completed || 0;
+skipRecursiveWalk = isSyncOnly;
+}
+}
+
+if (!skipRecursiveWalk) await coreRecursiveEngine(rootNodes, {
 signal: signal,
 onFile: (f, parent) => {
 if (!isSyncOnly) {
@@ -42821,14 +45578,7 @@ globalLineageMap.set(folder.id, folder.lineage);
 }
 },
 onProgress: (st) => {
-const folderText = isPartialScan
-? L.status_scanning_selection.replace('{n}', st.folders + " " + L.unit_folders)
-: `${L.str_scanning} ${st.folders} ${L.unit_folders}`;
-
-const retryTag = st.isRetrying ? `\n[ ${L.str_retries} ]` : "";
-const statusInfo = ` | ${L.str_files}: ${st.files} | ${L.str_speed}: ${st.currentConcurrency} | ${L.str_cached} ${st.cacheHits} ${L.unit_folders}`;
-
-updateLoadTxt(folderText + statusInfo + retryTag);
+updateLoadTxt(formatIndexProgress({ ...st, files: fileMap.size }, scanIndexProgressOptions));
 }
 });
 
@@ -43301,12 +46051,14 @@ let processedFolders = 0;
 if (S.scanAbortController) S.scanAbortController.abort();
 S.scanAbortController = new AbortController();
 const signal = S.scanAbortController.signal;
-setLoad(true);
+setLoad(true, false, DEFERRED_LOAD_MASK_DELAY);
 
 const isPartialScan = selectedTargets.length > 0;
+const duplicateIndexProgressOptions = isPartialScan
+? { folderText: count => L.status_scanning_selection.replace('{n}', count + " " + L.unit_folders) }
+: {};
 let rootNodes =[];
 if (isPartialScan) {
-updateLoadTxt(L.msg_init_scan_sel);
 selectedTargets.forEach(item => {
 if (item.kind === 'drive#folder') {
     rootNodes.push({
@@ -43320,8 +46072,9 @@ if (item.kind === 'drive#folder') {
     fileMap.set(item.id, item);
 }
 });
+updateLoadTxt(formatIndexProgress({ files: fileMap.size }, duplicateIndexProgressOptions));
 } else {
-updateLoadTxt(`${L.str_scanning} 0`);
+updateLoadTxt(formatIndexProgress({}, duplicateIndexProgressOptions));
 const startNode = S.path[S.path.length - 1];
 rootNodes =[{ id: startNode.id || '', name: startNode.name || 'Root', lineage: [], retryCount: 0 }];
 }
@@ -43334,6 +46087,25 @@ setLoad(false);
 };
 
 try {
+if (window.pkGlobalIndex) {
+const indexResult = isPartialScan
+? await window.pkGlobalIndex.ensureScope(rootNodes, {
+signal,
+background: false,
+requireComplete: true,
+onProgress: progress => updateLoadTxt(formatIndexProgress({ ...progress, files: fileMap.size + Number(progress.files || 0) }, duplicateIndexProgressOptions))
+})
+: await window.pkGlobalIndex.ensureFull({
+signal,
+background: false,
+onProgress: progress => updateLoadTxt(formatIndexProgress({ ...progress, files: fileMap.size + Number(progress.files || 0) }, duplicateIndexProgressOptions))
+});
+if (!indexResult || indexResult.status !== 'ready') {
+const error = new Error('GLOBAL_INDEX_INCOMPLETE');
+error.code = 'GLOBAL_INDEX_INCOMPLETE';
+throw error;
+}
+}
 await coreRecursiveEngine(rootNodes, {
 signal: signal,
 onFile: (f, parent) => {
@@ -43351,12 +46123,7 @@ onFolder: (folder, filesInFolder) => {
     }
 },
 onProgress: (st) => {
-    const folderText = isPartialScan
-        ? L.status_scanning_selection.replace('{n}', st.folders + " " + L.unit_folders)
-        : `${L.str_scanning} ${st.folders} ${L.unit_folders}`;
-    const retryTag = st.isRetrying ? `\n[ ${L.str_retries} ]` : "";
-    const statusInfo = ` | ${L.str_files}: ${st.files} | ${L.str_speed}: ${st.currentConcurrency} | ${L.str_cached} ${st.cacheHits} ${L.unit_folders}`;
-    updateLoadTxt(folderText + statusInfo + retryTag);
+    updateLoadTxt(formatIndexProgress({ ...st, files: fileMap.size }, duplicateIndexProgressOptions));
 }
 });
 
@@ -44430,8 +47197,9 @@ const rawSimThreshold = Number.parseFloat(result.threshold);
 const simThreshold = Number.isFinite(rawSimThreshold) && rawSimThreshold <= 0.5 ? 0.01 : 1.0;
 const simAlgo = result.algo || 'sim';
 
-setLoad(true);
+setLoad(true, false, DEFERRED_LOAD_MASK_DELAY);
 isGUISensitive = true;
+updateLoadTxt(formatIndexProgress({}));
 
 let nodeMap = new Map();
 const largeFolders = [];
@@ -44527,10 +47295,18 @@ files:[]
 const cacheKey = '__analyze_nodeMap_' + startNodes.map(n => n.id).join('_');
 let useCache = false;
 
-if (typeof globalCache !== 'undefined' && globalCache.has(cacheKey) && globalDirtyFolders.size === 0) {
-const cachedArr = globalCache.get(cacheKey);
+if (window.pkGlobalIndex) {
+const cachedArr = window.pkGlobalIndex.getDerived(cacheKey);
+if (Array.isArray(cachedArr)) {
 nodeMap = new Map(cachedArr);
 useCache = true;
+}
+} else if (typeof globalCache !== 'undefined' && globalCache.has(cacheKey) && globalDirtyFolders.size === 0) {
+const cachedArr = globalCache.get(cacheKey);
+if (Array.isArray(cachedArr)) {
+nodeMap = new Map(cachedArr);
+useCache = true;
+}
 }
 
 const propagateSize = (parentId, addSize) => {
@@ -44569,6 +47345,19 @@ let totalDirsScanned = 0;
 
 try {
 if (!useCache) {
+if (window.pkGlobalIndex) {
+const indexResult = await window.pkGlobalIndex.ensureScope(startNodes, {
+signal,
+background: false,
+requireComplete: true,
+onProgress: progress => updateLoadTxt(formatIndexProgress(progress))
+});
+if (!indexResult || indexResult.status !== 'ready') {
+const error = new Error('GLOBAL_INDEX_INCOMPLETE');
+error.code = 'GLOBAL_INDEX_INCOMPLETE';
+throw error;
+}
+}
 await coreRecursiveEngine(startNodes, {
 signal: signal,
 
@@ -44614,7 +47403,7 @@ if (nodeMap.has(parent.id)) {
 },
 
 onProgress: (st) => {
-updateLoadTxt(`${L.str_scanning} ${st.folders} ${L.unit_folders} | ${L.str_files}: ${st.files} | ${L.str_speed}: ${st.currentConcurrency} | ${L.str_cached} ${st.cacheHits} ${L.unit_folders}`);
+updateLoadTxt(formatIndexProgress(st));
 }
 });
 
@@ -44623,7 +47412,9 @@ throw new Error('StoppedByUser');
 }
 
 if (typeof globalCache !== 'undefined') {
-globalCache.set(cacheKey, Array.from(nodeMap.entries()));
+const entries = Array.from(nodeMap.entries());
+if (window.pkGlobalIndex) window.pkGlobalIndex.setDerived(cacheKey, entries);
+else globalCache.set(cacheKey, entries);
 }
 } else {
 Array.from(nodeMap.values()).forEach(node => {
@@ -45387,9 +48178,10 @@ m.querySelector('#exp_confirm').click();
 
 if (!format) return;
 
-setLoad(true);
+setLoad(true, false, DEFERRED_LOAD_MASK_DELAY);
 isGUISensitive = true;
 S.scanning = true;
+updateLoadTxt(formatIndexProgress({}, { title: L.msg_exporting }));
 S.scanId = (S.scanId || 0) + 1;
 const myScanId = S.scanId;
 
@@ -45416,6 +48208,7 @@ retryCount: 0
 const itemTree = new Map();
 
 try {
+updateLoadTxt(formatIndexProgress({}, { title: L.msg_exporting }));
 await coreRecursiveEngine(startNodes, {
 signal: signal,
 onFolder: (folder, filesInFolder) => {
@@ -45428,7 +48221,7 @@ if (typeof globalCache !== 'undefined' && !globalCache.has(folder.id)) {
 indexParents(folder.id, folder.name, filesInFolder);
 },
 onProgress: (st) => {
-updateLoadTxt(`${L.msg_exporting}\n${L.str_folders}: ${st.folders} | ${L.str_files}: ${st.files}`);
+updateLoadTxt(formatIndexProgress(st, { title: L.msg_exporting }));
 }
 });
 
@@ -45533,6 +48326,13 @@ const cur = S.path[S.path.length - 1];
 const folderId = cur.id || '';
 const realCacheKey = S.getRealCacheKey(folderId || 'root');
 const beforePathId = folderId;
+const createFolderMutation = beginFolderMutation([folderId], 'create_folder');
+let createFolderCompleted = false;
+let createFolderProgressTask = null;
+let createFolderProgressTimer = setTimeout(() => {
+createFolderProgressTimer = null;
+createFolderProgressTask = FloatBarManager.create(L.msg_creating_folder);
+}, 500);
 
 try {
 const res = await fetch('https://api-drive.mypikpak.com/drive/v1/files', {
@@ -45630,11 +48430,30 @@ if (cached) globalCache.set(key, patchCacheValue(cached));
 }
 
 showToast(L.msg_newfolder_created.replace('{n}', folder.name || name), 'success');
-if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
+if (window.pkGlobalIndex && isRealHomeFolderId(realCacheKey)) {
+window.pkGlobalIndex.adoptFolder(realCacheKey, {
+name: getKnownRealFolderName(realCacheKey),
+lineage: normalizeRealFolderId(realCacheKey) && globalLineageMap.has(normalizeRealFolderId(realCacheKey))
+? globalLineageMap.get(normalizeRealFolderId(realCacheKey))
+: []
+});
+window.pkGlobalIndex.adoptFolder(folder.id, {
+items: [],
+name: folder.name || name,
+lineage: [...(normalizeRealFolderId(realCacheKey) && globalLineageMap.has(normalizeRealFolderId(realCacheKey))
+? globalLineageMap.get(normalizeRealFolderId(realCacheKey))
+: []), { id: folder.id, name: folder.name || name }]
+});
+}
+createFolderCompleted = true;
 if (typeof scheduleBackgroundResume === 'function') scheduleBackgroundResume();
 } catch (e) {
 showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 } finally {
+const pending = finishFolderMutation(createFolderMutation, { success: createFolderCompleted, revalidate: !createFolderCompleted });
+pending.forEach(id => scheduleRealFolderRevalidation(id, 0));
+if (createFolderProgressTimer) clearTimeout(createFolderProgressTimer);
+if (createFolderProgressTask) createFolderProgressTask.destroy();
 isGUISensitive = false;
 scheduleBackgroundResume();
 }
@@ -45663,8 +48482,10 @@ S.clipItems = itemList;
 S.clipType = 'copy';
 
 const curId = S.path[S.path.length - 1].id || '';
-
-S.clipSourceParentId = S.isFlattened ? '__VIRTUAL__' : curId;
+const isAggregateSource = S.isFlattened || S.dupMode ||
+(S.analyzeMode && curId === 'analyze_root') || curId === 'virtual_search_root' ||
+(S.recentMode && S.path.length === 1) || (S.starredMode && S.path.length === 1);
+S.clipSourceParentId = isAggregateSource ? '__VIRTUAL__' : curId;
 
 setLoad(false);
 UI.btnPaste.disabled = false;
@@ -45702,8 +48523,10 @@ S.clipItems = itemList;
 S.clipType = 'move';
 
 const curId = S.path[S.path.length - 1].id || '';
-
-S.clipSourceParentId = S.isFlattened ? '__VIRTUAL__' : curId;
+const isAggregateSource = S.isFlattened || S.dupMode ||
+(S.analyzeMode && curId === 'analyze_root') || curId === 'virtual_search_root' ||
+(S.recentMode && S.path.length === 1) || (S.starredMode && S.path.length === 1);
+S.clipSourceParentId = isAggregateSource ? '__VIRTUAL__' : curId;
 
 setLoad(false);
 UI.btnPaste.disabled = false;
@@ -45721,6 +48544,14 @@ showAlert(L.msg_op_blocked_moving);
 return;
 }
 
+const restoreGlobalSearchAfterPaste = !!(UI.chkGlobal && UI.chkGlobal.checked);
+if (restoreGlobalSearchAfterPaste) {
+S.globalSearchSuspendedForPaste = true;
+UI.chkGlobal.checked = false;
+syncGlobalSearchCheckboxState();
+}
+
+try {
 const items = S.clipItems.slice();
 const type = S.clipType;
 const srcId = S.clipSourceParentId;
@@ -45735,6 +48566,13 @@ S.clipSourceParentId = '';
 updateStat();
 
 await executeFileTransfer(items, type, normalize(srcId), normalize(destId), targetFolderName);
+} finally {
+if (restoreGlobalSearchAfterPaste) {
+S.globalSearchSuspendedForPaste = false;
+if (UI.chkGlobal) UI.chkGlobal.checked = true;
+syncGlobalSearchCheckboxState();
+}
+}
 };
 
 function patchStage01RenameVisibleRow(row, newName, modifiedTime) {
@@ -45785,7 +48623,20 @@ const patch = { name: newName, modified_time: modifiedTime, modifiedTime: modifi
 Object.assign(item, patch);
 if (S.itemMap && S.itemMap.has(id)) S.itemMap.set(id, { ...S.itemMap.get(id), ...patch });
 if (Array.isArray(S.items)) S.items = S.items.map(row => row && row.id === id ? { ...row, ...patch } : row);
-if (item.kind === 'drive#folder') gmSet('pk_fmod_' + item.id, modifiedTime);
+if (item.kind === 'drive#folder') {
+gmSet('pk_fmod_' + item.id, modifiedTime);
+const clearRenamedLineage = (folderId, parentName) => {
+if (typeof globalLineageMap !== 'undefined') globalLineageMap.delete(folderId);
+const hit = readRealFolderCache(folderId);
+if (!hit) return;
+hit.items.forEach(child => {
+if (!child || child.kind !== 'drive#folder') return;
+if (typeof globalParentIndex !== 'undefined') globalParentIndex.set(child.id, { id: folderId, name: parentName });
+clearRenamedLineage(child.id, child.name);
+});
+};
+clearRenamedLineage(item.id, newName);
+}
 gmSet('pk_fmod_' + parentId, modifiedTime);
 patchStage01RenameCacheRecord(S.cache, parentId, id, patch);
 if (typeof globalCache !== 'undefined') patchStage01RenameCacheRecord(globalCache, parentId, id, patch);
@@ -45798,8 +48649,6 @@ const anaItem = S.analyzeResultItems.find(x => x.id === id);
 if (anaItem) Object.assign(anaItem, patch);
 }
 if (S.analyzeMap && S.analyzeMap.has(id)) Object.assign(S.analyzeMap.get(id), patch);
-if (typeof globalDirtyFolders !== 'undefined') globalDirtyFolders.add(parentId === 'root' ? '' : parentId);
-if (typeof scheduleBackgroundResume === 'function') scheduleBackgroundResume();
 return item;
 }
 
@@ -45820,6 +48669,13 @@ abandonLiveManualRefresh('local_mutation', { toast: 'info', detach: false });
 }
 
 let progressTask = null;
+const renameFallbackId = isNormalHomeFolderContext() ? (S.path[S.path.length - 1]?.id || '') : null;
+const renameParentResolution = await resolveRealMutationParentMap([item], renameFallbackId);
+if (renameParentResolution.unresolvedIds.length) invalidateCompleteGlobalIndexForUnknownParents();
+const renameParentId = renameParentResolution.parentByItemId.get(String(id));
+if (renameParentId !== undefined) item.parent_id = renameParentId;
+const renameMutation = beginFolderMutation(Array.from(renameParentResolution.parentIds), 'rename');
+let renameSucceeded = false;
 try {
 progressTask = FloatBarManager.create(L.str_renaming);
 
@@ -45832,10 +48688,13 @@ const row = UI.in.querySelector(`.pk-row[data-id="${id}"]`);
 patchStage01RenameVisibleRow(row, newName, nowIso);
 
 if (S.dupMode) renderDupView(); else refresh();
+renameSucceeded = true;
 
 } catch (e) {
 showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 } finally {
+const pending = finishFolderMutation(renameMutation, { success: renameSucceeded, revalidate: !renameSucceeded });
+pending.forEach(folderId => scheduleRealFolderRevalidation(folderId, 300));
 if (progressTask) progressTask.destroy();
 }
 };
@@ -46419,7 +49278,7 @@ if (rnDisplay.length === 0) {
 const mode = m.querySelector('input[name="rn_mode"]:checked').value;
 const selectedIds = S.getSelectedIds();
 const selectedIdSet = new Set(selectedIds);
-const selectedItems = S.display.filter(i => !i.isHeader && selectedIdSet.has(i.id));
+const selectedItems = S.display.filter(i => i && !i.isHeader && selectedIdSet.has(i.id));
 const isSeriesFolderOnly = mode === 'pattern' && selectedItems.length > 0 && selectedItems.every(i => i.kind === 'drive#folder');
 rnIn.innerHTML = `<div style="padding:40px; text-align:center; color:#888;">${isSeriesFolderOnly ? L.rn_tip_series_folder_only : L.rn_tip_none}</div>`;
 txtStatNum.innerText = "0";
@@ -46502,7 +49361,7 @@ if(cbAll) { cbAll.checked = false; cbAll.indeterminate = false; }
 
 const selectedIds = S.getSelectedIds();
 const selectedIdSet = new Set(selectedIds);
-const items = S.display.filter(i => !i.isHeader);
+const items = S.display.filter(i => i && !i.isHeader);
 
 if (false) {
 const targetIds =[];
@@ -47346,6 +50205,24 @@ if (S.liveRefreshCtx && S.liveRefreshCtx.status === 'refreshing') {
 abandonLiveManualRefresh('local_mutation', { toast: 'info', detach: false });
 }
 
+const bulkRenameItems = new Map();
+validChanges.forEach(change => {
+const source = S.itemMap.get(change.id);
+if (!source) return;
+const snapshot = { ...source };
+bulkRenameItems.set(change.id, snapshot);
+});
+const bulkRenameResolution = await resolveRealMutationParentMap(Array.from(bulkRenameItems.values()), null);
+if (bulkRenameResolution.unresolvedIds.length) invalidateCompleteGlobalIndexForUnknownParents();
+bulkRenameItems.forEach((snapshot, itemId) => {
+const parentId = bulkRenameResolution.parentByItemId.get(String(itemId));
+if (parentId !== undefined) snapshot.parent_id = parentId;
+});
+const bulkRenameParents = bulkRenameResolution.parentIds;
+const bulkRenameMutation = beginFolderMutation(Array.from(bulkRenameParents), 'bulk_rename');
+const bulkRenameSnapshotComplete = bulkRenameItems.size === validChanges.length;
+let bulkRenameCompleted = false;
+
 let progressTask = FloatBarManager.create(L.str_renaming);
 isGUISensitive = true;
 m.remove();
@@ -47363,7 +50240,7 @@ const runRenameTask = async (task) => {
 try {
 await apiAction(`/${task.id}`, { name: task.new });
 stats.success++;
-const item = S.itemMap.get(task.id);
+const item = bulkRenameItems.get(task.id);
 if (item) {
 const nowIso = new Date(getServerNow()).toISOString();
 patchStage01RenameRuntimeState(item, task.id, task.new, nowIso);
@@ -47416,9 +50293,12 @@ progressTask.destroy();
 progressTask = null;
 }
 if (finalMsg) showToast(finalMsg, stats.fail > 0 ? 'warning' : 'success');
+bulkRenameCompleted = stats.fail === 0 && bulkRenameSnapshotComplete;
 } catch (e) {
 if (e.message !== 'StoppedByUser') showAlert(`${L.str_error_crit}: ${formatCloudErrorMessage(e)}`);
 } finally {
+const pending = finishFolderMutation(bulkRenameMutation, { success: bulkRenameCompleted, revalidate: !bulkRenameCompleted });
+pending.forEach(folderId => scheduleRealFolderRevalidation(folderId, 300));
 if (progressTask) progressTask.destroy();
 isGUISensitive = false;
 scheduleBackgroundResume();
@@ -47449,7 +50329,7 @@ return;
 }
 if (!await showConfirm(L.msg_prune_confirm)) return;
 
-setLoad(true);
+setLoad(true, false, DEFERRED_LOAD_MASK_DELAY);
 S.scanning = true;
 S.scanId = (S.scanId || 0) + 1;
 const myScanId = S.scanId;
@@ -47468,9 +50348,22 @@ scheduleBackgroundResume();
 };
 
 const folderMap = new Map();
-updateLoadTxt(L.str_scanning_dir);
+updateLoadTxt(formatIndexProgress({}, { label: L.str_scanning_dir }));
 
 try {
+if (window.pkGlobalIndex) {
+const indexResult = await window.pkGlobalIndex.ensureScope(selectedFolders, {
+signal,
+background: false,
+requireComplete: true,
+onProgress: progress => updateLoadTxt(formatIndexProgress(progress, { label: L.str_scanning_dir }))
+});
+if (!indexResult || indexResult.status !== 'ready') {
+const error = new Error('GLOBAL_INDEX_INCOMPLETE');
+error.code = 'GLOBAL_INDEX_INCOMPLETE';
+throw error;
+}
+}
 await coreRecursiveEngine(selectedFolders, {
 signal: signal,
 onFolder: (folder, filesInFolder, subFolders) => {
@@ -47486,11 +50379,7 @@ subFolderIds: subFolders.map(s => s.id)
 });
 },
 onProgress: (st) => {
-const folderText = `${L.str_scanning_dir} ${st.folders} ${L.unit_folders}`;
-
-const statusInfo = ` | ${L.str_files}: ${st.files} | ${L.str_speed}: ${st.currentConcurrency} | ${L.str_cached} ${st.cacheHits} ${L.unit_folders}`;
-
-updateLoadTxt(folderText + statusInfo);
+updateLoadTxt(formatIndexProgress(st, { label: L.str_scanning_dir }));
 }
 });
 
@@ -47565,8 +50454,7 @@ toDeleteList.forEach(folder => {
 });
 
 affectedParentIds.forEach(pid => {
-    if (typeof globalCache !== 'undefined') globalCache.delete(pid);
-    S.cache.delete(pid);
+    syncFolderSummaryCountFromCache(pid);
 });
 
 if (pruneStartedFromVirtualResultRoot) {
@@ -47576,7 +50464,11 @@ if (pruneStartedFromVirtualResultRoot) {
         updateStat();
     }
 } else {
-    await load(false, true);
+    if (isNormalHomeFolderContext(pruneStartPathId)) hydrateRealFolderCache(pruneStartPathId, true);
+    else {
+        refresh();
+        updateStat();
+    }
 }
 showToast(L.str_cleanup_done);
 }
@@ -47659,6 +50551,7 @@ if (task) {
 task._deleted = true;
 const forceDelete = task.status !== 'DONE';
 task._deleteFileIntent = forceDelete || isDeleteFile;
+if (task._uploadTaskId) cancelCloudTargetWatch(task._uploadTaskId);
 
 if (task.file_id) {
 if (forceDelete) ghostsToHardDelete.push(task.file_id);
@@ -47688,12 +50581,7 @@ await executeBatchDelete(filesToTrash, { silent: true, hardDelete: false, forceR
 
 if (ghostsToHardDelete.length > 0) {
 try {
-await fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
-method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: ghostsToHardDelete })
-});
-ghostsToHardDelete.forEach(id => {
-if (typeof window.pkRemoveGhostFile === 'function') window.pkRemoveGhostFile(id);
-});
+await deleteGhostFilesWithIndexSync(ghostsToHardDelete, { kind: 'upload_task_ghost_delete' });
 } catch (e) { console.error("Failed to hard delete ghost files:", e); }
 }
 
@@ -47751,6 +50639,7 @@ S.uploadTasks.forEach(task => {
 task._deleted = true;
 const forceDelete = task.status !== 'DONE';
 task._deleteFileIntent = forceDelete || isDeleteFile;
+if (task._uploadTaskId) cancelCloudTargetWatch(task._uploadTaskId);
 
 if (S.upMng) {
 S.upMng.pause(task, true);
@@ -47775,12 +50664,7 @@ await executeBatchDelete(filesToTrash, { silent: true, hardDelete: false, forceR
 
 if (ghostsToHardDelete.length > 0) {
 try {
-await fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
-method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: ghostsToHardDelete })
-});
-ghostsToHardDelete.forEach(id => {
-if (typeof window.pkRemoveGhostFile === 'function') window.pkRemoveGhostFile(id);
-});
+await deleteGhostFilesWithIndexSync(ghostsToHardDelete, { kind: 'upload_task_ghost_clear' });
 } catch (e) {}
 }
 showToast(L.msg_task_clear_success_fmt.replace('{n}', count));
@@ -48301,7 +51185,7 @@ showAlert(L.msg_op_blocked_moving);
 return;
 }
 
-setLoad(true);
+setLoad(true, false, DEFERRED_LOAD_MASK_DELAY);
 isGUISensitive = true;
 const abortCtrl = new AbortController();
 const { signal } = abortCtrl;
@@ -48341,6 +51225,7 @@ allFiles.push(isShareDownloadContext ? { ...item, _lineage: [] } : item);
 let progressTask = null;
 
 try {
+updateLoadTxt(formatIndexProgress({ files: allFiles.length }, { singleLine: true }));
 await coreRecursiveEngine(rootNodes, {
 signal,
 listFolder: isShareDownloadContext ? listShareDownloadFolder : null,
@@ -48354,7 +51239,7 @@ onFolderError: isShareDownloadContext ? (folder, error) => {
 failedFiles.push(formatShareDownloadFailure(folder, error));
 } : null,
 onProgress: (st) => {
-updateLoadTxt(`${L.msg_batch_scanning}\n${L.str_files}: ${allFiles.length} | ${L.str_speed}: ${st.currentConcurrency}`);
+updateLoadTxt(formatIndexProgress({ ...st, files: allFiles.length }, { singleLine: true }));
 }
 });
 
@@ -48399,28 +51284,40 @@ const hydrateQueue = [...allFiles];
 const activeTasks = new Set();
 const shareDownloadOptions = { signal };
 let hydrateFatalError = null;
+const hydrateCaptchaScope = `browser_hydrate_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 const hydrateWithRetry = async (file, maxRetries = 3) => {
 if (file._isShareItem) return await resolveShareDownloadTask(file, shareDownloadOptions);
 if (file.web_content_link) return file;
 if (file.phase === "PHASE_TYPE_PENDING" || file.phase === "PHASE_TYPE_RUNNING" || file.trashed) return null;
 let lastErr = null;
+let captchaRecoveryCount = 0;
 const lookupId = getOfflineReferenceLookupId(file) || file.id;
 for (let i = 0; i < maxRetries; i++) {
 if (!isRunning) return null;
 try {
 await waitBeforeDownloadHydrate(i);
 if (!isRunning) return null;
-const detail = await apiGet(lookupId);
+const detail = await apiGet(lookupId, { signal, callerManagedCaptchaRecovery: true });
 if (detail && detail.web_content_link) return detail;
 if (detail && (detail.phase === "PHASE_TYPE_PENDING" || detail.phase === "PHASE_TYPE_RUNNING")) return null;
 throw createDownloadLinkEmptyError();
 } catch (e) {
 lastErr = e;
 if (isDownloadHydrateCaptchaInvalidError(e)) {
+if ((e && e.captchaRecoveryExhausted) || captchaRecoveryCount >= 2) {
+    const timeoutErr = new Error(L.err_captcha_simple);
+    timeoutErr.code = 'DOWNLOAD_HYDRATE_CAPTCHA_TIMEOUT';
+    timeoutErr.cause = e;
+    throw timeoutErr;
+}
+captchaRecoveryCount++;
 const recovered = await recoverDownloadHydrateCaptcha(e, {
     isRunning: () => isRunning,
+    signal,
+    scope: hydrateCaptchaScope,
+    restartAfterForeignWait: true,
     onWait: () => {
-        if (progressTask) progressTask.update(`${L.msg_batch_hydrating} ${readyFiles.length} / ${allFiles.length}`);
+        if (progressTask) progressTask.update(`${L.msg_batch_restoring_access_verification || L.str_waiting_token || L.msg_batch_hydrating} ${readyFiles.length} / ${allFiles.length}`);
     }
 });
 if (recovered && isRunning) {
@@ -48533,7 +51430,7 @@ await openSettingsAndFocusDownloaderAddress(initialDownloaderType);
 return;
 }
 
-setLoad(true);
+setLoad(true, false, DEFERRED_LOAD_MASK_DELAY);
 isGUISensitive = true;
 const abortCtrl = new AbortController();
 const { signal } = abortCtrl;
@@ -48578,6 +51475,7 @@ allFiles.push({ ...item, _lineage: [] });
 
 let progressTask = null;
 try {
+updateLoadTxt(formatIndexProgress({ files: allFiles.length }, { singleLine: true }));
 await coreRecursiveEngine(rootNodes, {
 signal,
 listFolder: isShareDownloadContext ? listShareDownloadFolder : null,
@@ -48593,7 +51491,7 @@ failedFiles.push(formatShareDownloadFailure(folder, error));
 onProgress: (st) => {
 const now = Date.now();
 if (now - stats.lastUiTime > 150) {
-updateLoadTxt(`${L.msg_batch_scanning}\n${L.str_files}: ${allFiles.length} | ${L.str_speed}: ${st.currentConcurrency}`);
+updateLoadTxt(formatIndexProgress({ ...st, files: allFiles.length }, { singleLine: true }));
 stats.lastUiTime = now;
 }
 }
@@ -48625,29 +51523,41 @@ const hydrateQueue = [...allFiles];
 const activeTasks = new Set();
 const shareDownloadOptions = { signal };
 let hydrateFatalError = null;
+const hydrateCaptchaScope = `downloader_hydrate_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
 const hydrateWithRetry = async (file, maxRetries = 3) => {
 if (file._isShareItem) return await resolveShareDownloadTask(file, shareDownloadOptions);
 if (file.web_content_link) return file;
 if (file.phase === "PHASE_TYPE_PENDING" || file.phase === "PHASE_TYPE_RUNNING" || file.trashed) return null;
 let lastErr = null;
+let captchaRecoveryCount = 0;
 const lookupId = getOfflineReferenceLookupId(file) || file.id;
 for (let i = 0; i < maxRetries; i++) {
 if (!isRunning) return null;
 try {
 await waitBeforeDownloadHydrate(i);
 if (!isRunning) return null;
-const detail = await apiGet(lookupId);
+const detail = await apiGet(lookupId, { signal, callerManagedCaptchaRecovery: true });
 if (detail && detail.web_content_link) return detail;
 if (detail && (detail.phase === "PHASE_TYPE_PENDING" || detail.phase === "PHASE_TYPE_RUNNING")) return null;
 throw createDownloadLinkEmptyError();
 } catch (e) {
 lastErr = e;
 if (isDownloadHydrateCaptchaInvalidError(e)) {
+if ((e && e.captchaRecoveryExhausted) || captchaRecoveryCount >= 2) {
+    const timeoutErr = new Error(L.err_captcha_simple);
+    timeoutErr.code = 'DOWNLOAD_HYDRATE_CAPTCHA_TIMEOUT';
+    timeoutErr.cause = e;
+    throw timeoutErr;
+}
+captchaRecoveryCount++;
 const recovered = await recoverDownloadHydrateCaptcha(e, {
     isRunning: () => isRunning,
+    signal,
+    scope: hydrateCaptchaScope,
+    restartAfterForeignWait: true,
     onWait: () => {
-        if (progressTask) progressTask.update(`${L.msg_batch_hydrating} ${stats.hydratedCount} / ${allFiles.length}`);
+        if (progressTask) progressTask.update(`${L.msg_batch_restoring_access_verification || L.str_waiting_token || L.msg_batch_hydrating} ${stats.hydratedCount} / ${allFiles.length}`);
     }
 });
 if (recovered && isRunning) {
@@ -48921,10 +51831,26 @@ showToast(formatDownloaderCountText(L.msg_downloader_sent, currentDownloaderType
 }
 } catch (e) {
 if (e.message !== 'StoppedByUser' && e.name !== 'AbortError') {
+const captchaRecoveryFailed = !!(
+e && (
+    e.code === 'DOWNLOAD_HYDRATE_CAPTCHA_TIMEOUT' ||
+    e.captchaRecoveryExhausted === true ||
+    (e.cause && e.cause.captchaRecoveryExhausted === true)
+)
+);
+
+if (captchaRecoveryFailed) {
+    if (progressTask) {
+        progressTask.destroy();
+        progressTask = null;
+    }
+    showAlert(L.err_captcha_simple, L.title_alert);
+} else {
 const errorDownloaderType = getCurrentDownloaderType();
 if (errorDownloaderType === 'idm') showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 else if (errorDownloaderType === 'abdm') showAlert(L.desc_abdm_setup, L.lbl_downloader_status);
 else showAlert(`${formatDownloaderText(L.msg_downloader_check_fail, errorDownloaderType)}\n(${formatCloudErrorMessage(e)})`);
+}
 }
 } finally {
 setLoad(false);
@@ -48990,6 +51916,9 @@ const currentDeletePathId = String(originPathId || (S.path && S.path.length ? S.
 const currentDeletePathDepth = Number(originPathDepth || (Array.isArray(S.path) ? S.path.length : 0));
 const deleteOriginModeSnapshot = { recentMode: !!originRecentMode, starredMode: !!originStarredMode };
 const deleteStartedFromVirtualResultRoot = !!(suppressVirtualRootRefresh && isVirtualResultRootPath(currentDeletePathId, currentDeletePathDepth, deleteOriginModeSnapshot));
+const deleteStartedInNormalHome = !S.trashMode && !S.shareMode && !S.shareParseMode && !S.linkBookmarkMode &&
+!S.starredMode && !S.recentMode && !S.historyMode && !S.offlineMode && !S.uploadMode &&
+!S.isFlattened && !S.dupMode && !S.analyzeMode && isRealHomeFolderId(currentDeletePathId);
 
 if (S.liveRefreshCtx && S.liveRefreshCtx.status === 'refreshing') {
 abandonLiveManualRefresh('local_mutation', { localRemovedIds: ids, toast: 'info', detach: false });
@@ -49004,6 +51933,29 @@ if (item && item.id) tempItemLookup.set(item.id, item);
 }
 
 const BATCH_SIZE = 200;
+const affectedParentIds = new Set();
+const deleteItems = ids.map(id => {
+const known = tempItemLookup.get(id);
+if (known) return known;
+const placeholder = { id };
+tempItemLookup.set(id, placeholder);
+return placeholder;
+});
+const deleteParentResolution = await resolveRealMutationParentMap(
+deleteItems,
+deleteStartedInNormalHome ? currentDeletePathId : null
+);
+if (deleteParentResolution.unresolvedIds.length) invalidateCompleteGlobalIndexForUnknownParents();
+const initialDeleteParents = new Set(deleteParentResolution.parentIds);
+const deleteMutation = beginFolderMutation(Array.from(initialDeleteParents), 'delete');
+let deleteCompleted = false;
+const registerDeleteParent = pid => {
+const target = normalizeRealFolderId(pid);
+if (!isRealHomeFolderId(target)) return false;
+affectedParentIds.add(target);
+attachFolderMutationTarget(deleteMutation, target);
+return true;
+};
 
 const progressTask = FloatBarManager.create(L.str_deleting);
 const updateFloat = progressTask.update;
@@ -49043,12 +51995,9 @@ S.activeId = null;
 try {
 const totalToDelete = ids.length;
 let deletedCount = 0;
-const affectedParentIds = new Set();
 const deletedSet = new Set();
 
-if (!deleteStartedFromVirtualResultRoot && !isVirtualResultRootId(currentDeletePathId)) {
-affectedParentIds.add(currentDeletePathId || 'root');
-}
+deleteParentResolution.parentIds.forEach(registerDeleteParent);
 
 for (let i = 0; i < totalToDelete; i += BATCH_SIZE) {
 const chunk = ids.slice(i, i + BATCH_SIZE);
@@ -49060,7 +52009,10 @@ let success = false;
 while (retry < maxRetries && !success) {
 try {
 if (isTask) {
-    await apiCancelTask(chunk, deleteFiles);
+    await apiCancelTask(chunk, deleteFiles, {
+        strict: true,
+        taskItems: chunk.map(id => tempItemLookup.get(id)).filter(Boolean)
+    });
 } else {
     const action = hardDelete ? 'files:batchDelete' : 'files:batchTrash';
     const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/${action}`, {
@@ -49072,6 +52024,7 @@ if (isTask) {
 }
 success = true;
 } catch (err) {
+if (err && (err.name === 'AbortError' || err.captchaRecoveryExhausted || isDownloadHydrateCaptchaInvalidError(err))) throw err;
 retry++;
 console.warn(`[Delete] Retry ${retry}/${maxRetries}`);
 updateFloat(`${L.str_deleting} (Retry ${retry})`);
@@ -49098,6 +52051,7 @@ await sleep(500);
 
 const chunkSet = new Set(chunk);
 const chunkLockedIds =[];
+const chunkForgottenFolderIds = new Set();
 
 chunk.forEach(id => {
 S.movingIds.delete(id);
@@ -49121,9 +52075,11 @@ if (it.kind === 'drive#folder') {
 
 if (physicalFolderId && typeof globalCache !== 'undefined') {
 const purgeDescendants = (fid) => {
-    const data = globalCache.get(fid) || (S.cache ? S.cache.get(fid) : null);
+    chunkForgottenFolderIds.add(String(fid));
+    const data = globalCache.get(fid) || (S.cache ? S.cache.get(fid) : null) || (hardDelete ? globalTombstoneCache.get(fid) : null);
+    if (hardDelete) globalTombstoneCache.delete(fid);
     if (data) {
-        globalTombstoneCache.set(fid, Array.isArray(data) ?[...data] : {...data});
+        if (!hardDelete) globalTombstoneCache.set(fid, Array.isArray(data) ?[...data] : {...data});
 
         const list = Array.isArray(data) ? data : (data.items ||[]);
         list.forEach(child => {
@@ -49148,11 +52104,10 @@ deletedSet.add(it.file_id);
 if (typeof globalParentIndex !== 'undefined' && globalParentIndex.has(it.file_id)) {
     const parentInfo = globalParentIndex.get(it.file_id);
     if (parentInfo && parentInfo.id) {
-        affectedParentIds.add(parentInfo.id === 'root' ? '' : parentInfo.id);
+        registerDeleteParent(parentInfo.id === 'root' ? '' : parentInfo.id);
     }
 }
-affectedParentIds.add('root');
-affectedParentIds.add('');
+registerDeleteParent('root');
 }
 
 if (it && S.analyzeMap) {
@@ -49213,10 +52168,15 @@ if (S.analyzeResultItems) {
 }
 }
 
-if (it && it.parent_id) affectedParentIds.add(it.parent_id);
+const resolvedParentId = deleteParentResolution.parentByItemId.get(String(id));
+if (resolvedParentId !== undefined) registerDeleteParent(resolvedParentId);
 S.itemMap.delete(id);
 deletedSet.add(id);
 });
+
+if (chunkForgottenFolderIds.size && window.pkGlobalIndex && typeof window.pkGlobalIndex.dropFolders === 'function') {
+window.pkGlobalIndex.dropFolders(Array.from(chunkForgottenFolderIds));
+}
 
 if (S.broadcast) S.broadcast.postMessage({ type: 'LOCK_REM', ids: chunkLockedIds });
 
@@ -49259,8 +52219,11 @@ updateFloat(`${L.str_deleting} ${Math.min(deletedCount, totalToDelete)} / ${tota
 if (deletedCount < totalToDelete) await sleep(50);
 }
 
-const cur = S.path[S.path.length - 1];
-if (cur && cur.id) gmSet('pk_fmod_' + cur.id, new Date(getServerNow()).toISOString());
+const deleteModifiedTime = new Date(getServerNow()).toISOString();
+affectedParentIds.forEach(pid => {
+const id = normalizeRealFolderId(pid);
+if (id) gmSet('pk_fmod_' + id, deleteModifiedTime);
+});
 
 if (typeof globalCache !== 'undefined') {
 const cleanList = (raw) => {
@@ -49280,19 +52243,15 @@ for (const key of S.cache.keys()) {
 S.cache.set(key, cleanList(S.cache.get(key)));
 }
 
-affectedParentIds.forEach(pid => {
-const keysToCheck = (pid === 'root' || pid === '') ? ['root', ''] : [pid];
-keysToCheck.forEach(key => {
-if (typeof globalDirtyFolders !== 'undefined') globalDirtyFolders.add(key);
-});
-});
 globalCache.delete('root_trashed');
 S.cache.delete('root_trashed');
 
 if (typeof scheduleBackgroundResume === 'function') scheduleBackgroundResume();
 }
 
-if (window.pkSmartRefreshTrigger && !deleteStartedFromVirtualResultRoot) window.pkSmartRefreshTrigger();
+affectedParentIds.forEach(pid => syncFolderSummaryCountFromCache(pid));
+
+if (window.pkSmartRefreshTrigger && !deleteStartedFromVirtualResultRoot && !deleteStartedInNormalHome) window.pkSmartRefreshTrigger();
 
 if (forceRefresh && !deleteStartedFromVirtualResultRoot) {
 await load(false, true);
@@ -49304,11 +52263,15 @@ setTimeout(() => updateQuotaUI(), 2000);
 if (!silent && !S.dupMode) {
 showToast(isTask ? L.msg_task_deleted : L.msg_del_items_done.replace('{n}', deletedCount));
 }
+deleteCompleted = true;
 
 } catch (e) {
 console.error(e);
 showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 } finally {
+
+const pending = finishFolderMutation(deleteMutation, { success: deleteCompleted, revalidate: !deleteCompleted });
+pending.forEach(folderId => scheduleRealFolderRevalidation(folderId, 300));
 
 if (typeof allLockedIdsArray !== 'undefined' && allLockedIdsArray.length > 0) {
 allLockedIdsArray.forEach(id => S.movingIds.delete(id));
@@ -49893,6 +52856,38 @@ if (S.uploadMode && typeof renderVisible === 'function' && !document.hidden) ren
 });
 };
 
+const applyCompletedUploadToFolderCache = (task, hash, rawMeta = null) => {
+if (!task || !task.file_id) return { patched: false, completeMeta: false, folderId: '' };
+const targetPid = normalizeRealFolderId(task.parentId);
+const meta = rawMeta || task._finalFileMeta || null;
+let fileItem = null;
+if (meta && meta.id) {
+fileItem = minifyFile({ ...meta, parent_id: meta.parent_id !== undefined ? meta.parent_id : targetPid }, false);
+}
+if (!fileItem || !fileItem.id) {
+fileItem = {
+id: task.file_id,
+kind: 'drive#file',
+name: task.name,
+size: task.size,
+parent_id: targetPid,
+mime_type: task.mime_type || '',
+thumbnail_link: task.thumbnail_link || task.icon_link,
+icon_link: task.icon_link,
+modified_time: new Date(getServerNow()).toISOString(),
+hash: hash || task.hash || ''
+};
+}
+const fallback = isNormalHomeFolderContext(targetPid) ? S.items : null;
+const patched = patchRealFolderCaches(targetPid, list => {
+const id = String(fileItem.id);
+return [fileItem, ...list.filter(file => String(file && file.id || '') !== id)];
+}, fallback);
+if (patched && isNormalHomeFolderContext(targetPid)) hydrateRealFolderCache(targetPid, true);
+if (patched) syncFolderSummaryCountFromCache(targetPid);
+return { patched: !!patched, completeMeta: !!(meta && meta.id), folderId: targetPid };
+};
+
 S.upMng = {
 limit: 3,
 running: 0,
@@ -49988,6 +52983,11 @@ const signature = await crypto.subtle.sign("HMAC", key, enc.encode(stringToSign)
 return btoa(String.fromCharCode(...new Uint8Array(signature)));
 };
 
+const uploadOriginParentId = normalizeRealFolderId(task.parentId);
+const uploadMutation = beginFolderMutation([uploadOriginParentId], 'upload');
+const uploadRevalidateIds = new Set();
+let uploadCompleted = false;
+
 try {
 let finalParentId = task.parentId;
 
@@ -50019,10 +53019,14 @@ if (!S.upMng._syncLocks.has(cacheKey)) {
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    if (typeof globalDirtyFolders !== 'undefined') globalDirtyFolders.add('');
-                    if (typeof globalCache !== 'undefined') globalCache.delete('');
-                    if (typeof runBackgroundCrawler === 'function') runBackgroundCrawler();
-                    return data.file.id;
+                    const folder = data.file || data;
+                    attachFolderMutationTarget(uploadMutation, 'root');
+                    const patched = folder && folder.id ? patchRealFolderCaches('root', list => {
+                        const item = minifyFile(folder, false);
+                        return [item, ...list.filter(row => row && row.id !== item.id)];
+                    }, isNormalHomeFolderContext('root') ? S.items : null) : null;
+                    if (!patched) uploadRevalidateIds.add('');
+                    return folder.id;
                 }
                 if (res.status === 400 || res.status === 429) {
                     await new Promise(r => setTimeout(r, 1000));
@@ -50079,7 +53083,14 @@ for (const name of folderNames) {
                     });
                     if (res.ok) {
                         const data = await res.json();
-                        return data.file.id;
+                        const folder = data.file || data;
+                        attachFolderMutationTarget(uploadMutation, currentPid);
+                        const patched = folder && folder.id ? patchRealFolderCaches(currentPid, list => {
+                            const item = minifyFile(folder, false);
+                            return [item, ...list.filter(row => row && row.id !== item.id)];
+                        }, isNormalHomeFolderContext(currentPid) ? S.items : null) : null;
+                        if (!patched) uploadRevalidateIds.add(normalizeRealFolderId(currentPid));
+                        return folder.id;
                     }
                     if (res.status === 400 || res.status === 429) {
                         await new Promise(r => setTimeout(r, 1000));
@@ -50106,6 +53117,12 @@ for (const name of folderNames) {
     }
 }
 finalParentId = currentPid;
+}
+
+task.parentId = finalParentId;
+attachFolderMutationTarget(uploadMutation, finalParentId);
+if (task.relativeFolder && uploadOriginParentId !== normalizeRealFolderId(finalParentId)) {
+uploadRevalidateIds.add(uploadOriginParentId);
 }
 
 if (task._deleted) throw new Error("Aborted");
@@ -50207,7 +53224,20 @@ if (data.name) task.name = data.name;
 }
 
 const uploadTaskId = (data.task && data.task.id) || data.task_id || data.upload_task_id || (data.resumable && data.resumable.task_id) || '';
-if (uploadTaskId) task._uploadTaskId = uploadTaskId;
+if (uploadTaskId) {
+task._uploadTaskId = uploadTaskId;
+registerCloudTaskTarget({
+id: uploadTaskId,
+file_id: task.file_id || newlyCreatedFileId || '',
+phase: (data.task && data.task.phase) || data.phase || '',
+reference_resource: task.file_id ? { id: task.file_id, kind: 'drive#file' } : undefined
+}, finalParentId, {
+taskType: 'upload',
+defaultDownload: false,
+resourceId: task.file_id || newlyCreatedFileId || '',
+resourceKind: 'drive#file'
+});
+}
 
 if (newlyCreatedFileId && !task._ghostAdded) {
 if (typeof window.pkAddGhostFile === 'function') window.pkAddGhostFile(newlyCreatedFileId);
@@ -50232,8 +53262,11 @@ for (let i = 1; i <= maxPoll; i++) {
         const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/tasks/${encodeURIComponent(task._uploadTaskId)}`, { headers: getHeaders() });
         if (res.ok) {
             const taskData = await res.json().catch(() => null);
-            const phase = (taskData && taskData.phase) || (taskData && taskData.task && taskData.task.phase) || '';
-            const ref = (taskData && taskData.reference_resource) || (taskData && taskData.task && taskData.task.reference_resource) || {};
+            const watchTaskData = taskData && taskData.task && typeof taskData.task === 'object'
+                ? Object.assign({}, taskData, taskData.task)
+                : taskData;
+            const phase = (watchTaskData && watchTaskData.phase) || '';
+            const ref = (watchTaskData && watchTaskData.reference_resource) || {};
             let refVisualChanged = false;
             if (ref.name) task.name = ref.name;
             if (ref.mime_type) task.mime_type = ref.mime_type;
@@ -50246,11 +53279,28 @@ for (let i = 1; i <= maxPoll; i++) {
                 refVisualChanged = true;
             }
             if (refVisualChanged) scheduleUploadRenderVisible();
-            if (phase === 'PHASE_TYPE_COMPLETE') return true;
-            if (phase === 'PHASE_TYPE_ERROR') throw new Error((taskData && (taskData.message || taskData.error_description)) || L.err_unknown);
+            if (phase === 'PHASE_TYPE_COMPLETE') {
+                const record = S.cloudTargetWatches && S.cloudTargetWatches.get(String(task._uploadTaskId));
+                if (record) {
+                    syncCloudTargetWatchIndex(record, watchTaskData, true);
+                    if (finishCloudTargetWatch(record, true, watchTaskData)) S.cloudTargetWatches.delete(String(task._uploadTaskId));
+                }
+                return true;
+            }
+            if (phase === 'PHASE_TYPE_ERROR' || phase === 'PHASE_TYPE_FAILED') {
+                const record = S.cloudTargetWatches && S.cloudTargetWatches.get(String(task._uploadTaskId));
+                if (record) {
+                    syncCloudTargetWatchIndex(record, watchTaskData, true);
+                    if (finishCloudTargetWatch(record, false, watchTaskData)) S.cloudTargetWatches.delete(String(task._uploadTaskId));
+                }
+                const terminalError = new Error(String((watchTaskData && (watchTaskData.code || watchTaskData.error_code || watchTaskData.error)) || 'UPLOAD_TASK_ERROR'));
+                terminalError.isUploadTaskTerminal = true;
+                throw terminalError;
+            }
         }
     } catch (e) {
         if (e.message === "Aborted") throw e;
+        if (e.isUploadTaskTerminal) throw e;
         console.warn('[Upload] Task completion poll warning:', e);
     }
 
@@ -50264,11 +53314,13 @@ if (task._deleted) {
 console.warn(`[Upload] Task ${task.id} was deleted by user during initialization. Triggering self-destruct.`);
 if (newlyCreatedFileId && task._deleteFileIntent) {
     try {
-        await fetch('https://api-drive.mypikpak.com/drive/v1/files:batchTrash', {
+        const cleanupRes = await fetch('https://api-drive.mypikpak.com/drive/v1/files:batchTrash', {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify({ ids: [newlyCreatedFileId] })
         });
+        if (!cleanupRes.ok) throw new Error(`API ${cleanupRes.status}`);
+        if (typeof window.pkRemoveGhostFile === 'function') window.pkRemoveGhostFile(newlyCreatedFileId);
     } catch (err) {
         console.error(`[Upload] Failed to cleanup ghost file ${newlyCreatedFileId}`, err);
     }
@@ -50289,27 +53341,9 @@ if (S.uploadMode) {
 }
 setTimeout(() => updateQuotaUI(), 1000);
 
-if (typeof globalCache !== 'undefined') {
-    const targetPid = (task.parentId === 'root' || task.parentId === 'upload_root') ? '' : (task.parentId || '');
-    if (globalCache.has(targetPid)) {
-        const cacheEntry = globalCache.get(targetPid);
-        const list = Array.isArray(cacheEntry) ? cacheEntry : (cacheEntry.items || []);
-        const newFileStub = {
-            id: task.file_id, kind: 'drive#file', name: task.name, size: task.size,
-            parent_id: targetPid, mime_type: task.mime_type || '',
-            thumbnail_link: task.thumbnail_link || task.icon_link, icon_link: task.icon_link,
-            modified_time: new Date().toISOString(), hash: hash
-        };
-        if (!list.some(f => f.id === newFileStub.id)) list.push(newFileStub);
-    }
-}
-
-if (typeof globalDirtyFolders !== 'undefined') {
-    const targetPid = task.parentId === 'root' ? '' : (task.parentId || '');
-    globalDirtyFolders.add(targetPid);
-    if (typeof runBackgroundCrawler === 'function') runBackgroundCrawler();
-}
-if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
+const uploadCacheResult = applyCompletedUploadToFolderCache(task, hash, data.file && data.file.id ? data.file : null);
+if (!uploadCacheResult.patched || !uploadCacheResult.completeMeta) uploadRevalidateIds.add(uploadCacheResult.folderId);
+uploadCompleted = true;
 }
 else if (data.resumable && data.resumable.params) {
 const p = data.resumable.params;
@@ -50525,9 +53559,11 @@ task.message = L.msg_task_init_part;
     await ossRequest('POST', `uploadId=${uploadId}`, xmlBody, 'application/xml');
 
     if (task._deleted && task.file_id && task._deleteFileIntent) {
-        fetch('https://api-drive.mypikpak.com/drive/v1/files:batchTrash', {
+        const cleanupRes = await fetch('https://api-drive.mypikpak.com/drive/v1/files:batchTrash', {
             method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: [task.file_id] })
-        }).catch(()=>{});
+        });
+        if (!cleanupRes.ok) throw new Error(`API ${cleanupRes.status}`);
+        if (typeof window.pkRemoveGhostFile === 'function') window.pkRemoveGhostFile(task.file_id);
         throw new Error("Aborted");
     }
 
@@ -50541,6 +53577,7 @@ task.message = L.msg_task_init_part;
         try {
             const meta = await apiGet(task.file_id);
             if (meta) {
+                task._finalFileMeta = meta;
                 let metaVisualChanged = false;
                 if (meta.icon_link && task.icon_link !== meta.icon_link) {
                     task.icon_link = meta.icon_link;
@@ -50626,27 +53663,9 @@ if (S.uploadMode) {
     }
 }
 
-if (typeof globalCache !== 'undefined') {
-    const targetPid = (task.parentId === 'root' || task.parentId === 'upload_root') ? '' : (task.parentId || '');
-    if (globalCache.has(targetPid)) {
-        const cacheEntry = globalCache.get(targetPid);
-        const list = Array.isArray(cacheEntry) ? cacheEntry : (cacheEntry.items || []);
-        const newFileStub = {
-            id: task.file_id, kind: 'drive#file', name: task.name, size: task.size,
-            parent_id: targetPid, mime_type: task.mime_type || '',
-            thumbnail_link: task.thumbnail_link || task.icon_link, icon_link: task.icon_link,
-            modified_time: new Date().toISOString(), hash: hash
-        };
-        if (!list.some(f => f.id === newFileStub.id)) list.push(newFileStub);
-    }
-}
-
-if (typeof globalDirtyFolders !== 'undefined') {
-    const targetPid = task.parentId === 'root' ? '' : (task.parentId || '');
-    globalDirtyFolders.add(targetPid);
-    if (typeof runBackgroundCrawler === 'function') runBackgroundCrawler();
-}
-if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
+const uploadCacheResult = applyCompletedUploadToFolderCache(task, hash, task._finalFileMeta || null);
+if (!uploadCacheResult.patched || !uploadCacheResult.completeMeta) uploadRevalidateIds.add(uploadCacheResult.folderId);
+uploadCompleted = true;
 }
 } catch (e) {
 const isManualAbort = e.message === 'Aborted';
@@ -50654,21 +53673,34 @@ task.status = isManualAbort ? 'PAUSED' : 'ERROR';
 task.message = isManualAbort ? L.msg_task_paused : formatCloudErrorMessage(e, L.err_unknown);
 
 if (e.status === 403 && task.file_id) {
+const failedFileId = task.file_id;
 task.message = e.isOssError ? L.msg_oss_upload_forbidden : L.msg_token_expired_retry;
 task._initData = null;
 task._uploadId = null;
 task.progress = 0;
 task._totalUploadedBytes = 0;
-fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
-    method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: [task.file_id] })
-}).catch(()=>{});
-if (typeof window.pkRemoveGhostFile === 'function') window.pkRemoveGhostFile(task.file_id);
+try {
+const cleanupRes = await fetch('https://api-drive.mypikpak.com/drive/v1/files:batchDelete', {
+    method: 'POST', headers: getHeaders(), body: JSON.stringify({ ids: [failedFileId] })
+});
+if (!cleanupRes.ok) throw new Error(`API ${cleanupRes.status}`);
+if (typeof window.pkRemoveGhostFile === 'function') window.pkRemoveGhostFile(failedFileId);
 task.file_id = null;
+} catch (cleanupError) {
+console.warn('[Upload] Failed to cleanup rejected upload file:', cleanupError);
+uploadRevalidateIds.add(normalizeRealFolderId(task.parentId));
+}
 }
 
 if (S.uploadMode) updateRowUI(task);
 S.upMng.saveTask(task);
 } finally {
+const pending = finishFolderMutation(uploadMutation, {
+success: uploadCompleted,
+revalidate: !uploadCompleted,
+revalidateIds: Array.from(uploadRevalidateIds)
+});
+pending.forEach(folderId => scheduleRealFolderRevalidation(folderId, 800));
 clearInterval(speedTimer);
 task._xhr = null; S.upMng.running--;
 
@@ -51810,7 +54842,9 @@ renderMenu(folders);
 } else {
 pop.innerHTML = `<div class="pk-loading-line pk-loading-flex"><div class="pk-spin-lg pk-spin-xs"></div></div>`;
 try {
-const listItems = await apiList(parentId || '', 1000, null, null, false, true);
+const listItems = window.pkGlobalIndex
+? await window.pkGlobalIndex.ensureFolder(parentId || '', { background: false, name: getKnownRealFolderName(parentId || '') })
+: await apiList(parentId || '', 1000, null, null, false, true);
 if (typeof globalCache !== 'undefined') globalCache.set(cacheKey, listItems);
 renderMenu(listItems.filter(f => f.kind === 'drive#folder'));
 } catch (err) { cleanup(); }
@@ -51910,7 +54944,9 @@ items = Array.isArray(raw) ? raw : raw.items;
 
 try {
 if (items === null) {
-items = await apiList(id || '', 1000, null, null, false, true);
+items = window.pkGlobalIndex
+? await window.pkGlobalIndex.ensureFolder(id || '', { background: false, name: name || L.picker_all })
+: await apiList(id || '', 1000, null, null, false, true);
 
 if (typeof globalCache !== 'undefined') globalCache.set(cacheKey, items);
 indexParents(id, name || L.picker_all, items);
@@ -51949,6 +54985,10 @@ const cur = currentPath[currentPath.length - 1];
 const name = await showPrompt(L.msg_newfolder_prompt, '', L.picker_new, { maxLen: CONF.fileNameMaxLen });
 if (name) {
 if (isPikPakFileNameTooLong(name)) { showPikPakFileNameLimitTip(); return; }
+const parentId = normalizeRealFolderId(cur.id);
+const pickerCreateMutation = beginFolderMutation([parentId], 'picker_create_folder');
+let pickerCreateSucceeded = false;
+let pickerCreateNeedsRevalidate = false;
 try {
 const res = await fetch('https://api-drive.mypikpak.com/drive/v1/files', {
     method: 'POST', headers: getHeaders(),
@@ -51957,14 +54997,27 @@ const res = await fetch('https://api-drive.mypikpak.com/drive/v1/files', {
 if (!res.ok) throw new Error("Create Failed");
 const data = await res.json();
 const newFolder = data.file || data;
-const parentId = cur.id || 'root';
-if (typeof globalCache !== 'undefined') globalCache.delete(parentId);
-if (S.cache) S.cache.delete(parentId);
-globalDirtyFolders.add(parentId);
-gmSet('pk_fmod_' + parentId, new Date(getServerNow()).toISOString());
+if (newFolder && newFolder.id) {
+const folderItem = minifyFile({ ...newFolder, kind: 'drive#folder', parent_id: parentId }, false);
+const patched = patchRealFolderCaches(parentId, list => [folderItem, ...list.filter(item => item && item.id !== folderItem.id)]);
+if (!patched) pickerCreateNeedsRevalidate = true;
+} else {
+pickerCreateNeedsRevalidate = true;
+}
+gmSet('pk_fmod_' + (parentId || 'root'), new Date(getServerNow()).toISOString());
+pickerCreateSucceeded = true;
 if (newFolder && newFolder.id) await loadFolder(newFolder.id, newFolder.name);
 else await loadFolder(cur.id, null, true);
 } catch(e) { showAlert(formatCloudErrorMessage(e)); }
+finally {
+const pending = finishFolderMutation(pickerCreateMutation, {
+success: pickerCreateSucceeded,
+revalidate: !pickerCreateSucceeded,
+revalidateIds: pickerCreateNeedsRevalidate ? [parentId] : []
+});
+pending.forEach(folderId => scheduleRealFolderRevalidation(folderId, 300));
+scheduleBackgroundResume();
+}
 }
 };
 }
@@ -52636,19 +55689,16 @@ async function trashMagnetArchiveSourceRows(rows) {
 const L = getStrings();
 const ids = (Array.isArray(rows) ? rows : []).map(row => row && row.id).filter(Boolean);
 if (!ids.length) return 0;
-const BATCH_SIZE = 100;
-for (let i = 0; i < ids.length; i += BATCH_SIZE) {
-const chunk = ids.slice(i, i + BATCH_SIZE);
-const res = await fetch('https://api-drive.mypikpak.com/drive/v1/files:batchTrash', {
-method: 'POST',
-headers: getHeaders(),
-body: JSON.stringify({ ids: chunk })
+await executeBatchDelete(ids, {
+silent: true,
+forceRefresh: false,
+explicitItems: (Array.isArray(rows) ? rows : []).map(row => row && row.item).filter(Boolean),
+originPathId: S.path && S.path.length ? S.path[S.path.length - 1].id : '',
+originPathDepth: Array.isArray(S.path) ? S.path.length : 0,
+originRecentMode: !!S.recentMode,
+originStarredMode: !!S.starredMode,
+suppressVirtualRootRefresh: true
 });
-if (!res.ok) {
-const err = await res.json().catch(() => ({}));
-throw new Error(err.error_description || `API ${res.status}`);
-}
-}
 
 const isTrashConfirmedPayload = payload => {
 if (!payload || typeof payload !== 'object') return false;
@@ -53071,11 +56121,14 @@ while (true) {
 await waitForMagnetArchiveCaptchaIdle();
 await waitBeforeMagnetArchiveDetailRequest(attempt);
 try {
-return await apiGet(id);
+    return await apiGet(id, { callerManagedCaptchaRecovery: true });
 } catch (e) {
 if (typeof isDownloadHydrateCaptchaInvalidError === 'function' && isDownloadHydrateCaptchaInvalidError(e)) {
 const recovered = typeof recoverDownloadHydrateCaptcha === 'function' ? await recoverDownloadHydrateCaptcha(e, {
     isRunning: () => S.magnetArchiveBusy !== false,
+    scope: 'magnet_archive',
+    restartAfterForeignWait: true,
+    action: e.captchaAction || 'GET:/drive/v1/files',
     onWait: () => {
         if (progressTask) updateMagnetArchiveCheckProgress(progressTask, Math.min(progressTotal, progressDoneKeys.size), progressTotal, L.msg_magnet_archive_checking);
     }
@@ -54405,6 +57458,7 @@ while (retry < 3) {
     try {
         const created = await apiAddOfflineTask(magnetLink, saveToId);
         addResults.push(created);
+        registerCloudTaskTarget(created, saveToId);
         successCount++;
         break;
     } catch (reqErr) {
@@ -54438,16 +57492,15 @@ showToast(L.msg_cloud_task_success.replace('{n}', successCount));
 }
 
 if (successCount > 0) {
-if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
 setTimeout(() => updateQuotaUI(), 1000);
 const curPathId = S.path[S.path.length - 1].id || '';
 if (S.offlineMode) {
 await handleOfflineTaskAdded(addResults, { source: files.length > 1 ? 'batch' : 'single', batch: files.length > 1, schedule: false });
 scheduleOfflineTaskAddProbe(addExistsCount && !addResults.length ? 'add_exists' : (files.length > 1 ? 'batch_add' : 'add'), 1000);
 } else if (saveToId && curPathId === saveToId) {
-load(false, true);
-} else if (!saveToId && S.path.length === 1 && window.pkSmartRefreshTrigger) {
-    window.pkSmartRefreshTrigger(true);
+updateStat();
+} else if (!saveToId && S.path.length === 1) {
+updateStat();
 }
 }
 };
@@ -54504,6 +57557,14 @@ if (ids.length === 0) return;
 
 ensureItemMap();
 
+const restoreItems = ids.map(id => S.itemMap.get(id)).filter(Boolean);
+const restoreParentResolution = await resolveRealMutationParentMap(restoreItems, null);
+if (restoreParentResolution.unresolvedIds.length) invalidateCompleteGlobalIndexForUnknownParents();
+const affectedParentIds = new Set(restoreParentResolution.parentIds);
+const restoreFinalParentByItemId = new Map(restoreParentResolution.parentByItemId);
+const restoreMutation = beginFolderMutation(Array.from(affectedParentIds), 'restore');
+let restoreCompleted = false;
+
 const progressTask = FloatBarManager.create(L.msg_prepare_restore);
 const updateFloat = progressTask.update;
 
@@ -54515,17 +57576,18 @@ try {
 const BATCH_SIZE = 500;
 const total = ids.length;
 const taskIds =[];
-const affectedParentIds = new Set();
 const restoredFolders = [];
 
 ids.forEach(id => {
 const item = S.itemMap.get(id);
 if (item) {
 if (item.kind === 'drive#folder') restoredFolders.push(item);
-if (item.parent_id) affectedParentIds.add(item.parent_id);
-else affectedParentIds.add('root');
+const parentId = restoreParentResolution.parentByItemId.get(String(id));
+if (parentId !== undefined) affectedParentIds.add(parentId);
 }
 });
+const restoredFolderIds = new Set(restoredFolders.map(folder => String(folder.id || '')).filter(Boolean));
+affectedParentIds.forEach(parentId => attachFolderMutationTarget(restoreMutation, parentId));
 
 updateFloat(L.msg_submit_request);
 
@@ -54544,6 +57606,28 @@ const data = await res.json();
 
 if (data.task_id) {
 taskIds.push(data.task_id);
+const restoreGroups = new Map();
+chunk.forEach(itemId => {
+const parentId = restoreParentResolution.parentByItemId.get(String(itemId));
+if (parentId === undefined) return;
+const normalizedParent = normalizeRealFolderId(parentId);
+if (!restoreGroups.has(normalizedParent)) restoreGroups.set(normalizedParent, []);
+restoreGroups.get(normalizedParent).push(String(itemId));
+});
+const folderChecks = [];
+restoreGroups.forEach((presentIds, folderId) => folderChecks.push({
+folderId,
+baselineSignature: getRealFolderCacheSignature(folderId),
+requireChange: true
+}));
+const firstTarget = folderChecks.length ? folderChecks[0].folderId : '';
+const unresolvedRestoreIds = chunk.filter(itemId => !restoreParentResolution.parentByItemId.has(String(itemId)));
+registerCloudTaskTarget({ id: data.task_id }, firstTarget, {
+taskType: 'untrash',
+defaultDownload: false,
+folderChecks,
+expectedItemIds: unresolvedRestoreIds
+});
 }
 
 updateFloat(L.msg_submit_request);
@@ -54560,38 +57644,59 @@ const maxPollRetries = 120;
 while (pendingTasks.size > 0 && pollRetries < maxPollRetries) {
 await sleep(1000);
 pollRetries++;
-
-const currentIdsToCheck = Array.from(pendingTasks).join(',');
-const filters = {
-phase: { eq: "PHASE_TYPE_COMPLETE" },
-id: { in: currentIdsToCheck }
-};
-const filterStr = encodeURIComponent(JSON.stringify(filters));
-
-const pollUrl = `https://api-drive.mypikpak.com/drive/v1/tasks?with=reference_resource&type=&thumbnail_size=SIZE_SMALL&limit=100&filters=${filterStr}`;
-
+let terminalFailure = null;
+const pendingIds = Array.from(pendingTasks);
+for (let offset = 0; offset < pendingIds.length; offset += 6) {
+const chunk = pendingIds.slice(offset, offset + 6);
+await Promise.all(chunk.map(async taskId => {
 try {
-const tRes = await fetch(pollUrl, { headers: getHeaders() });
-if (tRes.ok) {
-    const tData = await tRes.json();
-    const completedTasks = tData.tasks || [];
+    const tRes = await fetch(`https://api-drive.mypikpak.com/drive/v1/tasks/${encodeURIComponent(taskId)}?_t=${Date.now()}`, { headers: getHeaders() });
+    if (!tRes.ok) return;
+    const raw = await tRes.json().catch(() => ({}));
+    const task = raw && raw.task && typeof raw.task === 'object' ? Object.assign({}, raw, raw.task) : raw;
+    const phase = String(task.phase || '').toUpperCase();
+    if (phase !== 'PHASE_TYPE_COMPLETE' && phase !== 'PHASE_TYPE_ERROR' && phase !== 'PHASE_TYPE_FAILED') return;
 
-    completedTasks.forEach(t => {
-        if (pendingTasks.has(t.id)) {
-            pendingTasks.delete(t.id);
-        }
-    });
-
-    updateFloat(L.msg_server_processing);
-}
+    pendingTasks.delete(String(taskId));
+    const record = S.cloudTargetWatches && S.cloudTargetWatches.get(String(taskId));
+    const completed = phase === 'PHASE_TYPE_COMPLETE';
+    if (record) {
+        syncCloudTargetWatchIndex(record, task, true);
+        if (finishCloudTargetWatch(record, completed, task)) S.cloudTargetWatches.delete(String(taskId));
+    }
+    if (!completed && !terminalFailure) {
+        const code = String(task.code || task.error_code || task.error || 'RESTORE_TASK_ERROR');
+        terminalFailure = new Error(code);
+        terminalFailure.code = code;
+    }
 } catch (err) {
-console.warn("[Restore] Poll failed, retrying...", err);
+    console.warn("[Restore] Poll failed, retrying...", err);
 }
+}));
+if (terminalFailure) throw terminalFailure;
+}
+updateFloat(L.msg_server_processing);
 }
 
 if (pendingTasks.size > 0) {
 console.warn(`[Restore] Timeout waiting for tasks: ${Array.from(pendingTasks)}`);
+const timeoutError = new Error('RESTORE_TASK_TIMEOUT');
+timeoutError.code = 'RESTORE_TASK_TIMEOUT';
+throw timeoutError;
 }
+}
+
+for (let i = 0; i < ids.length; i += 6) {
+await Promise.all(ids.slice(i, i + 6).map(async id => {
+try {
+const meta = await apiGet(id);
+const parentId = resolveKnownRealParentId(meta, null);
+if (parentId === null) return;
+restoreFinalParentByItemId.set(String(id), parentId);
+affectedParentIds.add(parentId);
+attachFolderMutationTarget(restoreMutation, parentId);
+} catch (e) {}
+}));
 }
 
 const allIdSet = new Set(ids);
@@ -54627,6 +57732,7 @@ children.forEach(childId => wipeCrawlerMemory(childId));
 
 reviveFromTombstone(id);
 wipeCrawlerMemory(id);
+if (restoredFolderIds.has(String(id)) && window.pkGlobalIndex) window.pkGlobalIndex.markDirty(id);
 });
 
 
@@ -54664,7 +57770,6 @@ keys.forEach(k => {
 if (typeof globalCache !== 'undefined') globalCache.delete(k);
 if (S.cache) S.cache.delete(k);
 if (typeof scannedFolderIds !== 'undefined') scannedFolderIds.delete(k);
-if (typeof globalDirtyFolders !== 'undefined') globalDirtyFolders.add(k);
 });
 
 const queueId = (pid === 'root') ? '' : pid;
@@ -54677,13 +57782,23 @@ backgroundQueue.unshift({ id: folder.id, name: folder.name, retryCount: 0 });
 });
 
 scheduleBackgroundResume();
-if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
+restoreCompleted = true;
 showToast(L.msg_restore_done.replace('{n}', total));
 
 } catch(e) {
 showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
 load(false, true);
 } finally {
+const restoreIdsByParent = new Map();
+restoreFinalParentByItemId.forEach((parentId, itemId) => {
+if (!restoreIdsByParent.has(parentId)) restoreIdsByParent.set(parentId, []);
+restoreIdsByParent.get(parentId).push(itemId);
+});
+const pending = finishFolderMutation(restoreMutation, { success: restoreCompleted, revalidate: true });
+pending.forEach(folderId => scheduleRealFolderExpectation(folderId, {
+presentIds: restoreCompleted ? (restoreIdsByParent.get(normalizeRealFolderId(folderId)) || []) : [],
+maxAttempts: restoreCompleted ? 10 : 5
+}, 500));
 if (progressTask) progressTask.destroy();
 isGUISensitive = false;
 scheduleBackgroundResume();
@@ -54728,6 +57843,7 @@ S.clearSelection();
 
 if (typeof globalCache !== 'undefined') globalCache.delete('root_trashed');
 if (S.cache) S.cache.delete('root_trashed');
+if (typeof globalTombstoneCache !== 'undefined') globalTombstoneCache.clear();
 
 refresh();
 updateStat();
@@ -56461,6 +59577,10 @@ if (cleanCloseBtn) cleanCloseBtn.onclick = closeClean;
 cleanM.querySelector('#clean_confirm').onclick = async () => {
 const selected = Array.from(cleanM.querySelectorAll('.clean-opt:checked')).map(el => el.value);
 if (selected.length === 0) { closeClean(); return; }
+if (selected.includes('index') && hasPendingFolderMutationWork()) {
+showToast(L.str_processing, 'warning');
+return;
+}
 if (!await showConfirm(L.msg_clean_confirm)) return;
 if (S.configCloudBusy) {
 showToast(L.msg_config_cloud_busy_clean_block, 'warning');
@@ -56475,9 +59595,12 @@ if (typeof S !== 'undefined' && S.cache) S.cache.clear();
 if (typeof globalLineageMap !== 'undefined') globalLineageMap.clear();
 if (typeof globalParentIndex !== 'undefined') globalParentIndex.clear();
 if (typeof globalDirtyFolders !== 'undefined') globalDirtyFolders.clear();
+if (typeof globalFolderMutationStates !== 'undefined') globalFolderMutationStates.clear();
 if (typeof scannedFolderIds !== 'undefined') scannedFolderIds.clear();
 if (typeof backgroundQueue !== 'undefined') backgroundQueue.length = 0;
 if (typeof isBackgroundRunning !== 'undefined') isBackgroundRunning = false;
+if (window.pkGlobalIndex && typeof window.pkGlobalIndex.reset === 'function') window.pkGlobalIndex.reset();
+if (typeof globalPreloadPromise !== 'undefined') globalPreloadPromise = null;
 if (typeof DurationProber !== 'undefined') DurationProber.reset();
 }
 
@@ -57546,47 +60669,57 @@ showToast(L.err_folder_not_ready, 'error');
 setLoad(false); return;
 }
 
-if (isUploadLocate) {
-const normalizeUploadLocateParentId = (value) => {
+const normalizeLocateParentId = (value) => {
     const pid = String(value || '').trim();
     return (!pid || pid === 'root' || pid === 'upload_root') ? '' : pid;
 };
-const findCachedUploadLocateItem = (fileId) => {
-    if (typeof globalCache === 'undefined' || !globalCache || typeof globalCache.values !== 'function') return null;
+const findCachedLocateItem = (fileId) => {
+    if (typeof globalCache === 'undefined' || !globalCache || typeof globalCache.entries !== 'function') return null;
     const fid = String(fileId || '');
-    for (const raw of globalCache.values()) {
+    for (const [cacheId, raw] of globalCache.entries()) {
+        const normalizedCacheId = normalizeRealFolderId(cacheId);
+        if (!isRealHomeFolderId(normalizedCacheId)) continue;
         const list = Array.isArray(raw) ? raw : (raw && raw.items || []);
         if (!Array.isArray(list)) continue;
-        const hit = list.find(f => f && String(f.id || f.file_id || '') === fid);
-        if (hit) return hit;
+        const hit = list.find(f => f && f.kind !== 'drive#task' && String(f.id || '') === fid);
+        if (hit) return { item: hit, parentId: hit.parent_id !== undefined ? hit.parent_id : normalizedCacheId };
     }
     return null;
 };
-const cachedUploadItem = findCachedUploadLocateItem(lookupId);
-const sourceParentId = item.parent_id !== undefined ? item.parent_id : item.parentId;
-const cachedParentId = cachedUploadItem && cachedUploadItem.parent_id !== undefined ? cachedUploadItem.parent_id : '';
-const cachedParentText = String(cachedParentId || '').trim();
-const rawParentId = (cachedParentText && cachedParentText !== 'root' && cachedParentText !== 'upload_root') ? cachedParentId : sourceParentId;
-const rawParentText = String(rawParentId || '').trim();
-const hasUsableParentId = !!rawParentText && rawParentText !== 'root' && rawParentText !== 'upload_root';
-if (cachedUploadItem || hasUsableParentId) {
+const cachedLocate = findCachedLocateItem(lookupId);
+const cachedItem = cachedLocate && cachedLocate.item;
+const taskRef = item._offlineTask && item._offlineTask.reference_resource && typeof item._offlineTask.reference_resource === 'object'
+? item._offlineTask.reference_resource
+: {};
+const indexedParent = typeof globalParentIndex !== 'undefined' ? globalParentIndex.get(String(lookupId)) : null;
+const cloudWatch = item.kind === 'drive#task' && S.cloudTargetWatches ? S.cloudTargetWatches.get(getOfflineTaskPrimaryId(item)) : null;
+const taskRefHasParent = Object.prototype.hasOwnProperty.call(taskRef, 'parent_id');
+const itemHasParent = Object.prototype.hasOwnProperty.call(item, 'parent_id');
+let rawParentId = cachedLocate ? cachedLocate.parentId
+: (String(taskRef.parent_id || '').trim() ? taskRef.parent_id
+    : (String(item.parent_id || '').trim() ? item.parent_id
+        : (indexedParent ? indexedParent.id
+            : (cloudWatch && cloudWatch.targetId ? cloudWatch.targetId
+                : (taskRefHasParent ? taskRef.parent_id : (itemHasParent ? item.parent_id : item.parentId))))));
+const hasKnownParent = !!cachedLocate || taskRefHasParent || itemHasParent || !!indexedParent || !!(cloudWatch && cloudWatch.targetId) || !!String(rawParentId || '').trim();
+
+if (cachedItem || hasKnownParent) {
     item = {
         ...item,
-        ...(cachedUploadItem || {}),
+        ...(cachedItem || {}),
         id: lookupId,
-        kind: 'drive#file',
-        name: (cachedUploadItem && cachedUploadItem.name) || item.name || '',
-        size: (cachedUploadItem && cachedUploadItem.size) || item.size || (item.file && item.file.size) || 0,
-        parent_id: normalizeUploadLocateParentId(rawParentId),
-        mime_type: (cachedUploadItem && cachedUploadItem.mime_type) || item.mime_type || (item.file && item.file.type) || '',
-        icon_link: (cachedUploadItem && cachedUploadItem.icon_link) || item.icon_link || '',
-        thumbnail_link: (cachedUploadItem && cachedUploadItem.thumbnail_link) || item.thumbnail_link || item.icon_link || '',
-        phase: (cachedUploadItem && cachedUploadItem.phase) || 'PHASE_TYPE_COMPLETE'
+        kind: (cachedItem && cachedItem.kind) || taskRef.kind || item._ref_kind || 'drive#file',
+        name: (cachedItem && cachedItem.name) || taskRef.name || item.name || '',
+        size: (cachedItem && cachedItem.size) || taskRef.size || item.size || (item.file && item.file.size) || 0,
+        parent_id: normalizeLocateParentId(rawParentId),
+        mime_type: (cachedItem && cachedItem.mime_type) || taskRef.mime_type || item.mime_type || (item.file && item.file.type) || '',
+        icon_link: (cachedItem && cachedItem.icon_link) || taskRef.icon_link || item.icon_link || '',
+        thumbnail_link: (cachedItem && cachedItem.thumbnail_link) || taskRef.thumbnail_link || item.thumbnail_link || item.icon_link || '',
+        phase: (cachedItem && cachedItem.phase) || taskRef.phase || 'PHASE_TYPE_COMPLETE'
     };
-} else {
+} else if (isUploadLocate) {
     showToast(L.err_folder_not_ready, 'error');
     setLoad(false); return;
-}
 } else {
 try {
 item = await apiGetWithCaptchaRecovery(lookupId, {
@@ -57626,6 +60759,16 @@ if (typeof globalLineageMap !== 'undefined' && globalLineageMap.has(currParentId
     const cachedLineage = globalLineageMap.get(currParentId);
     pathChain.unshift(...cachedLineage);
     break;
+}
+
+const indexedAncestor = typeof globalParentIndex !== 'undefined' ? globalParentIndex.get(currParentId) : null;
+if (indexedAncestor) {
+    const ancestorParentId = normalizeLocateParentId(indexedAncestor.id);
+    const ancestorParentHit = readRealFolderCache(ancestorParentId);
+    const ancestorItem = ancestorParentHit && ancestorParentHit.items.find(row => row && String(row.id || '') === String(currParentId));
+    pathChain.unshift({ id: currParentId, name: (ancestorItem && ancestorItem.name) || getKnownRealFolderName(currParentId) || currParentId });
+    currParentId = ancestorParentId;
+    continue;
 }
 
 try {
@@ -57789,6 +60932,7 @@ S.cache.delete(cacheKey);
 if (typeof globalCache !== 'undefined') globalCache.delete(cacheKey);
 
 globalDirtyFolders.add(currentContextId || 'root');
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(currentContextId);
 
 updateLoadTxt(L.str_loc_stale);
 load(false, true);
@@ -57801,7 +60945,7 @@ S.sel.clear();
 S.sel.add(item.id);
 S.activeId = item.id;
 
-const targetIdx = S.display.findIndex(x => x.id === item.id);
+const targetIdx = S.display.findIndex(x => x && x.id === item.id);
 
 if (targetIdx !== -1) {
 const vpHeight = UI.vp.clientHeight;
@@ -57952,6 +61096,18 @@ ctx.style.display = 'none';
 const action = e.target.getAttribute('data-action');
 const isStar = (action === 'star');
 
+const estimatedSelectionCount = S.selMode === 'all'
+? Math.max(0, (Array.isArray(S.display) ? S.display.length : 0) - (S.selEx ? S.selEx.size : 0))
+: (S.sel ? S.sel.size : 0);
+const starProgressText = isStar ? L.msg_starring : L.msg_unstarring;
+let starTask = null;
+if (estimatedSelectionCount > 100) {
+starTask = FloatBarManager.create(`${starProgressText} 0 / ${estimatedSelectionCount}`, {
+reserveText: `${starProgressText} ${estimatedSelectionCount} / ${estimatedSelectionCount}`
+});
+await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+}
+
 const rawIds = S.getSelectedIds();
 const ids = rawIds.filter(id => {
 const it = S.itemMap.get(id);
@@ -57967,17 +61123,30 @@ return true;
 });
 
 if (ids.length === 0) {
+if (starTask) starTask.destroy();
 showToast(isStar ? L.msg_star_added : L.msg_unstar_done);
 return;
+}
+
+const total = ids.length;
+if (!starTask) {
+starTask = FloatBarManager.create(`${starProgressText} 0 / ${total}`, {
+reserveText: `${starProgressText} ${total} / ${total}`
+});
 }
 
 if (S.liveRefreshCtx && S.liveRefreshCtx.status === 'refreshing') {
 abandonLiveManualRefresh('local_mutation', { toast: 'info', detach: false });
 }
 
-const starTask = FloatBarManager.create(isStar ? L.msg_starring : L.msg_unstarring);
-const total = ids.length;
 let successCount = 0;
+const remainingSelectedIds = new Set(rawIds);
+starTask.update(`${starProgressText} 0 / ${total}`);
+const starItems = ids.map(id => S.itemMap.get(id)).filter(Boolean);
+const starParentResolution = await resolveRealMutationParentMap(starItems, null);
+if (starParentResolution.unresolvedIds.length) invalidateCompleteGlobalIndexForUnknownParents();
+const starMutation = beginFolderMutation(Array.from(starParentResolution.parentIds), isStar ? 'star' : 'unstar');
+let starCompleted = false;
 
 try {
 const url = `https://api-drive.mypikpak.com/drive/v1/files:${action}`;
@@ -57987,9 +61156,9 @@ const BATCH_SIZE = 100;
 
 for (let i = 0; i < total; i += BATCH_SIZE) {
 const chunk = ids.slice(i, i + BATCH_SIZE);
-const chunkSet = new Set(chunk);
+const chunkSet = new Set(chunk.map(id => String(id || '')));
 
-starTask.update(`${isStar ? L.msg_starring : L.msg_unstarring} ${Math.min(i + BATCH_SIZE, total)} / ${total}`);
+starTask.update(`${starProgressText} ${Math.min(i + BATCH_SIZE, total)} / ${total}`);
 
 const res = await fetch(url, {
 method: 'POST', headers: headers,
@@ -58002,9 +61171,6 @@ if (res.status === 400 && errText.includes('captcha')) throw new Error(L.err_cap
 throw new Error(`API ${res.status}`);
 }
 
-chunk.forEach(id => {
-if (isStar) S.starredSet.add(id); else S.starredSet.delete(id);
-
 const syncObject = (o) => {
     if (!o) return;
     o.starred = isStar;
@@ -58016,24 +61182,59 @@ const syncObject = (o) => {
     }
 };
 
+chunk.forEach(id => {
+if (isStar) {
+    S.starredSet.add(id);
+    S.starredCancelTombstones.delete(id);
+} else {
+    S.starredSet.delete(id);
+    S.starredCancelTombstones.add(id);
+}
 syncObject(S.itemMap.get(id));
+});
 
 const deepSync = (cacheMap) => {
     if (!cacheMap) return;
     cacheMap.forEach((data) => {
         const list = Array.isArray(data) ? data : (data?.items || []);
-        const target = list.find(f => f.id === id);
-        if (target) syncObject(target);
+        for (let j = 0; j < list.length; j++) {
+            const target = list[j];
+            if (target && chunkSet.has(String(target.id || ''))) syncObject(target);
+        }
     });
 };
 
 deepSync(globalCache);
 deepSync(S.cache);
-});
+
+const removeFromStarredCache = (cacheMap) => {
+    if (!cacheMap || typeof cacheMap.get !== 'function' || typeof cacheMap.set !== 'function' || !cacheMap.has('starred_root')) return;
+    const snapshot = cacheMap.get('starred_root');
+    if (Array.isArray(snapshot)) {
+        cacheMap.set('starred_root', snapshot.filter(item => item && !chunkSet.has(String(item.id || ''))));
+    } else if (snapshot && Array.isArray(snapshot.items)) {
+        cacheMap.set('starred_root', {
+            ...snapshot,
+            items: snapshot.items.filter(item => item && !chunkSet.has(String(item.id || '')))
+        });
+    }
+};
+
+if (!isStar) {
+    removeFromStarredCache(globalCache);
+    removeFromStarredCache(S.cache);
+}
 
 if (!isStar && S.starredMode && S.path.length === 1) {
-S.items = S.items.filter(it => !chunkSet.has(it.id));
-S.display = S.display.filter(d => !d.isHeader && !chunkSet.has(d.id));
+S.sortId++;
+S.items = S.items.filter(it => it && !chunkSet.has(String(it.id || '')));
+S.display = S.display.filter(d => d && !chunkSet.has(String(d.id || '')));
+chunk.forEach(id => {
+    S.itemMap.delete(id);
+    remainingSelectedIds.delete(id);
+});
+
+S.setExplicitSelection(Array.from(remainingSelectedIds).filter(id => S.itemMap.has(id)));
 renderVisible();
 updateStat();
 } else {
@@ -58046,108 +61247,208 @@ if (total > BATCH_SIZE) await sleep(50);
 
 starTask.destroy();
 showToast(isStar ? L.msg_star_added : L.msg_unstar_done);
+starCompleted = true;
 
 } catch (err) {
 console.error(err);
 if (starTask) starTask.destroy();
-
-ids.forEach(id => {
-const revertStatus = !isStar;
-if (revertStatus) S.starredSet.add(id); else S.starredSet.delete(id);
-const item = S.itemMap.get(id);
-if (item) {
-item.starred = revertStatus;
-if (!item.tags) item.tags = [];
-if (revertStatus) {
-    if (!item.tags.some(t => t.name === 'STAR')) item.tags.push({name: 'STAR', type: 0});
-} else {
-    item.tags = item.tags.filter(t => t.name !== 'STAR');
-}
-}
-});
 renderVisible();
+updateStat();
 showAlert(formatCloudErrorMessage(err));
+} finally {
+const pending = finishFolderMutation(starMutation, { success: starCompleted, revalidate: !starCompleted });
+pending.forEach(folderId => scheduleRealFolderRevalidation(folderId, 300));
+scheduleBackgroundResume();
 }
 };
 }
 
-const observeUnzipTask = (taskId, folderId, fileId, skipUiRefresh = false) => {
-const checkStatus = async () => {
+const UNZIP_TARGET_WATCH_SESSION_KEY = 'pk_unzip_target_watches_v1';
+
+const persistUnzipTargetWatches = () => {
 try {
-const res = await fetch(`https://api-drive.mypikpak.com/decompress/v1/progress?task_id=${taskId}`, { headers: getHeaders() });
-if (!res.ok) return;
+const rows = Array.from(S.unzipTargetWatches.values()).filter(record => record && !record.finished).map(record => ({
+taskId: record.taskId,
+accountId: record.accountId || getCurrentDriveAccountId(),
+folderId: record.folderId,
+fileId: record.fileId,
+skipUiRefresh: !!record.skipUiRefresh,
+createdAt: record.createdAt,
+baselineSignature: record.baselineSignature || '',
+terminalSeen: record.terminalSeen === true,
+reconcileFailures: Number(record.reconcileFailures || 0)
+}));
+sessionStorage.setItem(UNZIP_TARGET_WATCH_SESSION_KEY, JSON.stringify(rows));
+} catch (e) {}
+};
+
+const observeUnzipTask = (taskId, folderId, fileId, skipUiRefresh = false, restored = null) => {
+const id = String(taskId || '').trim();
+if (!id || S.unzipTargetWatchClosed) return;
+const knownParent = resolveKnownRealParentId({ id: fileId }, isRealHomeFolderId(folderId) ? folderId : null);
+let record = S.unzipTargetWatches.get(id);
+if (record) {
+if (!skipUiRefresh) record.skipUiRefresh = false;
+if (knownParent !== null) {
+record.folderId = knownParent;
+attachFolderMutationTarget(record.mutation, knownParent);
+if (!record.baselineSignature) record.baselineSignature = getRealFolderCacheSignature(knownParent);
+}
+persistUnzipTargetWatches();
+return;
+}
+const targetId = knownParent !== null ? knownParent : '';
+record = {
+taskId: id,
+accountId: getCurrentDriveAccountId(),
+folderId: targetId,
+fileId: String(fileId || ''),
+skipUiRefresh: !!skipUiRefresh,
+createdAt: Number(restored && restored.createdAt || Date.now()),
+baselineSignature: String(restored && restored.baselineSignature || getRealFolderCacheSignature(targetId)),
+mutation: beginFolderMutation([targetId], 'unzip'),
+finished: false,
+misses: 0,
+terminalSeen: restored && restored.terminalSeen === true,
+reconcileFailures: Number(restored && restored.reconcileFailures || 0),
+reconciling: false,
+timer: 0
+};
+S.unzipTargetWatches.set(id, record);
+if (knownParent === null) invalidateCompleteGlobalIndexForUnknownParents();
+persistUnzipTargetWatches();
+const initialPendingFolders = finishFolderMutation(record.mutation, { success: true, revalidate: true });
+initialPendingFolders.forEach(folderId => scheduleRealFolderRevalidation(folderId, 0));
+
+const finishWatch = (success, physicalParentId = record.folderId) => {
+if (record.finished) return;
+if (record.timer) clearTimeout(record.timer);
+const target = normalizeRealFolderId(physicalParentId);
+record.folderId = target;
+attachFolderMutationTarget(record.mutation, target);
+const pendingFolders = finishFolderMutation(record.mutation, { success, revalidate: true });
+pendingFolders.forEach(folderId => {
+if (normalizeRealFolderId(folderId) !== target) scheduleRealFolderRevalidation(folderId, 0);
+});
+if (!success) {
+record.finished = true;
+scheduleRealFolderRevalidation(target, 0);
+S.unzipTargetWatches.delete(id);
+persistUnzipTargetWatches();
+return;
+}
+record.terminalSeen = true;
+if (record.reconciling) return;
+record.reconciling = true;
+persistUnzipTargetWatches();
+waitForStableRealFolder(target, {
+baselineSignature: record.baselineSignature,
+requireChange: !!record.baselineSignature && Number(record.reconcileFailures || 0) < 3,
+maxAttempts: 8
+}).then(ok => {
+record.reconciling = false;
+if (ok) {
+record.finished = true;
+S.unzipTargetWatches.delete(id);
+persistUnzipTargetWatches();
+scheduleBackgroundResume(0);
+return;
+}
+record.reconcileFailures++;
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(target);
+scheduleRealFolderRevalidation(target, 0);
+persistUnzipTargetWatches();
+scheduleCheck(Math.min(60000, 15000 * Math.max(1, record.reconcileFailures)));
+}).catch(() => {
+record.reconciling = false;
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(target);
+persistUnzipTargetWatches();
+scheduleCheck(30000);
+});
+};
+
+const scheduleCheck = delay => {
+if (record.finished || S.unzipTargetWatchClosed) return;
+record.timer = setTimeout(checkStatus, delay);
+};
+
+const checkStatus = async () => {
+if (record.finished || S.unzipTargetWatchClosed) return;
+try {
+const res = await fetch(`https://api-drive.mypikpak.com/decompress/v1/progress?task_id=${encodeURIComponent(id)}`, { headers: getHeaders() });
+if (!res.ok) {
+if (res.status === 404) {
+record.misses++;
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(record.folderId);
+scheduleRealFolderRevalidation(record.folderId, 0);
+if (record.terminalSeen) finishWatch(true);
+else if (record.misses >= 30) finishWatch(false);
+else scheduleCheck(Math.min(60000, 10000 * Math.max(1, record.misses)));
+return;
+}
+throw new Error(`Unzip Progress API ${res.status}`);
+}
+record.misses = 0;
 const data = await res.json();
+const phase = String(data.phase || '').toUpperCase();
 
-if (data.phase === 'PHASE_TYPE_COMPLETE') {
-
+if (phase === 'PHASE_TYPE_COMPLETE') {
 if (S) S.clearSelection();
-
-let physicalParentId = folderId || 'root';
-if (fileId && S.itemMap.has(fileId)) {
-const it = S.itemMap.get(fileId);
+let physicalParentId = record.folderId;
+if (record.fileId && S.itemMap.has(record.fileId)) {
+const it = S.itemMap.get(record.fileId);
 if (!it.params) it.params = {};
 it.params.global_file_kind = '1';
-if (it.parent_id) physicalParentId = it.parent_id;
-else if (it.parent_id === '') physicalParentId = 'root';
+const resolvedParent = resolveKnownRealParentId(it, null);
+if (resolvedParent !== null) physicalParentId = resolvedParent;
 }
-
 S.items.forEach(it => {
-if ((it.kind === 'drive#task' || S.offlineMode || S.uploadMode) && it.file_id === fileId) {
-    if (!it.params) it.params = {};
-    it.params.global_file_kind = '1';
+if ((it.kind === 'drive#task' || S.offlineMode || S.uploadMode) && it.file_id === record.fileId) {
+if (!it.params) it.params = {};
+it.params.global_file_kind = '1';
 }
 });
+finishWatch(true, physicalParentId);
 
-if (skipUiRefresh) return;
-
+if (record.skipUiRefresh) {
+scheduleBackgroundResume(0);
+return;
+}
 if (S && S.getSelectedCount() > 0) S.clearSelection();
-
 refresh();
 updateStat();
-
-const dirtyTargets = new Set();
-if (folderId) dirtyTargets.add(folderId); else dirtyTargets.add('root');
-dirtyTargets.add(physicalParentId);
-
-dirtyTargets.forEach(target => {
-globalDirtyFolders.add(target);
-if (target === 'root') globalDirtyFolders.add('');
-
-if (typeof globalCache !== 'undefined') globalCache.delete(target);
-if (typeof pkState !== 'undefined' && pkState && pkState.cache) pkState.cache.delete(target);
-if (typeof scannedFolderIds !== 'undefined') scannedFolderIds.delete(target === 'root' ? '' : target);
-
-backgroundQueue.unshift({ id: target === 'root' ? '' : target, name: 'Unzipped_Update', retryCount: 0 });
-});
-
 runBackgroundCrawler();
-
 const curPathNode = S.path[S.path.length - 1];
-const curId = curPathNode.id || 'root';
-
-if (dirtyTargets.has(curId) || curId === 'virtual_search_root' || S.isFlattened || S.dupMode) {
-if (window.pkSmartRefreshTrigger) {
-    setTimeout(() => window.pkSmartRefreshTrigger(true), 1200);
-}
-} else {
-dirtyTargets.forEach(target => {
-    apiList(target === 'root' ? '' : target, 500, null, null, false, true).then(newFiles => {
-        if (typeof globalCache !== 'undefined') globalCache.set(target, newFiles);
-    }).catch(()=>{});
-});
+const curId = normalizeRealFolderId(curPathNode && curPathNode.id);
+if (curId === normalizeRealFolderId(physicalParentId) || curPathNode?.id === 'virtual_search_root' || S.isFlattened || S.dupMode) {
+if (window.pkSmartRefreshTrigger) setTimeout(() => window.pkSmartRefreshTrigger(true), 1200);
 }
 return;
 }
 
-if (data.phase === 'PHASE_TYPE_RUNNING' || data.phase === 'PHASE_TYPE_PENDING') {
-setTimeout(checkStatus, 4000);
+if (phase === 'PHASE_TYPE_ERROR' || phase === 'PHASE_TYPE_FAILED') {
+finishWatch(false);
+return;
 }
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(record.folderId);
+scheduleRealFolderRevalidation(record.folderId, 0);
+scheduleCheck(phase === 'PHASE_TYPE_RUNNING' || phase === 'PHASE_TYPE_PENDING' ? 4000 : 8000);
 } catch (e) {
-setTimeout(checkStatus, 8000);
+scheduleCheck(8000);
 }
 };
 checkStatus();
 };
+
+setTimeout(() => {
+try {
+const accountId = getCurrentDriveAccountId();
+const rows = JSON.parse(sessionStorage.getItem(UNZIP_TARGET_WATCH_SESSION_KEY) || '[]');
+(Array.isArray(rows) ? rows : []).filter(row => row && row.taskId && (!row.accountId || !accountId || row.accountId === accountId)).forEach(row => {
+observeUnzipTask(row.taskId, row.folderId || '', row.fileId || '', !!row.skipUiRefresh, row);
+});
+} catch (e) {}
+}, 0);
 
 const getArchivePasswordIconHtml = (fileItem = null) => {
 const fallbackHtml = CONF.typeIcons.archive.replace(/width="\d+"/, 'width="64"').replace(/height="\d+"/, 'height="64"');
@@ -58495,6 +61796,7 @@ let created = null;
 let taskExists = false;
 try {
 created = await apiAddOfflineTask(magnet, file.parent_id || "");
+if (created) registerCloudTaskTarget(created, file.parent_id || '');
 } catch (reqErr) {
 if (isOfflineTaskAlreadyExistsError(reqErr)) {
 taskExists = true;
@@ -58505,7 +61807,6 @@ throw reqErr;
 }
 
 showToast(L.msg_cloud_task_success.replace('{n}', 1));
-if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
 
 if (S.offlineMode) {
 if (created) await handleOfflineTaskAdded(created, { source: 'archive', batch: false, schedule: false });
@@ -59113,8 +62414,11 @@ previewUnzipStarted = true;
 previewSubmitActive = false;
 let isPolling = true;
 
-const currentFolderId = S.path[S.path.length - 1].id || '';
-observeUnzipTask(taskId, currentFolderId, file.id);
+const currentFolderId = Object.prototype.hasOwnProperty.call(resp, '_pkPhysicalParentId')
+? resp._pkPhysicalParentId
+: (S.path[S.path.length - 1].id || '');
+const physicalFileId = resp._pkPhysicalFileId || file.id;
+observeUnzipTask(taskId, currentFolderId, physicalFileId);
 
 const updatePreviewProgress = (progress) => {
     const pct = Math.max(0, Math.min(100, Number(progress) || 0));
@@ -59296,13 +62600,24 @@ try {
 const res = await fetch(`https://api-drive.mypikpak.com/decompress/v1/progress?task_id=${taskId}`, { headers: getHeaders() });
 if (res.ok) {
 const d = await res.json();
-if (d.phase === 'PHASE_TYPE_COMPLETE' || d.phase === 'PHASE_TYPE_ERROR') return;
-} else if (res.status === 404) {
-return;
+const phase = String(d.phase || '').toUpperCase();
+if (phase === 'PHASE_TYPE_COMPLETE') return true;
+if (phase === 'PHASE_TYPE_ERROR' || phase === 'PHASE_TYPE_FAILED') {
+const code = String(d.code || d.error_code || d.error || 'UNZIP_TASK_ERROR');
+const taskError = new Error(code);
+taskError.code = code;
+taskError.isTerminalTaskError = true;
+throw taskError;
 }
-} catch(e) {}
+}
+} catch(e) {
+if (e && e.isTerminalTaskError) throw e;
+}
 await sleep(2000);
 }
+const timeoutError = new Error('UNZIP_TASK_TIMEOUT');
+timeoutError.code = 'UNZIP_TASK_TIMEOUT';
+throw timeoutError;
 };
 
 const processSingleItem = async (file, index) => {
@@ -60589,10 +63904,10 @@ try {
 for (const task of targets) {
 const url = task.source_url || task.params.url;
 try {
-await apiAddOfflineTask(url);
+const created = await apiAddOfflineTask(url);
+if (created) registerCloudTaskTarget(created, '');
 await apiCancelTask([task.id]);
 successCount++;
-if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
 } catch (e) {
 console.error(`[Retry] Failed for ${task.name}:`, e);
 if (e.message && e.message.includes(L.err_task_exists)) {
@@ -61530,8 +64845,6 @@ requestAnimationFrame(flushDeferredRelayout);
 return;
 }
 
-if (typeof globalNeedsSync !== 'undefined') globalNeedsSync = true;
-
 if (typeof globalCache !== 'undefined') {
 globalCache.delete(cacheKey);
 if (folderId === 'root') {
@@ -61552,6 +64865,7 @@ if (typeof globalDirtyFolders !== 'undefined') {
 globalDirtyFolders.add(folderId === 'root' ? '' : folderId);
 if (folderId === 'root') globalDirtyFolders.add('root');
 }
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(folderId);
 
 if (typeof scannedFolderIds !== 'undefined') {
 scannedFolderIds.delete(folderId === 'root' ? '' : folderId);
@@ -61645,6 +64959,17 @@ if (S.shareMode && window.pkSmartRefreshTrigger) window.pkSmartRefreshTrigger(tr
 const checkAndRefresh = async (isRetry = false, bypassLock = false) => {
 if (document.hidden) return;
 if (S.liveRefreshCtx && S.liveRefreshCtx.status === 'refreshing') return;
+if (typeof S.isStrictVirtualNavMode === 'function' && S.isStrictVirtualNavMode()) {
+if (retryTimer) {
+    clearTimeout(retryTimer);
+    retryTimer = null;
+}
+if (silentAbortController) {
+    silentAbortController.abort();
+    silentAbortController = null;
+}
+return;
+}
 const recentSession = globalCache.get('recent_session');
 const recentCached = globalCache.get('recent_root');
 const recentPaginationPending = !!(S.recentMode && ((!recentSession || !recentSession.completed) || (recentCached && !Array.isArray(recentCached) && recentCached.nextToken)));
@@ -61696,6 +65021,21 @@ return;
 }
 
 const cacheKey = S.shareMode ? 'share_root' : (isStarredRoot ? 'starred_root' : (S.getRealCacheKey ? S.getRealCacheKey(cur.id || 'root') : (cur.id || 'root')));
+const smartFolderId = normalizeRealFolderId(cur.id || 'root');
+const smartTracksFolderMutations = isNormalHomeFolderContext(smartFolderId);
+const smartMutationSnapshot = smartTracksFolderMutations ? getCurrentFolderMutationSnapshot(smartFolderId) : null;
+if (smartMutationSnapshot && smartMutationSnapshot.pending > 0) return;
+const isSmartMutationStable = () => {
+const latestCur = S.path[S.path.length - 1] || {};
+const latestStarredRoot = S.starredMode && S.path.length === 1;
+const latestKey = S.shareMode ? 'share_root' : (S.offlineMode ? 'offline_root' : (latestStarredRoot ? 'starred_root' : (S.getRealCacheKey ? S.getRealCacheKey(latestCur.id || 'root') : (latestCur.id || 'root'))));
+if (latestKey !== cacheKey) return false;
+if (!smartTracksFolderMutations) return true;
+if (!isNormalHomeFolderContext(smartFolderId)) return false;
+const latest = getFolderMutationState(smartFolderId, false);
+if (!smartMutationSnapshot) return !latest;
+return !!latest && latest.pending === 0 && latest.revision === smartMutationSnapshot.revision;
+};
 
 if (cur.id === 'virtual_search_root' || cur.id === 'analyze_root' || cur.id === 'upload_root' || cur.id === 'share_parse_root') return;
 
@@ -61756,6 +65096,7 @@ return {
     created_time: t.created_time,
     modified_time: t.updated_time || ref.modified_time || '',
     file_id: t.file_id || '',
+    parent_id: ref.parent_id || '',
     source_url: (t.params && t.params.url) ? t.params.url : '',
     params: Object.assign({}, t.params || {}, ref.params || {}),
     mime_type: ref.mime_type || '',
@@ -61891,8 +65232,12 @@ else currentExpectedKey = S.getRealCacheKey ? S.getRealCacheKey(nowCur.id || 'ro
 
 if (currentExpectedKey === cacheKey) {
 diffWorker.onmessage = (e) => {
+if (!isSmartMutationStable()) return;
 const hasChanges = e.data;
 if (!hasChanges) {
+    if (smartMutationSnapshot && smartMutationSnapshot.needsRevalidate) {
+        markFolderMutationRevalidated(smartFolderId, smartMutationSnapshot.revision);
+    }
     return;
 }
 
@@ -61917,6 +65262,13 @@ if (allFetchedItems.length > 0) {
 
 S.cache.set(cacheKey, allFetchedItems);
 if (typeof globalCache !== 'undefined') globalCache.set(cacheKey, allFetchedItems);
+if (smartTracksFolderMutations && isSmartMutationStable() && window.pkGlobalIndex) {
+window.pkGlobalIndex.adoptFolder(smartFolderId, {
+items: allFetchedItems,
+name: (S.path[S.path.length - 1] || {}).name || (smartFolderId ? '' : 'Root'),
+lineage: smartFolderId && globalLineageMap.has(smartFolderId) ? globalLineageMap.get(smartFolderId) : []
+});
+}
 
 const newItemMap = new Map();
 const newStarredSet = new Set();
@@ -61929,7 +65281,7 @@ for (let i = 0; i < allFetchedItems.length; i++) {
 }
 
 requestAnimationFrame(() => {
-    if (S.getSelectedCount() > 0 || S.loading || S.scanning) return;
+    if (S.getSelectedCount() > 0 || S.loading || S.scanning || !isSmartMutationStable()) return;
 
     const scrollTop = UI.vp ? UI.vp.scrollTop : 0;
     const sameOrder = S.items.length === allFetchedItems.length && S.items.every((oldItem, idx) => oldItem && allFetchedItems[idx] && oldItem.id === allFetchedItems[idx].id);
@@ -61939,6 +65291,10 @@ requestAnimationFrame(() => {
     S.items.splice(0, S.items.length, ...allFetchedItems);
     S.itemMap = newItemMap;
     S.starredSet = newStarredSet;
+    if (smartMutationSnapshot && smartMutationSnapshot.needsRevalidate) {
+        markFolderMutationRevalidated(smartFolderId, smartMutationSnapshot.revision);
+    }
+    syncFolderSummaryCountFromCache(smartFolderId);
 
     if (canPatchVisible) {
     const updateDisplayItem = (item) => item && !item.isHeader && item.id ? (newItemMap.get(item.id) || item) : item;
@@ -62069,6 +65425,37 @@ const cacheData = { items: [...S.items], nextToken: null };
 if (typeof globalCache !== 'undefined') globalCache.set(cacheKey, cacheData);
 }
 stopOfflineLightProbe('mode_change');
+if (S.cloudTargetWatchTimer) {
+clearTimeout(S.cloudTargetWatchTimer);
+S.cloudTargetWatchTimer = 0;
+}
+S.cloudTargetWatchClosed = true;
+persistCloudTargetWatches();
+if (S.cloudTargetWatches && S.cloudTargetWatches.size > 0) {
+S.cloudTargetWatches.forEach(record => {
+if (!record || record.finished) return;
+if (record.mutation) finishFolderMutation(record.mutation, { success: false, revalidate: true });
+});
+}
+S.unzipTargetWatchClosed = true;
+persistUnzipTargetWatches();
+if (S.unzipTargetWatches && S.unzipTargetWatches.size > 0) {
+S.unzipTargetWatches.forEach(record => {
+if (!record || record.finished) return;
+if (record.timer) clearTimeout(record.timer);
+if (record.mutation) finishFolderMutation(record.mutation, { success: false, revalidate: true });
+});
+}
+if (S.cloudTaskCreatedHandler) {
+document.removeEventListener('pk-cloud-task-created', S.cloudTaskCreatedHandler);
+S.cloudTaskCreatedHandler = null;
+}
+if (window.pkDeleteGhostFilesWithIndexSync === deleteGhostFilesWithIndexSync) {
+delete window.pkDeleteGhostFilesWithIndexSync;
+}
+if (window.pkCancelCloudTargetWatch === cancelCloudTargetWatch) {
+delete window.pkCancelCloudTargetWatch;
+}
 pkState = null;
 
 delete window.pkUpdateCrawlerUI;
@@ -62318,7 +65705,15 @@ clearInterval(quotaTimer);
 if(originalClose) originalClose.call(UI.btnClose, e);
 };
 
-await load(false, true);
+const initialFolderNode = S.path[S.path.length - 1] || { id: 'root' };
+const initialFolderId = initialFolderNode.id || 'root';
+const canReuseIndexedInitialFolder = !!(
+window.pkGlobalIndex &&
+!S.trashMode && !S.shareMode && !S.shareParseMode && !S.linkBookmarkMode && !S.starredMode &&
+!S.recentMode && !S.historyMode && !S.offlineMode && !S.uploadMode && !S.isFlattened && !S.dupMode && !S.analyzeMode &&
+window.pkGlobalIndex.isCompleteFolder(initialFolderId)
+);
+await load(false, !canReuseIndexedInitialFolder);
 
 if (globalSavedState && globalSavedState.scrollTop !== undefined) {
 setTimeout(() => {
@@ -62349,6 +65744,7 @@ setTimeout(async () => {
 const stubStr = gmGet('pk_migration_stub', '');
 if (!stubStr) return;
 
+let migrationRestoreMutation = null;
 try {
 const stub = JSON.parse(stubStr);
 const isValidStub = stub && typeof stub === 'object' && !Array.isArray(stub) && Number.isFinite(Number(stub.timestamp)) && stub.source_uid && stub.share_id && Array.isArray(stub.file_ids) && stub.file_ids.length > 0;
@@ -62401,6 +65797,14 @@ trace_file_ids: stub.file_ids.join(',')
 }
 };
 
+let migrationTargetId = resolveCloudTargetFolderId('', true, '');
+if (!migrationTargetId && window.pkGlobalIndex) {
+await window.pkGlobalIndex.ensureFolder('', { background: true, name: 'Root' }).catch(()=>{});
+migrationTargetId = resolveCloudTargetFolderId('', true, '');
+}
+const migrationBaseline = migrationTargetId ? getRealFolderCacheSignature(migrationTargetId) : '';
+migrationRestoreMutation = beginFolderMutation([migrationTargetId || ''], 'migration_restore');
+
 const saveRes = await fetch(`https://api-drive.mypikpak.com/drive/v1/share/restore`, {
 method: 'POST',
 headers: getHeaders(),
@@ -62427,8 +65831,18 @@ const saveData = await saveRes.json();
 
 const migrateTaskRaw = saveData.task_id || saveData.taskId || saveData.restore_task_id || saveData.restoreTaskId || saveData.task_ids || saveData.taskIds || saveData.restore_task_ids || saveData.restoreTaskIds;
 const migrateTaskId = Array.isArray(migrateTaskRaw) ? migrateTaskRaw[0] : String(migrateTaskRaw || '').split(',')[0].trim();
+let migrateTaskData = null;
 
 if (migrateTaskId) {
+registerCloudTaskTarget({ id: migrateTaskId }, migrationTargetId, {
+taskType: 'restore',
+defaultDownload: !migrationTargetId,
+baselineSignature: migrationBaseline
+});
+if (migrationRestoreMutation && !migrationRestoreMutation.finished) {
+const pendingFolders = finishFolderMutation(migrationRestoreMutation, { success: true, revalidate: true });
+pendingFolders.forEach(folderId => scheduleRealFolderRevalidation(folderId, 0));
+}
 let isDone = false;
 let pollCount = 0;
 while(!isDone && pollCount < 300) {
@@ -62436,12 +65850,45 @@ await sleep(2000);
 pollCount++;
 const tRes = await fetch(`https://api-drive.mypikpak.com/drive/v1/tasks/${encodeURIComponent(migrateTaskId)}`, { headers: getHeaders() });
 if (!tRes.ok) continue;
-const tData = await tRes.json();
-if (tData.phase === 'PHASE_TYPE_COMPLETE') isDone = true;
-else if (tData.phase === 'PHASE_TYPE_ERROR') throw new Error("Transfer task failed on server.");
+const rawTaskData = await tRes.json();
+const tData = rawTaskData && rawTaskData.task && typeof rawTaskData.task === 'object'
+? Object.assign({}, rawTaskData, rawTaskData.task)
+: rawTaskData;
+const phase = String(tData.phase || '').toUpperCase();
+if (phase === 'PHASE_TYPE_COMPLETE') {
+isDone = true;
+migrateTaskData = tData;
+const record = S.cloudTargetWatches && S.cloudTargetWatches.get(String(migrateTaskId));
+if (record) {
+syncCloudTargetWatchIndex(record, tData, true);
+if (finishCloudTargetWatch(record, true, tData)) S.cloudTargetWatches.delete(String(migrateTaskId));
 }
-if (!isDone) console.warn("[Migration] Task polling timed out, but might still be running.");
+} else if (phase === 'PHASE_TYPE_ERROR' || phase === 'PHASE_TYPE_FAILED') {
+const record = S.cloudTargetWatches && S.cloudTargetWatches.get(String(migrateTaskId));
+if (record) {
+syncCloudTargetWatchIndex(record, tData, true);
+if (finishCloudTargetWatch(record, false, tData)) S.cloudTargetWatches.delete(String(migrateTaskId));
 }
+const code = String(tData.code || tData.error_code || tData.error || 'MIGRATION_RESTORE_TASK_ERROR');
+const taskError = new Error(code);
+taskError.code = code;
+throw taskError;
+}
+}
+if (!isDone) {
+const timeoutError = new Error('MIGRATION_RESTORE_TASK_TIMEOUT');
+timeoutError.code = 'MIGRATION_RESTORE_TASK_TIMEOUT';
+throw timeoutError;
+}
+}
+
+await syncShareRestoreGlobalIndex(migrateTaskData ? [migrateTaskData] : [], [saveData], {
+mutation: migrationRestoreMutation,
+targetId: migrationTargetId,
+baselineSignature: migrationBaseline
+}).catch(error => {
+console.warn('[Migration] Global index sync failed:', error);
+});
 
 gmSet('pk_migration_stub', '');
 setLoad(false);
@@ -62455,6 +65902,11 @@ gmSet('pk_migration_stub', '');
 setLoad(false);
 const keep = await showConfirm(L.msg_migrate_err_keep.replace('{e}', formatCloudErrorMessage(e)), L.title_alert);
 if (!keep) gmSet('pk_migration_stub', '');
+} finally {
+if (migrationRestoreMutation && !migrationRestoreMutation.finished) {
+const pending = finishFolderMutation(migrationRestoreMutation, { success: false, revalidate: true });
+pending.forEach(id => scheduleRealFolderRevalidation(id, 0));
+}
 }
 }, 1500);
 }
@@ -62468,12 +65920,581 @@ let globalLineageMap = new Map();
 let globalParentIndex = new Map();
 let globalTombstoneCache = new Map();
 let globalDirtyFolders = new Set();
+let globalFolderMutationStates = new Map();
+let globalFolderMutationSeq = 0;
 let globalNeedsSync = false;
 let isGlobalIndexReady = false;
 let hasShownGlobalWarnSession = false;
 let serverClockOffset = 0;
 let hasSyncedTime = false;
 let globalSavedState = null;
+
+const GlobalIndex = (() => {
+const folderStates = new Map();
+const derivedCache = new Map();
+let indexRevision = 0;
+let indexGeneration = 0;
+let fullStatus = 'idle';
+let activeFullRun = null;
+
+const canonicalId = id => {
+const value = String(id === undefined || id === null ? '' : id).trim();
+return !value || value === 'root' ? '' : value;
+};
+const isHomeFolderId = id => {
+const value = canonicalId(id);
+if (!value) return true;
+return !value.startsWith('virtual_') && !value.startsWith('__') && !value.startsWith('root_') && !value.includes('_root') &&
+value !== 'analyze_root' && value !== 'global_search' && value !== 'search_result';
+};
+const getMutationState = id => globalFolderMutationStates.get(canonicalId(id)) || null;
+const isDirtyId = id => {
+const normalized = canonicalId(id);
+const mutation = getMutationState(normalized);
+return globalDirtyFolders.has(normalized) || (!normalized && globalDirtyFolders.has('root')) || !!(mutation && (mutation.pending > 0 || mutation.needsRevalidate));
+};
+const getState = (id, create = true) => {
+const normalized = canonicalId(id);
+let state = folderStates.get(normalized);
+if (!state && create) {
+state = {
+id: normalized,
+status: 'idle',
+revision: 0,
+promise: null,
+error: null,
+completedAt: 0,
+lineage: null,
+name: normalized ? '' : 'Root'
+};
+folderStates.set(normalized, state);
+}
+return state || null;
+};
+const getCachedArray = id => {
+const normalized = canonicalId(id);
+const direct = globalCache.get(normalized);
+if (Array.isArray(direct)) return direct;
+if (!normalized) {
+const rootAlias = globalCache.get('root');
+if (Array.isArray(rootAlias)) return rootAlias;
+}
+return null;
+};
+const canReuseCachedFolder = id => {
+const normalized = canonicalId(id);
+const state = getState(normalized, false);
+if (isDirtyId(normalized) || (state && (state.status === 'dirty' || state.status === 'failed'))) return false;
+return Array.isArray(getCachedArray(normalized));
+};
+const getKnownFolderName = id => {
+const normalized = canonicalId(id);
+if (!normalized) return 'Root';
+const state = folderStates.get(normalized);
+if (state && state.name) return state.name;
+const parent = globalParentIndex.get(normalized);
+if (parent) {
+const siblings = getCachedArray(parent.id);
+const item = siblings && siblings.find(row => row && String(row.id || '') === normalized);
+if (item && item.name) return item.name;
+}
+return '';
+};
+const getMutationRevision = id => {
+const state = getMutationState(id);
+return state ? Number(state.revision || 0) : 0;
+};
+const waitForConsumer = (promise, signal) => {
+if (!signal) return promise;
+if (signal.aborted) return Promise.reject(new DOMException('Aborted by user', 'AbortError'));
+return new Promise((resolve, reject) => {
+const onAbort = () => reject(new DOMException('Aborted by user', 'AbortError'));
+signal.addEventListener('abort', onAbort, { once: true });
+promise.then(
+value => {
+signal.removeEventListener('abort', onAbort);
+resolve(value);
+},
+error => {
+signal.removeEventListener('abort', onAbort);
+reject(error);
+}
+);
+});
+};
+const syncLegacyReadyFlags = () => {
+isGlobalIndexReady = fullStatus === 'ready';
+globalNeedsSync = fullStatus !== 'ready';
+};
+const hasUnstableMutations = () => {
+if (typeof globalFolderMutationStates === 'undefined') return false;
+for (const state of globalFolderMutationStates.values()) {
+if (state && (state.pending > 0 || state.needsRevalidate)) return true;
+}
+return false;
+};
+const hasDirtyHomeFolders = () => {
+for (const dirtyId of globalDirtyFolders) {
+if (isHomeFolderId(dirtyId)) return true;
+}
+return false;
+};
+const removeStaleChildParents = (parentId, files) => {
+const normalizedParent = canonicalId(parentId);
+const childIds = new Set(files.filter(item => item && item.kind === 'drive#folder' && item.id).map(item => String(item.id)));
+for (const [childId, parent] of globalParentIndex.entries()) {
+if (canonicalId(parent && parent.id) === normalizedParent && !childIds.has(String(childId))) {
+globalParentIndex.delete(childId);
+globalLineageMap.delete(childId);
+}
+}
+};
+const commitFolder = (folderId, files, options = {}) => {
+const id = canonicalId(folderId);
+if (!Array.isArray(files)) throw new TypeError('GLOBAL_INDEX_INVALID_FOLDER_DATA');
+const items = [...files];
+const previousItems = getCachedArray(id);
+const previousFolderIds = new Set((previousItems || []).filter(item => item && item.kind === 'drive#folder' && item.id).map(item => String(item.id)));
+const previousFolderById = new Map((previousItems || []).filter(item => item && item.kind === 'drive#folder' && item.id).map(item => [String(item.id), item]));
+globalCache.set(id, items);
+if (!id) globalCache.set('root', items);
+if (typeof pkState !== 'undefined' && pkState && pkState.cache) {
+pkState.cache.set(id || 'root', [...items]);
+}
+
+const state = getState(id, true);
+state.status = 'complete';
+state.error = null;
+state.completedAt = Date.now();
+state.name = options.name || state.name || (id ? '' : 'Root');
+if (Array.isArray(options.lineage)) state.lineage = [...options.lineage];
+state.revision++;
+
+removeStaleChildParents(id, items);
+if (typeof indexParents === 'function') indexParents(id || 'root', state.name || 'Root', items);
+const lineage = Array.isArray(state.lineage)
+? state.lineage
+: (id && globalLineageMap.has(id) ? globalLineageMap.get(id) : []);
+globalLineageMap.set(id, [...lineage]);
+if (!id) globalLineageMap.set('root', []);
+items.forEach(item => {
+if (!item || item.kind !== 'drive#folder' || !item.id) return;
+globalLineageMap.set(item.id, [...lineage, { id: item.id, name: item.name }]);
+});
+
+const missingAddedFolders = items.filter(item => {
+if (!item || item.kind !== 'drive#folder' || !item.id || previousFolderIds.has(String(item.id))) return false;
+return isDirtyId(item.id) || !getCachedArray(item.id);
+});
+const changedChildFolders = items.filter(item => {
+if (!item || item.kind !== 'drive#folder' || !item.id) return false;
+const previous = previousFolderById.get(String(item.id));
+if (!previous) return false;
+return ['modified_time', 'file_count', 'size'].some(key => String(previous[key] ?? '') !== String(item[key] ?? ''));
+});
+changedChildFolders.forEach(item => {
+if (!isDirtyId(item.id)) markDirty(item.id);
+});
+if (missingAddedFolders.length > 0 || changedChildFolders.length > 0) {
+if (fullStatus === 'ready') {
+fullStatus = 'dirty';
+syncLegacyReadyFlags();
+}
+if (activeFullRun) {
+activeFullRun.pendingAddedFolderIds.add(id);
+} else if (typeof scheduleBackgroundResume === 'function') {
+scheduleBackgroundResume(0);
+}
+}
+
+globalDirtyFolders.delete(id);
+if (!id) globalDirtyFolders.delete('root');
+indexRevision++;
+return items;
+};
+const adoptCachedFolder = (folderId, options = {}) => {
+const id = canonicalId(folderId);
+if (isDirtyId(id)) return null;
+const files = getCachedArray(id);
+if (!files) return null;
+const state = getState(id, true);
+if (state.status !== 'complete') {
+state.status = 'complete';
+state.error = null;
+state.completedAt = Date.now();
+state.name = options.name || state.name || (id ? '' : 'Root');
+if (Array.isArray(options.lineage)) state.lineage = [...options.lineage];
+removeStaleChildParents(id, files);
+if (typeof indexParents === 'function') indexParents(id || 'root', state.name || 'Root', files);
+const lineage = Array.isArray(state.lineage)
+? state.lineage
+: (id && globalLineageMap.has(id) ? globalLineageMap.get(id) : []);
+globalLineageMap.set(id, [...lineage]);
+if (!id) globalLineageMap.set('root', []);
+files.forEach(item => {
+if (item && item.kind === 'drive#folder' && item.id && !globalLineageMap.has(item.id)) {
+globalLineageMap.set(item.id, [...lineage, { id: item.id, name: item.name }]);
+}
+});
+}
+return files;
+};
+const ensureFolder = (folderId, options = {}) => {
+const id = canonicalId(folderId);
+const state = getState(id, true);
+const pendingMutation = getMutationState(id);
+if (pendingMutation && pendingMutation.pending > 0) {
+const waitTask = (async () => {
+while (true) {
+const latest = getMutationState(id);
+if (!latest || latest.pending <= 0) break;
+await sleep(250);
+}
+return ensureFolder(id, { ...options, signal: null });
+})();
+return waitForConsumer(waitTask, options.signal);
+}
+const force = options.force === true || isDirtyId(id) || state.status === 'dirty' || state.status === 'failed';
+if (!force) {
+const cached = adoptCachedFolder(id, options);
+if (cached) return waitForConsumer(Promise.resolve(cached), options.signal);
+}
+if (state.promise) return waitForConsumer(state.promise, options.signal);
+
+const requestGeneration = indexGeneration;
+const requestStateRevision = state.revision;
+const requestMutationRevision = getMutationRevision(id);
+state.status = 'loading';
+state.error = null;
+
+const task = apiList(id, 1000, options.onProgress || null, null, false, options.background === true).then(files => {
+if (files && files._pkNotFound) {
+const missingError = new Error('GLOBAL_INDEX_FOLDER_NOT_FOUND');
+missingError.code = 'GLOBAL_INDEX_FOLDER_NOT_FOUND';
+const parent = globalParentIndex.get(id);
+if (parent && parent.id !== undefined && parent.id !== null) markDirty(parent.id);
+throw missingError;
+}
+const latestMutationRevision = getMutationRevision(id);
+if (requestGeneration !== indexGeneration || state.revision !== requestStateRevision || latestMutationRevision !== requestMutationRevision) {
+const staleError = new Error('GLOBAL_INDEX_STALE_RESULT');
+staleError.code = 'GLOBAL_INDEX_STALE_RESULT';
+throw staleError;
+}
+return commitFolder(id, files, options);
+}).catch(error => {
+const stale = error && error.code === 'GLOBAL_INDEX_STALE_RESULT';
+if (stale) {
+if (requestGeneration === indexGeneration && canReuseCachedFolder(id)) return getCachedArray(id);
+if (requestGeneration === indexGeneration) {
+if (state.revision === requestStateRevision) {
+state.status = 'dirty';
+state.error = error;
+}
+if (fullStatus === 'ready') fullStatus = 'dirty';
+syncLegacyReadyFlags();
+}
+throw error;
+}
+state.status = 'failed';
+state.error = error;
+if (fullStatus === 'ready') fullStatus = 'degraded';
+syncLegacyReadyFlags();
+throw error;
+}).finally(() => {
+if (state.promise === task) state.promise = null;
+});
+state.promise = task;
+return waitForConsumer(task, options.signal);
+};
+const emitFullProgress = (run, progress = run.latestProgress || {}) => {
+const snapshot = {
+status: fullStatus,
+folders: Number(progress.folders || 0),
+files: Number(progress.files || 0),
+currentConcurrency: Number(progress.currentConcurrency || 0),
+cacheHits: Number(progress.cacheHits || 0),
+retries: Number(progress.retries || 0),
+isRetrying: progress.isRetrying === true,
+failedFolders: Math.max(Number(progress.failedFolders || 0), run.failed.size),
+revision: indexRevision
+};
+run.latestProgress = snapshot;
+run.progressListeners.forEach(listener => {
+try { listener(snapshot); } catch (e) {}
+});
+};
+const createFullRun = options => {
+const run = {
+generation: indexGeneration,
+failed: new Map(),
+foregroundConsumers: options.background !== true ? 1 : 0,
+progressListeners: new Set(),
+pendingAddedFolderIds: new Set(),
+needsRescan: false,
+latestProgress: null,
+abortController: new AbortController(),
+promise: null
+};
+if (typeof options.onProgress === 'function') run.progressListeners.add(options.onProgress);
+fullStatus = 'building';
+syncLegacyReadyFlags();
+
+run.promise = (async () => {
+let stats = { folders: 0, files: 0, currentConcurrency: 10, cacheHits: 0, retries: 0, failedFolders: 0 };
+while (run.generation === indexGeneration && !run.abortController.signal.aborted) {
+run.failed.clear();
+run.pendingAddedFolderIds.clear();
+run.needsRescan = false;
+fullStatus = 'building';
+syncLegacyReadyFlags();
+
+try {
+stats = await coreRecursiveEngine([{ id: '', name: 'Root', lineage: [], retryCount: 0 }], {
+signal: run.abortController.signal,
+background: () => run.foregroundConsumers === 0,
+maxRetries: 3,
+onFolder: (folder, filesInFolder) => {
+const id = canonicalId(folder && folder.id);
+if (run.pendingAddedFolderIds.has(id) && getCachedArray(id) === filesInFolder) run.pendingAddedFolderIds.delete(id);
+},
+onFolderError: (folder, error) => run.failed.set(canonicalId(folder && folder.id), error),
+onProgress: progress => emitFullProgress(run, progress)
+});
+} catch (error) {
+fullStatus = 'dirty';
+syncLegacyReadyFlags();
+if (typeof isDownloadHydrateCaptchaInvalidError === 'function' && isDownloadHydrateCaptchaInvalidError(error)) {
+    scheduleBackgroundResume(30000);
+}
+throw error;
+}
+
+if (run.generation !== indexGeneration || run.abortController.signal.aborted) {
+return { status: 'idle', completed: 0, failed: 0, revision: indexRevision };
+}
+if (run.pendingAddedFolderIds.size > 0) run.needsRescan = true;
+if (run.failed.size > 0) break;
+if (!run.needsRescan && !hasDirtyHomeFolders() && !hasUnstableMutations() && certifyFullFromCache()) break;
+}
+
+if (run.failed.size > 0) {
+fullStatus = 'degraded';
+syncLegacyReadyFlags();
+}
+emitFullProgress(run, stats);
+return {
+status: fullStatus,
+completed: Number(stats.folders || 0),
+failed: run.failed.size,
+failedIds: Array.from(run.failed.keys()),
+revision: indexRevision
+};
+})().finally(() => {
+if (activeFullRun === run) activeFullRun = null;
+});
+return run;
+};
+const ensureFull = (options = {}) => {
+if (fullStatus === 'ready' && !hasDirtyHomeFolders() && !hasUnstableMutations()) {
+return waitForConsumer(Promise.resolve({ status: 'ready', completed: folderStates.size, failed: 0, revision: indexRevision }), options.signal);
+}
+const progressListener = typeof options.onProgress === 'function' ? options.onProgress : null;
+let ownsForegroundDemand = false;
+if (!activeFullRun) {
+activeFullRun = createFullRun({ ...options, onProgress: null });
+ownsForegroundDemand = options.background !== true;
+} else if (options.background !== true) {
+activeFullRun.foregroundConsumers++;
+ownsForegroundDemand = true;
+}
+if (progressListener) {
+activeFullRun.progressListeners.add(progressListener);
+if (activeFullRun.latestProgress) {
+try { progressListener(activeFullRun.latestProgress); } catch (e) {}
+}
+}
+const run = activeFullRun;
+const consumer = waitForConsumer(run.promise, options.signal);
+return consumer.finally(() => {
+if (progressListener) run.progressListeners.delete(progressListener);
+if (ownsForegroundDemand) run.foregroundConsumers = Math.max(0, run.foregroundConsumers - 1);
+});
+};
+const certifyFullFromCache = () => {
+if (hasDirtyHomeFolders() || hasUnstableMutations()) return false;
+const queue = [''];
+const seen = new Set();
+while (queue.length > 0) {
+const id = canonicalId(queue.pop());
+if (seen.has(id)) continue;
+seen.add(id);
+const files = getCachedArray(id);
+const state = getState(id, false);
+if (!files || (state && (state.status === 'dirty' || state.status === 'failed' || state.status === 'loading'))) return false;
+files.forEach(item => {
+if (item && item.kind === 'drive#folder' && item.id) queue.push(item.id);
+});
+}
+fullStatus = 'ready';
+syncLegacyReadyFlags();
+return true;
+};
+const ensureScope = async (folderIds, options = {}) => {
+const roots = (Array.isArray(folderIds) ? folderIds : [folderIds]).map(id => ({
+id: canonicalId(id && typeof id === 'object' ? id.id : id),
+name: id && typeof id === 'object' ? id.name : '',
+lineage: id && typeof id === 'object' && Array.isArray(id.lineage) ? id.lineage : []
+}));
+if (roots.some(node => !node.id)) return ensureFull(options);
+
+const failed = new Map();
+const stats = await coreRecursiveEngine(roots, {
+signal: options.signal,
+background: options.background === true,
+maxRetries: 3,
+onFolderError: (folder, error) => failed.set(canonicalId(folder && folder.id), error),
+onProgress: options.onProgress
+});
+if (options.signal && options.signal.aborted) throw new DOMException('Aborted by user', 'AbortError');
+const failedIds = Array.from(failed.keys());
+const result = { status: failedIds.length ? 'degraded' : 'ready', completed: Number(stats.folders || 0), failed: failedIds.length, failedIds, revision: indexRevision };
+if (failedIds.length === 0) certifyFullFromCache();
+if (options.requireComplete !== false && failedIds.length) {
+const error = new Error('GLOBAL_INDEX_INCOMPLETE');
+error.code = 'GLOBAL_INDEX_INCOMPLETE';
+error.failedIds = failedIds;
+throw error;
+}
+return result;
+};
+const markDirty = folderIds => {
+const ids = Array.isArray(folderIds) ? folderIds : [folderIds];
+ids.forEach(folderId => {
+const id = canonicalId(folderId);
+if (!isHomeFolderId(id)) return;
+const state = getState(id, true);
+state.status = 'dirty';
+state.error = null;
+state.revision++;
+globalDirtyFolders.add(id);
+if (!id) globalDirtyFolders.delete('root');
+if (activeFullRun) activeFullRun.needsRescan = true;
+});
+if (fullStatus === 'ready') fullStatus = 'dirty';
+syncLegacyReadyFlags();
+};
+const markAllDirty = () => {
+const ids = new Set(folderStates.keys());
+getCompleteEntries().forEach(([folderId]) => ids.add(canonicalId(folderId)));
+if (!ids.size) ids.add('');
+markDirty(Array.from(ids));
+return Array.from(ids);
+};
+const adoptFolder = (folderId, options = {}) => {
+const id = canonicalId(folderId);
+const files = Array.isArray(options.items) ? options.items : getCachedArray(id);
+if (!files) {
+markDirty(id);
+return false;
+}
+commitFolder(id, files, options);
+return true;
+};
+const getCompleteEntries = () => {
+const entries = [];
+const queue = [''];
+const seen = new Set();
+while (queue.length > 0) {
+const id = canonicalId(queue.pop());
+if (seen.has(id)) continue;
+seen.add(id);
+const files = isDirtyId(id) ? null : getCachedArray(id);
+if (!files) continue;
+entries.push([id, files]);
+files.forEach(item => {
+if (item && item.kind === 'drive#folder' && item.id) queue.push(item.id);
+});
+}
+return entries;
+};
+const dropFolders = folderIds => {
+const pending = (Array.isArray(folderIds) ? folderIds : [folderIds])
+.map(canonicalId)
+.filter(Boolean);
+const dropped = new Set(pending);
+for (let i = 0; i < pending.length; i++) {
+const parentId = pending[i];
+for (const [childId, parent] of globalParentIndex.entries()) {
+if (canonicalId(parent && parent.id) !== parentId || dropped.has(String(childId))) continue;
+dropped.add(String(childId));
+pending.push(String(childId));
+}
+}
+if (!dropped.size) return [];
+
+dropped.forEach(id => {
+const state = getState(id, false);
+if (state) state.revision++;
+folderStates.delete(id);
+globalCache.delete(id);
+if (typeof pkState !== 'undefined' && pkState && pkState.cache) pkState.cache.delete(id);
+globalDirtyFolders.delete(id);
+globalLineageMap.delete(id);
+globalParentIndex.delete(id);
+if (typeof scannedFolderIds !== 'undefined') scannedFolderIds.delete(id);
+});
+for (const [childId, parent] of Array.from(globalParentIndex.entries())) {
+if (dropped.has(canonicalId(parent && parent.id))) {
+globalParentIndex.delete(childId);
+globalLineageMap.delete(childId);
+}
+}
+indexRevision++;
+if (activeFullRun) activeFullRun.needsRescan = true;
+if (fullStatus === 'ready') fullStatus = 'dirty';
+syncLegacyReadyFlags();
+return Array.from(dropped);
+};
+const reset = () => {
+indexGeneration++;
+folderStates.clear();
+derivedCache.clear();
+if (activeFullRun && activeFullRun.abortController) activeFullRun.abortController.abort();
+activeFullRun = null;
+indexRevision = 0;
+fullStatus = 'idle';
+syncLegacyReadyFlags();
+};
+return {
+canonicalId,
+ensureFolder,
+ensureScope,
+ensureFull,
+markDirty,
+markAllDirty,
+adoptFolder,
+getCompleteEntries,
+dropFolders,
+certifyFull: certifyFullFromCache,
+getDerived: key => {
+if (hasDirtyHomeFolders() || hasUnstableMutations() || fullStatus === 'building' || fullStatus === 'dirty' || fullStatus === 'degraded') return null;
+const cached = derivedCache.get(String(key));
+if (!cached || cached.revision !== indexRevision) return null;
+return cached.value;
+},
+setDerived: (key, value) => {
+derivedCache.set(String(key), { revision: indexRevision, value });
+return value;
+},
+getStatus: () => fullStatus,
+getRevision: () => indexRevision,
+isReady: () => fullStatus === 'ready' && !hasDirtyHomeFolders() && !hasUnstableMutations(),
+isCompleteFolder: canReuseCachedFolder,
+reset
+};
+})();
+window.pkGlobalIndex = GlobalIndex;
 
 const syncTime = (headers) => {
 if (!headers) return;
@@ -63003,155 +67024,39 @@ _minified: true
 };
 
 async function runBackgroundCrawler() {
+if (!window.pkGlobalIndex) return;
 if (isBackgroundRunning) return;
 if (isPkBackgroundPaused()) {
 scheduleBackgroundResume();
 return;
 }
 isBackgroundRunning = true;
-
 if (window.pkUpdateCrawlerUI) window.pkUpdateCrawlerUI();
 const homeBtn = document.querySelector('#pk-nav-home');
 if (homeBtn) homeBtn.classList.add('pk-status-dot');
-
-const userSetLimit = parseInt(localStorage.getItem('pk_user_limit') || "50");
-const BACKGROUND_MAX_CONCURRENCY = Math.min(userSetLimit, 32);
-let currentConcurrencyLimit = 5;
-
-const MIN_CONCURRENCY = 2;
-let activeRequests = 0;
-let pendingRetries = 0;
-
 try {
-const requeueFolder = (folder) => {
-if (!folder || folder.id === undefined || folder.id === null) return;
-if (!backgroundQueue.some(f => f && f.id === folder.id)) {
-backgroundQueue.unshift(folder);
-}
-};
-
-const pauseCrawler = (folder) => {
-if (folder) requeueFolder(folder);
-scheduleBackgroundResume();
-};
-
-const fetchFolderContents = async (folder) => {
-if (isPkBackgroundPaused()) {
-pauseCrawler(folder);
-return;
-}
-activeRequests++;
+const pending = backgroundQueue.splice(0, backgroundQueue.length);
+const forceIds = pending.filter(item => item && item.forceRevalidate).map(item => item.id);
+if (forceIds.length) window.pkGlobalIndex.markDirty(forceIds);
+for (const item of pending) {
+if (!item || item.id === undefined || item.id === null || item.forceRevalidate) continue;
 try {
-let files;
-if (globalCache.has(folder.id)) {
-files = globalCache.get(folder.id);
-} else {
-files = await apiList(folder.id, 1000, null, null, false, true);
-if (isPkBackgroundPaused()) {
-pauseCrawler(folder);
-return;
-}
-globalCache.set(folder.id, files);
-}
-
-if (isPkBackgroundPaused()) {
-pauseCrawler(folder);
-return;
-}
-
-if (files && Array.isArray(files)) {
-for (let i = 0; i < files.length; i++) {
-const f = files[i];
-if (f.kind === 'drive#folder') {
-if (!scannedFolderIds.has(f.id)) {
-    backgroundQueue.push({ id: f.id, name: f.name, retryCount: 0 });
-    scannedFolderIds.add(f.id);
+await window.pkGlobalIndex.ensureFolder(item.id, {
+background: true,
+name: item.name || '',
+lineage: item.id && globalLineageMap.has(item.id) ? globalLineageMap.get(item.id) : []
+});
+scannedFolderIds.add(window.pkGlobalIndex.canonicalId(item.id));
+} catch (error) {
+if (!error || error.code !== 'GLOBAL_INDEX_STALE_RESULT') {
+console.warn('[GlobalIndex] Targeted background folder failed:', item.id, error);
 }
 }
 }
-}
-
-if (currentConcurrencyLimit < BACKGROUND_MAX_CONCURRENCY) {
-currentConcurrencyLimit += 0.2;
-}
-
-} catch (err) {
-currentConcurrencyLimit = MIN_CONCURRENCY;
-folder.retryCount = (folder.retryCount || 0) + 1;
-const backoffTime = Math.min(folder.retryCount * 5000, 30000);
-pendingRetries++;
-try {
-await sleep(backoffTime);
-if (isPkBackgroundPaused()) {
-pauseCrawler(folder);
-} else {
-requeueFolder(folder);
-}
-} finally {
-pendingRetries--;
-}
-} finally {
-activeRequests--;
-}
-};
-
-while (backgroundQueue.length > 0 || activeRequests > 0 || pendingRetries > 0 || (typeof globalDirtyFolders !== 'undefined' && globalDirtyFolders.size > 0)) {
-if (isPkBackgroundPaused()) {
-if (homeBtn) homeBtn.classList.remove('pk-status-dot');
-scheduleBackgroundResume();
-return;
-}
-
-if (homeBtn) homeBtn.classList.add('pk-status-dot');
-
-if (backgroundQueue.length > 0 && activeRequests < Math.floor(currentConcurrencyLimit)) {
-const folder = backgroundQueue.pop();
-
-if (isPkBackgroundPaused()) {
-pauseCrawler(folder);
-return;
-}
-fetchFolderContents(folder);
-await sleep(50);
-}
-else if (activeRequests > 0 || pendingRetries > 0) {
-await sleep(500);
-}
-else if (typeof globalDirtyFolders !== 'undefined' && globalDirtyFolders.size > 0) {
-const dirtyId = Array.from(globalDirtyFolders)[0];
-globalDirtyFolders.delete(dirtyId);
-
-if (typeof globalCache !== 'undefined') {
-for (const k of globalCache.keys()) {
-if (k && k.startsWith('__analyze_nodeMap_')) {
-globalCache.delete(k);
-}
-}
-}
-
-const normalizedId = dirtyId === 'root' ? '' : dirtyId;
-backgroundQueue.unshift({ id: normalizedId, name: "Dirty_Reval", retryCount: 0 });
-continue;
-}
-else {
-let discovered = 0;
-if (typeof globalCache !== 'undefined') {
-for (const [parentFid, files] of globalCache) {
-if (!files) continue;
-for (let i = 0; i < files.length; i++) {
-const f = files[i];
-if (f.kind === 'drive#folder' && !scannedFolderIds.has(f.id)) {
-    backgroundQueue.push({ id: f.id, name: f.name, retryCount: 0 });
-    scannedFolderIds.add(f.id);
-    discovered++;
-}
-}
-if (discovered > 0) break;
-}
-}
-if (discovered === 0) break;
-}
-}
+const indexResult = await window.pkGlobalIndex.ensureFull({ background: true });
+if (indexResult && indexResult.status === 'degraded') scheduleBackgroundResume(30000);
+} catch (error) {
+console.warn('[GlobalIndex] Background build failed:', error);
 } finally {
 isBackgroundRunning = false;
 if (window.pkUpdateCrawlerUI) window.pkUpdateCrawlerUI();
@@ -63161,6 +67066,49 @@ if (homeBtn) homeBtn.classList.remove('pk-status-dot');
 
 async function preLoadRootFiles(onProgress) {
 if (globalPreloadPromise) return globalPreloadPromise;
+
+if (window.pkGlobalIndex) {
+globalPreloadPromise = (async () => {
+try {
+const isAuthReady = await waitForAuth(3500);
+if (!isAuthReady) {
+console.warn('Background Crawler: Auth not ready. Halting preload.');
+return false;
+}
+if (typeof window.pkCleanupGhostFiles === 'function') await window.pkCleanupGhostFiles();
+if (isPkBackgroundPaused()) {
+scheduleBackgroundResume();
+return false;
+}
+await window.pkGlobalIndex.ensureFolder('', {
+background: true,
+name: 'Root',
+lineage: [],
+onProgress
+});
+runBackgroundCrawler();
+return window.pkGlobalIndex.isCompleteFolder('');
+} catch (error) {
+if (error && error.code === 'GLOBAL_INDEX_STALE_RESULT') {
+if (window.pkGlobalIndex.isCompleteFolder('')) {
+runBackgroundCrawler();
+return true;
+}
+scheduleBackgroundResume(0);
+return false;
+}
+console.error('Background pre-load failed:', error);
+const msg = String((error && error.message) || error || '');
+if (/400|401|403|CAPTCHA|AUTH_RETRY/i.test(msg) && typeof window.pkEnterAuthRecoveryWindow === 'function') {
+window.pkEnterAuthRecoveryWindow('background-preload-auth-error', 5000);
+}
+return false;
+}
+})().finally(() => {
+if (!window.pkGlobalIndex.isCompleteFolder('')) globalPreloadPromise = null;
+});
+return globalPreloadPromise;
+}
 
 globalPreloadPromise = new Promise(async (resolve) => {
 try {
@@ -63173,7 +67121,7 @@ resolve(false);
 return;
 }
 
-if (typeof window.pkCleanupGhostFiles === 'function') window.pkCleanupGhostFiles();
+if (typeof window.pkCleanupGhostFiles === 'function') await window.pkCleanupGhostFiles();
 
 if (isPkBackgroundPaused()) {
 if (!backgroundQueue.some(f => f && f.id === '')) backgroundQueue.unshift({ id: '', name: 'Root', retryCount: 0 });
