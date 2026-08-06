@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            4.5.0
+// @version            4.6.0
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -553,11 +553,13 @@ const parsed = parseConfigJson(value, null);
 if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return true;
 if (String(parsed.scope || '').toLowerCase() !== 'drive') return true;
 const now = Date.now();
-const expiresAt = parseConfigTime(parsed.expiresAt || parsed.expireAt || parsed.expire_at);
-if (expiresAt && expiresAt < now) return true;
+const token = String(parsed.captcha_token || parsed.token || '');
+if (token.length <= 20) return true;
 const savedAt = parseConfigTime(parsed.savedAt || parsed.saved_at || parsed.checkedAt || parsed.checked_at || parsed.updatedAt || parsed.updated_at);
-if (!expiresAt && !savedAt) return true;
-return !!(savedAt && options.ttlMs && now - savedAt > options.ttlMs);
+const lastSeenAt = parseConfigTime(parsed.lastSeenAt || parsed.last_seen_at);
+const retentionAnchor = Math.max(savedAt || 0, lastSeenAt || 0);
+if (!retentionAnchor) return true;
+return !!(options.ttlMs && now - retentionAnchor > options.ttlMs);
 }
 
 function normalizeScriptUpdateDismissValue(value, options = {}) {
@@ -1081,9 +1083,117 @@ let pkDownloadCaptchaRefreshPromise = null;
 let pkDownloadCaptchaRefreshLastAt = 0;
 let pkOfficialDriveHttp = null;
 let pkOfficialDriveHttpSearchPromise = null;
+let pkDownloadCaptchaLastSafeGetUrl = '';
+let pkDownloadCaptchaRecoveryStripToken = '';
 const pkDownloadInvalidCaptchaTokens = new Set();
-const PK_DRIVE_CAPTCHA_TEMPLATE_MAX_AGE = 4 * 60 * 1000;
+let pkOfficialAuthRefreshPromise = null;
+let pkOfficialAuthBootstrapActive = false;
+let pkOfficialAuthRefreshLastAt = 0;
+let pkCapturedAuthorizationToken = '';
+const pkInvalidAuthorizationTokens = new Set();
+const PK_OFFICIAL_AUTH_INVALID = 'pk-official-auth-invalid';
+const PK_OFFICIAL_AUTH_RECOVERY_STATE = 'pk-official-auth-recovery-state';
+const PK_OFFICIAL_AUTH_RECOVERY_REQUEST = 'pk-official-auth-recovery-request';
+const PK_OFFICIAL_AUTH_RECOVERY_RESULT = 'pk-official-auth-recovery-result';
+const PK_DRIVE_CAPTCHA_TEMPLATE_MAX_AGE = 15 * 60 * 1000;
+const PK_DRIVE_CAPTCHA_EXPIRY_SKEW_MS = 30 * 1000;
+const PK_DRIVE_CAPTCHA_UNKNOWN_TTL_MS = 30 * 1000;
 const PK_DRIVE_CAPTCHA_META_KEYS = ['captcha_sign', 'client_version', 'package_name', 'timestamp', 'user_id'];
+
+const normalizeAuthorizationToken = value => String(value || '').trim().slice(0, 8192);
+
+const emitOfficialAuthRecoveryState = (state, reason) => {
+try {
+    document.dispatchEvent(new CustomEvent(PK_OFFICIAL_AUTH_RECOVERY_STATE, {
+        detail: JSON.stringify({ state: String(state || ''), reason: String(reason || ''), at: Date.now() })
+    }));
+} catch (e) {}
+};
+
+const rememberInvalidAuthorizationToken = token => {
+const clean = normalizeAuthorizationToken(token);
+if (clean.length <= 20) return '';
+pkInvalidAuthorizationTokens.add(clean);
+while (pkInvalidAuthorizationTokens.size > 20) {
+    const first = pkInvalidAuthorizationTokens.values().next().value;
+    pkInvalidAuthorizationTokens.delete(first);
+}
+if (pkCapturedAuthorizationToken === clean) pkCapturedAuthorizationToken = '';
+try {
+    document.dispatchEvent(new CustomEvent(PK_OFFICIAL_AUTH_INVALID, { detail: clean }));
+} catch (e) {}
+return clean;
+};
+
+const captureAuthorizationToken = token => {
+const clean = normalizeAuthorizationToken(token);
+if (clean.length <= 20 || pkInvalidAuthorizationTokens.has(clean)) return '';
+pkCapturedAuthorizationToken = clean;
+try {
+    document.dispatchEvent(new CustomEvent('pk-token-captured', { detail: clean }));
+} catch (e) {}
+return clean;
+};
+
+const readStoredAuthorizationToken = () => {
+try {
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || !key.startsWith('credentials')) continue;
+        try {
+            const value = JSON.parse(localStorage.getItem(key));
+            if (!value || !value.access_token) continue;
+            const candidate = String(value.token_type || 'Bearer') + ' ' + String(value.access_token || '');
+            const captured = captureAuthorizationToken(candidate);
+            if (captured) return captured;
+        } catch (e) {}
+    }
+} catch (e) {}
+return '';
+};
+
+const isAuthenticatedPikPakApiUrl = url => {
+try {
+    return new URL(url, location.href).hostname.toLowerCase() === 'api-drive.mypikpak.com';
+} catch (e) {
+    return false;
+}
+};
+
+const isOfficialAuthBootstrapUrl = url => {
+if (!pkOfficialAuthBootstrapActive) return false;
+try {
+    const target = new URL(url, location.href);
+    return target.hostname.toLowerCase() === 'api-drive.mypikpak.com' && target.pathname === '/drive/v1/about';
+} catch (e) {
+    return false;
+}
+};
+
+const getAuthorizationExpiryMs = token => {
+const clean = normalizeAuthorizationToken(token).replace(/^Bearer\s+/i, '');
+const parts = clean.split('.');
+if (parts.length < 2) return 0;
+try {
+    const body = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = body + '='.repeat((4 - body.length % 4) % 4);
+    const payload = JSON.parse(atob(padded));
+    const exp = Number(payload && payload.exp || 0);
+    return exp > 0 ? exp * 1000 : 0;
+} catch (e) {
+    return 0;
+}
+};
+
+const isOidcExpiredResponse = async response => {
+if (!response || (response.status !== 401 && response.status !== 403)) return false;
+const data = await response.clone().json().catch(() => null);
+if (!data || typeof data !== 'object') return false;
+const details = Array.isArray(data.details) ? data.details.map(row => row && row.detail || '').join(' ') : '';
+const text = [data.error, data.error_description, data.message, data.msg, details].filter(Boolean).join(' ').toLowerCase();
+const code = Number(data.error_code || 0) || 0;
+return code === 16 || text.includes('token is expired') || text.includes('token expired') || text.includes('access token expired') || (text.includes('oidc') && text.includes('expired'));
+};
 
 const isDriveCaptchaPayload = payload => {
 if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return false;
@@ -1125,44 +1235,65 @@ try {
 const readCapturedDownloadCaptchaRecord = () => {
 let raw = '';
 try { raw = localStorage.getItem('pk_captured_captcha') || ''; } catch (e) {}
-if (!raw) return { token: '', savedAt: 0, expiresAt: 0 };
+if (!raw) return { token: '', savedAt: 0, expiresAt: 0, expiresIn: 0, lastSeenAt: 0 };
 try {
     const parsed = JSON.parse(raw);
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
         if (String(parsed.scope || '').toLowerCase() !== 'drive') {
             try { if ((localStorage.getItem('pk_captured_captcha') || '') === raw) localStorage.removeItem('pk_captured_captcha'); } catch (e) {}
-            return { token: '', savedAt: 0, expiresAt: 0 };
+            return { token: '', savedAt: 0, expiresAt: 0, expiresIn: 0, lastSeenAt: 0 };
         }
         const token = String(parsed.captcha_token || parsed.token || '');
         const savedAt = Number(parsed.savedAt || parsed.saved_at || 0) || 0;
         const expiresAt = Number(parsed.expiresAt || parsed.expires_at || 0) || 0;
-        if (expiresAt && expiresAt <= Date.now()) {
-            try { if ((localStorage.getItem('pk_captured_captcha') || '') === raw) localStorage.removeItem('pk_captured_captcha'); } catch (e) {}
-            return { token: '', savedAt: 0, expiresAt: 0 };
-        }
-        return { token, savedAt, expiresAt };
+        const expiresIn = Number(parsed.expiresIn || parsed.expires_in || 0) || 0;
+        const lastSeenAt = Number(parsed.lastSeenAt || parsed.last_seen_at || savedAt || 0) || 0;
+        return { token, savedAt, expiresAt, expiresIn, lastSeenAt };
     }
 } catch (e) {}
 try { if ((localStorage.getItem('pk_captured_captcha') || '') === raw) localStorage.removeItem('pk_captured_captcha'); } catch (e) {}
-return { token: '', savedAt: 0, expiresAt: 0 };
+return { token: '', savedAt: 0, expiresAt: 0, expiresIn: 0, lastSeenAt: 0 };
 };
 
-const readCapturedDownloadCaptchaToken = () => readCapturedDownloadCaptchaRecord().token;
-
-const storeCapturedDownloadCaptchaToken = (token, expiresInSeconds = 300) => {
-const clean = String(token || '').slice(0, 2048);
-if (clean.length <= 20) return false;
-if (pkDownloadInvalidCaptchaTokens.has(clean)) return false;
-const now = Date.now();
-const current = readCapturedDownloadCaptchaRecord();
-const preserveCurrentTimes = current.token === clean && current.savedAt > 0 && current.expiresAt > now;
-const ttlMs = Math.max(30, Number(expiresInSeconds) || 300) * 1000;
-const payload = {
-    captcha_token: clean,
-    scope: 'drive',
-    savedAt: preserveCurrentTimes ? current.savedAt : now,
-    expiresAt: preserveCurrentTimes ? current.expiresAt : now + ttlMs
+const getCapturedDownloadCaptchaEffectiveExpiresAt = record => {
+    if (!record || !record.token) return 0;
+    const expiresAt = Number(record.expiresAt || 0) || 0;
+    const savedAt = Number(record.savedAt || 0) || 0;
+    const expiresIn = Math.max(30, Number(record.expiresIn || 300) || 300);
+    const hardExpiresAt = savedAt ? savedAt + Math.max(0, expiresIn * 1000 - PK_DRIVE_CAPTCHA_EXPIRY_SKEW_MS) : 0;
+    const candidates = [expiresAt, hardExpiresAt].filter(value => value > 0);
+    return candidates.length ? Math.min(...candidates) : 0;
 };
+
+const readCapturedDownloadCaptchaToken = () => {
+    const record = readCapturedDownloadCaptchaRecord();
+    return record && record.token ? record.token : '';
+};
+
+const storeCapturedDownloadCaptchaToken = (token, expiresInSeconds) => {
+    const clean = String(token || '').slice(0, 2048);
+    if (clean.length <= 20) return false;
+    if (pkDownloadInvalidCaptchaTokens.has(clean)) return false;
+    const now = Date.now();
+    const current = readCapturedDownloadCaptchaRecord();
+    const sameToken = current.token === clean && current.savedAt > 0;
+    const parsedExpiresIn = Number(expiresInSeconds);
+    const hasKnownLifetime = Number.isFinite(parsedExpiresIn) && parsedExpiresIn > 0;
+    const expiresIn = hasKnownLifetime ? Math.max(30, parsedExpiresIn) : (sameToken ? Number(current.expiresIn || 0) || 0 : 0);
+    const savedAt = sameToken ? current.savedAt : now;
+    const currentExpiresAt = sameToken ? getCapturedDownloadCaptchaEffectiveExpiresAt(current) : 0;
+    const hardExpiresAt = hasKnownLifetime
+        ? savedAt + Math.max(0, expiresIn * 1000 - PK_DRIVE_CAPTCHA_EXPIRY_SKEW_MS)
+        : (currentExpiresAt > 0 ? currentExpiresAt : now + PK_DRIVE_CAPTCHA_UNKNOWN_TTL_MS);
+    const expiresAt = currentExpiresAt > 0 ? Math.min(currentExpiresAt, hardExpiresAt) : hardExpiresAt;
+    const payload = {
+        captcha_token: clean,
+        scope: 'drive',
+        savedAt,
+        lastSeenAt: now,
+        expiresAt,
+        expiresIn
+    };
 try {
     localStorage.setItem('pk_captured_captcha', JSON.stringify(payload));
     return true;
@@ -1300,6 +1431,103 @@ pkOfficialDriveHttpSearchPromise = new Promise(resolve => {
 return pkOfficialDriveHttpSearchPromise;
 };
 
+const waitForFreshAuthorizationToken = async (invalidToken, timeoutMs = 5000) => {
+const blocked = normalizeAuthorizationToken(invalidToken);
+const startedAt = Date.now();
+while (Date.now() - startedAt < timeoutMs) {
+    const current = normalizeAuthorizationToken(pkCapturedAuthorizationToken || readStoredAuthorizationToken());
+    if (current.length > 20 && current !== blocked && !pkInvalidAuthorizationTokens.has(current)) return current;
+    await new Promise(resolve => setTimeout(resolve, 100));
+}
+return '';
+};
+
+const beginOfficialAccessTokenRefresh = invalidToken => {
+const blocked = rememberInvalidAuthorizationToken(invalidToken || pkCapturedAuthorizationToken);
+if (pkOfficialAuthRefreshPromise) return pkOfficialAuthRefreshPromise;
+const now = Date.now();
+if (now - pkOfficialAuthRefreshLastAt < 500) {
+    return Promise.resolve({ ok: false, reason: 'auth_refresh_throttled', token: '' });
+}
+pkOfficialAuthRefreshLastAt = now;
+pkOfficialAuthRefreshPromise = (async () => {
+    emitOfficialAuthRecoveryState('waiting', 'oidc_token_expired');
+    const officialHttp = await findOfficialDriveHttp().catch(() => null);
+    if (!officialHttp) throw new Error('official_http_unavailable');
+    let lastError = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+        pkOfficialAuthBootstrapActive = true;
+        try {
+            await officialHttp('https://api-drive.mypikpak.com/drive/v1/about?_t=' + Date.now(), {
+                method: 'GET',
+                cache: 'no-store'
+            });
+        } catch (error) {
+            lastError = error;
+        } finally {
+            pkOfficialAuthBootstrapActive = false;
+        }
+        const fresh = await waitForFreshAuthorizationToken(blocked, 3500);
+        if (fresh) {
+            emitOfficialAuthRecoveryState('recovered', 'official_http_refreshed');
+            return { ok: true, reason: 'official_http_refreshed', token: fresh };
+        }
+        if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 500 * Math.pow(2, attempt)));
+    }
+    throw lastError || new Error('fresh_authorization_not_observed');
+})().catch(error => {
+    const reason = error && error.message ? error.message : 'auth_refresh_failed';
+    emitOfficialAuthRecoveryState('failed', reason);
+    return { ok: false, reason, token: '' };
+}).finally(() => {
+    pkOfficialAuthBootstrapActive = false;
+    pkOfficialAuthRefreshPromise = null;
+});
+return pkOfficialAuthRefreshPromise;
+};
+
+document.addEventListener(PK_OFFICIAL_AUTH_RECOVERY_REQUEST, event => {
+let detail = {};
+try { detail = JSON.parse(String(event && event.detail || '{}')); } catch (e) {}
+const requestId = String(detail.requestId || '');
+if (!requestId) return;
+const invalidToken = normalizeAuthorizationToken(detail.invalidToken || pkCapturedAuthorizationToken || readStoredAuthorizationToken());
+beginOfficialAccessTokenRefresh(invalidToken).then(result => {
+    document.dispatchEvent(new CustomEvent(PK_OFFICIAL_AUTH_RECOVERY_RESULT, {
+        detail: JSON.stringify({
+            requestId,
+            ok: !!(result && result.ok),
+            reason: String(result && result.reason || 'auth_refresh_failed'),
+            at: Date.now()
+        })
+    }));
+}).catch(error => {
+    document.dispatchEvent(new CustomEvent(PK_OFFICIAL_AUTH_RECOVERY_RESULT, {
+        detail: JSON.stringify({
+            requestId,
+            ok: false,
+            reason: String(error && error.message || 'auth_refresh_failed'),
+            at: Date.now()
+        })
+    }));
+});
+});
+
+const replaceRequestAuthorization = (args, raw, opts, token, retryRaw) => {
+const fresh = normalizeAuthorizationToken(token);
+if (fresh.length <= 20) return { args, opts, token: '' };
+try {
+    const nextOpts = { ...opts };
+    const nextHeaders = new Headers(nextOpts.headers || (raw && raw.headers) || undefined);
+    nextHeaders.set('Authorization', fresh);
+    nextOpts.headers = nextHeaders;
+    const nextArgs = [retryRaw || raw, nextOpts];
+    return { args: nextArgs, opts: nextOpts, token: fresh };
+} catch (e) {
+    return { args, opts, token: '' };
+}
+};
+
 const replayDownloadCaptchaInitTemplate = async detail => {
 const template = pkDownloadCaptchaInitTemplate;
 if (!isReusableDriveCaptchaInitTemplate(template)) throw new Error('drive_captcha_template_unavailable');
@@ -1314,6 +1542,7 @@ const response = await _f.call(window, template.url, init);
 const data = await response.clone().json().catch(() => null);
 const token = data && (data.captcha_token || (data.data && data.data.captcha_token));
 if (!response.ok || !token || String(token).length <= 20) throw new Error('captcha_refresh_failed');
+pkDownloadInvalidCaptchaTokens.delete(String(token));
 if (!storeCapturedDownloadCaptchaToken(token, data && data.expires_in)) throw new Error('captcha_refresh_token_rejected');
 pkDownloadCaptchaTemplateLastToken = String(token);
 return true;
@@ -1322,8 +1551,11 @@ return true;
 const getOfficialCaptchaRecoveryRequest = detail => {
 try {
     const method = String(detail && detail.requestMethod || 'GET').toUpperCase();
-    if (method !== 'GET') return null;
-    const target = new URL(String(detail && detail.requestUrl || ''), location.href);
+    const candidateUrl = method === 'GET'
+        ? String(detail && detail.requestUrl || '')
+        : pkDownloadCaptchaLastSafeGetUrl;
+    if (!candidateUrl) return null;
+    const target = new URL(candidateUrl, location.href);
     if (target.hostname.toLowerCase() !== 'api-drive.mypikpak.com') return null;
     const prefix = '/drive/v1/files/';
     if (target.pathname !== '/drive/v1/files') {
@@ -1331,27 +1563,43 @@ try {
         const fileId = target.pathname.slice(prefix.length);
         if (!fileId || fileId.includes('/')) return null;
     }
-    return { url: target.href, method };
+    return { url: target.href, method: 'GET' };
 } catch (e) {
     return null;
 }
 };
 
 const bootstrapOfficialDownloadCaptcha = async detail => {
-const officialHttp = await findOfficialDriveHttp();
-if (!officialHttp) throw new Error('official_http_unavailable');
 const recoveryRequest = getOfficialCaptchaRecoveryRequest(detail);
 let requestError = null;
-try {
-    const recoveryUrl = recoveryRequest
-        ? recoveryRequest.url
-        : 'https://api-drive.mypikpak.com/drive/v1/about?_t=' + Date.now();
-    await officialHttp(recoveryUrl, {
-        method: recoveryRequest ? recoveryRequest.method : 'GET',
-        cache: 'no-store'
-    });
-} catch (e) {
-    requestError = e;
+let templateError = null;
+const preferExactTemplate = String(detail.requestMethod || 'GET').toUpperCase() !== 'GET' && isReusableDriveCaptchaInitTemplate(pkDownloadCaptchaInitTemplate);
+if (preferExactTemplate) {
+    try {
+        return await replayDownloadCaptchaInitTemplate(detail);
+    } catch (error) {
+        templateError = error;
+    }
+}
+const officialHttp = await findOfficialDriveHttp().catch(() => null);
+if (officialHttp) {
+    const previousStripToken = pkDownloadCaptchaRecoveryStripToken;
+    pkDownloadCaptchaRecoveryStripToken = String(detail.invalidToken || '');
+    try {
+        const recoveryUrl = recoveryRequest
+            ? recoveryRequest.url
+            : 'https://api-drive.mypikpak.com/drive/v1/about?_t=' + Date.now();
+        await officialHttp(recoveryUrl, {
+            method: recoveryRequest ? recoveryRequest.method : 'GET',
+            cache: 'no-store'
+        });
+    } catch (e) {
+        requestError = e;
+    } finally {
+        pkDownloadCaptchaRecoveryStripToken = previousStripToken;
+    }
+} else {
+    requestError = new Error('official_http_unavailable');
 }
 await new Promise(resolve => setTimeout(resolve, 100));
 const token = readAvailableDownloadCaptchaToken(detail.invalidToken);
@@ -1359,58 +1607,71 @@ if (token) {
     storeCapturedDownloadCaptchaToken(token);
     return true;
 }
-if (isReusableDriveCaptchaInitTemplate(pkDownloadCaptchaInitTemplate)) return replayDownloadCaptchaInitTemplate(detail);
-if (!recoveryRequest) throw requestError || new Error('captcha_recovery_request_unavailable');
-throw requestError || new Error('captcha_action_refresh_failed');
+if (!preferExactTemplate && isReusableDriveCaptchaInitTemplate(pkDownloadCaptchaInitTemplate)) {
+    try {
+        return await replayDownloadCaptchaInitTemplate(detail);
+    } catch (error) {
+        templateError = error;
+    }
+}
+if (!recoveryRequest) throw requestError || templateError || new Error('captcha_recovery_request_unavailable');
+throw requestError || templateError || new Error('captcha_action_refresh_failed');
+};
+
+const beginDownloadCaptchaRefresh = detail => {
+const invalidToken = String(detail.invalidToken || '');
+if (invalidToken) {
+    rememberInvalidDownloadCaptchaToken(invalidToken);
+}
+if (pkDownloadCaptchaRefreshPromise) return pkDownloadCaptchaRefreshPromise;
+const now = Date.now();
+if (now - pkDownloadCaptchaRefreshLastAt < 1000) {
+    return Promise.resolve({ ok: false, reason: 'refresh_throttled' });
+}
+pkDownloadCaptchaRefreshLastAt = now;
+pkDownloadCaptchaRefreshPromise = (async () => {
+    await bootstrapOfficialDownloadCaptcha(detail);
+    return { ok: true, reason: 'refreshed' };
+})().catch(error => {
+    return { ok: false, reason: error && error.message ? error.message : 'refresh_failed' };
+}).finally(() => {
+    pkDownloadCaptchaRefreshPromise = null;
+});
+return pkDownloadCaptchaRefreshPromise;
 };
 
 document.addEventListener(PK_DOWNLOAD_CAPTCHA_REFRESH_REQUEST, event => {
 let detail = {};
 try { detail = JSON.parse(String(event && event.detail || '{}')); } catch (e) {}
 const requestId = String(detail.requestId || '');
-const invalidToken = String(detail.invalidToken || '');
-if (invalidToken) {
-    rememberInvalidDownloadCaptchaToken(invalidToken);
-    try {
-        const stored = readCapturedDownloadCaptchaToken();
-        if (stored === invalidToken) localStorage.removeItem('pk_captured_captcha');
-    } catch (e) {}
-    if (pkDownloadCaptchaTemplateLastToken && invalidToken === pkDownloadCaptchaTemplateLastToken) {
-        pkDownloadCaptchaInitTemplate = null;
-        pkDownloadCaptchaTemplateLastToken = '';
-    }
-}
-if (pkDownloadCaptchaRefreshPromise) return;
-const now = Date.now();
-if (now - pkDownloadCaptchaRefreshLastAt < 1000) {
-    emitDownloadCaptchaRefreshResult(requestId, false, 'refresh_throttled');
-    return;
-}
-pkDownloadCaptchaRefreshLastAt = now;
-pkDownloadCaptchaRefreshPromise = (async () => {
-    if (isReusableDriveCaptchaInitTemplate(pkDownloadCaptchaInitTemplate)) await replayDownloadCaptchaInitTemplate(detail);
-    else await bootstrapOfficialDownloadCaptcha(detail);
-    emitDownloadCaptchaRefreshResult(requestId, true, 'refreshed');
-    return true;
-})().catch(error => {
+beginDownloadCaptchaRefresh(detail).then(result => {
+    emitDownloadCaptchaRefreshResult(requestId, !!(result && result.ok), result && result.reason ? result.reason : 'refresh_failed');
+}).catch(error => {
     emitDownloadCaptchaRefreshResult(requestId, false, error && error.message ? error.message : 'refresh_failed');
-    return false;
-}).finally(() => {
-    pkDownloadCaptchaRefreshPromise = null;
 });
 });
 
 window.fetch = async function(...args) {
 const raw = args[0];
 const url = raw && raw.url ? raw.url : (raw ? raw.toString() : '');
-const opts = args[1] || {};
+let opts = args[1] || {};
+let retryRaw = raw;
+try {
+if (typeof Request !== 'undefined' && raw instanceof Request) retryRaw = raw.clone();
+} catch (e) {}
 let outgoingCaptchaToken = '';
+let outgoingAuthorizationToken = '';
 let captchaInitIsDrive = false;
 let isDriveApiRequest = false;
+let isAuthenticatedApiRequest = false;
 try {
     const target = new URL(url, location.href);
     isDriveApiRequest = target.hostname.toLowerCase() === 'api-drive.mypikpak.com' && target.pathname.startsWith('/drive/');
+    isAuthenticatedApiRequest = target.hostname.toLowerCase() === 'api-drive.mypikpak.com';
 } catch (e) {}
+const isAuthBootstrapRequest = isOfficialAuthBootstrapUrl(url);
+const requestMethod = String(opts.method || (raw && raw.method) || 'GET').toUpperCase();
+const isSafeAuthReplayMethod = requestMethod === 'GET' || requestMethod === 'HEAD';
 
 if (url.includes('/v1/shield/captcha/init')) {
 captchaInitIsDrive = await rememberDownloadCaptchaInitTemplate(raw, url, opts);
@@ -1428,9 +1689,14 @@ try {
 const sourceHeaders = opts.headers || (raw && raw.headers) || undefined;
 const pageHeaders = new Headers(sourceHeaders);
 const pageCaptcha = pageHeaders.get('x-captcha-token') || pageHeaders.get('X-Captcha-Token') || '';
+const pageAuthorization = pageHeaders.get('authorization') || pageHeaders.get('Authorization') || '';
 if (isDriveApiRequest && pageCaptcha.length > 20) {
     outgoingCaptchaToken = String(pageCaptcha);
     storeCapturedDownloadCaptchaToken(outgoingCaptchaToken);
+}
+if (isAuthenticatedApiRequest && pageAuthorization.length > 20) {
+    outgoingAuthorizationToken = normalizeAuthorizationToken(pageAuthorization);
+    captureAuthorizationToken(outgoingAuthorizationToken);
 }
 } catch (e) {}
 
@@ -1469,19 +1735,97 @@ try {
         storeCapturedDownloadCaptchaToken(outgoingCaptchaToken);
     }
 
-    if (auth && auth.length > 20) document.dispatchEvent(new CustomEvent('pk-token-captured', { detail: auth }));
+    if (auth && auth.length > 20) {
+        outgoingAuthorizationToken = normalizeAuthorizationToken(auth);
+        captureAuthorizationToken(outgoingAuthorizationToken);
+    }
 } catch (e) {}
 }
 
-const res = await _f.apply(this, args);
+if (isDriveApiRequest && outgoingCaptchaToken && pkDownloadCaptchaRecoveryStripToken && outgoingCaptchaToken === pkDownloadCaptchaRecoveryStripToken) {
+try {
+    const nextOpts = { ...opts };
+    const nextHeaders = new Headers(nextOpts.headers || (raw && raw.headers) || undefined);
+    nextHeaders.delete('x-captcha-token');
+    nextOpts.headers = nextHeaders;
+    opts = nextOpts;
+    args[1] = nextOpts;
+    outgoingCaptchaToken = '';
+} catch (e) {}
+}
+
+if (isDriveApiRequest && !outgoingCaptchaToken && !pkDownloadCaptchaRecoveryStripToken) {
+try {
+    const capturedCaptcha = readAvailableDownloadCaptchaToken('');
+    if (capturedCaptcha) {
+        const nextOpts = { ...opts };
+        const nextHeaders = new Headers(nextOpts.headers || (raw && raw.headers) || undefined);
+        nextHeaders.set('x-captcha-token', capturedCaptcha);
+        nextOpts.headers = nextHeaders;
+        opts = nextOpts;
+        args[1] = nextOpts;
+        outgoingCaptchaToken = capturedCaptcha;
+        storeCapturedDownloadCaptchaToken(capturedCaptcha);
+    }
+} catch (e) {}
+}
+
+if (isAuthenticatedApiRequest && !isAuthBootstrapRequest) {
+let preflightRecovery = null;
+const tokenExpiryMs = getAuthorizationExpiryMs(outgoingAuthorizationToken);
+let tokenNeedsRefresh = tokenExpiryMs > 0 && tokenExpiryMs <= Date.now();
+if (!tokenNeedsRefresh && tokenExpiryMs > Date.now() && tokenExpiryMs - Date.now() <= 5000) {
+    await new Promise(resolve => setTimeout(resolve, Math.max(0, tokenExpiryMs - Date.now() + 50)));
+    tokenNeedsRefresh = true;
+}
+if (pkOfficialAuthRefreshPromise) {
+    preflightRecovery = await pkOfficialAuthRefreshPromise;
+} else if (outgoingAuthorizationToken && (pkInvalidAuthorizationTokens.has(outgoingAuthorizationToken) || tokenNeedsRefresh)) {
+    preflightRecovery = await beginOfficialAccessTokenRefresh(outgoingAuthorizationToken);
+}
+const preflightToken = normalizeAuthorizationToken((preflightRecovery && preflightRecovery.token) || pkCapturedAuthorizationToken);
+if (preflightToken && preflightToken !== outgoingAuthorizationToken && !pkInvalidAuthorizationTokens.has(preflightToken)) {
+    const replaced = replaceRequestAuthorization(args, raw, opts, preflightToken, null);
+    args = replaced.args;
+    opts = replaced.opts;
+    outgoingAuthorizationToken = replaced.token || outgoingAuthorizationToken;
+}
+}
+
+let res = await _f.apply(this, args);
+
+if (isAuthenticatedApiRequest && !isAuthBootstrapRequest && await isOidcExpiredResponse(res)) {
+const recovery = await beginOfficialAccessTokenRefresh(outgoingAuthorizationToken);
+const freshAuthorization = normalizeAuthorizationToken(recovery && recovery.token);
+if (isSafeAuthReplayMethod && recovery && recovery.ok && freshAuthorization && freshAuthorization !== outgoingAuthorizationToken) {
+    const replaced = replaceRequestAuthorization(args, raw, opts, freshAuthorization, retryRaw);
+    if (replaced.token) {
+        args = replaced.args;
+        opts = replaced.opts;
+        outgoingAuthorizationToken = replaced.token;
+        res = await _f.apply(this, args);
+    }
+}
+}
 
 try {
 const u = url.split('?')[0];
 const method = String(opts.method || (raw && raw.method) || 'GET').toUpperCase();
+if (res && res.ok && method === 'GET' && isDriveApiRequest) {
+    try {
+        const safeTarget = new URL(url, location.href);
+        const safePrefix = '/drive/v1/files/';
+        const isSafeDetail = safeTarget.pathname.startsWith(safePrefix) && !safeTarget.pathname.slice(safePrefix.length).includes('/');
+        if (safeTarget.pathname === '/drive/v1/files' || isSafeDetail) {
+            pkDownloadCaptchaLastSafeGetUrl = safeTarget.href;
+        }
+    } catch (e) {}
+}
 if (res && res.ok && captchaInitIsDrive && url.includes('/v1/shield/captcha/init')) {
     const captchaInitData = await res.clone().json().catch(() => null);
     const captchaInitToken = captchaInitData && (captchaInitData.captcha_token || (captchaInitData.data && captchaInitData.data.captcha_token));
     if (captchaInitToken) {
+        pkDownloadInvalidCaptchaTokens.delete(String(captchaInitToken));
         storeCapturedDownloadCaptchaToken(captchaInitToken, captchaInitData && captchaInitData.expires_in);
         pkDownloadCaptchaTemplateLastToken = String(captchaInitToken);
     }
@@ -1498,16 +1842,16 @@ if (res && res.status === 400 && url.includes('api-drive.mypikpak.com')) {
     const captchaData = await res.clone().json().catch(() => null);
     if (captchaData && String(captchaData.error || '').toLowerCase() === 'captcha_invalid') {
         rememberInvalidDownloadCaptchaToken(outgoingCaptchaToken);
-        try {
-            const stored = readCapturedDownloadCaptchaToken();
-            if (outgoingCaptchaToken && stored === outgoingCaptchaToken) localStorage.removeItem('pk_captured_captcha');
-        } catch (e) {}
         let actionPath = '';
         try { actionPath = new URL(url, location.href).pathname; } catch (e) {}
-        const detailPrefix = '/drive/v1/files/';
-        if (actionPath.startsWith(detailPrefix) && !actionPath.slice(detailPrefix.length).includes('/')) actionPath = '/drive/v1/files';
         const actionMethod = actionPath === '/drive/v1/events' ? 'GET' : method;
         const captchaAction = actionMethod + ':' + (actionPath || '/drive/v1/files');
+        const recoveryDetail = {
+            invalidToken: outgoingCaptchaToken,
+            action: captchaAction,
+            requestUrl: url,
+            requestMethod: method
+        };
         document.dispatchEvent(new CustomEvent(PK_DOWNLOAD_CAPTCHA_INVALID, {
             detail: JSON.stringify({
                 token: outgoingCaptchaToken,
@@ -1516,6 +1860,7 @@ if (res && res.status === 400 && url.includes('api-drive.mypikpak.com')) {
                 requestMethod: method
             })
         }));
+        beginDownloadCaptchaRefresh(recoveryDetail).catch(() => {});
     }
 }
 
@@ -1585,9 +1930,16 @@ let downloadHydrateCaptchaWaitScope = '';
 const DOWNLOAD_HYDRATE_CAPTCHA_REFRESH_REQUEST_EVENT = 'pk-download-hydrate-captcha-refresh-request';
 const DOWNLOAD_HYDRATE_CAPTCHA_REFRESH_RESULT_EVENT = 'pk-download-hydrate-captcha-refresh-result';
 const DOWNLOAD_HYDRATE_CAPTCHA_INVALID_EVENT = 'pk-download-hydrate-captcha-invalid';
+const OFFICIAL_AUTH_INVALID_EVENT = 'pk-official-auth-invalid';
+const OFFICIAL_AUTH_RECOVERY_STATE_EVENT = 'pk-official-auth-recovery-state';
+const OFFICIAL_AUTH_RECOVERY_REQUEST_EVENT = 'pk-official-auth-recovery-request';
+const OFFICIAL_AUTH_RECOVERY_RESULT_EVENT = 'pk-official-auth-recovery-result';
 let downloadHydrateCaptchaRefreshRequestSeq = 0;
 let downloadHydrateCaptchaRefreshLastResult = null;
 let downloadHydrateCaptchaAutoRefreshLastAt = 0;
+let officialAuthRecoveryRequestSeq = 0;
+let officialAuthRecoveryWaitPromise = null;
+let officialAuthRecoveryLastResult = null;
 
 document.addEventListener(DOWNLOAD_HYDRATE_CAPTCHA_REFRESH_RESULT_EVENT, event => {
 let detail = null;
@@ -1607,17 +1959,36 @@ document.addEventListener(DOWNLOAD_HYDRATE_CAPTCHA_INVALID_EVENT, event => {
 let detail = null;
 try { detail = JSON.parse(String(event && event.detail || '')); } catch (e) {}
 if (!detail) return;
-const invalidToken = String(detail.token || '');
-if (invalidToken.length > 20) {
-try {
-rememberDownloadHydrateInvalidCaptchaToken(invalidToken);
-clearStoredDownloadHydrateCaptchaToken(invalidToken);
-} catch (e) {}
-}
+const invalidToken = typeof rememberDownloadHydrateInvalidCaptchaToken === 'function'
+    ? rememberDownloadHydrateInvalidCaptchaToken(detail.token)
+    : String(detail.token || '');
 try { resetHeaderCache(); } catch (e) {}
 const now = Date.now();
 if (now - downloadHydrateCaptchaAutoRefreshLastAt < 500) return;
 downloadHydrateCaptchaAutoRefreshLastAt = now;
+if (typeof recoverDownloadHydrateCaptcha === 'function') {
+    if (downloadHydrateCaptchaWaitPromise) return;
+    const recoveryError = new Error('captcha_invalid');
+    recoveryError.status = 400;
+    recoveryError.statusCode = 400;
+    recoveryError.code = 'captcha_invalid';
+    recoveryError.data = { error: 'captcha_invalid' };
+    recoveryError.captchaToken = invalidToken;
+    recoveryError.captchaAction = String(detail.action || 'GET:/drive/v1/files');
+    recoveryError.captchaRequestUrl = String(detail.requestUrl || '');
+    recoveryError.captchaRequestMethod = String(detail.requestMethod || 'GET').toUpperCase();
+    recoverDownloadHydrateCaptcha(recoveryError, {
+        scope: 'page_drive_fetch',
+        restartAfterForeignWait: true,
+        restartAfterExhaustedWait: true,
+        action: recoveryError.captchaAction,
+        requestUrl: recoveryError.captchaRequestUrl,
+        requestMethod: recoveryError.captchaRequestMethod
+    }).catch(error => {
+        console.warn('[Hydrate Captcha] page request recovery failed:', error);
+    });
+    return;
+}
 requestOfficialDownloadHydrateCaptchaRefresh(
     String(detail.action || 'GET:/drive/v1/files'),
     invalidToken,
@@ -1697,6 +2068,248 @@ function clearDownloadHydrateCaptchaLastError() {
 downloadHydrateCaptchaLastError = null;
 }
 
+function isDownloadHydrateCaptchaInvalidError(error) {
+if (!error) return false;
+const data = error.data || (error.response && error.response.data) || {};
+const status = Number(error.status || error.statusCode || (error.response && (error.response.status || error.response.statusCode)) || 0);
+const officialTypes = [data.error, data.code, error.code]
+.map(value => String(value || '').trim().toLowerCase())
+.filter(Boolean);
+return status === 400 && officialTypes.includes('captcha_invalid');
+}
+
+function rememberDownloadHydrateInvalidCaptchaToken(token) {
+const value = String(token || '');
+if (value.length <= 20) return '';
+downloadHydrateInvalidCaptchaTokens.add(value);
+while (downloadHydrateInvalidCaptchaTokens.size > 20) {
+const first = downloadHydrateInvalidCaptchaTokens.values().next().value;
+downloadHydrateInvalidCaptchaTokens.delete(first);
+}
+return value;
+}
+
+function clearStoredDownloadHydrateCaptchaToken(token) {
+const target = String(token || '');
+try {
+const captured = readStoredCapturedCaptchaRecord().token;
+if (target && captured === target) localStorage.removeItem('pk_captured_captcha');
+} catch (e) {}
+if (!target) return;
+try {
+const keys = [];
+for (let i = 0; i < localStorage.length; i++) {
+const key = localStorage.key(i);
+if (key && key.startsWith('captcha')) keys.push(key);
+}
+keys.forEach(key => {
+try {
+    const value = JSON.parse(localStorage.getItem(key));
+    if (value && value.captcha_token === target) localStorage.removeItem(key);
+} catch (e) {}
+});
+} catch (e) {}
+}
+
+function markDownloadHydrateCaptchaInvalid(error) {
+const invalidToken = rememberDownloadHydrateInvalidCaptchaToken(error && error.captchaToken);
+resetHeaderCache();
+return invalidToken;
+}
+
+function isDownloadHydrateCaptchaWaiting() {
+return !!downloadHydrateCaptchaWaitPromise;
+}
+
+async function waitForDownloadHydrateCaptchaRefresh(invalidToken, options = {}) {
+if (downloadHydrateCaptchaWaitPromise) {
+await waitForActiveDownloadHydrateCaptcha(options);
+return true;
+}
+const waitScope = String(options.scope || 'shared');
+const configuredMaxWait = Math.max(10000, Number(CONF.downloadHydrateCaptchaWaitMax) || 5 * 60 * 1000);
+const requestedMaxWait = Number(options.maxWait) || 0;
+const maxWait = requestedMaxWait > 0 ? Math.max(1000, Math.min(configuredMaxWait, requestedMaxWait)) : configuredMaxWait;
+const refreshAction = String(options.action || 'GET:/drive/v1/files');
+const refreshRequestUrl = String(options.requestUrl || '');
+const refreshRequestMethod = String(options.requestMethod || 'GET').toUpperCase();
+downloadHydrateCaptchaWaitScope = waitScope;
+downloadHydrateCaptchaWaitPromise = (async () => {
+const startedAt = Date.now();
+const waits = [250, 500, 1000, 2000, 5000];
+let waitIndex = 0;
+let activeRefreshAttempt = 0;
+let nextActiveRefreshAt = 0;
+while (true) {
+resetHeaderCache();
+const elapsed = Date.now() - startedAt;
+if (elapsed >= maxWait) return false;
+if (elapsed >= nextActiveRefreshAt) {
+requestOfficialDownloadHydrateCaptchaRefresh(refreshAction, invalidToken, refreshRequestUrl, refreshRequestMethod);
+const refreshDelay = Math.min(30000, 3000 * Math.pow(2, Math.min(activeRefreshAttempt, 4)));
+nextActiveRefreshAt = elapsed + refreshDelay;
+activeRefreshAttempt++;
+}
+const token = (getHeaders()['x-captcha-token'] || '');
+const refreshedByBridge = !!(downloadHydrateCaptchaRefreshLastResult && downloadHydrateCaptchaRefreshLastResult.ok && downloadHydrateCaptchaRefreshLastResult.at >= startedAt);
+if (token && token !== invalidToken && !isDownloadHydrateCaptchaTokenInvalid(token) && (refreshedByBridge || elapsed >= 1000)) {
+return true;
+}
+const waitMs = Math.min(waits[Math.min(waitIndex, waits.length - 1)], maxWait - elapsed);
+if (typeof options.onWait === 'function') options.onWait({ elapsed, waitMs });
+await sleep(waitMs);
+waitIndex++;
+}
+return false;
+})().finally(() => {
+downloadHydrateCaptchaWaitPromise = null;
+downloadHydrateCaptchaWaitScope = '';
+});
+return downloadHydrateCaptchaWaitPromise;
+}
+
+async function recoverDownloadHydrateCaptcha(error, options = {}) {
+const requestedScope = String(options.scope || 'shared');
+let restartedAfterExhaustedWait = false;
+while (downloadHydrateCaptchaWaitPromise) {
+const activeScope = String(downloadHydrateCaptchaWaitScope || 'shared');
+try {
+await waitForActiveDownloadHydrateCaptcha(options);
+return true;
+} catch (waitError) {
+if (!isDownloadHydrateCaptchaInvalidError(waitError) && waitError !== downloadHydrateCaptchaLastError) throw waitError;
+const canRestartAfterForeignWait = options.restartAfterForeignWait === true && activeScope !== requestedScope;
+const canRestartAfterExhaustedWait = options.restartAfterExhaustedWait === true && !restartedAfterExhaustedWait;
+if (!canRestartAfterForeignWait && !canRestartAfterExhaustedWait) return false;
+if (canRestartAfterExhaustedWait) restartedAfterExhaustedWait = true;
+console.warn(`[Hydrate Captcha] previous recovery scope ${activeScope} exhausted; starting one fresh ${requestedScope} generation.`);
+}
+}
+downloadHydrateCaptchaLastError = error || downloadHydrateCaptchaLastError;
+const invalidToken = markDownloadHydrateCaptchaInvalid(error);
+const sharedWait = waitForDownloadHydrateCaptchaRefresh(invalidToken, {
+maxWait: options.maxWait,
+onWait: options.onWait,
+scope: requestedScope,
+action: options.action || (error && error.captchaAction) || 'GET:/drive/v1/files',
+requestUrl: options.requestUrl || (error && error.captchaRequestUrl) || '',
+requestMethod: options.requestMethod || (error && error.captchaRequestMethod) || 'GET'
+});
+let ok = false;
+if (options.signal || typeof options.isRunning === 'function') {
+try {
+await waitForActiveDownloadHydrateCaptcha(options);
+ok = true;
+} catch (waitError) {
+if (isDownloadHydrateCaptchaInvalidError(waitError) || waitError === downloadHydrateCaptchaLastError) ok = false;
+else throw waitError;
+}
+} else {
+ok = await sharedWait;
+}
+if (ok) {
+resetHeaderCache();
+downloadHydrateCaptchaLastError = null;
+return true;
+}
+console.warn('[Hydrate Captcha] token refresh wait timed out.');
+return false;
+}
+
+function readRequestHeaderValue(headers, name) {
+try {
+if (headers && typeof headers.get === 'function') return String(headers.get(name) || '');
+const key = Object.keys(headers || {}).find(row => row.toLowerCase() === String(name || '').toLowerCase());
+return key ? String(headers[key] || '') : '';
+} catch (e) {
+return '';
+}
+}
+
+function getMainAuthorizationExpiryMs(token) {
+const clean = normalizeMainAuthorizationToken(token).replace(/^Bearer\s+/i, '');
+const parts = clean.split('.');
+if (parts.length < 2) return 0;
+try {
+const body = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+const padded = body + '='.repeat((4 - body.length % 4) % 4);
+const payload = JSON.parse(atob(padded));
+const exp = Number(payload && payload.exp || 0);
+return exp > 0 ? exp * 1000 : 0;
+} catch (e) {
+return 0;
+}
+}
+
+function waitForPromiseWithAbort(promise, signal) {
+if (!signal) return promise;
+if (signal.aborted) return Promise.reject(new DOMException('Aborted by user', 'AbortError'));
+return new Promise((resolve, reject) => {
+const onAbort = () => reject(new DOMException('Aborted by user', 'AbortError'));
+signal.addEventListener('abort', onAbort, { once: true });
+Promise.resolve(promise).then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort));
+});
+}
+
+function requestOfficialAccessTokenRecovery(invalidToken = '') {
+const blocked = normalizeMainAuthorizationToken(invalidToken);
+if (officialAuthRecoveryWaitPromise) return officialAuthRecoveryWaitPromise;
+if (blocked) rememberInvalidAuthorizationTokenMain(blocked);
+const requestId = `official_auth_${Date.now()}_${++officialAuthRecoveryRequestSeq}`;
+officialAuthRecoveryWaitPromise = new Promise(resolve => {
+let settled = false;
+const finish = result => {
+if (settled) return;
+settled = true;
+clearTimeout(timeoutId);
+document.removeEventListener(OFFICIAL_AUTH_RECOVERY_RESULT_EVENT, onResult);
+resolve(result);
+};
+const onResult = event => {
+let detail = null;
+try { detail = JSON.parse(String(event && event.detail || '')); } catch (e) {}
+if (!detail || String(detail.requestId || '') !== requestId) return;
+resetHeaderCache();
+const freshToken = normalizeMainAuthorizationToken(getHeaders().Authorization);
+const tokenChanged = freshToken.length > 20 && freshToken !== blocked && !isAuthorizationTokenInvalid(freshToken);
+const result = {
+    ok: detail.ok === true && tokenChanged,
+    reason: detail.ok === true && !tokenChanged ? 'fresh_authorization_not_visible' : String(detail.reason || 'auth_refresh_failed'),
+    token: tokenChanged ? freshToken : '',
+    requestId,
+    at: Date.now()
+};
+officialAuthRecoveryLastResult = { ...result, token: result.token ? '[available]' : '' };
+finish(result);
+};
+const timeoutId = setTimeout(() => {
+const result = { ok: false, reason: 'auth_refresh_bridge_timeout', token: '', requestId, at: Date.now() };
+officialAuthRecoveryLastResult = result;
+finish(result);
+}, 45000);
+document.addEventListener(OFFICIAL_AUTH_RECOVERY_RESULT_EVENT, onResult);
+try {
+document.dispatchEvent(new CustomEvent(OFFICIAL_AUTH_RECOVERY_REQUEST_EVENT, {
+    detail: JSON.stringify({ requestId, invalidToken: blocked, at: Date.now() })
+}));
+} catch (error) {
+const result = { ok: false, reason: String(error && error.message || 'auth_refresh_bridge_dispatch_failed'), token: '', requestId, at: Date.now() };
+officialAuthRecoveryLastResult = result;
+finish(result);
+}
+}).finally(() => {
+officialAuthRecoveryWaitPromise = null;
+});
+return officialAuthRecoveryWaitPromise;
+}
+
+async function readOfficialAccessTokenError(response) {
+if (!response || (response.status !== 401 && response.status !== 403)) return null;
+const data = await response.clone().json().catch(() => null);
+if (!isOfficialAccessTokenExpiredPayload(data, response.status)) return null;
+return { status: response.status, data };
+}
+
 const pkNativeFetch = window.fetch.bind(window);
 function rebuildDriveApiRequestInit(input, init = {}) {
 const nextInit = { ...(init || {}) };
@@ -1744,7 +2357,6 @@ try {
 const rawUrl = input && input.url ? input.url : String(input || '');
 pathname = new URL(rawUrl, location.href).pathname || pathname;
 } catch (e) {}
-if (/^\/drive\/v1\/files\/[^/]+$/.test(pathname)) pathname = '/drive/v1/files';
 if (pathname === '/drive/v1/events') method = 'GET';
 return `${method}:${pathname}`;
 }
@@ -1756,22 +2368,35 @@ const rawUrl = input && input.url ? input.url : String(input || '');
 hostname = new URL(rawUrl, location.href).hostname.toLowerCase();
 } catch (e) {}
 const callerManagedCaptchaRecovery = !!(init && init.pkCallerManagedCaptchaRecovery);
+const captchaRecoveryOnWait = init && typeof init.pkCaptchaRecoveryOnWait === 'function' ? init.pkCaptchaRecoveryOnWait : null;
+const captchaRecoveryIsRunning = init && typeof init.pkCaptchaRecoveryIsRunning === 'function' ? init.pkCaptchaRecoveryIsRunning : null;
+const captchaRecoveryScope = String(init && init.pkCaptchaRecoveryScope || 'drive_fetch');
 let nativeInit = init;
-if (callerManagedCaptchaRecovery) {
+if (callerManagedCaptchaRecovery || captchaRecoveryOnWait || captchaRecoveryIsRunning || (init && init.pkCaptchaRecoveryScope)) {
 nativeInit = { ...(init || {}) };
 delete nativeInit.pkCallerManagedCaptchaRecovery;
+delete nativeInit.pkCaptchaRecoveryOnWait;
+delete nativeInit.pkCaptchaRecoveryIsRunning;
+delete nativeInit.pkCaptchaRecoveryScope;
 }
-if (hostname !== 'api-drive.mypikpak.com' || callerManagedCaptchaRecovery) return pkNativeFetch(input, nativeInit);
+if (hostname !== 'api-drive.mypikpak.com') return pkNativeFetch(input, nativeInit);
 
 const signal = (init && init.signal) || (input && input.signal) || null;
+const isCaptchaRecoveryRunning = () => !(signal && signal.aborted) && (!captchaRecoveryIsRunning || captchaRecoveryIsRunning());
 const maxWait = Math.max(10000, Number(CONF.downloadHydrateCaptchaWaitMax) || 5 * 60 * 1000);
 let requestTemplate = null;
+let authPreflightChecked = false;
+let authReplayAttempted = false;
 try {
 if (typeof Request !== 'undefined' && input instanceof Request) requestTemplate = input.clone();
 } catch (e) {}
 
 try {
-const waited = await waitForActiveDownloadHydrateCaptcha({ signal });
+const waited = await waitForActiveDownloadHydrateCaptcha({
+    signal,
+    isRunning: isCaptchaRecoveryRunning,
+    onWait: captchaRecoveryOnWait
+});
 if (waited) resetHeaderCache();
 } catch (waitError) {
 if (waitError && waitError.name === 'AbortError') throw waitError;
@@ -1784,9 +2409,46 @@ const deadline = Date.now() + maxWait;
 while (true) {
 if (signal && signal.aborted) throw new DOMException('Aborted by user', 'AbortError');
 
+if (officialAuthRecoveryWaitPromise) {
+const inheritedRecovery = await waitForPromiseWithAbort(officialAuthRecoveryWaitPromise, signal);
+if (inheritedRecovery && inheritedRecovery.ok) resetHeaderCache();
+}
+
 const attemptInput = requestTemplate ? requestTemplate.clone() : input;
-const attemptInit = rebuildDriveApiRequestInit(attemptInput, init);
+let attemptInit = rebuildDriveApiRequestInit(attemptInput, nativeInit);
+const requestMethod = String((attemptInit && attemptInit.method) || (attemptInput && attemptInput.method) || 'GET').toUpperCase();
+const isSafeAuthReplayMethod = requestMethod === 'GET' || requestMethod === 'HEAD';
+let outgoingAuthorization = normalizeMainAuthorizationToken(readRequestHeaderValue(attemptInit.headers, 'authorization'));
+
+if (!authPreflightChecked) {
+authPreflightChecked = true;
+const expiryMs = getMainAuthorizationExpiryMs(outgoingAuthorization);
+if (expiryMs > 0 && expiryMs <= Date.now() + 5000) {
+    if (expiryMs > Date.now()) {
+        await waitForPromiseWithAbort(new Promise(resolve => setTimeout(resolve, Math.max(0, expiryMs - Date.now() + 50))), signal);
+    }
+    const preflightRecovery = await waitForPromiseWithAbort(requestOfficialAccessTokenRecovery(outgoingAuthorization), signal);
+    if (preflightRecovery && preflightRecovery.ok) {
+        resetHeaderCache();
+        attemptInit = rebuildDriveApiRequestInit(attemptInput, nativeInit);
+        outgoingAuthorization = normalizeMainAuthorizationToken(readRequestHeaderValue(attemptInit.headers, 'authorization'));
+    }
+}
+}
+
 const response = await pkNativeFetch(attemptInput, attemptInit);
+const authError = await readOfficialAccessTokenError(response);
+if (authError) {
+if (authReplayAttempted) return response;
+const recovery = await waitForPromiseWithAbort(requestOfficialAccessTokenRecovery(outgoingAuthorization), signal);
+if (isSafeAuthReplayMethod && !authReplayAttempted && recovery && recovery.ok) {
+    authReplayAttempted = true;
+    resetHeaderCache();
+    continue;
+}
+return response;
+}
+
 const captchaError = await readDriveApiCaptchaError(response, attemptInit.headers);
 if (!captchaError) return response;
 captchaError.captchaAction = getDriveApiCaptchaAction(attemptInput, attemptInit);
@@ -1803,10 +2465,11 @@ captchaError.captchaRecoveryExhausted = true;
 throw captchaError;
 }
 const recovered = await recoverDownloadHydrateCaptcha(captchaError, {
-isRunning: () => !(signal && signal.aborted),
+isRunning: isCaptchaRecoveryRunning,
+onWait: captchaRecoveryOnWait,
 signal,
 maxWait: remaining,
-scope: 'drive_fetch',
+scope: captchaRecoveryScope,
 restartAfterForeignWait: true,
 restartAfterExhaustedWait: true,
 action: captchaError.captchaAction,
@@ -2184,6 +2847,8 @@ CONF.icons.txtPreviewParseLinksSVG = CONF.icons.cloudDownload;
 CONF.icons.shareParseStop = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>`;
 CONF.icons.shareParseBack = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>`;
 CONF.icons.imgSearch = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><g transform="scale(0.0234375)"><path d="M107.739429 580.388571a365.860571 365.860571 0 0 0 648.630857 85.504L635.611429 532.48a36.571429 36.571429 0 0 0-56.612572 2.852571l-39.131428 53.101715a109.714286 109.714286 0 0 1-167.716572 10.605714L235.008 455.387429a36.571429 36.571429 0 0 0-58.002286 6.729142l-69.266285 118.272z m-19.894858-110.738285l26.038858-44.470857a109.714286 109.714286 0 0 1 174.08-20.333715l137.216 143.798857a36.571429 36.571429 0 0 0 55.881142-3.584l39.131429-53.101714a109.714286 109.714286 0 0 1 169.691429-8.484571l102.985142 113.810285A365.714286 365.714286 0 1 0 87.844571 469.577143z m658.139429 318.317714a438.857143 438.857143 0 1 1 50.029714-52.736c1.316571 1.024 2.56 2.194286 3.803429 3.437714l206.921143 206.848a36.571429 36.571429 0 0 1-51.712 51.712l-206.921143-206.848a37.083429 37.083429 0 0 1-2.194286-2.413714zM526.628571 314.514286a73.142857 73.142857 0 1 1 0-146.285715 73.142857 73.142857 0 0 1 0 146.285715z" fill="currentColor"></path></g></svg>`;
+CONF.icons.videoScreenshot = `<svg class="icon" viewBox="0 0 1088 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"><path d="M128 105.6a22.4 22.4 0 0 0-22.4 22.4v768a22.4 22.4 0 0 0 22.4 22.4h832a22.4 22.4 0 0 0 22.4-22.4V128a22.4 22.4 0 0 0-22.4-22.4H128zM128 22.4h832A105.6 105.6 0 0 1 1065.6 128v768a105.6 105.6 0 0 1-105.6 105.6H128A105.6 105.6 0 0 1 22.4 896V128A105.6 105.6 0 0 1 128 22.4z"/><path d="M240 160h32a48 48 0 0 1 0 96h-32a48 48 0 0 1 0-96zM240 768h32a48 48 0 0 1 0 96h-32a48 48 0 0 1 0-96zM528 160h32a48 48 0 0 1 0 96h-32a48 48 0 0 1 0-96zM528 768h32a48 48 0 0 1 0 96h-32a48 48 0 0 1 0-96zM816 160h32a48 48 0 0 1 0 96h-32a48 48 0 0 1 0-96zM816 768h32a48 48 0 0 1 0 96h-32a48 48 0 0 1 0-96z"/><path d="M646.592 526.72l-170.208 104.416a19.392 19.392 0 0 1-19.136-0.864 20.384 20.384 0 0 1-9.248-17.184v-208.832c0-7.04 3.52-13.568 9.28-17.248a19.008 19.008 0 0 1 19.104-0.832l170.208 104.416a20.288 20.288 0 0 1 10.784 18.048c0 7.68-4.16 14.624-10.784 18.08z"/></svg>`;
+CONF.icons.locatePlay = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72c0 .78.85 1.26 1.52.86l10.04-6.86a1.03 1.03 0 0 0 0-1.72L9.52 4.28A1.03 1.03 0 0 0 8 5.14z"/></svg>`;
 CONF.icons.dragUploadPlus = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
 CONF.icons.crumbTrash = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
 CONF.icons.crumbStar = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
@@ -4823,6 +5488,18 @@ zh: {
   "btn_ext": "外部播放",
   "tip_ext": "使用PotPlayer播放或获取播放链接 [Alt] + [E]",
   "btn_img_search": "以图搜图 [F]",
+  "btn_select_all": "全选",
+  "btn_video_screenshot_locate_play": "定位播放",
+  "btn_video_screenshot": "视频截帧",
+  "tip_video_screenshot": "对选中的单个视频进行画面截帧 [Shift] + [F]",
+  "title_video_screenshot": "视频截帧",
+  "msg_video_screenshot_loading": "正在进行视频截帧...",
+  "msg_video_screenshot_progress": "正在进行视频截帧 {n}/16",
+  "msg_video_screenshot_no_source": "未找到可用的视频播放源。",
+  "msg_video_screenshot_failed": "视频截帧失败，请稍后重试。",
+  "msg_video_screenshot_frame_failed": "该画面暂时无法生成",
+  "msg_video_screenshot_save": "保存图片",
+  "msg_video_screenshot_close": "关闭",
   "tip_pip": "画中画 [P]",
   "str_no_sub": "无字幕",
   "lbl_sub_sel": "字幕选择",
@@ -5547,37 +6224,137 @@ let cachedCredKey = null;
 let cachedCaptchaKey = null;
 let memoryCapturedToken = '';
 const downloadHydrateInvalidCaptchaTokens = new Set();
+const DOWNLOAD_HYDRATE_CAPTCHA_EXPIRY_SKEW_MS = 30 * 1000;
+const invalidAuthorizationTokens = new Set();
+let officialAuthRecoveryState = { state: 'idle', reason: '', at: 0 };
 
-function readStoredCapturedCaptchaToken() {
+function normalizeMainAuthorizationToken(value) {
+return String(value || '').trim().slice(0, 8192);
+}
+
+function isAuthorizationTokenInvalid(token) {
+const clean = normalizeMainAuthorizationToken(token);
+return !!(clean && invalidAuthorizationTokens.has(clean));
+}
+
+function rememberInvalidAuthorizationTokenMain(token) {
+const clean = normalizeMainAuthorizationToken(token);
+if (clean.length <= 20) return '';
+invalidAuthorizationTokens.add(clean);
+while (invalidAuthorizationTokens.size > 20) {
+const first = invalidAuthorizationTokens.values().next().value;
+invalidAuthorizationTokens.delete(first);
+}
+if (memoryCapturedToken === clean) memoryCapturedToken = '';
+cachedCredKey = null;
+return clean;
+}
+
+function readStoredCapturedCaptchaRecord() {
 let raw = '';
 try { raw = localStorage.getItem('pk_captured_captcha') || ''; } catch (e) {}
-if (!raw) return '';
+if (!raw) return { token: '', savedAt: 0, expiresAt: 0, expiresIn: 0, lastSeenAt: 0 };
 try {
 const parsed = JSON.parse(raw);
 if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
     if (String(parsed.scope || '').toLowerCase() !== 'drive') {
         try { if ((localStorage.getItem('pk_captured_captcha') || '') === raw) localStorage.removeItem('pk_captured_captcha'); } catch (e) {}
-        return '';
+        return { token: '', savedAt: 0, expiresAt: 0, expiresIn: 0, lastSeenAt: 0 };
     }
-    const expiresAt = parseConfigTime(parsed.expiresAt || parsed.expires_at);
-    if (expiresAt && expiresAt <= Date.now()) {
-        try { if ((localStorage.getItem('pk_captured_captcha') || '') === raw) localStorage.removeItem('pk_captured_captcha'); } catch (e) {}
-        return '';
-    }
-    return String(parsed.captcha_token || parsed.token || '');
+    return {
+        token: String(parsed.captcha_token || parsed.token || ''),
+        savedAt: Number(parsed.savedAt || parsed.saved_at || 0) || 0,
+        expiresAt: Number(parsed.expiresAt || parsed.expires_at || 0) || 0,
+        expiresIn: Number(parsed.expiresIn || parsed.expires_in || 0) || 0,
+        lastSeenAt: Number(parsed.lastSeenAt || parsed.last_seen_at || parsed.savedAt || parsed.saved_at || 0) || 0
+    };
 }
 } catch (e) {}
 try { if ((localStorage.getItem('pk_captured_captcha') || '') === raw) localStorage.removeItem('pk_captured_captcha'); } catch (e) {}
-return '';
+return { token: '', savedAt: 0, expiresAt: 0, expiresIn: 0, lastSeenAt: 0 };
+}
+
+function getStoredCapturedCaptchaEffectiveExpiresAt(record) {
+if (!record || !record.token) return 0;
+const expiresAt = Number(record.expiresAt || 0) || 0;
+const savedAt = Number(record.savedAt || 0) || 0;
+const expiresIn = Math.max(30, Number(record.expiresIn || 300) || 300);
+const hardExpiresAt = savedAt ? savedAt + Math.max(0, expiresIn * 1000 - DOWNLOAD_HYDRATE_CAPTCHA_EXPIRY_SKEW_MS) : 0;
+const candidates = [expiresAt, hardExpiresAt].filter(value => value > 0);
+return candidates.length ? Math.min(...candidates) : 0;
+}
+
+function readStoredCapturedCaptchaToken() {
+const record = readStoredCapturedCaptchaRecord();
+return record && record.token ? record.token : '';
 }
 
 function isDownloadHydrateCaptchaTokenInvalid(token) {
 return !!(token && downloadHydrateInvalidCaptchaTokens.has(String(token)));
 }
 
+function readDownloadHydrateCaptchaRecoveryDebug() {
+const record = readStoredCapturedCaptchaRecord();
+const effectiveExpiresAt = getStoredCapturedCaptchaEffectiveExpiresAt(record);
+return {
+    storedTokenPresent: !!record.token,
+    savedAt: record.savedAt || 0,
+    lastSeenAt: record.lastSeenAt || 0,
+    storedExpiresAt: record.expiresAt || 0,
+    effectiveExpiresAt,
+    remainingMs: effectiveExpiresAt ? effectiveExpiresAt - Date.now() : 0,
+    expired: !!record.token && (!effectiveExpiresAt || effectiveExpiresAt <= Date.now()),
+    expiryAdvisoryOnly: true,
+    storedTokenMarkedInvalid: isDownloadHydrateCaptchaTokenInvalid(record.token),
+    invalidTokenCount: downloadHydrateInvalidCaptchaTokens.size,
+    recoveryActive: !!downloadHydrateCaptchaWaitPromise,
+    recoveryScope: String(downloadHydrateCaptchaWaitScope || ''),
+    lastRefreshResult: downloadHydrateCaptchaRefreshLastResult ? { ...downloadHydrateCaptchaRefreshLastResult } : null
+};
+}
+
+window.pkDownloadCaptchaRecoveryDebug = readDownloadHydrateCaptchaRecoveryDebug;
+try {
+if (typeof unsafeWindow !== 'undefined' && unsafeWindow) unsafeWindow.pkDownloadCaptchaRecoveryDebug = readDownloadHydrateCaptchaRecoveryDebug;
+} catch (e) {}
+
 document.addEventListener('pk-token-captured', (e) => {
-memoryCapturedToken = e.detail;
+const token = normalizeMainAuthorizationToken(e.detail);
+if (token.length <= 20 || isAuthorizationTokenInvalid(token)) return;
+memoryCapturedToken = token;
 });
+
+document.addEventListener(OFFICIAL_AUTH_INVALID_EVENT, (e) => {
+rememberInvalidAuthorizationTokenMain(e && e.detail);
+});
+
+document.addEventListener(OFFICIAL_AUTH_RECOVERY_STATE_EVENT, (e) => {
+let detail = null;
+try { detail = JSON.parse(String(e && e.detail || '')); } catch (error) {}
+if (!detail) return;
+officialAuthRecoveryState = {
+state: String(detail.state || 'idle'),
+reason: String(detail.reason || ''),
+at: Number(detail.at || Date.now()) || Date.now()
+};
+if (officialAuthRecoveryState.state === 'recovered') {
+cachedCredKey = null;
+cachedCaptchaKey = null;
+}
+});
+
+const readOfficialAuthRecoveryDebug = () => ({
+state: officialAuthRecoveryState.state,
+reason: officialAuthRecoveryState.reason,
+at: officialAuthRecoveryState.at,
+invalidAuthorizationCount: invalidAuthorizationTokens.size,
+bridgeInFlight: !!officialAuthRecoveryWaitPromise,
+lastBridgeResult: officialAuthRecoveryLastResult ? { ...officialAuthRecoveryLastResult } : null
+});
+window.pkOfficialAuthRecoveryDebug = readOfficialAuthRecoveryDebug;
+try {
+if (typeof unsafeWindow !== 'undefined' && unsafeWindow) unsafeWindow.pkOfficialAuthRecoveryDebug = readOfficialAuthRecoveryDebug;
+} catch (e) {}
 
 function resetHeaderCache() {
 cachedCredKey = null;
@@ -5652,13 +6429,16 @@ const OFFICIAL_AUTH_READY_TTL_MS = 2 * 60 * 1000;
 const isLoginRoute = () => location.href.includes('/login') || location.pathname.includes('login');
 
 const hasCredentialSnapshot = () => {
-if (memoryCapturedToken && memoryCapturedToken.length > 10) return true;
+if (memoryCapturedToken && memoryCapturedToken.length > 10 && !isAuthorizationTokenInvalid(memoryCapturedToken)) return true;
 for (let i = 0; i < localStorage.length; i++) {
 const k = localStorage.key(i);
 if (k && k.startsWith('credentials')) {
 try {
 const v = JSON.parse(localStorage.getItem(k));
-if (v && v.access_token) return true;
+        if (v && v.access_token) {
+            const candidate = String(v.token_type || 'Bearer') + ' ' + String(v.access_token || '');
+            if (!isAuthorizationTokenInvalid(candidate)) return true;
+        }
 } catch {}
 }
 }
@@ -5834,7 +6614,7 @@ window.addEventListener('popstate', checkAuthRoute);
 
 function getHeaders() {
 const recoveryActive = typeof window.pkIsAuthRecoveryActive === 'function' && window.pkIsAuthRecoveryActive();
-let token = memoryCapturedToken || '', captcha = '';
+let token = memoryCapturedToken && !isAuthorizationTokenInvalid(memoryCapturedToken) ? memoryCapturedToken : '', captcha = '';
 
 if (recoveryActive) {
 cachedCredKey = null;
@@ -5844,7 +6624,10 @@ cachedCaptchaKey = null;
 if (!token && cachedCredKey) {
 try {
 const v = JSON.parse(localStorage.getItem(cachedCredKey));
-if (v && v.access_token) token = v.token_type + ' ' + v.access_token;
+    if (v && v.access_token) {
+        const candidate = String(v.token_type || 'Bearer') + ' ' + String(v.access_token || '');
+        if (!isAuthorizationTokenInvalid(candidate)) token = candidate;
+    }
 } catch {}
 }
 
@@ -5854,9 +6637,11 @@ const k = localStorage.key(i);
 if (k && k.startsWith('credentials')) {
 try {
 const v = JSON.parse(localStorage.getItem(k));
-if (v && v.access_token) {
-token = v.token_type + ' ' + v.access_token;
-cachedCredKey = k;
+        if (v && v.access_token) {
+            const candidate = String(v.token_type || 'Bearer') + ' ' + String(v.access_token || '');
+            if (isAuthorizationTokenInvalid(candidate)) continue;
+            token = candidate;
+            cachedCredKey = k;
 break;
 }
 } catch {}
@@ -5874,6 +6659,15 @@ window.pkMarkAuthRecovered();
 }
 
 return headers;
+}
+
+function isOfficialAccessTokenExpiredPayload(data, status = 0) {
+if (status !== 401 && status !== 403) return false;
+if (!data || typeof data !== 'object') return false;
+const details = Array.isArray(data.details) ? data.details.map(row => row && row.detail || '').join(' ') : '';
+const text = [data.error, data.error_description, data.message, data.msg, details].filter(Boolean).join(' ').toLowerCase();
+const code = Number(data.error_code || 0) || 0;
+return code === 16 || text.includes('token is expired') || text.includes('token expired') || text.includes('access token expired') || (text.includes('oidc') && text.includes('expired'));
 }
 
 let authReadyProbePromise = null;
@@ -5979,9 +6773,18 @@ return missing;
 
 if (res.status === 401 || res.status === 403) {
 console.warn(`[API] ${res.status} Unauthorized. Throwing hard auth error...`);
-localStorage.removeItem('pk_captured_captcha');
+const authData = await res.clone().json().catch(() => ({}));
 resetHeaderCache();
-throw new Error(`API Error ${res.status}`);
+const authError = new Error(`API Error ${res.status}`);
+authError.status = res.status;
+authError.statusCode = res.status;
+authError.data = authData;
+authError.response = { status: res.status, statusCode: res.status, data: authData };
+if (isOfficialAccessTokenExpiredPayload(authData, res.status)) {
+    authError.code = 'OIDC_TOKEN_EXPIRED';
+    authError.authRecoveryExhausted = true;
+}
+throw authError;
 }
 
 if (res.status === 400) {
@@ -6086,6 +6889,9 @@ headers,
 signal: options.signal || undefined
 };
 if (options.callerManagedCaptchaRecovery) requestInit.pkCallerManagedCaptchaRecovery = true;
+if (typeof options.onWait === 'function') requestInit.pkCaptchaRecoveryOnWait = options.onWait;
+if (typeof options.isRunning === 'function') requestInit.pkCaptchaRecoveryIsRunning = options.isRunning;
+if (options.captchaRecoveryScope) requestInit.pkCaptchaRecoveryScope = String(options.captchaRecoveryScope);
 const res = await fetch(requestUrl, requestInit);
 try { syncTime(res.headers); } catch (e) {}
 if (!res.ok) {
@@ -6100,8 +6906,13 @@ err.code = String(data.code || data.error || data.error_code || (res.status === 
 err.errorCode = Number(data.error_code || 0) || 0;
 err.data = data;
 err.response = { status: res.status, statusCode: res.status, data };
+if (isOfficialAccessTokenExpiredPayload(data, res.status)) {
+err.code = 'OIDC_TOKEN_EXPIRED';
+err.authRecoveryExhausted = true;
+}
 err.captchaToken = headers['x-captcha-token'] || '';
-err.captchaAction = 'GET:/drive/v1/files';
+try { err.captchaAction = `GET:${new URL(requestUrl).pathname}`; }
+catch (actionError) { err.captchaAction = 'GET:/drive/v1/files'; }
 err.captchaRequestUrl = requestUrl;
 err.captchaRequestMethod = 'GET';
 throw err;
@@ -7176,6 +7987,13 @@ stats.isRetrying = pendingRetries > 0;
 return;
 }
 
+if (errorCode === 'OIDC_TOKEN_EXPIRED' || (err && err.authRecoveryExhausted)) {
+stats.failedFolders++;
+terminalError = err;
+if (onFolderError) onFolderError(current, err, stats);
+return;
+}
+
 if (errorCode === 'GLOBAL_INDEX_STALE_RESULT') {
 stats.retries++;
 current.staleRetryCount = (current.staleRetryCount || 0) + 1;
@@ -7915,155 +8733,6 @@ const now = Date.now();
 const scheduledAt = Math.max(now, downloadHydrateNextAt) + interval;
 downloadHydrateNextAt = scheduledAt;
 await sleep(scheduledAt - now);
-}
-
-function isDownloadHydrateCaptchaInvalidError(error) {
-if (!error) return false;
-const data = error.data || (error.response && error.response.data) || {};
-const status = Number(error.status || error.statusCode || (error.response && (error.response.status || error.response.statusCode)) || 0);
-const officialTypes = [data.error, data.code, error.code]
-.map(value => String(value || '').trim().toLowerCase())
-.filter(Boolean);
-return status === 400 && officialTypes.includes('captcha_invalid');
-}
-
-function rememberDownloadHydrateInvalidCaptchaToken(token) {
-const value = String(token || '');
-if (value.length <= 20) return '';
-downloadHydrateInvalidCaptchaTokens.add(value);
-while (downloadHydrateInvalidCaptchaTokens.size > 20) {
-const first = downloadHydrateInvalidCaptchaTokens.values().next().value;
-downloadHydrateInvalidCaptchaTokens.delete(first);
-}
-return value;
-}
-
-function clearStoredDownloadHydrateCaptchaToken(token) {
-const target = String(token || '');
-try {
-const captured = readStoredCapturedCaptchaToken();
-if (target && captured === target) localStorage.removeItem('pk_captured_captcha');
-} catch (e) {}
-if (!target) return;
-try {
-const keys = [];
-for (let i = 0; i < localStorage.length; i++) {
-const key = localStorage.key(i);
-if (key && key.startsWith('captcha')) keys.push(key);
-}
-keys.forEach(key => {
-try {
-    const value = JSON.parse(localStorage.getItem(key));
-    if (value && value.captcha_token === target) localStorage.removeItem(key);
-} catch (e) {}
-});
-} catch (e) {}
-}
-
-function markDownloadHydrateCaptchaInvalid(error) {
-const invalidToken = rememberDownloadHydrateInvalidCaptchaToken(error && error.captchaToken);
-clearStoredDownloadHydrateCaptchaToken(invalidToken);
-resetHeaderCache();
-return invalidToken;
-}
-
-function isDownloadHydrateCaptchaWaiting() {
-return !!downloadHydrateCaptchaWaitPromise;
-}
-
-async function waitForDownloadHydrateCaptchaRefresh(invalidToken, options = {}) {
-if (downloadHydrateCaptchaWaitPromise) {
-await waitForActiveDownloadHydrateCaptcha(options);
-return true;
-}
-const waitScope = String(options.scope || 'shared');
-const configuredMaxWait = Math.max(10000, Number(CONF.downloadHydrateCaptchaWaitMax) || 5 * 60 * 1000);
-const requestedMaxWait = Number(options.maxWait) || 0;
-const maxWait = requestedMaxWait > 0 ? Math.max(1000, Math.min(configuredMaxWait, requestedMaxWait)) : configuredMaxWait;
-const refreshAction = String(options.action || 'GET:/drive/v1/files');
-const refreshRequestUrl = String(options.requestUrl || '');
-const refreshRequestMethod = String(options.requestMethod || 'GET').toUpperCase();
-downloadHydrateCaptchaWaitScope = waitScope;
-downloadHydrateCaptchaWaitPromise = (async () => {
-const startedAt = Date.now();
-const waits = [250, 500, 1000, 2000, 5000];
-const activeRefreshSchedule = [0, 3000, 10000];
-let waitIndex = 0;
-let activeRefreshAttempt = 0;
-while (true) {
-resetHeaderCache();
-const elapsed = Date.now() - startedAt;
-if (elapsed >= maxWait) return false;
-if (activeRefreshAttempt < activeRefreshSchedule.length && elapsed >= activeRefreshSchedule[activeRefreshAttempt]) {
-requestOfficialDownloadHydrateCaptchaRefresh(refreshAction, invalidToken, refreshRequestUrl, refreshRequestMethod);
-activeRefreshAttempt++;
-}
-const token = (getHeaders()['x-captcha-token'] || '');
-const refreshedByBridge = !!(downloadHydrateCaptchaRefreshLastResult && downloadHydrateCaptchaRefreshLastResult.ok && downloadHydrateCaptchaRefreshLastResult.at >= startedAt);
-if (token && token !== invalidToken && !isDownloadHydrateCaptchaTokenInvalid(token) && (refreshedByBridge || elapsed >= 1000)) {
-return true;
-}
-const waitMs = Math.min(waits[Math.min(waitIndex, waits.length - 1)], maxWait - elapsed);
-if (typeof options.onWait === 'function') options.onWait({ elapsed, waitMs });
-await sleep(waitMs);
-waitIndex++;
-}
-return false;
-})().finally(() => {
-downloadHydrateCaptchaWaitPromise = null;
-downloadHydrateCaptchaWaitScope = '';
-});
-return downloadHydrateCaptchaWaitPromise;
-}
-
-async function recoverDownloadHydrateCaptcha(error, options = {}) {
-const requestedScope = String(options.scope || 'shared');
-let restartedAfterExhaustedWait = false;
-while (downloadHydrateCaptchaWaitPromise) {
-const activeScope = String(downloadHydrateCaptchaWaitScope || 'shared');
-try {
-await waitForActiveDownloadHydrateCaptcha(options);
-return true;
-} catch (waitError) {
-if (!isDownloadHydrateCaptchaInvalidError(waitError) && waitError !== downloadHydrateCaptchaLastError) throw waitError;
-const canRestartAfterForeignWait = options.restartAfterForeignWait === true && activeScope !== requestedScope;
-const canRestartAfterExhaustedWait = options.restartAfterExhaustedWait === true && !restartedAfterExhaustedWait;
-if (!canRestartAfterForeignWait && !canRestartAfterExhaustedWait) return false;
-if (canRestartAfterExhaustedWait) restartedAfterExhaustedWait = true;
-console.warn(`[Hydrate Captcha] previous recovery scope ${activeScope} exhausted; starting one fresh ${requestedScope} generation.`);
-}
-}
-downloadHydrateCaptchaLastError = error || downloadHydrateCaptchaLastError;
-const invalidToken = markDownloadHydrateCaptchaInvalid(error);
-if (invalidToken) console.warn('[Hydrate Captcha] captcha_invalid detected, waiting for refreshed token...');
-const sharedWait = waitForDownloadHydrateCaptchaRefresh(invalidToken, {
-maxWait: options.maxWait,
-onWait: options.onWait,
-scope: requestedScope,
-action: options.action || (error && error.captchaAction) || 'GET:/drive/v1/files',
-requestUrl: options.requestUrl || (error && error.captchaRequestUrl) || '',
-requestMethod: options.requestMethod || (error && error.captchaRequestMethod) || 'GET'
-});
-let ok = false;
-if (options.signal || typeof options.isRunning === 'function') {
-try {
-await waitForActiveDownloadHydrateCaptcha(options);
-ok = true;
-} catch (waitError) {
-if (isDownloadHydrateCaptchaInvalidError(waitError) || waitError === downloadHydrateCaptchaLastError) ok = false;
-else throw waitError;
-}
-} else {
-ok = await sharedWait;
-}
-if (ok) {
-resetHeaderCache();
-downloadHydrateCaptchaLastError = null;
-if (invalidToken) console.warn('[Hydrate Captcha] refreshed token detected, resuming hydration.');
-return true;
-}
-if (invalidToken) console.warn('[Hydrate Captcha] token refresh wait timed out.');
-return false;
 }
 
 function isAriaWsRpcUrl(url) {
@@ -10638,6 +11307,7 @@ ${CONF.icons.invert}
 <div class="pk-grp">
 <button class="pk-btn" id="pk-migrate" data-pk-tip="${L.tip_migrate}" style="color: var(--pk-pri);">${CONF.icons.migrate} <span>${L.btn_migrate}</span></button>
 <button class="pk-btn" id="pk-magnet-archive-check" data-pk-tip="${L.tip_magnet_archive_check}">${CONF.icons.cloudArchive} <span>${L.btn_magnet_archive_check}</span></button>
+<button class="pk-btn" id="pk-video-screenshot" data-pk-tip="${L.tip_video_screenshot}">${CONF.icons.videoScreenshot} <span>${L.btn_video_screenshot}</span></button>
 <button class="pk-btn" id="pk-img-search" data-pk-tip="${L.btn_img_search}">${pkIconSized('imgSearch', 16)} <span>${L.btn_img_search.replace(' [F]', '')}</span></button>
 <button class="pk-btn" id="pk-export-m3u" data-pk-tip="${L.tip_export_m3u}">${CONF.icons.exportM3U} <span>${L.btn_export_m3u}</span></button>
 <button class="pk-btn" id="pk-ext" data-pk-tip="${L.tip_ext}">${CONF.icons.ext} <span>${L.btn_ext}</span></button>
@@ -10979,6 +11649,7 @@ btnBulkRename: el.querySelector('#pk-bulkrename'),
 btnPrune: el.querySelector('#pk-prune'),
 btnUnzip: el.querySelector('#pk-unzip'),
 btnMigrate: el.querySelector('#pk-migrate'),
+btnVideoScreenshot: el.querySelector('#pk-video-screenshot'),
 btnMagnetArchiveCheck: el.querySelector('#pk-magnet-archive-check'),
 btnExportM3U: el.querySelector('#pk-export-m3u'),
 btnBlacklistManager: el.querySelector('#pk-blacklist-manager'),
@@ -16477,7 +17148,8 @@ return !!(item && (item._offlineReferenceMissingLocal === true || item._offlineR
 
 function getOfflineReferenceLookupId(item) {
 if (!item || typeof item !== 'object') return '';
-if (String(item.kind || '').toLowerCase().includes('task') || item._offlineTask || item._offlinePhase) {
+const kind = String(item.kind || '').toLowerCase();
+if (kind.includes('task') || kind === 'pk#upload' || item._offlineTask || item._offlinePhase) {
 return String(item.file_id || (item.params && item.params.file_id) || (item.reference_resource && item.reference_resource.id) || '').trim();
 }
 return String(item.id || item.file_id || '').trim();
@@ -19018,7 +19690,6 @@ if (attempt + 1 >= maxAttempts) {
 if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(id);
 return false;
 }
-// Keep the folder non-certifiable while waiting for delayed cloud materialization.
 if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(id);
 const retryDelay = Math.min(60000, 1000 * Math.pow(2, Math.min(5, attempt + 1)));
 return new Promise(resolve => {
@@ -25304,6 +25975,39 @@ const dur = Number((it && it.params && it.params.duration) || 0);
 return m.startsWith('video/') || dur > 0 || ['mp4','mkv','avi','mov','wmv','flv','webm','ts','m4v','3gp'].some(e => n.endsWith('.' + e));
 }
 
+const computeOfficialVideoEvidence = (it, seen = new Set()) => {
+if (!it || it.isHeader || it.kind === 'drive#folder') return false;
+if (typeof it === 'object') {
+if (seen.has(it)) return false;
+seen.add(it);
+}
+if (it.kind === 'pk#upload') {
+    if (it._officialVideoEvidence === true) return true;
+    const finalMeta = it._finalFileMeta;
+    return !!(finalMeta && finalMeta !== it && computeOfficialVideoEvidence(finalMeta, seen));
+}
+if (it._officialVideoEvidence === true) return true;
+const videoMetadata = it.video_media_metadata;
+if (videoMetadata && typeof videoMetadata === 'object' && Object.keys(videoMetadata).length > 0) return true;
+const mime = String(it.mime_type || '').toLowerCase().trim();
+if (mime.startsWith('audio/')) return false;
+if (mime.startsWith('video/')) return true;
+const duration = Number(it.params && it.params.duration);
+if (Number.isFinite(duration) && duration > 0) return true;
+const medias = Array.isArray(it.medias) ? it.medias : [];
+return medias.some(media => {
+if (!media || typeof media !== 'object') return false;
+const video = media.video && typeof media.video === 'object' ? media.video : null;
+if (video && Object.keys(video).length > 0) return true;
+const mediaMime = String(media.mime_type || '').toLowerCase().trim();
+if (mediaMime.startsWith('video/')) return true;
+const mediaType = String(media.media_type || media.type || media.video_type || '').toLowerCase().trim();
+return mediaType.includes('video');
+});
+};
+
+window.pkHasOfficialVideoEvidence = computeOfficialVideoEvidence;
+
 function isImageLikeItem(it) {
 const m = String((it && it.mime_type) || '').toLowerCase();
 const n = String((it && it.name) || '').toLowerCase();
@@ -26097,6 +26801,24 @@ if (Number.isFinite(duration) && duration > 0 && Number.isFinite(limitSeconds) &
 return duration > limitSeconds + 1;
 }
 return true;
+}
+
+function getSharePreviewCaptureDuration(detail, duration) {
+const fullDuration = Number(duration || (detail && detail.params && detail.params.duration) || 0);
+if (!(fullDuration > 0) || !Number.isFinite(fullDuration) || !detail || !detail._isShareItem) return fullDuration;
+const params = detail.params && typeof detail.params === 'object' ? detail.params : {};
+let seconds = Number(params.anonymous_play_seconds || 0);
+let range = Number(params.anonymous_play_range || 0);
+if (range > 1) range /= 100;
+if (!(seconds > 0) && !(range > 0)) return fullDuration;
+let ratio = 0;
+if (seconds > 0) ratio = Math.max(ratio, seconds / fullDuration);
+if (range > 0) ratio = Math.max(ratio, range);
+ratio = Math.max(0, Math.min(1, ratio));
+if (!(ratio > 0) || ratio >= 0.995) return fullDuration;
+const limit = fullDuration * ratio;
+const margin = Math.min(1, Math.max(0.5, limit * 0.05));
+return Math.min(fullDuration, Math.max(0.1, limit - margin));
 }
 
 async function confirmShareDownloadPreviewLimited(options = {}) {
@@ -27088,7 +27810,7 @@ if (typeof syncTime === 'function') syncTime(res.headers);
 if (!res.ok) {
 const bodyText = await res.text().catch(() => '');
 const data = parseLinkBookmarkOfficialResponseBody(bodyText);
-if (res.status === 400 || res.status === 401 || res.status === 403) {
+if (res.status === 400) {
 localStorage.removeItem('pk_captured_captcha');
 resetHeaderCache();
 }
@@ -27165,7 +27887,7 @@ if (typeof syncTime === 'function') syncTime(res.headers);
 const bodyText = await res.text().catch(() => '');
 const data = parseLinkBookmarkOfficialResponseBody(bodyText);
 if (!res.ok) {
-if (res.status === 400 || res.status === 401 || res.status === 403) {
+if (res.status === 400) {
 localStorage.removeItem('pk_captured_captcha');
 resetHeaderCache();
 }
@@ -35903,6 +36625,14 @@ return;
 }
 }
 
+if (!e.ctrlKey && !e.altKey && e.shiftKey && !e.metaKey && (e.key === 'f' || e.key === 'F')) {
+if (UI.btnVideoScreenshot && !UI.btnVideoScreenshot.disabled && UI.btnVideoScreenshot.style.display !== 'none') {
+e.preventDefault();
+UI.btnVideoScreenshot.click();
+return;
+}
+}
+
 if (!e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey) {
 if (e.key === 'f' || e.key === 'F') {
 if (UI.btnImgSearch && !UI.btnImgSearch.disabled && UI.btnImgSearch.style.display !== 'none') {
@@ -36510,6 +37240,7 @@ if (UI.stat) UI.stat.style.display = inShareParsePanel ? 'none' : '';
 let shareParseSelectedSize = 0;
 let hasShareParseSelectedFolder = false;
 let shareParseSingleVideo = false;
+let shareParseSingleScreenshotVideo = false;
 let shareParseSingleMediaWithCover = false;
 let shareParseSingleItem = null;
 if (n > 0) {
@@ -36528,6 +37259,7 @@ if (!inShareParsePanel && n === 1 && shareParseSingleItem && shareParseSingleIte
 const isVid = isVideoLikeItem(shareParseSingleItem);
 const isImg = isImageLikeItem(shareParseSingleItem);
 if (isVid) shareParseSingleVideo = true;
+if (computeOfficialVideoEvidence(shareParseSingleItem)) shareParseSingleScreenshotVideo = true;
 if (isVid || isImg) {
 if (shareParseSingleItem.thumbnail_link && shareParseSingleItem.thumbnail_link !== shareParseSingleItem.icon_link) {
 const isMax = UI.win.classList.contains('pk-maximized');
@@ -36560,6 +37292,14 @@ b.disabled = true;
 b.style.display = 'none';
 }
 });
+if (UI.btnVideoScreenshot) {
+const canShowShareScreenshot = !inShareParsePanel;
+const canCaptureShareScreenshot = canShowShareScreenshot && n === 1 && shareParseSingleScreenshotVideo;
+UI.btnVideoScreenshot.style.display = canShowShareScreenshot ? 'inline-flex' : 'none';
+UI.btnVideoScreenshot.disabled = !canCaptureShareScreenshot;
+UI.btnVideoScreenshot.style.cursor = canCaptureShareScreenshot ? 'pointer' : 'not-allowed';
+UI.btnVideoScreenshot.style.opacity = canCaptureShareScreenshot ? '1' : '0.4';
+}
 [UI.btnAria2, UI.btnDown].forEach(b => {
 if (!b) return;
 b.style.display = inShareParsePanel ? 'none' : 'inline-flex';
@@ -36654,6 +37394,7 @@ const isHistory = S.historyMode;
 const isUpload = S.uploadMode;
 
 let isSingleVideo = false;
+let isSingleScreenshotVideo = false;
 let isSingleMediaWithCover = false;
 if (n === 1) {
 const id = selectedIds[0];
@@ -36673,6 +37414,7 @@ const searchableCover = typeof resolveSearchableCoverForImageSearch === 'functio
 : getDirectSearchableCoverForImageSearch(item);
 
 if (isVid && isTaskReady) isSingleVideo = true;
+if (window.pkHasOfficialVideoEvidence(item) && isTaskReady) isSingleScreenshotVideo = true;
 
 if (isFolder && searchableCover) {
     isSingleMediaWithCover = true;
@@ -36693,6 +37435,14 @@ if (isFolder && searchableCover) {
 const hasOfflineReferenceMissingLocalSelected = isOffline && selectedIds.some(id => isOfflineReferenceMissingLocalMarked(S.itemMap.get(id)));
 
 if (UI.btnExt) UI.btnExt.disabled = S.trashMode || hasOfflineReferenceMissingLocalSelected || !isSingleVideo;
+if (UI.btnVideoScreenshot) {
+const canShowVideoScreenshot = !!UI.btnImgSearch && UI.btnImgSearch.style.display !== 'none';
+const canCaptureVideo = canShowVideoScreenshot && !hasOfflineReferenceMissingLocalSelected && isSingleScreenshotVideo;
+UI.btnVideoScreenshot.style.display = canShowVideoScreenshot ? 'inline-flex' : 'none';
+UI.btnVideoScreenshot.disabled = !canCaptureVideo;
+UI.btnVideoScreenshot.style.cursor = UI.btnVideoScreenshot.disabled ? 'not-allowed' : 'pointer';
+UI.btnVideoScreenshot.style.opacity = UI.btnVideoScreenshot.disabled ? '0.4' : '1';
+}
 if (UI.btnExportM3U) {
 const selectedVideosForM3U = getM3UExportSelectedVideos();
 UI.btnExportM3U.style.display = UI.btnExt ? UI.btnExt.style.display : 'none';
@@ -38347,8 +39097,11 @@ let retryUsed = false;
 let seeking = false;
 let loadingAudio = false;
 let pendingPlayRequested = false;
+let audioAutoResumeMuted = false;
+let audioPlayBlockedByPolicy = false;
 let audioFailedLocked = false;
 let audioFailNextTimer = null;
+let audioMediaRetryTimer = null;
 let audioFailAutoSkipCount = 0;
 let audioPlaylistOpen = false;
 let audioDurationRenderRaf = 0;
@@ -38494,6 +39247,12 @@ clearTimeout(audioFailNextTimer);
 audioFailNextTimer = null;
 }
 };
+const clearAudioMediaRetryTimer = () => {
+if (audioMediaRetryTimer) {
+clearTimeout(audioMediaRetryTimer);
+audioMediaRetryTimer = null;
+}
+};
 const scheduleAudioFailNext = () => {
 clearAudioFailNextTimer();
 if (list.length <= 1 || audioFailAutoSkipCount >= list.length - 1) return;
@@ -38508,6 +39267,9 @@ switchAudio(audioPlayMode === 'shuffle' ? getAudioShuffleNextIndex() : curIdx + 
 const markAudioFinalFailure = (text) => {
 audioFailedLocked = true;
 pendingPlayRequested = false;
+audioAutoResumeMuted = false;
+audioPlayBlockedByPolicy = false;
+audio.muted = audioMuted;
 loadingAudio = false;
 setStatus(text || L.audio_play_failed, true);
 updatePlayButton();
@@ -38521,6 +39283,50 @@ playBtn.removeAttribute('title');
 playBtn.dataset.tip = label;
 playBtn.setAttribute('aria-label', label);
 updateMiniInfo();
+};
+const isAudioAutoplayPolicyError = (error) => {
+const name = String(error && error.name || '').toLowerCase();
+const message = String(error && error.message || '').toLowerCase();
+return name === 'notallowederror' || name === 'notallowed' || message.includes('autoplay') || message.includes('user gesture');
+};
+
+const beginAudioAutoResume = () => {
+audioPlayBlockedByPolicy = false;
+if (!pendingPlayRequested || audioMuted) {
+audioAutoResumeMuted = false;
+audio.muted = audioMuted;
+return;
+}
+audioAutoResumeMuted = true;
+audio.muted = true;
+};
+const finishAudioAutoResume = () => {
+if (!audioAutoResumeMuted || destroyed) return;
+audioAutoResumeMuted = false;
+audio.muted = audioMuted;
+};
+const attemptAudioPlay = async () => {
+if (destroyed || !audio.src || !pendingPlayRequested) return false;
+try {
+await audio.play();
+if (destroyed) return false;
+audioPlayBlockedByPolicy = false;
+finishAudioAutoResume();
+pendingPlayRequested = false;
+audioFailedLocked = false;
+setStatus(L.audio_playing);
+updatePlayButton();
+return true;
+} catch (error) {
+if (isAudioAutoplayPolicyError(error)) {
+audioPlayBlockedByPolicy = true;
+setStatus(L.audio_ready);
+updatePlayButton();
+return false;
+}
+if (!destroyed && audio.error && audio.error.code) markAudioFinalFailure(L.audio_play_failed);
+return false;
+}
 };
 const updateMuteButton = () => {
 const isMuted = audio.muted || audio.volume <= 0;
@@ -38706,7 +39512,11 @@ updateMiniInfo();
 };
 const resetAudioElement = () => {
 clearAudioFailNextTimer();
+clearAudioMediaRetryTimer();
 audioFailedLocked = false;
+audioAutoResumeMuted = false;
+audioPlayBlockedByPolicy = false;
+audio.muted = audioMuted;
 audio.pause();
 audio.removeAttribute('src');
 audio.load();
@@ -38738,20 +39548,12 @@ const result = await resolveAudioPlayableSource(current(), force, {
 });
 if (destroyed || token !== loadToken) return;
 refreshAudioCover(result.url);
+const shouldPlay = autoPlay || pendingPlayRequested;
+if (shouldPlay) beginAudioAutoResume();
 audio.src = result.url;
 audio.load();
 setStatus(L.audio_ready);
-if (autoPlay || pendingPlayRequested) {
-try {
-await audio.play();
-if (!destroyed && token === loadToken) {
-    pendingPlayRequested = false;
-    setStatus(L.audio_playing);
-}
-} catch (e) {
-if (!destroyed && token === loadToken && !(audio.error && audio.error.code)) setStatus(L.audio_ready);
-}
-}
+if (shouldPlay && token === loadToken) await attemptAudioPlay();
 } catch (e) {
 if ((e && e.name === 'AbortError') || destroyed || token !== loadToken) return;
 markAudioFinalFailure(formatCloudErrorMessage(e, L.audio_link_missing));
@@ -39035,6 +39837,7 @@ activeAudioDetailController = null;
 }
 stopAudioDurationPrefetch();
 clearAudioFailNextTimer();
+clearAudioMediaRetryTimer();
 removeAudioMiniShell();
 if (pkAudioMiniSession && pkAudioMiniSession.owner === d) pkAudioMiniSession = null;
 document.removeEventListener('pk-duration-saved', onUnifiedDurationSaved);
@@ -39093,18 +39896,13 @@ return;
 }
 if (audio.paused || audio.ended) {
 pendingPlayRequested = true;
-audio.play().then(() => {
-if (!destroyed) {
-audioFailedLocked = false;
-pendingPlayRequested = false;
-setStatus(L.audio_playing);
-updatePlayButton();
-}
-}).catch(() => {
-if (!destroyed && audio.error && audio.error.code) markAudioFinalFailure(L.audio_play_failed);
-});
+finishAudioAutoResume();
+audio.muted = audioMuted;
+attemptAudioPlay();
 } else {
 pendingPlayRequested = false;
+audioAutoResumeMuted = false;
+audio.muted = audioMuted;
 audio.pause();
 }
 };
@@ -39154,27 +39952,21 @@ else updateAudioPlaylistActive();
 });
 audio.addEventListener('canplay', () => {
 if (!pendingPlayRequested || destroyed || !audio.src || !audio.paused) return;
-audio.play().then(() => {
-if (!destroyed) {
-audioFailedLocked = false;
-pendingPlayRequested = false;
-setStatus(L.audio_playing);
-updatePlayButton();
-}
-}).catch(() => {
-if (!destroyed && audio.error && audio.error.code) markAudioFinalFailure(L.audio_play_failed);
-});
+attemptAudioPlay();
 });
 audio.addEventListener('timeupdate', updateTime);
 audio.addEventListener('playing', () => {
 clearAudioFailNextTimer();
 audioFailAutoSkipCount = 0;
 audioFailedLocked = false;
+audioPlayBlockedByPolicy = false;
+finishAudioAutoResume();
+pendingPlayRequested = false;
 setStatus(L.audio_playing);
 updatePlayButton();
 });
 audio.addEventListener('pause', () => {
-if (!destroyed && audio.src && !audio.ended && !audioFailedLocked) setStatus(L.audio_paused);
+if (!destroyed && audio.src && !audio.ended && !audioFailedLocked) setStatus(audioPlayBlockedByPolicy ? L.audio_ready : L.audio_paused);
 updatePlayButton();
 });
 audio.addEventListener('volumechange', () => {
@@ -39187,8 +39979,16 @@ audio.addEventListener('error', () => {
 if (destroyed || !audio.src) return;
 if (!retryUsed) {
 retryUsed = true;
+pendingPlayRequested = true;
+audioPlayBlockedByPolicy = false;
 setStatus(L.audio_link_expired);
+const retryToken = loadToken;
+clearAudioMediaRetryTimer();
+audioMediaRetryTimer = setTimeout(() => {
+audioMediaRetryTimer = null;
+if (destroyed || retryToken !== loadToken) return;
 loadCurrent(true, true);
+}, 350);
 return;
 }
 const code = audio.error && audio.error.code;
@@ -39207,9 +40007,13 @@ setTimeout(() => d.focus(), 0);
 loadCurrent(true, false);
 }
 
-async function playVideo(item, startFullscreen = false) {
+async function playVideo(item, startFullscreen = false, options = {}) {
 if (S.trashMode) return;
 closeAudioMiniForMediaOpen();
+const playerOptions = options && typeof options === 'object' ? options : {};
+const requestedStartTime = Number(playerOptions.startTime);
+const hasRequestedStartTime = Number.isFinite(requestedStartTime) && requestedStartTime >= 0;
+const forceScriptPlayer = playerOptions.forceScriptPlayer === true;
 const getPhysicalId = (it) => {
 if ((S.offlineMode && it.kind === 'drive#task') || (S.uploadMode && it.file_id)) {
 return it.file_id || it.id;
@@ -39220,11 +40024,24 @@ return it.id;
 let pkHls = null;
 let isPlayerDestroyed = false;
 const L = getStrings();
-if (getDefaultOpenPlayerPref() === 'potplayer' && typeof openDefaultPotPlayerForItem === 'function') {
+if (!forceScriptPlayer && getDefaultOpenPlayerPref() === 'potplayer' && typeof openDefaultPotPlayerForItem === 'function') {
 const handledByExternalPlayer = await openDefaultPotPlayerForItem(item);
 if (handledByExternalPlayer) return;
 }
 const shouldSyncOfficialPlayHistory = (it = item) => !(it && it._isShareItem);
+const canReadOfficialHistoryProgress = (it = item) => {
+if (!it || !shouldSyncOfficialPlayHistory(it)) return false;
+if (S.historyMode) return true;
+if (S.trashMode || S.shareMode || S.shareParseMode || S.linkBookmarkMode ||
+    S.starredMode || S.recentMode || S.offlineMode || S.uploadMode ||
+    S.isFlattened || S.dupMode || S.analyzeMode) return false;
+
+const path = Array.isArray(S.path) ? S.path : [];
+return !path.some(node => {
+    const id = String((node && node.id) || '');
+    return id === 'virtual_search_root' || id === 'analyze_root' || id.startsWith('virtual_');
+});
+};
 let sharePreviewLimitTipShown = false;
 let sharePreviewSoftLimitTipShown = false;
 let sharePreviewSoftLimitSuppressed = false;
@@ -40078,12 +40895,16 @@ if (loader && (v.readyState >= 2 || box.querySelector('.pk-err-dialog'))) loader
 };
 
 const getLoadedHistoryProgress = (it) => {
-if (!shouldLoadVideoProgressCache() || !S.historyMode || !it) return null;
+if (!shouldLoadVideoProgressCache() || !canReadOfficialHistoryProgress(it)) return null;
 
 const targetId = String(getPhysicalId(it) || '');
 if (!targetId) return null;
 
 const candidates = [it];
+const historyItem = Array.isArray(S.historyItems)
+    ? S.historyItems.find(f => f && String(f.id || '') === targetId)
+    : null;
+if (historyItem && historyItem !== it) candidates.push(historyItem);
 const mapItem = S.itemMap && S.itemMap.get(targetId);
 if (mapItem) candidates.push(mapItem);
 
@@ -41455,14 +42276,27 @@ return;
 
 const shouldSwitchToFreshOriginal = currentResName === L.str_original && freshData.name === L.str_original && freshData.src && freshData.src !== currentLink;
 if (v.error || !currentLink || shouldSwitchToFreshOriginal || (currentResName === L.str_original && freshData.name !== L.str_original)) {
-const savedTime = parseFloat(v.currentTime || 0);
-const shouldReloadOfficialProgress = shouldSwitchToFreshOriginal && savedTime <= 1 && !hasUserSeeked && shouldLoadVideoProgressCache();
+const savedTime = parseFloat(v.currentTime || 0) || 0;
+
+const shouldReloadHistoryProgress = canReadOfficialHistoryProgress(initItem) &&
+    !hasRequestedStartTime &&
+    savedTime <= 1 &&
+    !hasUserSeeked &&
+    !v._isRestarting &&
+    shouldLoadVideoProgressCache();
+const shouldReloadOfficialProgress = !hasRequestedStartTime &&
+    (shouldSwitchToFreshOriginal || shouldReloadHistoryProgress) &&
+    savedTime <= 1 &&
+    !hasUserSeeked &&
+    shouldLoadVideoProgressCache();
 
 currentLink = freshData.src;
 currentResName = freshData.name;
 resTxt.textContent = currentResName;
 
-loadSource(currentLink, shouldReloadOfficialProgress ? null : savedTime);
+loadSource(currentLink, hasRequestedStartTime && savedTime <= 1
+    ? requestedStartTime
+    : (shouldReloadOfficialProgress ? null : savedTime));
 
 v.play().catch(()=>{});
 
@@ -42785,6 +43619,8 @@ console.warn("[AutoSub] Load failed", e);
 };
 
 const btnCloudSub = d.querySelector('#pk_sub_cloud_btn');
+
+if (btnCloudSub && S.shareParseMode && item && item._isShareItem) btnCloudSub.style.display = 'none';
 btnCloudSub.onclick = async (e) => {
 e.stopPropagation();
 
@@ -43531,7 +44367,7 @@ box.classList.add('buffering');
 const initialLoader = d.querySelector('.pk-p-loading');
 if (initialLoader) initialLoader.style.display = 'block';
 } else {
-loadSource(currentLink, null);
+loadSource(currentLink, hasRequestedStartTime ? requestedStartTime : null);
 setTimeout(() => {
 if (isPlayerDestroyed) return;
 
@@ -50680,17 +51516,654 @@ m.querySelector('#clear_up_confirm').click();
 });
 };
 
-const resolvePlayableDetailForExternal = async (item) => {
+const resolvePlayableDetailForExternal = async (item, options = {}) => {
 const targetApiId = ((S.offlineMode && item.kind === 'drive#task') || (S.uploadMode && item.file_id)) ? getOfflineReferenceLookupId(item) : item.id;
-if (item._isShareItem) return await resolveSharePlayableFile(item);
+if (item._isShareItem) return await resolveSharePlayableFile(item, options);
 if (!targetApiId) throw new Error("File ID not ready");
 try {
-return await apiGetWithCaptchaRecovery(targetApiId);
+return await apiGetWithCaptchaRecovery(targetApiId, {
+    signal: options.signal || null,
+    isRunning: typeof options.isRunning === 'function' ? options.isRunning : (() => true),
+    attempts: options.attempts || 3,
+    captchaRecoveryScope: options.captchaRecoveryScope || 'foreground_video_detail'
+});
 } catch (e) {
+if (e && e.name === 'AbortError') throw e;
 await markOfflineReferenceMissingFromError(item, e, { source: 'external_detail' });
 throw e;
 }
 };
+
+async function captureVideoContactSheet(item, options = {}) {
+const operationToken = options && options.operationToken ? options.operationToken : null;
+const releaseCaptureButton = options && typeof options.releaseButton === 'function' ? options.releaseButton : null;
+const captureAbortController = new AbortController();
+const captureSignal = captureAbortController.signal;
+const L = getStrings();
+const name = String((item && item.name) || L.btn_video_screenshot || 'video').trim() || 'video';
+const safeName = name.replace(/\.[^/.]+$/, '').replace(/[\\/:*?"<>|]+/g, '_').slice(0, 120) || 'video';
+const frameCount = 16;
+const frameUrls = [];
+const frameBlobs = [];
+const frameRecords = new Map();
+const selectedFrameIndexes = new Set();
+let media = null;
+let hls = null;
+let activeSourceUrl = '';
+let closed = false;
+let cleaned = false;
+let selectionActionBusy = false;
+
+const makeCaptureAbortError = () => {
+const error = new Error('Video frame capture aborted');
+error.name = 'AbortError';
+error.code = 'VIDEO_SCREENSHOT_ABORTED';
+return error;
+};
+const makeVisibilityPauseError = () => {
+const error = new Error('Video frame capture paused while the page was hidden');
+error.code = 'VIDEO_SCREENSHOT_VISIBILITY_PAUSED';
+return error;
+};
+const isVisibilityPauseError = error => !!(error && error.code === 'VIDEO_SCREENSHOT_VISIBILITY_PAUSED');
+const throwIfCaptureStopped = () => {
+if (closed || captureSignal.aborted) throw makeCaptureAbortError();
+};
+const waitUntilVisible = () => {
+throwIfCaptureStopped();
+if (!document.hidden) return Promise.resolve();
+return new Promise((resolve, reject) => {
+let settled = false;
+let abortHandler = null;
+const finish = (error = null) => {
+if (settled) return;
+settled = true;
+document.removeEventListener('visibilitychange', onVisibility, true);
+if (abortHandler) captureSignal.removeEventListener('abort', abortHandler);
+if (error) reject(error); else resolve();
+};
+const onVisibility = () => { if (!document.hidden) finish(); };
+abortHandler = () => finish(makeCaptureAbortError());
+document.addEventListener('visibilitychange', onVisibility, true);
+captureSignal.addEventListener('abort', abortHandler, { once: true });
+if (!document.hidden) finish();
+});
+};
+
+const m = showModal(`
+<h3 style="border:none;margin:0 0 14px;font-size:18px;font-weight:700;color:var(--pk-fg);">${esc(L.title_video_screenshot || L.btn_video_screenshot)}</h3>
+<div style="font-size:13px;color:var(--pk-fg);opacity:.72;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:12px;">${esc(name)}</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;min-height:34px;margin-bottom:10px;">
+<div id="pk-video-screenshot-status" style="flex:1 1 220px;min-width:180px;min-height:22px;font-size:13px;color:var(--pk-fg);opacity:.78;">${esc(L.msg_video_screenshot_loading || '')}</div>
+<div id="pk-video-screenshot-actions" style="display:flex;align-items:center;gap:8px;flex:0 0 auto;">
+<button type="button" id="pk-video-screenshot-invert" class="pk-btn" disabled style="display:none;height:32px;padding:0 12px;gap:6px;opacity:.4;cursor:not-allowed;">${CONF.icons.invert}<span>${esc(L.btn_invert || '')}</span></button>
+<button type="button" id="pk-video-screenshot-select-all" class="pk-btn" disabled style="height:32px;padding:0 12px;opacity:.4;cursor:not-allowed;"><span>${esc(L.btn_select_all || '')}</span></button>
+<button type="button" id="pk-video-screenshot-locate-play" class="pk-btn" disabled style="height:32px;padding:0 12px;gap:6px;opacity:.4;cursor:not-allowed;">${CONF.icons.locatePlay}<span>${esc(L.btn_video_screenshot_locate_play || '')}</span></button>
+<button type="button" id="pk-video-screenshot-save" class="pk-btn" disabled style="height:32px;padding:0 12px;gap:6px;opacity:.4;cursor:not-allowed;">${CONF.icons.download}<span>${esc(L.msg_video_screenshot_save || '')}</span></button>
+<button type="button" id="pk-video-screenshot-search" class="pk-btn" disabled style="height:32px;padding:0 12px;gap:6px;opacity:.4;cursor:not-allowed;">${CONF.icons.imgSearch}<span>${esc((L.btn_img_search || '').replace(/\s*\[[^\]]+\]\s*$/, ''))}</span></button>
+</div>
+</div>
+<div id="pk-video-screenshot-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:min(820px,80vw);max-height:66vh;overflow:auto;padding:2px;"></div>
+`);
+const modalBox = m.querySelector('.pk-modal');
+if (modalBox) {
+modalBox.style.width = 'min(880px, 92vw)';
+modalBox.style.maxWidth = '92vw';
+modalBox.style.padding = '22px';
+modalBox.style.boxSizing = 'border-box';
+}
+const statusEl = m.querySelector('#pk-video-screenshot-status');
+const gridEl = m.querySelector('#pk-video-screenshot-grid');
+const selectAllBtn = m.querySelector('#pk-video-screenshot-select-all');
+const locatePlayBtn = m.querySelector('#pk-video-screenshot-locate-play');
+const invertSelectionBtn = m.querySelector('#pk-video-screenshot-invert');
+const saveSelectionBtn = m.querySelector('#pk-video-screenshot-save');
+const searchSelectionBtn = m.querySelector('#pk-video-screenshot-search');
+
+const setStatus = text => {
+if (statusEl && !closed) statusEl.textContent = String(text || '');
+};
+
+const getSelectedFrameRecords = () => Array.from(selectedFrameIndexes)
+.sort((a, b) => a - b)
+.map(index => frameRecords.get(index))
+.filter(Boolean);
+
+const updateSelectionActions = () => {
+const hasFrames = !closed && !selectionActionBusy && frameRecords.size > 0;
+const selectedRecords = getSelectedFrameRecords();
+const enabled = hasFrames && selectedRecords.length > 0;
+const locateEnabled = hasFrames && selectedRecords.length === 1;
+[saveSelectionBtn, searchSelectionBtn].forEach(button => {
+if (!button) return;
+button.disabled = !enabled;
+button.style.opacity = enabled ? '1' : '.4';
+button.style.cursor = enabled ? 'pointer' : 'not-allowed';
+});
+if (locatePlayBtn) {
+locatePlayBtn.disabled = !locateEnabled;
+locatePlayBtn.style.opacity = locateEnabled ? '1' : '.4';
+locatePlayBtn.style.cursor = locateEnabled ? 'pointer' : 'not-allowed';
+}
+if (selectAllBtn) {
+selectAllBtn.disabled = !hasFrames;
+selectAllBtn.style.opacity = hasFrames ? '1' : '.4';
+selectAllBtn.style.cursor = hasFrames ? 'pointer' : 'not-allowed';
+}
+if (invertSelectionBtn) {
+invertSelectionBtn.disabled = !enabled;
+invertSelectionBtn.style.display = enabled ? 'inline-flex' : 'none';
+invertSelectionBtn.style.opacity = enabled ? '1' : '.4';
+invertSelectionBtn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+}
+};
+
+const syncFrameSelectionVisuals = () => {
+if (!gridEl) return;
+gridEl.querySelectorAll('[data-frame-index]').forEach(cell => {
+const index = Number(cell.dataset.frameIndex);
+const selected = Number.isInteger(index) && selectedFrameIndexes.has(index);
+cell.setAttribute('aria-pressed', String(selected));
+cell.style.borderColor = selected ? 'var(--pk-pri)' : 'var(--pk-bd)';
+cell.style.boxShadow = selected ? '0 0 0 2px color-mix(in srgb, var(--pk-pri) 35%, transparent)' : 'none';
+const check = cell.querySelector('[data-frame-check]');
+if (check) check.style.display = selected ? 'flex' : 'none';
+});
+};
+
+const selectAllFrames = () => {
+if (closed || !frameRecords.size) return;
+const indexes = Array.from(frameRecords.keys());
+const allSelected = indexes.length > 0 && indexes.every(index => selectedFrameIndexes.has(index));
+indexes.forEach(index => {
+if (allSelected) selectedFrameIndexes.delete(index);
+else selectedFrameIndexes.add(index);
+});
+syncFrameSelectionVisuals();
+updateSelectionActions();
+};
+
+const invertSelectedFrames = () => {
+if (closed || !frameRecords.size) return;
+frameRecords.forEach((_record, index) => {
+if (selectedFrameIndexes.has(index)) selectedFrameIndexes.delete(index);
+else selectedFrameIndexes.add(index);
+});
+syncFrameSelectionVisuals();
+updateSelectionActions();
+};
+
+const loadScreenshotImage = url => new Promise((resolve, reject) => {
+const image = new Image();
+image.onload = () => resolve(image);
+image.onerror = () => reject(new Error('VIDEO_SCREENSHOT_IMAGE_LOAD_FAILED'));
+image.src = String(url || '');
+});
+
+const saveSelectedFrames = async () => {
+const records = getSelectedFrameRecords();
+if (!records.length || closed) return;
+selectionActionBusy = true;
+updateSelectionActions();
+try {
+for (const record of records) {
+if (closed) break;
+const link = document.createElement('a');
+link.href = record.url;
+link.download = `${safeName}_${String(record.index + 1).padStart(2, '0')}.jpg`;
+link.style.display = 'none';
+document.body.appendChild(link);
+link.click();
+link.remove();
+await sleep(90);
+}
+} finally {
+selectionActionBusy = false;
+updateSelectionActions();
+}
+};
+
+const searchSelectedFrames = async () => {
+const records = getSelectedFrameRecords();
+if (!records.length || closed) return;
+selectionActionBusy = true;
+updateSelectionActions();
+try {
+for (const record of records) {
+if (closed) break;
+const image = await loadScreenshotImage(record.url);
+await startImageSearch(image, `${safeName}_${String(record.index + 1).padStart(2, '0')}.jpg`, document.body, record.url);
+if (records.length > 1) await sleep(200);
+}
+} finally {
+selectionActionBusy = false;
+updateSelectionActions();
+}
+};
+
+const locateSelectedFramePlayback = async () => {
+const records = getSelectedFrameRecords();
+if (closed || records.length !== 1 || selectionActionBusy) return;
+const record = records[0];
+const startTime = Number(record && record.seconds);
+if (!Number.isFinite(startTime) || startTime < 0) return;
+selectionActionBusy = true;
+updateSelectionActions();
+cleanup();
+try { m.remove(); } catch (e) {}
+await playVideo(item, false, { startTime, forceScriptPlayer: true });
+};
+
+if (selectAllBtn) selectAllBtn.addEventListener('click', selectAllFrames);
+if (invertSelectionBtn) invertSelectionBtn.addEventListener('click', invertSelectedFrames);
+if (locatePlayBtn) locatePlayBtn.addEventListener('click', locateSelectedFramePlayback);
+if (saveSelectionBtn) saveSelectionBtn.addEventListener('click', saveSelectedFrames);
+if (searchSelectionBtn) searchSelectionBtn.addEventListener('click', searchSelectedFrames);
+
+const cleanup = () => {
+if (cleaned) return;
+cleaned = true;
+closed = true;
+try { captureAbortController.abort(); } catch (e) {}
+if (releaseCaptureButton) {
+try { releaseCaptureButton(operationToken); } catch (e) {}
+}
+try { if (hls) hls.destroy(); } catch (e) {}
+hls = null;
+try { if (media) { media.pause(); media.removeAttribute('src'); media.load(); } } catch (e) {}
+if (media && media.parentNode) media.parentNode.removeChild(media);
+media = null;
+frameUrls.forEach(url => { try { URL.revokeObjectURL(url); } catch (e) {} });
+frameUrls.length = 0;
+frameBlobs.length = 0;
+frameRecords.clear();
+selectedFrameIndexes.clear();
+};
+
+const closeBtn = m.querySelector('.pk-modal-close');
+if (closeBtn) closeBtn.addEventListener('click', cleanup, { once: true });
+
+const waitForEvent = (target, events, timeout, ready, signal = captureSignal) => new Promise((resolve, reject) => {
+let timer = 0;
+let settled = false;
+let abortHandler = null;
+let visibilityHandler = null;
+const eventList = Array.isArray(events) ? events : [events];
+const finish = (error, value) => {
+if (settled) return;
+settled = true;
+if (timer) clearTimeout(timer);
+eventList.forEach(event => target.removeEventListener(event, onEvent));
+if (signal && abortHandler) signal.removeEventListener('abort', abortHandler);
+if (visibilityHandler) document.removeEventListener('visibilitychange', visibilityHandler, true);
+if (error) reject(error); else resolve(value);
+};
+const onEvent = () => {
+try { if (!ready || ready()) finish(null, target); } catch (e) { finish(e); }
+};
+abortHandler = () => finish(makeCaptureAbortError());
+visibilityHandler = () => { if (document.hidden) finish(makeVisibilityPauseError()); };
+if (signal && signal.aborted) { finish(makeCaptureAbortError()); return; }
+eventList.forEach(event => target.addEventListener(event, onEvent, { once: false }));
+if (signal) signal.addEventListener('abort', abortHandler, { once: true });
+document.addEventListener('visibilitychange', visibilityHandler, true);
+if (ready) { try { if (ready()) return finish(null, target); } catch (e) { return finish(e); } }
+timer = setTimeout(() => finish(new Error('VIDEO_SCREENSHOT_TIMEOUT')), Math.max(1000, Number(timeout) || 15000));
+});
+
+const destroyHls = () => {
+if (!hls) return;
+try { hls.destroy(); } catch (e) {}
+hls = null;
+};
+
+const loadMediaSource = async url => {
+await waitUntilVisible();
+throwIfCaptureStopped();
+const rawUrl = String(url || '').trim();
+if (!rawUrl) throw new Error('VIDEO_SCREENSHOT_SOURCE_MISSING');
+destroyHls();
+try { media.removeAttribute('src'); media.load(); } catch (e) {}
+const isTsHls = isPikPakTsDownloaderUrl(rawUrl);
+const isM3u8 = isTsHls || /\.m3u8(?:[?#]|$)/i.test(rawUrl) || /[?&]ext=\.m3u8(?:&|$)/i.test(rawUrl);
+let finalUrl = rawUrl;
+if (/[?&]ext=\.m3u8(?:&|$)/i.test(finalUrl)) finalUrl = buildPikPakTsHlsUrl(finalUrl);
+const HlsCtor = isTsHls ? (getPikPakOfficialHlsCtor() || window.Hls) : window.Hls;
+if (isM3u8 && HlsCtor && typeof HlsCtor.isSupported === 'function' && HlsCtor.isSupported()) {
+const events = HlsCtor.Events || {};
+hls = new HlsCtor({ debug: false, enableWorker: true, lowLatencyMode: false, fragLoadingMaxRetry: 2, manifestLoadingMaxRetry: 2, levelLoadingMaxRetry: 2, fragLoadingTimeOut: 20000, manifestLoadingTimeOut: 15000, startLevel: -1 });
+const activeHls = hls;
+await new Promise((resolve, reject) => {
+let settled = false;
+let abortHandler = null;
+let visibilityHandler = null;
+let timer = setTimeout(() => finish(new Error('VIDEO_SCREENSHOT_TIMEOUT')), 20000);
+const finish = error => {
+if (settled) return;
+settled = true;
+clearTimeout(timer);
+if (events.ERROR) activeHls.off(events.ERROR, onError);
+if (events.MANIFEST_PARSED) activeHls.off(events.MANIFEST_PARSED, onReady);
+if (abortHandler) captureSignal.removeEventListener('abort', abortHandler);
+if (visibilityHandler) document.removeEventListener('visibilitychange', visibilityHandler, true);
+if (error) reject(error); else resolve();
+};
+const onError = (event, data) => { if (data && data.fatal) finish(new Error('VIDEO_SCREENSHOT_MEDIA_ERROR')); };
+const onReady = () => finish(null);
+abortHandler = () => finish(makeCaptureAbortError());
+visibilityHandler = () => { if (document.hidden) finish(makeVisibilityPauseError()); };
+if (captureSignal.aborted) { finish(makeCaptureAbortError()); return; }
+if (events.ERROR) activeHls.on(events.ERROR, onError);
+if (events.MANIFEST_PARSED) activeHls.on(events.MANIFEST_PARSED, onReady);
+else setTimeout(onReady, 0);
+captureSignal.addEventListener('abort', abortHandler, { once: true });
+document.addEventListener('visibilitychange', visibilityHandler, true);
+activeHls.loadSource(finalUrl);
+activeHls.attachMedia(media);
+});
+await waitForEvent(media, ['loadedmetadata', 'durationchange'], 20000, () => media.readyState >= 1 && Number.isFinite(media.duration) && media.duration > 0);
+activeSourceUrl = rawUrl;
+return;
+}
+if (isM3u8 && media.canPlayType && !media.canPlayType('application/vnd.apple.mpegurl')) throw new Error('VIDEO_SCREENSHOT_HLS_UNSUPPORTED');
+media.src = finalUrl;
+media.load();
+await waitForEvent(media, ['loadedmetadata', 'durationchange'], 20000, () => media.readyState >= 1 && Number.isFinite(media.duration) && media.duration > 0);
+activeSourceUrl = rawUrl;
+};
+
+const waitForPresentedFrame = (target, timeout = 8000) => new Promise((resolve, reject) => {
+if (closed || captureSignal.aborted) { reject(makeCaptureAbortError()); return; }
+const frameIsReady = metadata => {
+const currentTime = Number(media.currentTime);
+const mediaTime = Number(metadata && metadata.mediaTime);
+const currentReady = media.readyState >= 2 && Number.isFinite(currentTime) && Math.abs(currentTime - target) < 3;
+const presentedReady = !Number.isFinite(mediaTime) || Math.abs(mediaTime - target) < 3;
+return currentReady && presentedReady;
+};
+if (typeof media.requestVideoFrameCallback !== 'function') {
+waitForEvent(media, ['canplay', 'loadeddata', 'timeupdate', 'playing'], timeout, () => frameIsReady(null))
+.then(() => waitUntilVisible())
+.then(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+.then(resolve, reject);
+return;
+}
+let settled = false;
+let timer = 0;
+let callbackId = 0;
+let abortHandler = null;
+let visibilityHandler = null;
+const finish = (error) => {
+if (settled) return;
+settled = true;
+if (timer) clearTimeout(timer);
+if (typeof media.cancelVideoFrameCallback === 'function' && callbackId) {
+try { media.cancelVideoFrameCallback(callbackId); } catch (e) {}
+}
+if (abortHandler) captureSignal.removeEventListener('abort', abortHandler);
+if (visibilityHandler) document.removeEventListener('visibilitychange', visibilityHandler, true);
+if (error) reject(error); else resolve();
+};
+abortHandler = () => finish(makeCaptureAbortError());
+visibilityHandler = () => { if (document.hidden) finish(makeVisibilityPauseError()); };
+captureSignal.addEventListener('abort', abortHandler, { once: true });
+document.addEventListener('visibilitychange', visibilityHandler, true);
+const onFrame = (_now, metadata) => {
+if (closed || captureSignal.aborted) { finish(makeCaptureAbortError()); return; }
+if (frameIsReady(metadata)) { finish(); return; }
+try { callbackId = media.requestVideoFrameCallback(onFrame); } catch (e) { finish(e); }
+};
+timer = setTimeout(() => finish(new Error('VIDEO_SCREENSHOT_FRAME_TIMEOUT')), Math.max(1000, Number(timeout) || 4500));
+try { callbackId = media.requestVideoFrameCallback(onFrame); } catch (e) { finish(e); }
+});
+
+const seekMediaOnce = async target => {
+await waitUntilVisible();
+throwIfCaptureStopped();
+try { media.pause(); media.currentTime = target; } catch (e) { throw e; }
+await waitForEvent(media, ['seeked', 'canplay', 'loadeddata', 'timeupdate', 'progress'], 20000, () => {
+const currentTime = Number(media.currentTime);
+return media.readyState >= 2 && Number.isFinite(currentTime) && Math.abs(currentTime - target) < 1.5;
+});
+try {
+const playResult = media.play();
+if (playResult && typeof playResult.catch === 'function') playResult.catch(() => {});
+} catch (e) {}
+await waitForPresentedFrame(target, 8000);
+try { media.pause(); } catch (e) {}
+};
+
+const reloadMediaForFrame = async () => {
+await waitUntilVisible();
+throwIfCaptureStopped();
+const sourceUrl = String(activeSourceUrl || '').trim();
+if (!sourceUrl) throw new Error('VIDEO_SCREENSHOT_SOURCE_MISSING');
+
+await loadMediaSource(sourceUrl);
+};
+
+const seekMedia = async seconds => {
+await waitUntilVisible();
+throwIfCaptureStopped();
+const target = Math.max(0, Math.min(Number(seconds) || 0, Math.max(0, Number(media.duration) || 0)));
+let lastError = null;
+for (let attempt = 0; attempt < 4; attempt++) {
+try {
+await seekMediaOnce(target);
+return;
+} catch (e) {
+lastError = e;
+if (isVisibilityPauseError(e)) {
+await waitUntilVisible();
+if (closed) throw makeCaptureAbortError();
+attempt--;
+continue;
+}
+if (closed || attempt >= 3) break;
+
+if (attempt >= 1) {
+try { await reloadMediaForFrame(); } catch (reloadError) {
+lastError = reloadError;
+if (closed) break;
+}
+}
+await sleep(250 * (attempt + 1));
+}
+}
+throw lastError || new Error('VIDEO_SCREENSHOT_SEEK_FAILED');
+};
+
+const canvasBlob = (canvas, type, quality, signal = captureSignal) => new Promise((resolve, reject) => {
+let done = false;
+let abortHandler = null;
+let visibilityHandler = null;
+const finish = (error, blob = null) => {
+if (done) return;
+done = true;
+clearTimeout(timer);
+if (abortHandler) signal.removeEventListener('abort', abortHandler);
+if (visibilityHandler) document.removeEventListener('visibilitychange', visibilityHandler, true);
+if (error) reject(error); else if (blob && blob.size > 0) resolve(blob); else reject(new Error('VIDEO_SCREENSHOT_EMPTY'));
+};
+const timer = setTimeout(() => finish(new Error('VIDEO_SCREENSHOT_ENCODE_TIMEOUT')), 5000);
+abortHandler = () => finish(makeCaptureAbortError());
+visibilityHandler = () => { if (document.hidden) finish(makeVisibilityPauseError()); };
+if (signal && signal.aborted) { finish(makeCaptureAbortError()); return; }
+if (signal) signal.addEventListener('abort', abortHandler, { once: true });
+document.addEventListener('visibilitychange', visibilityHandler, true);
+try {
+canvas.toBlob(blob => {
+finish(null, blob);
+}, type, quality);
+} catch (e) {
+finish(e);
+}
+});
+
+const renderFrame = (blob, index, seconds) => {
+if (!gridEl || closed) return;
+const cell = document.createElement('div');
+cell.style.cssText = 'position:relative;aspect-ratio:16/9;background:rgba(0,0,0,.28);border:2px solid var(--pk-bd);border-radius:7px;overflow:hidden;cursor:pointer;box-sizing:border-box;transition:border-color .15s,box-shadow .15s;';
+cell.dataset.frameIndex = String(index);
+cell.setAttribute('role', 'button');
+cell.setAttribute('aria-pressed', 'false');
+const url = URL.createObjectURL(blob);
+frameUrls.push(url);
+frameBlobs.push(blob);
+frameRecords.set(index, { index, url, blob, seconds });
+const img = document.createElement('img');
+img.src = url;
+img.alt = `${name} ${index + 1}`;
+img.draggable = false;
+img.style.cssText = 'display:block;width:100%;height:100%;object-fit:cover;';
+const label = document.createElement('span');
+label.textContent = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
+label.style.cssText = 'position:absolute;left:5px;bottom:5px;padding:2px 5px;border-radius:4px;background:rgba(0,0,0,.68);color:#fff;font-size:11px;line-height:1.2;';
+const check = document.createElement('span');
+check.textContent = '\u2713';
+check.dataset.frameCheck = '1';
+check.style.cssText = 'position:absolute;right:7px;top:7px;width:20px;height:20px;border-radius:50%;display:none;align-items:center;justify-content:center;background:var(--pk-pri);color:#fff;font-size:14px;font-weight:700;line-height:20px;box-shadow:0 1px 4px rgba(0,0,0,.45);';
+cell.appendChild(img);
+cell.appendChild(label);
+cell.appendChild(check);
+cell.addEventListener('click', () => {
+if (closed) return;
+const isSelected = selectedFrameIndexes.has(index);
+if (isSelected) selectedFrameIndexes.delete(index);
+else selectedFrameIndexes.add(index);
+syncFrameSelectionVisuals();
+updateSelectionActions();
+});
+gridEl.appendChild(cell);
+updateSelectionActions();
+};
+
+try {
+if (!item || !window.pkHasOfficialVideoEvidence(item)) throw new Error('VIDEO_SCREENSHOT_NOT_VIDEO');
+setStatus(L.msg_video_screenshot_loading);
+const detail = await resolvePlayableDetailForExternal(item, {
+    signal: captureSignal,
+    isRunning: () => !closed,
+    captchaRecoveryScope: 'foreground_video_screenshot'
+});
+if (!window.pkHasOfficialVideoEvidence(detail)) throw new Error('VIDEO_SCREENSHOT_NOT_VIDEO');
+const sourceData = getBestSource(detail);
+if (!hasPlayableSource(sourceData)) throw new Error('VIDEO_SCREENSHOT_SOURCE_MISSING');
+const sourceCandidates = [];
+const addCandidate = url => { const value = String(url || '').trim(); if (value && !sourceCandidates.includes(value)) sourceCandidates.push(value); };
+addCandidate(sourceData.src);
+(Array.isArray(sourceData.list) ? sourceData.list : []).forEach(row => addCandidate(row && (row.link || row.url)));
+addCandidate(detail.web_content_link);
+Object.values(detail.links && typeof detail.links === 'object' ? detail.links : {}).forEach(link => addCandidate(typeof link === 'string' ? link : (link && link.url)));
+if (Array.isArray(detail.medias)) detail.medias.forEach(mediaItem => addCandidate(mediaItem && mediaItem.link && mediaItem.link.url));
+media = document.createElement('video');
+media.muted = true;
+media.playsInline = true;
+media.preload = 'auto';
+media.crossOrigin = 'anonymous';
+media.style.cssText = 'position:fixed;left:-10000px;top:-10000px;width:2px;height:2px;opacity:0;pointer-events:none;';
+document.body.appendChild(media);
+let loaded = false;
+let lastError = null;
+let activeSourceIndex = -1;
+for (let i = 0; i < Math.min(sourceCandidates.length, 5); i++) {
+try { await loadMediaSource(sourceCandidates[i]); loaded = true; activeSourceIndex = i; break; } catch (e) {
+lastError = e;
+if (isVisibilityPauseError(e)) { await waitUntilVisible(); i--; continue; }
+if (closed) throw makeCaptureAbortError();
+activeSourceUrl = '';
+destroyHls();
+}
+}
+if (!loaded) throw lastError || new Error('VIDEO_SCREENSHOT_SOURCE_MISSING');
+let sourceRefreshAttempted = false;
+const tryLoadAlternativeSource = async () => {
+for (let i = activeSourceIndex + 1; i < Math.min(sourceCandidates.length, 5); i++) {
+try { await loadMediaSource(sourceCandidates[i]); activeSourceIndex = i; return true; } catch (e) {
+if (isVisibilityPauseError(e)) { await waitUntilVisible(); i--; continue; }
+if (closed) throw makeCaptureAbortError();
+}
+}
+if (sourceRefreshAttempted) return false;
+sourceRefreshAttempted = true;
+try {
+const refreshedDetail = await resolvePlayableDetailForExternal(item, {
+    signal: captureSignal,
+    isRunning: () => !closed,
+    captchaRecoveryScope: 'foreground_video_screenshot_refresh'
+});
+const refreshedSource = getBestSource(refreshedDetail);
+addCandidate(refreshedSource && refreshedSource.src);
+(Array.isArray(refreshedSource && refreshedSource.list) ? refreshedSource.list : []).forEach(row => addCandidate(row && (row.link || row.url)));
+addCandidate(refreshedDetail && refreshedDetail.web_content_link);
+Object.values(refreshedDetail && typeof refreshedDetail.links === 'object' ? refreshedDetail.links : {}).forEach(link => addCandidate(typeof link === 'string' ? link : (link && link.url)));
+if (Array.isArray(refreshedDetail && refreshedDetail.medias)) refreshedDetail.medias.forEach(mediaItem => addCandidate(mediaItem && mediaItem.link && mediaItem.link.url));
+} catch (e) {
+if (closed || captureSignal.aborted) throw makeCaptureAbortError();
+return false;
+}
+for (let i = activeSourceIndex + 1; i < Math.min(sourceCandidates.length, 5); i++) {
+try { await loadMediaSource(sourceCandidates[i]); activeSourceIndex = i; return true; } catch (e) {
+if (isVisibilityPauseError(e)) { await waitUntilVisible(); i--; continue; }
+if (closed) throw makeCaptureAbortError();
+}
+}
+return false;
+};
+const duration = Number(media.duration || (item.params && item.params.duration) || 0);
+if (!(duration > 0)) throw new Error('VIDEO_SCREENSHOT_DURATION_MISSING');
+const captureDuration = getSharePreviewCaptureDuration(detail, duration);
+const canvas = document.createElement('canvas');
+const maxSide = 1280;
+const ratio = (media.videoWidth > 0 && media.videoHeight > 0) ? media.videoWidth / media.videoHeight : 16 / 9;
+let width = Math.round(Math.min(maxSide, Math.max(320, maxSide)));
+let height = Math.round(width / ratio);
+if (height > maxSide) { height = maxSide; width = Math.round(height * ratio); }
+canvas.width = Math.max(2, width);
+canvas.height = Math.max(2, height);
+const ctx = canvas.getContext('2d', { alpha: false });
+if (!ctx) throw new Error('VIDEO_SCREENSHOT_CANVAS_UNAVAILABLE');
+for (let index = 0; index < frameCount; index++) {
+if (closed) return;
+await waitUntilVisible();
+const seconds = Math.min(captureDuration, Math.max(0.1, captureDuration * ((index + 0.5) / frameCount)));
+setStatus((L.msg_video_screenshot_progress || '').replace('{n}', String(frameRecords.size)));
+try {
+await seekMedia(seconds);
+ctx.drawImage(media, 0, 0, canvas.width, canvas.height);
+const blob = await canvasBlob(canvas, 'image/jpeg', 0.86);
+renderFrame(blob, index, seconds);
+setStatus((L.msg_video_screenshot_progress || '').replace('{n}', String(frameRecords.size)));
+} catch (e) {
+if (isVisibilityPauseError(e)) {
+await waitUntilVisible();
+if (closed) return;
+index--;
+continue;
+}
+if (closed || captureSignal.aborted) return;
+if (await tryLoadAlternativeSource()) {
+index--;
+continue;
+}
+console.debug('[VideoScreenshot] Frame retry exhausted', { index: index + 1, seconds, error: e });
+const failed = document.createElement('div');
+failed.style.cssText = 'display:flex;align-items:center;justify-content:center;aspect-ratio:16/9;border:1px solid var(--pk-bd);border-radius:7px;background:rgba(0,0,0,.22);color:var(--pk-fg);opacity:.65;font-size:12px;text-align:center;padding:8px;box-sizing:border-box;';
+failed.textContent = L.msg_video_screenshot_frame_failed || L.err_capture;
+if (gridEl) gridEl.appendChild(failed);
+setStatus((L.msg_video_screenshot_progress || '').replace('{n}', String(frameRecords.size)));
+}
+}
+const captured = gridEl ? gridEl.querySelectorAll('img').length : 0;
+if (!captured) throw new Error('VIDEO_SCREENSHOT_NO_FRAME');
+setStatus(`${captured}/${frameCount}`);
+} catch (error) {
+if (!closed) {
+setStatus(L.msg_video_screenshot_failed || L.err_capture);
+showToast(L.msg_video_screenshot_failed || L.err_capture, 'error');
+}
+}
+}
 
 const cleanExternalPlaybackUrl = (url) => {
 let cleanUrl = String(url || '').replace('&ext=.m3u8', '');
@@ -51074,6 +52547,35 @@ return;
 openExternalPlaybackDialog(detail, { source: 'normal' });
 };
 
+if (UI.btnVideoScreenshot) UI.btnVideoScreenshot.onclick = async () => {
+if (UI.btnVideoScreenshot.disabled || UI.btnVideoScreenshot.dataset.busy === '1') return;
+const selectedIds = S.getSelectedIds();
+if (selectedIds.length !== 1) return;
+const item = (S.shareParseMode
+? ((S.shareParseInsightItemMap && S.shareParseInsightItemMap.get(selectedIds[0])) || (S.shareParseItemMap && S.shareParseItemMap.get(selectedIds[0])))
+: null) || S.itemMap.get(selectedIds[0]);
+if (!item || !window.pkHasOfficialVideoEvidence(item)) return;
+const operationToken = {};
+const releaseCaptureButton = () => {
+if (UI.btnVideoScreenshot._pkCaptureOperationToken !== operationToken) return;
+delete UI.btnVideoScreenshot._pkCaptureOperationToken;
+delete UI.btnVideoScreenshot.dataset.busy;
+UI.btnVideoScreenshot.disabled = false;
+UI.btnVideoScreenshot.style.cursor = 'pointer';
+UI.btnVideoScreenshot.style.opacity = '1';
+updateStat();
+};
+UI.btnVideoScreenshot._pkCaptureOperationToken = operationToken;
+UI.btnVideoScreenshot.dataset.busy = '1';
+UI.btnVideoScreenshot.disabled = true;
+UI.btnVideoScreenshot.style.cursor = 'wait';
+try {
+await captureVideoContactSheet(item, { operationToken, releaseButton: releaseCaptureButton });
+} finally {
+releaseCaptureButton();
+}
+};
+
 
 if (UI.btnExportM3U) UI.btnExportM3U.onclick = async () => {
 const L = getStrings();
@@ -51297,7 +52799,15 @@ if (!isRunning) return null;
 try {
 await waitBeforeDownloadHydrate(i);
 if (!isRunning) return null;
-const detail = await apiGet(lookupId, { signal, callerManagedCaptchaRecovery: true });
+const detail = await apiGet(lookupId, {
+    signal,
+    callerManagedCaptchaRecovery: true,
+    isRunning: () => isRunning,
+    captchaRecoveryScope: hydrateCaptchaScope,
+    onWait: () => {
+        if (progressTask) progressTask.update(`${L.msg_batch_restoring_access_verification || L.str_waiting_token || L.msg_batch_hydrating} ${readyFiles.length} / ${allFiles.length}`);
+    }
+});
 if (detail && detail.web_content_link) return detail;
 if (detail && (detail.phase === "PHASE_TYPE_PENDING" || detail.phase === "PHASE_TYPE_RUNNING")) return null;
 throw createDownloadLinkEmptyError();
@@ -51537,7 +53047,15 @@ if (!isRunning) return null;
 try {
 await waitBeforeDownloadHydrate(i);
 if (!isRunning) return null;
-const detail = await apiGet(lookupId, { signal, callerManagedCaptchaRecovery: true });
+const detail = await apiGet(lookupId, {
+    signal,
+    callerManagedCaptchaRecovery: true,
+    isRunning: () => isRunning,
+    captchaRecoveryScope: hydrateCaptchaScope,
+    onWait: () => {
+        if (progressTask) progressTask.update(`${L.msg_batch_restoring_access_verification || L.str_waiting_token || L.msg_batch_hydrating} ${stats.hydratedCount} / ${allFiles.length}`);
+    }
+});
 if (detail && detail.web_content_link) return detail;
 if (detail && (detail.phase === "PHASE_TYPE_PENDING" || detail.phase === "PHASE_TYPE_RUNNING")) return null;
 throw createDownloadLinkEmptyError();
@@ -53136,6 +54654,34 @@ _lastPollBytes = 0;
 const safePid = (finalParentId === 'root' || finalParentId === 'upload_root') ? '' : (finalParentId || '');
 
 let data = null;
+const applyOfficialUploadMediaMeta = (source) => {
+    if (!source || typeof source !== 'object') return false;
+    const hadVideoEvidence = window.pkHasOfficialVideoEvidence(task);
+    const reference = source.reference_resource;
+    const hasSourceVideoEvidence = window.pkHasOfficialVideoEvidence(source) || !!(
+        reference && typeof reference === 'object' && window.pkHasOfficialVideoEvidence(reference)
+    );
+    if (source.mime_type) task.mime_type = source.mime_type;
+    if (Array.isArray(source.medias)) task.medias = source.medias;
+    if (source.video_media_metadata && typeof source.video_media_metadata === 'object') {
+        task.video_media_metadata = source.video_media_metadata;
+    }
+    if (source.params && typeof source.params === 'object') {
+        task.params = Object.assign({}, task.params || {}, source.params);
+    }
+    if (reference && typeof reference === 'object') {
+        if (reference.mime_type) task.mime_type = reference.mime_type;
+        if (Array.isArray(reference.medias)) task.medias = reference.medias;
+        if (reference.video_media_metadata && typeof reference.video_media_metadata === 'object') {
+            task.video_media_metadata = reference.video_media_metadata;
+        }
+        if (reference.params && typeof reference.params === 'object') {
+            task.params = Object.assign({}, task.params || {}, reference.params);
+        }
+    }
+    if (hasSourceVideoEvidence) task._officialVideoEvidence = true;
+    return !hadVideoEvidence && window.pkHasOfficialVideoEvidence(task);
+};
 
 if (task._initData && task.file_id) {
 data = task._initData;
@@ -53199,7 +54745,9 @@ task._initData = data;
 
 let newlyCreatedFileId = null;
 let uploadVisualChanged = false;
+let uploadMetadataChanged = false;
 if (data.file) {
+uploadMetadataChanged = applyOfficialUploadMediaMeta(data.file) || uploadMetadataChanged;
 if (data.file.id) {
     task.file_id = data.file.id;
     newlyCreatedFileId = data.file.id;
@@ -53214,10 +54762,12 @@ if (data.file.icon_link) {
     uploadVisualChanged = true;
 }
 } else if (data.task && data.task.file_id) {
+uploadMetadataChanged = applyOfficialUploadMediaMeta(data.task) || uploadMetadataChanged;
 task.file_id = data.task.file_id;
 newlyCreatedFileId = data.task.file_id;
 if (data.task.name) task.name = data.task.name;
 } else if (data.id) {
+uploadMetadataChanged = applyOfficialUploadMediaMeta(data) || uploadMetadataChanged;
 task.file_id = data.id;
 newlyCreatedFileId = data.id;
 if (data.name) task.name = data.name;
@@ -53244,7 +54794,10 @@ if (typeof window.pkAddGhostFile === 'function') window.pkAddGhostFile(newlyCrea
 task._ghostAdded = true;
 }
 S.upMng.saveTask(task);
-if (uploadVisualChanged) scheduleUploadRenderVisible();
+if (uploadVisualChanged || uploadMetadataChanged) {
+    scheduleUploadRenderVisible();
+    if (typeof updateStat === 'function') updateStat();
+}
 
 const waitOfficialUploadTaskComplete = async () => {
 if (!task._uploadTaskId) return true;
@@ -53268,6 +54821,7 @@ for (let i = 1; i <= maxPoll; i++) {
             const phase = (watchTaskData && watchTaskData.phase) || '';
             const ref = (watchTaskData && watchTaskData.reference_resource) || {};
             let refVisualChanged = false;
+            const refMetadataChanged = applyOfficialUploadMediaMeta(watchTaskData) || applyOfficialUploadMediaMeta(ref);
             if (ref.name) task.name = ref.name;
             if (ref.mime_type) task.mime_type = ref.mime_type;
             if (ref.icon_link && task.icon_link !== ref.icon_link) {
@@ -53278,7 +54832,10 @@ for (let i = 1; i <= maxPoll; i++) {
                 task.thumbnail_link = ref.thumbnail_link;
                 refVisualChanged = true;
             }
-            if (refVisualChanged) scheduleUploadRenderVisible();
+            if (refVisualChanged || refMetadataChanged) {
+                scheduleUploadRenderVisible();
+                if (typeof updateStat === 'function') updateStat();
+            }
             if (phase === 'PHASE_TYPE_COMPLETE') {
                 const record = S.cloudTargetWatches && S.cloudTargetWatches.get(String(task._uploadTaskId));
                 if (record) {
@@ -53578,14 +55135,16 @@ task.message = L.msg_task_init_part;
             const meta = await apiGet(task.file_id);
             if (meta) {
                 task._finalFileMeta = meta;
+                const metaEvidenceChanged = applyOfficialUploadMediaMeta(meta);
                 let metaVisualChanged = false;
                 if (meta.icon_link && task.icon_link !== meta.icon_link) {
                     task.icon_link = meta.icon_link;
                     metaVisualChanged = true;
                 }
-                if (meta.mime_type) task.mime_type = meta.mime_type;
-                if (meta.medias) task.medias = meta.medias;
-                if (metaVisualChanged) scheduleUploadRenderVisible();
+                if (metaVisualChanged || metaEvidenceChanged) {
+                    scheduleUploadRenderVisible();
+                    if (typeof updateStat === 'function') updateStat();
+                }
 
                 const isValidThumb = meta.thumbnail_link && meta.thumbnail_link !== meta.icon_link;
 
@@ -54281,7 +55840,7 @@ mainHeader.style.display = '';
 if (mainHeader.dataset.pkInitialGridHd !== '1') mainHeader.style.visibility = '';
 }
 
-const stdBtns = [UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate, UI.btnBlacklistManager];
+const stdBtns = [UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate, UI.btnVideoScreenshot, UI.btnBlacklistManager];
 const shareBtns = [UI.btnCancelShare, UI.btnShareExportLinks];
 const upBtns = [UI.btnUpPause, UI.btnUpStart, UI.btnUpDel, UI.btnUpClearAll];
 const upSep = document.getElementById('pk-up-sep');
@@ -54386,6 +55945,7 @@ shareBtns.forEach(b => { if(b) b.style.display = 'none'; });
 if (UI.btnExt) UI.btnExt.style.display = S.shareParseListActive ? 'inline-flex' : 'none';
 if (UI.btnExportM3U) UI.btnExportM3U.style.display = S.shareParseListActive ? 'inline-flex' : 'none';
 if (UI.btnImgSearch) UI.btnImgSearch.style.display = S.shareParseListActive ? 'inline-flex' : 'none';
+if (UI.btnVideoScreenshot) UI.btnVideoScreenshot.style.display = S.shareParseListActive ? 'inline-flex' : 'none';
 if (UI.btnRefresh) UI.btnRefresh.style.display = 'none';
 if (UI.actionBar) {
 UI.actionBar.style.display = S.shareParseListActive ? 'flex' : 'none';
@@ -54424,7 +55984,7 @@ if(UI.bottomGrp) UI.bottomGrp.style.display = 'none';
 else if (S.offlineMode) {
 UI.win.classList.remove('pk-mode-trash');
 
-[UI.btnNewFolder, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate].forEach(b => { if(b) b.style.display = 'none'; });
+ [UI.btnNewFolder, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate, UI.btnVideoScreenshot].forEach(b => { if(b) b.style.display = 'none'; });
 
 [UI.btnDel, UI.btnRefresh, UI.btnBlacklistManager].forEach(b => { if(b) b.style.display = 'inline-flex'; });
 
@@ -56121,7 +57681,14 @@ while (true) {
 await waitForMagnetArchiveCaptchaIdle();
 await waitBeforeMagnetArchiveDetailRequest(attempt);
 try {
-    return await apiGet(id, { callerManagedCaptchaRecovery: true });
+    return await apiGet(id, {
+        callerManagedCaptchaRecovery: true,
+        isRunning: () => S.magnetArchiveBusy !== false,
+        captchaRecoveryScope: 'magnet_archive',
+        onWait: () => {
+            if (progressTask) updateMagnetArchiveCheckProgress(progressTask, Math.min(progressTotal, progressDoneKeys.size), progressTotal, L.msg_magnet_archive_checking);
+        }
+    });
 } catch (e) {
 if (typeof isDownloadHydrateCaptchaInvalidError === 'function' && isDownloadHydrateCaptchaInvalidError(e)) {
 const recovered = typeof recoverDownloadHydrateCaptcha === 'function' ? await recoverDownloadHydrateCaptcha(e, {
@@ -60819,7 +62386,7 @@ if (UI.btnNavHome) UI.btnNavHome.classList.add('act');
 const upSep = document.getElementById('pk-up-sep');
 if(upSep) upSep.style.display = 'none';
 
-[UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate, UI.btnRefresh, UI.btnBlacklistManager].forEach(b => { if(b) b.style.display = 'inline-flex'; });
+[UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate, UI.btnVideoScreenshot, UI.btnRefresh, UI.btnBlacklistManager].forEach(b => { if(b) b.style.display = 'inline-flex'; });
 if(UI.uploadWrap) UI.uploadWrap.style.display = 'inline-flex';
 if(UI.actionBar) UI.actionBar.style.display = 'flex';
 if(UI.win) UI.win.classList.remove('pk-link-bookmark-mode');
@@ -64584,7 +66151,7 @@ const navs =[UI.btnNavHome, UI.btnNavTrash, UI.btnNavShare, UI.btnNavShareParse,
 navs.forEach(n => { if(n) n.classList.remove('act'); });
 if (UI.win) UI.win.classList.toggle('pk-link-bookmark-mode', !!S.linkBookmarkMode);
 
-const stdBtns =[UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate, UI.btnBlacklistManager];
+const stdBtns =[UI.btnNewFolder, UI.btnDel, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate, UI.btnVideoScreenshot, UI.btnBlacklistManager];
 const shareBtns =[UI.btnCancelShare, UI.btnShareExportLinks];
 const upBtns =[UI.btnUpPause, UI.btnUpStart, UI.btnUpDel, UI.btnUpClearAll];
 const upSep = el.querySelector('#pk-up-sep');
@@ -64639,7 +66206,7 @@ shareBtns.forEach(b => { if(b) b.style.display = 'none'; });
 upBtns.forEach(b => { if(b) b.style.display = 'none'; });
 [UI.btnRetryTask, UI.btnCopyLinkOffline].forEach(b => { if(b) b.style.display = 'none'; });
 downBtns.forEach(b => { if(b) b.style.display = 'none'; });
-[UI.btnAria2, UI.btnDown, UI.btnExt, UI.btnExportM3U, UI.btnImgSearch].forEach(b => { if(b) b.style.display = S.shareParseListActive ? 'inline-flex' : 'none'; });
+[UI.btnAria2, UI.btnDown, UI.btnExt, UI.btnExportM3U, UI.btnImgSearch, UI.btnVideoScreenshot].forEach(b => { if(b) b.style.display = S.shareParseListActive ? 'inline-flex' : 'none'; });
 if(UI.btnRefresh) UI.btnRefresh.style.display = 'none';
 if(UI.uploadWrap) UI.uploadWrap.style.display = 'none';
 if(UI.lblGlobal) UI.lblGlobal.style.display = 'none';
@@ -64692,7 +66259,7 @@ renderCrumb();
 else if (S.offlineMode) {
 if(UI.btnNavOffline) UI.btnNavOffline.classList.add('act');
 if (S.path[0]) S.path[0].name = L.title_offline;
-if(UI.bottomGrp) UI.bottomGrp.style.display = 'flex';[UI.btnNewFolder, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate].forEach(b => { if(b) b.style.display = 'none'; });
+ if(UI.bottomGrp) UI.bottomGrp.style.display = 'flex';[UI.btnNewFolder, UI.btnCopy, UI.btnCut, UI.btnPaste, UI.btnRename, UI.btnBulkRename, UI.btnPrune, UI.btnUnzip, UI.btnMigrate, UI.btnVideoScreenshot].forEach(b => { if(b) b.style.display = 'none'; });
 [UI.btnDel, UI.btnRefresh, UI.btnBlacklistManager].forEach(b => { if(b) b.style.display = 'inline-flex'; });
 shareBtns.forEach(b => { if(b) b.style.display = 'none'; });
 [UI.btnAria2, UI.btnDown].forEach(b => { if(b) b.style.display = 'none'; });
@@ -66939,6 +68506,7 @@ probeAudio = null;
 
 const minifyFile = (f, isBackground = false) => {
 if (f._minified) return f;
+const officialVideoEvidence = window.pkHasOfficialVideoEvidence(f);
 const { id, kind, name, parent_id, size, mime_type, thumbnail_link, icon_link, web_content_link, hash, gcid, md5_checksum } = f;
 const trashed = !!f.trashed;
 const tags = f.tags ? [...f.tags] : [];
@@ -67019,6 +68587,7 @@ _trash_remaining_days: trashRemainingDays,
 _trash_expire_time: trashExpireTime,
 _trash_deleted_time: trashDeletedTime,
 _trash_retention_days: trashRetentionDays,
+_officialVideoEvidence: officialVideoEvidence,
 _minified: true
 };
 };
