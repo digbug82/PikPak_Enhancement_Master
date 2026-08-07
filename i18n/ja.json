@@ -615,7 +615,7 @@
   "btn_img_search": "画像で検索 [F]",
   "btn_select_all": "すべて選択",
   "btn_video_screenshot_locate_play": "この位置から再生",
-  "btn_video_screenshot": "動画フレームキャプチャ",
+  "btn_video_screenshot": "フレーム抽出",
   "tip_video_screenshot": "選択した1本の動画からフレームをキャプチャします [Shift] + [F]",
   "title_video_screenshot": "フレーム抽出",
   "msg_video_screenshot_loading": "動画フレームをキャプチャしています...",
