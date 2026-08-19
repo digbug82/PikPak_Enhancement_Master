@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            4.6.0
+// @version            4.6.1
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -14591,11 +14591,62 @@ m.querySelector('.pk-modal-close').addEventListener('click', () => m.remove());
 return m;
 }
 
-function showAlert(msg, title = L.title_alert) {
+const PK_DOWNLOADER_SETUP_LINKS = new Set([
+'https://ariang.mayswind.net/',
+'https://motrix.app/',
+'https://gopeed.com/',
+'https://abdownloadmanager.com/'
+]);
+
+function renderDownloaderSetupMessage(target, msg) {
+if (!target) return;
+const source = document.createElement('template');
+source.innerHTML = String(msg || '').replace(/\n/g, '<br>');
+
+const appendSafeNode = (parent, node) => {
+if (node.nodeType === 3) {
+parent.appendChild(document.createTextNode(node.nodeValue || ''));
+return;
+}
+if (node.nodeType !== 1) return;
+
+const tag = String(node.tagName || '').toLowerCase();
+if (tag === 'br') {
+parent.appendChild(document.createElement('br'));
+return;
+}
+
+if (tag === 'a') {
+let href = '';
+try { href = new URL(node.getAttribute('href') || '').href; } catch (e) {}
+if (PK_DOWNLOADER_SETUP_LINKS.has(href)) {
+const link = document.createElement('a');
+link.href = href;
+link.target = '_blank';
+link.rel = 'noopener noreferrer';
+link.style.color = 'var(--pk-pri)';
+link.style.fontWeight = '700';
+link.style.textDecoration = 'underline';
+link.textContent = node.textContent || href;
+parent.appendChild(link);
+} else {
+parent.appendChild(document.createTextNode(node.textContent || ''));
+}
+return;
+}
+
+Array.from(node.childNodes).forEach(child => appendSafeNode(parent, child));
+};
+
+Array.from(source.content.childNodes).forEach(node => appendSafeNode(target, node));
+}
+
+function showAlert(msg, title = L.title_alert, options = {}) {
 return new Promise((resolve) => {
+const renderDownloaderSetup = options && options.renderDownloaderSetup === true;
 const m = showModal(`
 <h3 style="border:none; margin-bottom:16px; font-size:18px; font-weight:700; color:var(--pk-fg);">${title}</h3>
-<div style="margin-bottom:32px; line-height:1.6; font-size:14px; color:var(--pk-fg); opacity:0.9; word-break:break-all;">${esc(msg).replace(/\n/g, '<br>')}</div>
+<div data-pk-alert-message style="margin-bottom:32px; line-height:1.6; font-size:14px; color:var(--pk-fg); opacity:0.9; word-break:break-all;">${renderDownloaderSetup ? '' : esc(msg).replace(/\n/g, '<br>')}</div>
 <div class="pk-modal-act" style="justify-content: flex-end;">
 <button class="pk-btn pri" id="alert_ok"
     style="height:40px; min-width:86px; padding:0 30px; border-radius:8px; background:var(--pk-pri); color:#fff; font-weight:bold; font-size:14px; justify-content:center;">
@@ -14603,6 +14654,7 @@ ${L.btn_ok}
 </button>
 </div>
 `);
+if (renderDownloaderSetup) renderDownloaderSetupMessage(m.querySelector('[data-pk-alert-message]'), msg);
 const modalBox = m.querySelector('.pk-modal');
 if (modalBox) {
 Object.assign(modalBox.style, { width: '420px', padding: '30px', boxSizing: 'border-box' });
@@ -14621,6 +14673,10 @@ m.querySelector('#alert_ok').click();
 }
 });
 });
+}
+
+function showDownloaderSetupAlert(msg, title = L.lbl_downloader_status) {
+return showAlert(msg, title, { renderDownloaderSetup: true });
 }
 
 function showConfirm(msg, title = L.title_confirm, options = {}) {
@@ -53366,7 +53422,7 @@ if (captchaRecoveryFailed) {
 } else {
 const errorDownloaderType = getCurrentDownloaderType();
 if (errorDownloaderType === 'idm') showAlert(`${L.str_error}: ${formatCloudErrorMessage(e)}`);
-else if (errorDownloaderType === 'abdm') showAlert(L.desc_abdm_setup, L.lbl_downloader_status);
+else if (errorDownloaderType === 'abdm') showDownloaderSetupAlert(L.desc_abdm_setup, L.lbl_downloader_status);
 else showAlert(`${formatDownloaderText(L.msg_downloader_check_fail, errorDownloaderType)}\n(${formatCloudErrorMessage(e)})`);
 }
 }
@@ -59755,8 +59811,9 @@ const m = showModal(`
                 onmouseout="this.style.borderColor='var(--pk-bd)'"
                 style="display:flex; align-items:center; justify-content:space-between; min-height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:8px 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box;">
             <span style="font-size:14px; color:var(--pk-fg); user-select:none; line-height:1.4;">${L.desc_download_accel_domain}</span>
-            <input type="checkbox" id="set_download_accel_enable" ${curDownloadAccelEnable ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer; flex-shrink:0; margin-left:12px;">
+            <input type="checkbox" id="set_download_accel_enable" ${curDownloadAccelEnable ? 'checked' : ''} aria-controls="pk_download_accel_details" aria-expanded="${curDownloadAccelEnable ? 'true' : 'false'}" style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer; flex-shrink:0; margin-left:12px;">
         </label>
+        <div id="pk_download_accel_details" ${curDownloadAccelEnable ? '' : 'hidden'} aria-hidden="${curDownloadAccelEnable ? 'false' : 'true'}" style="display:${curDownloadAccelEnable ? 'flex' : 'none'}; flex-direction:column; gap:12px;">
         <div class="pk-custom-select" id="cs_download_accel_mode" style="margin-top:0;">
             <div class="pk-select-label">${L.label_download_accel_mode}</div>
             <div class="pk-select-trigger"><span id="txt_download_accel_mode"></span>${CONF.crumbIcons.down}</div>
@@ -59792,6 +59849,7 @@ const m = showModal(`
             <div id="pk_download_accel_preview_source" style="font-size:12px; line-height:1.45; color:var(--pk-muted); word-break:break-all;"></div>
             <div id="pk_download_accel_preview_result" style="font-size:12px; line-height:1.45; color:var(--pk-fg); word-break:break-all;"></div>
         </fieldset>
+        </div>
     </div>
 </div>
 
@@ -60378,7 +60436,7 @@ if (type === 'idm') updateIdmExportModeVisibility();
 const runAriaTest = async () => {
 const url = ariaInp.value.trim();
 const token = ariaTok.value.trim();
-const showTip = () => showAlert(L.tip_mixed_content, L.lbl_downloader_status);
+const showTip = () => showDownloaderSetupAlert(L.tip_mixed_content, L.lbl_downloader_status);
 
 if (!url) {
 ariaDot.className = 'pk-aria-dot';
@@ -60418,7 +60476,7 @@ ariaTimer = setTimeout(runAriaTest, 600);
 const runGopeedTest = async () => {
 const url = gopeedInp.value.trim();
 const token = gopeedTok.value.trim();
-const showTip = (msg = L.desc_gopeed_setup) => showAlert(msg, L.lbl_downloader_status);
+const showTip = (msg = L.desc_gopeed_setup) => showDownloaderSetupAlert(msg, L.lbl_downloader_status);
 
 if (!url) {
 gopeedDot.className = 'pk-aria-dot';
@@ -60454,7 +60512,7 @@ gopeedTimer = setTimeout(runGopeedTest, 600);
 
 const runAbdmTest = async () => {
 const url = abdmInp.value.trim();
-const showTip = () => showAlert(L.desc_abdm_setup, L.lbl_downloader_status);
+const showTip = () => showDownloaderSetupAlert(L.desc_abdm_setup, L.lbl_downloader_status);
 
 if (!url) {
 abdmDot.className = 'pk-aria-dot';
@@ -60760,10 +60818,16 @@ const accelDomainInp = m.querySelector('#set_download_accel_domain');
 const accelQueryParamInp = m.querySelector('#set_download_accel_query_param');
 const accelEnableInp = m.querySelector('#set_download_accel_enable');
 const accelGroupEl = m.querySelector('#pk_download_accel_group');
+const accelDetailsEl = m.querySelector('#pk_download_accel_details');
 const accelPreviewSourceEl = m.querySelector('#pk_download_accel_preview_source');
 const accelPreviewResultEl = m.querySelector('#pk_download_accel_preview_result');
 const updateAccelPreview = () => {
 if (!accelPreviewSourceEl || !accelPreviewResultEl) return;
+if (!accelEnableInp || !accelEnableInp.checked) {
+accelPreviewSourceEl.textContent = '';
+accelPreviewResultEl.textContent = '';
+return;
+}
 const rawSetting = accelDomainInp ? accelDomainInp.value.trim() : '';
 const queryParam = accelQueryParamInp ? accelQueryParamInp.value.trim() : '';
 const preview = buildDownloadAccelPreviewUrl(rawSetting, selectedDownloadAccelMode, queryParam);
@@ -60787,8 +60851,9 @@ if (accelDomainInp) accelDomainInp.placeholder = isTemplate ? 'https://proxy.exa
 updateAccelPreview();
 };
 const updateAccelBorder = () => {
-const hasDomain = !!(accelDomainInp && accelDomainInp.value.trim());
-const customParam = !!(accelQueryParamInp && accelQueryParamInp.value.trim() && normalizeDownloadAccelQueryParam(accelQueryParamInp.value) !== CONF.downloadAccelQueryParam);
+const enabled = !!(accelEnableInp && accelEnableInp.checked);
+const hasDomain = !!(enabled && accelDomainInp && accelDomainInp.value.trim());
+const customParam = !!(enabled && accelQueryParamInp && accelQueryParamInp.value.trim() && normalizeDownloadAccelQueryParam(accelQueryParamInp.value) !== CONF.downloadAccelQueryParam);
 const hasTypedValue = hasDomain || customParam;
 if (accelGroupEl) accelGroupEl.classList.toggle('pk-typing-active', hasTypedValue);
 if (accelDomainInp) {
@@ -60801,11 +60866,22 @@ accelQueryParamInp.style.borderColor = customParam ? 'var(--pk-pri)' : 'var(--pk
 }
 updateAccelPreview();
 };
-if (accelDomainInp) accelDomainInp.oninput = updateAccelBorder;
-if (accelQueryParamInp) accelQueryParamInp.oninput = updateAccelBorder;
-if (accelEnableInp) accelEnableInp.onchange = updateAccelBorder;
+const updateAccelVisibility = () => {
+const enabled = !!(accelEnableInp && accelEnableInp.checked);
+if (accelDetailsEl) {
+accelDetailsEl.hidden = !enabled;
+accelDetailsEl.style.display = enabled ? 'flex' : 'none';
+accelDetailsEl.setAttribute('aria-hidden', enabled ? 'false' : 'true');
+}
+if (accelEnableInp) accelEnableInp.setAttribute('aria-expanded', enabled ? 'true' : 'false');
+if (!enabled) closeSettingsSelectMenus();
 updateAccelModeTip();
 updateAccelBorder();
+};
+if (accelDomainInp) accelDomainInp.oninput = updateAccelBorder;
+if (accelQueryParamInp) accelQueryParamInp.oninput = updateAccelBorder;
+if (accelEnableInp) accelEnableInp.onchange = updateAccelVisibility;
+updateAccelVisibility();
 
 bindConfigLiveInputLimits(m, [
 ['#set_download_accel_domain', 'pk_download_accel_domain'],
@@ -61793,7 +61869,7 @@ const hasSettingsChanged = oldSig !== newSig || oldIdmSig !== newIdmSig || downl
 const reloadSettingsChanged = curLang !== selectedLang || newTurbo !== oldTurbo;
 const ariaChanged = newUrl !== gmGet('pk_aria2_url', '') || newToken !== gmGet('pk_aria2_token', '');
 
-if (rawDownloadAccelDomain && !newDownloadAccelDomain) {
+if (newDownloadAccelEnable && rawDownloadAccelDomain && !newDownloadAccelDomain) {
 const domainInp = m.querySelector('#set_download_accel_domain');
 if (domainInp) domainInp.style.borderColor = '#d93025';
 showToast(L.msg_download_accel_invalid_domain, 'error');
