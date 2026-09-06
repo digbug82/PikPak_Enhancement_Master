@@ -53,6 +53,10 @@
 * **Penyepaduan alat luaran**: menyokong main balik luaran VLC dan muat turun Gopeed pada peranti mudah alih, dengan keutamaan disimpan berasingan daripada PotPlayer serta pemuat turun desktop.
 * **Dialog dan panel penggunaan**: dialog utama seperti Tetapan, Kongsi, Muat Turun Awan, Arkib Awan, Analisis Fail dan Penamaan Semula Pukal disesuaikan untuk sentuhan dan skrin pendek, serta dilengkapi panel penggunaan ruang dan trafik mudah alih.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/mobile/mobile_ms.gif" alt="mobile">
+</p>
+
 ---
 
 ### Pengurusan Pukal dan Ruang
