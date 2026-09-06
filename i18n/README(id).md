@@ -53,6 +53,10 @@
 * **Integrasi alat eksternal**: mendukung pemutaran eksternal VLC dan unduhan Gopeed di perangkat seluler, dengan preferensi yang disimpan terpisah dari PotPlayer dan pengunduh desktop.
 * **Dialog dan panel penggunaan**: dialog utama seperti Pengaturan, Berbagi, Unduhan Cloud, Arsip Cloud, Analisis File, dan Ganti Nama Massal dioptimalkan untuk sentuhan dan layar pendek, serta dilengkapi panel penggunaan ruang dan trafik seluler.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/mobile/mobile_id.gif" alt="mobile">
+</p>
+
 ---
 
 ### Manajemen Massal dan Ruang
