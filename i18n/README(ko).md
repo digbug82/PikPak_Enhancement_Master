@@ -53,6 +53,10 @@
 * **외부 도구 연동**: 모바일에서 VLC 외부 재생과 Gopeed 다운로드를 지원하며, 데스크톱 PotPlayer 및 다운로더 환경 설정과 별도로 저장합니다.
 * **팝업 및 사용량 패널**: 설정, 공유, 클라우드 다운로드, 클라우드 보관, 파일 분석, 일괄 이름 변경 등 주요 팝업을 터치와 짧은 화면에 맞게 최적화하고 모바일 저장 공간 및 트래픽 사용량 패널을 제공합니다.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/mobile/mobile_ko.gif" alt="mobile">
+</p>
+
 ---
 
 ### 일괄 및 공간 관리
