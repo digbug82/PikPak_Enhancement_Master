@@ -53,6 +53,10 @@
 * **External tool integration**: supports VLC playback and Gopeed downloads on mobile, with preferences stored separately from desktop PotPlayer and downloader settings.
 * **Dialogs and usage panels**: major dialogs, including Settings, Share, Cloud Download, Cloud Archive, File Analysis, and Batch Rename, are optimized for touch and short screens, with mobile storage and traffic usage panels.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/mobile/mobile_en.gif" alt="mobile">
+</p>
+
 ---
 
 ### Bulk and Space Management
