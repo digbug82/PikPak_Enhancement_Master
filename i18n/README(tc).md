@@ -53,6 +53,10 @@
 * **外部工具聯動**：行動端支援 VLC 外部播放和 Gopeed 下載，並與桌面端 PotPlayer 及下載器偏好分別儲存。
 * **彈窗與用量面板**：設定、分享、雲端下載、雲端歸檔、檔案分析、批量重新命名等主要彈窗均適配觸控和短螢幕，並提供行動端空間與流量用量面板。
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/mobile/mobile_tc.gif" alt="mobile">
+</p>
+
 ---
 
 ### 批次與空間管理
