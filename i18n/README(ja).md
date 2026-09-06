@@ -53,6 +53,10 @@
 * **外部ツール連携**：モバイルで VLC 外部再生と Gopeed ダウンロードに対応し、デスクトップの PotPlayer およびダウンローダー設定とは別に保存します。
 * **ダイアログと使用量パネル**：設定、共有、クラウドダウンロード、クラウドアーカイブ、ファイル分析、一括名前変更などの主要ダイアログをタッチ操作と高さの低い画面に最適化し、モバイル向けのストレージ / 通信量パネルも提供します。
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/img/mobile/mobile_ja.gif" alt="mobile">
+</p>
+
 ---
 
 ### 一括処理と容量管理
