@@ -320,6 +320,18 @@
 
 ## 更新日志
 
+### V5.1.0
+
+* 新增 **“外观随系统”**，可跟随系统明暗主题变化。
+* 新增 **“默认”视频清晰度**，自动选择“原画”之后的第一档可用清晰度。
+* 新增 **配置自动上传**，默认关闭；仅在有可信同步基线、本地配置发生变化且云端未变化时自动上传，无基线的新设备不会直接覆盖云端。
+* 优化 **文件列表与网格视图渲染性能**，缓解低配置设备的 GPU / CPU 占用及滚动微卡顿。
+* 优化 **视频源加载与清晰度切换**。
+* 优化 **媒体播放器操作入口**，修复切换视频后以图搜图按钮重复出现在右上角的问题。
+* 优化 **移动端操作栏与分享列表显示**。
+* 修复 **部分环境升级后目录文件无法显示**的问题。
+* UI 与稳定性优化。
+
 ### V5.0.0
 
 * 全面升级 **移动端核心界面**，针对窄屏及触控设备完成系统性的响应式适配，提升不同尺寸与横竖屏场景下的布局一致性和操作体验。
@@ -546,4 +558,4 @@
 
 本项目在 UI 设计语言及部分网页端 API 调用逻辑上，深受 [PikPak File Manager v1.2.0](https://github.com/poihoii/PikPak_FileManager) (by 브랜뉴) 的启发，特此致敬。
 
-特别感谢 [@yebuwudong](https://github.com/yebuwudong) 在 [PR #9：add mobile manager layout and touch support](https://github.com/digbug82/PikPak_Enhancement_Master/pull/9) 中提交的移动端适配方案。其对全屏管理器、底部导航、移动端操作菜单、触控交互及响应式布局的探索，为 V5.0.0 的移动端重构提供了重要参考与启发。
+感谢 [@yebuwudong](https://github.com/yebuwudong) 在 [PR #9](https://github.com/digbug82/PikPak_Enhancement_Master/pull/9) 中提供的移动端布局与触控适配方案，为 V5.0.0 的移动端重构提供了重要参考。
