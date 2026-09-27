@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            5.0.0
+// @version            5.1.0
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -192,6 +192,7 @@ const CONFIG_LIMIT_SCHEMA = {
 entries: [
 { key: 'pk_lang', type: 'enum', defaultValue: '', localLimit: { allowed: ['', 'zh', 'tc', 'en', 'ko', 'ja', 'id', 'ms'], maxLen: 16 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_theme', type: 'enum', defaultValue: 'auto', localLimit: { allowed: ['auto', 'light', 'dark'], maxLen: 16 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
+{ key: 'pk_theme_follow_system', type: 'boolean', defaultValue: false, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_turbo_mode', type: 'boolean', defaultValue: false, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_turbo_activation_id', type: 'string', defaultValue: '', localLimit: { maxLen: 64 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'strict-local', mergeStrategy: 'none' },
 { key: 'pk_turbo_notice_id', type: 'string', defaultValue: '', localLimit: { maxLen: 64 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'strict-local', mergeStrategy: 'none' },
@@ -212,7 +213,7 @@ entries: [
 { key: 'pk_skip_outro', type: 'number', defaultValue: 0, localLimit: { min: 0, max: 3600 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_vol_level', type: 'number', defaultValue: 1, localLimit: { min: 0, max: 1 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_vol_muted', type: 'boolean', defaultValue: false, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
-{ key: 'pk_default_video_quality', type: 'enum', defaultValue: 'original', localLimit: { allowed: ['original', '1080p', '720p', '480p'], maxLen: 32 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
+{ key: 'pk_default_video_quality', type: 'enum', defaultValue: 'original', localLimit: { allowed: ['default', 'original', '1080p', '720p', '480p'], maxLen: 32 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_video_load_progress_cache', type: 'boolean', defaultValue: true, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_visual_media_continuous_browse', type: 'boolean', defaultValue: false, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_audio_play_mode', type: 'enum', defaultValue: 'order', localLimit: { allowed: ['order', 'loop', 'single', 'shuffle'], maxLen: 16 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
@@ -287,6 +288,8 @@ entries: [
 { key: 'pk_migration_stub', type: 'string', defaultValue: '', localLimit: { maxLen: CONFIG_SIZE.MB }, isPrefix: false, lru: false, ttl: false, cloudSync: 'strict-local', mergeStrategy: 'none' },
 { key: 'pk_cfg_sync_last_remote_hash', type: 'string', defaultValue: '', localLimit: { maxLen: 128, maxSize: 64 * CONFIG_SIZE.KB }, isPrefix: false, lru: false, ttl: false, cloudSync: 'strict-local', mergeStrategy: 'none' },
 { key: 'pk_cfg_sync_last_local_hash', type: 'string', defaultValue: '', localLimit: { maxLen: 128, maxSize: 64 * CONFIG_SIZE.KB }, isPrefix: false, lru: false, ttl: false, cloudSync: 'strict-local', mergeStrategy: 'none' },
+{ key: 'pk_cfg_sync_last_conflict_hash', type: 'string', defaultValue: '', localLimit: { maxLen: 128, maxSize: 64 * CONFIG_SIZE.KB }, isPrefix: false, lru: false, ttl: false, cloudSync: 'strict-local', mergeStrategy: 'none' },
+{ key: 'pk_cfg_auto_sync_enabled', type: 'boolean', defaultValue: false, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'strict-local', mergeStrategy: 'none' },
 { key: 'pk_cfg_sync_last_sync_at', type: 'string', defaultValue: '', localLimit: { maxLen: 64, maxSize: 64 * CONFIG_SIZE.KB }, isPrefix: false, lru: false, ttl: false, cloudSync: 'strict-local', mergeStrategy: 'none' },
 { key: 'pk_cfg_sync_last_report', type: 'jsonObject', defaultValue: '{}', localLimit: { maxItems: 80, maxFieldLen: 4096, maxSize: 64 * CONFIG_SIZE.KB }, isPrefix: false, lru: false, ttl: false, cloudSync: 'strict-local', mergeStrategy: 'none' },
 { prefix: 'pk_archive_pwd_', type: 'archivePwd', defaultValue: '', localLimit: { maxItems: 1000, maxItemLen: 512, maxSize: 256 * CONFIG_SIZE.KB }, isPrefix: true, lru: true, ttl: false, cloudSync: 'default', mergeStrategy: 'fillOnly' },
@@ -3953,7 +3956,7 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-script-version-k { color:var(--pk-fg);opacity:.72;font-weight:600;white-space:nowrap; }
 .pk-script-version-v { color:var(--pk-fg);font-weight:800;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
 .pk-script-version-v.new { color:var(--pk-pri);cursor:pointer; }
-.pk-cfg-cloud { position:relative;padding:25px 15px 15px 15px;border:2px solid var(--pk-bd);border-radius:8px;display:flex;flex-direction:column;gap:12px;transition:border-color .2s;transform:translateZ(0);overflow:visible;isolation:isolate; }
+.pk-cfg-cloud { position:relative;padding:25px 15px 15px 15px;border:2px solid var(--pk-bd);border-radius:8px;display:flex;flex-direction:column;gap:12px;transition:border-color .2s;transform:translate(0);overflow:visible;isolation:isolate; }
 @media (hover:hover) and (pointer:fine){.pk-cfg-cloud:hover { border-color:var(--pk-pri); }}
 .pk-cfg-cloud > * { position:relative;z-index:1; }
 .pk-cfg-cloud > .pk-select-label { z-index:3;background:var(--pk-bg); }
@@ -4021,7 +4024,7 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-mobile-context-action { display:inline-flex; align-items:center; justify-content:center; }
 #pk-top-bar { z-index: 30; }
 #pk-actionbar, #pk-trash-bar { z-index: 20; }
-.pk-btn { height: 32px; padding: 0 12px; border-radius: 4px; border: 1px solid transparent; background: transparent; color: var(--pk-fg); cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background-color 0.1s; position: relative; font-weight: 500; white-space: nowrap; flex-shrink: 0; backface-visibility: hidden; }
+.pk-btn { height: 32px; padding: 0 12px; border-radius: 4px; border: 1px solid transparent; background: transparent; color: var(--pk-fg); cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background-color 0.1s; position: relative; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
 .pk-btn.pk-btn-ghost { border:none; background:transparent; }
 .pk-btn.pk-btn-wide { padding:0 24px; border-radius:6px; }
 #pk-theme svg { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -4156,6 +4159,8 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-ov.pk-hide-btn-text .pk-maximized #pk-transfer-detail-btn { order: 1 !important; align-items: center !important; margin: 0 0 2px 0 !important; }
 .pk-ov.pk-hide-btn-text .pk-maximized #pk-quota-txt { order: 2 !important; font-size: 10px !important; font-weight: 700 !important; transform: scale(0.8) !important; line-height: 1 !important; }
 .pk-ov.pk-hide-btn-text .pk-maximized #pk-quota-bar-box { width: 44px !important; height: 4px !important; border-radius: 2px !important; }
+.pk-ov.pk-hide-btn-text .pk-mobile-context-action > span { display:none!important; }
+.pk-ov.pk-hide-btn-text .pk-mobile-context-action { width:40px!important; min-width:40px!important; padding:0!important; gap:0!important; }
 .pk-ov.pk-auto-hide-toolbar-text .pk-tb .pk-txt-long { display:none!important; }
 .pk-ov.pk-auto-hide-toolbar-text .pk-tb .pk-txt-short { display:inline!important; }
 .pk-ov.pk-auto-hide-toolbar-text .pk-tb #pk-dup-folder-sel-wrap { max-width:100px!important; }
@@ -4243,10 +4248,10 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-gv-more svg { width: 16px; height: 16px; flex-shrink: 0; }
 .pk-gv-cover { position: relative; height: calc(100% - 56px); min-height: 140px; background: transparent; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px; }
 .pk-gv-cover:not(.pk-gv-file) { align-items: flex-end; padding-bottom: 8px; box-sizing: border-box; }
-.pk-gv-cover.pk-gv-file { width: auto; max-width: 100%; aspect-ratio: 1 / 1; align-self: center; border-radius: 18px; flex: 0 0 auto; isolation: isolate; transform: translateZ(0); backface-visibility: hidden; -webkit-backface-visibility: hidden; will-change: transform; }
-.pk-gv-cover.pk-gv-file .pk-gv-media-mount { width: 100%; height: 100%; display: block; position: relative; isolation: isolate; transform: translateZ(0); backface-visibility: hidden; -webkit-backface-visibility: hidden; will-change: transform; }
-.pk-gv-cover.pk-gv-file .pk-gv-media-mount > div { width: 100%; height: 100%; position: relative; transform: translateZ(0); backface-visibility: hidden; -webkit-backface-visibility: hidden; will-change: transform; }
-.pk-gv-cover.pk-gv-file .pk-gv-media-mount .pk-max-thumb { width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; object-fit: cover !important; border-radius: 0 !important; transform: translateZ(0); transform-origin: center center; backface-visibility: hidden; -webkit-backface-visibility: hidden; will-change: transform, opacity; }
+.pk-gv-cover.pk-gv-file { width: auto; max-width: 100%; aspect-ratio: 1 / 1; align-self: center; border-radius: 18px; flex: 0 0 auto; isolation: isolate; transform: none; }
+.pk-gv-cover.pk-gv-file .pk-gv-media-mount { width: 100%; height: 100%; display: block; position: relative; isolation: isolate; transform: none; }
+.pk-gv-cover.pk-gv-file .pk-gv-media-mount > div { width: 100%; height: 100%; position: relative; transform: none; }
+.pk-gv-cover.pk-gv-file .pk-gv-media-mount .pk-max-thumb { width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; object-fit: cover !important; border-radius: 0 !important; transform: none; transform-origin: center center; }
 .pk-gv-cover.pk-gv-has-thumb { background: transparent; }
 .pk-gv-cover img { max-width: 100%; max-height: 100%; object-fit: cover; display: block; border-radius: 12px; }
 .pk-gv-cover.pk-gv-has-thumb > img { width: 100%; height: 100%; }
@@ -4256,17 +4261,17 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-gv-cover .pk-gv-icon { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
 .pk-gv-cover .pk-gv-icon svg, .pk-gv-cover .pk-gv-icon img { width: 108px !important; height: 108px !important; max-width: 108px !important; max-height: 108px !important; object-fit: contain !important; }
 .pk-gv-cover .pk-gv-icon img { border-radius: 10px; }
-.pk-gv-folder-preview.pk-gv-folder-has-thumb { background: transparent; isolation: isolate; transform: translateZ(0); }
-.pk-gv-folder-preview.pk-gv-folder-has-thumb img { width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 0; transform: translateZ(0) scale(1.02); transform-origin: center center; backface-visibility: hidden; will-change: transform; }
-.pk-gv-folder-shell { position: relative; width: 176px; height: 138px; margin: 12px auto 0; display: flex; align-items: flex-end; justify-content: center; transform: translateY(12px); }
+.pk-gv-folder-preview.pk-gv-folder-has-thumb { background: transparent; isolation: isolate; transform: none; }
+.pk-gv-folder-preview.pk-gv-folder-has-thumb img { width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 0; transform: scale(1.02); transform-origin: center center; }
+.pk-gv-folder-shell { position: relative; width: 176px; height: 138px; margin: 12px auto 0; display: flex; align-items: flex-end; justify-content: center; transform: none; }
 .pk-gv-folder-back { position: absolute; top: 19px; left: 0; right: 0; bottom: 0; background: #fbc645; border-radius: 12px; }
 .pk-gv-folder-tab { position: absolute; top: 6px; left: 15px; width: 62px; height: 23px; background: #fbc645; border-radius: 9px 9px 0 0; }
-.pk-gv-folder-preview { position: absolute; top: 0; left: 15px; right: 15px; bottom: 23px; border-radius: 10px; overflow: hidden; clip-path: inset(0 round 10px); background: #fff7e6; z-index: 1; display: flex; align-items: center; justify-content: center; isolation: isolate; transform: translateZ(0); }
-.pk-gv-folder-preview { position: absolute; top: 0; left: 15px; right: 15px; bottom: 23px; border-radius: 10px; overflow: hidden; clip-path: inset(0 round 10px); background: #fff7e6; z-index: 1; display: flex; align-items: center; justify-content: center; isolation: isolate; transform: translateZ(0); backface-visibility: hidden; -webkit-backface-visibility: hidden; will-change: transform; }
+.pk-gv-folder-preview { position: absolute; top: 0; left: 15px; right: 15px; bottom: 23px; border-radius: 10px; overflow: hidden; clip-path: inset(0 round 10px); background: #fff7e6; z-index: 1; display: flex; align-items: center; justify-content: center; isolation: isolate; transform: none; }
+.pk-gv-folder-preview { position: absolute; top: 0; left: 15px; right: 15px; bottom: 23px; border-radius: 10px; overflow: hidden; clip-path: inset(0 round 10px); background: #fff7e6; z-index: 1; display: flex; align-items: center; justify-content: center; isolation: isolate; transform: none; }
 .pk-gv-folder-fallback { width: 102px !important; height: 102px !important; max-width: 102px !important; max-height: 102px !important; object-fit: contain !important; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; }
-.pk-gv-folder-front { position: absolute; left: -1px; right: -1px; bottom: -1px; height: 86px; background: #f9b126; border-radius: 12px; z-index: 2; box-shadow: 0 -2px 12px rgba(249, 177, 38, 0.2); transform: translateZ(0); backface-visibility: hidden; -webkit-backface-visibility: hidden; will-change: transform; }
-.pk-gv-folder-shell { isolation: isolate; transform: translateZ(0); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-.pk-gv-folder-back, .pk-gv-folder-tab { transform: translateZ(0); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.pk-gv-folder-front { position: absolute; left: -1px; right: -1px; bottom: -1px; height: 86px; background: #f9b126; border-radius: 12px; z-index: 2; box-shadow: 0 -2px 12px rgba(249, 177, 38, 0.2); transform: none; }
+.pk-gv-folder-shell { isolation: isolate; transform: none; }
+.pk-gv-folder-back, .pk-gv-folder-tab { transform: none; }
 .pk-gv-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 48px; height: 48px; border-radius: 50%; background: rgba(0,0,0,0.4); display: inline-flex; align-items: center; justify-content: center; pointer-events: none; z-index: 3; }
 .pk-gv-play svg { width: 28px !important; height: 28px !important; color: #fff; margin-left: 3px; }
 .pk-gv-fav { position: absolute; right: 14px; bottom: 14px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.95); color: #f4b400; display: grid; place-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); pointer-events: none; z-index: 3; line-height: 0; }
@@ -4525,7 +4530,7 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-sep-sm { width: 1px; height: 16px; background: var(--pk-bd); margin: 0 8px; flex-shrink: 0; }
 #pk-refresh, #pk-trash-refresh { width: auto !important; justify-content: center !important; flex-shrink: 0; }
 #pk-refresh svg, #pk-trash-refresh svg { width: 16px !important; height: 16px !important; }
-.pk-grid-hd input[type="checkbox"], .pk-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; margin: 0 auto !important; flex-shrink: 0; accent-color: var(--pk-pri); box-sizing: content-box; transform: translateZ(0); display: block; position: relative; }
+.pk-grid-hd input[type="checkbox"], .pk-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; margin: 0 auto !important; flex-shrink: 0; accent-color: var(--pk-pri); box-sizing: content-box; transform: translate(0); display: block; position: relative; }
 .pk-player-box { position: relative; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; user-select: none; overflow: hidden; }
 .pk-player-video { width: 100%; height: 100%; object-fit: contain; outline: none; transform: translateZ(0); backface-visibility: hidden; image-rendering: -webkit-optimize-contrast; -webkit-font-smoothing: antialiased; }
 .pk-player-top { position: absolute; top: 0; left: 0; right: 0; height: 64px; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100 !important; opacity: 1; transition: opacity 0.3s; pointer-events: auto; }
@@ -4552,7 +4557,7 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-media-star-btn.pk-media-starred svg,.pk-media-star-btn.pk-media-starred svg path { fill:currentColor!important; }
 #pk_p_star:focus:not(:focus-visible),#pk_img_star:focus:not(:focus-visible) { outline:none!important; box-shadow:none!important; }
 #pk_p_star:focus-visible,#pk_img_star:focus-visible { outline:2px solid rgba(255,255,255,.92)!important; outline-offset:2px!important; box-shadow:0 0 0 2px rgba(26,94,255,.68)!important; }
-.pk-media-mobile-menu-action[data-pk-available="false"] { display:none!important; }
+.pk-mobile-media-viewer .pk-media-mobile-menu-action[data-pk-available="false"] { display:none!important; }
 .pk-media-mobile-menu-action[data-pk-available="true"] { display:flex!important; }
 .pk-media-more-wrap { position:relative; display:none; align-items:center; justify-content:center; }
 .pk-media-more-menu { position:absolute; top:calc(100% + 4px); right:0; display:none; min-width:150px; padding:6px; border:1px solid rgba(255,255,255,.14); border-radius:8px; background:rgba(20,20,20,.96); box-shadow:0 10px 28px rgba(0,0,0,.48); backdrop-filter:blur(10px); z-index:140; }
@@ -4565,6 +4570,8 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 #pk_p_full svg { width: 28px; height: 28px; }
 .pk-p-time { color: #ddd; font-size: 13px; font-family: "Segoe UI", Roboto, monospace; min-width: 90px; text-align: center; font-variant-numeric: tabular-nums; margin: 0 5px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
 .pk-p-menu-con { position: relative; display: flex; align-items: center; justify-content: center; height: 40px; cursor: pointer; font-size: 15px; color: #ddd; font-weight: 600; padding: 0; min-width: 50px; transition: color 0.2s; border-radius: 4px; }
+.pk-p-menu-con.pk-p-menu-disabled { color:#777; cursor:default; }
+.pk-p-menu-con.pk-p-menu-disabled .pk-p-pop { display:none!important; animation:none!important; }
 #pk_sub_trigger .pk-p-btn { width: 50px; height: 40px; }
 .pk-p-pop { position: absolute; bottom: 45px; left: 50%; transform: translateX(-50%); background: rgba(20, 20, 20, 0.9); border-radius: 8px; padding: 6px 0; display: none; flex-direction: column-reverse; min-width: 100px; text-align: center; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); z-index: 20; backdrop-filter: blur(10px); }
 .pk-p-pop::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 45px; background: transparent; }
@@ -4739,8 +4746,8 @@ body.pk-dragging { cursor: pointer !important; user-select: none !important; -we
 .pk-p-btn:hover { color:var(--pk-pri); background:transparent; transform:scale(1.05); }
 #pk_p_play:hover,#pk_p_vol:hover,#pk_p_close:hover { color:#fff!important; filter:brightness(1.5); background:rgba(255,255,255,.15)!important; transform:none!important; }
 .pk-media-more-item:hover { background:rgba(255,255,255,.1); color:#fff; outline:none; }
-.pk-p-menu-con:hover { color:var(--pk-pri); background:transparent; }
-.pk-p-menu-con:hover .pk-p-pop { display:flex; animation:pkFadeIn .2s ease; }
+.pk-p-menu-con:not(.pk-p-menu-disabled):hover { color:var(--pk-pri); background:transparent; }
+.pk-p-menu-con:not(.pk-p-menu-disabled):hover .pk-p-pop { display:flex; animation:pkFadeIn .2s ease; }
 .pk-p-item:hover { background:rgba(255,255,255,.1); color:#fff; }
 .pk-p-vol-slider:hover { height:6px; }
 .pk-p-vol-slider::-webkit-slider-thumb:hover { transform:scale(1.2); }
@@ -4867,7 +4874,7 @@ body.pk-dragging .pk-tooltip { display: none !important; opacity: 0 !important; 
 .pk-crumb-sep.pk-active { background: var(--pk-hl); color: currentColor; }
 @media (hover:hover) and (pointer:fine){.pk-crumb-sep:hover { background: var(--pk-hl); color: currentColor; }}
 .pk-crumb-sep svg { width: 14px; height: 14px; stroke-width: 3.5; transition: transform 0.2s ease; }
-.pk-crumb-pop { position: fixed; background: var(--pk-bg); border: 1px solid var(--pk-bd); border-radius: 8px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); z-index: 2147483647 !important; min-width: 180px; max-width: 320px; max-height: 50vh; overflow-y: auto; padding: 6px 0; opacity: 0; pointer-events: none; transition: opacity 0.1s ease; border-top: 1px solid rgba(255, 255, 255, 0.05); }
+.pk-crumb-pop { position: fixed; background: var(--pk-bg); border: 1px solid var(--pk-bd); border-radius: 8px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); z-index: 2147483647 !important; min-width: 180px; max-width: 320px; max-height: 50vh; overflow-y: auto; padding: 6px 0; opacity: 0; pointer-events: none; transition: opacity 0.1s ease; border-top: 1px solid rgba(255, 255, 255, 0.05); box-sizing: border-box; }
 .pk-crumb-pop.pk-show { opacity: 1; pointer-events: auto; }
 .pk-crumb-item { padding: 8px 12px; font-size: 13px; line-height: 1.5; cursor: pointer; display: flex; align-items: center; justify-content: flex-start; gap: 8px; color: var(--pk-fg); }
 body.pk-body-max .pk-crumb-pop .pk-crumb-item { font-size:16px; }
@@ -4980,7 +4987,7 @@ body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:1
 .pk-select-item { padding: 10px 12px; border-radius: 5px; cursor: pointer; color: var(--pk-fg); font-size: 14px; transition: background 0.1s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (hover:hover) and (pointer:fine){.pk-select-item:hover { background: var(--pk-hl); color: var(--pk-pri); }}
 .pk-select-item.act { background: rgba(0, 103, 192, 0.1); color: var(--pk-pri); font-weight: 700; }
-.pk-select-label { position: absolute; top: 0; transform: translate3d(0, -50%, 0); -webkit-transform: translate3d(0, -50%, 0); backface-visibility: hidden; -webkit-backface-visibility: hidden; will-change: transform; left: 10px; background: var(--pk-bg); padding: 0 5px; font-size: 11px; color: var(--pk-pri); font-weight: bold; pointer-events: none; z-index: 10; line-height: 1; pointer-events: none; }
+.pk-select-label { position: absolute; top: 0; transform: translateY(-50%); -webkit-transform: translateY(-50%); left: 10px; background: var(--pk-bg); padding: 0 5px; font-size: 11px; color: var(--pk-pri); font-weight: bold; pointer-events: none; z-index: 10; line-height: 1; pointer-events: none; }
 .pk-err-dialog .pk-err-field-select{position:relative;width:100%;min-width:0;margin:0;padding:0;border:2px solid var(--pk-bd);border-radius:8px;background:var(--pk-bg);box-sizing:border-box;overflow:visible;transition:border-color .2s;}
 .pk-err-dialog .pk-err-field-select.pk-select-open{border-color:var(--pk-pri);}
 @media (hover:hover) and (pointer:fine){.pk-err-dialog .pk-err-field-select:hover{border-color:var(--pk-pri);}}
@@ -4988,7 +4995,7 @@ body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:1
 .pk-err-dialog .pk-err-field-select .pk-select-trigger{height:40px;margin-top:-7px;border:none!important;border-radius:6px;background:transparent;padding:0 13px 0 12px;display:flex;align-items:center;box-sizing:border-box;}
 @media (hover:hover) and (pointer:fine){.pk-err-dialog .pk-err-field-select .pk-select-trigger:hover{border-color:transparent;}}
 .pk-err-dialog .pk-err-field-select .pk-select-menu{top:calc(100% + 6px);margin-top:0;}
-.pk-field input, .pk-field select, .pk-share-modal input, .pk-ov input { transform: translateZ(0); will-change: transform; }
+.pk-field input, .pk-field select, .pk-share-modal input, .pk-ov input { transform: translate(0); }
 .pk-maximized { position: fixed !important; width: 100% !important; height: 100% !important; max-width: none !important; top: 0 !important; left: 0 !important; border-radius: 0 !important; border: none !important; z-index: 2147483647 !important; }
 .pk-maximized .pk-sidebar { width: 190px !important; align-items: flex-start !important; padding: 20px 10px !important; overflow-x: hidden !important; box-sizing: border-box !important; }
 .pk-maximized .pk-nav-btn { width: 100% !important; max-width: 100% !important; justify-content: flex-start !important; padding: 0 15px !important; gap: 10px; height: 54px !important; border-radius: 8px !important; box-sizing: border-box !important; }
@@ -5131,6 +5138,8 @@ body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:1
 .pk-placeholder-icon { position: absolute !important; inset: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 1 !important; transition: opacity 0.2s, visibility 0.2s; }
 .pk-placeholder-icon svg { width: 44px !important; height: 44px !important; object-fit: contain !important; }
 .pk-max-icon-box .pk-max-thumb { position: absolute !important; top: 0 !important; left: 0 !important; width: 50px !important; height: 50px !important; object-fit: cover !important; border-radius: 4px !important; opacity: 0; z-index: 2 !important; transition: opacity 0.25s ease-in-out; background: transparent; }
+.pk-ov:not(.pk-mobile) .pk-win.pk-maximized:not(.pk-grid-view) .pk-max-icon-box .pk-dir-list-icon-slot,.pk-ov:not(.pk-mobile) .pk-win.pk-maximized:not(.pk-grid-view) .pk-share-icon-wrap .pk-dir-list-icon-slot { width:52px!important; height:52px!important; min-width:52px!important; min-height:52px!important; flex:0 0 52px!important; }
+.pk-ov:not(.pk-mobile) .pk-win.pk-maximized:not(.pk-grid-view) .pk-max-icon-box .pk-dir-list-icon-slot > img,.pk-ov:not(.pk-mobile) .pk-win.pk-maximized:not(.pk-grid-view) .pk-max-icon-box .pk-dir-list-icon-fallback > img,.pk-ov:not(.pk-mobile) .pk-win.pk-maximized:not(.pk-grid-view) .pk-share-icon-wrap .pk-dir-list-icon-slot > img,.pk-ov:not(.pk-mobile) .pk-win.pk-maximized:not(.pk-grid-view) .pk-share-icon-wrap .pk-dir-list-icon-fallback > img { width:52px!important; height:52px!important; min-width:52px!important; min-height:52px!important; max-width:52px!important; max-height:52px!important; }
 .pk-maximized .pk-share-icon-wrap { width: 50px !important; height: 50px !important; margin-right: 20px !important; background: transparent !important; overflow: visible !important; }
 .pk-maximized .pk-row:has(.pk-max-thumb) .pk-name-txt { padding-left: 0 !important; }
 .pk-maximized .pk-nav-btn svg { width: 28px !important; height: 28px !important; }
@@ -5203,7 +5212,7 @@ body:has(.pk-ov:not([style*="display: none"])), body:has(.pk-img-ov), body:has(#
 .pk-pop-max .pk-dropdown-item { padding: 12px 15px !important; font-size: 15px !important; gap: 10px !important; font-weight: 600 !important; }
 .pk-pop-max .pk-dropdown-item svg { width: 22px !important; height: 22px !important; }
 .pk-btn-arrow { margin-left: 2px; opacity: 0.6; transition: transform 0.2s; }
-.pk-aria-status-box { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: bold; margin-top: 6px; transform: translateZ(0); -webkit-transform: translateZ(0); backface-visibility: hidden; will-change: transform; cursor: default; }
+.pk-aria-status-box { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: bold; margin-top: 6px; transform: translate(0); -webkit-transform: translate(0); cursor: default; }
 .pk-setting-fieldset{position:relative;padding:25px 15px 15px 15px;border:2px solid var(--pk-bd);border-radius:8px;transition:border-color .2s;transform:translateZ(0);backface-visibility:hidden;}.pk-setting-fieldset.pk-select-open{z-index:10040;}.pk-custom-select.pk-select-open{z-index:10050!important;}.pk-setting-fieldset.pk-inner-active{border-color:var(--pk-bd)!important;}.pk-setting-stack{display:flex;flex-direction:column;gap:15px;}.pk-setting-checkrow{display:flex;align-items:center;justify-content:space-between;height:44px;min-height:44px;border:2px solid var(--pk-bd);border-radius:8px;padding:0 12px;cursor:pointer;background:var(--pk-bg);transition:border-color .2s;box-sizing:border-box;}.pk-setting-checkrow span{font-size:14px;font-weight:400;color:var(--pk-fg);user-select:none;line-height:1.4;}.pk-setting-checkrow input{width:16px;height:16px;accent-color:var(--pk-pri);cursor:pointer;flex-shrink:0;margin-left:12px;}.pk-modal-ov [data-setting-key].pk-setting-focus-flash{outline:2px solid rgba(0,103,192,.68);outline-offset:3px;background:rgba(0,103,192,.08);border-radius:8px;transition:background-color .2s,outline-color .2s;}.pk-gopeed-help{font-size:12px;color:#888;line-height:1.55;background:var(--pk-hl);border:1px solid var(--pk-bd);border-radius:8px;padding:10px 12px;}
 @media (hover:hover) and (pointer:fine){.pk-setting-fieldset:hover:not(.pk-inner-active),.pk-setting-checkrow:hover{border-color:var(--pk-pri);}}
 .pk-pref-fieldset{position:relative;padding:15px;border:2px solid var(--pk-bd);border-radius:8px;transition:border-color .2s;cursor:default;box-sizing:border-box;}
@@ -5215,7 +5224,7 @@ body:has(.pk-ov:not([style*="display: none"])), body:has(.pk-img-ov), body:has(#
 .pk-token-eye { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border: none; border-radius: 6px; background: transparent; color: #8a94a4; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; transition: background 0.15s, color 0.15s; z-index: 20; }
 @media (hover:hover) and (pointer:fine){.pk-token-eye:hover { background: rgba(0,103,192,0.1); color: var(--pk-pri); }}
 .pk-token-eye svg { width: 18px; height: 18px; display: block; }
-.pk-aria-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; transform: translateZ(0); }
+.pk-aria-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; transform: translate(0); }
 .pk-aria-dot.ok { background: #52c41a; box-shadow: 0 0 8px rgba(82, 196, 26, 0.5); }
 .pk-aria-dot.err { background: #ff4d4f; }
 .pk-aria-dot.wait { background: var(--pk-pri); animation: pk-pulse 1.5s infinite; }
@@ -5239,7 +5248,7 @@ body:has(.pk-ov:not([style*="display: none"])), body:has(.pk-img-ov), body:has(#
 .pk-min-ph { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:1; transition:opacity 0.2s; }
 .pk-min-ph-img { width:100%; height:100%; object-fit:contain; border-radius:4px; pointer-events:none; }
 .pk-min-thumb { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:2; transition:opacity 0.2s; }
-.pk-active-border { border-color: var(--pk-pri) !important; } #pk_dl_group { transform: translateZ(0); backface-visibility: hidden; will-change: border-color; }
+.pk-active-border { border-color: var(--pk-pri) !important; } #pk_dl_group { transform: translate(0); }
 @media (hover:hover) and (pointer:fine){#pk_video_playback_group:hover,#pk_dl_group:hover,#pk_download_accel_group:hover{border-color:var(--pk-pri)!important;}#pk_dl_group.pk-typing-active:hover,#pk_download_accel_group.pk-typing-active:hover{border-color:var(--pk-bd)!important;}.pk-download-accel-subgroup:hover{border-color:var(--pk-pri)!important;}.pk-download-accel-subgroup:hover>legend{color:var(--pk-pri)!important;}}
 .pk-row > div.pk-name, .pk-min-icon, .pk-max-icon-box, .pk-min-media-box { overflow: visible !important; }
 .pk-maximized .pk-row .pk-name>img[style*="width:24px"] { width: 48px !important; height: 48px !important; margin-right: 20px !important; margin-left: -4px !important; }
@@ -5438,18 +5447,19 @@ html.pk-player-web-fullscreen-lock, body.pk-player-web-fullscreen-lock { overflo
 .pk-tt > div > span:first-child { overflow:hidden; text-overflow:ellipsis; }
 .pk-tt > div > span:last-child { display:none!important; }
 #pk-maximize { display:none!important; }
-.pk-hd .pk-btn { width:40px!important; min-width:40px!important; height:40px!important; padding:0!important; }
+.pk-hd .pk-btn { width:40px!important; min-width:40px!important; height:40px!important; padding:0!important; box-sizing:border-box!important; }
 .pk-tb,.pk-maximized .pk-tb { width:100%; height:48px!important; min-height:48px; padding:0 8px!important; gap:6px!important; overflow-x:auto!important; overflow-y:hidden!important; flex-wrap:nowrap!important; overscroll-behavior-x:contain; scrollbar-width:none; box-sizing:border-box; }
 .pk-tb > div[style*="flex:1"] { display:none!important; }
-.pk-tb .pk-btn,.pk-maximized .pk-tb .pk-btn { width:40px!important; min-width:40px!important; height:40px!important; padding:0!important; gap:0!important; border-radius:7px!important; justify-content:center!important; }
-.pk-tb .pk-btn > span,.pk-maximized .pk-tb .pk-btn > span { display:none!important; }
+.pk-tb .pk-btn,.pk-maximized .pk-tb .pk-btn { width:auto!important; min-width:40px!important; height:40px!important; padding:0 8px!important; gap:6px!important; border-radius:7px!important; justify-content:center!important; }
 .pk-tb .pk-btn svg,.pk-maximized .pk-tb .pk-btn svg { width:18px!important; height:18px!important; margin:0!important; }
 .pk-win.pk-mobile-selection-mode #pk-refresh,.pk-win.pk-mobile-selection-mode #pk-trash-refresh,.pk-win.pk-mobile-selection-mode #pk-newfolder { display:none!important; }
 .pk-win.pk-mobile-actionbar-browse:not(.pk-mobile-actionbar-disabled-browse) #pk-mobile-context-actions { display:none!important; }
 .pk-win.pk-mobile-actionbar-browse:not(.pk-mobile-actionbar-disabled-browse) #pk-mobile-context-tail-actions { display:none!important; }
 .pk-win:is(.pk-mobile-actionbar-selection,.pk-mobile-actionbar-disabled-browse) #pk-mobile-context-actions { display:flex!important; align-items:center!important; gap:6px!important; flex:0 0 auto!important; }
 .pk-win:is(.pk-mobile-actionbar-selection,.pk-mobile-actionbar-disabled-browse) #pk-mobile-context-tail-actions { display:flex!important; align-items:center!important; gap:6px!important; flex:0 0 auto!important; }
-.pk-win:is(.pk-mobile-actionbar-selection,.pk-mobile-actionbar-disabled-browse) .pk-mobile-context-action { width:40px!important; min-width:40px!important; height:40px!important; padding:0!important; border:1px solid transparent!important; border-radius:7px!important; background:transparent!important; color:var(--pk-fg)!important; }
+.pk-win:is(.pk-mobile-actionbar-selection,.pk-mobile-actionbar-disabled-browse) .pk-mobile-context-action { width:auto!important; min-width:40px!important; max-width:none!important; height:40px!important; padding:0 8px!important; gap:6px!important; border:1px solid transparent!important; border-radius:7px!important; background:transparent!important; color:var(--pk-fg)!important; flex:0 0 auto!important; white-space:nowrap!important; }
+.pk-ov.pk-hide-btn-text .pk-win:is(.pk-mobile-actionbar-selection,.pk-mobile-actionbar-disabled-browse) .pk-mobile-context-action { width:40px!important; min-width:40px!important; max-width:40px!important; padding:0!important; gap:0!important; }
+.pk-ov.pk-hide-btn-text .pk-win:is(.pk-mobile-actionbar-selection,.pk-mobile-actionbar-disabled-browse) .pk-mobile-context-action > span { display:none!important; }
 .pk-win:is(.pk-mobile-actionbar-selection,.pk-mobile-actionbar-disabled-browse) #pk-mobile-action-blacklist { color:#d93025!important; }
 @media (hover:hover) and (pointer:fine){.pk-win:is(.pk-mobile-actionbar-selection,.pk-mobile-actionbar-disabled-browse) .pk-mobile-context-action:hover:not(:disabled) { background:var(--pk-btn-hov)!important; }}
 .pk-win:is(.pk-mobile-actionbar-selection,.pk-mobile-actionbar-disabled-browse) .pk-mobile-context-action:disabled { opacity:.38!important; cursor:not-allowed!important; }
@@ -5457,9 +5467,9 @@ html.pk-player-web-fullscreen-lock, body.pk-player-web-fullscreen-lock { overflo
 .pk-win.pk-mobile-actionbar-browse #pk-actionbar > .pk-sep { display:none!important; }
 .pk-win.pk-mobile-actionbar-selection #pk-blacklist-manager { display:none!important; }
 .pk-win.pk-mobile-actionbar-selection #pk-actionbar > .pk-sep { display:none!important; }
-#pk-btn-upload .pk-btn-arrow { display:none!important; }
+.pk-ov.pk-hide-btn-text #pk-btn-upload .pk-btn-arrow { display:none!important; }
 .pk-ov .pk-win #pk-upload-wrap { flex:0 0 auto!important; height:40px!important; display:flex; align-items:center!important; }
-.pk-ov .pk-win #pk-btn-upload,.pk-ov .pk-win.pk-maximized #pk-btn-upload { width:40px!important; min-width:40px!important; max-width:40px!important; height:40px!important; padding:0!important; gap:0!important; border-radius:7px!important; }
+.pk-ov .pk-win #pk-btn-upload,.pk-ov .pk-win.pk-maximized #pk-btn-upload { width:auto!important; min-width:40px!important; max-width:none!important; height:40px!important; padding:0 8px!important; gap:6px!important; border-radius:7px!important; }
 .pk-ov .pk-win #pk-btn-upload > svg:not(.pk-btn-arrow) { width:18px!important; height:18px!important; margin:0!important; }
 .pk-nav { flex:0 0 min(58vw,240px); width:min(58vw,240px); max-width:none; min-width:150px; height:40px; margin:0; padding:0 4px; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; box-sizing:border-box; }
 .pk-nav::-webkit-scrollbar { display:none; }
@@ -6088,6 +6098,10 @@ html.pk-player-web-fullscreen-lock, body.pk-player-web-fullscreen-lock { overflo
 .pk-mobile-filter-exit-slot #pk-filter-exit-btn > svg { width:17px!important; height:17px!important; margin:0!important; }
 .pk-mobile-filter-exit-slot #pk-filter-exit-btn:active { filter:brightness(.9); }
 .pk-mobile-filter-exit-slot #pk-filter-exit-btn:focus-visible { outline:2px solid color-mix(in srgb,var(--pk-pri) 38%,transparent); outline-offset:2px; }
+.pk-ov.pk-mobile #pk-filter-exit-btn { width:34px!important; min-width:34px!important; max-width:34px!important; padding:0!important; justify-content:center!important; gap:0!important; }
+.pk-ov.pk-mobile #pk-filter-exit-btn > span { display:none!important; }
+.pk-ov.pk-mobile #pk-btn-exit { width:40px!important; min-width:40px!important; max-width:40px!important; padding:0!important; justify-content:center!important; gap:0!important; }
+.pk-ov.pk-mobile #pk-btn-exit > span { display:none!important; }
 .pk-ov.pk-mobile-search-active #pk-mobile-filter-strip { display:none!important; }
 #pk-actionbar,#pk-trash-bar { overflow-x:auto!important; }
 #pk-export,#pk-scan-dup,#pk-analyze,#pk-blacklist-manager,#pk-trash-blacklist-manager { display:none!important; }
@@ -6182,13 +6196,16 @@ html.pk-player-web-fullscreen-lock, body.pk-player-web-fullscreen-lock { overflo
 .pk-win.pk-share-list:not(.pk-grid-view) .pk-row.pk-mobile-share-row .pk-share-icon-wrap .pk-dir-list-icon-slot { width:50px!important; height:50px!important; min-width:50px!important; min-height:50px!important; flex:0 0 50px!important; }
 .pk-win.pk-share-list:not(.pk-grid-view) .pk-row.pk-mobile-share-row .pk-share-icon-wrap .pk-dir-list-icon-fallback { width:100%!important; height:100%!important; }
 .pk-win.pk-share-list:not(.pk-grid-view) .pk-row.pk-mobile-share-row .pk-share-icon-wrap img { width:100%!important; height:100%!important; min-width:100%!important; min-height:100%!important; object-fit:contain!important; margin:0!important; transform:none!important; }
+.pk-ov.pk-mobile .pk-win.pk-share-list:not(.pk-grid-view) .pk-row.pk-mobile-share-row .pk-share-icon-generic-file .pk-dir-list-icon-fallback > .pk-official-dir-fallback { transform:scale(1.08)!important; transform-origin:center center!important; }
 .pk-win.pk-share-list:not(.pk-grid-view) .pk-row.pk-mobile-share-row .pk-share-lock { width:18px!important; height:18px!important; bottom:-2px!important; right:-6px!important; z-index:15!important; }
 .pk-win.pk-share-list:not(.pk-grid-view) .pk-row.pk-mobile-share-row .pk-share-lock svg { width:100%!important; height:100%!important; min-width:100%!important; min-height:100%!important; margin:0!important; transform:none!important; display:block!important; color:#fff!important; }
 .pk-win.pk-share-list:not(.pk-grid-view) .pk-row.pk-mobile-share-row .pk-name-txt { font-size:12px!important; line-height:19px!important; }
-.pk-mobile-share-stats { display:flex; align-items:center; gap:12px; min-width:0; height:15px; overflow:hidden; color:#657284; font-size:11px; line-height:15px; font-variant-numeric:tabular-nums; white-space:nowrap; }
-.pk-mobile-share-stat { display:inline-flex; flex:0 0 auto; align-items:center; gap:3px; min-width:0; height:15px; }
-.pk-win.pk-maximized:not(.pk-grid-view) .pk-mobile-share-stat > .pk-mobile-share-stat-icon,.pk-mobile-share-stat > .pk-mobile-share-stat-icon { display:block!important; flex:0 0 14px!important; width:14px!important; min-width:14px!important; max-width:14px!important; height:14px!important; min-height:14px!important; max-height:14px!important; margin:0!important; }
-.pk-mobile-share-stat-value { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .pk-mobile-share-stats { display:flex; align-items:center; gap:12px; min-width:0; height:15px; overflow:visible; color:#657284; font-size:11px; line-height:15px; font-variant-numeric:tabular-nums; white-space:nowrap; transform:translateY(4px); }
+      .pk-mobile-share-stat { display:inline-flex; flex:0 0 auto; align-items:center; gap:3px; min-width:0; height:15px; }
+      .pk-win.pk-maximized:not(.pk-grid-view) .pk-mobile-share-stat > .pk-mobile-share-stat-icon,.pk-mobile-share-stat > .pk-mobile-share-stat-icon { display:block!important; flex:0 0 14px!important; width:14px!important; min-width:14px!important; max-width:14px!important; height:14px!important; min-height:14px!important; max-height:14px!important; margin:0!important; }
+      .pk-mobile-share-view-icon { transform:translateY(-1px)!important; }
+      .pk-mobile-share-save-icon { transform:translateY(-1px)!important; }
+      .pk-mobile-share-stat-value { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .pk-mobile-share-meta > .pk-mobile-list-date { flex:0 0 auto; }
 .pk-mobile-share-meta > .pk-mobile-share-status { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; }
 .pk-dark .pk-mobile-share-stats { color:#929dad; }
@@ -6233,9 +6250,9 @@ html.pk-player-web-fullscreen-lock, body.pk-player-web-fullscreen-lock { overflo
 .pk-win:not(.pk-mode-trash) .pk-name .pk-name-txt,.pk-win:not(.pk-mode-trash) .pk-name .pk-name-txt:hover { color:var(--pk-fg)!important; cursor:default!important; }
 .pk-win:not(.pk-grid-view) .pk-max-icon-box { width:54px!important; min-width:54px!important; height:54px!important; margin:0 10px 0 0!important; align-self:center!important; }
 .pk-win:not(.pk-grid-view) .pk-max-icon-box .pk-max-thumb { top:50%!important; left:50%!important; width:50px!important; height:50px!important; transform:translate(-50%,-50%)!important; }
-.pk-win:not(.pk-grid-view) .pk-bl-marker { width:18px!important; height:18px!important; bottom:-1px!important; left:9px!important; }
-.pk-win:not(.pk-grid-view) .pk-row.pk-mobile-two-line-row .pk-max-icon-box > .pk-bl-marker { left:9px!important; bottom:1px!important; z-index:120!important; }
-.pk-win:not(.pk-maximized):not(.pk-grid-view) .pk-row.pk-mobile-two-line-row .pk-max-icon-box > .pk-bl-marker { left:5px!important; }
+.pk-win:not(.pk-grid-view) .pk-bl-marker { width:18px!important; height:18px!important; bottom:-1px!important; left:2px!important; }
+.pk-win:not(.pk-grid-view) .pk-row.pk-mobile-two-line-row .pk-max-icon-box > .pk-bl-marker { left:2px!important; bottom:1px!important; z-index:120!important; }
+.pk-win:not(.pk-grid-view) .pk-bl-marker > svg { width:100%!important; height:100%!important; min-width:0!important; min-height:0!important; max-width:none!important; max-height:none!important; margin:0!important; transform:none!important; flex:0 0 auto!important; display:block!important; }
 .pk-win:not(.pk-grid-view) .pk-row.pk-mobile-two-line-row .pk-max-icon-box > .pk-folder-badge { bottom:-2px!important; }
 .pk-grid-view .pk-vp { padding:10px 0 12px; }
 .pk-grid-view .pk-row { border-radius:12px!important; }
@@ -6254,7 +6271,7 @@ html.pk-player-web-fullscreen-lock, body.pk-player-web-fullscreen-lock { overflo
 .pk-gv-cover,.pk-maximized .pk-gv-cover { height:calc(100% - 48px)!important; min-height:100px!important; border-radius:10px!important; }
 .pk-gv-cover .pk-gv-icon svg,.pk-gv-cover .pk-gv-icon img,.pk-maximized .pk-gv-cover .pk-gv-icon svg,.pk-maximized .pk-gv-cover .pk-gv-icon img { width:76px!important; height:76px!important; max-width:76px!important; max-height:76px!important; }
 .pk-gv-cover.pk-gv-folder,.pk-maximized .pk-gv-cover.pk-gv-folder { align-items:center!important; padding-bottom:0!important; }
-.pk-gv-folder-shell,.pk-maximized .pk-gv-folder-shell { width:160px!important; max-width:100%!important; height:126px!important; min-height:126px!important; margin:0 auto!important; transform:translateZ(0)!important; flex:0 0 auto!important; }
+.pk-gv-folder-shell,.pk-maximized .pk-gv-folder-shell { width:160px!important; max-width:100%!important; height:126px!important; min-height:126px!important; margin:0 auto!important; transform:none!important; flex:0 0 auto!important; }
 .pk-gv-folder-back,.pk-maximized .pk-gv-folder-back { top:18px!important; border-radius:10px!important; }
 .pk-gv-folder-tab,.pk-maximized .pk-gv-folder-tab { top:6px!important; left:14px!important; width:58px!important; height:22px!important; border-radius:8px 8px 0 0!important; }
 .pk-gv-folder-preview,.pk-maximized .pk-gv-folder-preview { left:14px!important; right:14px!important; bottom:22px!important; border-radius:9px!important; }
@@ -6283,15 +6300,13 @@ html.pk-player-web-fullscreen-lock, body.pk-player-web-fullscreen-lock { overflo
 .pk-gv-meta-sep { margin:0 4px; }
 .pk-gv-play { width:38px; height:38px; }
 .pk-gv-play svg { width:22px!important; height:22px!important; }
-.pk-ft,.pk-maximized .pk-ft { position:relative; height:50px!important; min-height:50px; padding:0 8px!important; overflow:visible!important; }
+.pk-ft,.pk-maximized .pk-ft { position:relative; height:50px!important; min-height:50px; padding:0 8px!important; overflow:visible!important; box-sizing:border-box!important; }
 .pk-ft .pk-stat { display:none!important; }
 .pk-ft .pk-grp { width:100%; height:100%; overflow-x:auto; overflow-y:hidden; gap:6px; align-items:center!important; scrollbar-width:none; touch-action:pan-x; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch; }
-.pk-ft .pk-grp > .pk-btn,.pk-maximized .pk-ft .pk-grp > .pk-btn { width:40px!important; min-width:40px!important; height:40px!important; padding:0!important; gap:0!important; border-radius:7px!important; }
-.pk-ft .pk-grp > .pk-btn > span { display:none!important; }
+.pk-ft .pk-grp > .pk-btn,.pk-maximized .pk-ft .pk-grp > .pk-btn { width:auto!important; min-width:40px!important; height:40px!important; padding:0 8px!important; gap:6px!important; border-radius:7px!important; }
 .pk-mobile-inline-actions { display:contents; }
 #pk-top-bar #pk-share-parse-insight,#pk-actionbar #pk-share-parse-insight { display:none!important; visibility:hidden!important; pointer-events:none!important; }
-.pk-mobile-inline-action { order:-2; width:40px!important; min-width:40px!important; height:40px!important; padding:0!important; gap:0!important; border-radius:7px!important; flex:0 0 40px!important; }
-.pk-mobile-inline-action > span { display:none!important; }
+.pk-mobile-inline-action { order:-2; width:auto!important; min-width:40px!important; height:40px!important; padding:0 8px!important; gap:6px!important; border-radius:7px!important; flex:0 0 auto!important; }
 .pk-mobile-inline-action svg { width:18px!important; height:18px!important; margin:0!important; }
 .pk-mobile-inline-action.pk-mobile-inline-action-danger { color:#d93025!important; }
 .pk-win.pk-mode-trash.pk-mobile-promoted-footer-only .pk-ft .pk-grp { display:flex!important; }
@@ -6309,8 +6324,8 @@ html.pk-player-web-fullscreen-lock, body.pk-player-web-fullscreen-lock { overflo
 .pk-win.pk-maximized #pk-crumb > span:not(.pk-crumb-sep) { font-size:13px!important; height:auto!important; padding:2px 6px!important; margin:auto 2px!important; }
 .pk-win.pk-maximized #pk-crumb > div > span { font-size:15px!important; height:auto!important; padding:2px 6px!important; margin:0!important; }
 .pk-win.pk-maximized #pk-crumb svg { width:14px!important; height:14px!important; vertical-align:-4px!important; margin-top:0!important; }
-.pk-win #pk-crumb > .pk-crumb-sep,.pk-win.pk-maximized #pk-crumb > .pk-crumb-sep { width:22px!important; height:22px!important; margin:0 2px!important; padding:2px 6px!important; font-size:13px!important; display:inline-flex!important; align-items:center!important; justify-content:center!important; }
-.pk-win #pk-crumb > .pk-crumb-sep svg,.pk-win.pk-maximized #pk-crumb > .pk-crumb-sep svg { width:14px!important; height:14px!important; vertical-align:middle!important; margin:0!important; }
+.pk-win #pk-crumb > .pk-crumb-sep,.pk-win.pk-maximized #pk-crumb > .pk-crumb-sep { width:34px!important; min-width:34px!important; flex:0 0 34px!important; height:26px!important; margin:0 2px!important; padding:2px 6px!important; box-sizing:border-box!important; font-size:13px!important; display:inline-flex!important; align-items:center!important; justify-content:center!important; }
+.pk-win #pk-crumb > .pk-crumb-sep svg,.pk-win.pk-maximized #pk-crumb > .pk-crumb-sep svg { width:14px!important; min-width:14px!important; max-width:14px!important; height:14px!important; min-height:14px!important; max-height:14px!important; flex:0 0 14px!important; flex-shrink:0!important; vertical-align:middle!important; margin:0!important; display:block!important; }
 body.pk-body-max .pk-crumb-pop .pk-crumb-item { font-size:13px!important; }
 body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:10px!important; height:16px!important; min-width:auto!important; margin-left:6px!important; padding:1px 6px 0 6px!important; }
 .pk-win .pk-global-chk,.pk-win.pk-maximized .pk-global-chk { font-size:13px!important; }
@@ -6324,7 +6339,7 @@ body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:1
 .pk-win .pk-grid-hd,.pk-win.pk-maximized .pk-grid-hd { font-size:13px!important; }
 .pk-win .pk-tb .pk-btn,.pk-win.pk-maximized .pk-tb .pk-btn,.pk-win .pk-ft .pk-btn,.pk-win.pk-maximized .pk-ft .pk-btn { font-size:13px!important; }
 .pk-win .pk-ft,.pk-win.pk-maximized .pk-ft { font-size:13px!important; }
-.pk-win .pk-ft .pk-mobile-inline-action,.pk-win.pk-maximized .pk-ft .pk-mobile-inline-action { width:40px!important; min-width:40px!important; max-width:40px!important; height:40px!important; padding:0!important; gap:0!important; align-self:center!important; line-height:1!important; }
+.pk-win .pk-ft .pk-mobile-inline-action,.pk-win.pk-maximized .pk-ft .pk-mobile-inline-action { width:auto!important; min-width:40px!important; max-width:none!important; height:40px!important; padding:0 8px!important; gap:6px!important; align-self:center!important; line-height:1!important; }
 .pk-win .pk-ft .pk-grp .pk-btn > svg,.pk-win.pk-maximized .pk-ft .pk-grp .pk-btn > svg { display:block!important; flex:0 0 auto!important; align-self:center!important; margin:0!important; vertical-align:middle!important; }
 .pk-win #pk-filter-cat-label,.pk-win.pk-maximized #pk-filter-cat-label { height:32px!important; font-size:13px!important; padding:0 12px!important; }
 .pk-win #pk-filter-exts-wrap,.pk-win.pk-maximized #pk-filter-exts-wrap { height:32px!important; }
@@ -6706,6 +6721,8 @@ body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:1
 .pk-media-more-wrap { display:flex; }
 .pk-mobile-media-viewer .pk-media-mobile-menu-action { display:none!important; }
 .pk-mobile-media-viewer .pk-media-more-trigger { display:flex!important; }
+#pk-player-ov #pk_p_search,
+.pk-img-ov #pk_img_search { display:none!important; }
 .pk-media-more-menu { top:calc(100% + 2px); right:0; }
 .pk-p-menu-con { min-width:42px; height:42px; font-size:13px; }
 @media (hover:hover) and (pointer:fine){.pk-mobile-media-viewer #pk_p_res_menu:hover > .pk-p-pop,.pk-mobile-media-viewer #pk_p_spd_menu:hover > .pk-p-pop { display:none; animation:none; }}
@@ -6715,6 +6732,7 @@ body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:1
 #pk_p_web_full { display:none!important; }
  .pk-p-prog-wrap { left:10px!important; right:10px!important; bottom:calc(96px + env(safe-area-inset-bottom,0px))!important; gap:8px!important; }
 #pk-player-ov #pk_p_box #pk_p_preview { bottom:calc(123px + env(safe-area-inset-bottom,0px))!important; }
+#pk-player-ov.pk-mobile-media-viewer #pk_p_preview .pk-prev-time { display:none!important; }
 #pk-player-ov #pk_p_box .pk-p-resume-toast { bottom:calc(150px + env(safe-area-inset-bottom,0px))!important; }
 #pk-player-ov #pk_p_box .pk-p-resume-toast { left:16px!important; right:16px!important; width:auto!important; max-width:none!important; min-width:0!important; padding:9px 12px!important; border-radius:18px!important; display:flex!important; flex-wrap:nowrap!important; align-items:center!important; gap:8px!important; box-sizing:border-box!important; }
 #pk-player-ov #pk_p_box .pk-p-resume-toast > span:first-child { flex:1 1 auto!important; min-width:0!important; overflow:hidden!important; overflow-wrap:anywhere!important; word-break:normal!important; white-space:normal!important; text-align:left!important; line-height:1.35!important; }
@@ -6905,6 +6923,13 @@ return result;
 }
 function gmHas(key) { try { if (typeof GM_listValues !== 'undefined') { const keys = GM_listValues(); if (Array.isArray(keys)) return keys.includes(key); } if (typeof GM_getValue !== 'undefined') { const marker = `__pk_missing_${key}_${Date.now()}_${Math.random()}__`; return GM_getValue(key, marker) !== marker; } } catch (e) {} return false; }
 async function gmSetAsync(key, val) { const r = gmSet(key, val); if (r && typeof r.then === 'function') await r; }
+const DEFAULT_VIDEO_QUALITY_MIGRATION_KEY = 'pem_default_video_quality_migration_510';
+const migrateDefaultVideoQualityPreference = () => {
+if (gmGet(DEFAULT_VIDEO_QUALITY_MIGRATION_KEY, '') === '1') return;
+gmSet('pk_default_video_quality', 'default');
+gmSet(DEFAULT_VIDEO_QUALITY_MIGRATION_KEY, '1');
+};
+migrateDefaultVideoQualityPreference();
 scheduleConfigPrefixCleanup('startup', 1800);
 let pkScriptUpdateCheckPromise=null;
 function getScriptVersion(){try{return String((typeof GM_info!=='undefined'&&GM_info.script&&GM_info.script.version)||'0').replace(/^v/i,'').trim();}catch(e){return '0';}}
@@ -8020,7 +8045,7 @@ zh: {
   "ph_sub_search": "输入关键词，下方链接自动更新...",
   "str_compat_mode": "兼容模式",
   "lang_code": "zh",
-  "btn_go_search": "🔍 去 {n} 手动搜",
+  "btn_go_search": "🔍 去 {n} 搜",
   "btn_restart": "从头播放",
   "btn_prev_video": "上一个 [Ctrl + ←]",
   "btn_next_video": "下一个 [Ctrl + →]",
@@ -8162,6 +8187,7 @@ zh: {
   "label_default_video_quality": "默认视频清晰度/外部播放清晰度",
   "label_video_load_progress_cache": "打开视频时读取播放进度",
   "label_visual_media_continuous_browse": "图片和视频连续浏览",
+  "label_theme_follow_system": "外观随系统",
   "msg_visual_media_action_unavailable": "当前项目不支持星标或删除",
   "opt_quality_1080p": "1080P",
   "opt_quality_720p": "720P",
@@ -8257,6 +8283,7 @@ zh: {
   "lbl_dl_filter": "下载过滤",
   "lbl_config_manage": "配置管理",
   "lbl_config_cloud_sync": "云同步配置",
+  "label_config_cloud_auto_sync": "自动上传",
   "label_config_cloud_last_sync": "上次同步",
   "label_config_cloud_remote_size": "云端配置",
   "label_config_cloud_chunk_count": "分片数量",
@@ -8365,7 +8392,7 @@ zh: {
   "err_invalid_config": "无效的配置文件：未检测到指纹标识或格式错误",
   "err_json_format": "文件解析失败：JSON 语法错误或文件已损坏",
   "lbl_storage": "存储空间",
-  "lbl_browse_exp": "浏览体验",
+  "lbl_browse_exp": "外观与浏览",
   "lbl_skip_bl_on_del": "删除时跳过管理器中记录资源",
   "lbl_pwd_manage": "解压密码管理",
   "title_pwd_vault": "解压密码库",
@@ -9346,6 +9373,39 @@ await sleep((typeof window.pkIsAuthRecoveryActive === 'function' && window.pkIsA
 return false;
 }
 
+function computeOfficialVideoEvidence(it, seen = new Set()) {
+if (!it || it.isHeader || it.kind === 'drive#folder') return false;
+if (typeof it === 'object') {
+if (seen.has(it)) return false;
+seen.add(it);
+}
+if (it.kind === 'pk#upload') {
+    if (it._officialVideoEvidence === true) return true;
+    const finalMeta = it._finalFileMeta;
+    return !!(finalMeta && finalMeta !== it && computeOfficialVideoEvidence(finalMeta, seen));
+}
+if (it._officialVideoEvidence === true) return true;
+const videoMetadata = it.video_media_metadata;
+if (videoMetadata && typeof videoMetadata === 'object' && Object.keys(videoMetadata).length > 0) return true;
+const mime = String(it.mime_type || '').toLowerCase().trim();
+if (mime.startsWith('audio/')) return false;
+if (mime.startsWith('video/')) return true;
+const duration = Number(it.params && it.params.duration);
+if (Number.isFinite(duration) && duration > 0) return true;
+const medias = Array.isArray(it.medias) ? it.medias : [];
+return medias.some(media => {
+if (!media || typeof media !== 'object') return false;
+const video = media.video && typeof media.video === 'object' ? media.video : null;
+if (video && Object.keys(video).length > 0) return true;
+const mediaMime = String(media.mime_type || '').toLowerCase().trim();
+if (mediaMime.startsWith('video/')) return true;
+const mediaType = String(media.media_type || media.type || media.video_type || '').toLowerCase().trim();
+return mediaType.includes('video');
+});
+}
+
+window.pkHasOfficialVideoEvidence = computeOfficialVideoEvidence;
+
 async function apiList(parentId, limit = 1000, onProgress, signal, trashed = false, isBackground = false) {
 let all = [], next = null, safe = 5000;
 const TIMEOUT_MS = 25000;
@@ -9475,7 +9535,9 @@ e = new Error('FETCH_TIMEOUT');
 errMsg = 'Local Timeout';
 }
 
-const isNetworkError = e.name === 'TypeError' || errMsg.includes('fetch') || errMsg.includes('PAGINATION') || isTimeout;
+const isNetworkError = isTimeout
+|| errMsg.includes('PAGINATION')
+|| /failed to fetch|networkerror|network error|fetch failed|load failed|err_network|err_connection/i.test(errMsg);
 
 if ((isNetworkError || errMsg === 'AUTH_RETRY') && safe > 0) {
 const backoff = pageRetries === 1 ? 500 : Math.min(pageRetries * 2000, 10000);
@@ -10820,8 +10882,9 @@ return `<span class="pk-dir-list-icon-slot" style="${slotStyle}"><span class="pk
 function getShareOfficialListIconHtml(item = null, lockHtml = '', disabled = false) {
 const remoteSrc = String((item && item.icon_link) || '');
 const disabledClass = disabled ? ' pk-share-icon-disabled' : '';
+const genericFileClass = !isOfficialDirFallbackFolder(item) ? ' pk-share-icon-generic-file' : '';
 const disabledStyle = disabled ? 'opacity:0.6;' : '';
-return `<div class="pk-share-icon-wrap${disabledClass}" draggable="false" style="${disabledStyle}display:flex;align-items:center;justify-content:center;position:relative;">${getDirListIconSlotHtml(item, { mode: 'list', size: 24, remoteSrc, remoteClass: 'pk-min-icon-img', remoteObjectFit: 'contain' })}${lockHtml || ''}</div>`;
+return `<div class="pk-share-icon-wrap${disabledClass}${genericFileClass}" draggable="false" style="${disabledStyle}display:flex;align-items:center;justify-content:center;position:relative;">${getDirListIconSlotHtml(item, { mode: 'list', size: 24, remoteSrc, remoteClass: 'pk-min-icon-img', remoteObjectFit: 'contain' })}${lockHtml || ''}</div>`;
 }
 
 function getPreviewIconFailCache() {
@@ -14542,8 +14605,9 @@ return `<label class="pk-dup-chk"${tipAttr}><input type="checkbox" id="${id}" ch
 };
 
 const savedTheme = gmGet('pk_theme', 'auto');
+const followSystemTheme = gmGet('pk_theme_follow_system', false) === true;
 const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-let isDark = savedTheme === 'dark' || (savedTheme === 'auto' && sysDark);
+let isDark = followSystemTheme ? sysDark : (savedTheme === 'dark' || (savedTheme === 'auto' && sysDark));
 
 if (isDark) el.classList.add('pk-dark');
 
@@ -14891,8 +14955,8 @@ ${CONF.icons.blacklist} <span>${L.title_blacklist}</span>
 <button class="pk-btn" id="pk-newfolder" data-pk-tip="${L.tip_newfolder}">${CONF.icons.newfolder} <span>${L.btn_newfolder}</span></button>
 <button class="pk-btn" id="pk-del" data-pk-tip="${L.tip_del}">${CONF.icons.del} <span>${L.btn_del}</span></button>
 <div id="pk-mobile-context-actions" class="pk-mobile-context-actions" aria-label="${esc(L.btn_more || L.str_more || '')}">
-<button type="button" class="pk-mobile-context-action" id="pk-mobile-action-share" data-pk-mobile-context-action="share" data-pk-tip="${esc(L.ctx_share || '')}" aria-label="${esc(L.ctx_share || '')}">${ctxIcons.share}</button>
-<button type="button" class="pk-mobile-context-action" id="pk-mobile-action-star" data-pk-mobile-context-action="star" data-pk-tip="${esc(L.ctx_star || '')}" aria-label="${esc(L.ctx_star || '')}">${ctxIcons.star}</button>
+<button type="button" class="pk-mobile-context-action" id="pk-mobile-action-share" data-pk-mobile-context-action="share" data-pk-tip="${esc(L.ctx_share || '')}" aria-label="${esc(L.ctx_share || '')}">${ctxIcons.share}<span>${L.ctx_share}</span></button>
+<button type="button" class="pk-mobile-context-action" id="pk-mobile-action-star" data-pk-mobile-context-action="star" data-pk-tip="${esc(L.ctx_star || '')}" aria-label="${esc(L.ctx_star || '')}">${ctxIcons.star}<span>${L.ctx_star}</span></button>
 </div>
 <button class="pk-btn" id="pk-clear-history-all" style="display:none;" data-pk-tip="${L.tip_clear_all_history}">${CONF.icons.emptyTrash} <span>${L.btn_clear_all_history}</span></button>
 <button class="pk-btn" id="pk-deselect" data-pk-tip="${L.tip_deselect}" style="display:none">${CONF.icons.deselect} <span>${L.btn_deselect}</span></button>
@@ -14906,8 +14970,8 @@ ${CONF.icons.blacklist} <span>${L.title_blacklist}</span>
 <button class="pk-btn" id="pk-prune" data-pk-tip="${L.tip_prune}">${CONF.icons.prune} <span>${L.btn_prune}</span></button>
 <button class="pk-btn" id="pk-unzip" data-pk-tip="${L.tip_unzip}">${CONF.icons.unzip} <span>${L.btn_unzip}</span></button>
 <div id="pk-mobile-context-tail-actions" class="pk-mobile-context-actions pk-mobile-context-tail-actions" aria-label="${esc(L.btn_more || L.str_more || '')}">
-<button type="button" class="pk-mobile-context-action" id="pk-mobile-action-copy-name" data-pk-mobile-context-action="copy-name" data-pk-tip="${esc(L.ctx_copy_name || '')}" aria-label="${esc(L.ctx_copy_name || '')}">${ctxIcons.copyName}</button>
-<button type="button" class="pk-mobile-context-action" id="pk-mobile-action-blacklist" data-pk-mobile-context-action="blacklist" data-pk-tip="${esc(L.ctx_add_bl || '')}" aria-label="${esc(L.ctx_add_bl || '')}">${ctxIcons.blAdd}</button>
+<button type="button" class="pk-mobile-context-action" id="pk-mobile-action-copy-name" data-pk-mobile-context-action="copy-name" data-pk-tip="${esc(L.ctx_copy_name || '')}" aria-label="${esc(L.ctx_copy_name || '')}">${ctxIcons.copyName}<span>${L.ctx_copy_name}</span></button>
+<button type="button" class="pk-mobile-context-action" id="pk-mobile-action-blacklist" data-pk-mobile-context-action="blacklist" data-pk-tip="${esc(L.ctx_add_bl || '')}" aria-label="${esc(L.ctx_add_bl || '')}">${ctxIcons.blAdd}<span>${L.ctx_add_bl}</span></button>
 </div>
 <button class="pk-btn" id="pk-cancel-share" data-pk-tip="${L.btn_cancel_share} [Delete]" style="display:none;">${CONF.icons.unshare} <span>${L.btn_cancel_share}</span></button>
 <button class="pk-btn" id="pk-share-export-links" data-pk-tip="${L.tip_share_export_links}" style="display:none;">${CONF.icons.shareExportLinks} <span>${L.btn_share_export_links}</span></button>
@@ -15738,7 +15802,7 @@ MOBILE_INLINE_ACTION_IDS.forEach(id => {
 const target = el.querySelector(`#${id}`);
 if (!isMobileInlineActionEligible(id, target)) return;
 const hostBar = target.closest('.pk-tb,.pk-ft');
-if (hostBar && getComputedStyle(hostBar).display === 'none') return;
+if (hostBar && window.getComputedStyle(hostBar).display === 'none') return;
 let item = existingItems.get(id);
 if (!item) {
     item = document.createElement('button');
@@ -15789,8 +15853,8 @@ if (footerGroup) {
 
 let mobileInlineActionsRaf = 0;
 const scheduleMobileInlineActionsSync = () => {
-if (mobileInlineActionsRaf) cancelAnimationFrame(mobileInlineActionsRaf);
-mobileInlineActionsRaf = requestAnimationFrame(() => {
+if (mobileInlineActionsRaf) window.cancelAnimationFrame(mobileInlineActionsRaf);
+mobileInlineActionsRaf = window.requestAnimationFrame(() => {
 mobileInlineActionsRaf = 0;
 syncMobileInlineActions();
 });
@@ -15816,7 +15880,7 @@ UI.mobileInlineActions.__pkObserver = mobileInlineActionsObserver;
 }
 
 const destroyMobileInlineActions = () => {
-if (mobileInlineActionsRaf) cancelAnimationFrame(mobileInlineActionsRaf);
+if (mobileInlineActionsRaf) window.cancelAnimationFrame(mobileInlineActionsRaf);
 mobileInlineActionsRaf = 0;
 window.removeEventListener('resize', scheduleMobileInlineActionsSync);
 if (UI.bottomGrp) {
@@ -17474,6 +17538,22 @@ play.style.display = (wrapperReady || imgReady) ? 'flex' : 'none';
 
 window.syncGridVideoPlayState = syncGridVideoPlayState;
 
+const pendingGridVideoPlaySync = new Map();
+let gridVideoPlaySyncRaf = 0;
+const queueGridVideoPlayStateSync = (row, item) => {
+pendingGridVideoPlaySync.set(row, item);
+if (gridVideoPlaySyncRaf) return;
+gridVideoPlaySyncRaf = requestAnimationFrame(() => {
+gridVideoPlaySyncRaf = 0;
+const pending = Array.from(pendingGridVideoPlaySync);
+pendingGridVideoPlaySync.clear();
+for (const [currentRow, currentItem] of pending) {
+if (!currentRow.isConnected || currentRow.dataset.pkBoundId !== String(currentItem.id || '')) continue;
+syncGridVideoPlayState(currentRow, currentItem);
+}
+});
+};
+
 const patchFrozenGridMedia = (row, item, prevMediaNode = null, prevMediaKey = '') => {
 const mount = row.querySelector('.pk-gv-media-mount');
 if (!mount || !item) return;
@@ -17483,13 +17563,7 @@ const mediaKey = makeGridMediaCacheKey(item);
 mount.dataset.pkIsVideo = isGridVideoItem(item) ? '1' : '0';
 mount.dataset.pkHasThumb = (item.thumbnail_link && item.thumbnail_link !== item.icon_link) ? '1' : '0';
 
-const syncGridVideoPlay = () => {
-if (typeof syncGridVideoPlayState === 'function') {
-syncGridVideoPlayState(row, item);
-}
-};
-
-const queueSyncGridVideoPlay = () => requestAnimationFrame(syncGridVideoPlay);
+const queueSyncGridVideoPlay = () => queueGridVideoPlayStateSync(row, item);
 
 const cachedMediaNode = typeof takeFrozenGridMediaNode === 'function' ? takeFrozenGridMediaNode(item) : null;
 if (cachedMediaNode) {
@@ -17520,6 +17594,11 @@ queueSyncGridVideoPlay();
 
 window.renderFrozenGridMedia = renderFrozenGridMedia;
 window.patchFrozenGridMedia = patchFrozenGridMedia;
+
+const setRowAttributeIfChanged = (row, name, value) => {
+const text = String(value);
+if (row.getAttribute(name) !== text) row.setAttribute(name, text);
+};
 
 const getRowClassName = (isSelected, isFocused, isMoving, selectedCount = -1) => {
 let cls = 'pk-row';
@@ -18396,7 +18475,14 @@ if (label != null) {
 button.setAttribute('data-pk-tip', label);
 button.setAttribute('aria-label', label);
 }
-if (iconHtml) button.innerHTML = iconHtml;
+if (iconHtml) {
+button.innerHTML = iconHtml;
+if (label != null) {
+const labelNode = document.createElement('span');
+labelNode.textContent = label;
+button.appendChild(labelNode);
+}
+}
 };
 
 setButton(UI.mobileActionShare, allowShare, !hasIds || !items.length, L.ctx_share, ctxIcons.share);
@@ -18652,18 +18738,35 @@ return r.width > 0 && r.height > 0;
 const detectAutoHideButtonTextOverflow = () => {
 if (!el || !UI || !UI.win || el.style.display === 'none' || !isAutoHideVisibleEl(UI.win)) return { toolbar: false, footer: false };
 const tol = 4;
+const rects = new Map();
+const styles = new Map();
+const readRect = node => {
+if (!rects.has(node)) rects.set(node, node.getBoundingClientRect());
+return rects.get(node);
+};
+const readStyle = node => {
+if (!styles.has(node)) styles.set(node, getComputedStyle(node));
+return styles.get(node);
+};
+const isVisible = node => {
+if (!node || !node.isConnected) return false;
+const style = readStyle(node);
+if (style.display === 'none' || style.visibility === 'hidden') return false;
+const rect = readRect(node);
+return rect.width > 0 && rect.height > 0;
+};
 const floatingSelectors = '.pk-hist-pop,.pk-dup-folder-pop,.pk-select-pop,.pk-dropdown-menu,.pk-modal-ov,.pk-img-ov,#pk-player-ov,#pk-audio-ov';
 const ignoreOverflowSelectors = '#pk-crumb,.pk-nav,.pk-picker-crumb,.pk-path';
-const hasVisibleFloatingDesc = node => !!(node && Array.from(node.querySelectorAll(floatingSelectors)).some(isAutoHideVisibleEl));
+const hasVisibleFloatingDesc = node => !!(node && Array.from(node.querySelectorAll(floatingSelectors)).some(isVisible));
 const isInFloatingDesc = node => !!(node && node.closest && node.closest(floatingSelectors));
 const isAutoHideOverflowIgnored = node => !!(node && node.closest && node.closest(ignoreOverflowSelectors));
 const isFooterActionsOverflow = () => {
 const footer = el.querySelector('.pk-ft');
 const group = UI.bottomGrp;
-if (!isAutoHideVisibleEl(footer) || !isAutoHideVisibleEl(group)) return false;
-const fr = footer.getBoundingClientRect();
-const gr = group.getBoundingClientRect();
-const fs = getComputedStyle(footer);
+if (!isVisible(footer) || !isVisible(group)) return false;
+const fr = readRect(footer);
+const gr = readRect(group);
+const fs = readStyle(footer);
 const padLeft = parseFloat(fs.paddingLeft) || 0;
 const padRight = parseFloat(fs.paddingRight) || 0;
 const gap = parseFloat(fs.columnGap || fs.gap) || 0;
@@ -18671,16 +18774,16 @@ const requiredGroupWidth = Math.max(gr.width, group.scrollWidth || 0);
 const availableGroupWidth = Math.max(0, fr.width - padLeft - padRight - gap - AUTO_HIDE_FOOTER_STAT_RESERVE);
 return gr.right > fr.right + tol || gr.left < fr.left - tol || requiredGroupWidth > availableGroupWidth + tol;
 };
-const bars = [el.querySelector('#pk-top-bar'), UI.actionBar, UI.trashBar, el.querySelector('.pk-link-bookmark-mode .pk-lbm-toolbar')].filter(isAutoHideVisibleEl);
+const bars = [el.querySelector('#pk-top-bar'), UI.actionBar, UI.trashBar, el.querySelector('.pk-link-bookmark-mode .pk-lbm-toolbar')].filter(isVisible);
 for (const bar of bars) {
-const br = bar.getBoundingClientRect();
-const children = Array.from(bar.children).filter(child => isAutoHideVisibleEl(child) && !isAutoHideOverflowIgnored(child));
+const br = readRect(bar);
+const children = Array.from(bar.children).filter(child => isVisible(child) && !isAutoHideOverflowIgnored(child));
 for (const child of children) {
-const cr = child.getBoundingClientRect();
+const cr = readRect(child);
 if (cr.right > br.right + tol || cr.left < br.left - tol) return { toolbar: true, footer: isFooterActionsOverflow() };
 const hasFloating = hasVisibleFloatingDesc(child);
 if (!hasFloating && child.scrollWidth > child.clientWidth + tol) return { toolbar: true, footer: isFooterActionsOverflow() };
-const spans = Array.from(child.querySelectorAll('span')).filter(span => isAutoHideVisibleEl(span) && !isInFloatingDesc(span) && !isAutoHideOverflowIgnored(span));
+const spans = Array.from(child.querySelectorAll('span')).filter(span => isVisible(span) && !isInFloatingDesc(span) && !isAutoHideOverflowIgnored(span));
 for (const span of spans) {
 if (span.scrollWidth > span.clientWidth + tol) return { toolbar: true, footer: isFooterActionsOverflow() };
 }
@@ -18706,6 +18809,7 @@ autoHideBtnTextLockWidth.toolbar = 0;
 autoHideBtnTextLockWidth.footer = 0;
 };
 if (el.style.display === 'none') { clearAutoClasses(); syncQuotaText(); return; }
+if (isMobileManagerEnvironment()) { clearAutoClasses(); syncQuotaText(); return; }
 if (gmGet('pk_hide_button_text', false)) { clearAutoClasses(); syncQuotaText(); return; }
 const currentLockWidth = getAutoHideButtonTextLockWidth();
 const toolbarLocked = el.classList.contains(AUTO_HIDE_TOOLBAR_CLASS) && autoHideBtnTextLockWidth.toolbar > 0 && currentLockWidth > 0 && currentLockWidth <= autoHideBtnTextLockWidth.toolbar + AUTO_HIDE_BTN_TEXT_RELEASE_GAP;
@@ -18735,7 +18839,7 @@ const bindAutoHideButtonTextObservers = () => {
 if (autoHideBtnTextBound) return;
 autoHideBtnTextBound = true;
 const resizeTargets = [UI.win, el.querySelector('#pk-top-bar'), UI.actionBar, UI.trashBar, el.querySelector('.pk-ft'), UI.bottomGrp].filter(Boolean);
-const mutationTargets = [el.querySelector('#pk-top-bar'), UI.actionBar, UI.trashBar, UI.bottomGrp, UI.in].filter(Boolean);
+const mutationTargets = [el.querySelector('#pk-top-bar'), UI.actionBar, UI.trashBar, UI.bottomGrp].filter(Boolean);
 if (typeof ResizeObserver !== 'undefined') {
 const ro = new ResizeObserver(requestAutoHideButtonTextCheck);
 resizeTargets.forEach(t => ro.observe(t));
@@ -19059,6 +19163,20 @@ requestAnimationFrame(() => {
 el.classList.remove('pk-no-transition');
 });
 };
+}
+
+const syncThemeToSystem = () => {
+if (!window.matchMedia || !gmGet('pk_theme_follow_system', false)) return;
+const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const currentDark = el.classList.contains('pk-dark');
+if (currentDark === systemDark || !UI.btnTheme) return;
+UI.btnTheme.click();
+};
+const systemThemeMedia = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+if (systemThemeMedia) {
+const onSystemThemeChange = () => syncThemeToSystem();
+if (systemThemeMedia.addEventListener) systemThemeMedia.addEventListener('change', onSystemThemeChange);
+else if (systemThemeMedia.addListener) systemThemeMedia.addListener(onSystemThemeChange);
 }
 
 const btnMax = el.querySelector('#pk-maximize');
@@ -29939,6 +30057,8 @@ return m;
 
 function getShareParseErrorMessage(err) {
 const L = getStrings();
+const serverText = err && err.data ? String(getOfficialStatusFields(err.data).shareStatusText || '').trim() : '';
+if (serverText) return serverText;
 if (err && err.shareParseKey && L[err.shareParseKey]) return L[err.shareParseKey];
 if (err && (err.name === 'TypeError' || err.name === 'AbortError')) return L.msg_share_parse_network_error;
 return L.msg_share_parse_failed || L.msg_share_parse_unknown_error;
@@ -31081,7 +31201,7 @@ S.selMode = 'explicit';
 S.activeId = null;
 S.lastSelIdx = -1;
 syncShareParseInsightMirror();
-showToast(failedFolders.length ? `${L.msg_share_parse_scan_failed} (${failedFolders.length})` : L.msg_share_parse_scan_done, failedFolders.length ? 'warning' : 'success');
+if (!failedFolders.length || !items.length) showToast(failedFolders.length ? `${L.msg_share_parse_scan_failed} (${failedFolders.length})` : L.msg_share_parse_scan_done, failedFolders.length ? 'warning' : 'success');
 renderShareParseCurrentView();
 } catch(e) {
 if (!S.shareParseMode || S.shareParseInsightReqId !== reqId) return;
@@ -31937,7 +32057,9 @@ S.shareParseAutoLoadResumeTarget = '';
 S.shareParseAutoLoadRegionBlocked = false;
 S.shareParseRegionResumeCtx = null;
 }
-if (!isRegionBlocked || Date.now() - Number(S.shareParseRegionUnavailableToastAt || 0) > 12000) {
+const hasVisibleShareItems = Array.isArray(S.shareParseDisplay) && S.shareParseDisplay.length > 0;
+if (!append && !S.shareParseListActive) S.shareParseError = msg;
+if (append && hasVisibleShareItems && (!isRegionBlocked || Date.now() - Number(S.shareParseRegionUnavailableToastAt || 0) > 12000)) {
 showToast(msg, 'error');
 if (isRegionBlocked) S.shareParseRegionUnavailableToastAt = Date.now();
 }
@@ -32022,39 +32144,6 @@ return (S.shareParseMode
 : null) || S.itemMap.get(id) || null;
 }
 
-const computeOfficialVideoEvidence = (it, seen = new Set()) => {
-if (!it || it.isHeader || it.kind === 'drive#folder') return false;
-if (typeof it === 'object') {
-if (seen.has(it)) return false;
-seen.add(it);
-}
-if (it.kind === 'pk#upload') {
-    if (it._officialVideoEvidence === true) return true;
-    const finalMeta = it._finalFileMeta;
-    return !!(finalMeta && finalMeta !== it && computeOfficialVideoEvidence(finalMeta, seen));
-}
-if (it._officialVideoEvidence === true) return true;
-const videoMetadata = it.video_media_metadata;
-if (videoMetadata && typeof videoMetadata === 'object' && Object.keys(videoMetadata).length > 0) return true;
-const mime = String(it.mime_type || '').toLowerCase().trim();
-if (mime.startsWith('audio/')) return false;
-if (mime.startsWith('video/')) return true;
-const duration = Number(it.params && it.params.duration);
-if (Number.isFinite(duration) && duration > 0) return true;
-const medias = Array.isArray(it.medias) ? it.medias : [];
-return medias.some(media => {
-if (!media || typeof media !== 'object') return false;
-const video = media.video && typeof media.video === 'object' ? media.video : null;
-if (video && Object.keys(video).length > 0) return true;
-const mediaMime = String(media.mime_type || '').toLowerCase().trim();
-if (mediaMime.startsWith('video/')) return true;
-const mediaType = String(media.media_type || media.type || media.video_type || '').toLowerCase().trim();
-return mediaType.includes('video');
-});
-};
-
-window.pkHasOfficialVideoEvidence = computeOfficialVideoEvidence;
-
 function isImageLikeItem(it) {
 const m = String((it && it.mime_type) || '').toLowerCase();
 const n = String((it && it.name) || '').toLowerCase();
@@ -32086,11 +32175,25 @@ return !!(item.starred || (item.tags && item.tags.some(tag => tag && tag.name ==
 
 function getVisualMediaPlayerActionAvailability(item) {
 const id = String((item && item.id) || '');
+const offlineId = item && S.offlineMode && isCompletedOfflineTaskItem(item) && !isOfflineReferenceMissingLocalMarked(item)
+? getOfflineReferenceLookupId(item)
+: '';
 const isTaskLike = !!(item && (item.kind === 'drive#task' || S.offlineMode || S.uploadMode));
-const isReadOnly = !!(item && (item._isShareItem || S.shareMode || S.shareParseMode || S.linkBookmarkMode || S.historyMode));
+const isShareParse = !!(item && (item._isShareItem || S.shareParseMode));
+const isReadOnly = !!(item && (item._isShareItem || S.shareMode || S.shareParseMode || S.linkBookmarkMode));
 const isProtected = !!(item && !S.trashMode && typeof isSystemItem === 'function' && isSystemItem(item));
 const available = !!id && !isTaskLike && !isReadOnly && !S.trashMode && !isProtected;
-return { id, canStar: available, canDelete: available, isTaskLike, isReadOnly, isProtected };
+const hideActions = !!(S.uploadMode || isShareParse);
+return {
+id: offlineId || id,
+canStar: available || !!offlineId,
+canDelete: available && !S.historyMode,
+showStar: !hideActions,
+showDelete: !hideActions && !S.historyMode && !S.offlineMode,
+isTaskLike,
+isReadOnly,
+isProtected
+};
 }
 
 function syncVisualMediaStarObject(target, starred) {
@@ -32104,18 +32207,20 @@ target.tags = target.tags.filter(tag => !tag || tag.name !== 'STAR');
 }
 }
 
-function syncVisualMediaStarCaches(item, starred) {
-const id = String((item && item.id) || '');
+function syncVisualMediaStarCaches(item, starred, actionId = '') {
+const sourceId = String((item && item.id) || '');
+const id = String(actionId || sourceId);
 if (!id) return;
+const ids = new Set([sourceId, id].filter(Boolean));
 const syncList = raw => {
 const list = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.items) ? raw.items : []);
 list.forEach(target => {
-if (target && String(target.id || '') === id) syncVisualMediaStarObject(target, starred);
+if (target && ids.has(String(target.id || ''))) syncVisualMediaStarObject(target, starred);
 });
 return list;
 };
 syncVisualMediaStarObject(item, starred);
-syncVisualMediaStarObject(S.itemMap && S.itemMap.get(id), starred);
+ids.forEach(targetId => syncVisualMediaStarObject(S.itemMap && S.itemMap.get(targetId), starred));
 syncList(S.items);
 syncList(S.display);
 [typeof globalCache !== 'undefined' ? globalCache : null, S.cache].forEach(cacheMap => {
@@ -32128,7 +32233,9 @@ if (!list) return;
 if (starred) {
 const existing = list.find(target => target && String(target.id || '') === id);
 if (existing) syncVisualMediaStarObject(existing, true);
-else list.push({ ...item, tags: Array.isArray(item.tags) ? item.tags.map(tag => ({ ...tag })) : [], starred: true });
+else list.push(sourceId !== id
+? { ...item, id, kind: 'drive#file', file_id: id, tags: Array.isArray(item.tags) ? item.tags.map(tag => ({ ...tag })) : [], starred: true }
+: { ...item, tags: Array.isArray(item.tags) ? item.tags.map(tag => ({ ...tag })) : [], starred: true });
 } else {
 const filtered = list.filter(target => target && String(target.id || '') !== id);
 if (Array.isArray(snapshot)) cacheMap.set('starred_root', filtered);
@@ -32164,7 +32271,7 @@ const errorText = await response.text();
 if (response.status === 400 && errorText.includes('captcha')) throw new Error(L.err_captcha_simple);
 throw new Error(`API ${response.status}`);
 }
-syncVisualMediaStarCaches(item, starred);
+syncVisualMediaStarCaches(item, starred, availability.id);
 const removedFromCurrentView = !starred && S.starredMode && Array.isArray(S.path) && S.path.length === 1;
 if (removedFromCurrentView) {
 const targetId = availability.id;
@@ -33548,7 +33655,6 @@ if (!raw.trim()) {
 S.shareParseInfo = null;
 S.shareParseError = L.msg_share_parse_empty_link;
 resetShareParseListState(false);
-showToast(L.msg_share_parse_empty_link, 'warning');
 renderShareParsePanel();
 return;
 }
@@ -33558,7 +33664,6 @@ if (!shareId) {
 S.shareParseInfo = null;
 S.shareParseError = L.msg_share_parse_invalid_link;
 resetShareParseListState(false);
-showToast(L.msg_share_parse_invalid_link, 'error');
 renderShareParsePanel();
 return;
 }
@@ -33598,7 +33703,6 @@ markShareParseHistoryCurrentError(e, msg);
 S.shareParseInfo = null;
 S.shareParseError = msg;
 resetShareParseListState(false);
-showToast(msg, 'error');
 } finally {
 if (S.shareParseReqId === reqId) {
 S.shareParseLoading = false;
@@ -34615,6 +34719,34 @@ encodedBytes: encodedPayload.length
 };
 }
 
+function isConfigCloudConflictSensitiveSchema(schema) {
+if (!schema || schema.cloudSync !== 'default' || !schema.key) return false;
+const strategy = schema.mergeStrategy || 'localDefaultOnly';
+return strategy === 'localDefaultOnly' || strategy === 'groupLocalDefaultOnly';
+}
+
+async function hashConfigCloudLocalConflictConfigs() {
+const configs = {};
+CONFIG_LIMIT_SCHEMA.entries.forEach(entry => {
+if (!isConfigCloudConflictSensitiveSchema(entry)) return;
+configs[entry.key] = getConfigCloudLocalValue(entry.key);
+});
+const stablePayload = {
+kind: 'pem-config-local-conflict-hash-v1',
+schemaVersion: CONF.configCloudSchemaVersion,
+configCount: Object.keys(configs).length,
+configs: sortConfigCloudObject(configs)
+};
+const encodedPayload = configCloudBytesToBase64Url(configCloudStringToBytes(JSON.stringify(stablePayload)));
+const hashed = await hashConfigCloudEncodedPayload(encodedPayload);
+return {
+hash: hashed.hash,
+algorithm: hashed.algorithm,
+configCount: stablePayload.configCount,
+encodedBytes: encodedPayload.length
+};
+}
+
 function collectConfigCloudPackValues() {
 const configs = {};
 const storedKeys = getStoredConfigKeys().filter(k => String(k || '').startsWith('pk_'));
@@ -35457,12 +35589,16 @@ written.push(action.key);
 }
 cleanupConfigPrefixKeys();
 const localHash = await hashConfigCloudLocalDefaultConfigs();
+const conflictHash = await hashConfigCloudLocalConflictConfigs();
 gmSet('pk_cfg_sync_last_remote_hash', preview.manifest.payloadHash);
 gmSet('pk_cfg_sync_last_local_hash', localHash.hash);
+gmSet('pk_cfg_sync_last_conflict_hash', conflictHash.hash);
 gmSet('pk_cfg_sync_last_sync_at', new Date().toISOString());
 writeConfigCloudSyncReport(makeConfigCloudPullReport(preview, 'success', {
 localHash: localHash.hash,
 localHashAlgorithm: localHash.algorithm,
+conflictHash: conflictHash.hash,
+conflictHashAlgorithm: conflictHash.algorithm,
 rollback: false,
 rolledBack: false
 }));
@@ -35504,6 +35640,31 @@ const preview = makeConfigCloudMergePreview(remotePackage);
 const stats = preview.stats || {};
 const updateCount = Number(stats.applyCount || 0) + Number(stats.mergeCount || 0);
 if (updateCount <= 0) {
+const conflictCount = Number(stats.conflictCount || 0);
+if (conflictCount <= 0) {
+const localHash = await hashConfigCloudLocalDefaultConfigs();
+const conflictHash = await hashConfigCloudLocalConflictConfigs();
+gmSet('pk_cfg_sync_last_remote_hash', preview.manifest.payloadHash);
+gmSet('pk_cfg_sync_last_local_hash', localHash.hash);
+gmSet('pk_cfg_sync_last_conflict_hash', conflictHash.hash);
+gmSet('pk_cfg_sync_last_sync_at', new Date().toISOString());
+writeConfigCloudSyncReport(makeConfigCloudPullReport(preview, 'success', {
+stage: 'no_write',
+writtenLocal: false,
+localHash: localHash.hash,
+localHashAlgorithm: localHash.algorithm,
+conflictHash: conflictHash.hash,
+conflictHashAlgorithm: conflictHash.algorithm,
+rollback: false,
+rolledBack: false
+}));
+} else {
+writeConfigCloudSyncReport(makeConfigCloudPullReport(preview, 'preview', {
+stage: 'no_write_conflict',
+writtenLocal: false,
+keepLocalConfig: true
+}));
+}
 showToast(getStrings().msg_config_cloud_pull_no_write, 'warning');
 return { ok: true, applied: false };
 }
@@ -35781,18 +35942,124 @@ return { attempted: true, restored: false, error: formatCloudErrorMessage(error,
 }
 }
 
-async function uploadConfigCloudToOfficial() {
+let configCloudBackupDbPromise = null;
+let configCloudAutoUploadTimer = 0;
+let configCloudAutoUploadInterval = 0;
+let configCloudAutoUploadRunning = false;
+startConfigCloudAutoSync();
+
+function openConfigCloudBackupDb() {
+if (configCloudBackupDbPromise) return configCloudBackupDbPromise;
+if (typeof indexedDB === 'undefined') return Promise.reject(new Error('CONFIG_CLOUD_LOCAL_BACKUP_UNAVAILABLE'));
+configCloudBackupDbPromise = new Promise((resolve, reject) => {
+const request = indexedDB.open('pk_config_cloud_backup', 1);
+request.onupgradeneeded = () => {
+const db = request.result;
+if (!db.objectStoreNames.contains('snapshots')) db.createObjectStore('snapshots', { keyPath: 'id' });
+};
+request.onsuccess = () => resolve(request.result);
+request.onerror = () => reject(request.error || new Error('CONFIG_CLOUD_LOCAL_BACKUP_OPEN_FAILED'));
+});
+return configCloudBackupDbPromise;
+}
+
+async function saveConfigCloudLocalBackup(remotePackage) {
+if (!remotePackage || !remotePackage.manifest || !remotePackage.encodedPayload) throw new Error('CONFIG_CLOUD_LOCAL_BACKUP_UNAVAILABLE');
+const db = await openConfigCloudBackupDb();
+await new Promise((resolve, reject) => {
+const tx = db.transaction('snapshots', 'readwrite');
+tx.objectStore('snapshots').put({
+id: 'latest',
+savedAt: new Date().toISOString(),
+manifest: remotePackage.manifest,
+encodedPayload: remotePackage.encodedPayload,
+hashAlgorithm: remotePackage.hashAlgorithm || getConfigCloudHashAlgorithm(remotePackage.manifest)
+});
+tx.oncomplete = () => resolve();
+tx.onerror = () => reject(tx.error || new Error('CONFIG_CLOUD_LOCAL_BACKUP_WRITE_FAILED'));
+});
+return true;
+}
+
+async function readConfigCloudLocalBackup() {
+try {
+const db = await openConfigCloudBackupDb();
+return await new Promise((resolve, reject) => {
+const tx = db.transaction('snapshots', 'readonly');
+const request = tx.objectStore('snapshots').get('latest');
+request.onsuccess = () => resolve(request.result || null);
+request.onerror = () => reject(request.error || new Error('CONFIG_CLOUD_LOCAL_BACKUP_READ_FAILED'));
+});
+} catch (e) {
+return null;
+}
+}
+
+function buildConfigCloudPackFromLocalBackup(record) {
+const manifest = record && record.manifest && typeof record.manifest === 'object' ? { ...record.manifest } : null;
+const encodedPayload = String(record && record.encodedPayload || '');
+if (!manifest || !manifest.syncId || !encodedPayload) throw new Error('CONFIG_CLOUD_LOCAL_BACKUP_INVALID');
+const chunkSize = Math.max(1, Number(manifest.chunkSize) || CONF.configCloudChunkSize);
+const chunks = [];
+for (let i = 0; i < encodedPayload.length; i += chunkSize) chunks.push(encodedPayload.slice(i, i + chunkSize));
+if (!chunks.length) throw new Error('CONFIG_CLOUD_LOCAL_BACKUP_INVALID');
+manifest.chunkCount = chunks.length;
+manifest.chunks = chunks.map((_, index) => ({ index, title: getConfigCloudChunkTitle(manifest.syncId, index) }));
+return {
+syncId: manifest.syncId,
+manifest,
+encodedPayload,
+chunks,
+tooManyChunks: chunks.length > CONF.configCloudMaxChunks,
+localTotal: 0,
+uploadedCount: Number(manifest.configCount) || 0,
+skippedStrictCount: 0,
+oversizeCategories: []
+};
+}
+
+async function restoreConfigCloudLocalBackupToOfficial(headers, attemptedIdentity) {
+const record = await readConfigCloudLocalBackup();
+if (!record) throw new Error('CONFIG_CLOUD_LOCAL_BACKUP_MISSING');
+const backupPack = buildConfigCloudPackFromLocalBackup(record);
+const backupIdentity = getConfigCloudRemotePackageIdentity({ manifest: backupPack.manifest });
+const latest = await fetchOfficialLinkBookmarkSnapshot(headers);
+const current = await readConfigCloudUploadRemoteState(headers, latest);
+if (current.identity === backupIdentity) return { attempted: false, restored: true };
+if (attemptedIdentity && current.identity !== attemptedIdentity) throw new Error('CONFIG_CLOUD_REMOTE_CHANGED_BEFORE_ROLLBACK');
+const cleaned = removeConfigCloudSyncPseudoLinksFromFolders(latest.folders);
+const restoredFolders = appendConfigCloudPackageToFolders(cleaned.folders, backupPack);
+const capacity = validateLinkBookmarkCapacityBudget(restoredFolders);
+if (!capacity.ok) throw new Error(capacity.message);
+await postOfficialLinkBookmarkFolders(restoredFolders, headers);
+await verifyConfigCloudSyncWrite(headers, backupPack.syncId, backupPack.manifest);
+return { attempted: true, restored: true };
+}
+
+async function uploadConfigCloudToOfficial(options = {}) {
+const isAuto = !!(options && options.auto);
+const expectedRemoteHash = String(options && options.expectedRemoteHash || '');
 let pack = null;
 let writtenRemote = false;
 let remoteVerified = false;
 let historyMerge = null;
+let localBackupSaved = false;
+let attemptedIdentity = '';
 let stage = 'prepare';
+let headers = null;
 try {
 stage = 'authorize';
-const headers = await getConfigCloudAuthorizedHeaders('config-cloud-upload-missing-token');
+headers = await getConfigCloudAuthorizedHeaders('config-cloud-upload-missing-token');
 stage = 'read_remote';
 const initialSnapshot = await fetchOfficialLinkBookmarkSnapshot(headers);
 const initialRemote = await readConfigCloudUploadRemoteState(headers, initialSnapshot);
+if (isAuto) {
+const baselineHash = expectedRemoteHash || String(gmGet('pk_cfg_sync_last_remote_hash', '') || '');
+if (!baselineHash || !gmGet('pk_cfg_sync_last_local_hash', '') || !gmGet('pk_cfg_sync_last_conflict_hash', '')) throw new Error('CONFIG_CLOUD_AUTO_NO_BASELINE');
+if (!initialRemote.remotePackage || String(initialRemote.remotePackage.manifest.payloadHash || '') !== baselineHash) throw new Error('CONFIG_CLOUD_AUTO_REMOTE_CHANGED');
+await saveConfigCloudLocalBackup(initialRemote.remotePackage);
+localBackupSaved = true;
+}
 historyMerge = prepareConfigCloudUploadShareHistory(initialRemote.remotePackage);
 if (historyMerge.changed) {
 stage = 'merge_history';
@@ -35830,13 +36097,14 @@ oversizeCategories: pack.oversizeCategories,
 keepBookmarks: true
 });
 writeConfigCloudSyncReport(report);
-showToast(getStrings().label_config_cloud_abort_too_many_chunks, 'error');
+if (!isAuto) showToast(getStrings().label_config_cloud_abort_too_many_chunks, 'error');
 return false;
 }
 stage = 'check_remote';
 const latest = await fetchOfficialLinkBookmarkSnapshot(headers);
 const latestRemote = await readConfigCloudUploadRemoteState(headers, latest);
 if (latestRemote.identity !== initialRemote.identity) throw new Error('CONFIG_CLOUD_REMOTE_CHANGED_DURING_UPLOAD');
+attemptedIdentity = getConfigCloudRemotePackageIdentity(pack);
 stage = 'write_new';
 let withNew = appendConfigCloudPackageToFolders(latest.folders, pack);
 let writeMode = 'append';
@@ -35848,7 +36116,7 @@ const replaced = removeConfigCloudSyncPseudoLinksFromFolders(latest.folders);
 const replacedWithNew = appendConfigCloudPackageToFolders(replaced.folders, pack);
 const replacedCapacity = validateLinkBookmarkCapacityBudget(replacedWithNew);
 if (!replacedCapacity.ok) {
-showToast(replacedCapacity.message, 'error');
+if (!isAuto) showToast(replacedCapacity.message, 'error');
 throw new Error(replacedCapacity.message);
 }
 withNew = replacedWithNew;
@@ -35875,8 +36143,10 @@ oldCleanupFailed = true;
 console.warn('[Config Cloud] Old sync cleanup failed:', cleanupError);
 }
 const localHash = await hashConfigCloudLocalDefaultConfigs();
+const conflictHash = await hashConfigCloudLocalConflictConfigs();
 gmSet('pk_cfg_sync_last_remote_hash', pack.manifest.payloadHash);
 gmSet('pk_cfg_sync_last_local_hash', localHash.hash);
+gmSet('pk_cfg_sync_last_conflict_hash', conflictHash.hash);
 gmSet('pk_cfg_sync_last_sync_at', pack.manifest.createdAt);
 writeConfigCloudSyncReport(makeConfigCloudBaseReport('upload', 'success', {
 writtenRemote: true,
@@ -35884,6 +36154,8 @@ keepOldRemote: oldCleanupFailed,
 keepLocalConfig: true,
 localHash: localHash.hash,
 localHashAlgorithm: localHash.algorithm,
+conflictHash: conflictHash.hash,
+conflictHashAlgorithm: conflictHash.algorithm,
 localTotal: pack.localTotal,
 uploadedCount: pack.uploadedCount,
 skippedStrictCount: pack.skippedStrictCount,
@@ -35905,14 +36177,25 @@ removedChunkCount,
 keepBookmarks: true
 }));
 if (S.linkBookmarkMode) await loadLinkBookmarkOfficial(true);
-showToast(getStrings().msg_config_cloud_upload_success);
+if (!isAuto || document.querySelector('#pk_cfg_cloud_group')) showToast(getStrings().msg_config_cloud_upload_success);
 return true;
 } catch (e) {
 console.warn('[Config Cloud] Upload failed:', e);
+let remoteRollback = { attempted: false, restored: true };
+if (isAuto && writtenRemote && localBackupSaved) {
+try { remoteRollback = await restoreConfigCloudLocalBackupToOfficial(headers, attemptedIdentity); }
+catch (rollbackError) { remoteRollback = { attempted: true, restored: false, error: formatCloudErrorMessage(rollbackError, String(rollbackError || '')) }; }
+}
 const rollback = restoreConfigCloudUploadShareHistory(remoteVerified ? null : historyMerge);
-writeConfigCloudSyncReport(makeConfigCloudBaseReport('upload', 'failed', {
+const errorReason = formatCloudErrorMessage(e, String(e || ''));
+const autoBlocked = isAuto && !writtenRemote && /^CONFIG_CLOUD_AUTO_/.test(errorReason);
+if (!autoBlocked) writeConfigCloudSyncReport(makeConfigCloudBaseReport('upload', 'failed', {
 stage: writtenRemote ? 'verify' : stage,
-reason: formatCloudErrorMessage(e, String(e || '')),
+reason: errorReason,
+auto: isAuto,
+remoteRollbackAttempted: remoteRollback.attempted,
+remoteRollbackRestored: remoteRollback.restored,
+remoteRollbackError: remoteRollback.error || '',
 writtenRemote,
 keepOldRemote: true,
 keepLocalConfig: rollback.restored,
@@ -35937,7 +36220,7 @@ syncId: pack ? pack.syncId : '',
 oversizeCategories: pack ? pack.oversizeCategories : [],
 keepBookmarks: true
 }));
-showToast(getStrings().msg_config_cloud_upload_failed, 'error');
+if (!isAuto) showToast(getStrings().msg_config_cloud_upload_failed, 'error');
 return false;
 }
 }
@@ -35950,6 +36233,7 @@ const cleanup = removeConfigCloudSyncPseudoLinksFromFolders(latest.folders);
 if (!cleanup.removedManifestCount && !cleanup.removedChunkCount) {
 gmSet('pk_cfg_sync_last_remote_hash', '');
 gmSet('pk_cfg_sync_last_local_hash', '');
+gmSet('pk_cfg_sync_last_conflict_hash', '');
 gmSet('pk_cfg_sync_last_sync_at', new Date().toISOString());
 writeConfigCloudSyncReport(makeConfigCloudBaseReport('clear', 'success', {
 writtenRemote: false,
@@ -35968,6 +36252,7 @@ const remain = collectConfigCloudSyncRecords(verified.folders);
 if (remain.manifests.length || remain.chunks.length) throw new Error('CONFIG_CLOUD_CLEAR_VERIFY_FAILED');
 gmSet('pk_cfg_sync_last_remote_hash', '');
 gmSet('pk_cfg_sync_last_local_hash', '');
+gmSet('pk_cfg_sync_last_conflict_hash', '');
 gmSet('pk_cfg_sync_last_sync_at', new Date().toISOString());
 writeConfigCloudSyncReport(makeConfigCloudBaseReport('clear', 'success', {
 writtenRemote: true,
@@ -36000,22 +36285,27 @@ const L = getStrings();
 const report = readConfigCloudSyncReport();
 const lastRemoteHash = gmGet('pk_cfg_sync_last_remote_hash', '');
 const lastLocalHash = gmGet('pk_cfg_sync_last_local_hash', '');
+const lastConflictHash = gmGet('pk_cfg_sync_last_conflict_hash', '');
 const lastSyncAt = gmGet('pk_cfg_sync_last_sync_at', '');
 let remoteManifest = null;
 let localHash = null;
+let conflictHash = null;
 try {
 remoteManifest = await readConfigCloudLatestManifestForStatus();
 } catch (e) {}
 try { localHash = await hashConfigCloudLocalDefaultConfigs(); } catch (e) {}
+try { conflictHash = await hashConfigCloudLocalConflictConfigs(); } catch (e) {}
 const remoteHash = remoteManifest && remoteManifest.payloadHash ? remoteManifest.payloadHash : '';
 const legacyUploadLocalHash = !!(lastLocalHash && lastRemoteHash && lastLocalHash === lastRemoteHash && report.operation === 'upload' && report.status === 'success' && !report.localHash);
-const localChanged = !!(!legacyUploadLocalHash && lastLocalHash && localHash && localHash.hash && localHash.hash !== lastLocalHash);
+const legacyLocalChanged = !!(!legacyUploadLocalHash && lastLocalHash && localHash && localHash.hash && localHash.hash !== lastLocalHash);
+const conflictLocalChanged = !!(lastConflictHash && conflictHash && conflictHash.hash && conflictHash.hash !== lastConflictHash);
+const localChanged = !!(lastConflictHash ? (legacyLocalChanged || conflictLocalChanged) : legacyLocalChanged);
 const remoteChanged = !!(remoteHash && lastRemoteHash && remoteHash !== lastRemoteHash);
 let state = 'unsynced';
 if (!lastRemoteHash && !remoteHash) state = report.operation === 'clear' && report.status === 'success' ? 'empty' : 'unsynced';
-else if (localChanged && (remoteChanged || (!lastRemoteHash && remoteHash))) state = 'conflict';
-else if (localChanged) state = 'local_changed';
+else if (lastConflictHash && conflictLocalChanged && (remoteChanged || (!lastRemoteHash && remoteHash))) state = 'conflict';
 else if (remoteChanged || (!lastRemoteHash && remoteHash)) state = 'remote_changed';
+else if (localChanged) state = 'local_changed';
 else if (lastRemoteHash && remoteHash === lastRemoteHash && (!lastLocalHash || !localHash || localHash.hash === lastLocalHash)) state = 'synced';
 else if (lastRemoteHash && !remoteHash) state = 'empty';
 if (report.status === 'failed' || report.status === 'aborted') state = 'failed';
@@ -36038,8 +36328,72 @@ remoteSizeText: encodedBytes ? fmtSize(encodedBytes) : L.label_config_cloud_none
 chunkCountText: chunkCount ? String(chunkCount) : '0',
 report,
 remoteManifest,
-localHash
+localHash,
+localChanged,
+conflictLocalChanged,
+remoteChanged,
+trustedBaseline: !!(lastRemoteHash && lastLocalHash && lastConflictHash),
+lastRemoteHash,
+remoteHash
 };
+}
+
+function isConfigCloudAutoSyncEnabled() {
+return !!gmGet('pk_cfg_auto_sync_enabled', false);
+}
+
+function clearConfigCloudAutoUploadSchedule() {
+if (configCloudAutoUploadTimer) window.clearTimeout(configCloudAutoUploadTimer);
+configCloudAutoUploadTimer = 0;
+}
+
+function scheduleConfigCloudAutoUpload(delay = 90000) {
+if (!isConfigCloudAutoSyncEnabled()) {
+clearConfigCloudAutoUploadSchedule();
+return;
+}
+clearConfigCloudAutoUploadSchedule();
+configCloudAutoUploadTimer = window.setTimeout(() => {
+configCloudAutoUploadTimer = 0;
+void runConfigCloudAutoUpload();
+}, Math.max(1000, Number(delay) || 90000));
+}
+
+async function runConfigCloudAutoUpload() {
+if (!isConfigCloudAutoSyncEnabled() || configCloudAutoUploadRunning) return false;
+const manager = document.querySelector('.pk-ov');
+if (!manager || manager.style.display === 'none') {
+scheduleConfigCloudAutoUpload();
+return false;
+}
+if (typeof S !== 'undefined' && (S.configCloudBusy || S.localCleanBusy)) {
+scheduleConfigCloudAutoUpload();
+return false;
+}
+configCloudAutoUploadRunning = true;
+if (typeof S !== 'undefined') S.configCloudBusy = true;
+setOpenConfigCloudSettingsBusy(true);
+try {
+const snapshot = await getConfigCloudSyncStatusSnapshot();
+if (!snapshot.trustedBaseline || !snapshot.localChanged || snapshot.remoteChanged) return false;
+return await uploadConfigCloudToOfficial({ auto: true, expectedRemoteHash: snapshot.remoteHash || snapshot.lastRemoteHash });
+} catch (e) {
+console.warn('[Config Cloud] Automatic upload skipped:', e);
+return false;
+} finally {
+if (typeof S !== 'undefined') S.configCloudBusy = false;
+setOpenConfigCloudSettingsBusy(false);
+configCloudAutoUploadRunning = false;
+scheduleConfigCloudAutoUpload();
+}
+}
+
+function startConfigCloudAutoSync() {
+if (configCloudAutoUploadInterval) return;
+configCloudAutoUploadInterval = window.setInterval(() => {
+if (isConfigCloudAutoSyncEnabled()) void runConfigCloudAutoUpload();
+}, 90000);
+if (isConfigCloudAutoSyncEnabled()) scheduleConfigCloudAutoUpload(12000);
 }
 
 function updateConfigCloudSettingsPanel(root, snapshot) {
@@ -36065,6 +36419,16 @@ btn.disabled = cloudLocked;
 });
 const cleanBtn = root.querySelector('#btn_cfg_clean');
 if (cleanBtn) cleanBtn.disabled = !!busy || !!S.localCleanBusy;
+}
+
+function setOpenConfigCloudSettingsBusy(busy) {
+document.querySelectorAll('#pk_cfg_cloud_group').forEach(group => {
+const root = group.closest('.pk-modal-ov') || group.parentElement;
+setConfigCloudSettingsBusy(root, busy);
+});
+document.querySelectorAll('#clean_confirm').forEach(btn => {
+btn.disabled = !!busy || !!S.localCleanBusy;
+});
 }
 
 function getLinkBookmarkTitleFromHref(href) {
@@ -37525,6 +37889,8 @@ window.addEventListener('resize', scheduleLinkBookmarkResizeRender, true);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', scheduleLinkBookmarkResizeRender, { passive: true });
 
 function renderList() {
+S._viewportContentRevision = (S._viewportContentRevision || 0) + 1;
+S._displayMembershipCache = null;
 scheduleMobileInlineActionsSync();
 enforceMobileBrowseSelectionInvariant();
 syncMobileSelectionScope();
@@ -38127,6 +38493,21 @@ if (UI.win) UI.win.classList.remove('pk-view-switching');
 });
 }
 });
+}
+
+function getRowTypeExtensions() {
+if (!getRowTypeExtensions.cache) {
+getRowTypeExtensions.cache = {
+            vid: new Set(['MP4','MKV','AVI','MOV','WMV','FLV','WEBM','TS','M4V','3GP','MPG','MPEG','RM','RMVB','ASF','VOB','DAT','DIVX','F4V','M2TS','MTS','TP','TRP','OGV','MPE','M2V','M3U8']),
+            aud: new Set(['MP3','WAV','FLAC','AAC','OGG','WMA','APE','M4A','AMR','OPUS','M4B','ALAC','AIFF','MID','MIDI','RA','DTS','AC3','DSF','DFF']),
+            img: new Set(['JPG','JPEG','PNG','GIF','BMP','WEBP','SVG','TIF','TIFF','ICO','HEIC','HEIF','RAW','CR2','NEF','ARW','DNG','ORF','AVIF','PSD','AI','EPS','JFIF','JPE']),
+            doc: new Set(['TXT','HTML','PDF','PPTX','CHM','DOCX','XLSX','HTM','DOC','DWG','MDB','PPT','XLS','RTF','ODT','ODS','ODP','EPUB','MOBI','AZW3','DJVU','CBZ','CBR','MD','LOG','CSV','XML','JSON']),
+            app: new Set(['APK','EXE','IPA','DMG','RPM','DEB','MSI','PKG','XAPK','APKS','AAB','JAR','BIN','SH','BAT','CMD']),
+            arc: new Set(['ZIP','RAR','7Z','TAR','GZ','ISO','CAB','BZ2','XZ','TGZ','WIM','ESD','IMG','ZST','LZH']),
+            sub: new Set(['SRT','ASS','SSA','VTT','SMI','SUB','IDX','SUP','LRC'])
+};
+}
+return getRowTypeExtensions.cache;
 }
 
 function renderVisible() {
@@ -39014,6 +39395,7 @@ const liveItem = S.itemMap.get(d.id);
 if (liveItem && liveItem !== d && isOfflineReferenceMissingLocalMarked(liveItem) && !isOfflineReferenceMissingLocalMarked(d)) {
 d = Object.assign({}, d, liveItem);
 S.display[i] = d;
+S._displayMembershipCache = null;
 }
 }
 
@@ -39138,10 +39520,10 @@ softResetPooledRow(row);
 resetPooledRow(row);
 }
 
-row.dataset.pkHistoryStable = useHistoryStableRows ? '1' : '0';
-row.dataset.pkHistorySig = historyStableSig;
-row.dataset.pkGridStable = (canTryGridStableRow && gridStableSig && !gridStableDuplicateId) ? '1' : '0';
-row.dataset.pkGridSig = gridStableSig;
+setRowAttributeIfChanged(row, 'data-pk-history-stable', useHistoryStableRows ? '1' : '0');
+setRowAttributeIfChanged(row, 'data-pk-history-sig', historyStableSig);
+setRowAttributeIfChanged(row, 'data-pk-grid-stable', (canTryGridStableRow && gridStableSig && !gridStableDuplicateId) ? '1' : '0');
+setRowAttributeIfChanged(row, 'data-pk-grid-sig', gridStableSig);
 
 if (suppressGridRebindTransition) {
 row.style.transition = 'none';
@@ -39195,7 +39577,7 @@ row.style.display = 'grid';
 }
 
 if (d.isHeader) {
-row.className = 'pk-group-hd';
+setRowAttributeIfChanged(row, 'class', 'pk-group-hd');
 
 if (i === 0) {
 row.style.setProperty('border-top', 'none', 'important');
@@ -39314,7 +39696,7 @@ const isFocused = S.activeId === d.id;
 
 const isMoving = S.movingIds && S.movingIds.has(d.id);
 
-row.className = getRowClassName(isSel, isFocused, isMoving, selectedCountForRender);
+setRowAttributeIfChanged(row, 'class', getRowClassName(isSel, isFocused, isMoving, selectedCountForRender));
 row.ondragstart = (e) => e.preventDefault();
 
 if (isFocused && !isSel) {
@@ -39339,7 +39721,7 @@ row.style.pointerEvents = '';
 row.style.cursor = '';
 }
 
-row.dataset.id = d.id;
+setRowAttributeIfChanged(row, 'data-id', d.id);
 
 const isProtected = !S.trashMode && isSystemItem(d);
 const isMax = UI.win.classList.contains('pk-maximized');
@@ -39360,7 +39742,7 @@ row.classList.toggle('pk-mobile-offline-row', useMobileOfflineMeta);
 row.classList.toggle('pk-mobile-upload-row', useMobileUploadMeta);
 const nameTip = getTooltipHlHTML(d.name, S.search).replace(/"/g, '&quot;');
 
-const getDynamicIcon = (item) => {
+const getDynamicIcon = (item, metadataOnly = false) => {
 let isBlacklisted = false;
 const cleanName = (item.name || "").replace(/[\r\n\v\f\u2028\u2029]+/g, ' ').trim().toLowerCase();
 if (item.kind === 'drive#folder') {
@@ -39380,6 +39762,7 @@ if (item.status === 'DONE' && item.file && item.mime_type && item.mime_type.star
 
 const hasReadyThumb = item.status === 'DONE' && item.thumbnail_link && item.thumbnail_link !== item.icon_link;
 if (!hasReadyThumb) {
+    if (metadataOnly) return '';
     const uploadIconSrc = item.icon_link || item.thumbnail_link || '';
     if (useLargeListIcons) {
         const boxStyle = "width:54px; min-width:54px; height:100%; display:flex; align-items:center; justify-content:center !important; margin-right:12px; position:relative;";
@@ -39513,6 +39896,8 @@ else if ((isFolder || isTask || isUploadTask) && !isCurrentRecentRoot() && typeo
 }
 }
 
+if (metadataOnly) return '';
+
 const iconHtml = getOfficialDirFallbackIconHtml(item, useLargeListIcons ? 'listMax' : 'list');
 const listIconSlotHtml = (mode = (useLargeListIcons ? 'listMax' : 'list'), remoteSrc = '', extra = {}) => getDirListIconSlotHtml(item, Object.assign({ mode, remoteSrc }, extra || {}));
 const boxStyle = "width:54px; min-width:54px; height:100%; display:flex; align-items:center; justify-content:center !important; margin-right:12px; position:relative;";
@@ -39626,11 +40011,15 @@ return `<div class="pk-min-icon" style="display:flex;align-items:center;justify-
 
 };
 
+const canSkipRowTemplate = (canReuseHistoryRow || canReuseGridRow) && !S.uploadMode && !S.offlineMode && !S.shareMode;
+if (canSkipRowTemplate) {
+getDynamicIcon(d, true);
+} else {
 const checkboxHtml = `<input type="checkbox" ${isSel ? 'checked' : ''}>`;
 let html = `<div>${checkboxHtml}</div>`;
 
 if (isGridMode && gridLayout) {
-getDynamicIcon(d);
+getDynamicIcon(d, true);
 const isFolder = d.kind === 'drive#folder';
 const isHistoryGrid = S.historyMode;
 const displayDate = S.trashMode ? getRemainingDays(d) : fmtDate(d.modified_time);
@@ -39922,8 +40311,104 @@ const uploadStatusText = String(d.message || '');
 const uploadProgress = Math.max(0, Math.min(100, Math.floor(Number(d.progress) || 0)));
 
 if (useMobileUploadMeta) {
-const uploadSpeedText = d.status === 'UPLOADING' && S.upMng ? S.upMng.fmtSpeed(d.speed) : (d.status === 'DONE' ? (S.upMng ? S.upMng.fmtSpeed(0) : '0 B/s') : '-');
-html = `<div class="pk-name pk-mobile-upload-content" ${thumbAttr} data-pidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${saveTip}">${saveVal}</div>`;
+const isMobileUploadComplete = d.status === 'DONE' || d.status === 'SUCCESS';
+const isMobileUploadActive = d.status === 'UPLOADING' && S.upMng;
+const uploadSpeedText = isMobileUploadComplete ? '' : (isMobileUploadActive ? S.upMng.fmtSpeed(d.speed) : '-');
+html = `<div class="pk-name pk-mobile-upload-content" ${thumbAttr} data-pk-tip="${nameTip}">
+${getDynamicIcon(d)}
+<div class="pk-mobile-upload-copy">
+    <div class="pk-mobile-upload-title"><span class="pk-name-txt" style="${nameStyle}">${nameDisplay}</span></div>
+    <div class="pk-mobile-upload-meta"><span class="pk-mobile-upload-size">${esc(fmtSize(d.size))}</span><span class="pk-mobile-upload-speed pk-up-spd" style="display:${isMobileUploadComplete ? 'none' : 'inline'};">${esc(uploadSpeedText)}</span></div>
+    <div class="pk-mobile-upload-status" style="color:${statusColor};"><span class="pk-mobile-upload-status-text" data-pk-tip="${esc(uploadStatusText)}">${esc(uploadStatusText)}</span><span class="pk-up-prog-txt">${uploadProgress}%</span></div>
+</div>
+</div>`;
+} else {
+html += `
+<div style="display:flex; flex-direction:column; justify-content:center; gap:4px; width:100%; min-width:0;">
+    <div style="display:flex; justify-content:space-between; font-size:12px; min-width:0;">
+        <span class="pk-force-tip" style="color:${statusColor}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-right:8px; display:block;" data-pk-tip="${esc(uploadStatusText)}">${esc(uploadStatusText)}</span>
+        <span class="pk-up-prog-txt" style="flex-shrink:0;">${uploadProgress}%</span>
+    </div>
+    <div style="width:100%; height:4px; background:var(--pk-bd); border-radius:2px; overflow:hidden; flex-shrink:0;">
+        <div class="pk-up-prog-bar" style="width:${uploadProgress}%; height:100%; background:${statusColor}; transition:width 0.2s;"></div>
+    </div>
+</div>
+`;
+}
+
+}
+else if (S.shareMode) {
+let iconImg = '';
+
+const isShareDisabled = (d.share_status === 'DELETED') || (d.limit_count > 0 && d.save_count >= d.limit_count);
+const lockHtml = d.pass_code ? `<div class="pk-share-lock">${CONF.icons.lock}</div>` : '';
+
+if (isShareDisabled) {
+iconImg = getShareOfficialListIconHtml(d, lockHtml, true);
+} else {
+const currentIcon = getDynamicIcon(d);
+const isUsingThumb = currentIcon.includes('pk-max-thumb');
+
+if (isUsingThumb) {
+    iconImg = `<div class="pk-share-icon-wrap" style="margin-right:20px !important;">${currentIcon}${lockHtml}</div>`;
+} else {
+    iconImg = getShareOfficialListIconHtml(d, lockHtml, false);
+}
+}
+
+const nameDisplay = shouldShowHl ? getSearchHlHTML(d.name, S.search, charCapacity) : esc(d.name);
+let statusColor = 'inherit';
+let statusText = '';
+const rawTimeLeft = String(d.expiration_left || "");
+const expirationText = formatI18nExpirationText(rawTimeLeft, L.share_days || L.unit_days, L.str_expire_suffix);
+const expireSeconds = Number(d.expiration_left_seconds);
+const hasExpireSeconds = Number.isFinite(expireSeconds);
+const isPermanentShare = String(d.expiration_days) === "-1" || String(rawTimeLeft) === "-1" || String(d.expiration_left_seconds) === "-1";
+
+if (d.share_status !== 'OK') {
+statusColor = '#ff4d4f';
+statusText = (d.save_count >= d.limit_count && d.limit_count > 0) ? (L.lbl_limit_reached) : (d.share_status_text || d.share_status);
+} else if (isPermanentShare) {
+statusColor = '#52c41a';
+statusText = L.share_perm;
+} else {
+statusText = expirationText;
+const isUrgent = hasExpireSeconds && expireSeconds >= 0 && expireSeconds <= 24 * 3600;
+statusColor = isUrgent ? '#ff4d4f' : 'inherit';
+}
+const shareDate = fmtDate(d.modified_time);
+
+if (useMobileShareMeta) {
+const mobileShareIcon = getShareOfficialListIconHtml(d, lockHtml, isShareDisabled);
+const mobileShareStatusText = d.share_status === 'EXPIRED'
+    ? (d.share_status_text || L.str_share_expired || statusText)
+    : (d.share_status === 'DELETED' ? (d.share_status_text || L.str_share_deleted || statusText) : statusText);
+const mobileShareViewIcon = `<svg class="pk-mobile-share-stat-icon pk-mobile-share-view-icon" viewBox="0 0 19 22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 11s2.8-4.2 7-4.2 7 4.2 7 4.2-2.8 4.2-7 4.2-7-4.2-7-4.2Z"></path><circle cx="9.5" cy="11" r="2"></circle></svg>`;
+const mobileShareSaveIcon = `<svg class="pk-mobile-share-stat-icon pk-mobile-share-save-icon" viewBox="0 0 19 22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5h9v14l-4.5-2.7L4 18.5v-14Z"></path></svg>`;
+const mobileShareViewValue = d.view_count || 0;
+const mobileShareSaveValue = d.limit_count > 0 ? `${d.save_count || 0}/${d.limit_count}` : (d.save_count || 0);
+const mobileShareSaveTip = d.limit_count > 0 ? `${L.lbl_limit_tip}: ${d.limit_count}` : '';
+
+html += `<div class="pk-name pk-mobile-list-name" data-pk-tip="${nameTip}">
+${mobileShareIcon}
+<div class="pk-mobile-list-copy">
+    <div class="pk-mobile-list-title"><span class="pk-name-txt" style="${isShareDisabled ? 'cursor:default; pointer-events:none;' : ''}">${nameDisplay}</span></div>
+    <div class="pk-mobile-share-stats"><span class="pk-mobile-share-stat">${mobileShareViewIcon}<span class="pk-mobile-share-stat-value">${esc(String(mobileShareViewValue))}</span></span><span class="pk-mobile-share-stat ${d.limit_count > 0 ? 'pk-force-tip' : ''}" data-pk-tip="${esc(mobileShareSaveTip)}">${mobileShareSaveIcon}<span class="pk-mobile-share-stat-value">${esc(String(mobileShareSaveValue))}</span></span></div>
+    <div class="pk-mobile-list-meta pk-mobile-share-meta"><span class="pk-mobile-list-date">${esc(shareDate || '-')}</span><span class="pk-mobile-share-status" style="color:${statusColor};">${esc(mobileShareStatusText || '-')}</span></div>
+</div>
+</div>`;
+} else {
+html += `<div class="pk-name" data-pk-tip="${nameTip}">
+${iconImg}
+<span class="pk-name-txt" style="${isShareDisabled ? 'cursor:default; pointer-events:none;' : ''}">${nameDisplay}</span>
+</div>`;
+
+html += `<div style="text-align:left; padding-left:2px; font-variant-numeric:tabular-nums;">${d.view_count || 0}</div>`;
+
+const saveVal = d.limit_count > 0 ? `${d.save_count || 0}/${d.limit_count}` : (d.save_count || 0);
+const saveTip = d.limit_count > 0 ? `${L.lbl_limit_tip}: ${d.limit_count}` : '';
+const saveClass = d.limit_count > 0 ? "pk-force-tip" : "";
+html += `<div class="${saveClass}" style="text-align:left; padding-left:2px; font-variant-numeric:tabular-nums; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${saveTip}">${saveVal}</div>`;
 html += `<div style="text-align:center;color:${statusColor};font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${esc(statusText)}">${esc(statusText)}</div>`;
 html += `<div style="text-align:right;font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" data-pk-tip="${shareDate}">${shareDate}</div>`;
 }
@@ -40332,15 +40817,7 @@ if (isFolder) {
     if (lastDot > 0) {
         const extUpper = rawName.substring(lastDot + 1).toUpperCase();
 
-        const SETS = {
-            vid: new Set(['MP4','MKV','AVI','MOV','WMV','FLV','WEBM','TS','M4V','3GP','MPG','MPEG','RM','RMVB','ASF','VOB','DAT','DIVX','F4V','M2TS','MTS','TP','TRP','OGV','MPE','M2V','M3U8']),
-            aud: new Set(['MP3','WAV','FLAC','AAC','OGG','WMA','APE','M4A','AMR','OPUS','M4B','ALAC','AIFF','MID','MIDI','RA','DTS','AC3','DSF','DFF']),
-            img: new Set(['JPG','JPEG','PNG','GIF','BMP','WEBP','SVG','TIF','TIFF','ICO','HEIC','HEIF','RAW','CR2','NEF','ARW','DNG','ORF','AVIF','PSD','AI','EPS','JFIF','JPE']),
-            doc: new Set(['TXT','HTML','PDF','PPTX','CHM','DOCX','XLSX','HTM','DOC','DWG','MDB','PPT','XLS','RTF','ODT','ODS','ODP','EPUB','MOBI','AZW3','DJVU','CBZ','CBR','MD','LOG','CSV','XML','JSON']),
-            app: new Set(['APK','EXE','IPA','DMG','RPM','DEB','MSI','PKG','XAPK','APKS','AAB','JAR','BIN','SH','BAT','CMD']),
-            arc: new Set(['ZIP','RAR','7Z','TAR','GZ','ISO','CAB','BZ2','XZ','TGZ','WIM','ESD','IMG','ZST','LZH']),
-            sub: new Set(['SRT','ASS','SSA','VTT','SMI','SUB','IDX','SUP','LRC'])
-        };
+        const SETS = getRowTypeExtensions();
 
         if (SETS.img.has(extUpper)) durHtml = `${extUpper} ${L.type_img}`;
         else if (SETS.arc.has(extUpper) || /^(PART\d+|\d{3}|[RZ]\d{2})$/.test(extUpper)) durHtml = `${extUpper} ${L.type_archive}`;
@@ -40371,9 +40848,10 @@ html += `<button class="pk-mobile-row-action" type="button" aria-label="${esc(L.
 if (!canReuseHistoryRow && !canReuseGridRow) {
 row.innerHTML = html;
 }
+}
 
-row.dataset.pkBoundId = d.id || '';
-row.dataset.pkBoundKind = d.kind || '';
+setRowAttributeIfChanged(row, 'data-pk-bound-id', d.id || '');
+setRowAttributeIfChanged(row, 'data-pk-bound-kind', d.kind || '');
 if (suppressGridRebindTransition) {
 const reboundId = d.id || '';
 requestAnimationFrame(() => {
@@ -40386,12 +40864,12 @@ if (row.dataset.pkBoundId === reboundId) {
 if (isGridMode && !canReuseGridRow && typeof patchFrozenGridMedia === 'function') {
 patchFrozenGridMedia(row, d, prevGridMediaNode, prevGridMediaKey);
 } else if (canReuseGridRow && typeof syncGridVideoPlayState === 'function') {
-requestAnimationFrame(() => syncGridVideoPlayState(row, d));
+queueGridVideoPlayStateSync(row, d);
 }
 if (isGridMode && useGridStableRows && !canReuseGridRow && !gridStableDuplicateId) {
 const finalGridStableSig = canTryGridStableRow ? gridStableSig : '';
-row.dataset.pkGridStable = finalGridStableSig ? '1' : '0';
-row.dataset.pkGridSig = finalGridStableSig;
+setRowAttributeIfChanged(row, 'data-pk-grid-stable', finalGridStableSig ? '1' : '0');
+setRowAttributeIfChanged(row, 'data-pk-grid-sig', finalGridStableSig);
 }
 
 const thumbImg = row.querySelector('.pk-max-thumb, .pk-min-thumb');
@@ -42626,7 +43104,7 @@ let normalGridScrollWindow = null;
 let gridScrollEndTimer = 0;
 const markGridScrolling = () => {
 if (!isGridView() || !UI.win) return;
-UI.win.classList.add('pk-grid-scrolling');
+if (!UI.win.classList.contains('pk-grid-scrolling')) UI.win.classList.add('pk-grid-scrolling');
 if (gridScrollEndTimer) clearTimeout(gridScrollEndTimer);
 gridScrollEndTimer = setTimeout(() => {
 gridScrollEndTimer = 0;
@@ -42739,7 +43217,10 @@ S._viewportScrollRaf = requestAnimationFrame(() => {
 S._viewportScrollRaf = 0;
 if (!isViewportRenderGenerationCurrent(renderGeneration)) return;
 let shouldRender = true;
-if (UI.vp && isGridView() && !isGroupedGridView()) {
+const scrollIsGrid = isGridView();
+const canReuseScrollWindow = !S.linkBookmarkMode && (!S.shareParseMode || S.shareParseListActive)
+&& (scrollIsGrid ? !isGroupedGridView() : !isGroupedResultMode());
+if (UI.vp && canReuseScrollWindow) {
 const rowHeight = Math.max(1, Number(CONF.rowHeight) || 1);
 const scrollTop = Math.max(0, Number(UI.vp.scrollTop) || 0);
 const viewportHeight = Math.max(0, Number(UI.vp.clientHeight) || 0);
@@ -42747,6 +43228,11 @@ const firstRow = Math.floor(scrollTop / rowHeight);
 const lastRow = Math.ceil((scrollTop + viewportHeight) / rowHeight);
 const curPath = S.path && S.path.length ? S.path[S.path.length - 1] : null;
 const nextWindow = {
+viewMode: scrollIsGrid ? 'grid' : 'list',
+contentRevision: S._viewportContentRevision || 0,
+renderGeneration,
+templateFamily: getViewportRowTemplateFamily(),
+firstReadablePathIndex: scrollIsGrid ? -1 : getFirstReadableListPathIndex(scrollTop, rowHeight, null, isMobileManagerEnvironment(), S.display.length),
 display: S.display,
 displayLength: S.display.length,
 pathId: curPath && curPath.id || '',
@@ -42763,7 +43249,10 @@ search: S.search || '',
 folderFirst: !!S.folderFirst
 };
 const prev = normalGridScrollWindow;
-shouldRender = !prev || prev.display !== nextWindow.display || prev.displayLength !== nextWindow.displayLength
+shouldRender = !prev || prev.viewMode !== nextWindow.viewMode || prev.contentRevision !== nextWindow.contentRevision
+|| prev.renderGeneration !== nextWindow.renderGeneration || prev.templateFamily !== nextWindow.templateFamily
+|| prev.firstReadablePathIndex !== nextWindow.firstReadablePathIndex
+|| prev.display !== nextWindow.display || prev.displayLength !== nextWindow.displayLength
 || prev.pathId !== nextWindow.pathId || prev.pathDepth !== nextWindow.pathDepth
 || prev.layoutKey !== nextWindow.layoutKey || prev.viewportWidth !== nextWindow.viewportWidth
 || prev.viewportHeight !== nextWindow.viewportHeight || prev.rowHeight !== nextWindow.rowHeight
@@ -44277,6 +44766,28 @@ invertBtn.classList.toggle('pk-mobile-selection-action-hidden', selected <= 0);
 }
 }
 
+function getDisplayMembershipStats() {
+const display = S.display;
+let cached = S._displayMembershipCache;
+if (!cached || cached.display !== display || cached.length !== display.length) {
+const counts = new Map();
+let total = 0;
+for (const item of display) {
+if (!item || item.isHeader) continue;
+total++;
+counts.set(item.id, (counts.get(item.id) || 0) + 1);
+}
+cached = { display, length: display.length, counts, total };
+S._displayMembershipCache = cached;
+}
+let total = cached.total;
+if (S.movingIds) for (const id of S.movingIds) total -= cached.counts.get(id) || 0;
+return {
+total,
+has: id => cached.counts.has(id) && !(S.movingIds && S.movingIds.has(id))
+};
+}
+
 function updateStat() {
 scheduleMobileInlineActionsSync();
 syncMobileActionbarState();
@@ -44303,17 +44814,8 @@ if (UI.stat) UI.stat.style.display = 'none';
 return;
 }
 
-let total = 0;
-const visibleIdSet = new Set();
-const len = S.display.length;
-
-for (let i = 0; i < len; i++) {
-const item = S.display[i];
-if (item && !item.isHeader && !(S.movingIds && S.movingIds.has(item.id))) {
-total++;
-visibleIdSet.add(item.id);
-}
-}
+const visibleIdSet = getDisplayMembershipStats();
+const total = visibleIdSet.total;
 
 const useLoadingAllSelectionStat = S.selMode === 'all' && S.loading && !S.search && !S.shareParseMode && !S.dupMode && !S.analyzeMode && !S.isFlattened && Array.isArray(S.items) && S.items.length > total;
 const loadingAllSelectionTotal = useLoadingAllSelectionStat ? S.items.reduce((cnt, item) => cnt + (item && !item.isHeader && !(S.movingIds && S.movingIds.has(item.id)) ? 1 : 0), 0) : total;
@@ -44327,8 +44829,9 @@ if (validExcludedIds.size !== S.selEx.size) {
 S.selEx = validExcludedIds;
 }
 } else {
-const validSelectedIds = S.getSelectedIds().filter(id => visibleIdSet.has(id));
-const hadShrink = validSelectedIds.length !== S.getSelectedCount();
+const currentSelectedIds = S.getSelectedIds();
+const validSelectedIds = currentSelectedIds.filter(id => visibleIdSet.has(id));
+const hadShrink = validSelectedIds.length !== currentSelectedIds.length;
 if (hadShrink) {
 S.setExplicitSelection(validSelectedIds);
 }
@@ -44549,7 +45052,7 @@ const searchableCover = typeof resolveSearchableCoverForImageSearch === 'functio
 : getDirectSearchableCoverForImageSearch(item);
 
 if (canExternalPlayItem(item)) isSingleVideo = true;
-if (window.pkHasOfficialVideoEvidence(item) && isTaskReady) isSingleScreenshotVideo = true;
+if (computeOfficialVideoEvidence(item) && isTaskReady) isSingleScreenshotVideo = true;
 
 if (isFolder && searchableCover) {
     isSingleMediaWithCover = true;
@@ -45047,7 +45550,7 @@ return false;
 
 const normalizeDefaultVideoQuality = (val) => {
 const v = String(val || '').toLowerCase();
-if (v === '1080p' || v === '720p' || v === '480p') return v;
+if (v === 'default' || v === '1080p' || v === '720p' || v === '480p') return v;
 return 'original';
 };
 
@@ -45258,6 +45761,12 @@ return false;
 const findQualityByDefaultPref = (list, pref) => {
 const p = normalizeDefaultVideoQuality(pref);
 const arr = Array.isArray(list) ? list : [];
+
+if (p === 'default') {
+const originalIndex = arr.findIndex(q => q && q.isOriginal);
+if (originalIndex < 0) return arr[0] || null;
+return arr[originalIndex + 1] || arr[originalIndex] || null;
+}
 
 if (p === 'original') {
 return arr.find(q => q && q.isOriginal) || null;
@@ -46358,7 +46867,7 @@ const useMobileSystemVolume = isTouchOnlyMobileManagerEnvironment();
 const useBinaryAudioVolume = () => isMobileManagerEnvironment();
 let lastVolume = (useMobileSystemVolume || useBinaryAudioVolume()) ? 1 : Math.max(0, Math.min(1, Number(gmGet('pk_audio_vol_level', 1)) || 1));
 const savedAudioMuted = gmGet('pk_audio_vol_muted', false);
-let audioMuted = useMobileSystemVolume ? false : (savedAudioMuted === true || savedAudioMuted === 'true');
+let audioMuted = savedAudioMuted === true || savedAudioMuted === 'true';
 let miniEl = null;
 let miniHost = null;
 
@@ -47500,10 +48009,13 @@ let totalInList = videoPlaylist.length;
 let isSwitching = false;
 let switchReqId = 0;
 let mediaSessionToken = 0;
+let qualitySwitchToken = 0;
+let qualitySwitchState = null;
 let activeHealthTimer = null;
 let mobileAudioWatchdogTimer = null;
 let mobileAudioWatchdogState = null;
 let mobileAudioFallbackAttemptedUrl = '';
+let mobileAudioUnsupportedPrompted = false;
 let activeHlsObjectUrl = null;
 let activeVideoDetailController = null;
 const VIDEO_DETAIL_DEBOUNCE_MS = 220;
@@ -47514,14 +48026,14 @@ if (!activeVideoDetailController) return;
 try { activeVideoDetailController.abort(); } catch (e) {}
 activeVideoDetailController = null;
 };
-const resolveVideoPlayableDetail = async (sourceItem, requestId) => {
+const resolveVideoPlayableDetail = async (sourceItem, requestId, options = {}) => {
 abortActiveVideoDetailRequest();
 const controller = new AbortController();
 activeVideoDetailController = controller;
 const isCurrent = () => !isPlayerDestroyed && item === sourceItem && switchReqId === requestId;
 try {
 if (!isCurrent()) throw new DOMException('Aborted by player state change', 'AbortError');
-await sleep(VIDEO_DETAIL_DEBOUNCE_MS);
+if (!(options && options.skipDebounce)) await sleep(VIDEO_DETAIL_DEBOUNCE_MS);
 if (!isCurrent()) throw new DOMException('Aborted by player state change', 'AbortError');
 const targetApiId = getPhysicalId(sourceItem);
 if (!sourceItem._isShareItem && !targetApiId) throw new Error('file_id_missing');
@@ -47541,6 +48053,7 @@ if (activeVideoDetailController === controller) activeVideoDetailController = nu
 };
 const showVideoSourceBox = (sourceItem = item, detailError = null) => {
 if (!box) return;
+if (!qualityList.length) syncQualityControl('unavailable');
 box.querySelectorAll('.pk-err-dialog').forEach(el => el.remove());
 if (posterEl) {
 posterEl.style.transition = 'none';
@@ -47605,6 +48118,7 @@ e.stopPropagation();
 dialog.remove();
 box.classList.add('buffering');
 if (loader) loader.style.display = 'block';
+if (!qualityList.length) syncQualityControl('loading');
 try {
 const retryItem = sourceItem || item;
 const retryReqId = switchReqId;
@@ -47614,11 +48128,7 @@ const freshData = getBestSource(detail);
 qualityList = freshData.list;
 currentLink = freshData.src;
 currentResName = freshData.name;
-if (resTxt) resTxt.textContent = currentResName;
-if (resList) {
-    resList.innerHTML = renderQualityMenu(qualityList, currentResName);
-    bindResEvents();
-}
+syncQualityControl(qualityList.length > 0 ? 'ready' : 'unavailable');
 if (!hasPlayableSource(freshData)) {
     showNoPlayableSourceBox(sourceItem);
     return;
@@ -47628,6 +48138,7 @@ v.play().catch(()=>{});
 } catch (err) {
 if (isVideoDetailAbortError(err) || isPlayerDestroyed || sourceItem !== item) return;
 await markOfflineReferenceMissingFromError(sourceItem || item, err, { source: 'video_no_source_retry' });
+if (!qualityList.length) syncQualityControl('unavailable');
 showVideoDetailFailureBox(sourceItem || item, err);
 }
 };
@@ -47919,11 +48430,7 @@ posterEl.style.display = 'flex';
 posterEl.style.opacity = '1';
 }
 
-if(resTxt) resTxt.textContent = currentResName;
-if(resList) {
-resList.innerHTML = renderQualityMenu(qualityList, currentResName);
-bindResEvents();
-}
+syncQualityControl(qualityList.length > 0 ? 'ready' : 'unavailable');
 
 removeErrDialog();
 shutterTargetTime = curT > 0.1 ? curT : 0;
@@ -48022,6 +48529,8 @@ mediaSessionToken++;
 const myReqId = switchReqId;
 abortActiveVideoDetailRequest();
 isSwitching = true;
+qualityList = [];
+syncQualityControl('loading');
 lastWorkingLink = null;
 lastWorkingResName = null;
 failedUrls.clear();
@@ -48049,6 +48558,7 @@ mobileAudioWatchdogTimer = null;
 }
 mobileAudioWatchdogState = null;
 mobileAudioFallbackAttemptedUrl = '';
+mobileAudioUnsupportedPrompted = false;
 
 if (pkHls) {
 try { pkHls.stopLoad(); } catch (e) {}
@@ -48176,13 +48686,7 @@ const freshData = getBestSource(newData);
 currentResName = freshData.name;
 currentLink = freshData.src;
 qualityList = freshData.list;
-const resTxt = d.querySelector('#pk_p_res_txt');
-if (resTxt) resTxt.textContent = currentResName;
-const resList = d.querySelector('#pk_p_res_list');
-if (resList) {
-resList.innerHTML = renderQualityMenu(qualityList, currentResName);
-bindResEvents();
-}
+syncQualityControl(qualityList.length > 0 ? 'ready' : 'unavailable');
 if (!hasPlayableSource(freshData)) {
 showNoPlayableSourceBox(newItem);
 return;
@@ -48196,10 +48700,7 @@ if (d.querySelector('#pk_sub_name')) d.querySelector('#pk_sub_name').textContent
 autoMatchSubtitle(newItem);
 
 if (myReqId === switchReqId) isSwitching = false;
-if (!isPlayerDestroyed) {
-const playAttempt = v.play();
-if (playAttempt && typeof playAttempt.catch === 'function') playAttempt.catch(()=>{});
-}
+if (!isPlayerDestroyed) await playVideoSource(sourceLoad);
 
 await waitForVideoVisualReady(newItem, myReqId, sourceLoad);
 if (myReqId !== switchReqId || isPlayerDestroyed || item !== newItem) return;
@@ -48209,6 +48710,7 @@ updateState();
 } catch (err) {
 if (isVideoDetailAbortError(err) || isPlayerDestroyed || myReqId !== switchReqId || item !== newItem) return;
 await markOfflineReferenceMissingFromError(newItem, err, { source: 'video_switch' });
+if (myReqId === switchReqId) syncQualityControl('unavailable');
 if (myReqId === switchReqId) showVideoDetailFailureBox(newItem, err);
 if (myReqId === switchReqId) console.error("[SoftSwitch] Critical Error:", err);
 } finally {
@@ -48801,6 +49303,15 @@ v.addEventListener('loadedmetadata', applyDirectStartTime, { once: true });
 startMobileAudioWatchdog(url, currentQualityItem, currentMediaToken, isPikPakTsHls);
 };
 
+const playVideoSource = async (sourceLoadPromise = null) => {
+try {
+if (sourceLoadPromise && typeof sourceLoadPromise.then === 'function') await sourceLoadPromise;
+} catch (e) {}
+if (isPlayerDestroyed) return;
+const p = v.play();
+if (p && typeof p.catch === 'function') p.catch(() => updateState());
+};
+
 let initialData = getBestSource(item);
 let currentLink = initialData.src;
 let qualityList = initialData.list;
@@ -48848,6 +49359,10 @@ if (!isOriginalSource || !sourceUrl || mobileAudioFallbackAttemptedUrl === sourc
 
 const candidate = findMobileAudioFallback();
 if (!candidate) {
+if (mobileAudioUnsupportedPrompted) return true;
+mobileAudioUnsupportedPrompted = true;
+if (state) state.fallbackTriggered = true;
+clearMobileAudioWatchdog();
 console.warn('[AudioCheck] Original source has no compatible 1080P fallback.', { reason, diagnostics, sourceUrl });
 showToast(L.audio_format_unsupported || L.msg_video_fail, 'warning');
 return false;
@@ -48874,11 +49389,7 @@ time: savedTime
 
 currentLink = fallbackUrl;
 currentResName = String(candidate.name || '1080P');
-if (resTxt) resTxt.textContent = `${L.str_compat_mode} (${currentResName})`;
-if (resList) {
-resList.innerHTML = renderQualityMenu(qualityList, currentResName);
-bindResEvents();
-}
+syncQualityControl('ready', `${L.str_compat_mode} (${currentResName})`);
 showMobileAudioFallbackToast(currentResName);
 
 try { v.pause(); } catch (e) {}
@@ -49321,14 +49832,46 @@ const spdMenu = d.querySelector('#pk_p_spd_menu');
 const plist = d.querySelector('#pk_p_plist');
 const pTab = d.querySelector('#pk_p_plist_tab');
 const pScroll = d.querySelector('#pk_p_plist_scroll');
+let qualityLoadState = qualityList.length > 0 ? 'ready' : 'loading';
+function syncQualityControl(state = qualityLoadState, labelOverride = '') {
+qualityLoadState = state;
+const qualityCount = Array.isArray(qualityList) ? qualityList.length : 0;
+const hasQualities = qualityCount > 0;
+const canOpenQualityMenu = qualityCount > 1;
+const isLoading = !hasQualities && state === 'loading';
+const label = hasQualities
+? (labelOverride || currentResName || L.lbl_resolution)
+: (isLoading ? L.loading : '--');
+if (resTxt) resTxt.textContent = label;
+if (resList) {
+resList.innerHTML = hasQualities ? renderQualityMenu(qualityList, currentResName) : '';
+if (canOpenQualityMenu) bindResEvents();
+}
+if (resMenu) {
+resMenu.classList.toggle('pk-p-menu-disabled', !canOpenQualityMenu);
+resMenu.dataset.pkQualityState = hasQualities ? (canOpenQualityMenu ? 'ready' : 'single') : (isLoading ? 'loading' : 'unavailable');
+resMenu.setAttribute('aria-disabled', canOpenQualityMenu ? 'false' : 'true');
+resMenu.setAttribute('aria-label', label);
+if (!canOpenQualityMenu) {
+resMenu.classList.remove('pk-mobile-menu-open');
+resMenu.setAttribute('aria-expanded', 'false');
+}
+}
+}
 let closeVideoMoreMenu = bindVisualMediaMoreMenu(d, videoMoreWrap, {
 pip: () => { if (btnPipTop && btnPipTop.dataset.pkAvailable === 'true') btnPipTop.click(); },
-search: () => { if (btnSearch && btnSearch.dataset.pkAvailable === 'true') btnSearch.click(); }
+search: () => { if (btnSearch) btnSearch.click(); }
 });
 const setVideoTopActionAvailable = (button, action, available) => {
 if (!button) return;
-button.dataset.pkAvailable = available ? 'true' : 'false';
-setVisualMediaMoreItemAvailable(videoMoreWrap, action, !!available);
+const isMobileViewer = isMobileManagerEnvironment();
+const keepSearchInMoreMenu = action === 'search' && isMobileViewer;
+const isAvailable = !!available;
+button.dataset.pkAvailable = isAvailable && !keepSearchInMoreMenu ? 'true' : 'false';
+button.disabled = !isAvailable;
+button.classList.toggle('pk-media-action-disabled', !isAvailable);
+button.setAttribute('aria-disabled', isAvailable ? 'false' : 'true');
+setVisualMediaMoreItemAvailable(videoMoreWrap, action, isAvailable);
 };
 setVideoTopActionAvailable(btnPipTop, 'pip', false);
 setVideoTopActionAvailable(btnSearch, 'search', false);
@@ -49343,6 +49886,7 @@ const updateVideoPlayerActionUi = () => {
 const availability = getVisualMediaPlayerActionAvailability(item);
 const starred = isVisualMediaItemStarred(item);
 if (btnStar) {
+btnStar.style.display = availability.showStar ? '' : 'none';
 btnStar.classList.toggle('pk-media-starred', starred);
 btnStar.classList.toggle('pk-media-action-disabled', !availability.canStar || visualMediaActionBusy);
 btnStar.setAttribute('aria-disabled', availability.canStar && !visualMediaActionBusy ? 'false' : 'true');
@@ -49350,6 +49894,7 @@ btnStar.setAttribute('aria-pressed', starred ? 'true' : 'false');
 btnStar.setAttribute('data-pk-tip', `${starred ? L.ctx_unstar : L.ctx_star} [S]`);
 }
 if (btnDelete) {
+btnDelete.style.display = availability.showDelete ? '' : 'none';
 btnDelete.classList.toggle('pk-media-action-disabled', !availability.canDelete || visualMediaActionBusy);
 btnDelete.setAttribute('aria-disabled', availability.canDelete && !visualMediaActionBusy ? 'false' : 'true');
 btnDelete.setAttribute('data-pk-tip', `${L.btn_del} [Delete]`);
@@ -49455,6 +50000,11 @@ menu.addEventListener('click', (event) => {
 if (!isMobileManagerEnvironment()) return;
 event.preventDefault();
 event.stopPropagation();
+if (menu === resMenu && menu.classList.contains('pk-p-menu-disabled')) {
+menu.classList.remove('pk-mobile-menu-open');
+menu.setAttribute('aria-expanded', 'false');
+return;
+}
 if (event.target && event.target.closest && event.target.closest('.pk-p-item')) {
 menu.classList.remove('pk-mobile-menu-open');
 menu.setAttribute('aria-expanded', 'false');
@@ -50134,8 +50684,6 @@ if (markSharePreviewStallError(e)) return;
 
 if (lastWorkingLink && lastWorkingLink !== currentLink && !failedUrls.has(lastWorkingLink)) {
 
-if (resTxt) resTxt.textContent = `${L.str_compat_mode} (${lastWorkingResName})`;
-
 const toast = document.createElement('div');
 toast.className = 'pk-player-notice';
 toast.style.cssText = "position:absolute;top:20px;left:50%;transform:translateX(-50%);background:rgba(217, 48, 37, 0.9);color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;z-index:100;animation:pkFadeIn 0.5s;";
@@ -50145,16 +50693,11 @@ setTimeout(() => toast.remove(), 4000);
 
 currentResName = lastWorkingResName;
 currentLink = lastWorkingLink;
+syncQualityControl('ready', `${L.str_compat_mode} (${currentResName})`);
 
 const savedTime = v.currentTime;
 loadSource(currentLink, savedTime);
 v.play().catch(()=>{});
-
-const resList = d.querySelector('#pk_p_res_list');
-if (resList) {
-resList.innerHTML = renderQualityMenu(qualityList, currentResName);
-bindResEvents();
-}
 return;
 }
 
@@ -50165,8 +50708,6 @@ return url !== currentLink && !failedUrls.has(url);
 
 if (nextCandidate) {
 
-if (resTxt) resTxt.textContent = `${L.str_compat_mode} (${nextCandidate.name})`;
-
 const toast = document.createElement('div');
 toast.className = 'pk-player-notice';
 toast.style.cssText = "position:absolute;top:20px;left:50%;transform:translateX(-50%);background:rgba(33, 150, 243, 0.9);color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;z-index:100;animation:pkFadeIn 0.5s;";
@@ -50176,16 +50717,11 @@ setTimeout(()=>toast.remove(), 4000);
 
 currentResName = nextCandidate.name;
 currentLink = nextCandidate.link || nextCandidate.url;
+syncQualityControl('ready', `${L.str_compat_mode} (${currentResName})`);
 
 const savedTime = v.currentTime;
 loadSource(currentLink, savedTime);
 v.play().catch(()=>{});
-
-const resList = d.querySelector('#pk_p_res_list');
-if (resList) {
-resList.innerHTML = renderQualityMenu(qualityList, currentResName);
-bindResEvents();
-}
 return;
 }
 
@@ -50218,16 +50754,17 @@ requestPresentedVideoFrame(v._pkMediaToken);
 const initReqId = switchReqId;
 const initItem = item;
 try {
-const newData = await resolveVideoPlayableDetail(initItem, initReqId);
+const newData = await resolveVideoPlayableDetail(initItem, initReqId, { skipDebounce: true });
 if (isPlayerDestroyed || initReqId !== switchReqId || item !== initItem) return;
 const freshData = getBestSource(newData);
 qualityList = freshData.list;
-resList.innerHTML = renderQualityMenu(qualityList, currentResName);
-bindResEvents();
+const resolvedCurrentQuality = qualityList.find(q => String(q && (q.link || q.url) || '') === String(currentLink || ''));
+if (!currentResName && resolvedCurrentQuality) currentResName = resolvedCurrentQuality.name;
+syncQualityControl(qualityList.length > 0 ? 'ready' : 'unavailable');
 if (!hasPlayableSource(freshData)) {
 currentLink = '';
 currentResName = freshData.name || '';
-if (resTxt) resTxt.textContent = currentResName;
+syncQualityControl('unavailable');
 showNoPlayableSourceBox(initItem);
 return;
 }
@@ -50250,20 +50787,17 @@ const shouldReloadOfficialProgress = !hasRequestedStartTime &&
 
 currentLink = freshData.src;
 currentResName = freshData.name;
-resTxt.textContent = currentResName;
+syncQualityControl(qualityList.length > 0 ? 'ready' : 'unavailable');
 
-loadSource(currentLink, hasRequestedStartTime && savedTime <= 1
+const sourceLoad = loadSource(currentLink, hasRequestedStartTime && savedTime <= 1
     ? requestedStartTime
     : (shouldReloadOfficialProgress ? null : savedTime));
-
-v.play().catch(()=>{});
-
-resList.innerHTML = renderQualityMenu(qualityList, currentResName);
-bindResEvents();
+playVideoSource(sourceLoad);
 }
 } catch (e) {
 if (isVideoDetailAbortError(e) || isPlayerDestroyed || initReqId !== switchReqId || item !== initItem) return;
 await markOfflineReferenceMissingFromError(initItem, e, { source: 'video_detail' });
+if (!qualityList.length) syncQualityControl('unavailable');
 if (!currentLink) showVideoDetailFailureBox(initItem, e);
 }
 })();
@@ -50744,7 +51278,7 @@ image.onload = () => {
 if (requestId !== switchReqId || item !== targetItem || image.dataset.pkPosterRequest !== requestKey) return;
 image.style.display = 'block';
 image.style.opacity = '1';
-if (searchButton) searchButton.style.setProperty('display', 'flex', 'important');
+if (searchButton) setVideoTopActionAvailable(searchButton, 'search', true);
 if (typeof syncMobileFullscreenVideoOrientation === 'function') syncMobileFullscreenVideoOrientation();
 };
 image.onerror = () => {
@@ -50764,7 +51298,7 @@ image.style.display = 'block';
 const currentSrc = String(image.getAttribute('src') || '');
 if (currentSrc === posterSrc && image.complete && image.naturalWidth > 0) {
 image.style.opacity = '1';
-if (searchButton) searchButton.style.setProperty('display', 'flex', 'important');
+if (searchButton) setVideoTopActionAvailable(searchButton, 'search', true);
 if (typeof syncMobileFullscreenVideoOrientation === 'function') syncMobileFullscreenVideoOrientation();
 return true;
 }
@@ -50907,7 +51441,10 @@ if (isDragSeek) return;
 if (v.currentTime > 0.1) handlePresentedFrameSignal();
 
 const dur = v.duration;
-const cur = v.currentTime;
+const switchState = qualitySwitchState;
+const preserveSwitchTime = !!switchState && switchState.token === qualitySwitchToken;
+const rawCur = preserveSwitchTime ? switchState.time : v.currentTime;
+const cur = preserveSwitchTime && v.duration > 0 ? Math.min(rawCur, v.duration) : rawCur;
 const now = performance.now();
 
 if (dur > 0) {
@@ -51604,11 +52141,12 @@ if (btnSearch) setVideoTopActionAvailable(btnSearch, 'search', true);
 }
 }
 
-const savedMute = gmGet('pk_vol_muted', false);
-const savedVol = parseFloat(gmGet('pk_vol_level', 1.0));
 const useMobileSystemVolume = isTouchOnlyMobileManagerEnvironment();
+const savedMuteValue = gmGet('pk_vol_muted', false);
+const savedMute = savedMuteValue === true || savedMuteValue === 'true';
+const savedVol = parseFloat(gmGet('pk_vol_level', 1.0));
 
-v.muted = useMobileSystemVolume ? false : savedMute;
+v.muted = savedMute;
 v.volume = (useMobileSystemVolume || useBinaryPlayerVolume()) ? 1 : ((Number.isFinite(savedVol) && savedVol >= 0 && savedVol <= 1) ? savedVol : 1.0);
 
 if (slideVol) slideVol.value = v.volume;
@@ -51655,16 +52193,60 @@ syncPlaybackRateUi(selectedPlaybackRate);
 };
 });
 
+const waitForQualitySwitchMetadata = (token, targetTime) => new Promise(resolve => {
+let timer = 0;
+let settled = false;
+const finish = (ready) => {
+if (settled) return;
+settled = true;
+if (timer) clearTimeout(timer);
+v.removeEventListener('loadedmetadata', onMetadata);
+resolve(ready);
+};
+const apply = () => {
+if (token !== qualitySwitchToken || isPlayerDestroyed) {
+finish(false);
+return;
+}
+const duration = Number(v.duration);
+const safeTime = duration > 0 && Number.isFinite(duration)
+? Math.min(Math.max(0, Number(targetTime) || 0), duration)
+: Math.max(0, Number(targetTime) || 0);
+if (safeTime > 0) {
+try { v.currentTime = safeTime; } catch (e) {}
+}
+if (qualitySwitchState && qualitySwitchState.token === token) qualitySwitchState.time = safeTime;
+finish(true);
+};
+const onMetadata = () => apply();
+if (v.readyState >= 1) apply();
+else {
+v.addEventListener('loadedmetadata', onMetadata, { once: true });
+timer = setTimeout(() => apply(), 5000);
+}
+});
+
 function bindResEvents() {
 resList.querySelectorAll('.pk-p-item').forEach(item => {
-item.onclick = () => {
+item.onclick = async () => {
 const link = item.dataset.link;
-if(link === currentLink) return;
+const pendingSwitch = qualitySwitchState && qualitySwitchState.token === qualitySwitchToken ? qualitySwitchState : null;
+if (link === currentLink && !pendingSwitch) return;
 mobileAudioFallbackAttemptedUrl = '';
 
-const curT = v.currentTime;
-const isPaused = v.paused;
-const curRate = selectedPlaybackRate;
+const curT = pendingSwitch ? pendingSwitch.time : Math.max(0, Number(v.currentTime) || 0);
+const isPaused = pendingSwitch ? pendingSwitch.wasPaused : v.paused;
+const curRate = pendingSwitch ? pendingSwitch.rate : selectedPlaybackRate;
+const switchToken = ++qualitySwitchToken;
+qualitySwitchState = {
+token: switchToken,
+time: curT,
+duration: Math.max(0, Number(v.duration) || 0),
+wasPaused: isPaused,
+rate: curRate
+};
+
+
 
 box.classList.add('buffering');
 if (loaderEl) loaderEl.style.display = 'block';
@@ -51694,18 +52276,29 @@ currentResName = item.textContent.trim();
 shutterTargetTime = curT > 0.1 ? curT : 0;
 
 v.pause();
-loadSource(link, curT);
+const sourceLoad = loadSource(link, curT);
 
 v.playbackRate = curRate;
-if(!isPaused) v.play().catch(()=>{});
 
-resList.innerHTML = renderQualityMenu(qualityList, currentResName);
-if(resTxt) resTxt.textContent = currentResName;
-bindResEvents();
+
+syncQualityControl('ready');
+try {
+await sourceLoad;
+if (switchToken !== qualitySwitchToken || isPlayerDestroyed) return;
+await waitForQualitySwitchMetadata(switchToken, curT);
+if (switchToken !== qualitySwitchToken || isPlayerDestroyed) return;
+if (!isPaused) await playVideoSource(sourceLoad);
+} catch (e) {}
+finally {
+if (switchToken === qualitySwitchToken) {
+qualitySwitchState = null;
+updateTimeUI();
+}
+}
 };
 });
 }
-bindResEvents();
+syncQualityControl(qualityList.length > 0 ? 'ready' : 'loading');
 
 const subState = {
 hasSub: false,
@@ -52866,8 +53459,9 @@ softSwitch(curListIdx, 'instant');
 return;
 }
 } else {
-loadSource(currentLink, hasRequestedStartTime ? requestedStartTime : null);
-setTimeout(() => {
+const sourceLoad = loadSource(currentLink, hasRequestedStartTime ? requestedStartTime : null);
+setTimeout(async () => {
+try { await sourceLoad; } catch (e) {}
 if (isPlayerDestroyed) return;
 
 const p = v.play();
@@ -53110,6 +53704,7 @@ const currentItem = imgList[curIdx];
 const availability = getVisualMediaPlayerActionAvailability(currentItem);
 const starred = isVisualMediaItemStarred(currentItem);
 if (btnStar) {
+btnStar.style.display = availability.showStar ? '' : 'none';
 btnStar.classList.toggle('pk-media-starred', starred);
 btnStar.classList.toggle('pk-media-action-disabled', !availability.canStar || visualMediaActionBusy);
 btnStar.setAttribute('aria-disabled', availability.canStar && !visualMediaActionBusy ? 'false' : 'true');
@@ -53117,6 +53712,7 @@ btnStar.setAttribute('aria-pressed', starred ? 'true' : 'false');
 btnStar.setAttribute('data-pk-tip', `${starred ? L.ctx_unstar : L.ctx_star} [S]`);
 }
 if (btnDelete) {
+btnDelete.style.display = availability.showDelete ? '' : 'none';
 btnDelete.classList.toggle('pk-media-action-disabled', !availability.canDelete || visualMediaActionBusy);
 btnDelete.setAttribute('aria-disabled', availability.canDelete && !visualMediaActionBusy ? 'false' : 'true');
 btnDelete.setAttribute('data-pk-tip', `${L.btn_del} [Delete]`);
@@ -61971,14 +62567,14 @@ updateSelectionActions();
 };
 
 try {
-if (!item || !window.pkHasOfficialVideoEvidence(item)) throw new Error('VIDEO_SCREENSHOT_NOT_VIDEO');
+if (!item || !computeOfficialVideoEvidence(item)) throw new Error('VIDEO_SCREENSHOT_NOT_VIDEO');
 setStatus(L.msg_video_screenshot_loading);
 const detail = await resolvePlayableDetailForExternal(item, {
     signal: captureSignal,
     isRunning: () => !closed,
     captchaRecoveryScope: 'foreground_video_screenshot'
 });
-if (!window.pkHasOfficialVideoEvidence(detail)) throw new Error('VIDEO_SCREENSHOT_NOT_VIDEO');
+if (!computeOfficialVideoEvidence(detail)) throw new Error('VIDEO_SCREENSHOT_NOT_VIDEO');
 const sourceData = getBestSource(detail);
 if (!hasPlayableSource(sourceData)) throw new Error('VIDEO_SCREENSHOT_SOURCE_MISSING');
 const sourceCandidates = [];
@@ -62584,7 +63180,7 @@ if (selectedIds.length !== 1) return;
 const item = (S.shareParseMode
 ? ((S.shareParseInsightItemMap && S.shareParseInsightItemMap.get(selectedIds[0])) || (S.shareParseItemMap && S.shareParseItemMap.get(selectedIds[0])))
 : null) || S.itemMap.get(selectedIds[0]);
-if (!item || !window.pkHasOfficialVideoEvidence(item)) return;
+if (!item || !computeOfficialVideoEvidence(item)) return;
 const operationToken = {};
 const releaseCaptureButton = () => {
 if (UI.btnVideoScreenshot._pkCaptureOperationToken !== operationToken) return;
@@ -64534,7 +65130,16 @@ mobileStatus.style.color = mobileStatusColor;
 if (msgSpan) msgSpan.style.color = mobileStatusColor;
 }
 
-if (spdTxt) spdTxt.textContent = isMobileUploadRow ? (task.status === 'UPLOADING' ? S.upMng.fmtSpeed(task.speed) : (task.status === 'DONE' ? S.upMng.fmtSpeed(0) : '-')) : (task.status === 'DONE' ? '-' : S.upMng.fmtSpeed(task.speed));
+if (spdTxt) {
+if (isMobileUploadRow) {
+const mobileUploadComplete = task.status === 'DONE' || task.status === 'SUCCESS';
+const showMobileUploadSpeed = !mobileUploadComplete;
+spdTxt.textContent = mobileUploadComplete ? '' : (task.status === 'UPLOADING' && S.upMng ? S.upMng.fmtSpeed(task.speed) : '-');
+spdTxt.style.display = showMobileUploadSpeed ? '' : 'none';
+} else {
+spdTxt.textContent = task.status === 'DONE' ? '-' : S.upMng.fmtSpeed(task.speed);
+}
+}
 }
 };
 
@@ -64832,10 +65437,10 @@ const safePid = (finalParentId === 'root' || finalParentId === 'upload_root') ? 
 let data = null;
 const applyOfficialUploadMediaMeta = (source) => {
     if (!source || typeof source !== 'object') return false;
-    const hadVideoEvidence = window.pkHasOfficialVideoEvidence(task);
+    const hadVideoEvidence = computeOfficialVideoEvidence(task);
     const reference = source.reference_resource;
-    const hasSourceVideoEvidence = window.pkHasOfficialVideoEvidence(source) || !!(
-        reference && typeof reference === 'object' && window.pkHasOfficialVideoEvidence(reference)
+    const hasSourceVideoEvidence = computeOfficialVideoEvidence(source) || !!(
+        reference && typeof reference === 'object' && computeOfficialVideoEvidence(reference)
     );
     if (source.mime_type) task.mime_type = source.mime_type;
     if (Array.isArray(source.medias)) task.medias = source.medias;
@@ -64856,7 +65461,7 @@ const applyOfficialUploadMediaMeta = (source) => {
         }
     }
     if (hasSourceVideoEvidence) task._officialVideoEvidence = true;
-    return !hadVideoEvidence && window.pkHasOfficialVideoEvidence(task);
+    return !hadVideoEvidence && computeOfficialVideoEvidence(task);
 };
 
 if (task._initData && task.file_id) {
@@ -69671,12 +70276,27 @@ if (openSettingsModal._active) return;
 openSettingsModal._active = true;
 const inputStyle = `width:100%; height:44px; padding:0 15px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box;`;
 const areaStyle = `width:100%; min-height:60px; max-height:120px; padding:12px 15px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:13px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; resize:vertical; line-height:1.5; font-family:inherit; cursor:auto;`;        const labelStyle = `position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; line-height:1; font-size:11px; color:var(--pk-pri); font-weight:bold; pointer-events:none; z-index:1;`;
+let localStatsClosed = false;
+let localStatsPending = null;
+let localCleanOpening = false;
+const assertLocalStatsOpen = () => {
+if (localStatsClosed) throw new DOMException('Settings closed', 'AbortError');
+};
+const yieldLocalStats = async () => {
+assertLocalStatsOpen();
+await new Promise(resolve => {
+if (typeof requestIdleCallback === 'function') requestIdleCallback(resolve, { timeout: 100 });
+else setTimeout(resolve, 16);
+});
+assertLocalStatsOpen();
+};
 const calcLocalforageStoreSize = async (name, storeName) => {
 if (!window.localforage) return 0;
 try {
 const store = window.localforage.createInstance({ name, storeName });
 let total = 0;
 await store.iterate((v, k) => {
+if (localStatsClosed) return false;
 total += String(k || '').length;
 if (v instanceof Blob) total += v.size;
 else if (v instanceof ArrayBuffer) total += v.byteLength;
@@ -69685,22 +70305,73 @@ else {
     try { total += JSON.stringify(v || '').length; } catch (e) {}
 }
 });
+assertLocalStatsOpen();
 return total;
-} catch (e) { return 0; }
+} catch (e) {
+assertLocalStatsOpen();
+return 0;
+}
 };
-const calcLocalDataStats = async () => {
+const measureLocalIndexJson = async value => {
+const itemsDescriptor = value && !Array.isArray(value) && typeof value === 'object'
+? Object.getOwnPropertyDescriptor(value, 'items') : null;
+const items = Array.isArray(value) ? value : itemsDescriptor && itemsDescriptor.value;
+if (!Array.isArray(items) || items.length < 128 || typeof value.toJSON === 'function' || typeof items.toJSON === 'function') {
+return JSON.stringify(value).length;
+}
+const measureItems = async () => {
+const length = items.length;
+let total = 2;
+let batchStarted = performance.now();
+for (let i = 0; i < length; i++) {
+const key = String(i);
+const encoded = JSON.stringify({ [key]: items[i] });
+total += (i ? 1 : 0) + (encoded === '{}' ? 4 : encoded.length - JSON.stringify(key).length - 3);
+if ((i + 1) % 32 === 0 || performance.now() - batchStarted >= 4) {
+await yieldLocalStats();
+batchStarted = performance.now();
+}
+}
+return total;
+};
+if (Array.isArray(value)) return measureItems();
+let total = 2;
+let count = 0;
+for (const key of Object.keys(value)) {
+if (key === 'items') {
+total += (count++ ? 1 : 0) + JSON.stringify(key).length + 1 + await measureItems();
+} else {
+const encoded = JSON.stringify({ [key]: value[key] });
+if (encoded !== '{}') total += (count++ ? 1 : 0) + encoded.length - 2;
+}
+}
+return total;
+};
+const collectLocalDataStats = async () => {
+await yieldLocalStats();
 const gmKeys = typeof GM_listValues !== 'undefined' ? GM_listValues() : [];
 const lsKeys = Object.keys(localStorage).filter(k => typeof k === 'string' && k.startsWith('pk_'));
 const keys = Array.from(new Set([...(Array.isArray(gmKeys) ? gmKeys : []), ...lsKeys]));
 const sizes = { index: 0, pref: 0, rules: 0, vault: 0, history: 0, shareParseHistory: 0, cache: 0 };
+let batchStarted = performance.now();
+let batchCount = 0;
 
 if (typeof globalCache !== 'undefined') {
 for (const [k, v] of globalCache.entries()) {
-try { sizes.index += k.toString().length + JSON.stringify(v).length; } catch(e){}
+try { sizes.index += k.toString().length + await measureLocalIndexJson(v); }
+catch (error) { assertLocalStatsOpen(); }
+if (++batchCount >= 32 || performance.now() - batchStarted >= 4) {
+await yieldLocalStats();
+batchStarted = performance.now();
+batchCount = 0;
+}
 }
 }
 
 sizes.cache += await calcLocalforageStoreSize('pk_thumbs', 'snapshots');
+assertLocalStatsOpen();
+batchStarted = performance.now();
+batchCount = 0;
 
 const getCat = (k) => {
 if (!k.startsWith('pk_')) return null;
@@ -69708,7 +70379,7 @@ if (k === SHARE_PARSE_HISTORY_KEY) return 'shareParseHistory';
 if (k.startsWith('pk_archive_pwd_') || k === 'pk_pwd_vault' || k === 'pk_pwd_try_count') return 'vault';
 if (k.startsWith('pk_duration_')) return 'history';
 
-const cacheKeys = ['pk_captured_captcha', 'pk_i18n_manifest', 'pk_script_update_cache', 'pk_potplayer_launch_state', 'pk_potplayer_protocol_state', 'pk_ghost_files', 'pk_migration_stub', 'pk_cfg_sync_last_remote_hash', 'pk_cfg_sync_last_local_hash', 'pk_cfg_sync_last_sync_at', 'pk_cfg_sync_last_report'];
+const cacheKeys = ['pk_captured_captcha', 'pk_i18n_manifest', 'pk_script_update_cache', 'pk_potplayer_launch_state', 'pk_potplayer_protocol_state', 'pk_ghost_files', 'pk_migration_stub', 'pk_cfg_sync_last_remote_hash', 'pk_cfg_sync_last_local_hash', 'pk_cfg_sync_last_conflict_hash', 'pk_cfg_sync_last_sync_at', 'pk_cfg_sync_last_report'];
 if (k.startsWith('pk_fmod_') || k.startsWith('pk_i18n_') || k.startsWith(CONF.scriptUpdateDismissPrefix) || cacheKeys.includes(k)) return 'cache';
 
 const ruleKeys =['pk_blacklist', 'pk_blacklist_folders', 'pk_downloader_type', 'pk_downloader_prefer_original_video_link', 'pk_idm_export_mode', 'pk_idm_url_export_type', 'pk_idm_exe_path', 'pk_idm_bat_root', 'pk_idm_bat_keep_structure', 'pk_idm_bat_add_queue', 'pk_idm_bat_start_queue', 'pk_aria2_url', 'pk_aria2_token', 'pk_aria2_dir', 'pk_aria2_keep_structure', 'pk_gopeed_url', 'pk_gopeed_token', 'pk_gopeed_dir', 'pk_gopeed_keep_structure', 'pk_abdm_url', 'pk_abdm_dir', 'pk_download_accel_enable', 'pk_download_accel_domain', 'pk_download_accel_mode', 'pk_download_accel_query_param', 'pk_download_accel_apply_browser', 'pk_download_accel_apply_downloader', 'pk_download_accel_apply_potplayer', 'pk_download_accel_apply_vlc', 'pk_download_accel_apply_m3u', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_share_update_times', 'pk_bn_find_hist', 'pk_bn_rep_hist', 'pk_skip_bl_on_del', 'pk_potplayer_custom_path'];
@@ -69717,17 +70388,28 @@ if (ruleKeys.includes(k) || k.startsWith('pk_scan_last_') || k.startsWith('pk_an
 return 'pref';
 };
 
-keys.forEach(k => {
+for (const k of keys) {
 const cat = getCat(k);
 if (cat) {
 let val = typeof GM_getValue !== 'undefined' ? GM_getValue(k) : undefined;
 if (val === undefined || val === null) val = localStorage.getItem(k);
 sizes[cat] += (k.length + (val ? JSON.stringify(val).length : 0));
 }
-});
+if (++batchCount >= 32 || performance.now() - batchStarted >= 4) {
+await yieldLocalStats();
+batchStarted = performance.now();
+batchCount = 0;
+}
+}
 
 const total = Object.values(sizes).reduce((sum, n) => sum + n, 0);
 return { keys, sizes, getCat, total };
+};
+const calcLocalDataStats = () => {
+if (!localStatsPending) {
+localStatsPending = collectLocalDataStats().finally(() => { localStatsPending = null; });
+}
+return localStatsPending;
 };
 const curLang = gmGet('pk_lang', lang);
 const curEngine = gmGet('pk_search_engine', 'google');
@@ -69770,6 +70452,8 @@ const curDownloadAccelApplyM3U = getBoolPref('pk_download_accel_apply_m3u', CONF
 const curBlur = gmGet('pk_blur_thumb', false);
 const curBlurScope = gmGet('pk_blur_scope', curBlur ? 'list' : 'off');
 const curHideButtonText = gmGet('pk_hide_button_text', false);
+const curThemeFollowSystem = gmGet('pk_theme_follow_system', false) === true;
+const curConfigCloudAutoSync = !!gmGet('pk_cfg_auto_sync_enabled', false);
 
 let selectedLang = curLang;
 let selectedEngine = curEngine;
@@ -69793,11 +70477,11 @@ const settingsModalHeightStyle = settingsModalMaximized ? 'height:min(760px,90vh
 
 const m = showLargeModal(`
 <div class="pk-settings-root" style="display:flex; flex-direction:column; ${settingsModalHeightStyle} width:720px; max-width:96vw; overflow:hidden; overscroll-behavior:none; position:relative;">
-<div class="pk-settings-head" style="padding: 30px 30px 15px 30px; flex-shrink:0; transform:translateZ(0);">
+<div class="pk-settings-head" style="padding: 30px 30px 15px 30px; flex-shrink:0; transform:translate(0);">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; border: none; line-height: 1.2; color: var(--pk-fg);">${L.modal_settings_title}</h3>
 </div>
 
-<div class="pk-settings-scroll pk-scroll pk-no-scrollbar" style="flex:1; overflow-y:auto; padding: 10px 30px 20px 30px; overscroll-behavior:contain; transform:translateZ(0);">
+<div class="pk-settings-scroll pk-scroll pk-no-scrollbar" style="flex:1; overflow-y:auto; padding: 10px 30px 20px 30px; overscroll-behavior:contain; transform:translate(0);">
 <div class="pk-settings-stack" style="display:flex; flex-direction:column; gap:25px; padding-top:10px;">
 
 <div class="pk-custom-select" id="cs_set_lang" style="position:relative; z-index:30;">
@@ -69830,7 +70514,7 @@ const m = showLargeModal(`
     <label for="set_turbo" class="pk-setting-wraprow"
         onmouseover="this.style.borderColor='var(--pk-pri)'"
         onmouseout="this.style.borderColor='var(--pk-bd)'"
-        style="display:flex; align-items:center; justify-content:space-between; height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:0 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+        style="display:flex; align-items:center; justify-content:space-between; height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:0 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box; transform: translate(0);">
         <span style="font-size:14px; color:var(--pk-fg);user-select:none;">${L.desc_turbo_mode}</span>
         <input type="checkbox" id="set_turbo" ${gmGet('pk_turbo_mode', false)?'checked':''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer;">
     </label>
@@ -69857,11 +70541,11 @@ const m = showLargeModal(`
     </div>
 </div>
 
-<div style="position:relative;${isMobileManagerEnvironment() ? ' display:none;' : ''}">
+<div style="position:relative;">
     <label for="set_hide_button_text" class="pk-setting-wraprow"
         onmouseover="this.style.borderColor='var(--pk-pri)'"
         onmouseout="this.style.borderColor='var(--pk-bd)'"
-        style="display:flex; align-items:center; justify-content:space-between; height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:0 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box; transform:translateZ(0);">
+        style="display:flex; align-items:center; justify-content:space-between; height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:0 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box; transform:translate(0);">
         <span style="font-size:14px; color:var(--pk-fg); user-select:none;">${L.desc_hide_button_text}</span>
         <input type="checkbox" id="set_hide_button_text" ${curHideButtonText ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer;">
     </label>
@@ -69893,12 +70577,12 @@ const m = showLargeModal(`
 <div id="pk_browse_experience_group" class="pk-setting-fieldset">
     <div class="pk-select-label">${L.lbl_browse_exp}</div>
     <div class="pk-setting-stack">
-        <label for="set_keep_pos" class="pk-setting-wraprow"
+        <label for="set_theme_follow_system" class="pk-setting-wraprow"
                 onmouseover="this.style.borderColor='var(--pk-pri)'"
                 onmouseout="this.style.borderColor='var(--pk-bd)'"
                 style="display:flex; align-items:center; justify-content:space-between; height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:0 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box;">
-            <span style="font-size:14px; color:var(--pk-fg);user-select:none;">${L.label_keep_pos}</span>
-            <input type="checkbox" id="set_keep_pos" ${gmGet('pk_keep_pos', true)?'checked':''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer;">
+            <span style="font-size:14px; color:var(--pk-fg); user-select:none;">${L.label_theme_follow_system}</span>
+            <input type="checkbox" id="set_theme_follow_system" ${curThemeFollowSystem ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer;">
         </label>
 
         <label for="set_visual_media_continuous_browse" class="pk-setting-wraprow"
@@ -69909,6 +70593,13 @@ const m = showLargeModal(`
             <input type="checkbox" id="set_visual_media_continuous_browse" ${curVisualMediaContinuousBrowse ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer;">
         </label>
 
+        <label for="set_keep_pos" class="pk-setting-wraprow"
+                onmouseover="this.style.borderColor='var(--pk-pri)'"
+                onmouseout="this.style.borderColor='var(--pk-bd)'"
+                style="display:flex; align-items:center; justify-content:space-between; height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:0 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box;">
+            <span style="font-size:14px; color:var(--pk-fg);user-select:none;">${L.label_keep_pos}</span>
+            <input type="checkbox" id="set_keep_pos" ${gmGet('pk_keep_pos', true)?'checked':''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer;">
+        </label>
     </div>
 </div>
 
@@ -69987,6 +70678,7 @@ const m = showLargeModal(`
             <div class="pk-select-label">${L.label_default_video_quality}</div>
             <div class="pk-select-trigger"><span id="txt_default_video_quality"></span>${CONF.crumbIcons.down}</div>
             <div class="pk-select-menu pk-scroll">
+                <div class="pk-select-item" data-val="default">${L.btn_default}</div>
                 <div class="pk-select-item" data-val="original">${L.str_original}</div>
                 <div class="pk-select-item" data-val="1080p">${L.opt_quality_1080p}</div>
                 <div class="pk-select-item" data-val="720p">${L.opt_quality_720p}</div>
@@ -70114,12 +70806,12 @@ const m = showLargeModal(`
 <div id="pk_aria2_group" class="pk-setting-fieldset ${(curAriaUrl || curAriaToken || curAriaDir || curDownloaderPreferOriginalVideoLink !== CONF.downloaderPreferOriginalVideoLink) ? 'pk-inner-active' : ''}">
     <div class="pk-select-label" id="label_aria_config">${formatDownloaderText(L.label_downloader_config, curDownloaderType === 'aria2' ? curDownloaderType : 'aria2')}</div>
     <div class="pk-setting-stack">
-        <div style="position:relative; transform: translateZ(0);">
+        <div style="position:relative; transform: translate(0);">
             <div data-setting-key="label_aria2_url" style="position:relative;">
                 <input type="text" id="set_aria_url" value="${esc(curAriaUrl)}" placeholder="${getDefaultRpcUrlForDownloader(curDownloaderType)}"
                         autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
                         oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                        style="width:100%; height:44px; padding:0 70px 0 12px; border:2px solid ${curAriaUrl ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+                        style="width:100%; height:44px; padding:0 70px 0 12px; border:2px solid ${curAriaUrl ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translate(0);">
                 <div class="pk-select-label" id="label_aria_url">${formatDownloaderText(L.label_downloader_url, curDownloaderType === 'aria2' ? curDownloaderType : 'aria2')}</div>
                 <div id="btn_aria_default" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:4px 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2);" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_default}</div>
             </div>
@@ -70129,20 +70821,20 @@ const m = showLargeModal(`
             </div>
         </div>
 
-        <div style="position:relative; transform: translateZ(0); -webkit-transform: translateZ(0);">
+        <div style="position:relative; transform: translate(0); -webkit-transform: translate(0);">
             <input type="text" id="set_aria_token" value="${esc(curAriaToken)}" placeholder="${L.ph_aria2_secret}"
                     autocomplete="off" spellcheck="false" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly');"
                     oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                    style="width:100%; height:44px; padding:0 48px 0 12px; border:2px solid ${curAriaToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; -webkit-text-security: disc; transform: translateZ(0);">
+                    style="width:100%; height:44px; padding:0 48px 0 12px; border:2px solid ${curAriaToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; -webkit-text-security: disc; transform: translate(0);">
             <button type="button" id="btn_aria_token_eye" class="pk-token-eye">${CONF.icons.eye}</button>
             <div class="pk-select-label" id="label_aria_token">${formatDownloaderText(L.label_downloader_token, curDownloaderType === 'aria2' ? curDownloaderType : 'aria2')}</div>
         </div>
 
-        <div style="position:relative; transform: translateZ(0); -webkit-transform: translateZ(0);">
+        <div style="position:relative; transform: translate(0); -webkit-transform: translate(0);">
             <input type="text" id="set_aria_dir" value="${esc(curAriaDir)}" placeholder="${L.ph_aria2_dir}"
                     autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
                     oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                    style="width:100%; height:44px; padding:0 58px 0 12px; border:2px solid ${curAriaDir ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+                    style="width:100%; height:44px; padding:0 58px 0 12px; border:2px solid ${curAriaDir ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translate(0);">
             <button type="button" id="btn_aria_dir_clear" style="position:absolute; right:10px; top:22px; transform:translateY(-50%); height:26px; min-width:38px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:0 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2); line-height:1;" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_clear_hist}</button>
             <div class="pk-select-label" id="label_aria_dir">${formatDownloaderText(L.label_downloader_dir, curDownloaderType === 'aria2' ? curDownloaderType : 'aria2')}</div>
         </div>
@@ -70160,12 +70852,12 @@ const m = showLargeModal(`
 <div id="pk_gopeed_group" class="pk-setting-fieldset ${(curGopeedUrl || curGopeedToken || (!isMobileDownloaderConfig && (curGopeedDir || curGopeedKeepStructure !== CONF.aria2KeepFolderStructure)) || curDownloaderPreferOriginalVideoLink !== CONF.downloaderPreferOriginalVideoLink) ? 'pk-inner-active' : ''}">
     <div class="pk-select-label">${L.label_gopeed_config}</div>
     <div class="pk-setting-stack">
-        <div style="position:relative; transform: translateZ(0);">
+        <div style="position:relative; transform: translate(0);">
             <div data-setting-key="label_gopeed_url" style="position:relative;">
                 <input type="text" id="set_gopeed_url" value="${esc(curGopeedUrl)}" placeholder="${L.ph_gopeed_url}"
                         autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
                         oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                        style="width:100%; height:44px; padding:0 70px 0 12px; border:2px solid ${curGopeedUrl ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+                        style="width:100%; height:44px; padding:0 70px 0 12px; border:2px solid ${curGopeedUrl ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translate(0);">
                 <div class="pk-select-label">${L.label_gopeed_url}</div>
                 <div id="btn_gopeed_default" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:4px 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2);" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_default}</div>
             </div>
@@ -70175,20 +70867,20 @@ const m = showLargeModal(`
             </div>
         </div>
 
-        <div style="position:relative; transform: translateZ(0); -webkit-transform: translateZ(0);">
+        <div style="position:relative; transform: translate(0); -webkit-transform: translate(0);">
             <input type="text" id="set_gopeed_token" value="${esc(curGopeedToken)}" placeholder="${L.ph_gopeed_token}"
                     autocomplete="off" spellcheck="false" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly');"
                     oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                    style="width:100%; height:44px; padding:0 48px 0 12px; border:2px solid ${curGopeedToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; -webkit-text-security: disc; transform: translateZ(0);">
+                    style="width:100%; height:44px; padding:0 48px 0 12px; border:2px solid ${curGopeedToken ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; -webkit-text-security: disc; transform: translate(0);">
             <button type="button" id="btn_gopeed_token_eye" class="pk-token-eye">${CONF.icons.eye}</button>
             <div class="pk-select-label">${L.label_gopeed_token}</div>
         </div>
 
-        <div id="pk_gopeed_dir_setting" style="position:relative; transform: translateZ(0); -webkit-transform: translateZ(0);${isMobileDownloaderConfig ? ' display:none;' : ''}">
+        <div id="pk_gopeed_dir_setting" style="position:relative; transform: translate(0); -webkit-transform: translate(0);${isMobileDownloaderConfig ? ' display:none;' : ''}">
             <input type="text" id="set_gopeed_dir" value="${esc(curGopeedDir)}" placeholder="${L.ph_gopeed_dir}"
                     autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
                     oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                    style="width:100%; height:44px; padding:0 58px 0 12px; border:2px solid ${curGopeedDir ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+                    style="width:100%; height:44px; padding:0 58px 0 12px; border:2px solid ${curGopeedDir ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translate(0);">
             <button type="button" id="btn_gopeed_dir_clear" style="position:absolute; right:10px; top:22px; transform:translateY(-50%); height:26px; min-width:38px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:0 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2); line-height:1;" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_clear_hist}</button>
             <div class="pk-select-label">${L.label_gopeed_dir}</div>
         </div>
@@ -70206,12 +70898,12 @@ const m = showLargeModal(`
 <div id="pk_abdm_group" class="pk-setting-fieldset ${(curAbdmUrl || curAbdmDir || curAbdmKeepStructure !== CONF.aria2KeepFolderStructure || curDownloaderPreferOriginalVideoLink !== CONF.downloaderPreferOriginalVideoLink) ? 'pk-inner-active' : ''}">
     <div class="pk-select-label">${L.label_abdm_config}</div>
     <div class="pk-setting-stack">
-        <div style="position:relative; transform: translateZ(0);">
+        <div style="position:relative; transform: translate(0);">
             <div data-setting-key="label_abdm_url" style="position:relative;">
                 <input type="text" id="set_abdm_url" value="${esc(curAbdmUrl)}" placeholder="${L.ph_abdm_url}"
                         autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
                         oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                        style="width:100%; height:44px; padding:0 70px 0 12px; border:2px solid ${curAbdmUrl ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+                        style="width:100%; height:44px; padding:0 70px 0 12px; border:2px solid ${curAbdmUrl ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translate(0);">
                 <div class="pk-select-label">${L.label_abdm_url}</div>
                 <div id="btn_abdm_default" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:4px 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2);" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_default}</div>
             </div>
@@ -70223,11 +70915,11 @@ const m = showLargeModal(`
             </div>
         </div>
 
-        <div style="position:relative; transform: translateZ(0); -webkit-transform: translateZ(0);">
+        <div style="position:relative; transform: translate(0); -webkit-transform: translate(0);">
             <input type="text" id="set_abdm_dir" value="${esc(curAbdmDir)}" placeholder="${L.ph_abdm_dir}"
                     autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
                     oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                    style="width:100%; height:44px; padding:0 58px 0 12px; border:2px solid ${curAbdmDir ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+                    style="width:100%; height:44px; padding:0 58px 0 12px; border:2px solid ${curAbdmDir ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translate(0);">
             <button type="button" id="btn_abdm_dir_clear" style="position:absolute; right:10px; top:22px; transform:translateY(-50%); height:26px; min-width:38px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:0 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2); line-height:1;" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_clear_hist}</button>
             <div class="pk-select-label">${L.label_abdm_dir}</div>
         </div>
@@ -70268,19 +70960,19 @@ const m = showLargeModal(`
             </label>
         </div>
         <div id="pk_idm_bat_group" class="pk-setting-stack" style="display:${curIdmExportMode === 'bat' ? 'flex' : 'none'};">
-            <div data-setting-key="label_idm_exe_path" style="position:relative; transform: translateZ(0); -webkit-transform: translateZ(0);">
+            <div data-setting-key="label_idm_exe_path" style="position:relative; transform: translate(0); -webkit-transform: translate(0);">
                 <input type="text" id="set_idm_exe_path" value="${esc(curIdmExePath)}" placeholder="${L.ph_idm_exe_path}"
                         autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
                         oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                        style="width:100%; height:44px; padding:0 58px 0 12px; border:2px solid ${curIdmExePath ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+                        style="width:100%; height:44px; padding:0 58px 0 12px; border:2px solid ${curIdmExePath ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translate(0);">
                 <button type="button" id="btn_idm_exe_path_clear" style="position:absolute; right:10px; top:22px; transform:translateY(-50%); height:26px; min-width:38px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:0 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2); line-height:1;" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_clear_hist}</button>
                 <div class="pk-select-label">${L.label_idm_exe_path}</div>
             </div>
-            <div style="position:relative; transform: translateZ(0); -webkit-transform: translateZ(0);">
+            <div style="position:relative; transform: translate(0); -webkit-transform: translate(0);">
                 <input type="text" id="set_idm_bat_root" value="${esc(curIdmBatRoot)}" placeholder="${L.ph_idm_download_dir}"
                         autocomplete="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');"
                         oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
-                        style="width:100%; height:44px; padding:0 58px 0 12px; border:2px solid ${curIdmBatRoot ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translateZ(0);">
+                        style="width:100%; height:44px; padding:0 58px 0 12px; border:2px solid ${curIdmBatRoot ? 'var(--pk-pri)' : 'var(--pk-bd)'}; border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:14px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; transform: translate(0);">
                 <button type="button" id="btn_idm_bat_root_clear" style="position:absolute; right:10px; top:22px; transform:translateY(-50%); height:26px; min-width:38px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--pk-pri); cursor:pointer; font-weight:bold; padding:0 8px; border-radius:4px; background:rgba(0,103,192,0.1); border:1px solid rgba(0,103,192,0.2); line-height:1;" onmouseover="this.style.background='rgba(0,103,192,0.2)'" onmouseout="this.style.background='rgba(0,103,192,0.1)'">${L.btn_clear_hist}</button>
                 <div class="pk-select-label">${formatDownloaderText(L.label_downloader_dir, 'IDM')}</div>
             </div>
@@ -70296,9 +70988,9 @@ const m = showLargeModal(`
     </div>
 </div>
 
-<div style="position:relative; padding:20px 15px 15px 15px; border:2px solid var(--pk-bd); border-radius:8px; transition:border-color 0.2s; transform:translateZ(0); backface-visibility:hidden;" onmouseover="this.style.borderColor='var(--pk-pri)'" onmouseout="this.style.borderColor='var(--pk-bd)'">
+<div style="position:relative; padding:20px 15px 15px 15px; border:2px solid var(--pk-bd); border-radius:8px; transition:border-color 0.2s; transform:translate(0);" onmouseover="this.style.borderColor='var(--pk-pri)'" onmouseout="this.style.borderColor='var(--pk-bd)'">
     <div class="pk-select-label" style="transform:translateY(-50.5%);">${L.lbl_pwd_manage}</div>
-    <div id="btn_open_vault" style="display:flex; align-items:center; justify-content:center; gap:10px; height:44px; background:var(--pk-hl); border-radius:8px; cursor:pointer; transition:all 0.2s; color:var(--pk-fg); transform:translateZ(0);" onmouseover="this.style.background='var(--pk-sel-bg)'; this.style.color='var(--pk-pri)'" onmouseout="this.style.background='var(--pk-hl)'; this.style.color='var(--pk-fg)'">
+    <div id="btn_open_vault" style="display:flex; align-items:center; justify-content:center; gap:10px; height:44px; background:var(--pk-hl); border-radius:8px; cursor:pointer; transition:all 0.2s; color:var(--pk-fg); transform:translate(0);" onmouseover="this.style.background='var(--pk-sel-bg)'; this.style.color='var(--pk-pri)'" onmouseout="this.style.background='var(--pk-hl)'; this.style.color='var(--pk-fg)'">
         <span style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--pk-pri);">${pkIconHtml('vault')}</span>
         <span style="font-size:14px; font-weight:700;">${L.title_pwd_vault}</span>
     </div>
@@ -70324,6 +71016,10 @@ const m = showLargeModal(`
             </div>
         </div>
     </div>
+    <label style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; cursor:pointer; color:var(--pk-fg);">
+        <span style="font-size:13px; font-weight:600;">${esc(L.label_config_cloud_auto_sync)}</span>
+        <input type="checkbox" id="set_cfg_cloud_auto_sync" ${gmGet('pk_cfg_auto_sync_enabled', false) ? 'checked' : ''} style="width:17px; height:17px; margin:0; accent-color:var(--pk-pri);">
+    </label>
     <div class="pk-cfg-cloud-actions">
         <button class="pk-btn" id="btn_cfg_cloud_upload">${CONF.icons.configCloudUpload}<span>${esc(L.btn_config_cloud_upload)}</span></button>
         <button class="pk-btn" id="btn_cfg_cloud_pull">${CONF.icons.configCloudPull}<span>${esc(L.btn_config_cloud_pull)}</span></button>
@@ -70331,7 +71027,7 @@ const m = showLargeModal(`
     </div>
 </div>
 
-<div style="position:relative; padding:20px 15px 15px 15px; border:2px solid var(--pk-bd); border-radius:8px; display:flex; flex-direction:column; gap:12px; transition:border-color 0.2s; transform:translateZ(0);" onmouseover="this.style.borderColor='var(--pk-pri)'" onmouseout="this.style.borderColor='var(--pk-bd)'">
+<div style="position:relative; padding:20px 15px 15px 15px; border:2px solid var(--pk-bd); border-radius:8px; display:flex; flex-direction:column; gap:12px; transition:border-color 0.2s; transform:translate(0);" onmouseover="this.style.borderColor='var(--pk-pri)'" onmouseout="this.style.borderColor='var(--pk-bd)'">
     <div class="pk-select-label" style="transform:translateY(-50.5%);">${L.lbl_config_manage}</div>
 
     <button class="pk-btn" id="btn_cfg_clean" style="background:transparent; border:1px solid #d93025; color:#d93025; height:36px; border-radius:6px; font-weight:600; width:100%; display:flex; align-items:center; justify-content:center;">
@@ -70420,16 +71116,21 @@ refreshConfigCloudSettingsPanel();
 const cfgCloudUploadBtn = m.querySelector('#btn_cfg_cloud_upload');
 const cfgCloudPullBtn = m.querySelector('#btn_cfg_cloud_pull');
 const cfgCloudClearBtn = m.querySelector('#btn_cfg_cloud_clear');
+setConfigCloudSettingsBusy(m, S.configCloudBusy);
 if (cfgCloudPullBtn) {
-cfgCloudPullBtn.disabled = false;
+cfgCloudPullBtn.disabled = !!(S.configCloudBusy || S.localCleanBusy);
 cfgCloudPullBtn.removeAttribute('data-pk-tip');
 cfgCloudPullBtn.onclick = async () => {
+if (S.configCloudBusy) {
+showToast(L.str_processing || L.msg_config_cloud_uploading, 'warning');
+return;
+}
 if (S.localCleanBusy) {
 showToast(L.msg_config_cloud_local_clean_busy, 'warning');
 return;
 }
 S.configCloudBusy = true;
-setConfigCloudSettingsBusy(m, true);
+setOpenConfigCloudSettingsBusy(true);
 showToast(L.msg_config_cloud_pulling, 'info');
 let snapshot = null;
 let pullResult = null;
@@ -70437,7 +71138,7 @@ try { snapshot = await getConfigCloudSyncStatusSnapshot(); } catch (e) {}
 try { pullResult = await pullConfigCloudFromOfficial({ isConflict: !!(snapshot && snapshot.state === 'conflict') }); }
 finally {
 S.configCloudBusy = false;
-setConfigCloudSettingsBusy(m, false);
+setOpenConfigCloudSettingsBusy(false);
 if (!pullResult || pullResult.applied !== true) await refreshConfigCloudSettingsPanel();
 }
 if (pullResult && pullResult.applied === true) {
@@ -70447,34 +71148,50 @@ setTimeout(() => location.reload(), 300);
 };
 }
 if (cfgCloudUploadBtn) cfgCloudUploadBtn.onclick = async () => {
+if (S.configCloudBusy) {
+showToast(L.str_processing || L.msg_config_cloud_uploading, 'warning');
+return;
+}
 if (S.localCleanBusy) {
 showToast(L.msg_config_cloud_local_clean_busy, 'warning');
 return;
 }
 S.configCloudBusy = true;
-setConfigCloudSettingsBusy(m, true);
+setOpenConfigCloudSettingsBusy(true);
 showToast(L.msg_config_cloud_uploading, 'info');
 try { await uploadConfigCloudToOfficial(); }
 finally {
 S.configCloudBusy = false;
-setConfigCloudSettingsBusy(m, false);
+setOpenConfigCloudSettingsBusy(false);
 await refreshConfigCloudSettingsPanel();
 }
 };
 if (cfgCloudClearBtn) cfgCloudClearBtn.onclick = async () => {
+if (S.configCloudBusy) {
+showToast(L.str_processing || L.msg_config_cloud_uploading, 'warning');
+return;
+}
 if (S.localCleanBusy) {
 showToast(L.msg_config_cloud_local_clean_busy, 'warning');
 return;
 }
 const ok = await showConfirm(L.msg_config_cloud_clear_confirm, L.lbl_config_cloud_sync);
 if (!ok) return;
+if (S.configCloudBusy) {
+showToast(L.str_processing || L.msg_config_cloud_uploading, 'warning');
+return;
+}
+if (S.localCleanBusy) {
+showToast(L.msg_config_cloud_local_clean_busy, 'warning');
+return;
+}
 S.configCloudBusy = true;
-setConfigCloudSettingsBusy(m, true);
+setOpenConfigCloudSettingsBusy(true);
 showToast(L.msg_config_cloud_clearing, 'info');
 try { await clearConfigCloudFromOfficial(); }
 finally {
 S.configCloudBusy = false;
-setConfigCloudSettingsBusy(m, false);
+setOpenConfigCloudSettingsBusy(false);
 await refreshConfigCloudSettingsPanel();
 }
 };
@@ -70993,6 +71710,7 @@ setTimeout(() => document.addEventListener('click', clickAway), 0);
 
 const _orgRemove = m.remove.bind(m);
 m.remove = () => {
+localStatsClosed = true;
 document.removeEventListener('click', clickAway);
 openSettingsModal._active = false;
 _orgRemove();
@@ -71322,11 +72040,26 @@ subM.querySelector('.pk-modal-close').onclick = closeVault;
 };
 
 m.querySelector('#btn_cfg_clean').onclick = async () => {
+if (localCleanOpening) return;
 if (S.configCloudBusy) {
 showToast(L.msg_config_cloud_busy_clean_block, 'warning');
 return;
 }
-const cleanStats = await calcLocalDataStats();
+localCleanOpening = true;
+let cleanStats;
+try {
+cleanStats = await calcLocalDataStats();
+} catch (error) {
+if (m.isConnected && (!error || error.name !== 'AbortError')) showToast(L.str_load_failed_simple || L.str_error, 'error');
+return;
+} finally {
+localCleanOpening = false;
+}
+if (!m.isConnected) return;
+if (S.configCloudBusy) {
+showToast(L.msg_config_cloud_busy_clean_block, 'warning');
+return;
+}
 const cleanSizeEl = m.querySelector('#txt_cfg_clean_size');
 if (cleanSizeEl) cleanSizeEl.textContent = `( ${fmtSize(cleanStats.total)} )`;
 const { keys, sizes, getCat } = cleanStats;
@@ -71490,6 +72223,7 @@ const config = {
 const exportExactKeys = new Set([
 'pk_lang',
 'pk_theme',
+'pk_theme_follow_system',
 'pk_turbo_mode',
 'pk_file_view_mode',
 'pk_view_independent',
@@ -71676,6 +72410,7 @@ throw new Error("INVALID_SIGNATURE");
 const importExactKeys = new Set([
 'pk_lang',
 'pk_theme',
+'pk_theme_follow_system',
 'pk_turbo_mode',
 'pk_file_view_mode',
 'pk_view_independent',
@@ -72051,9 +72786,9 @@ const newDownloadAccelApplyM3U = !!m.querySelector('#set_download_accel_apply_m3
 const oldDownloadAccelModeForSig = normalizeDownloadAccelMode(gmGet('pk_download_accel_mode', CONF.downloadAccelMode));
 const oldDownloadAccelDomainForSig = normalizeDownloadAccelSetting(gmGet('pk_download_accel_domain', CONF.downloadAccelDomain), oldDownloadAccelModeForSig);
 const newBlurScope = m.querySelector('#set_thumb_scope').value;
-const newHideButtonText = isMobileManagerEnvironment()
-? getBoolPref('pk_hide_button_text', false)
-: m.querySelector('#set_hide_button_text').checked;
+const newHideButtonText = m.querySelector('#set_hide_button_text').checked;
+const newThemeFollowSystem = !!m.querySelector('#set_theme_follow_system')?.checked;
+const newConfigCloudAutoSync = !!m.querySelector('#set_cfg_cloud_auto_sync')?.checked;
 const newKeepPos = m.querySelector('#set_keep_pos').checked;
 const newSkipBl = m.querySelector('#set_skip_bl').checked;
 const newClipboardMagnetFocus = isTouchPrimaryDevice()
@@ -72067,8 +72802,8 @@ const storedDownloaderTypeRaw = String(gmGet('pk_downloader_type', CONF.download
 const oldDownloaderType = normalizeDownloaderType(storedDownloaderTypeRaw);
 const downloaderTypeNeedsNormalize = !isMobileDownloaderConfig && storedDownloaderTypeRaw && storedDownloaderTypeRaw !== oldDownloaderType;
 const oldKeepStructure = getDownloaderKeepStructurePref();
-const oldSig = JSON.stringify([curLang, oldTurbo, oldDownloaderType, gmGet('pk_aria2_url', ''), gmGet('pk_aria2_token', ''), normalizeAriaDownloadDir(gmGet('pk_aria2_dir', CONF.aria2DownloadDir)), oldKeepStructure, curGopeedUrl, gmGet('pk_gopeed_token', ''), normalizeGopeedDownloadDir(gmGet('pk_gopeed_dir', CONF.gopeedDownloadDir)), oldKeepStructure, curAbdmUrl, normalizeAbdmDownloadDir(gmGet('pk_abdm_dir', CONF.abdmDownloadDir)), oldKeepStructure, getBoolPref('pk_downloader_prefer_original_video_link', CONF.downloaderPreferOriginalVideoLink), getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable), oldDownloadAccelDomainForSig, oldDownloadAccelModeForSig, normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam)), getBoolPref('pk_download_accel_apply_browser', CONF.downloadAccelApplyBrowser), getBoolPref('pk_download_accel_apply_downloader', CONF.downloadAccelApplyDownloader), curDownloadAccelApplyExternal, getBoolPref('pk_download_accel_apply_m3u', CONF.downloadAccelApplyM3U), gmGet('pk_blur_scope', gmGet('pk_blur_thumb', false) ? 'list' : 'off'), gmGet('pk_hide_button_text', false), gmGet('pk_keep_pos', true), gmGet('pk_skip_bl_on_del', true), gmGet('pk_clipboard_magnet_focus', true), gmGet('pk_comic_mode', true), gmGet('pk_sort_independent', false) ? 'indep' : 'global', gmGet('pk_view_independent', false) ? 'indep' : 'global', curEngine, curDefaultOpenPlayer, curDefaultVideoQuality, curVideoLoadProgressCache, curVisualMediaContinuousBrowse, gmGet('pk_dl_filter_ext', ''), gmGet('pk_dl_filter_size_min', ''), gmGet('pk_dl_filter_size_max', ''), gmGet('pk_dl_filter_size_unit', 'MB'), gmGet('pk_dl_filter_name', '')]);
-const newSig = JSON.stringify([selectedLang, newTurbo, newDownloaderType, newUrl, newToken, newAriaDir, newAriaKeepStructure, newGopeedUrl, newGopeedToken, newGopeedDir, newAriaKeepStructure, newAbdmUrl, newAbdmDir, newAriaKeepStructure, newDownloaderPreferOriginalVideoLink, newDownloadAccelEnable, newDownloadAccelDomain, newDownloadAccelMode, newDownloadAccelQueryParam, newDownloadAccelApplyBrowser, newDownloadAccelApplyDownloader, newDownloadAccelApplyExternal, newDownloadAccelApplyM3U, newBlurScope, newHideButtonText, newKeepPos, newSkipBl, newClipboardMagnetFocus, newComicMode, sortPref, viewPref, selectedEngine, normalizeDefaultOpenPlayerForEnvironment(selectedDefaultOpenPlayer, isMobileExternalPlayerConfig), normalizeDefaultVideoQuality(selectedDefaultVideoQuality), !!m.querySelector('#set_video_load_progress_cache').checked, !!m.querySelector('#set_visual_media_continuous_browse').checked, m.querySelector('#set_dl_filter_ext').value.trim(), m.querySelector('#set_dl_filter_size_min').value.trim(), m.querySelector('#set_dl_filter_size_max').value.trim(), m.querySelector('#cs_set_dl_size_unit .pk-select-item.act') ? m.querySelector('#cs_set_dl_size_unit .pk-select-item.act').dataset.val : 'MB', m.querySelector('#set_dl_filter_name').value.trim()]);
+const oldSig = JSON.stringify([curLang, oldTurbo, oldDownloaderType, gmGet('pk_aria2_url', ''), gmGet('pk_aria2_token', ''), normalizeAriaDownloadDir(gmGet('pk_aria2_dir', CONF.aria2DownloadDir)), oldKeepStructure, curGopeedUrl, gmGet('pk_gopeed_token', ''), normalizeGopeedDownloadDir(gmGet('pk_gopeed_dir', CONF.gopeedDownloadDir)), oldKeepStructure, curAbdmUrl, normalizeAbdmDownloadDir(gmGet('pk_abdm_dir', CONF.abdmDownloadDir)), oldKeepStructure, getBoolPref('pk_downloader_prefer_original_video_link', CONF.downloaderPreferOriginalVideoLink), getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable), oldDownloadAccelDomainForSig, oldDownloadAccelModeForSig, normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam)), getBoolPref('pk_download_accel_apply_browser', CONF.downloadAccelApplyBrowser), getBoolPref('pk_download_accel_apply_downloader', CONF.downloadAccelApplyDownloader), curDownloadAccelApplyExternal, getBoolPref('pk_download_accel_apply_m3u', CONF.downloadAccelApplyM3U), gmGet('pk_blur_scope', gmGet('pk_blur_thumb', false) ? 'list' : 'off'), gmGet('pk_hide_button_text', false), curThemeFollowSystem, curConfigCloudAutoSync, gmGet('pk_keep_pos', true), gmGet('pk_skip_bl_on_del', true), gmGet('pk_clipboard_magnet_focus', true), gmGet('pk_comic_mode', true), gmGet('pk_sort_independent', false) ? 'indep' : 'global', gmGet('pk_view_independent', false) ? 'indep' : 'global', curEngine, curDefaultOpenPlayer, curDefaultVideoQuality, curVideoLoadProgressCache, curVisualMediaContinuousBrowse, gmGet('pk_dl_filter_ext', ''), gmGet('pk_dl_filter_size_min', ''), gmGet('pk_dl_filter_size_max', ''), gmGet('pk_dl_filter_size_unit', 'MB'), gmGet('pk_dl_filter_name', '')]);
+const newSig = JSON.stringify([selectedLang, newTurbo, newDownloaderType, newUrl, newToken, newAriaDir, newAriaKeepStructure, newGopeedUrl, newGopeedToken, newGopeedDir, newAriaKeepStructure, newAbdmUrl, newAbdmDir, newAriaKeepStructure, newDownloaderPreferOriginalVideoLink, newDownloadAccelEnable, newDownloadAccelDomain, newDownloadAccelMode, newDownloadAccelQueryParam, newDownloadAccelApplyBrowser, newDownloadAccelApplyDownloader, newDownloadAccelApplyExternal, newDownloadAccelApplyM3U, newBlurScope, newHideButtonText, newThemeFollowSystem, newConfigCloudAutoSync, newKeepPos, newSkipBl, newClipboardMagnetFocus, newComicMode, sortPref, viewPref, selectedEngine, normalizeDefaultOpenPlayerForEnvironment(selectedDefaultOpenPlayer, isMobileExternalPlayerConfig), normalizeDefaultVideoQuality(selectedDefaultVideoQuality), !!m.querySelector('#set_video_load_progress_cache').checked, !!m.querySelector('#set_visual_media_continuous_browse').checked, m.querySelector('#set_dl_filter_ext').value.trim(), m.querySelector('#set_dl_filter_size_min').value.trim(), m.querySelector('#set_dl_filter_size_max').value.trim(), m.querySelector('#cs_set_dl_size_unit .pk-select-item.act') ? m.querySelector('#cs_set_dl_size_unit .pk-select-item.act').dataset.val : 'MB', m.querySelector('#set_dl_filter_name').value.trim()]);
 const oldIdmSig = JSON.stringify([normalizeIdmExportMode(gmGet('pk_idm_export_mode', CONF.idmExportMode)), normalizeIdmUrlExportType(gmGet('pk_idm_url_export_type', CONF.idmUrlExportType)), normalizeIdmExePath(gmGet('pk_idm_exe_path', CONF.idmExePath)), normalizeIdmBatDownloadRoot(gmGet('pk_idm_bat_root', CONF.idmBatDownloadRoot)), oldKeepStructure]);
 const newIdmSig = JSON.stringify([newIdmExportMode, newIdmUrlExportType, newIdmExePath, newIdmBatRoot, newAriaKeepStructure]);
 const hasSettingsChanged = oldSig !== newSig || oldIdmSig !== newIdmSig || downloaderTypeNeedsNormalize;
@@ -72087,8 +72822,18 @@ const applyChangesAndClose = async () => {
 gmSet('pk_blur_scope', newBlurScope);
 gmSet('pk_blur_thumb', newBlurScope !== 'off');
 gmSet('pk_hide_button_text', newHideButtonText);
+gmSet('pk_theme_follow_system', newThemeFollowSystem);
+if (newThemeFollowSystem) syncThemeToSystem();
+gmSet('pk_cfg_auto_sync_enabled', newConfigCloudAutoSync);
+if (newConfigCloudAutoSync) {
+startConfigCloudAutoSync();
+scheduleConfigCloudAutoUpload(1500);
+} else {
+clearConfigCloudAutoUploadSchedule();
+}
 if (el) {
 el.classList.toggle('pk-hide-btn-text', newHideButtonText);
+updateAutoHideButtonText();
 if (typeof refreshQuotaText === 'function') refreshQuotaText();
 }
 gmSet('pk_keep_pos', newKeepPos);
@@ -77740,7 +78485,8 @@ const txt = el.querySelector('#pk-quota-txt');
 if (!txt || !S.quota) return;
 const isMaxNow = UI.win.classList.contains('pk-maximized');
 const isCompactQuota = el.classList.contains('pk-hide-btn-text');
-txt.textContent = (isMaxNow && !isCompactQuota) ? `${S.quota.usedStr} / ${S.quota.limitStr}` : `${S.quota.pct}%`;
+const nextText = (isMaxNow && !isCompactQuota) ? `${S.quota.usedStr} / ${S.quota.limitStr}` : `${S.quota.pct}%`;
+if (txt.textContent !== nextText) txt.textContent = nextText;
 };
 
 const updateQuotaUI = async (options = null) => {
@@ -79082,7 +79828,7 @@ probeAudio = null;
 
 const minifyFile = (f, isBackground = false) => {
 if (f._minified) return f;
-const officialVideoEvidence = window.pkHasOfficialVideoEvidence(f);
+const officialVideoEvidence = computeOfficialVideoEvidence(f);
 const { id, kind, name, parent_id, size, mime_type, thumbnail_link, icon_link, web_content_link, hash, gcid, md5_checksum } = f;
 const trashed = !!f.trashed;
 const tags = f.tags ? [...f.tags] : [];
