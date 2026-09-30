@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            5.1.0
+// @version            5.2.0
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -102,9 +102,7 @@ return;
 const style = document.createElement('style');
 style.id = styleId;
 style.textContent = `
-#initial-loading,
-.pp-consumer-loading,
-[data-pk-official-loading-overlay="1"] {
+#initial-loading {
 display: none !important;
 visibility: hidden !important;
 opacity: 0 !important;
@@ -113,77 +111,67 @@ pointer-events: none !important;
 `;
 host.appendChild(style);
 
-const loadingImageSelector = 'img[src*="/operating/pp_loading.png"]';
-const guardedOverlays = new WeakSet();
-const forceHide = (overlay) => {
-if (!overlay || overlay.nodeType !== 1) return;
-if (overlay.id === 'app' || overlay === document.body || overlay === document.documentElement || overlay.closest('.pk-ov')) return;
-overlay.setAttribute('data-pk-official-loading-overlay', '1');
-const applyHiddenState = () => {
-if (overlay.style.getPropertyValue('display') !== 'none' || overlay.style.getPropertyPriority('display') !== 'important') {
-    overlay.style.setProperty('display', 'none', 'important');
-}
-if (overlay.style.getPropertyValue('visibility') !== 'hidden' || overlay.style.getPropertyPriority('visibility') !== 'important') {
-    overlay.style.setProperty('visibility', 'hidden', 'important');
-}
-if (overlay.style.getPropertyValue('pointer-events') !== 'none' || overlay.style.getPropertyPriority('pointer-events') !== 'important') {
-    overlay.style.setProperty('pointer-events', 'none', 'important');
-}
+const officialLoadingSelector = '.pikpak-loading-container';
+const scriptManagerSelector = '.pk-ov';
+const protectedBusinessSelector = '.el-overlay.el-modal-dialog,[role="dialog"][aria-modal="true"],.el-dialog';
+const savedOverlayStyles = new WeakMap();
+const watchedNodes = new WeakSet();
+let syncOfficialLoadingOverlays = () => {};
+const isVisibleElement = (node) => {
+if (!node || !node.isConnected) return false;
+let computed = null;
+try { computed = window.getComputedStyle(node); } catch (e) {}
+return !!computed && computed.display !== 'none' && computed.visibility !== 'hidden' && computed.opacity !== '0';
 };
-applyHiddenState();
-if (guardedOverlays.has(overlay)) return;
-guardedOverlays.add(overlay);
-const guard = new MutationObserver(() => {
-if (!overlay.isConnected) {
-    guard.disconnect();
-    return;
-}
-applyHiddenState();
+const isProtectedBusinessOverlay = (node) => !!(node && (node.matches(protectedBusinessSelector) || node.closest(protectedBusinessSelector)));
+const saveOverlayStyle = (overlay) => {
+if (savedOverlayStyles.has(overlay)) return;
+const properties = ['display', 'visibility', 'opacity', 'pointer-events'];
+const saved = {};
+properties.forEach(property => {
+saved[property] = [overlay.style.getPropertyValue(property), overlay.style.getPropertyPriority(property)];
 });
-guard.observe(overlay, { attributes: true, attributeFilter: ['style', 'class'] });
+savedOverlayStyles.set(overlay, saved);
 };
-const findOfficialLoadingOverlay = (img) => {
-const known = img.closest('#initial-loading, .pp-consumer-loading, [data-pk-official-loading-overlay="1"]');
-if (known) return known;
-let current = img.parentElement;
-for (let depth = 0; current && current !== document.body && current !== document.documentElement && depth < 8; depth++, current = current.parentElement) {
-    if (current.id === 'app' || current.closest('.pk-ov')) break;
-    const inlineStyle = String(current.getAttribute('style') || '').toLowerCase();
-    let computed = null;
-    try { computed = window.getComputedStyle(current); } catch (e) {}
-    const isFixed = (computed && computed.position === 'fixed') || /position\s*:\s*fixed/.test(inlineStyle);
-    const hasViewportSize = /width\s*:\s*100vw/.test(inlineStyle) && /height\s*:\s*100(?:d)?vh/.test(inlineStyle);
-    let coversViewport = false;
-    try {
-        const rect = current.getBoundingClientRect();
-        coversViewport = window.innerWidth > 0 && window.innerHeight > 0 && rect.width >= window.innerWidth * 0.8 && rect.height >= window.innerHeight * 0.8;
-    } catch (e) {}
-    if (isFixed && (hasViewportSize || coversViewport)) return current;
-}
-const content = img.closest('.content');
-if (content && content.parentElement && content.parentElement !== document.body && content.parentElement.id !== 'app' && !content.parentElement.closest('.pk-ov')) {
-    return content.parentElement;
-}
-return content || img;
-};
-const suppressIn = (root) => {
-if (!root) return;
-const images = [];
-if (root.nodeType === 1 && root.matches && root.matches(loadingImageSelector)) images.push(root);
-if (root.querySelectorAll) images.push(...root.querySelectorAll(loadingImageSelector));
-images.forEach(img => forceHide(findOfficialLoadingOverlay(img)));
-};
-suppressIn(document);
-const rootObserver = new MutationObserver((records) => {
-records.forEach(record => {
-    if (record.type === 'attributes') {
-        suppressIn(record.target);
-        return;
-    }
-    record.addedNodes.forEach(suppressIn);
+const restoreOverlay = (overlay) => {
+const saved = savedOverlayStyles.get(overlay);
+if (!saved) return;
+Object.entries(saved).forEach(([property, value]) => {
+if (value[0]) overlay.style.setProperty(property, value[0], value[1]);
+else overlay.style.removeProperty(property);
 });
+savedOverlayStyles.delete(overlay);
+};
+const hideOfficialLoadingOverlay = (overlay) => {
+if (!overlay || !overlay.matches(officialLoadingSelector) || isProtectedBusinessOverlay(overlay)) return;
+saveOverlayStyle(overlay);
+overlay.style.setProperty('display', 'none', 'important');
+overlay.style.setProperty('visibility', 'hidden', 'important');
+overlay.style.setProperty('opacity', '0', 'important');
+overlay.style.setProperty('pointer-events', 'none', 'important');
+};
+const watchNode = (node) => {
+if (!node || watchedNodes.has(node)) return;
+watchedNodes.add(node);
+const isLoading = node.matches(officialLoadingSelector);
+const observer = new MutationObserver(() => syncOfficialLoadingOverlays());
+observer.observe(node, isLoading ? { attributes: true, childList: true, subtree: true, attributeFilter: ['class', 'style', 'hidden'] } : { attributes: true, attributeFilter: ['class', 'style', 'hidden'] });
+};
+syncOfficialLoadingOverlays = () => {
+const managerOpen = Array.from(document.querySelectorAll(scriptManagerSelector)).some(isVisibleElement);
+document.querySelectorAll(officialLoadingSelector).forEach(overlay => {
+watchNode(overlay);
+if (managerOpen && !isProtectedBusinessOverlay(overlay)) hideOfficialLoadingOverlay(overlay);
+else restoreOverlay(overlay);
 });
-rootObserver.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
+document.querySelectorAll(scriptManagerSelector).forEach(watchNode);
+};
+const isRelevantNode = (node) => !!(node && node.nodeType === 1 && (node.matches(`${officialLoadingSelector},${scriptManagerSelector}`) || node.querySelector(`${officialLoadingSelector},${scriptManagerSelector}`)));
+syncOfficialLoadingOverlays();
+const rootObserver = new MutationObserver(records => {
+if (records.some(record => Array.from(record.addedNodes || []).some(isRelevantNode) || Array.from(record.removedNodes || []).some(isRelevantNode))) syncOfficialLoadingOverlays();
+});
+rootObserver.observe(document.documentElement, { childList: true, subtree: true });
 };
 installOfficialLoadingSuppressor();
 
@@ -252,6 +240,8 @@ entries: [
 { key: 'pk_pwd_try_count', type: 'number', defaultValue: 10, localLimit: { min: 10, max: 50, integer: true }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_clipboard_magnet_focus', type: 'boolean', defaultValue: true, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_clipboard_magnet_paste', type: 'boolean', defaultValue: true, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
+{ key: 'pk_magnet_auto_filter_recorded', type: 'boolean', defaultValue: false, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
+{ key: 'pk_magnet_official_filter_mode', type: 'enum', defaultValue: 'smart', localLimit: { allowed: ['close', 'smart'], maxLen: 8 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'strict-local', mergeStrategy: 'none' },
 { key: 'pk_magnet_archive_journal', type: 'jsonArray', defaultValue: '[]', localLimit: { maxItems: 2000, maxFieldLen: 2048, maxSize: 1024 * CONFIG_SIZE.KB, keepRecent: true }, isPrefix: false, lru: false, ttl: false, cloudSync: 'strict-local', mergeStrategy: 'none' },
 { key: 'pk_keep_pos', type: 'boolean', defaultValue: true, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'strict-local', mergeStrategy: 'none' },
 { key: 'pk_pos_left', type: 'cssPx', defaultValue: '', localLimit: { min: 0, max: 20000 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'strict-local', mergeStrategy: 'none' },
@@ -2811,6 +2801,7 @@ potplayerSuppressTodayTTL: 24 * 60 * 60 * 1000,
 potplayerPostRepairConfirmDelay: 6000,
 scriptUpdateManifestUrl: 'https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/version.json',
 scriptUpdateCheckTTL: 24 * 60 * 60 * 1000,
+scriptUpdateFailureTTL: 5 * 60 * 1000,
 scriptUpdateCacheKey: 'pk_script_update_cache',
 scriptUpdateDismissPrefix: 'pk_script_update_dismiss_',
 scriptUpdateProjectUrl: 'https://github.com/digbug82/PikPak_Enhancement_Master',
@@ -3854,8 +3845,8 @@ const CSS = `
 :where(#pk-settings-pop,.pk-dropdown-menu[data-pk-portal="1"],.pk-dup-folder-pop,.pk-crumb-pop,.pk-cal-pop,.pk-hist-pop,#pk-filter-cat-pop,#pk-filter-more-pop,.pk-tooltip,#pk-config-input-limit-tip,.pk-drag-ghost,.pk-selection-box,.pk-search-running-mask,.pk-img-ov,#pk-player-ov),:where(#pk-settings-pop,.pk-dropdown-menu[data-pk-portal="1"],.pk-dup-folder-pop,.pk-crumb-pop,.pk-cal-pop,.pk-hist-pop,#pk-filter-cat-pop,#pk-filter-more-pop,.pk-tooltip,#pk-config-input-limit-tip,.pk-drag-ghost,.pk-selection-box,.pk-search-running-mask,.pk-img-ov,#pk-player-ov) *{color-scheme:only light;forced-color-adjust:none;}
 :where(#pk-settings-pop,.pk-dropdown-menu[data-pk-portal="1"],.pk-dup-folder-pop,.pk-crumb-pop,.pk-cal-pop,.pk-hist-pop,#pk-filter-cat-pop,#pk-filter-more-pop,.pk-tooltip,.pk-img-ov,#pk-player-ov) svg{color-scheme:only light;forced-color-adjust:none;filter:none!important;-webkit-filter:none!important;mix-blend-mode:normal!important;isolation:isolate;}
 .pk-no-transition, .pk-no-transition * { transition: none !important; }
-.pk-magnet-preview-wrap { width:420px; max-width:86vw; display:flex; flex-direction:column; color:var(--pk-fg); overflow:hidden; }
-.pk-magnet-hero { width:100%; height:210px; background:var(--pk-hl); display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:14px 14px 0 0; }
+.pk-magnet-preview-wrap { width:100%; max-width:100%; box-sizing:border-box; display:flex; flex-direction:column; color:var(--pk-fg); overflow:hidden; }
+.pk-magnet-hero { width:100%; height:210px; background:var(--pk-hl); display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:0; }
 .pk-magnet-hero img { width:100%; height:100%; object-fit:cover; display:block; }
 .pk-magnet-empty { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:14px; opacity:0.62; }
 .pk-magnet-body { padding:18px 20px 20px 20px; display:flex; flex-direction:column; gap:12px; }
@@ -3890,6 +3881,37 @@ const CSS = `
 .pk-magnet-thumb.active { border:2px solid var(--pk-pri); }
 .pk-magnet-hero img { user-select:none; -webkit-user-drag:none; }
 .pk-magnet-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:2px; }
+.pk-magnet-tabs { display:flex; align-items:center; gap:4px; padding:0 20px; border-bottom:1px solid var(--pk-bd); background:var(--pk-bg); }
+.pk-magnet-tab { height:40px; padding:0 12px; border:0; border-bottom:2px solid transparent; background:transparent; color:var(--pk-muted); font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+.pk-magnet-tab.act { color:var(--pk-pri); border-bottom-color:var(--pk-pri); }
+.pk-magnet-pane { display:flex; flex-direction:column; gap:12px; }
+.pk-magnet-pane[hidden] { display:none!important; }
+.pk-magnet-file-pane { min-height:330px; display:flex; flex-direction:column; gap:10px; }
+.pk-magnet-file-tools { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:center; }
+.pk-magnet-file-tools[hidden] { display:none!important; }
+.pk-magnet-file-skip { grid-column:1 / -1; min-height:24px; display:flex; align-items:center; gap:6px; color:var(--pk-muted); font-size:12px; cursor:pointer; user-select:none; }
+.pk-magnet-file-skip input { width:15px; height:15px; margin:0; accent-color:var(--pk-pri); cursor:pointer; }
+.pk-magnet-file-search { width:100%; min-width:0; height:34px; border:1px solid var(--pk-bd); border-radius:6px; padding:0 10px; background:var(--pk-bg); color:var(--pk-fg); box-sizing:border-box; outline:none; }
+.pk-magnet-file-search:focus { border-color:var(--pk-pri); }
+.pk-magnet-file-toggle { height:34px; border:1px solid var(--pk-bd); border-radius:6px; padding:0 11px; background:var(--pk-bg); color:var(--pk-fg); font:inherit; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.pk-magnet-file-status { min-height:20px; display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; color:var(--pk-muted); }
+.pk-magnet-file-warning { color:#c62828; text-align:right; }
+.pk-magnet-file-list { height:300px; min-height:220px; overflow:auto; border:1px solid var(--pk-bd); border-radius:6px; background:var(--pk-bg); overscroll-behavior:contain; }
+.pk-magnet-file-state { min-height:220px; display:flex; align-items:center; justify-content:center; padding:20px; color:var(--pk-muted); font-size:13px; text-align:center; box-sizing:border-box; }
+.pk-magnet-file-row { min-width:0; height:38px; display:grid; grid-template-columns:18px 14px 18px minmax(0,1fr) auto; align-items:center; gap:6px; padding:0 10px; border-bottom:1px solid var(--pk-bd); box-sizing:border-box; font-size:12px; }
+.pk-magnet-file-row:last-child { border-bottom:0; }
+.pk-magnet-file-row.is-dir { font-weight:700; cursor:pointer; }
+.pk-magnet-file-row input { width:16px; height:16px; margin:0; accent-color:var(--pk-pri); cursor:pointer; }
+.pk-magnet-file-caret { width:18px; height:18px; display:flex; align-items:center; justify-content:center; color:var(--pk-muted); font-size:12px; cursor:pointer; user-select:none; }
+.pk-magnet-file-icon { width:18px; height:18px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.pk-magnet-file-icon img { width:18px!important; height:18px!important; }
+.pk-magnet-file-main { min-width:0; display:flex; align-items:center; gap:7px; overflow:hidden; }
+.pk-magnet-file-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pk-magnet-file-path { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--pk-muted); font-weight:400; }
+.pk-magnet-file-meta { display:flex; align-items:center; justify-content:flex-end; gap:7px; white-space:nowrap; color:var(--pk-muted); }
+.pk-magnet-unindexed,.pk-magnet-recorded-skip { padding:2px 5px; border-radius:4px; font-size:10px; font-weight:700; }
+.pk-magnet-unindexed { color:#c62828; background:rgba(198,40,40,.1); }
+.pk-magnet-recorded-skip { color:var(--pk-muted); background:var(--pk-hl); }
 .pk-magnet-archive-preview { width:760px; max-width:88vw; color:var(--pk-fg); display:flex; flex-direction:column; gap:14px; }
 .pk-magnet-archive-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
 .pk-magnet-archive-card { border:1px solid var(--pk-bd); border-radius:12px; background:var(--pk-bg); padding:10px 12px; min-width:0; }
@@ -4482,6 +4504,7 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-ctx-sep { height: 1px; background: var(--pk-bd); margin: 4px 0; }
 .pk-modal-ov { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.5); z-index: 10001; display: flex; align-items: center; justify-content: center; overscroll-behavior: none; overflow: hidden; padding: 20px; box-sizing: border-box; }
 .pk-modal { position: relative; background: var(--pk-bg); color: var(--pk-fg); padding: 25px; border-radius: 12px; width: 500px; max-height: 100%; overflow: hidden !important; display: flex; flex-direction: column; gap: 15px; border: 1px solid var(--pk-bd); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); overscroll-behavior: none; margin: auto; flex-shrink: 1; }
+.pk-magnet-preview-modal > .pk-modal > .pk-modal-close { top:6px; }
 .pk-modal h3 { margin: 0 0 5px 0; font-size: 16px; padding-bottom: 10px; padding-right: 40px; color: var(--pk-fg); }
 .pk-modal-close { position: absolute; top: 15px; right: 15px; cursor: pointer; color: var(--pk-icon-c); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: background 0.1s, color: 0.1s; }
 @media (hover:hover) and (pointer:fine){.pk-modal-close:hover { background: var(--pk-hl); color: var(--pk-fg); }}
@@ -6496,10 +6519,17 @@ body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:1
 .pk-cloud-task-modal .pk-cloud-torrent-action { grid-column:1 / -1; width:100%; min-width:0; min-height:42px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:var(--pk-hl); }
 .pk-cloud-task-modal .pk-cloud-main-actions { display:contents!important; }
 .pk-cloud-task-modal #cloud_cancel,.pk-cloud-task-modal #cloud_submit { width:100%!important; min-width:0!important; max-width:none!important; height:44px!important; flex:none!important; padding:0 8px!important; }
-.pk-magnet-preview-modal > .pk-modal { width:calc(100vw - 16px)!important; max-width:440px!important; max-height:calc(100dvh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important; padding:0!important; overflow:hidden!important; }
-.pk-magnet-preview-modal .pk-magnet-preview-wrap { width:100%!important; max-width:100%!important; min-width:0!important; max-height:calc(100dvh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)); overflow-x:hidden!important; overflow-y:auto!important; box-sizing:border-box; }
+.pk-magnet-preview-modal > .pk-modal { width:calc(100vw - 16px)!important; max-width:none!important; min-width:0!important; max-height:calc(100dvh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important; padding:0!important; overflow:hidden!important; box-sizing:border-box!important; }
+.pk-magnet-preview-modal .pk-magnet-preview-wrap { width:100%!important; max-width:100%!important; min-width:0!important; max-height:calc(100dvh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)); overflow-x:hidden!important; overflow-y:auto!important; box-sizing:border-box; scrollbar-width:none; -ms-overflow-style:none; -webkit-overflow-scrolling:touch; }
+.pk-magnet-preview-modal .pk-magnet-preview-wrap::-webkit-scrollbar { width:0; height:0; display:none; }
 .pk-magnet-preview-modal .pk-magnet-hero { height:clamp(130px,24dvh,160px); flex:0 0 auto; }
+.pk-magnet-preview-modal .pk-magnet-tabs { padding:0 14px; position:sticky; top:0; z-index:4; }
 .pk-magnet-preview-modal .pk-magnet-body { min-width:0; padding:14px; gap:10px; box-sizing:border-box; }
+.pk-magnet-preview-modal .pk-magnet-file-pane { min-height:min(390px,48dvh); }
+.pk-magnet-preview-modal .pk-magnet-file-list { height:min(330px,42dvh); min-height:200px; }
+.pk-magnet-preview-modal .pk-magnet-file-row { padding-left:8px; padding-right:8px; grid-template-columns:18px 12px 18px minmax(0,1fr) auto; gap:5px; }
+.pk-magnet-preview-modal .pk-magnet-file-path { display:none; }
+.pk-magnet-preview-modal .pk-magnet-file-warning { max-width:48%; }
 .pk-magnet-preview-modal .pk-magnet-shots { width:100%; min-width:0; overflow-x:auto; overflow-y:hidden; }
 .pk-magnet-preview-modal .pk-magnet-meta { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
 .pk-magnet-preview-modal .pk-magnet-meta-item:nth-child(3) { grid-column:1 / -1; }
@@ -6563,6 +6593,7 @@ body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:1
 .pk-mobile-usage-loading { min-height:84px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:8px; color:var(--pk-fg); opacity:.72; font-size:13px; line-height:1.45; text-align:center; }
 .pk-mobile-usage-retry { height:34px; min-width:92px; padding:0 14px; border:1px solid var(--pk-bd); border-radius:7px; background:var(--pk-bg); color:var(--pk-fg); display:inline-flex; align-items:center; justify-content:center; gap:7px; font-size:13px; cursor:pointer; }
 .pk-mobile-usage-retry svg { width:16px!important; height:16px!important; }
+.pk-magnet-preview-modal > .pk-modal > .pk-modal-close { top:2px!important; }
 .pk-modal h3 { font-size:17px; padding-right:36px; }
 .pk-modal-close { top:12px; right:12px; width:36px; height:36px; }
 .pk-modal-head { display:grid; grid-template-columns:minmax(0,1fr) 36px; align-items:center; column-gap:8px; width:100%; min-width:0; min-height:36px; margin:0 0 var(--pk-modal-head-after-gap,0px); box-sizing:border-box; }
@@ -6723,6 +6754,12 @@ body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:1
 .pk-mobile-media-viewer .pk-media-more-trigger { display:flex!important; }
 #pk-player-ov #pk_p_search,
 .pk-img-ov #pk_img_search { display:none!important; }
+#pk_p_box:fullscreen[data-pk-video-orientation="landscape"] .pk-media-more-wrap,
+#pk_p_box:-webkit-full-screen[data-pk-video-orientation="landscape"] .pk-media-more-wrap { display:none!important; }
+#pk_p_box:fullscreen[data-pk-video-orientation="landscape"] .pk-media-mobile-menu-action,
+#pk_p_box:-webkit-full-screen[data-pk-video-orientation="landscape"] .pk-media-mobile-menu-action { display:flex!important; }
+#pk-player-ov #pk_p_box:fullscreen[data-pk-video-orientation="landscape"] #pk_p_search,
+#pk-player-ov #pk_p_box:-webkit-full-screen[data-pk-video-orientation="landscape"] #pk_p_search { display:flex!important; }
 .pk-media-more-menu { top:calc(100% + 2px); right:0; }
 .pk-p-menu-con { min-width:42px; height:42px; font-size:13px; }
 @media (hover:hover) and (pointer:fine){.pk-mobile-media-viewer #pk_p_res_menu:hover > .pk-p-pop,.pk-mobile-media-viewer #pk_p_spd_menu:hover > .pk-p-pop { display:none; animation:none; }}
@@ -6936,13 +6973,13 @@ function getScriptVersion(){try{return String((typeof GM_info!=='undefined'&&GM_
 function compareScriptVersion(a,b){const norm=v=>String(v||'0').replace(/^v/i,'').split(/[+-]/)[0].split('.').map(x=>parseInt(x,10)||0);const pa=norm(a),pb=norm(b);for(let i=0;i<Math.max(pa.length,pb.length,3);i++){const da=pa[i]||0,db=pb[i]||0;if(da!==db)return da>db?1:-1;}return 0;}
 function readScriptUpdateCache(){try{const raw=localStorage.getItem(CONF.scriptUpdateCacheKey);if(!raw)return null;const data=JSON.parse(raw);return data&&typeof data==='object'?data:null;}catch(e){return null;}}
 function writeScriptUpdateCache(data){try{localStorage.setItem(CONF.scriptUpdateCacheKey,normalizeConfigValue(CONF.scriptUpdateCacheKey,JSON.stringify(data),'localWrite'));scheduleConfigPrefixCleanup('scriptUpdateCache');}catch(e){}}
-async function fetchScriptUpdateInfo(force=false){const now=Date.now();const cached=readScriptUpdateCache();if(!force&&cached&&cached.checkedAt&&(now-cached.checkedAt)<CONF.scriptUpdateCheckTTL)return cached;if(!force&&pkScriptUpdateCheckPromise)return pkScriptUpdateCheckPromise;const job=(async()=>{let result={checkedAt:now,ok:false,latestVersion:'',homepage:CONF.scriptUpdateProjectUrl,changelog:'',error:''};try{const url=`${CONF.scriptUpdateManifestUrl}${CONF.scriptUpdateManifestUrl.includes('?')?'&':'?'}_t=${now}`;const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();const latestVersion=String(data.version||data.latestVersion||data.tag||'').replace(/^v/i,'').trim();if(!latestVersion)throw new Error('Empty version');result={checkedAt:now,ok:true,latestVersion,homepage:String(data.homepage||data.url||CONF.scriptUpdateProjectUrl),changelog:String(data.changelog||data.changelogUrl||''),error:''};}catch(e){result.error=e&&e.message?e.message:String(e||'');}writeScriptUpdateCache(result);return result;})();if(!force)pkScriptUpdateCheckPromise=job;try{return await job;}finally{if(pkScriptUpdateCheckPromise===job)pkScriptUpdateCheckPromise=null;}}
+async function fetchScriptUpdateInfo(force=false){const now=Date.now();const cached=readScriptUpdateCache();const cacheTTL=cached&&cached.ok?CONF.scriptUpdateCheckTTL:CONF.scriptUpdateFailureTTL;if(!force&&cached&&cached.checkedAt&&(now-cached.checkedAt)<cacheTTL)return cached;if(!force&&pkScriptUpdateCheckPromise)return pkScriptUpdateCheckPromise;const job=(async()=>{let result={checkedAt:now,ok:false,latestVersion:'',homepage:CONF.scriptUpdateProjectUrl,changelog:'',lastSuccessAt:0,error:''};try{const url=`${CONF.scriptUpdateManifestUrl}${CONF.scriptUpdateManifestUrl.includes('?')?'&':'?'}_t=${now}`;const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();const latestVersion=String(data.version||data.latestVersion||data.tag||'').replace(/^v/i,'').trim();if(!latestVersion)throw new Error('Empty version');result={checkedAt:now,ok:true,latestVersion,homepage:String(data.homepage||data.url||CONF.scriptUpdateProjectUrl),changelog:String(data.changelog||data.changelogUrl||''),lastSuccessAt:now,error:''};}catch(e){const lastSuccessAt=Number(cached&&(cached.ok?cached.checkedAt:cached.lastSuccessAt))||0;const canKeepLastSuccess=!!(cached&&cached.latestVersion&&lastSuccessAt&&now-lastSuccessAt<=7*24*60*60*1000);result={checkedAt:now,ok:false,latestVersion:canKeepLastSuccess?String(cached.latestVersion):'',homepage:canKeepLastSuccess?String(cached.homepage||CONF.scriptUpdateProjectUrl):CONF.scriptUpdateProjectUrl,changelog:canKeepLastSuccess?String(cached.changelog||''):'',lastSuccessAt:canKeepLastSuccess?lastSuccessAt:0,error:e&&e.message?e.message:String(e||'')};}writeScriptUpdateCache(result);return result;})();if(!force)pkScriptUpdateCheckPromise=job;try{return await job;}finally{if(pkScriptUpdateCheckPromise===job)pkScriptUpdateCheckPromise=null;}}
 function isScriptUpdateNew(info){return !!(info&&info.ok&&info.latestVersion&&compareScriptVersion(info.latestVersion,getScriptVersion())>0);}
 function getScriptUpdateDismissKey(version){return `${CONF.scriptUpdateDismissPrefix}${String(version||'').replace(/[^0-9A-Za-z_.-]/g,'_')}`;}
 function isScriptUpdateDismissed(version){try{const raw=localStorage.getItem(getScriptUpdateDismissKey(version));if(raw==='1')return true;const data=raw?JSON.parse(raw):null;return !!(data&&data.v===1&&(!data.expiresAt||Number(data.expiresAt)>Date.now()));}catch(e){return false;}}
 function markScriptUpdateDismissed(version){try{const key=getScriptUpdateDismissKey(version);localStorage.setItem(key,normalizeConfigValue(key,'1','localWrite'));scheduleConfigPrefixCleanup('scriptUpdateDismiss');}catch(e){}}
 function formatScriptUpdateCheckedAt(ts){const L=getStrings();const n=Number(ts)||0;if(!n)return L.str_script_update_not_checked;const d=new Date(n);if(!Number.isFinite(d.getTime()))return L.str_script_update_not_checked;const p=x=>String(x).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
-function getScriptUpdateLatestText(info){const L=getStrings();if(info&&info.ok&&info.latestVersion)return info.latestVersion;if(info&&info.checkedAt)return L.str_script_update_failed;return L.str_script_update_not_checked;}
+function getScriptUpdateLatestText(info){const L=getStrings();if(info&&info.latestVersion)return info.ok?info.latestVersion:`${info.latestVersion} (${L.str_script_update_failed})`;if(info&&info.checkedAt)return L.str_script_update_failed;return L.str_script_update_not_checked;}
 function getDefaultPotPlayerProtocolState() {
 return {
 schemaVersion: CONF.potplayerProtocolStateSchemaVersion,
@@ -7736,6 +7773,9 @@ zh: {
   "tip_empty_trash": "清空回收站 [Shift] + [Delete]",
   "btn_exit": "退出",
   "btn_close": "关闭",
+  "btn_back": "返回",
+  "btn_more": "更多",
+  "str_more": "更多",
   "txt_preview_title": "TXT 预览",
   "txt_preview_loading": "正在加载文本...",
   "txt_preview_too_large": "文件过大，请下载后在本地查看。",
@@ -8290,6 +8330,7 @@ zh: {
   "label_config_cloud_scope": "同步范围",
   "btn_config_cloud_upload": "上传到云端",
   "btn_config_cloud_pull": "从云端拉取",
+  "btn_config_cloud_auto_upload_enable": "拉取并启用",
   "btn_config_cloud_clear": "清空云端配置",
   "status_config_cloud_unsynced": "未同步",
   "status_config_cloud_synced": "已同步",
@@ -8306,8 +8347,13 @@ zh: {
   "msg_config_cloud_pull_failed": "云端配置拉取失败",
   "msg_config_cloud_pull_cancelled": "已取消拉取，未写入本地配置",
   "msg_config_cloud_pull_no_write": "没有可写入本地的配置",
+  "msg_config_cloud_auto_upload_confirm": "启用自动上传前，需要先从云端拉取一次配置，以建立可信同步基线。拉取可能会覆盖当前本地配置。是否现在拉取并启用自动上传？",
+  "msg_config_cloud_auto_upload_enabled": "已建立同步基线，自动上传已启用",
+  "msg_config_cloud_auto_upload_remote_empty": "云端暂无可用配置，请先手动上传配置后再启用自动上传",
+  "msg_config_cloud_auto_upload_conflict": "云端配置存在冲突，请先处理冲突后再启用自动上传",
+  "msg_config_cloud_auto_upload_failed": "云端拉取未完成，自动上传未启用",
   "msg_config_cloud_pull_apply_summary": "本次将更新 {n} 项配置。",
-  "msg_config_cloud_pull_conflict_summary": "{n} 项冲突将保留本地版本。",
+  "msg_config_cloud_pull_conflict_summary": "{n} 项冲突将以云端版本为准。",
   "msg_config_cloud_clear_confirm": "确认清空云端配置？",
   "msg_config_cloud_clearing": "正在清空云端配置...",
   "msg_config_cloud_clear_success": "云端配置已清空",
@@ -8410,7 +8456,13 @@ zh: {
   "opt_keep_short": "保留名称最短的", "opt_keep_long": "保留名称最长的",
   "label_clipboard_magnet_focus": "剪贴板磁链识别",
   "desc_clipboard_magnet_focus": "回到前台时检测剪贴板磁链",
-  "msg_magnet_preview_desc": "已识别到剪贴板磁链，确认后将直接创建云下载任务。",
+  "label_magnet_filter_settings": "磁链文件过滤",
+  "label_magnet_official_smart_filter": "官方智能过滤",
+  "desc_magnet_official_smart_filter": "过滤官方识别的广告文件，不保存到云盘",
+  "label_magnet_auto_filter_recorded": "自动过滤资源管理器记录的文件和文件夹",
+  "desc_magnet_auto_filter_recorded": "保存磁链时自动跳过资源管理器中已记录的文件和文件夹",
+  "msg_magnet_official_filter_save_failed": "官方智能过滤设置保存失败，请稍后重试",
+  "msg_magnet_preview_desc": "已识别到磁链，可查看文件并选择需要保存的内容。",
   "msg_magnet_preview_fail": "未获取到公开预览信息，仍可继续添加。",
   "str_magnet_unknown_name": "未知资源",
   "str_no_preview": "暂无预览图",
@@ -8419,6 +8471,29 @@ zh: {
   "lbl_magnet_type": "类型",
   "lbl_magnet_hash": "磁链",
   "btn_magnet_continue": "高速云下载",
+  "tab_magnet_preview": "预览",
+  "tab_magnet_files": "文件",
+  "msg_magnet_files_loading": "正在读取磁链文件...",
+  "msg_magnet_files_unavailable": "未获取到文件列表，可继续保存完整资源。",
+  "ph_magnet_file_search": "搜索文件",
+  "tag_magnet_unindexed": "未收录",
+  "label_magnet_skip_recorded": "跳过资源管理器中已记录的文件和文件夹",
+  "tag_magnet_recorded_skip": "已记录，跳过",
+  "tag_magnet_recorded_folder_skip": "已记录文件夹，跳过",
+  "tag_magnet_recorded_partial": "部分已记录",
+  "msg_magnet_recorded_skip_summary": "已跳过 {n} 个文件，匹配 {f} 个文件、{d} 个文件夹",
+  "msg_magnet_recorded_skip_all": "所选文件均已被资源管理器记录，未重复保存",
+  "msg_magnet_selected_summary": "已选 {n} 个文件，共 {s}",
+  "msg_magnet_unindexed_selected": "其中 {n} 个未收录文件将被跳过",
+  "btn_magnet_save_all": "保存全部",
+  "btn_magnet_save_selected": "保存所选",
+  "btn_magnet_save_available": "保存可用项",
+  "msg_magnet_no_selection": "请至少选择一个文件",
+  "msg_magnet_instant_progress": "正在保存所选文件 {done}/{total}...",
+  "msg_magnet_instant_success": "已保存 {n} 个所选文件",
+  "msg_magnet_instant_partial": "已保存 {ok} 个文件，跳过 {skip} 个文件",
+  "msg_magnet_instant_failed": "所选文件保存失败",
+  "msg_magnet_instant_unavailable": "文件内容暂不可秒传，已清理未完成的占位文件。",
   "lbl_magnet_preview_source": "预览信息来自",
   "msg_magnet_preview_rate_limited": "预览服务请求过于频繁，已临时降级。仍可继续添加。",
   "msg_magnet_preview_timeout": "预览服务响应超时，仍可继续添加。",
@@ -10139,6 +10214,481 @@ e.data = err;
 throw e;
 }
 return await res.json();
+}
+
+function getMagnetNameFromLink(link) {
+try {
+const params = new URLSearchParams(String(link || '').split('?').slice(1).join('?'));
+const name = String(params.get('dn') || '').trim();
+if (name) return name;
+} catch (e) {}
+return '';
+}
+
+function sanitizeMagnetDriveName(name, fallback = '') {
+const clean = value => {
+let current = String(value || '').replace(/[\\/:*?"<>|\t\n\r]/g, '');
+while (true) {
+const next = current.trim().replace(/\.+$/g, '').trim();
+if (next === current) return current;
+current = next;
+}
+};
+return clean(name) || clean(fallback) || 'PikPak';
+}
+
+function normalizeMagnetResourceResponse(payload, link = '') {
+const list = payload && payload.list && typeof payload.list === 'object' ? payload.list : payload;
+const resources = Array.isArray(list && list.resources)
+? list.resources
+: (Array.isArray(payload && payload.resources) ? payload.resources : []);
+let sequence = 0;
+const files = [];
+const isDirectory = resource => !!(resource && (
+resource.is_dir === true || resource.is_dir === 'true' ||
+resource.kind === 'drive#folder' ||
+(resource.dir && Array.isArray(resource.dir.resources)) ||
+Array.isArray(resource.resources) || Array.isArray(resource.children)
+));
+const childrenOf = resource => {
+if (!resource || typeof resource !== 'object') return [];
+if (resource.dir && Array.isArray(resource.dir.resources)) return resource.dir.resources;
+if (Array.isArray(resource.resources)) return resource.resources;
+if (Array.isArray(resource.children)) return resource.children;
+return [];
+};
+const buildNode = (resource, parentPath = '', depth = 0) => {
+const name = String(resource && (resource.name || resource.file_name || resource.title) || '').trim() || getStrings().str_magnet_unknown_name;
+const dir = isDirectory(resource);
+const relativePath = parentPath ? `${parentPath}/${name}` : name;
+const node = {
+uid: `pk_magnet_resource_${sequence++}`,
+name,
+relativePath,
+depth,
+isDir: dir,
+size: Math.max(0, Number(resource && (resource.file_size ?? resource.size) || 0) || 0),
+gcid: String(resource && ((resource.meta && resource.meta.hash) || resource.gcid || resource.hash) || '').trim(),
+children: []
+};
+if (dir) {
+node.children = childrenOf(resource).map(child => buildNode(child, relativePath, depth + 1));
+} else {
+files.push(node);
+}
+return node;
+};
+let roots = [];
+let rootName = getMagnetNameFromLink(link) || getStrings().str_magnet_unknown_name;
+if (resources.length === 1 && isDirectory(resources[0])) {
+const rawRoot = resources[0];
+rootName = String(rawRoot.name || rawRoot.file_name || rootName).trim() || rootName;
+const root = {
+uid: `pk_magnet_resource_${sequence++}`,
+name: rootName,
+relativePath: '',
+depth: 0,
+isDir: true,
+size: Math.max(0, Number(rawRoot.file_size ?? rawRoot.size ?? 0) || 0),
+gcid: '',
+children: childrenOf(rawRoot).map(child => buildNode(child, '', 1))
+};
+roots = [root];
+} else {
+roots = resources.map(resource => buildNode(resource, '', 0));
+if (resources.length === 1 && roots[0]) rootName = roots[0].name || rootName;
+}
+const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+const instantReadyCount = files.reduce((sum, file) => sum + (file.gcid ? 1 : 0), 0);
+return { indexed: files.length > 0, rootName, roots, files, totalSize, instantReadyCount, raw: payload };
+}
+
+function normalizeMagnetOfficialFilterMode(value) {
+return String(value || '').trim().toLowerCase() === 'close' ? 'close' : 'smart';
+}
+
+function readMagnetOfficialFilterMode(payload) {
+const seen = new Set();
+const visit = value => {
+if (!value || typeof value !== 'object' || seen.has(value)) return '';
+seen.add(value);
+if (String(value.item || '') === 'filterFilesWhenCreate') return normalizeMagnetOfficialFilterMode(value.value);
+if (Object.prototype.hasOwnProperty.call(value, 'filterFilesWhenCreate')) {
+const item = value.filterFilesWhenCreate;
+return normalizeMagnetOfficialFilterMode(item && typeof item === 'object' ? item.value : item);
+}
+for (const child of Object.values(value)) {
+const found = visit(child);
+if (found) return found;
+}
+return '';
+};
+return visit(payload);
+}
+
+async function fetchMagnetOfficialFilterMode() {
+const res = await fetch('https://api-drive.mypikpak.com/user/v1/settings?items=filterFilesWhenCreate', { method: 'GET', headers: getHeaders(), cache: 'no-store' });
+if (!res.ok) throw new Error(`MAGNET_FILTER_SETTINGS_HTTP_${res.status}`);
+const mode = readMagnetOfficialFilterMode(await res.json());
+if (!mode) throw new Error('MAGNET_FILTER_SETTINGS_EMPTY');
+return mode;
+}
+
+async function saveMagnetOfficialFilterMode(mode) {
+const value = normalizeMagnetOfficialFilterMode(mode);
+const res = await fetch('https://api-drive.mypikpak.com/user/v1/settings', {
+method: 'POST',
+headers: getHeaders(),
+body: JSON.stringify({ item: 'filterFilesWhenCreate', value })
+});
+if (!res.ok) throw new Error(`MAGNET_FILTER_SETTINGS_SAVE_HTTP_${res.status}`);
+return value;
+}
+
+function normalizeMagnetRecordedName(value) {
+return String(value === undefined || value === null ? '' : value).replace(/[\r\n\v\f\u2028\u2029]+/g, ' ').trim().toLowerCase();
+}
+
+function getMagnetRecordedNameIndex() {
+const fileNames = new Set();
+const folderNames = new Set();
+const readNames = (key, fallback) => {
+let raw = null;
+try { raw = gmGet(key, null); } catch (e) {}
+if (raw === null || raw === undefined) raw = fallback;
+const values = Array.isArray(raw) ? raw : String(raw || '').split(/[\r\n]+/);
+return values.map(normalizeMagnetRecordedName).filter(Boolean);
+};
+const fallbackFiles = typeof S !== 'undefined' && S && S.blSet instanceof Set ? Array.from(S.blSet) : [];
+const fallbackFolders = typeof S !== 'undefined' && S && S.blFolderSet instanceof Set ? Array.from(S.blFolderSet) : [];
+readNames('pk_blacklist', fallbackFiles).forEach(name => fileNames.add(name));
+readNames('pk_blacklist_folders', fallbackFolders).forEach(name => folderNames.add(name));
+return { fileNames, folderNames };
+}
+
+function applyMagnetRecordedNameFilter(resolution, nameIndex) {
+if (!resolution || !Array.isArray(resolution.roots)) return { skippedFileCount: 0, fileCount: 0, folderCount: 0 };
+const fileNames = nameIndex && nameIndex.fileNames instanceof Set ? nameIndex.fileNames : new Set();
+const folderNames = nameIndex && nameIndex.folderNames instanceof Set ? nameIndex.folderNames : new Set();
+let skippedFileCount = 0;
+let fileCount = 0;
+let folderCount = 0;
+const walk = (node, inheritedFolderSkip = false) => {
+if (!node) return { total: 0, skipped: 0 };
+if (!node.isDir) {
+const directFileSkip = fileNames.has(normalizeMagnetRecordedName(node.name));
+const skipped = inheritedFolderSkip || directFileSkip;
+node._recordedSkip = skipped;
+node._recordedSkipReason = inheritedFolderSkip ? 'folder' : (directFileSkip ? 'file' : '');
+node._recordedFileCount = 1;
+node._recordedSkipFileCount = skipped ? 1 : 0;
+if (skipped) skippedFileCount++;
+if (directFileSkip) fileCount++;
+return { total: 1, skipped: skipped ? 1 : 0 };
+}
+const directFolderSkip = folderNames.has(normalizeMagnetRecordedName(node.name));
+if (directFolderSkip) folderCount++;
+let total = 0;
+let skipped = 0;
+(Array.isArray(node.children) ? node.children : []).forEach(child => {
+const childStats = walk(child, inheritedFolderSkip || directFolderSkip);
+total += childStats.total;
+skipped += childStats.skipped;
+});
+node._recordedFileCount = total;
+node._recordedSkipFileCount = skipped;
+node._recordedFolderMatch = directFolderSkip;
+node._recordedSkip = directFolderSkip || (total > 0 && skipped === total);
+node._recordedSkipReason = directFolderSkip ? 'folder' : (node._recordedSkip ? 'children' : '');
+return { total, skipped };
+};
+resolution.roots.forEach(root => walk(root, false));
+resolution._recordedSkipStats = { skippedFileCount, fileCount, folderCount };
+return resolution._recordedSkipStats;
+}
+async function apiResolveMagnetResources(link, options = {}) {
+const requestUrl = 'https://api-drive.mypikpak.com/drive/v1/resource/list';
+const res = await fetch(requestUrl, {
+method: 'POST',
+headers: getHeaders(),
+body: JSON.stringify({ urls: String(link || '').trim() }),
+signal: options.signal || undefined,
+pkCaptchaRecoveryScope: 'magnet_resource_list',
+pkCaptchaRecoveryIsRunning: () => !(options.signal && options.signal.aborted)
+});
+if (!res.ok) {
+const data = await res.json().catch(() => ({}));
+const error = new Error(pickOfficialApiErrorText(data, `API Error ${res.status}`));
+error.status = res.status;
+error.code = String(data.code || data.error || data.error_code || '');
+error.data = data;
+throw error;
+}
+return normalizeMagnetResourceResponse(await res.json(), link);
+}
+
+async function apiCreateMagnetFolder(parentId, name) {
+const safeName = sanitizeMagnetDriveName(name, getStrings().str_magnet_unknown_name);
+const res = await fetch('https://api-drive.mypikpak.com/drive/v1/files', {
+method: 'POST',
+headers: getHeaders(),
+body: JSON.stringify({ kind: 'drive#folder', parent_id: parentId || '', name: safeName })
+});
+if (!res.ok) {
+const data = await res.json().catch(() => ({}));
+const error = new Error(pickOfficialApiErrorText(data, `API Error ${res.status}`));
+error.status = res.status;
+error.statusCode = res.status;
+error.code = String(data.code || data.error || data.error_code || '');
+error.errorCode = Number(data.error_code || 0) || 0;
+error.data = data;
+error.response = { status: res.status, statusCode: res.status, data };
+throw error;
+}
+const data = await res.json();
+const folder = data.file || data;
+if (!folder || !folder.id) throw new Error('Folder creation failed');
+return folder;
+}
+
+async function apiCreateUniqueMagnetFolder(parentId, name) {
+let lastError = null;
+for (let index = 0; index < 20; index++) {
+const candidate = index === 0 ? name : `${name} (${index})`;
+try {
+return await apiCreateMagnetFolder(parentId, candidate);
+} catch (e) {
+lastError = e;
+const errorData = e && e.data && typeof e.data === 'object' ? e.data : {};
+const errorText = [
+String(e && e.message || ''),
+String(e && e.code || ''),
+String(e && e.errorCode || ''),
+String(errorData.code || ''),
+String(errorData.error || ''),
+String(errorData.error_code || '')
+].join(' ').toLowerCase();
+const duplicateName = /already[\s_-]*(?:exists?|present)|(?:file[\s_-]*)?name[\s_-]*(?:already[\s_-]*)?(?:exists?|present)|file[\s_-]*name[\s_-]*exists?|name[\s_-]*exists?|duplicate|repeated|same[\s_-]*(?:name|file)|conflict|同名|重复/.test(errorText);
+const status = Number(e && (e.status || e.statusCode) || 0);
+if ((status !== 400 && status !== 409) || !duplicateName) throw e;
+}
+}
+throw lastError || new Error('Folder creation failed');
+}
+
+async function apiInstantCreateMagnetFile(file, parentId) {
+const gcid = String(file && file.gcid || '').trim().toUpperCase();
+if (!gcid) {
+const unavailable = new Error(getStrings().msg_magnet_instant_unavailable);
+unavailable.code = 'MAGNET_CONTENT_UNAVAILABLE';
+throw unavailable;
+}
+const payload = {
+hash: gcid,
+name: sanitizeMagnetDriveName(file.name, getStrings().str_magnet_unknown_name),
+size: String(Math.max(0, Number(file.size) || 0)),
+kind: 'drive#file',
+parent_id: parentId || '',
+upload_type: 'UPLOAD_TYPE_RESUMABLE',
+folder_type: 'NORMAL',
+objProvider: { provider: 'UPLOAD_TYPE_UNKNOWN' }
+};
+let lastError = null;
+for (let attempt = 0; attempt < 3; attempt++) {
+try {
+const res = await fetch('https://api-drive.mypikpak.com/drive/v1/files', {
+method: 'POST',
+headers: getHeaders(),
+body: JSON.stringify(payload)
+});
+if (res.status === 429 && attempt < 2) {
+await sleep(1200 * (attempt + 1));
+continue;
+}
+if (!res.ok) {
+const data = await res.json().catch(() => ({}));
+const error = new Error(pickOfficialApiErrorText(data, `API Error ${res.status}`));
+error.status = res.status;
+error.code = String(data.code || data.error || data.error_code || '');
+throw error;
+}
+const data = await res.json();
+const rawFile = data && data.file && typeof data.file === 'object' ? data.file : null;
+const created = rawFile || (data && typeof data === 'object' ? data : {});
+const uploadType = String(data && data.upload_type || '').trim().toUpperCase();
+const phase = String(created && (created.phase || (data && data.phase)) || '').trim().toUpperCase();
+const hasResumable = !!(data && data.resumable && typeof data.resumable === 'object');
+const pendingPhase = /PENDING|RUNNING|PAUSED|QUEUED|PROCESSING/.test(phase);
+const failedPhase = /FAILED|ERROR|CANCELLED|CANCELED|ABORTED/.test(phase);
+const instantSuccess = !hasResumable && !pendingPhase && !failedPhase && (
+uploadType === 'UPLOAD_TYPE_UNKNOWN' ||
+phase === 'PHASE_TYPE_COMPLETE' ||
+(rawFile && (created.id || uploadType === 'UPLOAD_TYPE_RESUMABLE'))
+);
+if (!instantSuccess) {
+if (created && created.id) {
+try { await deleteGhostFilesWithIndexSync([created.id], { kind: 'magnet_instant_unavailable' }); } catch (e) {}
+}
+const unavailable = new Error(getStrings().msg_magnet_instant_unavailable);
+unavailable.code = 'MAGNET_CONTENT_UNAVAILABLE';
+throw unavailable;
+}
+return created;
+} catch (e) {
+lastError = e;
+if (e && e.code === 'MAGNET_CONTENT_UNAVAILABLE') throw e;
+const status = Number(e && e.status || 0);
+if (attempt < 2 && (!status || status === 429 || status >= 500)) await sleep(700 * (attempt + 1));
+else throw e;
+}
+}
+throw lastError || new Error(getStrings().msg_magnet_instant_failed);
+}
+
+async function executeMagnetInstantSelection(resolution, selectedFiles, targetId = '', options = {}) {
+const L = getStrings();
+const notify = typeof window.__pkShowToast === 'function' ? window.__pkShowToast : null;
+const formatCount = typeof window.__pkFormatI18nCount === 'function'
+? window.__pkFormatI18nCount
+: (template, values = {}) => String(template || '').replace(/\{n\}/g, String(values.n ?? ''));
+const recordedSkippedCount = Math.max(0, Number(options.recordedSkippedCount || 0));
+const ready = selectedFiles.filter(file => file && file.gcid);
+const unavailableCount = selectedFiles.length - ready.length;
+if (!ready.length) {
+if (notify) notify(recordedSkippedCount > 0 && unavailableCount === 0 ? L.msg_magnet_recorded_skip_all : L.msg_magnet_instant_failed, 'warning');
+return { successCount: 0, failCount: selectedFiles.length, skippedCount: unavailableCount + recordedSkippedCount, recordedSkippedCount, cancelled: false };
+}
+const floatBarManager = window.__pkFloatBarManager;
+const progress = floatBarManager && typeof floatBarManager.create === 'function'
+? floatBarManager.create(L.msg_magnet_instant_progress.replace('{done}', '0').replace('{total}', String(ready.length)))
+: { update: () => {}, destroy: () => {} };
+const refreshCloudTaskViewBridge = window.__pkRefreshCloudTaskView;
+const updateQuotaUIBridge = window.__pkUpdateQuotaUI;
+const normalizedTargetId = ['root', 'upload_root'].includes(String(targetId || '')) ? '' : String(targetId || '');
+const needsContainer = ready.length > 1 || ready.some(file => String(file.relativePath || '').includes('/'));
+let container = null;
+let baseId = normalizedTargetId;
+const folderIds = new Map([['', baseId]]);
+let completed = 0;
+const createdFiles = [];
+const failed = [];
+try {
+if (needsContainer) {
+const requestedName = sanitizeMagnetDriveName(resolution.rootName, L.str_magnet_unknown_name);
+container = await apiCreateUniqueMagnetFolder(baseId, requestedName);
+baseId = container.id;
+folderIds.set('', baseId);
+}
+const directories = Array.from(new Set(ready.flatMap(file => {
+const parts = String(file.relativePath || file.name || '').split('/').filter(Boolean).slice(0, -1);
+return parts.map((part, index) => parts.slice(0, index + 1).join('/'));
+}))).sort((a, b) => a.split('/').length - b.split('/').length || a.localeCompare(b));
+for (const path of directories) {
+const parentPath = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
+const name = path.includes('/') ? path.slice(path.lastIndexOf('/') + 1) : path;
+const folder = await apiCreateUniqueMagnetFolder(folderIds.get(parentPath) || baseId, name);
+folderIds.set(path, folder.id);
+}
+let cursor = 0;
+const worker = async () => {
+while (cursor < ready.length) {
+const index = cursor++;
+const file = ready[index];
+const path = String(file.relativePath || file.name || '');
+const parentPath = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
+try {
+const created = await apiInstantCreateMagnetFile(file, folderIds.get(parentPath) || baseId);
+createdFiles.push(created);
+} catch (e) {
+failed.push({ file, error: e });
+}
+completed++;
+progress.update(L.msg_magnet_instant_progress.replace('{done}', String(completed)).replace('{total}', String(ready.length)));
+}
+};
+await Promise.all(Array.from({ length: Math.min(3, ready.length) }, () => worker()));
+} catch (e) {
+failed.push({ error: e });
+} finally {
+progress.destroy();
+}
+if (!createdFiles.length && container && container.id) {
+try { await deleteGhostFilesWithIndexSync([container.id], { kind: 'magnet_instant_empty_cleanup' }); } catch (e) {}
+}
+const failedCount = Math.max(0, ready.length - createdFiles.length) + unavailableCount;
+const totalSkippedCount = failedCount + recordedSkippedCount;
+if (createdFiles.length && totalSkippedCount) {
+if (notify) notify(L.msg_magnet_instant_partial.replace('{ok}', String(createdFiles.length)).replace('{skip}', String(totalSkippedCount)), 'warning');
+} else if (createdFiles.length) {
+if (notify) notify(formatCount(L.msg_magnet_instant_success, { n: createdFiles.length }), 'success');
+} else {
+const unavailableOnly = failed.length && failed.every(entry => entry.error && entry.error.code === 'MAGNET_CONTENT_UNAVAILABLE');
+if (notify) notify(recordedSkippedCount > 0 && !failed.length && unavailableCount === 0 ? L.msg_magnet_recorded_skip_all : (unavailableOnly ? L.msg_magnet_instant_unavailable : L.msg_magnet_instant_failed), 'error');
+}
+if (createdFiles.length) {
+if (typeof updateQuotaUIBridge === 'function') {
+setTimeout(() => {
+try {
+const pending = updateQuotaUIBridge();
+if (pending && typeof pending.catch === 'function') pending.catch(() => {});
+} catch (e) {}
+}, 600);
+}
+const expectedTargetIds = container && container.id
+? [String(container.id)]
+: createdFiles.map(file => String(file && file.id || '')).filter(Boolean);
+if (expectedTargetIds.length && typeof scheduleRealFolderExpectation === 'function') {
+scheduleRealFolderExpectation(normalizedTargetId, { presentIds: expectedTargetIds, maxAttempts: 10 }, 150);
+} else if (typeof scheduleRealFolderRevalidation === 'function') {
+scheduleRealFolderRevalidation(normalizedTargetId, 150);
+}
+if (typeof refreshCloudTaskViewBridge === 'function') {
+try {
+refreshCloudTaskViewBridge(normalizedTargetId, { reason: 'magnet_instant_save', skipOfflineProbe: true });
+} catch (e) {}
+}
+}
+return { successCount: createdFiles.length, failCount: failedCount, skippedCount: totalSkippedCount, recordedSkippedCount, cancelled: false, createdFiles };
+}
+
+async function executeMagnetPreviewResult(link, result, options = {}) {
+const L = getStrings();
+const notify = typeof window.__pkShowToast === 'function' ? window.__pkShowToast : null;
+if (!result || !result.confirm) return { successCount: 0, failCount: 0, cancelled: true };
+const resolution = result.resolution;
+const selectedIds = new Set(Array.isArray(result.selectedIds) ? result.selectedIds : []);
+let selectedFiles = resolution && resolution.indexed
+? resolution.files.filter(file => selectedIds.has(file.uid))
+: [];
+let recordedSkippedCount = 0;
+if (result.skipRecordedResources && (!resolution || !resolution.indexed)) {
+if (notify) notify(L.msg_magnet_files_unavailable || L.str_action_failed, 'warning');
+return { successCount: 0, failCount: 0, skippedCount: 0, recordedSkippedCount: 0, cancelled: true };
+}
+if (result.skipRecordedResources && resolution && resolution.indexed) {
+applyMagnetRecordedNameFilter(resolution, getMagnetRecordedNameIndex());
+const beforeRecordedFilter = selectedFiles.length;
+selectedFiles = selectedFiles.filter(file => !file._recordedSkip);
+recordedSkippedCount = resolution._recordedSkipStats ? Number(resolution._recordedSkipStats.skippedFileCount || 0) : Math.max(0, beforeRecordedFilter - selectedFiles.length);
+}
+const allSelected = !!(resolution && resolution.indexed && selectedFiles.length === resolution.files.length && recordedSkippedCount === 0);
+if (!resolution || !resolution.indexed || allSelected) {
+const submit = window.__pkSubmitCloudLinks;
+if (typeof submit !== 'function') throw new Error('Cloud task submit helper unavailable');
+return submit([link], {
+targetId: result.targetId || '',
+targetName: result.targetName || L.lbl_default_folder,
+skipSnapshot: true,
+skipMagnetSelection: true,
+logPrefix: options.logPrefix || 'Magnet Task Create Failed',
+successMessage: options.successMessage || L.msg_cloud_task_success
+});
+}
+if (!selectedFiles.length) {
+if (notify) notify(recordedSkippedCount > 0 ? L.msg_magnet_recorded_skip_all : L.msg_magnet_no_selection, 'warning');
+return { successCount: 0, failCount: 0, skippedCount: recordedSkippedCount, recordedSkippedCount, cancelled: true };
+}
+return executeMagnetInstantSelection(resolution, selectedFiles, result.targetId || '', { recordedSkippedCount });
 }
 
 async function apiGetSharePhrases(shareId) {
@@ -12895,7 +13445,9 @@ window._pkBrowserOverlayActivationHandler = (event) => {
 S.browserOverlayLastTrustedGestureAt = Date.now();
 const target = event && event.target && event.target.closest ? event.target : null;
 const insideManager = !!(target && target.closest('.pk-ov,.pk-modal-ov,.pk-img-ov,#pk-player-ov,#pk-audio-ov'));
-if (insideManager && !S.navTransitionBusy && !S.browserNavRestoring) S.prepareBrowserOverlayGuard();
+if (insideManager && !S.navTransitionBusy && !S.browserNavRestoring) {
+try { S.prepareBrowserOverlayGuard(); } catch (e) {}
+}
 };
 window._pkBrowserOverlayPageShowHandler = () => S.reconcileBrowserOverlayLifecycle();
 window._pkBrowserOverlayPageHideHandler = () => {
@@ -14444,6 +14996,8 @@ setTimeout(() => el.remove(), 300);
 
 return { create };
 })();
+
+window.__pkFloatBarManager = FloatBarManager;
 
 S.broadcast.onmessage = (e) => {
 const { type, ids, src, dst } = e.data;
@@ -19651,7 +20205,9 @@ function showModal(html, options = {}) {
 const modalHost = getPkToastHost();
 let container = document.getElementById('pk-toast-container');
 if (container && modalHost) modalHost.appendChild(container);
-if (typeof S !== 'undefined' && S && typeof S.prepareBrowserOverlayGuard === 'function') S.prepareBrowserOverlayGuard();
+if (typeof S !== 'undefined' && S && typeof S.prepareBrowserOverlayGuard === 'function') {
+try { S.prepareBrowserOverlayGuard(); } catch (e) {}
+}
 const modalOptions = options && typeof options === 'object' ? options : {};
 const mobileType = ['dialog', 'large', 'sheet'].includes(modalOptions.mobileType) ? modalOptions.mobileType : 'dialog';
 const layoutScope = ['mobile', 'desktop'].includes(modalOptions.layoutScope) ? modalOptions.layoutScope : '';
@@ -19669,7 +20225,8 @@ m.style.setProperty('z-index', '2147483647', 'important');
 m.style.zIndex = (++modalZIndexCounter).toString();
 }
 
-if (document.querySelector('.pk-ov').classList.contains('pk-dark')) {
+const managerRoot = document.querySelector('.pk-ov');
+if (managerRoot && managerRoot.classList.contains('pk-dark')) {
 m.classList.add('pk-dark');
 }
 
@@ -19720,11 +20277,20 @@ btn.onmouseout = () => btn.style.setProperty('background', 'transparent', 'impor
 });
 
 (modalHost || document.body).appendChild(m);
-installModalAccessibility(m, modalOptions);
-if (typeof S !== 'undefined' && S && typeof S.registerBrowserOverlay === 'function') S.registerBrowserOverlay(m);
-if (document.getElementById('pk-toast-container')) ensurePkToastContainer();
+try { installModalAccessibility(m, modalOptions); } catch (e) {}
+if (typeof S !== 'undefined' && S && typeof S.registerBrowserOverlay === 'function') {
+try { S.registerBrowserOverlay(m); } catch (e) {}
+}
+if (document.getElementById('pk-toast-container')) {
+try { ensurePkToastContainer(); } catch (e) {}
+}
 
-m.querySelector('.pk-modal-close').addEventListener('click', () => m.remove());
+const defaultModalClose = m.querySelector('.pk-modal-close');
+if (defaultModalClose) defaultModalClose.addEventListener('click', () => {
+try { m.remove(); } catch (e) {
+try { m.parentNode?.removeChild(m); } catch (err) {}
+}
+});
 return m;
 }
 
@@ -19889,8 +20455,8 @@ const m = showModal(`
 <h3 style="border:none; margin-bottom:16px; font-size:18px; font-weight:700; color:var(--pk-fg);">${title}</h3>
 <div style="margin-bottom:30px; line-height:1.6; font-size:14px; color:var(--pk-fg);">${esc(msg).replace(/\n/g, '<br>')}</div>
 <div class="pk-modal-act" style="display:flex; justify-content:flex-end; gap:12px; align-items:center;">
-<button class="pk-btn" id="cfm_no" style="height:40px; min-width:86px; padding:0 24px; border-radius:8px; font-weight:500; justify-content:center; background:transparent;">${L.btn_no}</button>
-<button class="pk-btn pri" id="cfm_yes" style="height:40px; min-width:86px; padding:0 24px; border-radius:8px; background:var(--pk-pri); color:#fff; font-weight:bold; justify-content:center;">${L.btn_yes}</button>
+<button class="pk-btn" id="cfm_no" style="height:40px; min-width:86px; padding:0 24px; border-radius:8px; font-weight:500; justify-content:center; background:transparent;">${esc(options.noText || L.btn_no)}</button>
+<button class="pk-btn pri" id="cfm_yes" style="height:40px; min-width:86px; padding:0 24px; border-radius:8px; background:var(--pk-pri); color:#fff; font-weight:bold; justify-content:center;">${esc(options.yesText || L.btn_yes)}</button>
 </div>
 `, options);
 const modalBox = m.querySelector('.pk-modal');
@@ -20197,6 +20763,9 @@ t.classList.add('pk-show');
 
 schedulePkToastHide(t, displayTime);
 }
+
+window.__pkShowToast = showToast;
+window.__pkFormatI18nCount = formatI18nCount;
 
 const TURBO_ACTIVATION_ID_KEY = 'pk_turbo_activation_id';
 const TURBO_NOTICE_ID_KEY = 'pk_turbo_notice_id';
@@ -32832,6 +33401,23 @@ let currentSavePath = options.currentPath || null;
 const sourceModal = options.sourceModal || null;
 const hideSourceModal = !!sourceModal && options.hideSourceModal !== false;
 const sourceDisplay = options.sourceDisplay || 'flex';
+const singleMagnet = finalLinks.length === 1 && /^magnet:\?/i.test(finalLinks[0]);
+if (singleMagnet && options.skipMagnetSelection !== true && typeof window.__pkSubmitMagnetWithPreview === 'function') {
+if (sourceModal && hideSourceModal) sourceModal.style.display = 'none';
+const result = await window.__pkSubmitMagnetWithPreview(finalLinks[0], {
+targetId: saveToId,
+targetName: saveToName,
+currentPath: currentSavePath,
+logPrefix: options.logPrefix,
+successMessage: options.successMessage
+});
+if (result && result.cancelled) {
+if (sourceModal && hideSourceModal && document.contains(sourceModal)) sourceModal.style.display = sourceDisplay;
+} else if (sourceModal && options.removeSourceModal && document.contains(sourceModal)) {
+sourceModal.remove();
+}
+return result;
+}
 if (sourceModal && hideSourceModal) sourceModal.style.display = 'none';
 const videoPlatformRegex = /(?:youtube\.com|youtu\.be|twitter\.com|x\.com|tiktok\.com|douyin\.com|facebook\.com|fb\.watch|instagram\.com|t\.me|bilibili\.com)/i;
 let snapshotLinks = [];
@@ -32918,6 +33504,8 @@ refreshCloudTaskView(saveToId, { reason: processQueue.length > 1 ? 'batch_add' :
 }
 return { successCount, failCount, cancelled: false };
 }
+
+window.__pkSubmitCloudLinks = submitCloudLinks;
 
 function updateTextPreviewModalControls(modal) {
 if (!modal || !document.contains(modal)) return;
@@ -35362,6 +35950,40 @@ addAction(key, nextValue, 'merge', strategy, { beforeCount, afterCount });
 return preview;
 }
 
+function makeConfigCloudCloudPriorityPreview(preview) {
+const conflicts = Array.isArray(preview && preview.conflicts) ? preview.conflicts : [];
+if (!conflicts.length) return preview;
+const incoming = normalizeConfigCloudIncomingConfigs(preview.payload && preview.payload.configs || {});
+const actions = Array.isArray(preview.actions) ? preview.actions.slice() : [];
+const actionKeys = new Set(actions.map(action => action && action.key).filter(Boolean));
+const resolvedKeys = new Set();
+conflicts.forEach(conflict => {
+const key = String(conflict && conflict.key || '');
+if (!key || actionKeys.has(key) || !Object.prototype.hasOwnProperty.call(incoming.allowed, key)) return;
+const value = normalizeConfigValue(key, incoming.allowed[key], 'cloudMerge');
+if (value === undefined || (typeof value === 'number' && !Number.isFinite(value))) return;
+actions.push({ key, value, mode: 'apply', reason: 'cloudPriority', detail: {} });
+actionKeys.add(key);
+resolvedKeys.add(key);
+});
+if (!resolvedKeys.size) return preview;
+const stats = preview.stats || {};
+return {
+...preview,
+actions,
+skipped: Array.isArray(preview.skipped) ? preview.skipped.filter(item => !resolvedKeys.has(item && item.key)) : preview.skipped,
+conflicts: conflicts.filter(item => !resolvedKeys.has(item && item.key)),
+stats: {
+...stats,
+applyCount: Number(stats.applyCount || 0) + resolvedKeys.size,
+skippedCount: Math.max(0, Number(stats.skippedCount || 0) - resolvedKeys.size),
+conflictCount: Math.max(0, Number(stats.conflictCount || 0) - resolvedKeys.size)
+},
+originalConflictCount: Number(stats.conflictCount || 0),
+conflictResolution: 'cloud'
+};
+}
+
 function mergeConfigCloudMapLocalFirst(key, localValue, cloudValue) {
 const local = parseConfigCloudJsonValue(localValue, {});
 const remote = parseConfigCloudJsonValue(cloudValue, {});
@@ -35525,6 +36147,7 @@ skippedCount: stats.skippedCount || 0,
 discardedStrictCount: stats.discardedStrictCount || 0,
 invalidCount: (preview && Array.isArray(preview.invalid) ? preview.invalid.length : 0),
 conflictCount: stats.conflictCount || 0,
+conflictResolution: preview && preview.conflictResolution || '',
 clippedCount: stats.clippedCount || 0,
 unchangedCount: stats.unchangedCount || 0,
 skippedManifestCount: preview && Array.isArray(preview.skippedManifests) ? preview.skippedManifests.length : 0,
@@ -35564,7 +36187,7 @@ function formatConfigCloudPullConfirmMessage(preview, isConflict = false) {
 const L = getStrings();
 const stats = preview.stats || {};
 const updateCount = Number(stats.applyCount || 0) + Number(stats.mergeCount || 0);
-const conflictCount = Number(stats.conflictCount || 0);
+const conflictCount = Number(preview.originalConflictCount ?? stats.conflictCount ?? 0);
 const lines = [formatI18nCount(L.msg_config_cloud_pull_apply_summary || '', { n: String(updateCount) })];
 if (conflictCount > 0 || isConflict) lines.push(formatI18nCount(L.msg_config_cloud_pull_conflict_summary || '', { n: String(conflictCount) }));
 return lines.join('\n');
@@ -35636,11 +36259,28 @@ async function pullConfigCloudFromOfficial(options = {}) {
 try {
 const headers = await getConfigCloudAuthorizedHeaders('config-cloud-pull-missing-token');
 const remotePackage = await readConfigCloudRemotePackage(headers);
-const preview = makeConfigCloudMergePreview(remotePackage);
+let preview = makeConfigCloudMergePreview(remotePackage);
+if (options.cloudPriority !== false && Number(preview.stats && preview.stats.conflictCount || 0) > 0) preview = makeConfigCloudCloudPriorityPreview(preview);
 const stats = preview.stats || {};
 const updateCount = Number(stats.applyCount || 0) + Number(stats.mergeCount || 0);
-if (updateCount <= 0) {
 const conflictCount = Number(stats.conflictCount || 0);
+if (options.cloudPriority !== false && conflictCount > 0) {
+writeConfigCloudSyncReport(makeConfigCloudPullReport(preview, 'preview', {
+stage: 'cloud_priority_conflict',
+writtenLocal: false,
+keepLocalConfig: true
+}));
+return { ok: false, applied: false, conflict: true, errorCode: 'CONFIG_CLOUD_PULL_CONFLICT' };
+}
+if (options.rejectConflicts === true && conflictCount > 0) {
+writeConfigCloudSyncReport(makeConfigCloudPullReport(preview, 'preview', {
+stage: 'auto_enable_conflict',
+writtenLocal: false,
+keepLocalConfig: true
+}));
+return { ok: false, applied: false, conflict: true, errorCode: 'CONFIG_CLOUD_PULL_CONFLICT' };
+}
+if (updateCount <= 0) {
 if (conflictCount <= 0) {
 const localHash = await hashConfigCloudLocalDefaultConfigs();
 const conflictHash = await hashConfigCloudLocalConflictConfigs();
@@ -35665,15 +36305,15 @@ writtenLocal: false,
 keepLocalConfig: true
 }));
 }
-showToast(getStrings().msg_config_cloud_pull_no_write, 'warning');
-return { ok: true, applied: false };
+if (!options.suppressToast) showToast(getStrings().msg_config_cloud_pull_no_write, 'warning');
+return { ok: conflictCount <= 0, applied: false, conflict: conflictCount > 0, errorCode: conflictCount > 0 ? 'CONFIG_CLOUD_PULL_CONFLICT' : '' };
 }
 writeConfigCloudSyncReport(makeConfigCloudPullReport(preview, 'preview', {
 stage: 'preview',
 writtenLocal: false,
 keepLocalConfig: true
 }));
-const confirmed = await showConfirm(formatConfigCloudPullConfirmMessage(preview, !!options.isConflict), getStrings().lbl_config_cloud_sync);
+const confirmed = options.skipConfirm === true || await showConfirm(formatConfigCloudPullConfirmMessage(preview, !!options.isConflict), getStrings().lbl_config_cloud_sync);
 if (!confirmed) {
 writeConfigCloudSyncReport(makeConfigCloudPullReport(preview, 'cancel', {
 stage: 'confirm',
@@ -35682,20 +36322,20 @@ writtenLocal: false,
 keepLocalConfig: true,
 cancelledAt: new Date().toISOString()
 }));
-showToast(getStrings().msg_config_cloud_pull_cancelled, 'warning');
+if (!options.suppressToast) showToast(getStrings().msg_config_cloud_pull_cancelled, 'warning');
 return { ok: false, applied: false };
 }
 const ok = await applyConfigCloudMergePreview(preview);
-showToast(ok ? getStrings().msg_config_cloud_pull_success : getStrings().msg_config_cloud_pull_failed, ok ? 'success' : 'error');
-return { ok, applied: ok };
+if (!options.suppressToast) showToast(ok ? getStrings().msg_config_cloud_pull_success : getStrings().msg_config_cloud_pull_failed, ok ? 'success' : 'error');
+return { ok, applied: ok, conflict: false };
 } catch (e) {
 console.warn('[Config Cloud] Pull failed:', e);
 writeConfigCloudPullFailureReport(e, {
 skippedManifestCount: Array.isArray(e && e.skippedManifests) ? e.skippedManifests.length : 0,
 skippedManifests: Array.isArray(e && e.skippedManifests) ? e.skippedManifests.slice(0, 20) : []
 });
-showToast(getStrings().msg_config_cloud_pull_failed, 'error');
-return { ok: false, applied: false };
+if (!options.suppressToast) showToast(getStrings().msg_config_cloud_pull_failed, 'error');
+return { ok: false, applied: false, errorCode: e && e.message ? e.message : String(e || '') };
 }
 }
 
@@ -36417,6 +37057,8 @@ const cloudLocked = !!busy || !!S.localCleanBusy;
 root.querySelectorAll('.pk-cfg-cloud-actions .pk-btn').forEach(btn => {
 btn.disabled = cloudLocked;
 });
+const autoSyncInput = root.querySelector('#set_cfg_cloud_auto_sync');
+if (autoSyncInput) autoSyncInput.disabled = cloudLocked;
 const cleanBtn = root.querySelector('#btn_cfg_clean');
 if (cleanBtn) cleanBtn.disabled = !!busy || !!S.localCleanBusy;
 }
@@ -38322,6 +38964,7 @@ btnInv.onmouseenter = () => btnInv.style.color = 'var(--pk-pri)';
 btnInv.onmouseleave = () => btnInv.style.color = 'var(--pk-fg)';
 }
 }
+
 } else if (!useCompactSortHeader) {
 const isAnalyzeRoot = S.analyzeMode && cur.id === 'analyze_root';
 const hasDurationCol = !!hd.querySelector('[data-k="duration"]');
@@ -49864,14 +50507,30 @@ search: () => { if (btnSearch) btnSearch.click(); }
 });
 const setVideoTopActionAvailable = (button, action, available) => {
 if (!button) return;
+button._pkActionAvailable = !!available;
 const isMobileViewer = isMobileManagerEnvironment();
-const keepSearchInMoreMenu = action === 'search' && isMobileViewer;
+const isLandscapeFullscreen = isMobileViewer && document.fullscreenElement === box && box.dataset.pkVideoOrientation === 'landscape';
+const keepSearchInMoreMenu = action === 'search' && isMobileViewer && !isLandscapeFullscreen;
 const isAvailable = !!available;
 button.dataset.pkAvailable = isAvailable && !keepSearchInMoreMenu ? 'true' : 'false';
 button.disabled = !isAvailable;
 button.classList.toggle('pk-media-action-disabled', !isAvailable);
 button.setAttribute('aria-disabled', isAvailable ? 'false' : 'true');
 setVisualMediaMoreItemAvailable(videoMoreWrap, action, isAvailable);
+};
+const syncVideoTopActionLayout = () => {
+const isMobileViewer = isMobileManagerEnvironment();
+const isLandscapeFullscreen = isMobileViewer && document.fullscreenElement === box && box.dataset.pkVideoOrientation === 'landscape';
+[['pip', btnPipTop], ['search', btnSearch]].forEach(([action, button]) => {
+if (!button) return;
+const isAvailable = button._pkActionAvailable === true;
+const keepSearchInMoreMenu = action === 'search' && isMobileViewer && !isLandscapeFullscreen;
+button.dataset.pkAvailable = isAvailable && !keepSearchInMoreMenu ? 'true' : 'false';
+button.disabled = !isAvailable;
+button.classList.toggle('pk-media-action-disabled', !isAvailable);
+button.setAttribute('aria-disabled', isAvailable ? 'false' : 'true');
+setVisualMediaMoreItemAvailable(videoMoreWrap, action, isAvailable);
+});
 };
 setVideoTopActionAvailable(btnPipTop, 'pip', false);
 setVideoTopActionAvailable(btnSearch, 'search', false);
@@ -51974,6 +52633,7 @@ const syncMobileFullscreenVideoOrientation = () => {
 const isNativeFullscreen = document.fullscreenElement === box;
 if (!shouldManageMobileVideoOrientation || !isNativeFullscreen || isPlayerDestroyed) {
 releaseMobileFullscreenVideoOrientation();
+if (typeof syncVideoTopActionLayout === 'function') syncVideoTopActionLayout();
 return;
 }
 
@@ -51987,6 +52647,7 @@ height = Number(posterImg.naturalHeight);
 }
 }
 if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+if (typeof syncVideoTopActionLayout === 'function') syncVideoTopActionLayout();
 return;
 }
 
@@ -51994,11 +52655,13 @@ const desiredOrientation = getMediaOrientationByDimensions(width, height);
 if (!desiredOrientation) {
 releaseMobileFullscreenVideoOrientation();
 box.dataset.pkVideoOrientation = 'square';
+if (typeof syncVideoTopActionLayout === 'function') syncVideoTopActionLayout();
 return;
 }
 
 box.dataset.pkVideoOrientation = desiredOrientation;
 requestMobileFullscreenVideoOrientation(desiredOrientation);
+if (typeof syncVideoTopActionLayout === 'function') syncVideoTopActionLayout();
 };
 
 const syncNativeFullscreenUI = () => {
@@ -52013,6 +52676,7 @@ btnWebFull.style.display = isNativeFullscreen ? 'none' : '';
 }
 
 syncMobileFullscreenVideoOrientation();
+syncVideoTopActionLayout();
 };
 
 btnFull.onclick = async (e) => {
@@ -68428,7 +69092,8 @@ date: String(Date.now())
 }
 
 function createMagnetArchiveCheckProgress(text) {
-return FloatBarManager && typeof FloatBarManager.create === 'function' ? FloatBarManager.create(text) : null;
+const floatBarManager = window.__pkFloatBarManager;
+return floatBarManager && typeof floatBarManager.create === 'function' ? floatBarManager.create(text) : null;
 }
 
 function updateMagnetArchiveCheckProgress(task, done, total, text) {
@@ -69020,6 +69685,7 @@ state.ignored.set(signature, Date.now() + CONF.clipboardMagnetIgnoreTTL);
 };
 
 const getDefaultMagnetSaveTarget = () => {
+const L = getStrings();
 const curFolder = S.path[S.path.length - 1] || { id: '', name: L.lbl_default_folder };
 const curId = curFolder.id || '';
 const isVirtual = curId.startsWith('virtual_') || curId.includes('_root') || curId === 'analyze_root';
@@ -69027,7 +69693,11 @@ const isHomeSubDir = !S.trashMode && !S.shareMode && !S.offlineMode && !S.starre
 return { id: isHomeSubDir ? curId : '', name: isHomeSubDir ? (curFolder.name || L.lbl_default_folder) : L.lbl_default_folder, path: isHomeSubDir ? S.path.filter(p => !p.id.startsWith('virtual_')) : null };
 };
 
-const createMagnetCloudTasks = (links, targetId) => submitCloudLinks(links, { targetId: targetId || '', skipSnapshot: true, logPrefix: 'Magnet Task Create Failed' });
+const createMagnetCloudTasks = (links, targetId) => {
+const submit = window.__pkSubmitCloudLinks;
+if (typeof submit !== 'function') return Promise.reject(new Error('Cloud task submit helper unavailable'));
+return submit(links, { targetId: targetId || '', skipSnapshot: true, skipMagnetSelection: true, logPrefix: 'Magnet Task Create Failed' });
+};
 
 const openCloudTaskModalWithClipboardMagnets = (links) => {
 const list = (Array.isArray(links) ? links : []).map(v => String(v || '').trim()).filter(v => /^magnet:\?/i.test(v));
@@ -69055,16 +69725,18 @@ window.__pkSubmitMagnetWithPreview = async (link, options = {}) => {
 const L = getStrings();
 const cleanLink = String(link || '').trim();
 if (!cleanLink) return { successCount: 0, failCount: 0, cancelled: false };
+try {
 const preview = await requestMagnetPreview(cleanLink);
-const result = await showMagnetPreviewModal([cleanLink], preview);
+const result = await showMagnetPreviewModal([cleanLink], preview, options);
 if (!result || !result.confirm) return { successCount: 0, failCount: 0, cancelled: true };
-return submitCloudLinks([cleanLink], {
-targetId: result.targetId || '',
-targetName: result.targetName || L.lbl_default_folder,
-skipSnapshot: true,
-logPrefix: options.logPrefix || 'Magnet Task Create Failed',
-successMessage: options.successMessage || L.msg_cloud_task_success
-});
+return await executeMagnetPreviewResult(cleanLink, result, options);
+} catch (e) {
+console.error('Magnet preview submit failed:', e);
+const message = typeof formatCloudErrorMessage === 'function' ? formatCloudErrorMessage(e) : String(e && e.message || L.str_action_failed || 'Magnet task failed');
+const notify = window.__pkShowToast;
+if (typeof notify === 'function') notify(message, 'error');
+return { successCount: 0, failCount: 1, cancelled: false };
+}
 };
 
 const extractMagnetLinks = (rawText) => {
@@ -69178,11 +69850,21 @@ ontimeout: () => finish({ ok: false, code: 'timeout' })
 });
 };
 
-const showMagnetPreviewModal = (links, preview) => {
+const showMagnetPreviewModal = (links, preview, options = {}) => {
 return new Promise((resolve) => {
 const TXT = getClipText();
+const L = getStrings();
 const data = preview && preview.ok && preview.data ? preview.data : {};
+const defaultSkipRecordedResources = getBoolPref('pk_magnet_auto_filter_recorded', false) === true;
 let saveTarget = getDefaultMagnetSaveTarget();
+if (options.targetId !== undefined) saveTarget.id = options.targetId || '';
+if (options.targetName) saveTarget.name = options.targetName;
+if (options.currentPath) saveTarget.path = options.currentPath;
+let resourceResolution = null;
+let resourceStatus = 'loading';
+const selectedResourceIds = new Set();
+const expandedResourceIds = new Set();
+const resourceController = new AbortController();
 const toWhatslinkImageUrl = (value) => {
 let url = String(value || '').trim();
 if (!url) return '';
@@ -69270,20 +69952,36 @@ const warnHtml = failText ? `<div class="pk-magnet-warn">${esc(failText)}</div>`
 
 const m = showModal(`
 <div class="pk-magnet-preview-wrap">
+<div class="pk-magnet-tabs" role="tablist">
+    <button type="button" class="pk-magnet-tab act" id="pk_magnet_tab_preview" role="tab" aria-selected="true">${esc(TXT.tab_magnet_preview)}</button>
+    <button type="button" class="pk-magnet-tab" id="pk_magnet_tab_files" role="tab" aria-selected="false">${esc(TXT.tab_magnet_files)}</button>
+</div>
 <div class="pk-magnet-hero">${heroHtml}</div>
 <div class="pk-magnet-body">
     <div>
         <div class="pk-magnet-title">${esc(name)}</div>
         <div class="pk-magnet-desc">${esc(TXT.msg_magnet_preview_desc)}</div>
     </div>
-    ${warnHtml}
-    ${shotsHtml}
-    <div class="pk-magnet-meta">
-        <div class="pk-magnet-meta-item"><div class="pk-magnet-meta-label">${esc(TXT.lbl_magnet_count)}</div><div class="pk-magnet-meta-value">${esc(count)}</div></div>
-        <div class="pk-magnet-meta-item"><div class="pk-magnet-meta-label">${esc(TXT.lbl_magnet_size)}</div><div class="pk-magnet-meta-value">${esc(size)}</div></div>
-        <div class="pk-magnet-meta-item"><div class="pk-magnet-meta-label">${esc(TXT.lbl_magnet_type)}</div><div class="pk-magnet-meta-value">${esc(type)}</div></div>
+    <div class="pk-magnet-pane" id="pk_magnet_preview_pane" role="tabpanel">
+        ${warnHtml}
+        ${shotsHtml}
+        <div class="pk-magnet-meta">
+            <div class="pk-magnet-meta-item"><div class="pk-magnet-meta-label">${esc(TXT.lbl_magnet_count)}</div><div class="pk-magnet-meta-value">${esc(count)}</div></div>
+            <div class="pk-magnet-meta-item"><div class="pk-magnet-meta-label">${esc(TXT.lbl_magnet_size)}</div><div class="pk-magnet-meta-value">${esc(size)}</div></div>
+            <div class="pk-magnet-meta-item"><div class="pk-magnet-meta-label">${esc(TXT.lbl_magnet_type)}</div><div class="pk-magnet-meta-value">${esc(type)}</div></div>
+        </div>
+        <div class="pk-magnet-hash">${esc(TXT.lbl_magnet_hash)}：${esc(hashText)}</div>
+        <div class="pk-magnet-source">${esc(TXT.lbl_magnet_preview_source)} <a href="https://whatslink.info/" target="_blank" rel="noopener noreferrer">whatslink.info</a></div>
     </div>
-    <div class="pk-magnet-hash">${esc(TXT.lbl_magnet_hash)}：${esc(hashText)}</div>
+    <div class="pk-magnet-pane pk-magnet-file-pane" id="pk_magnet_files_pane" role="tabpanel" hidden>
+        <div class="pk-magnet-file-tools" id="pk_magnet_file_tools" hidden>
+            <input class="pk-magnet-file-search" id="pk_magnet_file_search" type="search" placeholder="${esc(TXT.ph_magnet_file_search)}" autocomplete="off">
+            <button type="button" class="pk-magnet-file-toggle" id="pk_magnet_toggle_all">${esc(TXT.btn_deselect_all)}</button>
+            <label class="pk-magnet-file-skip"><input type="checkbox" id="pk_magnet_skip_recorded" ${defaultSkipRecordedResources ? 'checked' : ''}><span>${esc(TXT.label_magnet_skip_recorded)}</span></label>
+        </div>
+        <div class="pk-magnet-file-status" id="pk_magnet_file_status"></div>
+        <div class="pk-magnet-file-list pk-scroll" id="pk_magnet_file_list"><div class="pk-magnet-file-state">${esc(TXT.msg_magnet_files_loading)}</div></div>
+    </div>
     <div class="pk-magnet-save-row">
         <span class="pk-magnet-save-label">${esc(L.lbl_save_to)}</span>
         <span class="pk-magnet-save-icon">${getOfficialFolderFallbackIconHtml(16)}</span>
@@ -69291,14 +69989,67 @@ const m = showModal(`
         ${L.tip_cloud_save_path ? `<span class="pk-magnet-save-help" role="button" tabindex="0" aria-label="${esc(L.tip_cloud_save_path)}" data-pk-tip="${esc(L.tip_cloud_save_path)}">${CONF.icons.help}</span>` : ''}
         <span class="pk-magnet-save-change" id="pk_magnet_change_dir">${esc(L.btn_modify)}</span>
     </div>
-    <div class="pk-magnet-source">${esc(TXT.lbl_magnet_preview_source)} <a href="https://whatslink.info/" target="_blank" rel="noopener noreferrer">whatslink.info</a></div>
     <div class="pk-magnet-actions">
-        <button class="pk-btn" id="pk_magnet_cancel" style="height:38px; min-width:86px; border-radius:9px;">${esc(TXT.btn_cancel)}</button>
-        <button class="pk-btn pri" id="pk_magnet_continue" style="height:38px; min-width:128px; border-radius:9px; background:var(--pk-pri); border:none; color:#fff; font-weight:800;">${esc(TXT.btn_magnet_continue)}</button>
+        <button type="button" class="pk-btn" id="pk_magnet_cancel" style="height:38px; min-width:86px; border-radius:9px;">${esc(TXT.btn_cancel)}</button>
+        <button type="button" class="pk-btn pri" id="pk_magnet_continue" style="height:38px; min-width:128px; border-radius:9px; background:var(--pk-pri); border:none; color:#fff; font-weight:800;">${esc(TXT.btn_magnet_save_all)}</button>
     </div>
 </div>
 </div>
 `, { className: 'pk-magnet-preview-modal' });
+
+const continueBtn = m.querySelector('#pk_magnet_continue');
+let activeMagnetPane = 'preview';
+let resourceRenderRaf = 0;
+let modalSettled = false;
+const removeMagnetModal = () => {
+try {
+if (m.isConnected) m.remove();
+} catch (e) {}
+if (m.isConnected) {
+try { m.parentNode?.removeChild(m); } catch (e) {}
+}
+};
+const settleMagnetModal = result => {
+if (modalSettled) return;
+modalSettled = true;
+try { resourceController.abort(); } catch (e) {}
+if (resourceRenderRaf) {
+cancelAnimationFrame(resourceRenderRaf);
+resourceRenderRaf = 0;
+}
+removeMagnetModal();
+resolve(result);
+};
+const close = event => {
+if (event) {
+event.preventDefault();
+event.stopPropagation();
+}
+settleMagnetModal({ confirm: false });
+};
+const modalCloseBtn = m.querySelector('.pk-modal-close');
+if (modalCloseBtn) modalCloseBtn.onclick = close;
+const cancelBtn = m.querySelector('#pk_magnet_cancel');
+if (cancelBtn) cancelBtn.onclick = close;
+if (continueBtn) continueBtn.onclick = event => {
+if (event) {
+event.preventDefault();
+event.stopPropagation();
+}
+if (continueBtn.disabled) {
+if (resourceResolution && resourceResolution.indexed && selectedResourceIds.size === 0) showToast(TXT.msg_magnet_no_selection, 'warning');
+return;
+}
+if (skipRecordedResources && resourceStatus === 'loading') return;
+settleMagnetModal({
+confirm: true,
+targetId: saveTarget.id,
+targetName: saveTarget.name,
+resolution: resourceResolution,
+skipRecordedResources,
+selectedIds: resourceResolution && resourceResolution.indexed ? Array.from(selectedResourceIds) : []
+});
+};
 
 const box = m.querySelector('.pk-modal');
 if (box) {
@@ -69417,6 +70168,417 @@ ensureHeroShot();
 const saveNameEl = m.querySelector('#pk_magnet_save_name');
 const changeDirEl = m.querySelector('#pk_magnet_change_dir');
 const saveHelpEl = m.querySelector('.pk-magnet-save-help');
+const previewTab = m.querySelector('#pk_magnet_tab_preview');
+const filesTab = m.querySelector('#pk_magnet_tab_files');
+const previewPane = m.querySelector('#pk_magnet_preview_pane');
+const filesPane = m.querySelector('#pk_magnet_files_pane');
+const fileTools = m.querySelector('#pk_magnet_file_tools');
+const fileSearch = m.querySelector('#pk_magnet_file_search');
+const fileToggleAll = m.querySelector('#pk_magnet_toggle_all');
+const fileSkipRecorded = m.querySelector('#pk_magnet_skip_recorded');
+const fileStatus = m.querySelector('#pk_magnet_file_status');
+const fileList = m.querySelector('#pk_magnet_file_list');
+let resourceSearchText = '';
+let resourceRenderLimit = 160;
+let resourceHasMore = false;
+let selectedResourceSize = 0;
+let selectedResourceReadyCount = 0;
+let skipRecordedResources = defaultSkipRecordedResources;
+if (continueBtn && skipRecordedResources) continueBtn.disabled = true;
+
+const indexResourceNode = (node, ancestors = []) => {
+if (!node) return 0;
+if (!node.isDir) {
+node._fileCount = 1;
+node._selectedCount = 0;
+node._ancestors = ancestors;
+return 1;
+}
+const nextAncestors = ancestors.concat(node);
+node._fileCount = node.children.reduce((sum, child) => sum + indexResourceNode(child, nextAncestors), 0);
+node._selectedCount = 0;
+return node._fileCount;
+};
+
+const refreshResourceSelectionCounts = () => {
+if (!resourceResolution || !resourceResolution.indexed) return;
+const walk = node => {
+if (!node.isDir) return selectedResourceIds.has(node.uid) ? 1 : 0;
+const count = node.children.reduce((sum, child) => sum + walk(child), 0);
+node._selectedCount = count;
+return count;
+};
+resourceResolution.roots.forEach(walk);
+};
+
+const setResourceFileSelected = (file, selected, updateAncestors = true) => {
+if (!file || file.isDir) return false;
+if (selected && skipRecordedResources && file._recordedSkip) return false;
+const wasSelected = selectedResourceIds.has(file.uid);
+if (wasSelected === selected) return false;
+if (selected) selectedResourceIds.add(file.uid);
+else selectedResourceIds.delete(file.uid);
+const delta = selected ? 1 : -1;
+selectedResourceSize = Math.max(0, selectedResourceSize + delta * Number(file.size || 0));
+if (file.gcid) selectedResourceReadyCount = Math.max(0, selectedResourceReadyCount + delta);
+if (updateAncestors) {
+(file._ancestors || []).forEach(parent => { parent._selectedCount = Math.max(0, Number(parent._selectedCount || 0) + delta); });
+}
+return true;
+};
+
+const setResourceNodeSelected = (node, selected) => {
+if (!node) return;
+if (node.isDir) {
+const walk = current => {
+if (current.isDir) current.children.forEach(walk);
+else setResourceFileSelected(current, selected, false);
+};
+walk(node);
+refreshResourceSelectionCounts();
+return;
+}
+setResourceFileSelected(node, selected, true);
+};
+
+const setAllResourceFilesSelected = selected => {
+selectedResourceIds.clear();
+selectedResourceSize = 0;
+selectedResourceReadyCount = 0;
+if (selected && resourceResolution && resourceResolution.indexed) {
+resourceResolution.files.forEach(file => {
+if (skipRecordedResources && file._recordedSkip) return;
+selectedResourceIds.add(file.uid);
+selectedResourceSize += Number(file.size || 0);
+if (file.gcid) selectedResourceReadyCount++;
+});
+}
+refreshResourceSelectionCounts();
+};
+
+const refreshRecordedResourceFilter = () => {
+if (!resourceResolution || !resourceResolution.indexed) return;
+applyMagnetRecordedNameFilter(resourceResolution, getMagnetRecordedNameIndex());
+if (skipRecordedResources) {
+resourceResolution.files.forEach(file => {
+if (file._recordedSkip) selectedResourceIds.delete(file.uid);
+});
+}
+selectedResourceSize = 0;
+selectedResourceReadyCount = 0;
+resourceResolution.files.forEach(file => {
+if (!selectedResourceIds.has(file.uid)) return;
+selectedResourceSize += Number(file.size || 0);
+if (file.gcid) selectedResourceReadyCount++;
+});
+refreshResourceSelectionCounts();
+};
+const updateMagnetSelectionState = () => {
+if (!continueBtn) return;
+if (resourceStatus === 'loading') {
+continueBtn.disabled = activeMagnetPane === 'files' || skipRecordedResources;
+continueBtn.textContent = TXT.btn_magnet_save_all;
+return;
+}
+if (!resourceResolution || !resourceResolution.indexed) {
+continueBtn.disabled = skipRecordedResources;
+continueBtn.textContent = TXT.btn_magnet_save_all;
+if (fileToggleAll) fileToggleAll.disabled = true;
+return;
+}
+const selectedCount = selectedResourceIds.size;
+const selectableFiles = resourceResolution.files.filter(file => !skipRecordedResources || !file._recordedSkip);
+const allSelected = selectedCount === resourceResolution.files.length;
+const allSelectableSelected = selectableFiles.length > 0 && selectedCount === selectableFiles.length;
+const unavailableCount = selectedCount - selectedResourceReadyCount;
+const query = resourceSearchText.trim().toLowerCase();
+const visibleSelection = query
+? resourceResolution.files.reduce((stats, file) => {
+const haystack = `${file.name} ${file.relativePath}`.toLowerCase();
+if (!haystack.includes(query) || !selectedResourceIds.has(file.uid)) return stats;
+stats.count += 1;
+stats.size += Number(file.size || 0);
+if (file.gcid) stats.ready += 1;
+return stats;
+}, { count: 0, size: 0, ready: 0 })
+: { count: selectedCount, size: selectedResourceSize, ready: selectedResourceReadyCount };
+continueBtn.disabled = selectedCount === 0 || (!allSelected && selectedResourceReadyCount === 0);
+continueBtn.textContent = allSelected
+? TXT.btn_magnet_save_all
+: (unavailableCount > 0 ? TXT.btn_magnet_save_available : TXT.btn_magnet_save_selected);
+if (fileToggleAll) {
+fileToggleAll.disabled = selectableFiles.length === 0;
+fileToggleAll.textContent = allSelectableSelected ? TXT.btn_deselect_all : TXT.btn_select_all;
+}
+if (fileStatus) {
+const summary = TXT.msg_magnet_selected_summary.replace('{n}', String(visibleSelection.count)).replace('{s}', fmtSize(visibleSelection.size));
+const visibleUnavailableCount = Math.max(0, visibleSelection.count - visibleSelection.ready);
+const warning = (query ? visibleUnavailableCount > 0 : unavailableCount > 0) && !allSelected
+? TXT.msg_magnet_unindexed_selected.replace('{n}', String(query ? visibleUnavailableCount : unavailableCount))
+: '';
+const recordedStats = skipRecordedResources && resourceResolution._recordedSkipStats ? resourceResolution._recordedSkipStats : { skippedFileCount: 0, fileCount: 0, folderCount: 0 };
+const recordedSummary = skipRecordedResources && recordedStats.skippedFileCount > 0 ? TXT.msg_magnet_recorded_skip_summary.replace('{n}', String(recordedStats.skippedFileCount)).replace('{f}', String(recordedStats.fileCount)).replace('{d}', String(recordedStats.folderCount)) : '';
+fileStatus.innerHTML = `<span>${esc(summary)}</span>${warning ? `<span class="pk-magnet-file-warning">${esc(warning)}</span>` : ''}${recordedSummary ? `<span class="pk-magnet-file-recorded-summary">${esc(recordedSummary)}</span>` : ''}`;
+}
+};
+
+const getMagnetResourceSearchMatch = (node, query) => {
+const q = String(query || '').trim().toLowerCase();
+if (!q || !node) return { matched: false, name: false, path: false };
+const name = String(node.name || '');
+const path = String(node.relativePath || '');
+const nameMatch = name.toLowerCase().includes(q);
+const pathMatch = path.toLowerCase().includes(q);
+return { matched: nameMatch || pathMatch, name: nameMatch, path: pathMatch };
+};
+
+const renderMagnetSearchText = (text, query, capacity) => {
+const raw = String(text || '');
+const q = String(query || '').trim();
+if (!q) return esc(raw);
+const lowerRaw = raw.toLowerCase();
+const lowerQuery = q.toLowerCase();
+const matchStart = lowerRaw.indexOf(lowerQuery);
+if (matchStart === -1) return esc(raw);
+const matchEnd = matchStart + q.length;
+const cap = Math.max(q.length + 8, Math.floor(Number(capacity) || 32));
+let start = 0;
+let end = raw.length;
+if (raw.length > cap) {
+const beforeMatch = Math.max(0, Math.floor((cap - q.length) * 0.35));
+start = Math.max(0, matchStart - beforeMatch);
+end = Math.min(raw.length, start + cap);
+if (end < matchEnd) {
+end = matchEnd;
+start = Math.max(0, end - cap);
+}
+}
+const prefix = start > 0 ? '...' : '';
+const suffix = end < raw.length ? '...' : '';
+const slice = raw.substring(start, end);
+const sliceLower = slice.toLowerCase();
+let cursor = 0;
+let html = '';
+let index = sliceLower.indexOf(lowerQuery);
+while (index !== -1) {
+html += esc(slice.substring(cursor, index));
+html += `<b style="color:var(--pk-match-fg); background:var(--pk-match-bg); border-radius:2px; padding:0 2px;">${esc(slice.substring(index, index + q.length))}</b>`;
+cursor = index + q.length;
+index = sliceLower.indexOf(lowerQuery, cursor);
+}
+html += esc(slice.substring(cursor));
+return prefix + html + suffix;
+};
+
+const getMagnetSearchNameCapacity = () => {
+const width = fileList && fileList.clientWidth ? fileList.clientWidth : (isMobileManagerEnvironment() ? 360 : 640);
+const reserved = isMobileManagerEnvironment() ? 126 : 164;
+return Math.max(16, Math.floor(Math.max(120, width - reserved) / 7));
+};
+
+const getVisibleResourceNodes = (limit = resourceRenderLimit) => {
+if (!resourceResolution || !resourceResolution.indexed) return { nodes: [], hasMore: false };
+const cap = Math.max(1, Number(limit) || 160);
+const query = resourceSearchText.trim().toLowerCase();
+const visible = [];
+if (query) {
+const walkSearch = node => {
+const match = getMagnetResourceSearchMatch(node, query);
+if (match.matched) visible.push({ node, depth: 0, searchResult: true, searchMatch: match });
+if (visible.length > cap) return false;
+if (node.isDir) {
+for (const child of node.children) {
+if (!walkSearch(child)) return false;
+}
+}
+return true;
+};
+for (const root of resourceResolution.roots) {
+if (!walkSearch(root)) break;
+}
+return { nodes: visible.slice(0, cap), hasMore: visible.length > cap };
+}
+const walk = (node, depth) => {
+visible.push({ node, depth, searchResult: false });
+if (visible.length > cap) return false;
+if (node.isDir && expandedResourceIds.has(node.uid)) {
+for (const child of node.children) {
+if (!walk(child, depth + 1)) return false;
+}
+}
+return true;
+};
+for (const root of resourceResolution.roots) {
+if (!walk(root, 0)) break;
+}
+return { nodes: visible.slice(0, cap), hasMore: visible.length > cap };
+};
+
+const renderMagnetResourceList = () => {
+if (!fileList) return;
+if (resourceStatus === 'loading') {
+fileList.innerHTML = `<div class="pk-magnet-file-state">${esc(TXT.msg_magnet_files_loading)}</div>`;
+updateMagnetSelectionState();
+return;
+}
+if (!resourceResolution || !resourceResolution.indexed) {
+fileList.innerHTML = `<div class="pk-magnet-file-state">${esc(TXT.msg_magnet_files_unavailable)}</div>`;
+if (fileTools) fileTools.hidden = true;
+if (fileStatus) fileStatus.textContent = '';
+updateMagnetSelectionState();
+return;
+}
+if (fileTools) fileTools.hidden = false;
+const previousScrollTop = fileList.scrollTop;
+const visibleState = getVisibleResourceNodes();
+const shown = visibleState.nodes;
+resourceHasMore = visibleState.hasMore;
+if (!shown.length) {
+fileList.innerHTML = `<div class="pk-magnet-file-state">${esc(TXT.str_no_files || TXT.msg_magnet_files_unavailable)}</div>`;
+updateMagnetSelectionState();
+return;
+}
+const fragment = document.createDocumentFragment();
+const searchQuery = resourceSearchText.trim();
+const nameCapacity = getMagnetSearchNameCapacity();
+shown.forEach(entry => {
+const node = entry.node;
+const fileCount = node.isDir ? Number(node._fileCount || 0) : 1;
+const recordedSkipCount = node.isDir ? Number(node._recordedSkipFileCount || 0) : (node._recordedSkip ? 1 : 0);
+const selectableFileCount = skipRecordedResources ? Math.max(0, fileCount - recordedSkipCount) : fileCount;
+const selectedCount = node.isDir ? Number(node._selectedCount || 0) : (selectedResourceIds.has(node.uid) ? 1 : 0);
+const checked = selectableFileCount > 0 && selectedCount === selectableFileCount;
+const indeterminate = selectedCount > 0 && selectedCount < selectableFileCount;
+const row = document.createElement('div');
+row.className = `pk-magnet-file-row${node.isDir ? ' is-dir' : ''}`;
+const parentPath = String(node.relativePath || '').includes('/') ? String(node.relativePath).slice(0, String(node.relativePath).lastIndexOf('/')) : '';
+const icon = getOfficialDirFallbackIconHtml({ kind: node.isDir ? 'drive#folder' : 'drive#file' }, 'list');
+const nameTip = isMobileManagerEnvironment() ? '' : ` data-pk-tip="${esc(node.relativePath || node.name)}"`;
+const searchMatch = entry.searchResult ? (entry.searchMatch || getMagnetResourceSearchMatch(node, searchQuery)) : null;
+const nameHtml = searchQuery && searchMatch && searchMatch.name ? renderMagnetSearchText(node.name, searchQuery, nameCapacity) : esc(node.name);
+const pathHtml = parentPath ? (searchQuery && searchMatch && searchMatch.path ? renderMagnetSearchText(parentPath, searchQuery, Math.max(18, nameCapacity)) : esc(parentPath)) : '';
+const recordedSkip = skipRecordedResources && !!node._recordedSkip;
+const recordedPartial = skipRecordedResources && node.isDir && recordedSkipCount > 0 && recordedSkipCount < fileCount;
+const recordedTagText = recordedSkip ? (node.isDir && node._recordedFolderMatch ? TXT.tag_magnet_recorded_folder_skip : TXT.tag_magnet_recorded_skip) : (recordedPartial ? TXT.tag_magnet_recorded_partial : '');
+row.innerHTML = `<input type="checkbox" aria-label="${esc(node.name)}"><span class="pk-magnet-file-caret">${node.isDir ? (expandedResourceIds.has(node.uid) ? '▾' : '▸') : ''}</span><span class="pk-magnet-file-icon">${icon}</span><span class="pk-magnet-file-main" style="padding-left:${Math.min(8, Math.max(0, entry.depth)) * 8}px"><span class="pk-magnet-file-name"${nameTip}>${nameHtml}</span>${entry.searchResult && parentPath ? `<span class="pk-magnet-file-path">${pathHtml}</span>` : ''}</span><span class="pk-magnet-file-meta">${!node.isDir && !node.gcid ? `<span class="pk-magnet-unindexed">${esc(TXT.tag_magnet_unindexed)}</span>` : ''}${node.isDir ? '' : `<span>${esc(fmtSize(node.size))}</span>`}</span>`;
+const checkbox = row.querySelector('input');
+if (recordedTagText) {
+const meta = row.querySelector('.pk-magnet-file-meta');
+if (meta) {
+const tag = document.createElement('span');
+tag.className = 'pk-magnet-recorded-skip';
+tag.textContent = recordedTagText;
+meta.prepend(tag);
+}
+}
+checkbox.checked = checked;
+checkbox.indeterminate = indeterminate;
+checkbox.disabled = selectableFileCount === 0;
+checkbox.onchange = event => {
+event.stopPropagation();
+setResourceNodeSelected(node, checkbox.checked);
+renderMagnetResourceList();
+};
+const toggleFolder = event => {
+if (!node.isDir) return;
+if (event) event.stopPropagation();
+if (expandedResourceIds.has(node.uid)) expandedResourceIds.delete(node.uid);
+else expandedResourceIds.add(node.uid);
+renderMagnetResourceList();
+};
+const caret = row.querySelector('.pk-magnet-file-caret');
+if (caret && node.isDir) caret.onclick = toggleFolder;
+if (node.isDir) row.onclick = event => {
+if (event.target === checkbox || event.target.closest('input')) return;
+toggleFolder(event);
+};
+fragment.appendChild(row);
+});
+fileList.replaceChildren(fragment);
+fileList.scrollTop = Math.min(previousScrollTop, fileList.scrollHeight);
+updateMagnetSelectionState();
+};
+
+const scheduleMagnetResourceRender = () => {
+if (resourceRenderRaf) cancelAnimationFrame(resourceRenderRaf);
+resourceRenderRaf = requestAnimationFrame(() => {
+resourceRenderRaf = 0;
+if (document.contains(m)) renderMagnetResourceList();
+});
+};
+
+const switchMagnetPane = pane => {
+activeMagnetPane = pane === 'files' ? 'files' : 'preview';
+const showFiles = activeMagnetPane === 'files';
+previewTab.classList.toggle('act', !showFiles);
+filesTab.classList.toggle('act', showFiles);
+previewTab.setAttribute('aria-selected', showFiles ? 'false' : 'true');
+filesTab.setAttribute('aria-selected', showFiles ? 'true' : 'false');
+previewPane.hidden = showFiles;
+filesPane.hidden = !showFiles;
+if (heroBox) heroBox.style.display = showFiles ? 'none' : 'flex';
+if (box) box.style.width = showFiles ? '680px' : '420px';
+if (showFiles) scheduleMagnetResourceRender();
+else updateMagnetSelectionState();
+};
+
+previewTab.onclick = () => switchMagnetPane('preview');
+filesTab.onclick = () => switchMagnetPane('files');
+if (fileSearch) fileSearch.oninput = () => {
+resourceSearchText = String(fileSearch.value || '');
+resourceRenderLimit = 160;
+scheduleMagnetResourceRender();
+};
+if (fileSkipRecorded) fileSkipRecorded.onchange = () => {
+skipRecordedResources = !!fileSkipRecorded.checked;
+refreshRecordedResourceFilter();
+renderMagnetResourceList();
+};
+if (fileToggleAll) fileToggleAll.onclick = () => {
+if (!resourceResolution || !resourceResolution.indexed) return;
+const selectableFiles = resourceResolution.files.filter(file => !skipRecordedResources || !file._recordedSkip);
+const allSelected = selectableFiles.length > 0 && selectedResourceIds.size === selectableFiles.length;
+setAllResourceFilesSelected(!allSelected);
+renderMagnetResourceList();
+};
+if (fileList) fileList.onscroll = () => {
+if (fileList.scrollTop + fileList.clientHeight < fileList.scrollHeight - 80) return;
+if (!resourceHasMore) return;
+resourceRenderLimit += 160;
+scheduleMagnetResourceRender();
+};
+
+apiResolveMagnetResources(links[0], { signal: resourceController.signal }).then(resolution => {
+if (!document.contains(m)) return;
+resourceResolution = resolution;
+resourceStatus = resolution && resolution.indexed ? 'ready' : 'unavailable';
+if (resourceResolution && resourceResolution.indexed) {
+resourceResolution.roots.forEach(root => {
+indexResourceNode(root);
+if (root.isDir) expandedResourceIds.add(root.uid);
+});
+if (resourceResolution.files.length <= 120) {
+const expand = node => {
+if (node.isDir) {
+expandedResourceIds.add(node.uid);
+node.children.forEach(expand);
+}
+};
+resourceResolution.roots.forEach(expand);
+}
+applyMagnetRecordedNameFilter(resourceResolution, getMagnetRecordedNameIndex());
+setAllResourceFilesSelected(true);
+filesTab.textContent = `${TXT.tab_magnet_files} (${resourceResolution.files.length})`;
+}
+scheduleMagnetResourceRender();
+}).catch(error => {
+if (error && error.name === 'AbortError') return;
+console.warn('Magnet resource list failed:', error);
+if (!document.contains(m)) return;
+resourceStatus = 'unavailable';
+resourceResolution = null;
+scheduleMagnetResourceRender();
+});
 
 const openMagnetSavePathTouchHelp = (event) => {
 if (!isTouchOnlyMobileManagerEnvironment() || !saveHelpEl) return;
@@ -69443,22 +70605,12 @@ showFolderSelector(saveTarget.id, (id, name, fullItem, selectedPathChain) => {
 };
 }
 
-const close = () => {
-m.remove();
-resolve({ confirm: false });
-};
-
-m.querySelector('.pk-modal-close').onclick = close;
-m.querySelector('#pk_magnet_cancel').onclick = close;
-m.querySelector('#pk_magnet_continue').onclick = () => {
-m.remove();
-resolve({ confirm: true, targetId: saveTarget.id, targetName: saveTarget.name });
-};
 });
 };
 
 const processMagnetQueue = async () => {
 if (state.processing) return;
+const L = getStrings();
 state.processing = true;
 
 try {
@@ -69499,7 +70651,7 @@ continue;
 }
 
 try {
-await createMagnetCloudTasks([task.link], result.targetId || '');
+await executeMagnetPreviewResult(task.link, result, { logPrefix: 'Magnet Task Create Failed' });
 } catch (e) {
 console.error('Magnet cloud task failed:', e);
 if (L.str_action_failed) showToast(L.str_action_failed, 'error');
@@ -69855,6 +71007,17 @@ const magnetLink = await new Promise((resolve, reject) => {
     reader.onerror = () => reject(new Error(L.err_file_read));
     reader.readAsArrayBuffer(file);
 });
+
+if (files.length === 1 && typeof window.__pkSubmitMagnetWithPreview === 'function') {
+fb.destroy();
+await window.__pkSubmitMagnetWithPreview(magnetLink, {
+targetId: saveToId,
+targetName: saveToName,
+currentPath: currentSavePath,
+logPrefix: 'Torrent Magnet Task Create Failed'
+});
+return;
+}
 
 fb.update(`${L.msg_creating_cloud_task} (${i + 1}/${files.length})`);
 
@@ -70278,6 +71441,7 @@ const inputStyle = `width:100%; height:44px; padding:0 15px; border:2px solid va
 const areaStyle = `width:100%; min-height:60px; max-height:120px; padding:12px 15px; border:2px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font-size:13px; font-weight:600; outline:none; transition:border-color 0.2s; box-sizing:border-box; resize:vertical; line-height:1.5; font-family:inherit; cursor:auto;`;        const labelStyle = `position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; line-height:1; font-size:11px; color:var(--pk-pri); font-weight:bold; pointer-events:none; z-index:1;`;
 let localStatsClosed = false;
 let localStatsPending = null;
+let localStatsCache = null;
 let localCleanOpening = false;
 const assertLocalStatsOpen = () => {
 if (localStatsClosed) throw new DOMException('Settings closed', 'AbortError');
@@ -70406,8 +71570,12 @@ const total = Object.values(sizes).reduce((sum, n) => sum + n, 0);
 return { keys, sizes, getCat, total };
 };
 const calcLocalDataStats = () => {
+if (localStatsCache) return Promise.resolve(localStatsCache);
 if (!localStatsPending) {
-localStatsPending = collectLocalDataStats().finally(() => { localStatsPending = null; });
+localStatsPending = collectLocalDataStats().then(stats => {
+localStatsCache = stats;
+return stats;
+}).finally(() => { localStatsPending = null; });
 }
 return localStatsPending;
 };
@@ -70472,6 +71640,8 @@ lastSyncText: L.label_config_cloud_none,
 remoteSizeText: L.label_config_cloud_none,
 chunkCountText: '0'
 };
+let officialMagnetFilterMode = normalizeMagnetOfficialFilterMode(gmGet('pk_magnet_official_filter_mode', 'smart'));
+let officialMagnetFilterDirty = false;
 const settingsModalMaximized = !!(UI.win && UI.win.classList && UI.win.classList.contains('pk-maximized'));
 const settingsModalHeightStyle = settingsModalMaximized ? 'height:min(760px,90vh); max-height:calc(100vh - 56px);' : 'height:min(650px,84vh); max-height:calc(100vh - 80px);';
 
@@ -70572,6 +71742,32 @@ const m = showLargeModal(`
         <input type="checkbox" id="set_clipboard_magnet_focus" ${gmGet('pk_clipboard_magnet_focus', true)?'checked':''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer;">
     </label>
     <div style="position:absolute; top:0; transform:translateY(-50%); left:10px; background:var(--pk-bg); padding:0 5px; font-size:11px; color:var(--pk-pri); font-weight:bold; pointer-events:none; line-height:1;">${L.label_clipboard_magnet_focus}</div>
+</div>
+
+<div id="pk_magnet_filter_group" class="pk-setting-fieldset">
+    <div class="pk-select-label">${L.label_magnet_filter_settings}</div>
+    <div class="pk-setting-stack">
+        <label for="set_magnet_official_smart_filter" class="pk-setting-wraprow"
+                onmouseover="this.style.borderColor='var(--pk-pri)'"
+                onmouseout="this.style.borderColor='var(--pk-bd)'"
+                style="display:flex; align-items:center; justify-content:space-between; min-height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:8px 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box;">
+            <span style="display:flex; flex-direction:column; gap:2px; min-width:0; padding-right:12px;">
+                <span style="font-size:14px; color:var(--pk-fg); user-select:none;">${L.label_magnet_official_smart_filter}</span>
+                <span style="font-size:12px; color:var(--pk-muted,#888); line-height:1.35; user-select:none;">${L.desc_magnet_official_smart_filter}</span>
+            </span>
+            <input type="checkbox" id="set_magnet_official_smart_filter" ${normalizeMagnetOfficialFilterMode(gmGet('pk_magnet_official_filter_mode', 'smart')) === 'smart' ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer; flex-shrink:0;">
+        </label>
+        <label for="set_magnet_auto_filter_recorded" class="pk-setting-wraprow"
+                onmouseover="this.style.borderColor='var(--pk-pri)'"
+                onmouseout="this.style.borderColor='var(--pk-bd)'"
+                style="display:flex; align-items:center; justify-content:space-between; min-height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:8px 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box;">
+            <span style="display:flex; flex-direction:column; gap:2px; min-width:0; padding-right:12px;">
+                <span style="font-size:14px; color:var(--pk-fg); user-select:none;">${L.label_magnet_auto_filter_recorded}</span>
+                <span style="font-size:12px; color:var(--pk-muted,#888); line-height:1.35; user-select:none;">${L.desc_magnet_auto_filter_recorded}</span>
+            </span>
+            <input type="checkbox" id="set_magnet_auto_filter_recorded" ${gmGet('pk_magnet_auto_filter_recorded', false) === true ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer; flex-shrink:0;">
+        </label>
+    </div>
 </div>
 
 <div id="pk_browse_experience_group" class="pk-setting-fieldset">
@@ -71063,6 +72259,19 @@ const m = showLargeModal(`
 </div>
 `, { className: 'pk-settings-modal' });
 
+const officialMagnetFilterInput = m.querySelector('#set_magnet_official_smart_filter');
+if (officialMagnetFilterInput) {
+officialMagnetFilterInput.onchange = () => {
+officialMagnetFilterDirty = officialMagnetFilterInput.checked !== (officialMagnetFilterMode === 'smart');
+};
+fetchMagnetOfficialFilterMode().then(mode => {
+if (!m.isConnected || officialMagnetFilterDirty) return;
+officialMagnetFilterMode = mode;
+officialMagnetFilterInput.checked = mode === 'smart';
+gmSet('pk_magnet_official_filter_mode', mode);
+}).catch(() => {});
+}
+
 const modalBox = m.querySelector('.pk-modal');
 if (modalBox) {
 Object.assign(modalBox.style, { width: 'auto', padding: '0', overflow: 'hidden', height: 'auto', minHeight: 'auto' });
@@ -71116,7 +72325,64 @@ refreshConfigCloudSettingsPanel();
 const cfgCloudUploadBtn = m.querySelector('#btn_cfg_cloud_upload');
 const cfgCloudPullBtn = m.querySelector('#btn_cfg_cloud_pull');
 const cfgCloudClearBtn = m.querySelector('#btn_cfg_cloud_clear');
+const cfgCloudAutoSyncInput = m.querySelector('#set_cfg_cloud_auto_sync');
 setConfigCloudSettingsBusy(m, S.configCloudBusy);
+if (cfgCloudAutoSyncInput) {
+cfgCloudAutoSyncInput.onchange = async () => {
+if (!cfgCloudAutoSyncInput.checked) return;
+cfgCloudAutoSyncInput.checked = false;
+if (S.configCloudBusy) {
+showToast(L.str_processing || L.msg_config_cloud_uploading, 'warning');
+return;
+}
+const confirmed = await showConfirm(L.msg_config_cloud_auto_upload_confirm, L.lbl_config_cloud_sync, {
+yesText: L.btn_config_cloud_auto_upload_enable
+});
+if (!confirmed || !m.isConnected) return;
+if (S.configCloudBusy) {
+showToast(L.str_processing || L.msg_config_cloud_uploading, 'warning');
+return;
+}
+if (S.localCleanBusy) {
+showToast(L.msg_config_cloud_local_clean_busy, 'warning');
+return;
+}
+S.configCloudBusy = true;
+setOpenConfigCloudSettingsBusy(true);
+showToast(L.msg_config_cloud_pulling, 'info');
+let pullResult = null;
+try {
+pullResult = await pullConfigCloudFromOfficial({
+skipConfirm: true,
+suppressToast: true,
+cloudPriority: true
+});
+} finally {
+S.configCloudBusy = false;
+setOpenConfigCloudSettingsBusy(false);
+}
+if (pullResult && pullResult.ok === true && pullResult.conflict !== true) {
+gmSet('pk_cfg_auto_sync_enabled', true);
+cfgCloudAutoSyncInput.checked = true;
+startConfigCloudAutoSync();
+scheduleConfigCloudAutoUpload(1500);
+showToast(L.msg_config_cloud_auto_upload_enabled, 'success');
+if (pullResult.applied === true) {
+if (m.isConnected) m.remove();
+setTimeout(() => location.reload(), 300);
+return;
+}
+await refreshConfigCloudSettingsPanel();
+return;
+}
+cfgCloudAutoSyncInput.checked = false;
+const errorCode = String(pullResult && pullResult.errorCode || '');
+if (pullResult && pullResult.conflict === true) showToast(L.msg_config_cloud_auto_upload_conflict, 'warning');
+else if (errorCode === 'CONFIG_CLOUD_SYNC_FOLDER_MISSING' || errorCode === 'CONFIG_CLOUD_MANIFEST_MISSING') showToast(L.msg_config_cloud_auto_upload_remote_empty, 'warning');
+else showToast(L.msg_config_cloud_auto_upload_failed, 'error');
+await refreshConfigCloudSettingsPanel();
+};
+}
 if (cfgCloudPullBtn) {
 cfgCloudPullBtn.disabled = !!(S.configCloudBusy || S.localCleanBusy);
 cfgCloudPullBtn.removeAttribute('data-pk-tip');
@@ -71132,10 +72398,8 @@ return;
 S.configCloudBusy = true;
 setOpenConfigCloudSettingsBusy(true);
 showToast(L.msg_config_cloud_pulling, 'info');
-let snapshot = null;
 let pullResult = null;
-try { snapshot = await getConfigCloudSyncStatusSnapshot(); } catch (e) {}
-try { pullResult = await pullConfigCloudFromOfficial({ isConflict: !!(snapshot && snapshot.state === 'conflict') }); }
+try { pullResult = await pullConfigCloudFromOfficial({ cloudPriority: true }); }
 finally {
 S.configCloudBusy = false;
 setOpenConfigCloudSettingsBusy(false);
@@ -72039,33 +73303,20 @@ subM.querySelector('#vault_cancel').onclick = closeVault;
 subM.querySelector('.pk-modal-close').onclick = closeVault;
 };
 
-m.querySelector('#btn_cfg_clean').onclick = async () => {
+m.querySelector('#btn_cfg_clean').onclick = () => {
 if (localCleanOpening) return;
 if (S.configCloudBusy) {
 showToast(L.msg_config_cloud_busy_clean_block, 'warning');
 return;
 }
 localCleanOpening = true;
-let cleanStats;
-try {
-cleanStats = await calcLocalDataStats();
-} catch (error) {
-if (m.isConnected && (!error || error.name !== 'AbortError')) showToast(L.str_load_failed_simple || L.str_error, 'error');
-return;
-} finally {
-localCleanOpening = false;
-}
-if (!m.isConnected) return;
-if (S.configCloudBusy) {
-showToast(L.msg_config_cloud_busy_clean_block, 'warning');
-return;
-}
-const cleanSizeEl = m.querySelector('#txt_cfg_clean_size');
-if (cleanSizeEl) cleanSizeEl.textContent = `( ${fmtSize(cleanStats.total)} )`;
-const { keys, sizes, getCat } = cleanStats;
-
+let cleanStats = null;
+let cleanKeys = [];
+let cleanSizes = {};
+let cleanGetCat = () => null;
+let cleanM;
 const renderLbl = (cat, txt, isChecked = false, isMandatory = false) => {
-const sz = sizes[cat];
+const sz = cleanSizes[cat];
 if (sz === 0 && cat !== 'index' && cat !== 'cache') return '';
 const szStr = fmtSize(sz);
 const checkAttr = (isChecked || isMandatory) ? 'checked' : '';
@@ -72080,7 +73331,13 @@ return `<label style="display:flex; align-items:flex-start; gap:12px; cursor:${c
     </div>
 </label>`;
 };
-
+const renderCleanOptions = stats => {
+cleanStats = stats;
+cleanKeys = Array.isArray(stats.keys) ? stats.keys : [];
+cleanSizes = stats.sizes || {};
+cleanGetCat = typeof stats.getCat === 'function' ? stats.getCat : () => null;
+const cleanSizeEl = m.querySelector('#txt_cfg_clean_size');
+if (cleanSizeEl) cleanSizeEl.textContent = `( ${fmtSize(stats.total)} )`;
 const htmlOptions =[
 renderLbl('index', L.opt_cfg_index, true, true),
 renderLbl('pref', L.opt_cfg_pref),
@@ -72090,17 +73347,30 @@ renderLbl('history', L.opt_cfg_history),
 renderLbl('shareParseHistory', L.opt_cfg_share_parse_history),
 renderLbl('cache', L.opt_cfg_cache)
 ].filter(Boolean).join('');
+const optionsEl = cleanM && cleanM.querySelector('#clean_options');
+if (optionsEl) {
+optionsEl.innerHTML = htmlOptions || `<div style="color:var(--pk-fg); opacity:0.7;">${L.str_load_failed_simple || L.label_config_cloud_none}</div>`;
+optionsEl.style.justifyContent = 'flex-start';
+optionsEl.style.alignItems = 'stretch';
+optionsEl.style.minHeight = '0';
+optionsEl.style.opacity = '1';
+}
+const confirmBtn = cleanM && cleanM.querySelector('#clean_confirm');
+if (confirmBtn) {
+confirmBtn.disabled = !htmlOptions;
+confirmBtn.style.opacity = htmlOptions ? '1' : '0.55';
+confirmBtn.style.cursor = htmlOptions ? 'pointer' : 'not-allowed';
+}
+};
 
-if (!htmlOptions) return;
-
-const cleanM = showModal(`
+cleanM = showModal(`
 <h3 style="border:none; margin-bottom:20px; font-size:18px; font-weight:700; color:var(--pk-fg);">${L.title_clean_data}</h3>
-<div style="display:flex; flex-direction:column; gap:16px; margin-bottom:25px;">
-${htmlOptions}
+<div id="clean_options" style="display:flex; flex-direction:column; gap:16px; margin-bottom:25px; min-height:80px; justify-content:center; align-items:center; color:var(--pk-fg); opacity:0.75;">
+${L.str_loading_placeholder || L.label_config_cloud_none}
 </div>
 <div class="pk-modal-act">
 <button class="pk-btn" id="clean_cancel">${L.btn_cancel}</button>
-<button class="pk-btn pri pk-btn-danger" id="clean_confirm">${L.btn_del}</button>
+<button class="pk-btn pri pk-btn-danger" id="clean_confirm" disabled style="opacity:0.55; cursor:wait;">${L.btn_del}</button>
 </div>
 `);
 const cleanBox = cleanM.querySelector('.pk-modal');
@@ -72119,6 +73389,7 @@ try { lastModal.focus(); } catch (e) {}
 };
 
 const closeClean = () => {
+localCleanOpening = false;
 cleanM.remove();
 focusSettingsAfterCleanClose();
 };
@@ -72145,6 +73416,7 @@ cleanM.querySelector('#clean_cancel').onclick = closeClean;
 const cleanCloseBtn = cleanM.querySelector('.pk-modal-close');
 if (cleanCloseBtn) cleanCloseBtn.onclick = closeClean;
 cleanM.querySelector('#clean_confirm').onclick = async () => {
+if (!cleanStats) return;
 const selected = Array.from(cleanM.querySelectorAll('.clean-opt:checked')).map(el => el.value);
 if (selected.length === 0) { closeClean(); return; }
 if (selected.includes('index') && hasPendingFolderMutationWork()) {
@@ -72182,8 +73454,8 @@ console.warn("Clear thumb cache error:", e);
 }
 }
 
-keys.forEach(k => {
-const cat = getCat(k);
+cleanKeys.forEach(k => {
+const cat = cleanGetCat(k);
 if (cat && selected.includes(cat)) {
 try {
     if (typeof GM_deleteValue !== 'undefined') {
@@ -72199,10 +73471,30 @@ try {
 });
 
 cleanupConfigPrefixKeys();
+localStatsCache = null;
 if (selected.includes('shareParseHistory')) refreshShareParseHistoryModal();
 showToast(L.msg_clean_success);
 setTimeout(() => location.reload(), 1500);
 };
+
+void calcLocalDataStats().then(stats => {
+if (!cleanM || !cleanM.isConnected || localStatsClosed) return;
+renderCleanOptions(stats);
+}).catch(error => {
+if (!cleanM || !cleanM.isConnected || localStatsClosed) return;
+const optionsEl = cleanM.querySelector('#clean_options');
+if (optionsEl) {
+optionsEl.innerHTML = `<div style="color:var(--pk-fg); opacity:0.7;">${L.str_load_failed_simple || L.label_config_cloud_none}</div>`;
+optionsEl.style.alignItems = 'center';
+}
+const confirmBtn = cleanM.querySelector('#clean_confirm');
+if (confirmBtn) {
+confirmBtn.disabled = true;
+confirmBtn.style.opacity = '0.55';
+confirmBtn.style.cursor = 'not-allowed';
+}
+if (!error || error.name !== 'AbortError') showToast(L.str_load_failed_simple || L.str_error, 'error');
+});
 };
 
 m.querySelector('#btn_cfg_export').onclick = () => {
@@ -72237,6 +73529,7 @@ const exportExactKeys = new Set([
 'pk_comic_mode',
 'pk_clipboard_magnet_focus',
 'pk_clipboard_magnet_paste',
+'pk_magnet_auto_filter_recorded',
 'pk_audio_play_mode',
 'pk_audio_vol_level',
 'pk_audio_vol_muted',
@@ -72424,6 +73717,7 @@ const importExactKeys = new Set([
 'pk_comic_mode',
 'pk_clipboard_magnet_focus',
 'pk_clipboard_magnet_paste',
+'pk_magnet_auto_filter_recorded',
 'pk_audio_play_mode',
 'pk_audio_vol_level',
 'pk_audio_vol_muted',
@@ -72791,6 +74085,8 @@ const newThemeFollowSystem = !!m.querySelector('#set_theme_follow_system')?.chec
 const newConfigCloudAutoSync = !!m.querySelector('#set_cfg_cloud_auto_sync')?.checked;
 const newKeepPos = m.querySelector('#set_keep_pos').checked;
 const newSkipBl = m.querySelector('#set_skip_bl').checked;
+const newOfficialMagnetFilterMode = m.querySelector('#set_magnet_official_smart_filter').checked ? 'smart' : 'close';
+const newMagnetAutoFilterRecorded = !!m.querySelector('#set_magnet_auto_filter_recorded').checked;
 const newClipboardMagnetFocus = isTouchPrimaryDevice()
 ? getBoolPref('pk_clipboard_magnet_focus', true)
 : m.querySelector('#set_clipboard_magnet_focus').checked;
@@ -72802,11 +74098,11 @@ const storedDownloaderTypeRaw = String(gmGet('pk_downloader_type', CONF.download
 const oldDownloaderType = normalizeDownloaderType(storedDownloaderTypeRaw);
 const downloaderTypeNeedsNormalize = !isMobileDownloaderConfig && storedDownloaderTypeRaw && storedDownloaderTypeRaw !== oldDownloaderType;
 const oldKeepStructure = getDownloaderKeepStructurePref();
-const oldSig = JSON.stringify([curLang, oldTurbo, oldDownloaderType, gmGet('pk_aria2_url', ''), gmGet('pk_aria2_token', ''), normalizeAriaDownloadDir(gmGet('pk_aria2_dir', CONF.aria2DownloadDir)), oldKeepStructure, curGopeedUrl, gmGet('pk_gopeed_token', ''), normalizeGopeedDownloadDir(gmGet('pk_gopeed_dir', CONF.gopeedDownloadDir)), oldKeepStructure, curAbdmUrl, normalizeAbdmDownloadDir(gmGet('pk_abdm_dir', CONF.abdmDownloadDir)), oldKeepStructure, getBoolPref('pk_downloader_prefer_original_video_link', CONF.downloaderPreferOriginalVideoLink), getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable), oldDownloadAccelDomainForSig, oldDownloadAccelModeForSig, normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam)), getBoolPref('pk_download_accel_apply_browser', CONF.downloadAccelApplyBrowser), getBoolPref('pk_download_accel_apply_downloader', CONF.downloadAccelApplyDownloader), curDownloadAccelApplyExternal, getBoolPref('pk_download_accel_apply_m3u', CONF.downloadAccelApplyM3U), gmGet('pk_blur_scope', gmGet('pk_blur_thumb', false) ? 'list' : 'off'), gmGet('pk_hide_button_text', false), curThemeFollowSystem, curConfigCloudAutoSync, gmGet('pk_keep_pos', true), gmGet('pk_skip_bl_on_del', true), gmGet('pk_clipboard_magnet_focus', true), gmGet('pk_comic_mode', true), gmGet('pk_sort_independent', false) ? 'indep' : 'global', gmGet('pk_view_independent', false) ? 'indep' : 'global', curEngine, curDefaultOpenPlayer, curDefaultVideoQuality, curVideoLoadProgressCache, curVisualMediaContinuousBrowse, gmGet('pk_dl_filter_ext', ''), gmGet('pk_dl_filter_size_min', ''), gmGet('pk_dl_filter_size_max', ''), gmGet('pk_dl_filter_size_unit', 'MB'), gmGet('pk_dl_filter_name', '')]);
-const newSig = JSON.stringify([selectedLang, newTurbo, newDownloaderType, newUrl, newToken, newAriaDir, newAriaKeepStructure, newGopeedUrl, newGopeedToken, newGopeedDir, newAriaKeepStructure, newAbdmUrl, newAbdmDir, newAriaKeepStructure, newDownloaderPreferOriginalVideoLink, newDownloadAccelEnable, newDownloadAccelDomain, newDownloadAccelMode, newDownloadAccelQueryParam, newDownloadAccelApplyBrowser, newDownloadAccelApplyDownloader, newDownloadAccelApplyExternal, newDownloadAccelApplyM3U, newBlurScope, newHideButtonText, newThemeFollowSystem, newConfigCloudAutoSync, newKeepPos, newSkipBl, newClipboardMagnetFocus, newComicMode, sortPref, viewPref, selectedEngine, normalizeDefaultOpenPlayerForEnvironment(selectedDefaultOpenPlayer, isMobileExternalPlayerConfig), normalizeDefaultVideoQuality(selectedDefaultVideoQuality), !!m.querySelector('#set_video_load_progress_cache').checked, !!m.querySelector('#set_visual_media_continuous_browse').checked, m.querySelector('#set_dl_filter_ext').value.trim(), m.querySelector('#set_dl_filter_size_min').value.trim(), m.querySelector('#set_dl_filter_size_max').value.trim(), m.querySelector('#cs_set_dl_size_unit .pk-select-item.act') ? m.querySelector('#cs_set_dl_size_unit .pk-select-item.act').dataset.val : 'MB', m.querySelector('#set_dl_filter_name').value.trim()]);
+const oldSig = JSON.stringify([curLang, oldTurbo, oldDownloaderType, gmGet('pk_aria2_url', ''), gmGet('pk_aria2_token', ''), normalizeAriaDownloadDir(gmGet('pk_aria2_dir', CONF.aria2DownloadDir)), oldKeepStructure, curGopeedUrl, gmGet('pk_gopeed_token', ''), normalizeGopeedDownloadDir(gmGet('pk_gopeed_dir', CONF.gopeedDownloadDir)), oldKeepStructure, curAbdmUrl, normalizeAbdmDownloadDir(gmGet('pk_abdm_dir', CONF.abdmDownloadDir)), oldKeepStructure, getBoolPref('pk_downloader_prefer_original_video_link', CONF.downloaderPreferOriginalVideoLink), getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable), oldDownloadAccelDomainForSig, oldDownloadAccelModeForSig, normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam)), getBoolPref('pk_download_accel_apply_browser', CONF.downloadAccelApplyBrowser), getBoolPref('pk_download_accel_apply_downloader', CONF.downloadAccelApplyDownloader), curDownloadAccelApplyExternal, getBoolPref('pk_download_accel_apply_m3u', CONF.downloadAccelApplyM3U), gmGet('pk_blur_scope', gmGet('pk_blur_thumb', false) ? 'list' : 'off'), gmGet('pk_hide_button_text', false), curThemeFollowSystem, curConfigCloudAutoSync, gmGet('pk_keep_pos', true), gmGet('pk_skip_bl_on_del', true), officialMagnetFilterMode, gmGet('pk_magnet_auto_filter_recorded', false), gmGet('pk_clipboard_magnet_focus', true), gmGet('pk_comic_mode', true), gmGet('pk_sort_independent', false) ? 'indep' : 'global', gmGet('pk_view_independent', false) ? 'indep' : 'global', curEngine, curDefaultOpenPlayer, curDefaultVideoQuality, curVideoLoadProgressCache, curVisualMediaContinuousBrowse, gmGet('pk_dl_filter_ext', ''), gmGet('pk_dl_filter_size_min', ''), gmGet('pk_dl_filter_size_max', ''), gmGet('pk_dl_filter_size_unit', 'MB'), gmGet('pk_dl_filter_name', '')]);
+const newSig = JSON.stringify([selectedLang, newTurbo, newDownloaderType, newUrl, newToken, newAriaDir, newAriaKeepStructure, newGopeedUrl, newGopeedToken, newGopeedDir, newAriaKeepStructure, newAbdmUrl, newAbdmDir, newAriaKeepStructure, newDownloaderPreferOriginalVideoLink, newDownloadAccelEnable, newDownloadAccelDomain, newDownloadAccelMode, newDownloadAccelQueryParam, newDownloadAccelApplyBrowser, newDownloadAccelApplyDownloader, newDownloadAccelApplyExternal, newDownloadAccelApplyM3U, newBlurScope, newHideButtonText, newThemeFollowSystem, newConfigCloudAutoSync, newKeepPos, newSkipBl, newOfficialMagnetFilterMode, newMagnetAutoFilterRecorded, newClipboardMagnetFocus, newComicMode, sortPref, viewPref, selectedEngine, normalizeDefaultOpenPlayerForEnvironment(selectedDefaultOpenPlayer, isMobileExternalPlayerConfig), normalizeDefaultVideoQuality(selectedDefaultVideoQuality), !!m.querySelector('#set_video_load_progress_cache').checked, !!m.querySelector('#set_visual_media_continuous_browse').checked, m.querySelector('#set_dl_filter_ext').value.trim(), m.querySelector('#set_dl_filter_size_min').value.trim(), m.querySelector('#set_dl_filter_size_max').value.trim(), m.querySelector('#cs_set_dl_size_unit .pk-select-item.act') ? m.querySelector('#cs_set_dl_size_unit .pk-select-item.act').dataset.val : 'MB', m.querySelector('#set_dl_filter_name').value.trim()]);
 const oldIdmSig = JSON.stringify([normalizeIdmExportMode(gmGet('pk_idm_export_mode', CONF.idmExportMode)), normalizeIdmUrlExportType(gmGet('pk_idm_url_export_type', CONF.idmUrlExportType)), normalizeIdmExePath(gmGet('pk_idm_exe_path', CONF.idmExePath)), normalizeIdmBatDownloadRoot(gmGet('pk_idm_bat_root', CONF.idmBatDownloadRoot)), oldKeepStructure]);
 const newIdmSig = JSON.stringify([newIdmExportMode, newIdmUrlExportType, newIdmExePath, newIdmBatRoot, newAriaKeepStructure]);
-const hasSettingsChanged = oldSig !== newSig || oldIdmSig !== newIdmSig || downloaderTypeNeedsNormalize;
+const hasSettingsChanged = oldSig !== newSig || oldIdmSig !== newIdmSig || downloaderTypeNeedsNormalize || officialMagnetFilterDirty;
 const reloadSettingsChanged = curLang !== selectedLang || newTurbo !== oldTurbo;
 
 if (newDownloadAccelEnable && rawDownloadAccelDomain && !newDownloadAccelDomain) {
@@ -72819,6 +74115,7 @@ return;
 if (!hasSettingsChanged) { m.remove(); return; }
 
 const applyChangesAndClose = async () => {
+gmSet('pk_magnet_auto_filter_recorded', newMagnetAutoFilterRecorded);
 gmSet('pk_blur_scope', newBlurScope);
 gmSet('pk_blur_thumb', newBlurScope !== 'off');
 gmSet('pk_hide_button_text', newHideButtonText);
@@ -72942,6 +74239,21 @@ if (saveBtn.dataset.pkSaving === '1') return;
 saveBtn.dataset.pkSaving = '1';
 saveBtn.disabled = true;
 saveBtn.textContent = L.str_saving;
+
+if (officialMagnetFilterDirty) {
+try {
+await saveMagnetOfficialFilterMode(newOfficialMagnetFilterMode);
+officialMagnetFilterMode = newOfficialMagnetFilterMode;
+officialMagnetFilterDirty = false;
+gmSet('pk_magnet_official_filter_mode', newOfficialMagnetFilterMode);
+} catch (e) {
+saveBtn.dataset.pkSaving = '0';
+saveBtn.disabled = false;
+saveBtn.textContent = L.btn_save;
+showToast(L.msg_magnet_official_filter_save_failed, 'error');
+return;
+}
+}
 
 await applyChangesAndClose();
 return;
@@ -78541,6 +79853,9 @@ return true;
 return false;
 }
 };
+
+window.__pkUpdateQuotaUI = updateQuotaUI;
+window.__pkRefreshCloudTaskView = refreshCloudTaskView;
 
 if (UI.btnTransferQuotaDetail) {
 UI.btnTransferQuotaDetail.onclick = (e) => {
