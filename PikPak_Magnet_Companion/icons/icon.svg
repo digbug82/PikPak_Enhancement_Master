@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="PikPak Magnet Companion">
+  <defs>
+    <linearGradient id="bg" x1="12" y1="8" x2="116" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4AA3FF"/>
+      <stop offset="1" stop-color="#2356D8"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="30" fill="url(#bg)"/>
+  <!-- White P stem and shoulder -->
+  <path d="M37 96V32H50"
+        fill="none" stroke="#FFFFFF" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Extended yellow magnet bowl -->
+  <path d="M50 32H62C78 32 87 40 87 53C87 66 78 74 62 74H50"
+        fill="none" stroke="#FFC44D" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Equal, vertically aligned magnetic pole faces -->
+  <path d="M50 27V37M50 69V79"
+        fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+</svg>
