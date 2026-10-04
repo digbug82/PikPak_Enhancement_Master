@@ -28,6 +28,10 @@
 4. 主脚本会在 PikPak 页面中打开磁链预览窗口。
 5. 在预览窗口中选择文件并确认保存。
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Magnet_Companion/demo.gif" alt="demo">
+</p>
+
 ## 设置
 
 点击扩展图标即可打开设置页，也可以在扩展管理页进入“扩展选项”。设置保存在伴生扩展的本地存储中：
@@ -71,6 +75,10 @@
 4. 主腳本會在 PikPak 頁面開啟磁鏈預覽視窗。
 5. 選擇需要的檔案並確認儲存。
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Magnet_Companion/demo.gif" alt="demo">
+</p>
+
 ## 設定
 
 點擊擴充功能圖示即可開啟設定頁，也可以從擴充功能管理頁進入「擴充功能選項」。設定會儲存在伴生擴充功能的本機儲存空間中。
@@ -112,6 +120,10 @@ This extension supports desktop Chrome and Microsoft Edge only. Android, iPhone,
 3. In the default confirmation mode, click “Send to PikPak” in the prompt. You can also use the context-menu item “Send magnet to PikPak”.
 4. The main userscript opens the magnet preview on the PikPak page.
 5. Select the files you want and confirm saving.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Magnet_Companion/demo.gif" alt="demo">
+</p>
 
 ## Settings
 
@@ -156,6 +168,10 @@ Click the extension icon to open the settings page, or open “Extension options
 4. メインスクリプトが PikPak ページでマグネットプレビューを開きます。
 5. 保存するファイルを選択して確定します。
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Magnet_Companion/demo.gif" alt="demo">
+</p>
+
 ## 設定
 
 拡張機能アイコンをクリックして設定を開くか、拡張機能管理ページの「拡張機能のオプション」を開きます。
@@ -198,6 +214,10 @@ Click the extension icon to open the settings page, or open “Extension options
 4. 메인 스크립트가 PikPak 페이지에서 마그넷 미리보기 창을 엽니다.
 5. 저장할 파일을 선택하고 확인합니다.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Magnet_Companion/demo.gif" alt="demo">
+</p>
+
 ## 설정
 
 확장 프로그램 아이콘을 클릭하거나 확장 프로그램 관리 페이지의 확장 프로그램 옵션을 엽니다.
@@ -231,6 +251,10 @@ Ekstensi ini hanya mendukung Chrome dan Microsoft Edge versi desktop. Browser se
 3. Pilih “Muat yang belum dikemas”.
 4. Pilih folder `PikPak_Magnet_Companion`.
 5. Pasang [PikPak_Enhancement_Master.user.js](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js) dan pastikan skrip berjalan di halaman PikPak.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Magnet_Companion/demo.gif" alt="demo">
+</p>
 
 ## Penggunaan
 
@@ -273,6 +297,10 @@ Sambungan ini hanya menyokong Chrome dan Microsoft Edge versi desktop. Pelayar m
 3. Pilih “Muatkan sambungan tidak dizip”.
 4. Pilih folder `PikPak_Magnet_Companion`.
 5. Pasang [PikPak_Enhancement_Master.user.js](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js) dan pastikan skrip berjalan pada halaman PikPak.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/digbug82/PikPak_Enhancement_Master/main/PikPak_Magnet_Companion/demo.gif" alt="demo">
+</p>
 
 ## Cara guna
 
