@@ -1,45 +1,6 @@
-## English
+## Language 
 
-# PikPak Magnet Companion
-
-This is a Manifest V3 companion extension that does not require a separate PikPak login. It works with the **PikPak Enhancement Master userscript** and does not access PikPak APIs or store account information. It detects magnet links in selected text on webpages and forwards them to an open PikPak page running the main userscript, while magnet parsing, preview, and saving are performed by the logged-in main userscript.
-
-## Compatibility
-
-This extension supports desktop Chrome and Microsoft Edge only. Android, iPhone, and iPad mobile browsers are not supported.
-
-## Installation
-
-1. Open the Chrome or Edge extensions page.
-2. Enable Developer mode.
-3. Choose “Load unpacked”.
-4. Select the `PikPak_Magnet_Companion` directory.
-5. Make sure [PikPak_Enhancement_Master.user.js](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js) is installed and running on the PikPak page.
-
-## Usage
-
-1. Open a PikPak page first.
-2. Select a magnet link or BTIH text on any regular webpage.
-3. In the default confirmation mode, click “Send to PikPak” in the prompt. You can also use the context-menu item “Send magnet to PikPak”.
-4. The main userscript opens the magnet preview on the PikPak page.
-5. Select the files you want and confirm saving.
-
-## Settings
-
-Click the extension icon to open the settings page, or open “Extension options” from the extensions management page. Settings are stored in the companion extension's local storage.
-
-- Confirm before sending (default): selecting a magnet shows a confirmation button and does not switch tabs immediately.
-- Send automatically: selecting a magnet sends it and switches to PikPak immediately.
-- Disable automatic detection: selected text is ignored; the context-menu action remains available.
-- The context menu and automatic switching to the PikPak tab can be toggled separately.
-
-## Troubleshooting
-
-- Click Reload for the extension on the extensions page, then refresh both the PikPak page and the source webpage.
-- Keep at least one supported drive page open (`mypikpak.com/drive/*`, `drive.mypikpak.com/*`, `mypikpak.net/drive/*`, or `pikpak.me/drive/*`), and make sure the main userscript is running.
-- The companion sends only after it receives the main userscript's ready handshake. If it reports that no main script was found, refresh the drive page and try again.
-- The website access permission only controls which pages the extension can inject into. It does not indicate that a magnet message has been received or that the main userscript is connected. Browser internal pages such as `edge://` and `chrome://` cannot be injected.
-- The extension can try to inject its content script into an already-open PikPak tab. If the browser still blocks this, refresh that tab manually.
+[简体中文](#简体中文) · [繁體中文](#繁體中文) · [English](#english) · [日本語](#日本語) · [한국어](#한국어) · [Bahasa Indonesia](#bahasa-indonesia) · [Bahasa Melayu](#bahasa-melayu)
 
 ## 简体中文
 
@@ -125,6 +86,49 @@ Click the extension icon to open the settings page, or open “Extension options
 - 必須至少開啟一個支援的網盤頁面（`mypikpak.com/drive/*`、`drive.mypikpak.com/*`、`mypikpak.net/drive/*` 或 `pikpak.me/drive/*`），並確認主使用者腳本正在執行。
 - 擴充功能只有收到主腳本的就緒握手後才會傳送磁鏈；若提示找不到主腳本，請重新整理網盤頁面後重試。
 - 擴充功能管理頁中的網站存取權限只表示擴充功能可以在哪些頁面注入內容腳本，不代表已收到磁鏈或已連線到主腳本。瀏覽器內建頁面（例如 `edge://`、`chrome://`）無法注入腳本。
+
+## English
+
+# PikPak Magnet Companion
+
+This is a Manifest V3 companion extension that does not require a separate PikPak login. It works with the **PikPak Enhancement Master userscript** and does not access PikPak APIs or store account information. It detects magnet links in selected text on webpages and forwards them to an open PikPak page running the main userscript, while magnet parsing, preview, and saving are performed by the logged-in main userscript.
+
+## Compatibility
+
+This extension supports desktop Chrome and Microsoft Edge only. Android, iPhone, and iPad mobile browsers are not supported.
+
+## Installation
+
+1. Open the Chrome or Edge extensions page.
+2. Enable Developer mode.
+3. Choose “Load unpacked”.
+4. Select the `PikPak_Magnet_Companion` directory.
+5. Make sure [PikPak_Enhancement_Master.user.js](https://github.com/digbug82/PikPak_Enhancement_Master/blob/main/PikPak_Enhancement_Master.user.js) is installed and running on the PikPak page.
+
+## Usage
+
+1. Open a PikPak page first.
+2. Select a magnet link or BTIH text on any regular webpage.
+3. In the default confirmation mode, click “Send to PikPak” in the prompt. You can also use the context-menu item “Send magnet to PikPak”.
+4. The main userscript opens the magnet preview on the PikPak page.
+5. Select the files you want and confirm saving.
+
+## Settings
+
+Click the extension icon to open the settings page, or open “Extension options” from the extensions management page. Settings are stored in the companion extension's local storage.
+
+- Confirm before sending (default): selecting a magnet shows a confirmation button and does not switch tabs immediately.
+- Send automatically: selecting a magnet sends it and switches to PikPak immediately.
+- Disable automatic detection: selected text is ignored; the context-menu action remains available.
+- The context menu and automatic switching to the PikPak tab can be toggled separately.
+
+## Troubleshooting
+
+- Click Reload for the extension on the extensions page, then refresh both the PikPak page and the source webpage.
+- Keep at least one supported drive page open (`mypikpak.com/drive/*`, `drive.mypikpak.com/*`, `mypikpak.net/drive/*`, or `pikpak.me/drive/*`), and make sure the main userscript is running.
+- The companion sends only after it receives the main userscript's ready handshake. If it reports that no main script was found, refresh the drive page and try again.
+- The website access permission only controls which pages the extension can inject into. It does not indicate that a magnet message has been received or that the main userscript is connected. Browser internal pages such as `edge://` and `chrome://` cannot be injected.
+- The extension can try to inject its content script into an already-open PikPak tab. If the browser still blocks this, refresh that tab manually.
 
 ## 日本語
 
