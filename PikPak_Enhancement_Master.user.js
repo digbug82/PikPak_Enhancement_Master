@@ -8,7 +8,7 @@
 // @name:id            PikPak Enhancement Master
 // @name:ms            PikPak Enhancement Master
 // @namespace          https://github.com/digbug82/
-// @version            5.2.0
+// @version            5.3.0
 // @author             digbug82
 // @license            AGPL-3.0-or-later
 // @description        PikPak 网盘增强：集成 Aria2/Gopeed/ABDM/IDM 下载、下载加速、下载过滤、分享链接解析、文件/文件夹查重、批量重命名、资源清理、批量解压、PotPlayer 直达、M3U 导出、排序与搜索增强、TXT 磁链提取、云归档、数据迁移、目录树导出、以图搜图、视音频播放增强等。
@@ -231,6 +231,7 @@ entries: [
 { key: 'pk_dl_filter_size_max', type: 'numberOrEmpty', defaultValue: '', localLimit: { min: 0, max: Number.MAX_SAFE_INTEGER }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'groupLocalDefaultOnly' },
 { key: 'pk_dl_filter_size_unit', type: 'enum', defaultValue: 'MB', localLimit: { allowed: ['B', 'KB', 'MB', 'GB', 'TB'], maxLen: 8 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'groupLocalDefaultOnly' },
 { key: 'pk_search_engine', type: 'enum', defaultValue: 'google', localLimit: { allowed: ['google', 'yandex', 'saucenao', 'tracemoe'], maxLen: 32 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
+{ key: 'pk_search_share_phrase_prompt', type: 'boolean', defaultValue: true, localLimit: {}, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_dup_strictness', type: 'enum', defaultValue: 'strict', localLimit: { allowed: ['strict', 'normal', 'loose'], maxLen: 32 }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'localDefaultOnly' },
 { key: 'pk_expired_shares', type: 'jsonArray', defaultValue: '[]', localLimit: { maxItems: 500, preferredItems: 50, maxFieldLen: 512, maxSize: 64 * CONFIG_SIZE.KB, keepRecent: true }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'dedupeByShare' },
 { key: 'pk_share_limits', type: 'shareLimits', defaultValue: '{}', localLimit: { maxItems: 500, maxKeyLen: 128, maxSize: 128 * CONFIG_SIZE.KB }, isPrefix: false, lru: false, ttl: false, cloudSync: 'default', mergeStrategy: 'mapLocalFirst' },
@@ -4159,7 +4160,7 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 @media (hover:hover) and (pointer:fine){.pk-dup-folder-pop.pk-dark .pk-dup-folder-item.pk-reset:hover { background:rgba(255,255,255,0.06); }}
 .pk-ov.pk-hide-btn-text .pk-txt-long { display: none !important; }
 .pk-ov.pk-hide-btn-text .pk-txt-short { display: inline !important; }
-.pk-ov.pk-hide-btn-text #pk-dup-folder-sel-wrap { max-width: 100px !important; }
+.pk-ov.pk-hide-btn-text #pk-dup-folder-sel-wrap { width: 220px !important; max-width: 220px !important; }
 .pk-ov.pk-hide-btn-text .pk-btn:not(#pk-filter-btn):not(#pk-filter-exit-btn):not(#pk-share-parse-back-list) > span, .pk-ov.pk-hide-btn-text .pk-nav-btn > span { display: none !important; }
 .pk-ov.pk-hide-btn-text .pk-tb .pk-btn:not(#pk-filter-btn):not(#pk-filter-exit-btn):not(#pk-share-parse-back-list), .pk-ov.pk-hide-btn-text .pk-ft .pk-grp .pk-btn:not(#pk-filter-btn):not(#pk-filter-exit-btn):not(#pk-share-parse-back-list) { padding:0 8px !important; min-width:32px; width:32px; justify-content:center; gap:0 !important; }
 .pk-ov.pk-hide-btn-text #pk-share-parse-back-list > span { display: none !important; }
@@ -4185,7 +4186,7 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-ov.pk-hide-btn-text .pk-mobile-context-action { width:40px!important; min-width:40px!important; padding:0!important; gap:0!important; }
 .pk-ov.pk-auto-hide-toolbar-text .pk-tb .pk-txt-long { display:none!important; }
 .pk-ov.pk-auto-hide-toolbar-text .pk-tb .pk-txt-short { display:inline!important; }
-.pk-ov.pk-auto-hide-toolbar-text .pk-tb #pk-dup-folder-sel-wrap { max-width:100px!important; }
+.pk-ov.pk-auto-hide-toolbar-text .pk-tb #pk-dup-folder-sel-wrap { width:220px!important; max-width:220px!important; }
 .pk-ov.pk-auto-hide-toolbar-text .pk-tb .pk-btn:not(#pk-filter-btn):not(#pk-filter-exit-btn):not(#pk-share-parse-back-list) > span { display:none!important; }
 .pk-ov.pk-auto-hide-toolbar-text .pk-tb .pk-btn:not(#pk-filter-btn):not(#pk-filter-exit-btn):not(#pk-share-parse-back-list) { padding:0 8px!important; min-width:32px; width:32px; justify-content:center; gap:0!important; }
 .pk-ov.pk-auto-hide-toolbar-text #pk-share-parse-back-list > span { display:none!important; }
@@ -7412,6 +7413,10 @@ return gcid || await calcXunleiGcid();
 
 function getLang(){const u=gmGet('pk_lang','');if(u)return u;const n=navigator.language.toLowerCase();return (n==='zh'||n.startsWith('zh-cn')||n.startsWith('zh-sg'))?'zh':(n.startsWith('zh-tw')||n.startsWith('zh-hk')||n.startsWith('zh-mo'))?'tc':(n.startsWith('id')||n.startsWith('in'))?'id':n.startsWith('ms')?'ms':n.startsWith('ko')?'ko':n.startsWith('ja')?'ja':'en';}
 const I18N_CONF={defaultLang:'zh',remoteLangs:['tc','en','ko','ja','id','ms'],manifestUrl:'https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/i18n/manifest.json',baseUrl:'https://cdn.jsdelivr.net/gh/digbug82/PikPak_Enhancement_Master@main/i18n/',cachePrefix:'pk_i18n_',manifestKey:'pk_i18n_manifest',cacheTTL:7*24*60*60*1000,manifestTTL:24*60*60*1000,requiredKeys:['title','modal_settings_title','label_lang','msg_settings_saved','btn_nav_home']};
+const PK_MAGNET_COMPANION_DOWNLOAD_URL = 'https://github.com/digbug82/PikPak_Enhancement_Master/raw/refs/heads/main/PikPak_Magnet_Companion.zip';
+const PK_MAGNET_COMPANION_INSTALL_URL = 'https://github.com/digbug82/PikPak_Enhancement_Master/tree/main/PikPak_Magnet_Companion';
+const PK_MAGNET_COMPANION_TIP_KEY = 'pk_magnet_companion_tip_dismissed';
+const openMagnetCompanionUrl = (url) => { try { window.open(url, '_blank', 'noopener,noreferrer'); } catch (e) {} };
 let pkRemoteI18n=null;
 let pkI18nReadyPromise=null;
 let pkI18nReadyLang='';
@@ -8218,6 +8223,7 @@ zh: {
   "desc_view_indep": "调整视图仅对当前文件夹生效",
   "desc_view_global": "全部文件夹使用相同的列表/网格视图",
   "label_search_engine": "搜图引擎",
+  "label_search_share_phrase_prompt": "搜索框识别分享代码",
   "opt_engine_google": "Google Lens (综合)",
   "opt_engine_yandex": "Yandex (综合)",
   "opt_engine_saucenao": "SauceNAO (Pixiv/插画)",
@@ -8461,6 +8467,13 @@ zh: {
   "desc_magnet_official_smart_filter": "过滤官方识别的广告文件，不保存到云盘",
   "label_magnet_auto_filter_recorded": "自动过滤资源管理器记录的文件和文件夹",
   "desc_magnet_auto_filter_recorded": "保存磁链时自动跳过资源管理器中已记录的文件和文件夹",
+  "label_magnet_companion": "PikPak 磁链伴生",
+  "desc_magnet_companion_desktop_only": "仅支持桌面版浏览器，不支持移动端浏览器。",
+  "btn_magnet_companion_download": "下载伴生扩展",
+  "btn_magnet_companion_install": "查看安装说明",
+  "tip_magnet_companion_title": "从任意网页发送磁链",
+  "tip_magnet_companion_desc": "安装 PikPak Magnet Companion 后，在其他网页选中磁链即可发送到这里。",
+  "btn_magnet_companion_dismiss": "不再提示",
   "msg_magnet_official_filter_save_failed": "官方智能过滤设置保存失败，请稍后重试",
   "msg_magnet_preview_desc": "已识别到磁链，可查看文件并选择需要保存的内容。",
   "msg_magnet_preview_fail": "未获取到公开预览信息，仍可继续添加。",
@@ -9483,15 +9496,16 @@ window.pkHasOfficialVideoEvidence = computeOfficialVideoEvidence;
 
 async function apiList(parentId, limit = 1000, onProgress, signal, trashed = false, isBackground = false) {
 let all = [], next = null, safe = 5000;
-const TIMEOUT_MS = 25000;
+const TIMEOUT_MS = isBackground ? 20000 : 25000;
 const filters = trashed ? `&filters=${encodeURIComponent('{"trashed":{"eq":true}}')}&parent_id=*` : `&parent_id=${parentId || ''}`;
 
 do {
 let pageRetries = 0;
-const MAX_PAGE_RETRIES = 5;
+const MAX_PAGE_RETRIES = 3;
 let pageSuccess = false;
+const pageDeadline = Date.now() + (isBackground ? 45000 : 60000);
 
-while (pageRetries < MAX_PAGE_RETRIES && !pageSuccess) {
+while (pageRetries < MAX_PAGE_RETRIES && !pageSuccess && Date.now() < pageDeadline) {
 if (signal?.aborted) throw new DOMException('Aborted by user', 'AbortError');
 while (typeof isDownloadHydrateCaptchaWaiting === 'function' && isDownloadHydrateCaptchaWaiting()) {
 if (signal?.aborted) throw new DOMException('Aborted by user', 'AbortError');
@@ -9573,18 +9587,26 @@ try { if (typeof showToast !== 'undefined') showToast(getStrings().err_captcha_s
 throw err;
 }
 if (res.status === 429) {
-await sleep(3000 * (pageRetries + 1));
-throw new Error('RATE_LIMIT');
+const rateError = new Error('RATE_LIMIT');
+rateError.status = 429;
+rateError.statusCode = 429;
+throw rateError;
 }
-throw new Error(`HTTP_${res.status}`);
+const httpError = new Error(`HTTP_${res.status}`);
+httpError.status = res.status;
+httpError.statusCode = res.status;
+throw httpError;
 }
 
 syncTime(res.headers);
 
-const data = await res.json();
+let data;
+data = await res.json().catch(() => null);
 
-if (!data.files && data.next_page_token) {
-throw new Error('PAGINATION_INCOMPLETE');
+if (!data || !Array.isArray(data.files)) {
+const invalidResponse = new Error('INVALID_FILE_LIST_RESPONSE');
+invalidResponse.code = 'INVALID_FILE_LIST_RESPONSE';
+throw invalidResponse;
 }
 
 if (data.files) {
@@ -9610,18 +9632,32 @@ e = new Error('FETCH_TIMEOUT');
 errMsg = 'Local Timeout';
 }
 
+const errorStatus = Number(e && (e.status || e.statusCode) || 0);
+const isRetryableHttpError = errorStatus === 408 || errorStatus === 425 || errorStatus === 429 || (errorStatus >= 500 && errorStatus <= 599);
 const isNetworkError = isTimeout
 || errMsg.includes('PAGINATION')
+|| errMsg.includes('INVALID_FILE_LIST_RESPONSE')
 || /failed to fetch|networkerror|network error|fetch failed|load failed|err_network|err_connection/i.test(errMsg);
 
-if ((isNetworkError || errMsg === 'AUTH_RETRY') && safe > 0) {
-const backoff = pageRetries === 1 ? 500 : Math.min(pageRetries * 2000, 10000);
+if ((isNetworkError || isRetryableHttpError || errMsg === 'AUTH_RETRY') && safe > 0 && Date.now() < pageDeadline && pageRetries < MAX_PAGE_RETRIES) {
+const baseBackoff = pageRetries === 1 ? 500 : Math.min(2500 * (2 ** (pageRetries - 2)), 8000);
+const backoff = baseBackoff + Math.floor(Math.random() * 250);
 console.warn(`[API] Retry ${pageRetries}/${MAX_PAGE_RETRIES} for ${parentId || 'Root'} due to ${errMsg}. Wait ${backoff}ms`);
 await sleep(backoff);
 continue;
 }
+if ((isNetworkError || isRetryableHttpError) && Date.now() >= pageDeadline) {
+const deadlineError = new Error('NETWORK_RETRY_DEADLINE');
+deadlineError.code = 'NETWORK_RETRY_DEADLINE';
+throw deadlineError;
+}
 throw e;
 }
+}
+if (!pageSuccess) {
+const deadlineError = new Error('NETWORK_RETRY_DEADLINE');
+deadlineError.code = 'NETWORK_RETRY_DEADLINE';
+throw deadlineError;
 }
 } while (next && safe > 0);
 
@@ -12581,6 +12617,8 @@ loadMaskShownAt: 0,
 loadMaskDeferred: false,
 pagingLoading: false,
 liveRefreshCtx: null,
+initialNetworkRetryCtx: null,
+_initialNetworkRetryLoad: false,
 offlinePagingPending: false,
 offlineLightProbeTimer: 0,
 offlineLightProbeTimerReason: '',
@@ -26286,8 +26324,127 @@ if (S.mergeRefreshCtx === ctx) S.mergeRefreshCtx = null;
 const computeDuplicateGroups = async (candidates, cfg, isRunningFn) => {
 const groups =[];
 const assigned = new Set();
-const strictness = gmGet('pk_dup_strictness', 'strict');
-const sizeRatioLimit = (strictness === 'loose') ? 0.10 : 0.05;
+const rawStrictness = gmGet('pk_dup_strictness', 'strict');
+const strictness = rawStrictness === 'loose' ? 'loose' : 'strict';
+const duplicateProfile = strictness === 'loose' ? {
+    durationPercent: 0.02,
+    durationMinSeconds: 3,
+    durationMaxSeconds: 30,
+    sizeDifferenceLimit: 0.10,
+    nameSimilarityLimit: 0.80
+} : {
+    durationPercent: 0.01,
+    durationMinSeconds: 2,
+    durationMaxSeconds: 10,
+    sizeDifferenceLimit: 0.05,
+    nameSimilarityLimit: 0.90
+};
+
+const normalizeDuplicateMetaName = (value) => {
+let name = String(value || '').replace(/[\r\n\v\f\u2028\u2029]+/g, ' ').trim().toLowerCase();
+name = name.replace(/\.[^/.]+$/, '');
+name = name.replace(/\s*[-_ .．。]+\s*(?:copy|duplicate|dup|副本|复制|拷贝|拷貝|コピー|複製|복사본|사본|복사)\s*\d*\s*$/iu, '');
+name = name.replace(/\s*[-_ .．。]*\s*(?:\(\s*\d+\s*\)|（\s*\d+\s*）|\[\s*\d+\s*\]|【\s*\d+\s*】)\s*$/u, '');
+name = name.replace(/[._()[\]{}【】（）《》<>\-]+/g, ' ').replace(/\s+/g, ' ').trim();
+return name;
+};
+
+const duplicateNameBigrams = (value) => {
+const chars = Array.from(String(value || '').replace(/\s+/g, ''));
+if (chars.length <= 1) return new Set(chars);
+const grams = new Set();
+for (let i = 0; i < chars.length - 1; i++) grams.add(chars[i] + chars[i + 1]);
+return grams;
+};
+
+const duplicateNameSimilarity = (a, b) => {
+if (!a || !b) return 0;
+if (a === b) return 1;
+const left = duplicateNameBigrams(a);
+const right = duplicateNameBigrams(b);
+if (!left.size || !right.size) return 0;
+let common = 0;
+left.forEach(token => { if (right.has(token)) common++; });
+return (2 * common) / (left.size + right.size);
+};
+
+const getDuplicateDurationTolerance = (duration) => {
+if (!(duration > 0)) return 0;
+return Math.min(
+    duplicateProfile.durationMaxSeconds,
+    Math.max(duplicateProfile.durationMinSeconds, duration * duplicateProfile.durationPercent)
+);
+};
+
+const duplicateSizeSimilarity = (a, b) => {
+if (!(a > 0) || !(b > 0)) return null;
+return Math.min(a, b) / Math.max(a, b);
+};
+
+const getDuplicateMeta = (item) => {
+const mime = String(item && item.mime_type || '').toLowerCase();
+const type = mime.startsWith('video') ? 'video' : mime.startsWith('image') ? 'image' : 'other';
+const name = normalizeDuplicateMetaName(item && item.name);
+const extMatch = String(item && item.name || '').match(/\.([a-z0-9]{1,8})$/i);
+return {
+    item,
+    id: item && item.id,
+    type,
+    hash: String(item && (item.gcid || item.md5_checksum || item.hash) || '').trim().toLowerCase(),
+    size: Number(item && item.size || 0),
+    duration: Number(item && item.params && item.params.duration || 0),
+    name,
+    extension: extMatch ? extMatch[1].toLowerCase() : ''
+};
+};
+
+const compareDuplicateMetadata = (a, b, options = {}) => {
+const requireName = options.requireName !== false;
+if (!a || !b || a.type !== b.type) return { matched: false, reason: 'type' };
+
+if (a.hash && b.hash && a.hash === b.hash && (!a.size || !b.size || a.size === b.size)) {
+    return { matched: true, reason: 'hash', level: 'exact', score: 1 };
+}
+
+if (a.type === 'video' && a.duration > 0 && b.duration > 0) {
+    const tolerance = Math.min(getDuplicateDurationTolerance(a.duration), getDuplicateDurationTolerance(b.duration));
+    if (Math.abs(a.duration - b.duration) > tolerance) return { matched: false, reason: 'duration' };
+} else if (a.type === 'video' && requireName && (!a.name || !b.name)) {
+    return { matched: false, reason: 'missing_duration_or_name' };
+}
+
+const sizeSimilarity = duplicateSizeSimilarity(a.size, b.size);
+if (sizeSimilarity !== null && (1 - sizeSimilarity) > duplicateProfile.sizeDifferenceLimit) {
+    return { matched: false, reason: 'size', sizeSimilarity };
+}
+
+const nameSimilarity = duplicateNameSimilarity(a.name, b.name);
+const sameName = !!a.name && a.name === b.name;
+const nameMatched = sameName || nameSimilarity >= duplicateProfile.nameSimilarityLimit;
+const sameExtension = !!a.extension && !!b.extension && a.extension === b.extension;
+const strongSizeSimilarity = strictness === 'loose' ? 0.95 : 0.98;
+
+if (requireName && !nameMatched) {
+    if (a.type === 'video' && a.duration > 0 && b.duration > 0 && sameExtension &&
+        sizeSimilarity !== null && sizeSimilarity >= strongSizeSimilarity) {
+        return { matched: true, reason: 'metadata_strong', level: 'metadata', score: 3, nameSimilarity, sizeSimilarity };
+    }
+    return { matched: false, reason: 'name', nameSimilarity, sizeSimilarity };
+}
+if (a.type === 'video' && a.duration > 0 && b.duration > 0 && sizeSimilarity === null) {
+    return { matched: false, reason: 'missing_size', nameSimilarity };
+}
+if (a.type !== 'video' && !nameMatched) return { matched: false, reason: 'name', nameSimilarity, sizeSimilarity };
+
+return {
+    matched: true,
+    reason: 'metadata',
+    level: 'metadata',
+    score: (sameName ? 2 : nameSimilarity) + (sizeSimilarity === null ? 0 : sizeSimilarity),
+    nameSimilarity,
+    sizeSimilarity
+};
+};
 
 const activeStages = ['hash', ...(cfg.video ? ['video'] : []), 'name'];
 const stageSpan = 100 / activeStages.length;
@@ -26364,58 +26521,71 @@ setStageProgress('hash', 1, 1, 1, 1);
 }
 
 if (isRunningFn() && cfg.video) {
-const simCandidates = candidates.filter(i => i.mime_type.startsWith('video') && !assigned.has(i.id));
-const validVideos = simCandidates.filter(item => (parseFloat(item.params?.duration || 0) > 0));
-validVideos.sort((a, b) => parseFloat(a.params?.duration || 0) - parseFloat(b.params?.duration || 0));
+const simCandidates = candidates
+    .filter(i => String(i && i.mime_type || '').toLowerCase().startsWith('video') && !assigned.has(i.id))
+    .map(getDuplicateMeta)
+    .filter(meta => meta.duration > 0);
+const totalCount = simCandidates.length;
+const bucketSizeSeconds = 2;
+const durationBuckets = new Map();
+const pairMatches = new Map();
+
+simCandidates.forEach((meta, index) => {
+const bucketKey = Math.floor(meta.duration / bucketSizeSeconds);
+if (!durationBuckets.has(bucketKey)) durationBuckets.set(bucketKey, []);
+durationBuckets.get(bucketKey).push(index);
+pairMatches.set(index, new Set());
+});
 
 let processedCount = 0;
-const totalCount = validVideos.length;
-
-if (totalCount <= 0) {
-setStageProgress('video', 0, 0);
-}
-
 for (let i = 0; i < totalCount; i++) {
+const meta = simCandidates[i];
+const tolerance = getDuplicateDurationTolerance(meta.duration);
+const minBucket = Math.floor(Math.max(0, meta.duration - tolerance) / bucketSizeSeconds);
+const maxBucket = Math.floor((meta.duration + tolerance) / bucketSizeSeconds);
+
+for (let bucketKey = minBucket; bucketKey <= maxBucket; bucketKey++) {
+const bucket = durationBuckets.get(bucketKey);
+if (!bucket) continue;
+for (const j of bucket) {
+    if (j <= i) continue;
+    const result = compareDuplicateMetadata(meta, simCandidates[j]);
+    if (!result.matched) continue;
+    pairMatches.get(i).add(j);
+    pairMatches.get(j).add(i);
+}
+}
+
 processedCount++;
-if (processedCount % 500 === 0) {
-if (!isRunningFn()) break;
-setStageProgress('video', processedCount, totalCount);
-await sleep(0);
-}
-
-if (assigned.has(validVideos[i].id)) continue;
-
-const root = validVideos[i];
-const rootDur = parseFloat(root.params?.duration || 0);
-const rootSize = parseInt(root.size || 0);
-const groupItems = [root];
-
-for (let j = i + 1; j < totalCount; j++) {
-const target = validVideos[j];
-if (assigned.has(target.id)) continue;
-
-const durThreshold = (strictness === 'loose') ? 3.0 : 2.0;
-const targetDur = parseFloat(target.params?.duration || 0);
-const durDiff = Math.abs(targetDur - rootDur);
-
-if (durDiff > durThreshold) break;
-
-const targetSize = parseInt(target.size || 0);
-if (rootSize > 0 && targetSize > 0) {
-const sizeDiff = Math.abs(targetSize - rootSize);
-const maxBase = Math.max(targetSize, rootSize);
-const ratio = sizeDiff / maxBase;
-
-if (strictness === 'loose' || ratio <= 0.10) {
-    groupItems.push(target);
-}
+if (processedCount % 200 === 0) {
+    if (!isRunningFn()) break;
+    setStageProgress('video', processedCount, totalCount);
+    await sleep(0);
 }
 }
 
-if (groupItems.length > 1) {
-const ids = groupItems.map(x => x.id);
-ids.forEach(id => { assigned.add(id); S.dupReasons.set(id, L.tag_sim); });
-groups.push({ ids: ids, type: L.tag_sim });
+const videoGroups = [];
+const videoAssigned = new Set();
+for (let i = 0; i < totalCount; i++) {
+if (videoAssigned.has(i)) continue;
+const group = [i];
+const neighbours = Array.from(pairMatches.get(i) || []).sort((a, b) => {
+    const aScore = compareDuplicateMetadata(simCandidates[i], simCandidates[a]).score || 0;
+    const bScore = compareDuplicateMetadata(simCandidates[i], simCandidates[b]).score || 0;
+    return bScore - aScore;
+});
+
+for (const j of neighbours) {
+    if (videoAssigned.has(j)) continue;
+    const canJoin = group.every(memberIndex => pairMatches.get(memberIndex)?.has(j));
+    if (canJoin) group.push(j);
+}
+
+if (group.length > 1) {
+    group.forEach(index => videoAssigned.add(index));
+    const ids = group.map(index => simCandidates[index].id);
+    ids.forEach(id => { assigned.add(id); S.dupReasons.set(id, L.tag_sim); });
+    groups.push({ ids, type: L.tag_sim });
 }
 }
 
@@ -26525,20 +26695,25 @@ const tempGroups =[];
 
 for (let j = 1; j < sortedForAlgo.length; j++) {
 const target = sortedForAlgo[j];
-const root = currentGroup[0];
-const rootSize = parseInt(root.size || 0);
-const targetSize = parseInt(target.size || 0);
+const targetMeta = getDuplicateMeta(target);
+const isMatch = currentGroup.every(member => {
+    const memberMeta = getDuplicateMeta(member);
+    const memberSize = Number(memberMeta.size || 0);
+    const targetSize = Number(targetMeta.size || 0);
 
-let isMatch = false;
-if (rootSize === 0 && targetSize === 0) {
-    isMatch = true;
-} else if (rootSize > 0 && targetSize > 0) {
-    const sizeDiff = Math.abs(targetSize - rootSize);
-    const maxBase = Math.max(targetSize, rootSize);
-    if ((sizeDiff / maxBase) <= sizeRatioLimit) {
-        isMatch = true;
+    if (memberMeta.type === 'video' && memberMeta.duration > 0 && targetMeta.duration > 0) {
+        const tolerance = Math.min(
+            getDuplicateDurationTolerance(memberMeta.duration),
+            getDuplicateDurationTolerance(targetMeta.duration)
+        );
+        if (Math.abs(memberMeta.duration - targetMeta.duration) > tolerance) return false;
     }
-}
+
+    if (memberSize === 0 && targetSize === 0) return true;
+    if (!(memberSize > 0 && targetSize > 0)) return false;
+    const sizeSimilarity = duplicateSizeSimilarity(memberSize, targetSize);
+    return sizeSimilarity !== null && (1 - sizeSimilarity) <= duplicateProfile.sizeDifferenceLimit;
+});
 
 if (isMatch) currentGroup.push(target);
 else {
@@ -26645,6 +26820,99 @@ if (ctx.timer) clearTimeout(ctx.timer);
 if (ctx.onlineHandler) window.removeEventListener('online', ctx.onlineHandler);
 if (ctx.visibilityHandler) document.removeEventListener('visibilitychange', ctx.visibilityHandler);
 if (S.networkResumeCtx === ctx) S.networkResumeCtx = null;
+}
+
+function clearInitialNetworkRetryCtx(reason = '') {
+const ctx = S.initialNetworkRetryCtx;
+if (!ctx) return;
+if (ctx.timer) clearTimeout(ctx.timer);
+if (ctx.onlineHandler) window.removeEventListener('online', ctx.onlineHandler);
+if (ctx.visibilityHandler) document.removeEventListener('visibilitychange', ctx.visibilityHandler);
+if (S.initialNetworkRetryCtx === ctx) S.initialNetworkRetryCtx = null;
+}
+
+function isInitialNetworkRetryCtxCurrent(ctx) {
+if (!ctx) return false;
+const cur = Array.isArray(S.path) && S.path.length ? S.path[S.path.length - 1] : null;
+const curId = String((cur && cur.id) || 'root');
+const curCacheKey = S.getRealCacheKey(curId);
+if (curId === 'analyze_root' || curId.startsWith('virtual_')) return false;
+return ctx.realCacheKey === curCacheKey &&
+ctx.pathKey === getLiveManualRefreshPathKey() &&
+ctx.modeKey === getLiveManualRefreshModeKey() &&
+!S.shareParseMode && !S.linkBookmarkMode && !S.historyMode && !S.offlineMode &&
+!S.uploadMode && !S.dupMode && !S.analyzeMode;
+}
+
+function scheduleInitialNetworkRetryCtx(ctx) {
+clearInitialNetworkRetryCtx('replace');
+ctx.retry = Number(ctx.retry || 0);
+ctx.maxRetries = Number(ctx.maxRetries || 6);
+let running = false;
+const tryResume = async source => {
+if (running || S.initialNetworkRetryCtx !== ctx) return;
+if (!isInitialNetworkRetryCtxCurrent(ctx)) {
+    clearInitialNetworkRetryCtx('context_changed');
+    return;
+}
+if (S.loading || S.scanning) {
+    ctx.schedule(1500);
+    return;
+}
+if (ctx.retry >= ctx.maxRetries) {
+    clearInitialNetworkRetryCtx('retry_exhausted');
+    console.warn('[Network] Initial directory load retry limit reached; waiting for a manual refresh.');
+    return;
+}
+if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    ctx.schedule(3000);
+    return;
+}
+
+running = true;
+try {
+    const h = getHeaders();
+    if (!h.Authorization || h.Authorization.length < 10) throw new Error('NO_AUTH');
+    const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/about?_t=${Date.now()}`, {
+        headers: h,
+        cache: 'no-store'
+    });
+    if (!res.ok) throw new Error(`PROBE_${res.status}`);
+} catch (e) {
+    running = false;
+    ctx.retry += 1;
+    const delay = Math.min(30000, 1500 * (2 ** Math.max(0, ctx.retry - 1)));
+    console.warn(`[Network] Initial directory load probe failed (${ctx.retry}/${ctx.maxRetries}); retrying in ${delay}ms.`, e);
+    ctx.schedule(delay);
+    return;
+}
+
+if (S.initialNetworkRetryCtx !== ctx || !isInitialNetworkRetryCtxCurrent(ctx)) {
+    running = false;
+    clearInitialNetworkRetryCtx('context_changed_after_probe');
+    return;
+}
+
+clearInitialNetworkRetryCtx('probe_ok');
+S._initialNetworkRetryLoad = true;
+try {
+    await load(false, true);
+} finally {
+    S._initialNetworkRetryLoad = false;
+}
+};
+ctx.schedule = delay => {
+if (ctx.timer) clearTimeout(ctx.timer);
+ctx.timer = setTimeout(() => tryResume('timer'), delay);
+};
+ctx.onlineHandler = () => tryResume('online');
+ctx.visibilityHandler = () => {
+if (!document.hidden) tryResume('visible');
+};
+window.addEventListener('online', ctx.onlineHandler);
+document.addEventListener('visibilitychange', ctx.visibilityHandler);
+S.initialNetworkRetryCtx = ctx;
+ctx.schedule(typeof navigator !== 'undefined' && navigator.onLine === false ? 3000 : 1200);
 }
 
 function isNetworkResumeCtxCurrent(ctx) {
@@ -27529,11 +27797,24 @@ const res = await fetch(url, { headers: getHeaders(), signal: signal, priority: 
 if (currentId !== activeLoadId) return;
 
 if (!res.ok) {
-if (res.status === 429) { await sleep(1000); continue; }
-throw new Error("API " + res.status);
+if (res.status === 429) {
+    const rateError = new Error("API 429");
+    rateError.status = 429;
+    rateError.statusCode = 429;
+    throw rateError;
+}
+const httpError = new Error("API " + res.status);
+httpError.status = res.status;
+httpError.statusCode = res.status;
+throw httpError;
 }
 
-data = await res.json();
+data = await res.json().catch(() => null);
+if (!data || !Array.isArray(data.files)) {
+const invalidResponse = new Error('INVALID_FILE_LIST_RESPONSE');
+invalidResponse.code = 'INVALID_FILE_LIST_RESPONSE';
+throw invalidResponse;
+}
 }
 
 if (data.files && data.files.length >= 0) {
@@ -27915,6 +28196,7 @@ scheduleTurboActivationToastAfterLoad();
 S._networkRetryCount = 0;
 if (S.recentMode && realCacheKey === 'recent_root') clearRecentRootPagingActive(currentId, 'load_completed');
 if (S.networkResumeCtx && S.networkResumeCtx.realCacheKey === realCacheKey) clearNetworkResumeCtx('load_completed');
+if (S.initialNetworkRetryCtx && S.initialNetworkRetryCtx.realCacheKey === realCacheKey) clearInitialNetworkRetryCtx('load_completed');
 if (S.offlineMode && realCacheKey === 'offline_root' && currentId === activeLoadId) scheduleOfflineLightProbe('enter', 1200);
 if (S.recentMode && realCacheKey === 'recent_root' && currentId === activeLoadId) scheduleRecentLightProbe('timer', RECENT_LIGHT_PROBE_INTERVAL);
 }
@@ -27958,10 +28240,12 @@ if (e.name !== 'AbortError') {
 console.error("API Error encountered:", e);
 
 const errorMessage = String((e && e.message) || '');
+const errorStatus = Number(e && (e.status || e.statusCode) || 0);
+const isRetryableHttpError = errorStatus === 408 || errorStatus === 425 || errorStatus === 429 || (errorStatus >= 500 && errorStatus <= 599);
 const isCaptchaError = typeof isDownloadHydrateCaptchaInvalidError === 'function' && isDownloadHydrateCaptchaInvalidError(e);
 const isAuthError = !isCaptchaError && /401|403|auth_retry/i.test(errorMessage);
 const isNotFoundError = errorMessage.includes('404');
-const isNetworkError = (typeof navigator !== 'undefined' && navigator.onLine === false) || /Failed to fetch|NetworkError|fetch failed|Load failed|ERR_NETWORK/i.test(errorMessage);
+const isNetworkError = (typeof navigator !== 'undefined' && navigator.onLine === false) || isRetryableHttpError || /Failed to fetch|NetworkError|fetch failed|Load failed|ERR_NETWORK|NETWORK_RETRY_DEADLINE|INVALID_FILE_LIST_RESPONSE/i.test(errorMessage);
 
 if (isCaptchaError) {
 S._isRetrying = false;
@@ -28108,7 +28392,24 @@ if (isNetworkError) {
     } else if (canProtectNetworkList && Array.isArray(S.items) && S.items.length > 0) {
         console.warn("[Network] Connection drop detected. Protected list is kept; automatic full reload is skipped.");
     } else {
-        console.warn("[Network] Connection drop detected. Current load is stopped without modal reload.");
+        const canRetryInitialLoad = currentId === activeLoadId && !signal.aborted &&
+            (!Array.isArray(S.items) || S.items.length === 0) &&
+            !S.shareParseMode && !S.linkBookmarkMode && !S.historyMode &&
+            !S.offlineMode && !S.uploadMode && !S.dupMode && !S.analyzeMode;
+        if (canRetryInitialLoad) {
+            scheduleInitialNetworkRetryCtx({
+                id: `initial_net_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+                realCacheKey,
+                folderId,
+                pathKey: getLiveManualRefreshPathKey(),
+                modeKey: getLiveManualRefreshModeKey(),
+                retry: 0,
+                maxRetries: 6
+            });
+            console.warn("[Network] Connection drop detected. Initial directory load will retry automatically.");
+        } else {
+            console.warn("[Network] Connection drop detected. Current load is stopped without modal reload.");
+        }
     }
 
     showToast(L.msg_network_unstable, 'warning');
@@ -33262,9 +33563,20 @@ const path = Array.isArray(S.path) ? S.path : [];
 const curFolder = path[path.length - 1] || {};
 const curId = String(curFolder.id || '');
 const isVirtual = curId.startsWith('virtual_') || curId.includes('_root') || curId === 'analyze_root';
-const isHomeSubDir = !S.trashMode && !S.shareMode && !S.shareParseMode && !S.offlineMode && !S.uploadMode && !S.starredMode && !S.recentMode && !S.historyMode && !S.isFlattened && !S.dupMode && path.length > 1 && !isVirtual;
+const hasVirtualPathNode = path.some(node => {
+const id = String((node && node.id) || '');
+return id === 'analyze_root' || id.startsWith('virtual_') || id.includes('_root');
+});
+const isVirtualView = !!(S.isFlattened || S.dupMode || S.analyzeMode || hasVirtualPathNode);
+const isHomeSubDir = !S.trashMode && !S.shareMode && !S.shareParseMode && !S.offlineMode && !S.uploadMode && !S.starredMode && !S.recentMode && !S.historyMode && !isVirtualView && path.length > 1 && !isVirtual;
 const L = getStrings();
-return { id: isHomeSubDir ? curId : '', name: isHomeSubDir ? (curFolder.name || L.lbl_default_folder) : L.lbl_default_folder, path: isHomeSubDir ? path.filter(p => !String(p.id || '').startsWith('virtual_')) : null };
+const realPath = isHomeSubDir
+? path.filter(p => {
+    const id = String((p && p.id) || '');
+    return id !== 'analyze_root' && !id.startsWith('virtual_') && !id.includes('_root');
+})
+: null;
+return { id: isHomeSubDir ? curId : '', name: isHomeSubDir ? (curFolder.name || L.lbl_default_folder) : L.lbl_default_folder, path: realPath };
 }
 
 function isCloudTaskRateLimited(reqErr) {
@@ -48654,6 +48966,13 @@ let switchReqId = 0;
 let mediaSessionToken = 0;
 let qualitySwitchToken = 0;
 let qualitySwitchState = null;
+const QUALITY_SWITCH_GRACE_MS = 8000;
+let qualitySwitchGraceUntil = 0;
+let qualitySwitchGraceMediaToken = 0;
+const isQualitySwitchGraceActive = (token = mediaSessionToken) => (
+Number(token || 0) === Number(qualitySwitchGraceMediaToken || 0) &&
+qualitySwitchGraceUntil > Date.now()
+);
 let activeHealthTimer = null;
 let mobileAudioWatchdogTimer = null;
 let mobileAudioWatchdogState = null;
@@ -49169,6 +49488,8 @@ return switchVisualMediaOverlay(d, requestedItem);
 
 switchReqId++;
 mediaSessionToken++;
+qualitySwitchGraceUntil = 0;
+qualitySwitchGraceMediaToken = 0;
 const myReqId = switchReqId;
 abortActiveVideoDetailRequest();
 isSwitching = true;
@@ -49411,6 +49732,7 @@ if (!url) {
 showNoPlayableSourceBox(item);
 return;
 }
+resetSharePreviewStallWatch();
 sharePreviewSoftLimitTipShown = false;
 if (sharePreviewLimitMarker) sharePreviewLimitMarker.style.display = 'none';
 let startTime = 0;
@@ -49537,6 +49859,7 @@ activeHlsObjectUrl = null;
 }
 
 v._pkMediaToken = currentMediaToken;
+v._pkLoadedMetadataToken = 0;
 v._bufferingSince = null;
 v._blackScreenCount = 0;
 box.classList.add('buffering');
@@ -49715,6 +50038,12 @@ if (activeHealthTimer === healthTimer) activeHealthTimer = null;
 return;
 }
 
+if (isQualitySwitchGraceActive(currentMediaToken)) {
+v._bufferingSince = null;
+v._blackScreenCount = 0;
+return;
+}
+
 if (box.classList.contains('buffering')) {
 if (!v._bufferingSince) v._bufferingSince = Date.now();
 const isColdStart = v.currentTime < 1.0;
@@ -49745,9 +50074,10 @@ else {
     }
 }
 
-const blackScreenLimit = isOfficialPikPakTsHls ? 8 : 3;
+const metadataReady = Number(v._pkLoadedMetadataToken || 0) === Number(currentMediaToken || 0);
+const blackScreenLimit = isOfficialPikPakTsHls ? 10 : 6;
 
-if (v._blackScreenCount > blackScreenLimit) {
+if (metadataReady && v._blackScreenCount > blackScreenLimit) {
     const quality = v.getVideoPlaybackQuality ? v.getVideoPlaybackQuality() : null;
     const decodedFrames = quality ? quality.totalVideoFrames : (v.webkitDecodedFrameCount || 0);
 
@@ -51311,6 +51641,15 @@ const handleVideoError = (e = {}) => {
 const eventToken = e.mediaToken || (e.target && e.target._pkMediaToken) || v._pkMediaToken || 0;
 if (eventToken && eventToken !== mediaSessionToken) return;
 if (isSwitching && !eventToken) return;
+if (!e.force && e.nativeEvent && isQualitySwitchGraceActive(eventToken || mediaSessionToken)) {
+console.warn('[VideoError] Ignored transient native error during quality switch grace period.', {
+mediaToken: eventToken || mediaSessionToken,
+currentLink,
+readyState: v.readyState,
+networkState: v.networkState
+});
+return;
+}
 
 if (!v.getAttribute('src') && !pkHls) return;
 if (v.networkState === 2 && !v.error && !e.force && !pkHls) return;
@@ -51868,6 +52207,7 @@ hideLoadingSpinner(true);
 updateState();
 lastWorkingLink = currentLink;
 lastWorkingResName = currentResName;
+if (currentLink) failedUrls.delete(currentLink);
 
 if (posterEl) {
 posterEl.style.pointerEvents = 'none';
@@ -52222,6 +52562,7 @@ syncOfficialPlayProgress(true);
 });
 
 v.addEventListener('loadedmetadata', () => {
+v._pkLoadedMetadataToken = Number(v._pkMediaToken || 0);
 triggerResume(v, item);
 updateTimeUI();
 const dur = v.duration;
@@ -52910,7 +53251,7 @@ wasPaused: isPaused,
 rate: curRate
 };
 
-
+failedUrls.delete(link);
 
 box.classList.add('buffering');
 if (loaderEl) loaderEl.style.display = 'block';
@@ -52941,6 +53282,8 @@ shutterTargetTime = curT > 0.1 ? curT : 0;
 
 v.pause();
 const sourceLoad = loadSource(link, curT);
+qualitySwitchGraceMediaToken = mediaSessionToken;
+qualitySwitchGraceUntil = Date.now() + QUALITY_SWITCH_GRACE_MS;
 
 v.playbackRate = curRate;
 
@@ -56814,6 +57157,10 @@ async function submitSearch(val) {
 const text = String(val || '').trim();
 cancelSharePhraseSearchLookup();
 if (!text || S.shareParseMode) {
+performSearch(val);
+return;
+}
+if (gmGet('pk_search_share_phrase_prompt', true) !== true) {
 performSearch(val);
 return;
 }
@@ -69689,8 +70036,19 @@ const L = getStrings();
 const curFolder = S.path[S.path.length - 1] || { id: '', name: L.lbl_default_folder };
 const curId = curFolder.id || '';
 const isVirtual = curId.startsWith('virtual_') || curId.includes('_root') || curId === 'analyze_root';
-const isHomeSubDir = !S.trashMode && !S.shareMode && !S.offlineMode && !S.starredMode && !S.recentMode && !S.isFlattened && !S.dupMode && S.path.length > 1 && !isVirtual;
-return { id: isHomeSubDir ? curId : '', name: isHomeSubDir ? (curFolder.name || L.lbl_default_folder) : L.lbl_default_folder, path: isHomeSubDir ? S.path.filter(p => !p.id.startsWith('virtual_')) : null };
+const hasVirtualPathNode = Array.isArray(S.path) && S.path.some(node => {
+    const id = String((node && node.id) || '');
+    return id === 'analyze_root' || id.startsWith('virtual_') || id.includes('_root');
+});
+const isVirtualView = !!(S.isFlattened || S.dupMode || S.analyzeMode || hasVirtualPathNode);
+const isHomeSubDir = !S.trashMode && !S.shareMode && !S.offlineMode && !S.starredMode && !S.recentMode && !isVirtualView && S.path.length > 1 && !isVirtual;
+const realPath = isHomeSubDir
+? S.path.filter(p => {
+    const id = String((p && p.id) || '');
+    return id !== 'analyze_root' && !id.startsWith('virtual_') && !id.includes('_root');
+})
+: null;
+return { id: isHomeSubDir ? curId : '', name: isHomeSubDir ? (curFolder.name || L.lbl_default_folder) : L.lbl_default_folder, path: realPath };
 };
 
 const createMagnetCloudTasks = (links, targetId) => {
@@ -70799,22 +71157,109 @@ window.addEventListener('pageshow', scheduleClipboardMagnetCheck);
 
 initClipboardMagnetFocusWatcher();
 
+if (!window.__pkMagnetCompanionBridgeBound) {
+window.__pkMagnetCompanionBridgeBound = true;
+window.__pkMagnetCompanionQueue = Promise.resolve();
+window.__pkMagnetCompanionAcceptedIds = window.__pkMagnetCompanionAcceptedIds || new Set();
+const postCompanionMessage = (type, payload = {}) => {
+window.postMessage({ source: 'pk-enhancement-master', type, ...payload }, location.origin);
+};
+const postMainReady = () => postCompanionMessage('PK_MAIN_READY');
+window.addEventListener('message', (event) => {
+   if (event.origin !== location.origin) return;
+const data = event.data || {};
+if (data.source === 'pk-magnet-companion' && data.type === 'PK_QUERY_MAIN_READY') {
+postMainReady();
+return;
+}
+if (data.source !== 'pk-magnet-companion' || data.type !== 'PK_MAGNET_SELECTED') return;
+
+const requestId = String(data.requestId || '');
+const rawText = String(data.text || '');
+const receivedLinks = Array.isArray(data.links) ? data.links : [];
+const parsedLinks = parseCloudLinks(receivedLinks.length ? receivedLinks.join('\n') : rawText, true)
+.filter(link => /^magnet:\?/i.test(link));
+const links = [...new Set(parsedLinks)];
+if (!links.length) {
+if (requestId) postCompanionMessage('PK_MAGNET_REJECTED', { requestId, reason: 'no-magnet' });
+return;
+}
+if (requestId && window.__pkMagnetCompanionAcceptedIds.has(requestId)) {
+postCompanionMessage('PK_MAGNET_ACCEPTED', { requestId });
+return;
+}
+if (requestId) {
+window.__pkMagnetCompanionAcceptedIds.add(requestId);
+if (window.__pkMagnetCompanionAcceptedIds.size > 200) {
+const oldest = window.__pkMagnetCompanionAcceptedIds.values().next().value;
+if (oldest) window.__pkMagnetCompanionAcceptedIds.delete(oldest);
+}
+}
+
+window.__pkMagnetCompanionQueue = window.__pkMagnetCompanionQueue.then(async () => {
+const maxPreview = Math.max(1, Number(CONF.clipboardMagnetPreviewQueueMax) || 3);
+if (links.length > maxPreview) {
+if (!openCloudTaskModalWithClipboardMagnets(links)) {
+console.warn('[PikPak] Magnet companion bulk panel is unavailable');
+}
+return;
+}
+let attempts = 0;
+while (typeof window.__pkSubmitMagnetWithPreview !== 'function' && attempts < 20) {
+await new Promise(resolve => setTimeout(resolve, 250));
+attempts++;
+}
+if (typeof window.__pkSubmitMagnetWithPreview !== 'function') {
+console.warn('[PikPak] Magnet companion bridge is unavailable');
+return;
+}
+for (const link of links) {
+await window.__pkSubmitMagnetWithPreview(link, { source: 'browser-selection' });
+}
+}).catch(error => console.warn('[PikPak] Magnet companion bridge failed:', error));
+if (requestId) postCompanionMessage('PK_MAGNET_ACCEPTED', { requestId });
+});
+window.__pkPostMainReady = postMainReady;
+}
+
 if (btnCloud) {
 btnCloud.onclick = () => {
 const curFolder = S.path[S.path.length - 1];
 const isVirtual = curFolder.id.startsWith('virtual_') || curFolder.id.includes('_root') || curFolder.id === 'analyze_root';
-const isHomeSubDir = !S.trashMode && !S.shareMode && !S.offlineMode && !S.starredMode && !S.recentMode && !S.isFlattened && !S.dupMode && S.path.length > 1 && !isVirtual;
+const hasVirtualPathNode = Array.isArray(S.path) && S.path.some(node => {
+    const id = String((node && node.id) || '');
+    return id === 'analyze_root' || id.startsWith('virtual_') || id.includes('_root');
+});
+const isVirtualView = !!(S.isFlattened || S.dupMode || S.analyzeMode || hasVirtualPathNode);
+const isHomeSubDir = !S.trashMode && !S.shareMode && !S.offlineMode && !S.starredMode && !S.recentMode && !isVirtualView && S.path.length > 1 && !isVirtual;
 
 let saveToId = isHomeSubDir ? (curFolder.id || '') : '';
 let saveToName = isHomeSubDir ? (curFolder.name || L.lbl_default_folder) : L.lbl_default_folder;
 
-let currentSavePath = isHomeSubDir ? S.path.filter(p => !p.id.startsWith('virtual_')) : null;
+let currentSavePath = isHomeSubDir ? S.path.filter(p => {
+    const id = String((p && p.id) || '');
+    return id !== 'analyze_root' && !id.startsWith('virtual_') && !id.includes('_root');
+}) : null;
+
+const showMagnetCompanionTip = !isMobileManagerEnvironment() && gmGet(PK_MAGNET_COMPANION_TIP_KEY, false) !== true;
 
 const m = showModal(`
 <div class="pk-cloud-task-root" style="padding: 10px 5px 0 5px; display: flex; flex-direction: column; gap: 20px;">
 <h3 style="border:none; margin:0; font-size:18px; font-weight:700; color:var(--pk-fg);">${L.title_cloud_task}</h3>
 
 <textarea class="pk-cloud-area pk-scroll" id="pk_cloud_input" placeholder="${L.ph_cloud_links}"></textarea>
+
+${showMagnetCompanionTip ? `<div id="pk_magnet_companion_tip" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border:1px solid color-mix(in srgb, var(--pk-pri) 45%, var(--pk-bd)); border-radius:8px; background:color-mix(in srgb, var(--pk-pri) 8%, var(--pk-bg));">
+    <div style="display:flex; flex-direction:column; gap:3px; min-width:0;">
+        <span style="font-size:13px; font-weight:700; color:var(--pk-fg);">${L.tip_magnet_companion_title}</span>
+        <span style="font-size:12px; line-height:1.4; color:var(--pk-muted,#888);">${L.tip_magnet_companion_desc}</span>
+    </div>
+    <div style="display:flex; flex-shrink:0; align-items:center; gap:8px;">
+        <button type="button" class="pk-btn pri" id="pk_magnet_companion_tip_learn" style="height:32px; padding:0 10px; border-radius:7px; white-space:nowrap;">${L.btn_magnet_companion_download}</button>
+        <button type="button" class="pk-btn" id="pk_magnet_companion_tip_install" style="height:32px; padding:0 8px; border-radius:7px; white-space:nowrap;">${L.btn_magnet_companion_install}</button>
+        <button type="button" class="pk-btn" id="pk_magnet_companion_tip_dismiss" style="height:32px; padding:0 8px; border-radius:7px; white-space:nowrap;">${L.btn_magnet_companion_dismiss}</button>
+    </div>
+</div>` : ''}
 
 <div class="pk-cloud-smart-row" style="display:flex; justify-content:space-between; align-items:center; margin-top:-8px; margin-bottom:-4px;">
 <label class="pk-cloud-smart-label" style="display:flex; align-items:center; cursor:pointer; font-size:12px; color:var(--pk-fg); user-select:none; opacity:0.8; transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">
@@ -70856,6 +71301,17 @@ const m = showModal(`
 const modalBox = m.querySelector('.pk-modal');
 modalBox.style.width = "560px";
 modalBox.style.padding = "30px";
+
+const companionTip = m.querySelector('#pk_magnet_companion_tip');
+const companionTipLearn = m.querySelector('#pk_magnet_companion_tip_learn');
+const companionTipInstall = m.querySelector('#pk_magnet_companion_tip_install');
+const companionTipDismiss = m.querySelector('#pk_magnet_companion_tip_dismiss');
+if (companionTipLearn) companionTipLearn.onclick = () => openMagnetCompanionUrl(PK_MAGNET_COMPANION_DOWNLOAD_URL);
+if (companionTipInstall) companionTipInstall.onclick = () => openMagnetCompanionUrl(PK_MAGNET_COMPANION_INSTALL_URL);
+if (companionTipDismiss) companionTipDismiss.onclick = () => {
+    gmSet(PK_MAGNET_COMPANION_TIP_KEY, true);
+    companionTip?.remove();
+};
 
 const closeBtn = m.querySelector('.pk-modal-close');
 if (closeBtn) { closeBtn.style.top = "36px"; closeBtn.style.right = "30px"; }
@@ -71546,7 +72002,7 @@ if (k.startsWith('pk_duration_')) return 'history';
 const cacheKeys = ['pk_captured_captcha', 'pk_i18n_manifest', 'pk_script_update_cache', 'pk_potplayer_launch_state', 'pk_potplayer_protocol_state', 'pk_ghost_files', 'pk_migration_stub', 'pk_cfg_sync_last_remote_hash', 'pk_cfg_sync_last_local_hash', 'pk_cfg_sync_last_conflict_hash', 'pk_cfg_sync_last_sync_at', 'pk_cfg_sync_last_report'];
 if (k.startsWith('pk_fmod_') || k.startsWith('pk_i18n_') || k.startsWith(CONF.scriptUpdateDismissPrefix) || cacheKeys.includes(k)) return 'cache';
 
-const ruleKeys =['pk_blacklist', 'pk_blacklist_folders', 'pk_downloader_type', 'pk_downloader_prefer_original_video_link', 'pk_idm_export_mode', 'pk_idm_url_export_type', 'pk_idm_exe_path', 'pk_idm_bat_root', 'pk_idm_bat_keep_structure', 'pk_idm_bat_add_queue', 'pk_idm_bat_start_queue', 'pk_aria2_url', 'pk_aria2_token', 'pk_aria2_dir', 'pk_aria2_keep_structure', 'pk_gopeed_url', 'pk_gopeed_token', 'pk_gopeed_dir', 'pk_gopeed_keep_structure', 'pk_abdm_url', 'pk_abdm_dir', 'pk_download_accel_enable', 'pk_download_accel_domain', 'pk_download_accel_mode', 'pk_download_accel_query_param', 'pk_download_accel_apply_browser', 'pk_download_accel_apply_downloader', 'pk_download_accel_apply_potplayer', 'pk_download_accel_apply_vlc', 'pk_download_accel_apply_m3u', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_share_update_times', 'pk_bn_find_hist', 'pk_bn_rep_hist', 'pk_skip_bl_on_del', 'pk_potplayer_custom_path'];
+const ruleKeys =['pk_blacklist', 'pk_blacklist_folders', 'pk_downloader_type', 'pk_downloader_prefer_original_video_link', 'pk_idm_export_mode', 'pk_idm_url_export_type', 'pk_idm_exe_path', 'pk_idm_bat_root', 'pk_idm_bat_keep_structure', 'pk_idm_bat_add_queue', 'pk_idm_bat_start_queue', 'pk_aria2_url', 'pk_aria2_token', 'pk_aria2_dir', 'pk_aria2_keep_structure', 'pk_gopeed_url', 'pk_gopeed_token', 'pk_gopeed_dir', 'pk_gopeed_keep_structure', 'pk_abdm_url', 'pk_abdm_dir', 'pk_download_accel_enable', 'pk_download_accel_domain', 'pk_download_accel_mode', 'pk_download_accel_query_param', 'pk_download_accel_apply_browser', 'pk_download_accel_apply_downloader', 'pk_download_accel_apply_potplayer', 'pk_download_accel_apply_vlc', 'pk_download_accel_apply_m3u', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_share_phrase_prompt', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_share_update_times', 'pk_bn_find_hist', 'pk_bn_rep_hist', 'pk_skip_bl_on_del', 'pk_potplayer_custom_path'];
 if (ruleKeys.includes(k) || k.startsWith('pk_scan_last_') || k.startsWith('pk_analyze_last_') || k === 'pk_dup_strictness') return 'rules';
 
 return 'pref';
@@ -71581,6 +72037,7 @@ return localStatsPending;
 };
 const curLang = gmGet('pk_lang', lang);
 const curEngine = gmGet('pk_search_engine', 'google');
+const curSearchSharePhrasePrompt = gmGet('pk_search_share_phrase_prompt', true) === true;
 const curDefaultVideoQuality = getDefaultVideoQualityPref();
 const isMobileExternalPlayerConfig = isMobileExternalPlayerEnvironment();
 const curDefaultOpenPlayer = getDefaultOpenPlayerPref();
@@ -71767,6 +72224,18 @@ const m = showLargeModal(`
             </span>
             <input type="checkbox" id="set_magnet_auto_filter_recorded" ${gmGet('pk_magnet_auto_filter_recorded', false) === true ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer; flex-shrink:0;">
         </label>
+        ${!isMobileManagerEnvironment() && gmGet(PK_MAGNET_COMPANION_TIP_KEY, false) !== true ? `<div id="pk_magnet_companion_card" style="display:flex; flex-direction:column; gap:10px; border:2px solid var(--pk-bd); border-radius:8px; padding:12px; background:var(--pk-bg); box-sizing:border-box;">
+            <div style="display:flex; flex-direction:column; gap:5px;">
+                <span style="font-size:14px; font-weight:700; color:var(--pk-fg);">${L.label_magnet_companion}</span>
+                <span style="font-size:12px; color:var(--pk-muted,#888); line-height:1.45;">${L.tip_magnet_companion_desc}</span>
+                <span style="font-size:12px; color:#d97706; line-height:1.4;">${L.desc_magnet_companion_desktop_only}</span>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <button type="button" class="pk-btn pri" id="pk_magnet_companion_download" style="min-height:34px; padding:0 12px; border-radius:7px; justify-content:center;">${L.btn_magnet_companion_download}</button>
+                <button type="button" class="pk-btn" id="pk_magnet_companion_install" style="min-height:34px; padding:0 12px; border-radius:7px; justify-content:center;">${L.btn_magnet_companion_install}</button>
+                <button type="button" class="pk-btn" id="set_magnet_companion_tip_dismissed" data-dismissed="${gmGet(PK_MAGNET_COMPANION_TIP_KEY, false) === true ? 'true' : 'false'}" aria-pressed="${gmGet(PK_MAGNET_COMPANION_TIP_KEY, false) === true ? 'true' : 'false'}" style="min-height:34px; padding:0 12px; border-radius:7px; justify-content:center;">${L.btn_magnet_companion_dismiss}</button>
+            </div>
+        </div>` : ''}
     </div>
 </div>
 
@@ -71787,6 +72256,14 @@ const m = showLargeModal(`
                 style="display:flex; align-items:center; justify-content:space-between; height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:0 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box;">
             <span style="font-size:14px; color:var(--pk-fg); user-select:none;">${L.label_visual_media_continuous_browse}</span>
             <input type="checkbox" id="set_visual_media_continuous_browse" ${curVisualMediaContinuousBrowse ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer;">
+        </label>
+
+        <label for="set_search_share_phrase_prompt" class="pk-setting-wraprow"
+                onmouseover="this.style.borderColor='var(--pk-pri)'"
+                onmouseout="this.style.borderColor='var(--pk-bd)'"
+                style="display:flex; align-items:center; justify-content:space-between; height:44px; border:2px solid var(--pk-bd); border-radius:8px; padding:0 12px; cursor:pointer; background:var(--pk-bg); transition:border-color 0.2s; box-sizing:border-box;">
+            <span style="font-size:14px; color:var(--pk-fg); user-select:none;">${L.label_search_share_phrase_prompt}</span>
+            <input type="checkbox" id="set_search_share_phrase_prompt" ${curSearchSharePhrasePrompt ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--pk-pri); cursor:pointer;">
         </label>
 
         <label for="set_keep_pos" class="pk-setting-wraprow"
@@ -72258,6 +72735,26 @@ const m = showLargeModal(`
 </div>
 </div>
 `, { className: 'pk-settings-modal' });
+
+const companionDownloadBtn = m.querySelector('#pk_magnet_companion_download');
+const companionInstallBtn = m.querySelector('#pk_magnet_companion_install');
+const companionTipDismissBtn = m.querySelector('#set_magnet_companion_tip_dismissed');
+if (companionDownloadBtn) companionDownloadBtn.onclick = () => openMagnetCompanionUrl(PK_MAGNET_COMPANION_DOWNLOAD_URL);
+if (companionInstallBtn) companionInstallBtn.onclick = () => openMagnetCompanionUrl(PK_MAGNET_COMPANION_INSTALL_URL);
+if (companionTipDismissBtn) {
+const updateCompanionTipDismissButton = () => {
+const dismissed = companionTipDismissBtn.dataset.dismissed === 'true';
+companionTipDismissBtn.setAttribute('aria-pressed', dismissed ? 'true' : 'false');
+};
+updateCompanionTipDismissButton();
+companionTipDismissBtn.onclick = () => {
+companionTipDismissBtn.dataset.dismissed = 'true';
+gmSet(PK_MAGNET_COMPANION_TIP_KEY, true);
+updateCompanionTipDismissButton();
+const companionCard = companionTipDismissBtn.closest('#pk_magnet_companion_card');
+if (companionCard) companionCard.style.display = 'none';
+};
+}
 
 const officialMagnetFilterInput = m.querySelector('#set_magnet_official_smart_filter');
 if (officialMagnetFilterInput) {
@@ -73583,6 +74080,7 @@ const exportExactKeys = new Set([
 'pk_dl_filter_size_max',
 'pk_dl_filter_size_unit',
 'pk_search_engine',
+'pk_search_share_phrase_prompt',
 'pk_default_video_quality',
 'pk_video_load_progress_cache',
 'pk_visual_media_continuous_browse',
@@ -73626,7 +74124,7 @@ const getCatWeight = (k) => {
 if (k.startsWith('pk_archive_pwd_') || k === 'pk_pwd_vault' || k === 'pk_pwd_try_count' || k === 'pk_share_limits') return 3;
 if (k.startsWith('pk_duration_')) return 4;
 
-const ruleKeys = ['pk_blacklist', 'pk_blacklist_folders', 'pk_downloader_type', 'pk_downloader_prefer_original_video_link', 'pk_idm_export_mode', 'pk_idm_url_export_type', 'pk_idm_exe_path', 'pk_idm_bat_root', 'pk_idm_bat_keep_structure', 'pk_idm_bat_add_queue', 'pk_idm_bat_start_queue', 'pk_aria2_url', 'pk_aria2_token', 'pk_aria2_dir', 'pk_aria2_keep_structure', 'pk_gopeed_url', 'pk_gopeed_token', 'pk_gopeed_dir', 'pk_gopeed_keep_structure', 'pk_abdm_url', 'pk_abdm_dir', 'pk_download_accel_enable', 'pk_download_accel_domain', 'pk_download_accel_mode', 'pk_download_accel_query_param', 'pk_download_accel_apply_browser', 'pk_download_accel_apply_downloader', 'pk_download_accel_apply_potplayer', 'pk_download_accel_apply_vlc', 'pk_download_accel_apply_m3u', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_share_update_times', 'pk_bn_find_hist', 'pk_bn_rep_hist', 'pk_dup_strictness', 'pk_skip_bl_on_del', 'pk_clipboard_magnet_focus', 'pk_potplayer_custom_path'];
+const ruleKeys = ['pk_blacklist', 'pk_blacklist_folders', 'pk_downloader_type', 'pk_downloader_prefer_original_video_link', 'pk_idm_export_mode', 'pk_idm_url_export_type', 'pk_idm_exe_path', 'pk_idm_bat_root', 'pk_idm_bat_keep_structure', 'pk_idm_bat_add_queue', 'pk_idm_bat_start_queue', 'pk_aria2_url', 'pk_aria2_token', 'pk_aria2_dir', 'pk_aria2_keep_structure', 'pk_gopeed_url', 'pk_gopeed_token', 'pk_gopeed_dir', 'pk_gopeed_keep_structure', 'pk_abdm_url', 'pk_abdm_dir', 'pk_download_accel_enable', 'pk_download_accel_domain', 'pk_download_accel_mode', 'pk_download_accel_query_param', 'pk_download_accel_apply_browser', 'pk_download_accel_apply_downloader', 'pk_download_accel_apply_potplayer', 'pk_download_accel_apply_vlc', 'pk_download_accel_apply_m3u', 'pk_dl_filter_ext', 'pk_dl_filter_name', 'pk_dl_filter_size_min', 'pk_dl_filter_size_max', 'pk_dl_filter_size_unit', 'pk_search_engine', 'pk_search_share_phrase_prompt', 'pk_search_history', 'pk_expired_shares', 'pk_share_limits', 'pk_share_update_times', 'pk_bn_find_hist', 'pk_bn_rep_hist', 'pk_dup_strictness', 'pk_skip_bl_on_del', 'pk_clipboard_magnet_focus', 'pk_potplayer_custom_path'];
 if (ruleKeys.includes(k) || k.startsWith('pk_scan_last_') || k.startsWith('pk_analyze_last_')) return 2;
 
 return 1;
@@ -73771,6 +74269,7 @@ const importExactKeys = new Set([
 'pk_dl_filter_size_max',
 'pk_dl_filter_size_unit',
 'pk_search_engine',
+'pk_search_share_phrase_prompt',
 'pk_default_video_quality',
 'pk_video_load_progress_cache',
 'pk_visual_media_continuous_browse',
@@ -74087,6 +74586,9 @@ const newKeepPos = m.querySelector('#set_keep_pos').checked;
 const newSkipBl = m.querySelector('#set_skip_bl').checked;
 const newOfficialMagnetFilterMode = m.querySelector('#set_magnet_official_smart_filter').checked ? 'smart' : 'close';
 const newMagnetAutoFilterRecorded = !!m.querySelector('#set_magnet_auto_filter_recorded').checked;
+const magnetCompanionTipButton = m.querySelector('#set_magnet_companion_tip_dismissed');
+const newMagnetCompanionTipDismissed = magnetCompanionTipButton ? magnetCompanionTipButton.dataset.dismissed === 'true' : gmGet(PK_MAGNET_COMPANION_TIP_KEY, false) === true;
+const newSearchSharePhrasePrompt = !!m.querySelector('#set_search_share_phrase_prompt').checked;
 const newClipboardMagnetFocus = isTouchPrimaryDevice()
 ? getBoolPref('pk_clipboard_magnet_focus', true)
 : m.querySelector('#set_clipboard_magnet_focus').checked;
@@ -74098,8 +74600,8 @@ const storedDownloaderTypeRaw = String(gmGet('pk_downloader_type', CONF.download
 const oldDownloaderType = normalizeDownloaderType(storedDownloaderTypeRaw);
 const downloaderTypeNeedsNormalize = !isMobileDownloaderConfig && storedDownloaderTypeRaw && storedDownloaderTypeRaw !== oldDownloaderType;
 const oldKeepStructure = getDownloaderKeepStructurePref();
-const oldSig = JSON.stringify([curLang, oldTurbo, oldDownloaderType, gmGet('pk_aria2_url', ''), gmGet('pk_aria2_token', ''), normalizeAriaDownloadDir(gmGet('pk_aria2_dir', CONF.aria2DownloadDir)), oldKeepStructure, curGopeedUrl, gmGet('pk_gopeed_token', ''), normalizeGopeedDownloadDir(gmGet('pk_gopeed_dir', CONF.gopeedDownloadDir)), oldKeepStructure, curAbdmUrl, normalizeAbdmDownloadDir(gmGet('pk_abdm_dir', CONF.abdmDownloadDir)), oldKeepStructure, getBoolPref('pk_downloader_prefer_original_video_link', CONF.downloaderPreferOriginalVideoLink), getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable), oldDownloadAccelDomainForSig, oldDownloadAccelModeForSig, normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam)), getBoolPref('pk_download_accel_apply_browser', CONF.downloadAccelApplyBrowser), getBoolPref('pk_download_accel_apply_downloader', CONF.downloadAccelApplyDownloader), curDownloadAccelApplyExternal, getBoolPref('pk_download_accel_apply_m3u', CONF.downloadAccelApplyM3U), gmGet('pk_blur_scope', gmGet('pk_blur_thumb', false) ? 'list' : 'off'), gmGet('pk_hide_button_text', false), curThemeFollowSystem, curConfigCloudAutoSync, gmGet('pk_keep_pos', true), gmGet('pk_skip_bl_on_del', true), officialMagnetFilterMode, gmGet('pk_magnet_auto_filter_recorded', false), gmGet('pk_clipboard_magnet_focus', true), gmGet('pk_comic_mode', true), gmGet('pk_sort_independent', false) ? 'indep' : 'global', gmGet('pk_view_independent', false) ? 'indep' : 'global', curEngine, curDefaultOpenPlayer, curDefaultVideoQuality, curVideoLoadProgressCache, curVisualMediaContinuousBrowse, gmGet('pk_dl_filter_ext', ''), gmGet('pk_dl_filter_size_min', ''), gmGet('pk_dl_filter_size_max', ''), gmGet('pk_dl_filter_size_unit', 'MB'), gmGet('pk_dl_filter_name', '')]);
-const newSig = JSON.stringify([selectedLang, newTurbo, newDownloaderType, newUrl, newToken, newAriaDir, newAriaKeepStructure, newGopeedUrl, newGopeedToken, newGopeedDir, newAriaKeepStructure, newAbdmUrl, newAbdmDir, newAriaKeepStructure, newDownloaderPreferOriginalVideoLink, newDownloadAccelEnable, newDownloadAccelDomain, newDownloadAccelMode, newDownloadAccelQueryParam, newDownloadAccelApplyBrowser, newDownloadAccelApplyDownloader, newDownloadAccelApplyExternal, newDownloadAccelApplyM3U, newBlurScope, newHideButtonText, newThemeFollowSystem, newConfigCloudAutoSync, newKeepPos, newSkipBl, newOfficialMagnetFilterMode, newMagnetAutoFilterRecorded, newClipboardMagnetFocus, newComicMode, sortPref, viewPref, selectedEngine, normalizeDefaultOpenPlayerForEnvironment(selectedDefaultOpenPlayer, isMobileExternalPlayerConfig), normalizeDefaultVideoQuality(selectedDefaultVideoQuality), !!m.querySelector('#set_video_load_progress_cache').checked, !!m.querySelector('#set_visual_media_continuous_browse').checked, m.querySelector('#set_dl_filter_ext').value.trim(), m.querySelector('#set_dl_filter_size_min').value.trim(), m.querySelector('#set_dl_filter_size_max').value.trim(), m.querySelector('#cs_set_dl_size_unit .pk-select-item.act') ? m.querySelector('#cs_set_dl_size_unit .pk-select-item.act').dataset.val : 'MB', m.querySelector('#set_dl_filter_name').value.trim()]);
+const oldSig = JSON.stringify([curLang, oldTurbo, oldDownloaderType, gmGet('pk_aria2_url', ''), gmGet('pk_aria2_token', ''), normalizeAriaDownloadDir(gmGet('pk_aria2_dir', CONF.aria2DownloadDir)), oldKeepStructure, curGopeedUrl, gmGet('pk_gopeed_token', ''), normalizeGopeedDownloadDir(gmGet('pk_gopeed_dir', CONF.gopeedDownloadDir)), oldKeepStructure, curAbdmUrl, normalizeAbdmDownloadDir(gmGet('pk_abdm_dir', CONF.abdmDownloadDir)), oldKeepStructure, getBoolPref('pk_downloader_prefer_original_video_link', CONF.downloaderPreferOriginalVideoLink), getBoolPref('pk_download_accel_enable', CONF.downloadAccelEnable), oldDownloadAccelDomainForSig, oldDownloadAccelModeForSig, normalizeDownloadAccelQueryParam(gmGet('pk_download_accel_query_param', CONF.downloadAccelQueryParam)), getBoolPref('pk_download_accel_apply_browser', CONF.downloadAccelApplyBrowser), getBoolPref('pk_download_accel_apply_downloader', CONF.downloadAccelApplyDownloader), curDownloadAccelApplyExternal, getBoolPref('pk_download_accel_apply_m3u', CONF.downloadAccelApplyM3U), gmGet('pk_blur_scope', gmGet('pk_blur_thumb', false) ? 'list' : 'off'), gmGet('pk_hide_button_text', false), curThemeFollowSystem, curConfigCloudAutoSync, gmGet('pk_keep_pos', true), gmGet('pk_skip_bl_on_del', true), officialMagnetFilterMode, gmGet('pk_magnet_auto_filter_recorded', false), gmGet(PK_MAGNET_COMPANION_TIP_KEY, false) === true, curSearchSharePhrasePrompt, gmGet('pk_clipboard_magnet_focus', true), gmGet('pk_comic_mode', true), gmGet('pk_sort_independent', false) ? 'indep' : 'global', gmGet('pk_view_independent', false) ? 'indep' : 'global', curEngine, curDefaultOpenPlayer, curDefaultVideoQuality, curVideoLoadProgressCache, curVisualMediaContinuousBrowse, gmGet('pk_dl_filter_ext', ''), gmGet('pk_dl_filter_size_min', ''), gmGet('pk_dl_filter_size_max', ''), gmGet('pk_dl_filter_size_unit', 'MB'), gmGet('pk_dl_filter_name', '')]);
+const newSig = JSON.stringify([selectedLang, newTurbo, newDownloaderType, newUrl, newToken, newAriaDir, newAriaKeepStructure, newGopeedUrl, newGopeedToken, newGopeedDir, newAriaKeepStructure, newAbdmUrl, newAbdmDir, newAriaKeepStructure, newDownloaderPreferOriginalVideoLink, newDownloadAccelEnable, newDownloadAccelDomain, newDownloadAccelMode, newDownloadAccelQueryParam, newDownloadAccelApplyBrowser, newDownloadAccelApplyDownloader, newDownloadAccelApplyExternal, newDownloadAccelApplyM3U, newBlurScope, newHideButtonText, newThemeFollowSystem, newConfigCloudAutoSync, newKeepPos, newSkipBl, newOfficialMagnetFilterMode, newMagnetAutoFilterRecorded, newMagnetCompanionTipDismissed, newSearchSharePhrasePrompt, newClipboardMagnetFocus, newComicMode, sortPref, viewPref, selectedEngine, normalizeDefaultOpenPlayerForEnvironment(selectedDefaultOpenPlayer, isMobileExternalPlayerConfig), normalizeDefaultVideoQuality(selectedDefaultVideoQuality), !!m.querySelector('#set_video_load_progress_cache').checked, !!m.querySelector('#set_visual_media_continuous_browse').checked, m.querySelector('#set_dl_filter_ext').value.trim(), m.querySelector('#set_dl_filter_size_min').value.trim(), m.querySelector('#set_dl_filter_size_max').value.trim(), m.querySelector('#cs_set_dl_size_unit .pk-select-item.act') ? m.querySelector('#cs_set_dl_size_unit .pk-select-item.act').dataset.val : 'MB', m.querySelector('#set_dl_filter_name').value.trim()]);
 const oldIdmSig = JSON.stringify([normalizeIdmExportMode(gmGet('pk_idm_export_mode', CONF.idmExportMode)), normalizeIdmUrlExportType(gmGet('pk_idm_url_export_type', CONF.idmUrlExportType)), normalizeIdmExePath(gmGet('pk_idm_exe_path', CONF.idmExePath)), normalizeIdmBatDownloadRoot(gmGet('pk_idm_bat_root', CONF.idmBatDownloadRoot)), oldKeepStructure]);
 const newIdmSig = JSON.stringify([newIdmExportMode, newIdmUrlExportType, newIdmExePath, newIdmBatRoot, newAriaKeepStructure]);
 const hasSettingsChanged = oldSig !== newSig || oldIdmSig !== newIdmSig || downloaderTypeNeedsNormalize || officialMagnetFilterDirty;
@@ -74116,6 +74618,8 @@ if (!hasSettingsChanged) { m.remove(); return; }
 
 const applyChangesAndClose = async () => {
 gmSet('pk_magnet_auto_filter_recorded', newMagnetAutoFilterRecorded);
+gmSet(PK_MAGNET_COMPANION_TIP_KEY, newMagnetCompanionTipDismissed);
+gmSet('pk_search_share_phrase_prompt', newSearchSharePhrasePrompt);
 gmSet('pk_blur_scope', newBlurScope);
 gmSet('pk_blur_thumb', newBlurScope !== 'off');
 gmSet('pk_hide_button_text', newHideButtonText);
@@ -81231,6 +81735,7 @@ _minified: true
 
 async function runBackgroundCrawler() {
 if (!window.pkGlobalIndex) return;
+if (typeof globalCache === 'undefined' || !globalCache || typeof globalCache.has !== 'function' || !globalCache.has('root')) return;
 if (isBackgroundRunning) return;
 if (isPkBackgroundPaused()) {
 scheduleBackgroundResume();
@@ -81723,5 +82228,12 @@ startObserver();
 tryInject();
 startObserver();
 }
+try {
+if (typeof window.__pkPostMainReady === 'function') {
+window.__pkPostMainReady();
+} else {
+window.postMessage({ source: 'pk-enhancement-master', type: 'PK_MAIN_READY' }, location.origin);
+}
+} catch (e) {}
 })()
 ;
