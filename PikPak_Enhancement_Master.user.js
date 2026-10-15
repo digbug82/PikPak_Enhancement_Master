@@ -3093,7 +3093,7 @@ return value.replace(/\s*(?:Ctrl|Command|⌘)\s*\+\s*F\b/gi, '').trim();
 
 function syncSearchClearVisibility(input, clear) {
 if (!input) return false;
-const hasValue = !!String(input.value || '').trim();
+const hasValue = !!String(input.value || '').trim() || !!(input.id === 'pk-search-input' && pkState && pkState.folderSearch);
 const wrap = typeof input.closest === 'function' ? input.closest('.pk-search') : input.parentNode;
 if (wrap && wrap.classList) wrap.classList.toggle('has-value', hasValue);
 if (clear && !isMobileManagerEnvironment()) clear.style.display = hasValue ? 'flex' : 'none';
@@ -13210,7 +13210,7 @@ const key = String(id || '');
 if (!key) return null;
 return S.getBrowserOverlays().find(el => el.dataset && el.dataset.pkBrowserOverlayId === key) || null;
 },
-locatePreviewSourceItem: (item = null) => {
+locatePreviewSourceItem: (item = null, preserveScroll = false) => {
 const source = item && typeof item === 'object' ? item : null;
 const id = source && String(source.id || source.file_id || '');
 const fileId = source && String(source.file_id || '');
@@ -13231,7 +13231,7 @@ S.activeId = targetId;
 S.lastSelIdx = targetIdx;
 const rowTop = getItemScrollTopByIndex(targetIdx);
 const vpHeight = UI.vp.clientHeight || 0;
-UI.vp.scrollTop = Math.max(0, rowTop - (vpHeight / 2) + (CONF.rowHeight / 2));
+if (!preserveScroll) UI.vp.scrollTop = Math.max(0, rowTop - (vpHeight / 2) + (CONF.rowHeight / 2));
 renderVisible();
 updateStat();
 return true;
@@ -14745,6 +14745,17 @@ return id;
 }
 };
 pkState = S;
+// Keep UI-only sorting/rendering in openManager; the outer prober uses this bridge.
+let durationViewTimer = null;
+S.refreshDurationView = () => {
+if (durationViewTimer) clearTimeout(durationViewTimer);
+durationViewTimer = setTimeout(() => {
+durationViewTimer = null;
+if (pkState !== S) return;
+if (S.sort === 'duration' && !S.loading && !S.scanning) refresh();
+else renderVisible();
+}, 250);
+};
 
 function isLocalSearchBackActive() {
 if (S.mobileSelectionMode || S.isStrictVirtualNavMode()) return false;
@@ -15484,6 +15495,56 @@ ${CONF.icons.search || '<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 <svg id="pk-search-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
 <div class="pk-hist-pop" id="pk-search-hist"></div>
 </div>
+
+<style>
+/* The grid header also uses z-index 30; lift the search bar while its popup is open. */
+#pk-top-bar:has(#pk-folder-search-controls[open]) { z-index:50!important; overflow:visible!important; }
+#pk-folder-search-controls { position:relative; flex:0 0 auto; color:var(--pk-fg); font-size:14px; line-height:1.5; }
+#pk-folder-search-controls, #pk-folder-search-controls * { box-sizing:border-box; }
+#pk-folder-search-controls > summary { padding:8px 10px; cursor:pointer; white-space:nowrap; border-radius:6px; }
+#pk-folder-search-controls > summary:hover { background:var(--pk-hl); }
+#pk-folder-search-controls .pk-folder-search-panel { position:absolute; right:0; top:calc(100% + 6px); width:min(360px,calc(100vw - 32px)); max-height:calc(100dvh - 120px); overflow:auto; padding:18px; border:1px solid var(--pk-bd); border-radius:12px; background:var(--pk-bg); color:var(--pk-fg); box-shadow:0 8px 24px rgba(0,0,0,.15); z-index:20; }
+#pk-folder-search-controls .pk-folder-search-heading { display:block; margin:0 0 6px; font-size:12px; font-weight:500; opacity:.7; }
+#pk-folder-search-scope { display:block; font-size:14px; font-weight:600; line-height:1.5; overflow-wrap:anywhere; }
+#pk-folder-search-controls .pk-folder-search-check { display:flex; align-items:center; gap:10px; min-height:44px; margin:4px 0 0; padding:0; font-size:14px; line-height:1.5; cursor:pointer; }
+#pk-folder-search-controls .pk-folder-search-check input { flex:0 0 18px; width:18px; height:18px; margin:0; accent-color:var(--pk-pri); cursor:pointer; }
+#pk-folder-search-controls .pk-folder-search-types { margin-top:12px; padding-top:14px; border-top:1px solid var(--pk-bd); }
+#pk-folder-search-controls .pk-folder-search-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+/* Independent classes avoid upstream toolbar rules that collapse .pk-btn to icon width. */
+#pk-folder-search-controls .pk-folder-search-choice, #pk-folder-search-apply { display:flex; align-items:center; justify-content:center; width:100%; min-width:0; min-height:44px; height:auto; margin:0; padding:8px; border:1px solid var(--pk-bd); border-radius:8px; background:var(--pk-bg); color:var(--pk-fg); font:inherit; font-size:14px; font-weight:500; line-height:1.4; text-align:center; white-space:nowrap; overflow:visible; cursor:pointer; }
+#pk-folder-search-controls .pk-folder-search-choice:hover { background:var(--pk-hl); }
+#pk-folder-search-controls .pk-folder-search-choice[aria-pressed="true"] { border-color:var(--pk-pri); background:var(--pk-pri); color:#fff; font-weight:600; }
+#pk-folder-search-controls .pk-folder-search-footer { margin-top:12px; padding-top:14px; border-top:1px solid var(--pk-bd); }
+#pk-folder-search-status { margin-bottom:12px; font-size:13px; line-height:1.5; opacity:.7; overflow-wrap:anywhere; }
+#pk-folder-search-apply { border-color:var(--pk-pri); background:var(--pk-pri); color:#fff; font-weight:600; }
+#pk-folder-search-apply:hover { filter:brightness(1.08); }
+#pk-folder-search-controls :is(summary,button,input):focus-visible { outline:2px solid var(--pk-pri); outline-offset:3px; }
+@media (max-width:360px) { #pk-folder-search-controls .pk-folder-search-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+</style>
+<details id="pk-folder-search-controls">
+<summary>搜索筛选</summary>
+<div class="pk-folder-search-panel">
+<span class="pk-folder-search-heading">搜索范围</span>
+<span id="pk-folder-search-scope">当前文件夹</span>
+<label class="pk-folder-search-check"><input id="pk-folder-search-recursive" type="checkbox" checked><span>包含子文件夹</span></label>
+<div class="pk-folder-search-types">
+<span class="pk-folder-search-heading">文件类型</span>
+<div class="pk-folder-search-grid" role="group" aria-label="搜索文件类型">
+<button type="button" class="pk-folder-search-choice" data-folder-search-cat="all" aria-pressed="true">全部类型</button>
+<button type="button" class="pk-folder-search-choice" data-folder-search-cat="audio" aria-pressed="false">音乐</button>
+<button type="button" class="pk-folder-search-choice" data-folder-search-cat="image" aria-pressed="false">图片</button>
+<button type="button" class="pk-folder-search-choice" data-folder-search-cat="video" aria-pressed="false">视频</button>
+<button type="button" class="pk-folder-search-choice" data-folder-search-cat="folder" aria-pressed="false">文件夹</button>
+</div>
+</div>
+<label class="pk-folder-search-check"><input id="pk-folder-search-starred" type="checkbox"><span>已加星标</span></label>
+<div class="pk-folder-search-footer">
+<div id="pk-folder-search-status" role="status" aria-atomic="true">首次搜索可能需要一点时间。</div>
+<button type="button" id="pk-folder-search-apply">搜索</button>
+</div>
+</div>
+</details>
+
 </div>
 
 <button class="pk-btn" id="pk-export" data-pk-tip="${L.tip_export}" disabled>
@@ -22166,7 +22227,7 @@ const path = Array.isArray(S.path) ? S.path : [];
 const cur = path.length ? path[path.length - 1] : null;
 const curId = String((cur && cur.id) || '');
 
-const isSearchResultRoot = curId === 'virtual_search_root';
+const isSearchResultRoot = curId === 'virtual_search_root' && !S.folderSearch;
 const isFileInsightResult = !!S.isFlattened || curId === 'file_insight';
 const isFileDupResult = !!S.dupMode || curId === 'file_dup';
 
@@ -26321,9 +26382,59 @@ if (S.liveRefreshCtx === ctx) S.liveRefreshCtx = null;
 if (S.mergeRefreshCtx === ctx) S.mergeRefreshCtx = null;
 }
 
+const getDuplicateItemType = (item) => {
+const mime = String(item && item.mime_type || '').toLowerCase();
+if (mime.startsWith('video/')) return 'video';
+if (mime.startsWith('image/')) return 'image';
+if (mime.startsWith('audio/')) return 'other';
+const ext = getItemExt(item);
+if (FOLDER_SEARCH_EXTS.video.has(ext)) return 'video';
+if (FOLDER_SEARCH_EXTS.image.has(ext)) return 'image';
+return 'other';
+};
+
+const getDuplicateKnownDuration = (item) => {
+const parse = value => {
+const n = Number(value);
+return Number.isFinite(n) && n > 0 ? n : 0;
+};
+return getFileDurationSeconds(item) || parse(S.durationMap && S.durationMap.get(item.id)) ||
+parse(gmGet('pk_duration_' + item.id, 0));
+};
+
+const getDuplicateSequenceTokens = (item) => {
+// A numbered segment is meaningful; an explicit "copy (1)" suffix is not.
+const name = String(item && item.name || '').toLowerCase().replace(/\.[^/.]+$/, '')
+.replace(/\s*[-_ .．。]*\s*(?:copy|duplicate|dup|副本|复制|拷贝|拷貝|コピー|複製|복사본|사본|복사)\s*(?:\d+|\(\s*\d+\s*\)|（\s*\d+\s*）|\[\s*\d+\s*\]|【\s*\d+\s*】)?\s*$/iu, '');
+const tokens = new Map();
+const seasonEpisode = name.match(/(?:^|[\s._-])s(\d{1,3})[\s._-]*e(\d{1,4})(?=$|[\s._-])/i);
+if (seasonEpisode) {
+tokens.set('season', Number(seasonEpisode[1]));
+tokens.set('episode', Number(seasonEpisode[2]));
+}
+for (const match of name.matchAll(/(?:^|[\s._-])(episode|ep|part|pt|disc|disk|cd|volume|vol)[\s._-]*(\d+)(?=$|[\s._-])/gi)) {
+const key = /^(episode|ep)$/.test(match[1]) ? 'episode' : /^(part|pt)$/.test(match[1]) ? 'part' : /^(disc|disk|cd)$/.test(match[1]) ? 'disc' : 'volume';
+tokens.set(key, Number(match[2]));
+}
+for (const match of name.matchAll(/第\s*(\d+)\s*([集话話部段章])/g)) {
+tokens.set(/[集话話]/.test(match[2]) ? 'episode' : 'part', Number(match[1]));
+}
+const suffix = name.match(/[（(\[【]\s*(\d+)\s*[）)\]】]\s*$/u);
+if (suffix) tokens.set('suffix', Number(suffix[1]));
+return tokens;
+};
+
+const duplicateSequenceConflict = (a, b) => {
+for (const [key, value] of a.sequence) {
+if (b.sequence.has(key) && b.sequence.get(key) !== value) return true;
+}
+return false;
+};
+
 const computeDuplicateGroups = async (candidates, cfg, isRunningFn) => {
 const groups =[];
 const assigned = new Set();
+const duplicateMetaCache = new Map();
 const rawStrictness = gmGet('pk_dup_strictness', 'strict');
 const strictness = rawStrictness === 'loose' ? 'loose' : 'strict';
 const duplicateProfile = strictness === 'loose' ? {
@@ -26344,7 +26455,7 @@ const normalizeDuplicateMetaName = (value) => {
 let name = String(value || '').replace(/[\r\n\v\f\u2028\u2029]+/g, ' ').trim().toLowerCase();
 name = name.replace(/\.[^/.]+$/, '');
 name = name.replace(/\s*[-_ .．。]+\s*(?:copy|duplicate|dup|副本|复制|拷贝|拷貝|コピー|複製|복사본|사본|복사)\s*\d*\s*$/iu, '');
-name = name.replace(/\s*[-_ .．。]*\s*(?:\(\s*\d+\s*\)|（\s*\d+\s*）|\[\s*\d+\s*\]|【\s*\d+\s*】)\s*$/u, '');
+
 name = name.replace(/[._()[\]{}【】（）《》<>\-]+/g, ' ').replace(/\s+/g, ' ').trim();
 return name;
 };
@@ -26382,20 +26493,22 @@ return Math.min(a, b) / Math.max(a, b);
 };
 
 const getDuplicateMeta = (item) => {
-const mime = String(item && item.mime_type || '').toLowerCase();
-const type = mime.startsWith('video') ? 'video' : mime.startsWith('image') ? 'image' : 'other';
-const name = normalizeDuplicateMetaName(item && item.name);
+if (duplicateMetaCache.has(item)) return duplicateMetaCache.get(item);
 const extMatch = String(item && item.name || '').match(/\.([a-z0-9]{1,8})$/i);
-return {
+const rawSize = Number(item && item.size || 0);
+const meta = {
     item,
     id: item && item.id,
-    type,
+    type: getDuplicateItemType(item),
     hash: String(item && (item.gcid || item.md5_checksum || item.hash) || '').trim().toLowerCase(),
-    size: Number(item && item.size || 0),
-    duration: Number(item && item.params && item.params.duration || 0),
-    name,
-    extension: extMatch ? extMatch[1].toLowerCase() : ''
+    size: Number.isFinite(rawSize) && rawSize > 0 ? rawSize : 0,
+    duration: getDuplicateKnownDuration(item),
+    name: normalizeDuplicateMetaName(item && item.name),
+    extension: extMatch ? extMatch[1].toLowerCase() : '',
+    sequence: getDuplicateSequenceTokens(item)
 };
+duplicateMetaCache.set(item, meta);
+return meta;
 };
 
 const compareDuplicateMetadata = (a, b, options = {}) => {
@@ -26405,6 +26518,8 @@ if (!a || !b || a.type !== b.type) return { matched: false, reason: 'type' };
 if (a.hash && b.hash && a.hash === b.hash && (!a.size || !b.size || a.size === b.size)) {
     return { matched: true, reason: 'hash', level: 'exact', score: 1 };
 }
+
+if (duplicateSequenceConflict(a, b)) return { matched: false, reason: 'sequence' };
 
 if (a.type === 'video' && a.duration > 0 && b.duration > 0) {
     const tolerance = Math.min(getDuplicateDurationTolerance(a.duration), getDuplicateDurationTolerance(b.duration));
@@ -26421,14 +26536,8 @@ if (sizeSimilarity !== null && (1 - sizeSimilarity) > duplicateProfile.sizeDiffe
 const nameSimilarity = duplicateNameSimilarity(a.name, b.name);
 const sameName = !!a.name && a.name === b.name;
 const nameMatched = sameName || nameSimilarity >= duplicateProfile.nameSimilarityLimit;
-const sameExtension = !!a.extension && !!b.extension && a.extension === b.extension;
-const strongSizeSimilarity = strictness === 'loose' ? 0.95 : 0.98;
 
 if (requireName && !nameMatched) {
-    if (a.type === 'video' && a.duration > 0 && b.duration > 0 && sameExtension &&
-        sizeSimilarity !== null && sizeSimilarity >= strongSizeSimilarity) {
-        return { matched: true, reason: 'metadata_strong', level: 'metadata', score: 3, nameSimilarity, sizeSimilarity };
-    }
     return { matched: false, reason: 'name', nameSimilarity, sizeSimilarity };
 }
 if (a.type === 'video' && a.duration > 0 && b.duration > 0 && sizeSimilarity === null) {
@@ -26482,8 +26591,8 @@ let hashProcessed = 0;
 const hashBuildTotal = candidates.length;
 
 for (const item of candidates) {
-const hash = item.gcid || item.md5_checksum || item.hash;
-const key = hash ? `${hash}|${item.size}` : null;
+const meta = getDuplicateMeta(item);
+const key = meta.hash ? `${meta.hash}|${meta.size}` : null;
 if (key) {
 if (!hashMap.has(key)) hashMap.set(key,[]);
 hashMap.get(key).push(item);
@@ -26522,7 +26631,7 @@ setStageProgress('hash', 1, 1, 1, 1);
 
 if (isRunningFn() && cfg.video) {
 const simCandidates = candidates
-    .filter(i => String(i && i.mime_type || '').toLowerCase().startsWith('video') && !assigned.has(i.id))
+    .filter(i => getDuplicateItemType(i) === 'video' && !assigned.has(i.id))
     .map(getDuplicateMeta)
     .filter(meta => meta.duration > 0);
 const totalCount = simCandidates.length;
@@ -26654,19 +26763,13 @@ return finalResult;
 };
 
 const remainingItems = candidates.filter(i => !assigned.has(i.id));
-const getTypeGroup = (mime) => {
-if (!mime) return 'other';
-if (mime.startsWith('video')) return 'video';
-if (mime.startsWith('image')) return 'image';
-return 'other';
-};
 
 const typeNameMap = new Map();
 let nameBuildProcessed = 0;
 const nameBuildTotal = remainingItems.length;
 
 for (const item of remainingItems) {
-const tGroup = getTypeGroup(item.mime_type);
+const tGroup = getDuplicateItemType(item);
 const cleaned = cleanNameAd(item.name);
 if (cleaned) {
 const key = tGroup + '|' + cleaned;
@@ -26700,6 +26803,11 @@ const isMatch = currentGroup.every(member => {
     const memberMeta = getDuplicateMeta(member);
     const memberSize = Number(memberMeta.size || 0);
     const targetSize = Number(targetMeta.size || 0);
+    if (duplicateSequenceConflict(memberMeta, targetMeta)) return false;
+    // Without two known video durations, require an exact, known size for name candidates.
+    if (memberMeta.type === 'video' && !(memberMeta.duration > 0 && targetMeta.duration > 0)) {
+        return memberSize > 0 && targetSize > 0 && memberSize === targetSize;
+    }
 
     if (memberMeta.type === 'video' && memberMeta.duration > 0 && targetMeta.duration > 0) {
         const tolerance = Math.min(
@@ -26709,7 +26817,7 @@ const isMatch = currentGroup.every(member => {
         if (Math.abs(memberMeta.duration - targetMeta.duration) > tolerance) return false;
     }
 
-    if (memberSize === 0 && targetSize === 0) return true;
+    if (memberSize === 0 && targetSize === 0) return false;
     if (!(memberSize > 0 && targetSize > 0)) return false;
     const sizeSimilarity = duplicateSizeSimilarity(memberSize, targetSize);
     return sizeSimilarity !== null && (1 - sizeSimilarity) <= duplicateProfile.sizeDifferenceLimit;
@@ -27165,6 +27273,7 @@ syncSearchClearVisibility(UI.searchInput, UI.searchClear);
 UI.searchClear.style.display = String(UI.searchInput.value || '').trim() ? 'flex' : 'none';
 }
 }
+if (S.syncFolderSearchControls) S.syncFolderSearchControls();
 
 if (cur.id === 'virtual_search_root') {
 if (typeof applyResolvedViewMode === 'function') applyResolvedViewMode('global_search');
@@ -28429,6 +28538,7 @@ showAlert(`${L.str_failed} ${formatCloudErrorMessage(e)}`);
 }
 
 async function refresh() {
+if (S.syncFolderSearchControls) S.syncFolderSearchControls();
 S.sortId++;
 const currentReqId = S.sortId;
 syncLocalUploadVisibility();
@@ -28567,7 +28677,15 @@ UI.btnPaste.style.display = isPasteBlocked ? 'none' : (S.trashMode ? 'none' : 'i
 const isInVirtualSearch = S.path.some(p => p.id === 'virtual_search_root');
 const isInsideSearchResult = isInVirtualSearch && cur.id !== 'virtual_search_root';
 
-if (S.search && !S.dupMode && !isInsideSearchResult) {
+if (S.folderSearch && cur.id === 'virtual_search_root') {
+const scoped = S.folderSearch;
+S.display = filterFolderSearchItems(scoped.items, scoped.query, scoped.category, scoped.starredOnly);
+S.items = [...S.display];
+S.lastGlobalResults = [...S.display];
+ensureItemMap();
+renderCrumb();
+}
+else if (S.search && !S.dupMode && !isInsideSearchResult) {
 const q = S.search.toLowerCase();
 const includePath = UI.chkSearchPath && UI.chkSearchPath.checked;
 
@@ -29481,6 +29599,10 @@ if (finalVirtualSortMaskSig) S.virtualSortMaskSig = finalVirtualSortMaskSig;
 }
 
 if (currentReqId !== S.sortId) return;
+
+if (S.sort === 'duration' && !isPkBackgroundSpecialMode(S, true)) {
+for (const item of S.display) DurationProber.add(item);
+}
 
 const currentIds = new Set(S.display.filter(Boolean).map(i => i.id));
 if (S.selMode === 'all') {
@@ -32956,39 +33078,10 @@ if (S.shareParseInsightMode) return;
 scheduleShareParseAutoPaging(S.shareParseCurParentId || '', { force: true });
 }
 
-const AUDIO_FILE_EXTS = new Set(['mp3','wav','flac','aac','m4a','ogg','opus','ape','wma','amr','m4b','alac','aiff','aif','mid','midi','ra','dts','ac3','dsf','dff']);
-
-function getItemExt(it) {
-const name = String((it && it.name) || '').toLowerCase();
-const m = name.match(/\.([^.\/\\]+)$/);
-return m ? m[1] : '';
-}
-
-function isAudioLikeItem(it) {
-if (!it || it.isHeader || it.kind === 'drive#folder') return false;
-const m = String((it && it.mime_type) || '').toLowerCase();
-return m.startsWith('audio/') || AUDIO_FILE_EXTS.has(getItemExt(it));
-}
-
-function getAudioDirectUrl(detail) {
-if (!detail) return '';
-if (detail.web_content_link) return detail.web_content_link;
-const oct = detail.links && detail.links['application/octet-stream'];
-return (oct && oct.url) || '';
-}
-
 function getAudioPhysicalId(it) {
 if (!it) return '';
 if ((S.offlineMode && it.kind === 'drive#task') || (S.uploadMode && it.file_id)) return it.file_id || it.id || '';
 return it.id || '';
-}
-
-function isVideoLikeItem(it) {
-if (isAudioLikeItem(it)) return false;
-const m = String((it && it.mime_type) || '').toLowerCase();
-const n = String((it && it.name) || '').toLowerCase();
-const dur = Number((it && it.params && it.params.duration) || 0);
-return m.startsWith('video/') || dur > 0 || ['mp4','mkv','avi','mov','wmv','flv','webm','ts','m4v','3gp'].some(e => n.endsWith('.' + e));
 }
 
 function isExternalPlaybackVideoItem(it) {
@@ -39707,6 +39800,10 @@ end = isGridMode && gridLayout
 : Math.min(S.display.length, Math.ceil((top + h) / CONF.rowHeight) + buffer);
 }
 
+// Probe the rendered window first, including cached items that bypass minifyFile.
+if (!isPkBackgroundSpecialMode(S, true) && !S.loading && !S.scanning) {
+DurationProber.prioritize(S.display.slice(start, end));
+}
 const isBlur = isBlurEnabledForView(isGridMode ? 'grid' : 'list');
 const rootPathStr = S.path.map(p => p.name).join('/');
 const firstReadablePathIndex = !isGridMode
@@ -43713,6 +43810,7 @@ if (!patchedTarget || returnedFiles.length < successItems.length) transferRevali
 
 if (typeof pkState !== 'undefined' && pkState && pkState.lastGlobalResults) {
 pkState.lastGlobalResults = pkState.lastGlobalResults.filter(x => !movedSet.has(x.id));
+if (pkState.folderSearch) pkState.folderSearch.items = pkState.folderSearch.items.filter(x => !movedSet.has(x.id));
 }
 } else {
 const targetFallback = isNormalHomeFolderContext(targetPid) ? S.items : null;
@@ -46192,25 +46290,6 @@ syncRefreshButtonVisibility();
 syncMobileActionbarState();
 }
 
-const PK_WEB_VOD_TS_DOWNLOADER = 'https://web-vod-xdrive.mypikpak.com/ts_downloader';
-const PK_WEB_VOD_CLIENT_ID = 'UElLUEFLX1dFQg';
-
-const buildPikPakTsHlsUrl = (rawUrl) => {
-const input = String(rawUrl || '').trim();
-if (!input) return input;
-
-if (input.includes('ts_downloader') && input.includes('url=')) {
-return input;
-}
-
-const cleanUrl = input
-.replace('&ext=.m3u8', '')
-.replace('?ext=.m3u8&', '?')
-.replace('?ext=.m3u8', '');
-
-return `${PK_WEB_VOD_TS_DOWNLOADER}?client_id=${PK_WEB_VOD_CLIENT_ID}&url=${encodeURIComponent(cleanUrl)}`;
-};
-
 const isPikPakTsDownloaderUrl = (url) => {
 const s = String(url || '');
 return s.includes('web-vod-xdrive.mypikpak.com/ts_downloader') || s.includes('/ts_downloader?');
@@ -48140,6 +48219,7 @@ target.params.duration = seconds;
 if (audioPlaylistOpen) renderAudioPlaylist();
 else updateAudioPlaylistActive();
 scheduleAudioDurationViewRefresh();
+S.refreshDurationView();
 };
 const getAudioPlaylistMeta = (it) => {
 const size = it && it.size ? fmtSize(Number(it.size)) : '';
@@ -52125,7 +52205,7 @@ pkHls.destroy();
 pkHls = null;
 }
 
-if (!d._pkSkipLocateOnDestroy) S.locatePreviewSourceItem(item);
+if (!d._pkSkipLocateOnDestroy) S.locatePreviewSourceItem(item, S.sort === 'duration');
 
 v.src = "";
 v.load();
@@ -52573,7 +52653,7 @@ gmSet('pk_duration_' + pId, seconds);
 
 S.durationMap.set(pId, seconds);
 if (item.params) item.params.duration = seconds;
-if (typeof renderVisible === 'function') renderVisible();
+S.refreshDurationView();
 }
 });
 
@@ -57037,6 +57117,151 @@ UI.searchHist.style.display = 'none';
 };
 });
 };
+
+// Scoped search is independent of file analysis and never builds a full-drive index.
+let folderSearchSeq = 0;
+let folderSearchController = null;
+let folderSearchPathKey = '';
+const folderSearchConfig = { category: 'all', starredOnly: false };
+const folderSearchControls = el.querySelector('#pk-folder-search-controls');
+const folderSearchRecursive = el.querySelector('#pk-folder-search-recursive');
+const folderSearchStarred = el.querySelector('#pk-folder-search-starred');
+const folderSearchStatus = el.querySelector('#pk-folder-search-status');
+const folderSearchScope = el.querySelector('#pk-folder-search-scope');
+const folderSearchButtons = [...el.querySelectorAll('[data-folder-search-cat]')];
+const folderSearchModesAllowed = () => !(
+S.trashMode || S.shareMode || S.shareParseMode || S.linkBookmarkMode || S.starredMode ||
+S.recentMode || S.historyMode || S.offlineMode || S.uploadMode || S.isFlattened || S.dupMode || S.analyzeMode
+);
+const folderSearchCurrentPathKey = () => JSON.stringify(S.path.map(node => String(node.id || '')));
+
+function cancelFolderSearch() {
+folderSearchSeq++;
+if (folderSearchController) folderSearchController.abort();
+folderSearchController = null;
+folderSearchPathKey = '';
+}
+function syncFolderSearchControls() {
+if (!folderSearchControls) return;
+const cur = S.path[S.path.length - 1] || { id: '' };
+const inSearch = S.path.some(node => node.id === 'virtual_search_root');
+const atScopedRoot = cur.id === 'virtual_search_root' && !!S.folderSearch;
+const allowed = folderSearchModesAllowed() && (!inSearch || atScopedRoot) && !(UI.chkGlobal && UI.chkGlobal.checked);
+folderSearchControls.style.display = allowed ? '' : 'none';
+if (folderSearchController && (!folderSearchModesAllowed() || folderSearchPathKey !== folderSearchCurrentPathKey())) {
+cancelFolderSearch();
+}
+if (!inSearch && S.folderSearch) S.folderSearch = null;
+const path = atScopedRoot ? S.folderSearch.path : S.path;
+const name = path[path.length - 1]?.name || L.btn_nav_home;
+folderSearchScope.textContent = name;
+folderSearchButtons.forEach(button => {
+const selected = button.dataset.folderSearchCat === folderSearchConfig.category;
+button.setAttribute('aria-pressed', String(selected));
+button.style.background = selected ? 'var(--pk-pri)' : '';
+button.style.color = selected ? '#fff' : '';
+});
+}
+
+async function performFolderSearch(value, force = false) {
+if (!folderSearchModesAllowed() || pkState !== S) return;
+const cur = S.path[S.path.length - 1] || { id: '' };
+if (S.path.some(node => node.id === 'virtual_search_root') && !(cur.id === 'virtual_search_root' && S.folderSearch)) return;
+const query = String(value || '').trim();
+const path = S.folderSearch && cur.id === 'virtual_search_root' ? S.folderSearch.path.map(node => ({ ...node })) : S.path.map(node => ({ ...node }));
+const root = path[path.length - 1];
+const includeChildren = folderSearchRecursive.checked;
+const category = folderSearchConfig.category;
+const starredOnly = folderSearchConfig.starredOnly;
+cancelFolderSearch();
+const seq = folderSearchSeq;
+folderSearchPathKey = folderSearchCurrentPathKey();
+const contextKey = folderSearchPathKey;
+const isCurrent = () => seq === folderSearchSeq && pkState === S && folderSearchModesAllowed() && contextKey === folderSearchCurrentPathKey();
+const controller = new AbortController();
+folderSearchController = controller;
+stopLiveManualRefreshBeforePathChange('scoped_search');
+setLoad(true, false, DEFERRED_LOAD_MASK_DELAY);
+UI.stopBtn.onclick = () => {
+cancelFolderSearch();
+folderSearchStatus.textContent = '搜索已停止，保留原列表。';
+setLoad(false);
+};
+folderSearchStatus.textContent = '正在读取目录清单…';
+try {
+const items = await collectFolderSearchItems({ id: root.id || '', name: root.name, lineage: path }, async (id, node, signal) => {
+let files;
+if (window.pkGlobalIndex) files = await window.pkGlobalIndex.ensureFolder(id, {
+signal, force, background: false, name: node.name, lineage: node.lineage
+});
+else {
+const key = id || 'root';
+const cached = globalCache.get(id) || globalCache.get(key);
+if (!force && Array.isArray(cached)) files = cached;
+else {
+files = await apiList(id, 1000, null, signal, false, true);
+globalCache.set(id, files);
+}
+}
+if (!signal.aborted && Array.isArray(files)) {
+if (typeof indexParents === 'function') indexParents(id, node.name, files);
+if (typeof globalLineageMap !== 'undefined') globalLineageMap.set(id, node.lineage);
+}
+return files;
+}, controller.signal, includeChildren, progress => {
+if (!isCurrent()) return;
+const text = `已读取 ${progress.folders} 个文件夹，${progress.items} 个项目`;
+folderSearchStatus.textContent = text;
+updateLoadTxt(text);
+});
+if (!isCurrent()) return;
+S.folderSearch = { items, query, category, starredOnly, path, includeChildren };
+S.preSearchPath = path.map(node => ({ ...node }));
+S.lastSearchGlobal = false;
+if (UI.chkGlobal) UI.chkGlobal.checked = false;
+S.search = query;
+if (query) saveHistory(query);
+S.sel.clear();
+S.path = [{ id: '', name: L.btn_nav_home }, { id: 'virtual_search_root', name: `在「${root.name || L.btn_nav_home}」内搜索` }];
+folderSearchController = null;
+folderSearchPathKey = '';
+await refresh();
+// Empty-keyword classification is still an active search and must offer an exit.
+UI.searchClear.style.display = 'flex';
+folderSearchStatus.textContent = `找到 ${S.display.length} 个项目`;
+folderSearchControls.open = false;
+} catch (error) {
+if (isCurrent() && error.name !== 'AbortError') {
+folderSearchStatus.textContent = '搜索未完成，请重试。';
+showAlert(`目录搜索失败：${formatCloudErrorMessage(error)}`);
+}
+} finally {
+if (seq === folderSearchSeq && pkState === S && (folderSearchController === controller || S.folderSearch)) {
+folderSearchController = null;
+folderSearchPathKey = '';
+if (contextKey === folderSearchCurrentPathKey() || S.path[S.path.length - 1]?.id === 'virtual_search_root') setLoad(false);
+}
+}
+}
+const applyFolderSearchControls = () => {
+cancelSharePhraseSearchLookup();
+if (UI.chkGlobal) UI.chkGlobal.checked = false;
+syncFolderSearchControls();
+void performFolderSearch(UI.searchInput.value);
+};
+folderSearchButtons.forEach(button => button.onclick = () => {
+folderSearchConfig.category = button.dataset.folderSearchCat;
+applyFolderSearchControls();
+});
+folderSearchRecursive.onchange = applyFolderSearchControls;
+folderSearchStarred.onchange = () => {
+folderSearchConfig.starredOnly = folderSearchStarred.checked;
+applyFolderSearchControls();
+};
+el.querySelector('#pk-folder-search-apply').onclick = applyFolderSearchControls;
+folderSearchControls.ontoggle = () => { if (folderSearchControls.open) syncFolderSearchControls(); };
+S.syncFolderSearchControls = syncFolderSearchControls;
+
 const performSearch = (val) => {
 const txt = val.trim();
 if (!txt) {
@@ -57156,6 +57381,11 @@ sharePhraseLookupController = null;
 async function submitSearch(val) {
 const text = String(val || '').trim();
 cancelSharePhraseSearchLookup();
+if (folderSearchModesAllowed() && !(UI.chkGlobal && UI.chkGlobal.checked) &&
+(S.folderSearch || folderSearchRecursive.checked || folderSearchConfig.category !== 'all' || folderSearchConfig.starredOnly)) {
+await performFolderSearch(val);
+return;
+}
 if (!text || S.shareParseMode) {
 performSearch(val);
 return;
@@ -57397,14 +57627,19 @@ if (UI.searchClear) {
 UI.searchClear.onclick = async () => {
 const wasGlobalChecked = UI.chkGlobal ? UI.chkGlobal.checked : false;
 
-if (!S.search && UI.searchInput.value) {
+if (!S.search && !S.folderSearch && UI.searchInput.value) {
 UI.searchInput.value = '';
 syncSearchClearVisibility(UI.searchInput, UI.searchClear);
 UI.searchInput.focus();
 return;
 }
 
-const searchWasActive = !!S.search;
+const searchWasActive = !!(S.search || S.folderSearch);
+cancelFolderSearch();
+S.folderSearch = null;
+folderSearchConfig.category = 'all';
+folderSearchConfig.starredOnly = false;
+folderSearchStarred.checked = false;
 const isInVirtualStack = S.path.some(node => node.id === 'virtual_search_root');
 let requiresReload = false;
 
@@ -57534,6 +57769,16 @@ if (UI.chkGlobal) UI.chkGlobal.addEventListener('click', guardGlobalSearchResult
 
 UI.chkGlobal.onchange = async (e) => {
 if (guardGlobalSearchResultCheckboxLock(e)) return;
+cancelFolderSearch();
+if (e.target.checked && S.folderSearch) {
+S.path = S.folderSearch.path.map(node => ({ ...node }));
+S.folderSearch = null;
+S.search = '';
+S.preSearchPath = null;
+S.lastGlobalResults = [];
+await load(false, false);
+}
+syncFolderSearchControls();
 if (e.target.checked) {
 if (S.movingIds && S.movingIds.size > 0) {
 e.target.checked = false;
@@ -58341,14 +58586,8 @@ await sleep(20);
 
 S.dupReasons.clear();
 const tempDupCandidates = tempItems.filter(i => {
-if (!i.mime_type) return false;
-const isVideo = i.mime_type.startsWith('video');
-const isImage = i.mime_type.startsWith('image');
-const isOther = !isVideo && !isImage;
-if (isVideo && tempDupCfg.video) return true;
-if (isImage && tempDupCfg.image) return true;
-if (isOther && tempDupCfg.other) return true;
-return false;
+if (!i || i.kind === 'drive#folder' || i.isHeader) return false;
+return !!tempDupCfg[getDuplicateItemType(i)];
 });
 
 const tempDupGroups = await computeDuplicateGroups(tempDupCandidates, tempDupCfg, () => S.scanning && !signal.aborted && myScanId === S.scanId && isManagerViewContextCurrent(scanStartContext));
@@ -58934,6 +59173,10 @@ return true;
 }
 
 UI.btnRefresh.onclick = async () => {
+if (S.folderSearch && S.path[S.path.length - 1]?.id === 'virtual_search_root') {
+await performFolderSearch(UI.searchInput.value, true);
+return;
+}
 if (shouldSuppressRefreshForVirtualResultPage()) return;
 updateQuotaUI();
 if (S.isFlattened) {
@@ -62795,6 +63038,7 @@ if (deletedSet.size === 0) return;
 
 if (S.lastGlobalResults && S.lastGlobalResults.length > 0) {
     S.lastGlobalResults = S.lastGlobalResults.filter(x => !deletedSet.has(x.id));
+if (S.folderSearch) S.folderSearch.items = S.folderSearch.items.filter(x => !deletedSet.has(x.id) && !(x._lineage || []).some(node => deletedSet.has(node.id)));
 }
 
 if (S.analyzeMode && S.analyzeResultItems) {
@@ -65461,6 +65705,7 @@ pruneClipboardByDeletedIds(deletedSet);
 
 if (typeof pkState !== 'undefined' && pkState && pkState.lastGlobalResults) {
 pkState.lastGlobalResults = pkState.lastGlobalResults.filter(x => !deletedSet.has(x.id));
+if (pkState.folderSearch) pkState.folderSearch.items = pkState.folderSearch.items.filter(x => !deletedSet.has(x.id) && !(x._lineage || []).some(node => deletedSet.has(node.id)));
 }
 
 if (typeof globalCache !== 'undefined') {
@@ -79940,6 +80185,8 @@ delete window.pkDeleteGhostFilesWithIndexSync;
 if (window.pkCancelCloudTargetWatch === cancelCloudTargetWatch) {
 delete window.pkCancelCloudTargetWatch;
 }
+cancelFolderSearch();
+DurationProber.reset();
 pkState = null;
 
 delete window.pkUpdateCrawlerUI;
@@ -81220,22 +81467,22 @@ window.pkGlobalIndex.dropFolders([id]);
 return changed;
 }
 
-function isPkBackgroundSpecialMode(state) {
+function isPkBackgroundSpecialMode(state, allowScopedSearch = false) {
 if (!state) return false;
 const cur = Array.isArray(state.path) && state.path.length ? state.path[state.path.length - 1] : null;
 const curId = String((cur && cur.id) || '');
 return !!(
 state.trashMode || state.shareMode || state.shareParseMode || state.linkBookmarkMode || state.historyMode ||
 state.offlineMode || state.uploadMode || state.dupMode || state.analyzeMode ||
-state.isFlattened || curId.startsWith('virtual_') || curId === 'analyze_root'
+state.isFlattened || (curId.startsWith('virtual_') && !(allowScopedSearch === true && curId === 'virtual_search_root' && state.folderSearch)) || curId === 'analyze_root'
 );
 }
 
-function isPkBackgroundPaused() {
+function isPkBackgroundPaused(allowScopedSearch = false) {
 const state = (typeof pkState !== 'undefined') ? pkState : null;
 return !!(
 isGUISensitive === true ||
-isPkBackgroundSpecialMode(state) ||
+isPkBackgroundSpecialMode(state, allowScopedSearch) ||
 (state && (state.scanning === true || state.loading === true)) ||
 document.getElementById('pk-player-ov')
 );
@@ -81268,238 +81515,319 @@ globalParentIndex.set(f.id, { id: pId, name: pName });
 }
 };
 
+
+const FOLDER_SEARCH_EXTS = {
+video: new Set('mp4 mkv avi mov wmv flv webm ts m4v 3gp mpg mpeg rm rmvb asf vob dat divx f4v m2ts mts tp trp ogv mpe m2v m3u8'.split(' ')),
+audio: new Set('mp3 wav flac aac ogg wma ape m4a amr opus m4b alac aiff mid midi ra dts ac3 dsf dff'.split(' ')),
+image: new Set('jpg jpeg png gif bmp webp svg tif tiff ico heic heif raw cr2 nef arw dng orf avif psd ai eps jfif jpe'.split(' '))
+};
+function filterFolderSearchItems(items, query, category = 'all', starredOnly = false) {
+const q = String(query || '').trim().toLowerCase();
+return items.filter(item => {
+if (!item || item.trashed || !item.id) return false;
+if (q && !String(item.name || '').toLowerCase().includes(q)) return false;
+if (starredOnly && !(item.starred || (item.tags || []).some(tag => tag && tag.name === 'STAR'))) return false;
+const folder = item.kind === 'drive#folder';
+if (category === 'all') return true;
+if (category === 'folder') return folder;
+if (folder) return false;
+const mime = String(item.mime_type || '').toLowerCase();
+const prefix = category === 'audio' ? 'audio/' : category + '/';
+const ext = String(item.name || '').toLowerCase().split('.').pop();
+return mime.startsWith(prefix) || !!(FOLDER_SEARCH_EXTS[category] && FOLDER_SEARCH_EXTS[category].has(ext));
+});
+}
+
+async function collectFolderSearchItems(root, listFolder, signal, includeChildren, onProgress) {
+const queue = [root];
+const visited = new Set();
+const items = new Map();
+let completed = 0;
+const checkAbort = () => {
+if (signal && signal.aborted) throw new DOMException('Search cancelled', 'AbortError');
+};
+for (let pos = 0; pos < queue.length; pos++) {
+checkAbort();
+const current = queue[pos];
+const id = current.id === 'root' ? '' : String(current.id || '');
+if (visited.has(id)) continue;
+visited.add(id);
+const files = await listFolder(id, current, signal);
+checkAbort();
+if (!Array.isArray(files)) throw new Error('Folder listing is incomplete');
+for (const file of files) {
+if (!file || !file.id || file.trashed) continue;
+// The lineage is the real parent path, so deep search results can be opened correctly.
+items.set(file.id, { ...file, _lineage: [...current.lineage] });
+if (includeChildren && file.kind === 'drive#folder' && !visited.has(String(file.id))) {
+queue.push({ id: file.id, name: file.name, lineage: [...current.lineage, { id: file.id, name: file.name }] });
+}
+}
+completed++;
+if (onProgress) onProgress({ folders: completed, items: items.size });
+}
+checkAbort();
+return [...items.values()];
+}
+
+const AUDIO_FILE_EXTS = new Set(['mp3','wav','flac','aac','m4a','ogg','opus','ape','wma','amr','m4b','alac','aiff','aif','mid','midi','ra','dts','ac3','dsf','dff']);
+
+function getItemExt(it) {
+const name = String((it && it.name) || '').toLowerCase();
+const m = name.match(/\.([^.\/\\]+)$/);
+return m ? m[1] : '';
+}
+
+function isAudioLikeItem(it) {
+if (!it || it.isHeader || it.kind === 'drive#folder') return false;
+const m = String((it && it.mime_type) || '').toLowerCase();
+return m.startsWith('audio/') || AUDIO_FILE_EXTS.has(getItemExt(it));
+}
+
+function getAudioDirectUrl(detail) {
+if (!detail) return '';
+if (detail.web_content_link) return detail.web_content_link;
+const oct = detail.links && detail.links['application/octet-stream'];
+return (oct && oct.url) || '';
+}
+
+function isVideoLikeItem(it) {
+if (isAudioLikeItem(it)) return false;
+const m = String((it && it.mime_type) || '').toLowerCase();
+const n = String((it && it.name) || '').toLowerCase();
+const dur = Number((it && it.params && it.params.duration) || 0);
+return m.startsWith('video/') || dur > 0 || ['mp4','mkv','avi','mov','wmv','flv','webm','ts','m4v','3gp'].some(e => n.endsWith('.' + e));
+}
+
+const PK_WEB_VOD_TS_DOWNLOADER = 'https://web-vod-xdrive.mypikpak.com/ts_downloader';
+const PK_WEB_VOD_CLIENT_ID = 'UElLUEFLX1dFQg';
+
+const buildPikPakTsHlsUrl = (rawUrl) => {
+const input = String(rawUrl || '').trim();
+if (!input) return input;
+
+if (input.includes('ts_downloader') && input.includes('url=')) {
+return input;
+}
+
+const cleanUrl = input
+.replace('&ext=.m3u8', '')
+.replace('?ext=.m3u8&', '?')
+.replace('?ext=.m3u8', '');
+
+return `${PK_WEB_VOD_TS_DOWNLOADER}?client_id=${PK_WEB_VOD_CLIENT_ID}&url=${encodeURIComponent(cleanUrl)}`;
+};
+
+function getFileDurationSeconds(file) {
+const parse = value => {
+const n = Number(value || 0);
+return Number.isFinite(n) && n > 0 ? Math.round(n) : 0;
+};
+if (!file) return 0;
+let duration = parse(file.video_media_metadata && file.video_media_metadata.duration) ||
+parse(file.audio_media_metadata && file.audio_media_metadata.duration) ||
+parse(file.params && file.params.duration);
+if (!duration && Array.isArray(file.medias)) {
+for (const media of file.medias) {
+duration = parse(media && media.duration) ||
+parse(media && media.video && media.video.duration) ||
+parse(media && media.audio && media.audio.duration);
+if (duration) break;
+}
+}
+return duration;
+}
+
+function getDurationProbeSources(detail, audio = false) {
+if (!detail) return [];
+const sources = [];
+const seen = new Set();
+const add = (url, original) => {
+const value = String(url || '').trim();
+if (!value || seen.has(value)) return;
+seen.add(value);
+sources.push({ url: value, original });
+};
+const medias = Array.isArray(detail.medias) ? detail.medias : [];
+if (!audio) {
+// Probe one small transcode first; fall back to the original file if needed.
+const transcodes = medias.filter(m => m && m.link && m.link.url &&
+!(m.is_origin === true || m.is_origin === 1 || String(m.is_origin).toLowerCase() === 'true'));
+transcodes.sort((a, b) => Number(a.video && a.video.height || a.height || 0) - Number(b.video && b.video.height || b.height || 0));
+if (transcodes.length) {
+const m = transcodes[0];
+const type = String(m.video && m.video.video_type || m.video_type || '').toLowerCase();
+add(type === 'mpegts' ? buildPikPakTsHlsUrl(m.link.url) : m.link.url, false);
+}
+}
+add(audio ? getAudioDirectUrl(detail) : detail.web_content_link, true);
+const oct = detail.links && detail.links['application/octet-stream'];
+add(typeof oct === 'string' ? oct : oct && oct.url, true);
+for (const m of medias) {
+if (!m || !m.link || !m.link.url) continue;
+if (m.is_origin === true || m.is_origin === 1 || String(m.is_origin).toLowerCase() === 'true') add(m.link.url, true);
+}
+return sources.slice(0, 3);
+}
+
 const DurationProber = (() => {
 let queue = [];
 let queuedIds = new Set();
 let failedDurationProbeSet = new Set();
-let isRunning = false;
-let probeVideo = null;
-let probeAudio = null;
+const MAX_CONCURRENT = 2;
+const START_INTERVAL = 500;
+const activeJobs = new Map();
 let loopTimer = null;
 let runToken = 0;
-let activeId = '';
+let nextStartAt = 0;
 
-const parseDuration = (value) => {
+const parseDuration = value => {
 const n = Number(value || 0);
 return Number.isFinite(n) && n > 0 ? Math.round(n) : 0;
 };
-
-const getProbeId = (item) => String((item && item.id) || '');
-
-const getKnownDuration = (item) => {
+const getState = () => typeof pkState !== 'undefined' ? pkState : null;
+const getProbeId = item => String(item && item.id || '');
+const getKnownDuration = item => {
 const id = getProbeId(item);
-return parseDuration((item && item.params && item.params.duration) || 0) ||
-parseDuration(id && S.durationMap && S.durationMap.get(id)) ||
+const state = getState();
+return getFileDurationSeconds(item) ||
+parseDuration(state && state.durationMap && state.durationMap.get(id)) ||
 parseDuration(id && gmGet('pk_duration_' + id, 0));
 };
-
-const isProbeAudio = (item) => typeof isAudioLikeItem === 'function' && isAudioLikeItem(item);
-const isProbeVideo = (item) => typeof isVideoLikeItem === 'function' && isVideoLikeItem(item);
-const isProbeMedia = (item) => isProbeAudio(item) || isProbeVideo(item);
-
 const shouldProbe = (item, isBackground = false) => {
 const id = getProbeId(item);
-if (!item || !id || item._pkSkipDurationProbe || item.isHeader || item.kind === 'drive#folder') return false;
+if (!getState() || !item || !id || item._pkSkipDurationProbe || item.isHeader || item.kind === 'drive#folder') return false;
 if (isBackground || failedDurationProbeSet.has(id) || getKnownDuration(item) > 0) return false;
-return isProbeMedia(item);
+return isAudioLikeItem(item) || isVideoLikeItem(item);
 };
 
-const getProbeElement = (audio) => {
-if (audio) {
-if (!probeAudio) {
-probeAudio = document.createElement('audio');
-probeAudio.preload = 'metadata';
-probeAudio.muted = true;
-probeAudio.crossOrigin = 'anonymous';
-probeAudio.referrerPolicy = 'no-referrer';
-probeAudio.style.display = 'none';
-}
-return probeAudio;
-}
-if (!probeVideo) {
-probeVideo = document.createElement('video');
-probeVideo.muted = true;
-probeVideo.preload = 'metadata';
-probeVideo.style.display = 'none';
-}
-return probeVideo;
-};
-
-const clearProbeElement = (el) => {
-if (!el) return;
-el.removeAttribute('src');
-try { el.load(); } catch (e) {}
-};
-
-const markFailed = (item) => {
+const saveAndNotify = (item, duration) => {
 const id = getProbeId(item);
-if (id) failedDurationProbeSet.add(id);
-};
-
-const syncDurationToItem = (target, id, dur) => {
-if (!target || target.id !== id) return;
-if (!target.params) target.params = {};
-target.params.duration = dur;
-};
-
-const syncDurationEverywhere = (id, dur) => {
-if (!id || !(dur > 0)) return;
-if (S.durationMap) S.durationMap.set(id, dur);
-if (S.itemMap && S.itemMap.get(id)) syncDurationToItem(S.itemMap.get(id), id, dur);
-[S.items, S.display].forEach(list => Array.isArray(list) && list.forEach(i => syncDurationToItem(i, id, dur)));
-if (typeof pkState !== 'undefined' && pkState) {
-if (pkState.itemMap && pkState.itemMap.get(id)) syncDurationToItem(pkState.itemMap.get(id), id, dur);
-[pkState.items, pkState.display].forEach(list => Array.isArray(list) && list.forEach(i => syncDurationToItem(i, id, dur)));
-}
-};
-
-const notifyDurationSaved = (id, dur) => {
-try {
-document.dispatchEvent(new CustomEvent('pk-duration-saved', { detail: { id, duration: dur } }));
-} catch (e) {}
-};
-
-const startNext = async () => {
-if (!isRunning || queue.length === 0) { isRunning = false; return; }
-
-const currentToken = runToken;
-
-if (isPkBackgroundPaused()) {
-if (loopTimer) clearTimeout(loopTimer);
-loopTimer = setTimeout(startNext, 2000);
-return;
-}
-
-const item = queue.shift();
-const itemId = getProbeId(item);
-if (itemId) queuedIds.delete(itemId);
-
-if (!shouldProbe(item, false)) {
-loopTimer = setTimeout(startNext, 0);
-return;
-}
-
-activeId = itemId;
-const isAudioProbe = isProbeAudio(item);
-const probeEl = getProbeElement(isAudioProbe);
-let watchdog = null;
-let cleaned = false;
-const currentMedia = probeEl;
-
-const cleanup = (failed = false) => {
-if (cleaned) return;
-cleaned = true;
-if (watchdog) clearTimeout(watchdog);
-if (currentMedia) {
-currentMedia.removeEventListener('loadedmetadata', onLoaded);
-currentMedia.removeEventListener('error', onError);
-clearProbeElement(currentMedia);
-}
-if (failed) markFailed(item);
-activeId = '';
-if (isRunning && currentToken === runToken) {
-loopTimer = setTimeout(startNext, 1500);
-}
-};
-
-const saveAndNotify = (targetItem, dur) => {
-if (targetItem && targetItem._pkSkipDurationProbe) return;
-const id = getProbeId(targetItem);
-const seconds = parseDuration(dur);
-if (!id || !(seconds > 0)) return;
-
+const seconds = parseDuration(duration);
+if (!id || !seconds || item._pkSkipDurationProbe) return;
 gmSet('pk_duration_' + id, seconds);
-syncDurationEverywhere(id, seconds);
-notifyDurationSaved(id, seconds);
-
-if (typeof pkState !== 'undefined' && pkState) {
-if (pkState.historyMode) return;
-
-const safeId = window.CSS && CSS.escape ? CSS.escape(id) : id.replace(/"/g, '\\"');
-const row = document.querySelector(`.pk-row[data-id="${safeId}"]`);
-if (row) {
-const cols = row.children;
-const durCol = cols.length > 1 ? cols[cols.length - 2] : null;
-
-if (durCol) {
-durCol.style.color = 'var(--pk-pri)';
-durCol.textContent = fmtDur(seconds);
-setTimeout(() => { if(durCol) durCol.style.color = ''; }, 2000);
+const state = getState();
+const sync = target => {
+if (!target || String(target.id || '') !== id) return;
+if (!target.params) target.params = {};
+target.params.duration = seconds;
+};
+if (state) {
+if (state.durationMap) state.durationMap.set(id, seconds);
+if (state.itemMap) sync(state.itemMap.get(id));
+[state.items, state.display].forEach(list => Array.isArray(list) && list.forEach(sync));
+if (typeof state.refreshDurationView === 'function') state.refreshDurationView();
 }
-}
-if (typeof renderVisible === 'function') renderVisible();
-}
+document.dispatchEvent(new CustomEvent('pk-duration-saved', { detail: { id, duration: seconds } }));
 };
 
-const onLoaded = () => {
-if (currentToken === runToken) {
-const dur = parseDuration(currentMedia && currentMedia.duration);
-if (dur > 0) {
-saveAndNotify(item, dur);
-cleanup(false);
-return;
-}
-}
-cleanup(true);
-};
-
-const onError = () => { cleanup(true); };
-
-currentMedia.addEventListener('loadedmetadata', onLoaded);
-currentMedia.addEventListener('error', onError);
-
+const fetchTimed = async (url, options, parentSignal) => {
+const controller = new AbortController();
+const abort = () => controller.abort();
+parentSignal.addEventListener('abort', abort, { once: true });
+if (parentSignal.aborted) controller.abort();
+const timer = setTimeout(abort, 15000);
 try {
-const res = await apiGet(item.id);
+const { read, ...requestOptions } = options;
+const response = await fetch(url, { ...requestOptions, signal: controller.signal });
+if (!response.ok) throw new Error('Duration probe HTTP ' + response.status);
+// Keep the timeout active until the response body has been consumed.
+return await read(response);
+} finally {
+clearTimeout(timer);
+parentSignal.removeEventListener('abort', abort);
+}
+};
 
-if (currentToken !== runToken) { cleanup(); return; }
-const url = isAudioProbe && typeof getAudioDirectUrl === 'function'
-? getAudioDirectUrl(res)
-: (res && res.web_content_link);
-if (!res || !url) { cleanup(true); return; }
-
-const nameLower = (item.name || '').toLowerCase();
-const urlLower = url.toLowerCase();
-
-const isM3u8 = nameLower.endsWith('.m3u8') || urlLower.includes('.m3u8');
-const isWmv = nameLower.endsWith('.wmv') || urlLower.includes('.wmv') || nameLower.endsWith('.asf') || urlLower.includes('.asf');
-const isAvi = nameLower.endsWith('.avi') || urlLower.includes('.avi') || nameLower.endsWith('.divx') || urlLower.includes('.divx');
-const isFlv = nameLower.endsWith('.flv') || urlLower.includes('.flv');
-const isMkv = nameLower.endsWith('.mkv') || urlLower.includes('.mkv');
-const isRmvb = nameLower.endsWith('.rmvb') || urlLower.includes('.rmvb') || nameLower.endsWith('.rm') || urlLower.includes('.rm');
-
-if (!isAudioProbe && isM3u8) {
-const fetchOptions = window.AbortSignal ? { signal: AbortSignal.timeout(15000) } : {};
-const text = await fetch(url, fetchOptions).then(r => r.text());
-let saved = false;
-
-if (currentToken === runToken) {
-const matches = text.matchAll(/#EXTINF:([\d.]+)/g);
+const probePlaylist = async (url, signal) => {
+const playlist = await fetchTimed(url, { read: response => response.text() }, signal);
+if (!playlist.trimStart().startsWith('#EXTM3U')) return 0;
+if (/#EXT-X-ENDLIST\b/.test(playlist)) {
 let total = 0;
-for (const m of matches) total += parseFloat(m[1]);
-if (total > 0) {
-saveAndNotify(item, Math.round(total));
-saved = true;
+for (const match of playlist.matchAll(/#EXTINF:([\d.]+)/g)) total += Number(match[1]);
+return parseDuration(total);
 }
+// A master playlist contains variants, not media durations. Read one media playlist.
+const lines = playlist.split(/\r?\n/).map(line => line.trim());
+const variants = [];
+for (let i = 0; i < lines.length; i++) {
+if (!lines[i].startsWith('#EXT-X-STREAM-INF:')) continue;
+const match = lines[i].match(/(?:[:,])BANDWIDTH=(\d+)/);
+let next = i + 1;
+while (next < lines.length && (!lines[next] || lines[next].startsWith('#'))) next++;
+if (next < lines.length) variants.push({ url: new URL(lines[next], url).href, bandwidth: Number(match && match[1] || 0) });
 }
-cleanup(!saved);
-}
-else if (!isAudioProbe && (isWmv || isAvi || isFlv || isMkv || isRmvb)) {
-const rangeEnd = isMkv ? 65535 : 8191;
-const fetchOptions = {
-headers: { 'Range': `bytes=0-${rangeEnd}` },
-...(window.AbortSignal ? { signal: AbortSignal.timeout(15000) } : {})
+if (!variants.length) return 0;
+variants.sort((a, b) => a.bandwidth - b.bandwidth);
+const media = await fetchTimed(variants[0].url, { read: response => response.text() }, signal);
+if (!media.trimStart().startsWith('#EXTM3U') || !/#EXT-X-ENDLIST\b/.test(media)) return 0;
+let total = 0;
+for (const match of media.matchAll(/#EXTINF:([\d.]+)/g)) total += Number(match[1]);
+return parseDuration(total);
 };
-let saved = false;
 
-try {
-const response = await fetch(url, fetchOptions);
-if (currentToken === runToken && (response.ok || response.status === 206)) {
-const buffer = await response.arrayBuffer();
+const probeNativeMedia = (url, audio, signal) => new Promise(resolve => {
+const media = document.createElement(audio ? 'audio' : 'video');
+media.preload = 'metadata';
+media.muted = true;
+let timer = null;
+let finished = false;
+const finish = duration => {
+if (finished) return;
+finished = true;
+clearTimeout(timer);
+media.removeEventListener('loadedmetadata', loaded);
+media.removeEventListener('durationchange', loaded);
+media.removeEventListener('error', failed);
+signal.removeEventListener('abort', failed);
+media.removeAttribute('src');
+try { media.load(); } catch (e) {}
+resolve(parseDuration(duration));
+};
+const loaded = () => {
+const duration = parseDuration(media.duration);
+if (duration) finish(duration);
+};
+const failed = () => finish(0);
+media.addEventListener('loadedmetadata', loaded);
+media.addEventListener('durationchange', loaded);
+media.addEventListener('error', failed);
+signal.addEventListener('abort', failed, { once: true });
+if (signal.aborted) { finish(0); return; }
+timer = setTimeout(failed, 15000);
+try { media.src = url; media.load(); } catch (e) { finish(0); }
+});
+
+const probeSource = async (item, source, audio, signal) => {
+const url = source.url;
+const urlLower = url.toLowerCase();
+// A transcode's container can differ from the original filename.
+const nameLower = source.original ? String(item.name || '').toLowerCase() : '';
+const isM3u8 = nameLower.endsWith('.m3u8') || urlLower.includes('.m3u8') || urlLower.includes('/ts_downloader?');
+const isWmv = nameLower.endsWith('.wmv') || nameLower.endsWith('.asf');
+const isAvi = nameLower.endsWith('.avi') || nameLower.endsWith('.divx');
+const isFlv = nameLower.endsWith('.flv');
+const isMkv = nameLower.endsWith('.mkv');
+const isRmvb = nameLower.endsWith('.rmvb') || nameLower.endsWith('.rm');
+if (!audio && isM3u8) return probePlaylist(url, signal);
+if (!audio && (isWmv || isAvi || isFlv || isMkv || isRmvb)) {
+const rangeEnd = isMkv ? 65535 : 8191;
+const buffer = await fetchTimed(url, {
+headers: { Range: `bytes=0-${rangeEnd}` },
+read: async response => {
+// Stop rather than download the whole original when a server ignores Range.
+const length = Number(response.headers.get('content-length') || 0);
+if (response.status !== 206 && !(length > 0 && length <= rangeEnd + 1)) {
+if (response.body) await response.body.cancel();
+throw new Error('Duration probe Range unsupported');
+}
+return response.arrayBuffer();
+}
+}, signal);
 const view = new DataView(buffer);
 const bytes = new Uint8Array(buffer);
 let seconds = 0;
 let formatName = '';
-
 if (isWmv) {
     formatName = nameLower.endsWith('.asf') ? 'ASF' : 'WMV';
     const guid = [0xA1, 0xDC, 0xAB, 0x8C, 0x47, 0xA9, 0xCF, 0x11, 0x8E, 0xE4, 0x00, 0xC0, 0x0C, 0x20, 0x53, 0x65];
@@ -81577,70 +81905,106 @@ if (isWmv) {
     }
 }
 
-if (seconds > 0) {
-    saveAndNotify(item, Math.round(seconds));
-    saved = true;
+return parseDuration(seconds);
+}
+return probeNativeMedia(url, audio, signal);
+};
+
+const probeItem = async (item, job) => {
+const id = getProbeId(item);
+const { token, controller } = job;
+let duration = 0;
+const detailTimer = setTimeout(() => controller.abort(), 15000);
+try {
+const detail = await apiGet(id, { signal: controller.signal });
+clearTimeout(detailTimer);
+if (token !== runToken || controller.signal.aborted) return;
+duration = getFileDurationSeconds(detail);
+if (!duration) {
+const audio = isAudioLikeItem(item);
+for (const source of getDurationProbeSources(detail, audio)) {
+if (token !== runToken || controller.signal.aborted) return;
+try { duration = await probeSource(item, source, audio, controller.signal); } catch (e) {}
+if (duration > 0) break;
 }
 }
-} catch (e) {}
-cleanup(!saved);
+if (token === runToken && !controller.signal.aborted && duration > 0) saveAndNotify(item, duration);
+} catch (e) {
+// Give the API breathing room if increased throughput reaches its rate limit.
+if (token === runToken && Number(e.status || e.statusCode) === 429) {
+nextStartAt = Math.max(nextStartAt, Date.now() + 30000);
 }
-else {
-if (document.hidden) {
-queue.unshift(item);
-if (itemId) queuedIds.add(itemId);
-isRunning = false;
-cleanup();
+} finally {
+clearTimeout(detailTimer);
+if (token === runToken && activeJobs.get(id) === job) {
+if (!(duration > 0)) failedDurationProbeSet.add(id);
+activeJobs.delete(id);
+startNext();
+}
+}
+};
+
+const startNext = () => {
+if (loopTimer !== null) clearTimeout(loopTimer);
+loopTimer = null;
+if (!queue.length || activeJobs.size >= MAX_CONCURRENT) return;
+if (isPkBackgroundPaused(true) || document.hidden) {
+loopTimer = setTimeout(startNext, 2000);
 return;
 }
-
-watchdog = setTimeout(() => {
-cleanup(true);
-}, 15000);
-
-currentMedia.src = url;
-currentMedia.load();
+const wait = nextStartAt - Date.now();
+if (wait > 0) { loopTimer = setTimeout(startNext, wait); return; }
+let item;
+while (queue.length) {
+item = queue.shift();
+queuedIds.delete(getProbeId(item));
+if (shouldProbe(item)) break;
+item = null;
 }
-} catch(e) {
-cleanup(true);
-}
+if (!item) return;
+const job = { token: runToken, controller: new AbortController() };
+activeJobs.set(getProbeId(item), job);
+nextStartAt = Date.now() + START_INTERVAL;
+void probeItem(item, job);
+if (queue.length && activeJobs.size < MAX_CONCURRENT) loopTimer = setTimeout(startNext, START_INTERVAL);
+};
+
+const enqueue = (item, isBackground = false) => {
+const id = getProbeId(item);
+if (!id || queuedIds.has(id) || activeJobs.has(id) || !shouldProbe(item, isBackground)) return;
+queue.push(item);
+queuedIds.add(id);
 };
 
 return {
 add: (item, isBackground = false) => {
-if (!shouldProbe(item, isBackground)) return;
-const id = getProbeId(item);
-if (queuedIds.has(id) || activeId === id) return;
-if (isBackground) {
-queue.push(item);
-} else {
-queue.unshift(item);
-}
-queuedIds.add(id);
-if (!isRunning) { isRunning = true; startNext(); }
-},
-checkAndRun: () => {
-if (!isRunning && queue.length > 0) {
-isRunning = true;
+enqueue(item, isBackground);
 startNext();
-}
 },
+prioritize: items => {
+const ranks = new Map();
+items.forEach((item, index) => {
+enqueue(item);
+const id = getProbeId(item);
+if (id && !ranks.has(id)) ranks.set(id, index);
+});
+const preferred = [], remaining = [];
+for (const item of queue) (ranks.has(getProbeId(item)) ? preferred : remaining).push(item);
+preferred.sort((a, b) => ranks.get(getProbeId(a)) - ranks.get(getProbeId(b)));
+queue = preferred.concat(remaining);
+startNext();
+},
+checkAndRun: startNext,
 reset: () => {
 runToken++;
+for (const job of activeJobs.values()) job.controller.abort();
+activeJobs.clear();
 queue = [];
 queuedIds = new Set();
 failedDurationProbeSet = new Set();
-activeId = '';
-isRunning = false;
-if (loopTimer) clearTimeout(loopTimer);
-if (probeVideo) {
-clearProbeElement(probeVideo);
-probeVideo = null;
-}
-if (probeAudio) {
-clearProbeElement(probeAudio);
-probeAudio = null;
-}
+nextStartAt = 0;
+if (loopTimer !== null) clearTimeout(loopTimer);
+loopTimer = null;
 }
 };
 })();
@@ -81653,17 +82017,7 @@ const trashed = !!f.trashed;
 const tags = f.tags ? [...f.tags] : [];
 const lineage = f._lineage ? [...f._lineage] : undefined;
 const isStarred = !!(f.starred || f.star || f.is_star || (tags.some(t => t.name === 'STAR')));
-let duration = 0;
-const parse = (v) => { if (!v) return 0; const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
-if (f.video_media_metadata?.duration) duration = parse(f.video_media_metadata.duration);
-if (!duration && f.audio_media_metadata?.duration) duration = parse(f.audio_media_metadata.duration);
-if (!duration && f.medias && Array.isArray(f.medias)) {
-for (const m of f.medias) {
-const d = m.duration ? parse(m.duration) : (m.video?.duration ? parse(m.video.duration) : 0);
-if (d > 0) { duration = d; break; }
-}
-}
-if (!duration && f.params?.duration) duration = parse(f.params.duration);
+let duration = getFileDurationSeconds(f);
 let final_modified_time = f.modified_time;
 const skipDurationProbe = !!f._pkSkipDurationProbe;
 const skipNewDurationProbe = skipDurationProbe || isBackground || trashed;
