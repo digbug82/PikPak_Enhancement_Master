@@ -4335,12 +4335,12 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-dark .pk-gv-cover.pk-gv-folder { background: transparent; }
 .pk-dark .pk-gv-folder-preview { background: #fff7e6; }
 .pk-dark .pk-grid-view .pk-name .pk-name-txt, .pk-dark .pk-gv-meta, .pk-dark .pk-gv-meta-item, .pk-dark .pk-gv-date, .pk-dark .pk-gv-size { color:#fff; }
-.pk-modal::-webkit-scrollbar, .pk-vp::-webkit-scrollbar, .pk-prev-list::-webkit-scrollbar, .pk-scroll::-webkit-scrollbar, #pk-rn-vp::-webkit-scrollbar, .pk-bl-area::-webkit-scrollbar, textarea::-webkit-scrollbar, .pk-sub-pane::-webkit-scrollbar, #pk_sub_search_list::-webkit-scrollbar, .pk-p-pop::-webkit-scrollbar, .pk-share-modal::-webkit-scrollbar { width: 6px; height: 6px; }
+.pk-modal::-webkit-scrollbar, .pk-vp::-webkit-scrollbar, .pk-lbm-grid::-webkit-scrollbar, .pk-prev-list::-webkit-scrollbar, .pk-scroll::-webkit-scrollbar, #pk-rn-vp::-webkit-scrollbar, .pk-bl-area::-webkit-scrollbar, textarea::-webkit-scrollbar, .pk-sub-pane::-webkit-scrollbar, #pk_sub_search_list::-webkit-scrollbar, .pk-p-pop::-webkit-scrollbar, .pk-share-modal::-webkit-scrollbar { width: 6px; height: 6px; }
 .pk-no-scrollbar::-webkit-scrollbar { display: none !important; }
 .pk-no-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; }
-.pk-vp::-webkit-scrollbar-track, .pk-modal::-webkit-scrollbar-track, .pk-prev-list::-webkit-scrollbar-track, .pk-scroll::-webkit-scrollbar-track, #pk-rn-vp::-webkit-scrollbar-track, .pk-bl-area::-webkit-scrollbar-track, textarea::-webkit-scrollbar-track, .pk-sub-pane::-webkit-scrollbar-track, #pk_sub_search_list::-webkit-scrollbar-track, .pk-p-pop::-webkit-scrollbar-track { background: var(--pk-sb-bg); }
-.pk-vp::-webkit-scrollbar-thumb, .pk-modal::-webkit-scrollbar-thumb, .pk-prev-list::-webkit-scrollbar-thumb, .pk-scroll::-webkit-scrollbar-thumb, #pk-rn-vp::-webkit-scrollbar-thumb, .pk-bl-area::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb, .pk-sub-pane::-webkit-scrollbar-thumb, #pk_sub_search_list::-webkit-scrollbar-thumb, .pk-p-pop::-webkit-scrollbar-thumb { background: var(--pk-sb-th); border-radius: 3px; }
-@media (hover:hover) and (pointer:fine){.pk-vp::-webkit-scrollbar-thumb:hover, .pk-modal::-webkit-scrollbar-thumb:hover, .pk-prev-list::-webkit-scrollbar-thumb:hover, .pk-scroll::-webkit-scrollbar-thumb:hover { background: var(--pk-sb-hov); }} ::-webkit-scrollbar { cursor: default; }
+.pk-vp::-webkit-scrollbar-track, .pk-lbm-grid::-webkit-scrollbar-track, .pk-modal::-webkit-scrollbar-track, .pk-prev-list::-webkit-scrollbar-track, .pk-scroll::-webkit-scrollbar-track, #pk-rn-vp::-webkit-scrollbar-track, .pk-bl-area::-webkit-scrollbar-track, textarea::-webkit-scrollbar-track, .pk-sub-pane::-webkit-scrollbar-track, #pk_sub_search_list::-webkit-scrollbar-track, .pk-p-pop::-webkit-scrollbar-track { background: var(--pk-sb-bg); }
+.pk-vp::-webkit-scrollbar-thumb, .pk-lbm-grid::-webkit-scrollbar-thumb, .pk-modal::-webkit-scrollbar-thumb, .pk-prev-list::-webkit-scrollbar-thumb, .pk-scroll::-webkit-scrollbar-thumb, #pk-rn-vp::-webkit-scrollbar-thumb, .pk-bl-area::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb, .pk-sub-pane::-webkit-scrollbar-thumb, #pk_sub_search_list::-webkit-scrollbar-thumb, .pk-p-pop::-webkit-scrollbar-thumb { background: var(--pk-sb-th); border-radius: 3px; }
+@media (hover:hover) and (pointer:fine){.pk-vp::-webkit-scrollbar-thumb:hover, .pk-lbm-grid::-webkit-scrollbar-thumb:hover, .pk-modal::-webkit-scrollbar-thumb:hover, .pk-prev-list::-webkit-scrollbar-thumb:hover, .pk-scroll::-webkit-scrollbar-thumb:hover { background: var(--pk-sb-hov); }} ::-webkit-scrollbar { cursor: default; }
 .pk-vp { flex: 1; overflow-y: auto; position: relative; background: var(--pk-bg); scrollbar-gutter: stable; }
 .pk-in { position: absolute; width: 100%; top: 0; }
 .pk-link-bookmark-mode .pk-grid-hd { display:none !important; }
@@ -4360,7 +4360,7 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-lbm-folder-list { display:flex; flex-direction:column; gap:10px; min-height:0; flex:1 1 auto; overflow:hidden; padding-right:2px; }
 .pk-link-bookmark-mode .pk-lbm-pager { flex:0 0 auto; min-height:32px; display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 2px 0; border-top:1px solid var(--pk-bd); color:var(--pk-fg); box-sizing:border-box; }
 .pk-link-bookmark-mode .pk-lbm-pager[hidden] { display:none !important; }
-.pk-link-bookmark-mode .pk-lbm-folder-pager,.pk-link-bookmark-mode .pk-lbm-link-pager { justify-content:space-between; padding:8px 2px 0; }
+.pk-link-bookmark-mode .pk-lbm-folder-pager { justify-content:space-between; padding:8px 2px 0; }
 .pk-link-bookmark-mode .pk-lbm-pager-nav { display:inline-flex; align-items:center; gap:6px; }
 .pk-link-bookmark-mode .pk-lbm-pager-btn { width:28px; height:28px; border:1px solid var(--pk-bd); border-radius:6px; background:rgba(var(--pk-bg-rgb),.68); color:var(--pk-fg); display:inline-flex; align-items:center; justify-content:center; padding:0; cursor:pointer; }
 @media (hover:hover) and (pointer:fine){.pk-link-bookmark-mode .pk-lbm-pager-btn:hover:not(:disabled) { background:var(--pk-hl); color:var(--pk-pri); }}
@@ -4423,7 +4423,7 @@ html.pk-txt-preview-fullscreen-lock, body.pk-txt-preview-fullscreen-lock { overf
 .pk-link-bookmark-mode .pk-lbm-alert.verify { border-color:rgba(217,48,37,.24); background:rgba(217,48,37,.1); color:#b91c1c; }
 .pk-link-bookmark-mode .pk-lbm-duplicate-warning { border:1px solid rgba(245,158,11,.35); background:rgba(245,158,11,.12); color:#92400e; border-radius:6px; padding:10px 12px; font-size:13px; font-weight:700; line-height:1.45; display:none; align-items:center; justify-content:space-between; gap:12px; }
 .pk-link-bookmark-mode .pk-lbm-merge-btn { height:28px; border:1px solid rgba(180,83,9,.28); border-radius:6px; background:#fff7ed; color:#b45309; display:inline-flex; align-items:center; justify-content:center; padding:0 10px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap; }
-.pk-lbm-grid { flex:1 1 auto; min-height:0; overflow:auto; display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; padding:2px 2px 4px; align-content:start; scrollbar-gutter:stable; }
+.pk-lbm-grid { flex:1 1 auto; min-height:0; overflow-x:hidden; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; padding:2px 2px 4px; align-content:start; scrollbar-gutter:stable; }
 .pk-link-bookmark-mode .pk-lbm-grid.is-empty { display:flex; align-items:center; justify-content:center; }
 .pk-link-bookmark-mode .pk-lbm-empty { width:100%; min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0; color:var(--pk-fg); text-align:center; padding:24px; padding-bottom:10vh; box-sizing:border-box; }
 .pk-link-bookmark-mode .pk-lbm-empty-icon { width:auto; height:auto; display:flex; align-items:center; justify-content:center; opacity:1; }
@@ -6717,8 +6717,7 @@ body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:1
 .pk-lbm-search { width:100%; min-width:0; }
 .pk-lbm-tools { margin-left:0; overflow-x:auto; flex-wrap:nowrap; }
 .pk-lbm-status { margin-left:0; }
-.pk-lbm-grid,.pk-maximized .pk-lbm-grid { grid-template-columns:1fr; gap:10px; scrollbar-gutter:auto; scrollbar-width:none; -ms-overflow-style:none; }
-.pk-lbm-grid::-webkit-scrollbar,.pk-maximized .pk-lbm-grid::-webkit-scrollbar { width:0; height:0; display:none; }
+.pk-lbm-grid,.pk-maximized .pk-lbm-grid { grid-template-columns:1fr; gap:10px; scrollbar-gutter:auto; }
 .pk-lbm-card { height:148px; padding:14px 12px 10px; }
 .pk-lbm-card-act span { display:none; }
 .pk-lbm-card-act { width:30px; height:30px; padding:0; }
@@ -12685,11 +12684,8 @@ linkBookmarkSelectedFolderIndex: 0,
 linkBookmarkSearch: '',
 linkBookmarkSearchDraft: '',
 linkBookmarkFolderPage: 1,
-linkBookmarkLinkPage: 1,
+linkBookmarkScrollToLinkIndex: null,
 linkBookmarkFolderPageSize: 3,
-linkBookmarkLinkPageSize: 1,
-linkBookmarkLinkPageFitKey: '',
-linkBookmarkLinkPageFitCap: 0,
 linkBookmarkIconRuntimeCache: new Map(),
 linkBookmarkSyncStatus: 'idle',
 linkBookmarkError: '',
@@ -15177,7 +15173,7 @@ el.style.forcedColorAdjust = 'none';
 
 el.addEventListener('wheel', (e) => {
 e.stopPropagation();
-const scrollTarget = e.target.closest('.pk-vp, .pk-modal, #pk-rn-vp, .pk-prev-list, textarea, .pk-scroll');
+const scrollTarget = e.target.closest('.pk-vp, .pk-lbm-grid, .pk-modal, #pk-rn-vp, .pk-prev-list, textarea, .pk-scroll');
 if (!scrollTarget) { e.preventDefault(); return; }
 const st = scrollTarget.scrollTop;
 const sh = scrollTarget.scrollHeight;
@@ -34729,9 +34725,8 @@ S.linkBookmarkSelectedFolderIndex = 0;
 S.linkBookmarkSearch = '';
 S.linkBookmarkSearchDraft = '';
 S.linkBookmarkFolderPage = 1;
-S.linkBookmarkLinkPage = 1;
+S.linkBookmarkScrollToLinkIndex = null;
 S.linkBookmarkFolderPageSize = 3;
-S.linkBookmarkLinkPageSize = 1;
 S.linkBookmarkIconRuntimeCache = new Map();
 S.linkBookmarkError = '';
 S.linkBookmarkRemoteHash = '';
@@ -37812,7 +37807,7 @@ S.linkBookmarkSearch = '';
 S.linkBookmarkSearchDraft = '';
 }
 setLinkBookmarkFolderPageForIndex(safeTargetIndex);
-setLinkBookmarkLinkPageForIndex(Math.max(0, latestList.length - 1));
+S.linkBookmarkScrollToLinkIndex = Math.max(0, latestList.length - 1);
 if (S.linkBookmarkMode) renderLinkBookmarkPanel();
 }
 document.removeEventListener('click', linkFolderOutsideHandler, true);
@@ -37884,7 +37879,6 @@ safeSelectedIndex = renamedIndex >= 0 ? renamedIndex : safeSelectedIndex;
 }
 S.linkBookmarkSelectedFolderIndex = safeSelectedIndex;
 setLinkBookmarkFolderPageForIndex(safeSelectedIndex);
-if (!isEdit) S.linkBookmarkLinkPage = 1;
 if (S.linkBookmarkMode) renderLinkBookmarkPanel();
 }
 }
@@ -38055,49 +38049,6 @@ size = calcSize(rawHeight - fixedHeight - pagerSpace);
 return size;
 }
 
-function getLinkBookmarkLinkPageSize(grid, totalCount, searchMode) {
-const fallback = getLinkBookmarkPositiveInt(S.linkBookmarkLinkPageSize, 1);
-if (!grid || !grid.clientWidth || !grid.clientHeight) return fallback;
-const style = window.getComputedStyle ? getComputedStyle(grid) : null;
-const columnGap = parseFloat(style && style.columnGap) || 14;
-const rowGap = parseFloat(style && style.rowGap) || 14;
-const isMobileLayout = typeof isMobileManagerEnvironment === 'function' && isMobileManagerEnvironment();
-const minColWidth = UI.win && UI.win.classList.contains('pk-maximized') ? 300 : (grid.clientWidth < 430 ? 220 : 260);
-const cardHeight = isMobileLayout ? 148 : 156;
-const sizeKey = `${Math.round(grid.clientWidth)}x${Math.round(grid.clientHeight)}:${minColWidth}:${Math.round(columnGap)}:${Math.round(rowGap)}:${searchMode ? 's' : 'n'}`;
-if (S.linkBookmarkLinkPageFitKey !== sizeKey) {
-S.linkBookmarkLinkPageFitKey = sizeKey;
-S.linkBookmarkLinkPageFitCap = 0;
-}
-const columns = isMobileLayout ? 1 : Math.max(1, Math.floor((grid.clientWidth + columnGap) / (minColWidth + columnGap)) || 1);
-let rows = Math.max(1, Math.floor((grid.clientHeight + rowGap) / (cardHeight + rowGap)) || 1);
-let size = Math.max(1, columns * rows);
-if (totalCount > size) {
-const usableHeight = Math.max(cardHeight, grid.clientHeight - 52);
-rows = Math.max(1, Math.floor((usableHeight + rowGap) / (cardHeight + rowGap)) || 1);
-size = Math.max(1, columns * rows);
-}
-const fitCap = getLinkBookmarkPositiveInt(S.linkBookmarkLinkPageFitCap, 0);
-if (fitCap > 0) size = Math.min(size, fitCap);
-return Math.max(1, size);
-}
-
-function adjustLinkBookmarkPageForClippedCards(grid, linkRender, links, linkPageSize) {
-if (!grid || !linkRender || !Array.isArray(links) || links.length <= 1 || !Array.isArray(linkRender.entries) || linkRender.entries.length <= 1 || linkPageSize <= 1) return false;
-const cards = Array.from(grid.querySelectorAll('.pk-lbm-card'));
-if (cards.length <= 1) return false;
-const lastCard = cards[cards.length - 1];
-const gridRect = grid.getBoundingClientRect();
-const cardRect = lastCard.getBoundingClientRect();
-const clipped = grid.scrollHeight > grid.clientHeight + 2 || grid.scrollWidth > grid.clientWidth + 2 || cardRect.bottom > gridRect.bottom - 2 || cardRect.right > gridRect.right - 2;
-if (!clipped) return false;
-S.linkBookmarkLinkPageFitCap = Math.max(1, linkPageSize - 1);
-const totalPages = Math.max(1, Math.ceil(linkRender.entries.length / S.linkBookmarkLinkPageFitCap));
-S.linkBookmarkLinkPage = clampLinkBookmarkPage(S.linkBookmarkLinkPage, totalPages);
-renderLinkBookmarkPanel();
-return true;
-}
-
 function getLinkBookmarkFolderRenderEntries(folders) {
 const fixed = [];
 const paged = [];
@@ -38185,11 +38136,6 @@ return;
 const page = pagedPos < firstPageSize ? 1 : 2 + Math.floor((pagedPos - firstPageSize) / pageSize);
 const totalPages = renderEntries.paged.length <= firstPageSize ? 1 : 1 + Math.ceil((renderEntries.paged.length - firstPageSize) / pageSize);
 S.linkBookmarkFolderPage = clampLinkBookmarkPage(page, totalPages);
-}
-
-function setLinkBookmarkLinkPageForIndex(linkIndex) {
-const pageSize = getLinkBookmarkPositiveInt(S.linkBookmarkLinkPageSize, 1);
-S.linkBookmarkLinkPage = clampLinkBookmarkPage(Math.floor(Math.max(0, Number(linkIndex) || 0) / pageSize) + 1, Number.MAX_SAFE_INTEGER);
 }
 
 function renderLinkBookmarkPager(container, options) {
@@ -38313,6 +38259,8 @@ grid.appendChild(box);
 
 function renderLinkBookmarkPanel() {
 const L = getStrings();
+const previousLinkGrid = UI.in && UI.in.querySelector('#pk-lbm-grid');
+const previousLinkGridScrollTop = previousLinkGrid ? previousLinkGrid.scrollTop : 0;
 ensureStaticPanelViewportVisible();
 prepareManagerStaticPanelChrome();
 const folderIcon = getOfficialFolderFallbackIconHtml(24);
@@ -38369,7 +38317,6 @@ UI.in.innerHTML = `
 <div class="pk-lbm-duplicate-warning" id="pk-lbm-duplicate-warning"><span></span><button type="button" class="pk-lbm-merge-btn pk-force-tip" id="pk-lbm-merge-duplicates"></button></div>
 <div class="pk-lbm-alert" id="pk-lbm-alert"></div>
 <div class="pk-lbm-grid" id="pk-lbm-grid"></div>
-<div class="pk-lbm-pager pk-lbm-link-pager" id="pk-lbm-link-pager" hidden></div>
 </section>
 </div>
 `;
@@ -38381,7 +38328,7 @@ let currentIndex = Math.min(Math.max(0, S.linkBookmarkSelectedFolderIndex || 0),
 if (S.linkBookmarkResetSelectOnEnter && (S.linkBookmarkHasLoaded || S.linkBookmarkSyncStatus !== 'syncing')) {
 currentIndex = getLinkBookmarkDefaultSelectedFolderIndex(folders);
 S.linkBookmarkFolderPage = 1;
-S.linkBookmarkLinkPage = 1;
+S.linkBookmarkScrollToLinkIndex = null;
 S.linkBookmarkResetSelectOnEnter = false;
 } else if (!allFolderEntries.some(entry => entry.index === currentIndex)) {
 currentIndex = allFolderEntries.length ? allFolderEntries[0].index : 0;
@@ -38440,7 +38387,9 @@ folderBtn.appendChild(main);
 folderBtn.appendChild(count);
 const selectFolder = () => {
 S.linkBookmarkSelectedFolderIndex = index;
-S.linkBookmarkLinkPage = 1;
+S.linkBookmarkScrollToLinkIndex = null;
+const currentGrid = UI.in.querySelector('#pk-lbm-grid');
+if (currentGrid) currentGrid.scrollTop = 0;
 renderLinkBookmarkPanel();
 };
 folderBtn.onclick = selectFolder;
@@ -38573,7 +38522,11 @@ const prevQ = normalizeLinkBookmarkText(S.linkBookmarkSearch).trim();
 S.linkBookmarkSearchDraft = searchInput.value;
 S.linkBookmarkSearch = searchInput.value;
 const nextQ = normalizeLinkBookmarkText(S.linkBookmarkSearch).trim();
-if (nextQ !== prevQ) S.linkBookmarkLinkPage = 1;
+if (nextQ !== prevQ) {
+S.linkBookmarkScrollToLinkIndex = null;
+const currentGrid = UI.in.querySelector('#pk-lbm-grid');
+if (currentGrid) currentGrid.scrollTop = 0;
+}
 renderLinkBookmarkPanel();
 const nextInput = UI.in && UI.in.querySelector('#pk-lbm-search-input');
 if (nextInput) {
@@ -38589,7 +38542,9 @@ syncLinkBookmarkSearchDraftUI();
 if (!normalizeLinkBookmarkText(searchInput.value).trim() && normalizeLinkBookmarkText(S.linkBookmarkSearch).trim()) {
 S.linkBookmarkSearch = '';
 S.linkBookmarkSearchDraft = '';
-S.linkBookmarkLinkPage = 1;
+S.linkBookmarkScrollToLinkIndex = null;
+const currentGrid = UI.in.querySelector('#pk-lbm-grid');
+if (currentGrid) currentGrid.scrollTop = 0;
 renderLinkBookmarkPanel();
 const nextInput = UI.in && UI.in.querySelector('#pk-lbm-search-input');
 if (nextInput) {
@@ -38617,7 +38572,9 @@ searchInput.value = '';
 S.linkBookmarkSearchDraft = '';
 if (hadSearch) {
 S.linkBookmarkSearch = '';
-S.linkBookmarkLinkPage = 1;
+S.linkBookmarkScrollToLinkIndex = null;
+const currentGrid = UI.in.querySelector('#pk-lbm-grid');
+if (currentGrid) currentGrid.scrollTop = 0;
 renderLinkBookmarkPanel();
 } else {
 syncLinkBookmarkSearchDraftUI();
@@ -38659,26 +38616,20 @@ loadLinkBookmarkOfficial(true);
 };
 }
 const grid = UI.in.querySelector('#pk-lbm-grid');
-const linkPager = UI.in.querySelector('#pk-lbm-link-pager');
 const q = normalizeLinkBookmarkText(S.linkBookmarkSearch).trim();
 const linkRender = getLinkBookmarkLinkRenderEntries(folders, currentIndex, q, L);
-const linkPageSize = getLinkBookmarkLinkPageSize(grid, linkRender.entries.length, linkRender.searchMode);
-S.linkBookmarkLinkPageSize = linkPageSize;
-const linkTotalPages = Math.max(1, Math.ceil(linkRender.entries.length / linkPageSize));
-S.linkBookmarkLinkPage = clampLinkBookmarkPage(S.linkBookmarkLinkPage, linkTotalPages);
-const linkPageStart = (S.linkBookmarkLinkPage - 1) * linkPageSize;
-const links = linkRender.entries.slice(linkPageStart, linkPageStart + linkPageSize);
 if (S.linkBookmarkSyncStatus === 'failed' && !S.linkBookmarkHasLoaded && S.linkBookmarkError) {
 const readFailTitle = S.linkBookmarkError === L.msg_link_bookmark_data_invalid ? S.linkBookmarkError : L.msg_link_bookmark_read_failed_retry;
 renderLinkBookmarkEmpty(grid, readFailTitle, '');
-renderLinkBookmarkPager(linkPager, { page: 1, totalPages: 1 });
+S.linkBookmarkScrollToLinkIndex = null;
 } else if (!linkRender.entries.length) {
 renderLinkBookmarkEmpty(grid, q ? L.msg_link_bookmark_no_match : L.msg_link_bookmark_empty, '');
-renderLinkBookmarkPager(linkPager, { page: 1, totalPages: 1 });
+S.linkBookmarkScrollToLinkIndex = null;
 } else {
 grid.classList.remove('is-empty');
 grid.innerHTML = '';
-links.forEach(entry => {
+let scrollTargetCard = null;
+linkRender.entries.forEach(entry => {
 const link = entry.link;
 const folderIndex = entry.folderIndex;
 const linkIndex = entry.linkIndex;
@@ -38805,21 +38756,18 @@ card.appendChild(head);
 card.appendChild(metaEl);
 card.appendChild(actions);
 grid.appendChild(card);
-});
-if (adjustLinkBookmarkPageForClippedCards(grid, linkRender, links, linkPageSize)) return;
-const finalLinkPageSize = getLinkBookmarkPositiveInt(S.linkBookmarkLinkPageSize, linkPageSize);
-const finalLinkTotalPages = Math.max(1, Math.ceil(linkRender.entries.length / finalLinkPageSize));
-S.linkBookmarkLinkPage = clampLinkBookmarkPage(S.linkBookmarkLinkPage, finalLinkTotalPages);
-renderLinkBookmarkPager(linkPager, {
-page: S.linkBookmarkLinkPage,
-totalPages: finalLinkTotalPages,
-totalCount: linkRender.entries.length,
-showTotal: true,
-onPage: (page) => {
-S.linkBookmarkLinkPage = page;
-renderLinkBookmarkPanel();
+if (!linkRender.searchMode && folderIndex === currentIndex && linkIndex === S.linkBookmarkScrollToLinkIndex) {
+scrollTargetCard = card;
 }
 });
+if (S.linkBookmarkScrollToLinkIndex !== null) {
+if (scrollTargetCard) {
+const gridTop = grid.getBoundingClientRect().top;
+const cardTop = scrollTargetCard.getBoundingClientRect().top;
+grid.scrollTop = Math.max(0, grid.scrollTop + cardTop - gridTop);
+}
+S.linkBookmarkScrollToLinkIndex = null;
+} else grid.scrollTop = previousLinkGridScrollTop;
 }
 }
 if (UI.pop) {
@@ -67515,7 +67463,7 @@ S.linkBookmarkMode = (mode === 'linkBookmark');
 if (enteringLinkBookmarkMode) {
 S.linkBookmarkResetSelectOnEnter = true;
 S.linkBookmarkFolderPage = 1;
-S.linkBookmarkLinkPage = 1;
+S.linkBookmarkScrollToLinkIndex = null;
 }
 S.starredMode = (mode === 'starred');
 S.recentMode = (mode === 'recent');
