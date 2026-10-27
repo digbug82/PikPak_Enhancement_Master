@@ -6613,7 +6613,7 @@ body.pk-body-max .pk-crumb-pop .pk-crumb-name-wrap .pk-tag-default { font-size:1
 .pk-share-parse-insight-modal-root { width:100%!important; max-width:none!important; min-width:0!important; box-sizing:border-box; }
 .pk-share-parse-insight-modal-root > .pk-share-parse-insight-head { padding:18px 18px 12px!important; box-sizing:border-box; }
 .pk-share-parse-insight-modal-root > .pk-share-parse-insight-desc { padding:0 18px 14px!important; box-sizing:border-box; }
-.pk-share-parse-insight-modal-root > .pk-share-parse-insight-form { padding:0 18px!important; box-sizing:border-box; }
+.pk-share-parse-insight-modal-root > .pk-share-parse-insight-form { padding:8px 18px 0!important; box-sizing:border-box; }
 .pk-share-parse-insight-modal-root > .pk-share-parse-insight-foot { padding:14px 18px 18px!important; box-sizing:border-box; }
 .pk-share-parse-insight-modal-root .pk-modal-act { gap:8px!important; }
 .pk-share-modal { width:100%!important; max-width:100%!important; min-width:0!important; gap:12px!important; padding:0!important; overflow:visible!important; box-sizing:border-box; }
@@ -7435,6 +7435,22 @@ function ensureI18nReady(force=false,langOverride=''){const lang=langOverride||g
 async function ensureI18nReadyBeforeOpen(langOverride=''){const lang=langOverride||getLang();if(lang==='zh')return null;try{return await Promise.race([ensureI18nReady(false,lang),sleep(4000).then(()=>null)]);}catch(e){return null;}}
 const T_LOCAL = {
 zh: {
+  "label_share_insight_cache_save": "扫描完成后保存透视数据到本地",
+  "btn_share_insight_cache_load": "使用本地结果",
+  "btn_share_insight_cache_delete": "删除本地结果",
+  "label_share_insight_cache_snapshot": "本地快照",
+  "msg_share_insight_cache_checking": "正在检查本地结果…",
+  "msg_share_insight_cache_empty": "当前账号、分享和扫描范围暂无本地结果。",
+  "msg_share_insight_cache_unavailable": "本地存储不可用或未识别到账号；仍可正常扫描。",
+  "msg_share_insight_cache_loading": "正在读取本地透视结果…",
+  "msg_share_insight_cache_saving": "正在保存本地透视结果…",
+  "msg_share_insight_cache_loaded": "已加载本地透视结果（非实时数据）",
+  "msg_share_insight_cache_saved": "透视数据已保存到本地",
+  "msg_share_insight_cache_save_failed": "本地保存失败（可能空间不足），本次透视结果仍可使用。",
+  "msg_share_insight_cache_read_failed": "本地结果不完整或版本不兼容，请重新扫描。",
+  "msg_share_insight_cache_delete_failed": "删除失败，请重试。",
+  "tip_share_insight_cache": "仅保存文件信息，不下载文件。下次解析同一分享、选择相同范围后可直接使用；上方排除词和大小条件会重新应用。快照不会自动更新，预览、下载和转存仍需分享有效。",
+
   "title": "PikPak 增强大师",
   "str_original": "原画",
   "str_folders": "文件夹",
@@ -14608,6 +14624,7 @@ out.push(item.id);
 return out;
 },
 getSelectableCount: () => {
+if (S.shareParseMode && S.shareParseListActive && S.shareParseInsightMode && S._shareInsightViewCache && S.display === S._shareInsightViewCache.display) return getDisplayMembershipStats().total;
 let count = 0;
 const list = Array.isArray(S.display) ? S.display : [];
 for (let i = 0; i < list.length; i++) {
@@ -14625,6 +14642,12 @@ if (!id) return false;
 return S.selMode === 'all' ? !S.selEx.has(id) : S.sel.has(id);
 },
 getSelectedCount: () => {
+if (S.shareParseMode && S.shareParseListActive && S.shareParseInsightMode && S.selMode === 'all' && S._shareInsightViewCache && S.display === S._shareInsightViewCache.display) {
+const membership = getDisplayMembershipStats();
+let excluded = 0;
+for (const id of S.selEx) if (membership.has(id)) excluded += S._displayMembershipCache.counts.get(id) || 0;
+return Math.max(0, membership.total - excluded);
+}
 return S.getSelectedIds().length;
 },
 getSelectedIds: () => {
@@ -31191,6 +31214,7 @@ updateShareParseInsightButtons();
 }
 
 function resetShareParseInsightState(clearData = true) {
+invalidateShareParseInsightView();
 if (S.shareParseInsightAbortController) {
 try { S.shareParseInsightAbortController.abort(); } catch (e) {}
 S.shareParseInsightAbortController = null;
@@ -31203,6 +31227,7 @@ S.shareParseInsightError = '';
 S.shareParseInsightProgress = { folder: 0, file: 0 };
 S.shareParseInsightFailedFolders = [];
 S.shareParseInsightToastStopped = false;
+S.shareParseInsightSnapshotAt = 0;
 if (clearData) {
 S.shareParseInsightItems = [];
 S.shareParseInsightDisplay = [];
@@ -31245,7 +31270,11 @@ const wa = charWeight(aa), wb = charWeight(bb);
 return wa !== wb ? wa - wb : collator.compare(aa, bb);
 };
 const asSize = v => parseInt(v || 0, 10) || 0;
-const asTime = v => v ? new Date(v).getTime() || 0 : 0;
+const timeKeys = new Map();
+const asTime = v => {
+if (!timeKeys.has(v)) timeKeys.set(v, v ? new Date(v).getTime() || 0 : 0);
+return timeKeys.get(v);
+};
 const asDur = item => parseFloat((item && item.params && item.params.duration) || item.duration || item.media_duration || 0) || 0;
 const asPath = item => String((item && (item._shareFilePathText || item._pathStr)) || (item && item._sharePath ? getSharePathText(item._sharePath) : '') || '');
 const extGroup = item => {
@@ -31311,30 +31340,61 @@ return state.cat === 'other' ? !definedExts.has(ext) : matchExts.includes(ext);
 });
 }
 
+// The viewport must never re-sort or re-index an unchanged insight dataset.
+function invalidateShareParseInsightView() {
+S._shareInsightViewCache = null;
+}
+
 function syncShareParseInsightMirror() {
 if (!(S.shareParseMode && S.shareParseListActive && S.shareParseInsightMode)) return false;
-const items = Array.isArray(S.shareParseInsightItems) ? S.shareParseInsightItems : [];
-const baseDisplay = filterShareInsightItemsByCategory(items);
+if (!Array.isArray(S.shareParseInsightItems)) S.shareParseInsightItems = [];
+const items = S.shareParseInsightItems;
+const state = S.shareParseInsightFilterState || {};
 const q = String(S.search || '').trim().toLowerCase();
 const includePath = !!(UI.chkSearchPath && UI.chkSearchPath.checked);
-const pathQ = normalizeSharePathSearchText(q);
-const display = sortShareParseDisplayList(q ? baseDisplay.filter(item => {
-if (!item || item.isHeader) return false;
-const name = String(item.name || '').toLowerCase();
-if (name.includes(q)) return true;
-if (!includePath) return false;
-const path = normalizeSharePathSearchText(item._shareFilePathText || item._pathStr || getSharePathText(item._sharePath) || '');
-return path.includes(pathQ);
-}) : baseDisplay);
-if (!S.shareParseInsightItemMap || typeof S.shareParseInsightItemMap.clear !== 'function') S.shareParseInsightItemMap = new Map();
-S.shareParseInsightItemMap.clear();
-items.forEach(item => { if (item && item.id) S.shareParseInsightItemMap.set(item.id, item); });
-S.items = items;
-S.display = display;
-if (S.itemMap && typeof S.itemMap.clear === 'function') {
-S.itemMap.clear();
-display.forEach(item => { if (item && item.id && !item.isHeader) S.itemMap.set(item.id, item); });
+const lang = getLang();
+const key = JSON.stringify([q, includePath, !!state.active, state.cat || 'all', state.ext || 'all', S.sort, S.dir, !!S.folderFirst, lang]);
+let cache = S._shareInsightViewCache;
+if (!cache || cache.items !== items || cache.length !== items.length) {
+const index = new Map();
+items.forEach(item => { if (item && item.id) index.set(item.id, item); });
+cache = { items, length: items.length, index, searchText: new WeakMap() };
+S._shareInsightViewCache = cache;
 }
+if (cache.key !== key) {
+const pathQ = normalizeSharePathSearchText(q);
+const sortKey = JSON.stringify([S.sort, S.dir, !!S.folderFirst, lang]);
+if (cache.sortKey !== sortKey) {
+cache.sorted = sortShareParseDisplayList(items);
+cache.sortKey = sortKey;
+}
+const baseDisplay = filterShareInsightItemsByCategory(cache.sorted);
+const matches = q ? baseDisplay.filter(item => {
+if (!item || item.isHeader) return false;
+let text = cache.searchText.get(item);
+if (!text) {
+text = { name: String(item.name || '').toLowerCase() };
+cache.searchText.set(item, text);
+}
+if (text.name.includes(q)) return true;
+if (!includePath) return false;
+if (text.path === undefined) text.path = normalizeSharePathSearchText(item._shareFilePathText || item._pathStr || getSharePathText(item._sharePath) || '');
+return text.path.includes(pathQ);
+}) : baseDisplay;
+cache.display = matches;
+cache.displayMap = new Map();
+cache.display.forEach(item => { if (item && item.id && !item.isHeader) cache.displayMap.set(item.id, item); });
+cache.key = key;
+cache.displayMapSize = cache.displayMap.size;
+}
+if (cache.displayMap.size !== cache.displayMapSize) {
+cache.displayMap = new Map(cache.display.filter(item => item && item.id && !item.isHeader).map(item => [item.id, item]));
+}
+S.shareParseInsightItemMap = cache.index;
+S.shareParseInsightDisplay = cache.display;
+S.items = items;
+S.display = cache.display;
+S.itemMap = cache.displayMap;
 return true;
 }
 
@@ -31799,6 +31859,159 @@ cancelled: !!(signal && signal.aborted) || !!S.shareParseInsightStop
 };
 }
 
+// IndexedDB is separate from configuration/cloud sync. One transaction publishes a
+// complete snapshot; a quota error/cancel leaves the previous snapshot untouched.
+function getShareInsightSnapshotKey(targets = []) {
+const account = getCurrentDriveAccountId();
+const scope = getShareParseFolderCacheScopeKey();
+if (!account || !scope) return '';
+const ids = Array.from(new Set(targets.map(item => String(item.id)))).sort();
+return JSON.stringify([account, scope, String(S.shareParseCurParentId || getShareParseRootParentId() || ''), ids]);
+}
+
+function openShareInsightSnapshotDb() {
+if (S._shareInsightSnapshotDbPromise) return S._shareInsightSnapshotDbPromise;
+S._shareInsightSnapshotDbPromise = new Promise((resolve, reject) => {
+if (typeof indexedDB === 'undefined') return reject(new Error('SNAPSHOT_UNAVAILABLE'));
+let blocked = false;
+const request = indexedDB.open('pk_share_insight_snapshots', 1);
+request.onupgradeneeded = () => {
+const db = request.result;
+if (!db.objectStoreNames.contains('snapshots')) db.createObjectStore('snapshots', { keyPath: 'key' });
+if (!db.objectStoreNames.contains('chunks')) db.createObjectStore('chunks', { keyPath: ['key', 'index'] });
+};
+request.onerror = () => reject(request.error || new Error('SNAPSHOT_OPEN_FAILED'));
+request.onblocked = () => { blocked = true; reject(new Error('SNAPSHOT_BLOCKED')); };
+request.onsuccess = () => {
+const db = request.result;
+if (blocked) { db.close(); return; }
+db.onversionchange = () => { db.close(); S._shareInsightSnapshotDbPromise = null; };
+resolve(db);
+};
+}).catch(error => { S._shareInsightSnapshotDbPromise = null; throw error; });
+return S._shareInsightSnapshotDbPromise;
+}
+
+async function getShareInsightSnapshotMeta(key) {
+if (!key) throw new Error('SNAPSHOT_SCOPE_UNAVAILABLE');
+const db = await openShareInsightSnapshotDb();
+return new Promise((resolve, reject) => {
+const tx = db.transaction('snapshots', 'readonly');
+let record = null;
+const request = tx.objectStore('snapshots').get(key);
+request.onsuccess = () => { record = request.result || null; };
+tx.oncomplete = () => resolve(record);
+tx.onabort = tx.onerror = () => reject(tx.error || new Error('SNAPSHOT_READ_FAILED'));
+});
+}
+
+function isValidShareInsightSnapshotMeta(record, key) {
+return !!(record && record.version === 1 && record.key === key &&
+Number.isSafeInteger(record.count) && record.count >= 0 &&
+Number.isSafeInteger(record.chunkCount) && record.chunkCount === Math.ceil(record.count / 500) &&
+Number.isFinite(record.savedAt) && Array.isArray(record.failedFolders));
+}
+
+function makeShareInsightSnapshotItem(item) {
+// Keep restore lineage and raw API metadata, but never reuse an old access token
+// or resolved playback session after opening a saved scan.
+const copy = { ...item };
+delete copy._passCodeToken;
+delete copy._shareResolvedDetail;
+delete copy.web_content_link;
+return copy;
+}
+
+async function saveShareInsightSnapshot(key, result, isCurrent = () => true) {
+if (!key) throw new Error('SNAPSHOT_SCOPE_UNAVAILABLE');
+const db = await openShareInsightSnapshotDb();
+if (!isCurrent()) throw new DOMException('Aborted', 'AbortError');
+const items = result.items;
+const meta = {
+version: 1, key, savedAt: Date.now(), count: items.length,
+chunkCount: Math.ceil(items.length / 500),
+failedFolders: result.failedFolders || [],
+progress: { ...S.shareParseInsightProgress }, retries: result.retries || 0
+};
+await new Promise((resolve, reject) => {
+const tx = db.transaction(['snapshots', 'chunks'], 'readwrite');
+const chunks = tx.objectStore('chunks');
+let failure = null;
+tx.oncomplete = () => resolve();
+tx.onabort = tx.onerror = () => reject(failure || tx.error || new Error('SNAPSHOT_WRITE_FAILED'));
+const next = index => {
+try {
+if (!isCurrent()) throw new DOMException('Aborted', 'AbortError');
+if (index === meta.chunkCount) { tx.objectStore('snapshots').put(meta); return; }
+const batch = items.slice(index * 500, (index + 1) * 500).map(makeShareInsightSnapshotItem);
+const request = chunks.put({ key, index, items: batch });
+request.onsuccess = () => next(index + 1);
+} catch (error) { failure = error; tx.abort(); }
+};
+const remove = chunks.delete(IDBKeyRange.bound([key, 0], [key, Number.MAX_SAFE_INTEGER]));
+remove.onsuccess = () => next(0);
+});
+return meta;
+}
+
+async function readShareInsightSnapshot(key, isCurrent = () => true) {
+if (!key) throw new Error('SNAPSHOT_SCOPE_UNAVAILABLE');
+const db = await openShareInsightSnapshotDb();
+if (!isCurrent()) throw new DOMException('Aborted', 'AbortError');
+const info = { ...S.shareParseInfo };
+return new Promise((resolve, reject) => {
+const tx = db.transaction(['snapshots', 'chunks'], 'readonly');
+let meta = null, failure = null;
+const items = [];
+tx.oncomplete = () => resolve({ ...meta, items });
+tx.onabort = tx.onerror = () => reject(failure || tx.error || new Error('SNAPSHOT_READ_FAILED'));
+const fail = error => { failure = error; tx.abort(); };
+const next = index => {
+if (!isCurrent()) return fail(new DOMException('Aborted', 'AbortError'));
+if (index === meta.chunkCount) {
+if (items.length !== meta.count) fail(new Error('SNAPSHOT_INCOMPLETE'));
+return;
+}
+const request = tx.objectStore('chunks').get([key, index]);
+request.onsuccess = () => {
+try {
+if (!isCurrent()) throw new DOMException('Aborted', 'AbortError');
+const batch = request.result && request.result.items;
+const expected = Math.min(500, meta.count - index * 500);
+if (!Array.isArray(batch) || batch.length !== expected) throw new Error('SNAPSHOT_INCOMPLETE');
+for (const item of batch) {
+if (!item || !item.id || !item._isShareInsightItem || !item._isShareItem || item.kind !== 'drive#file' || !Array.isArray(item._sharePath) || !Array.isArray(item._shareAncestorIds)) throw new Error('SNAPSHOT_INVALID_ITEM');
+delete item._shareResolvedDetail;
+delete item.web_content_link;
+item._shareId = info.share_id;
+item._passCodeToken = info.pass_code_token;
+items.push(item);
+}
+next(index + 1);
+} catch (error) { fail(error); }
+};
+};
+const request = tx.objectStore('snapshots').get(key);
+request.onsuccess = () => {
+meta = request.result;
+if (!isValidShareInsightSnapshotMeta(meta, key)) return fail(new Error('SNAPSHOT_INVALID'));
+next(0);
+};
+});
+}
+
+async function deleteShareInsightSnapshot(key) {
+if (!key) return;
+const db = await openShareInsightSnapshotDb();
+await new Promise((resolve, reject) => {
+const tx = db.transaction(['snapshots', 'chunks'], 'readwrite');
+tx.objectStore('snapshots').delete(key);
+tx.objectStore('chunks').delete(IDBKeyRange.bound([key, 0], [key, Number.MAX_SAFE_INTEGER]));
+tx.oncomplete = () => resolve();
+tx.onabort = tx.onerror = () => reject(tx.error || new Error('SNAPSHOT_DELETE_FAILED'));
+});
+}
+
 function filterShareParseInsightItemsByScanRule(items, scanFilter) {
 const src = Array.isArray(items) ? items.slice() : [];
 const rawTotal = src.length;
@@ -31824,6 +32037,7 @@ return true;
 function openShareParseInsightScanModal(selectedTargets = null) {
 const L = getStrings();
 const shareTargets = Array.isArray(selectedTargets) ? selectedTargets.filter(item => item && item._isShareItem && item.id).slice() : [];
+const snapshotKey = getShareInsightSnapshotKey(shareTargets);
 const lastMin = gmGet('pk_scan_last_min', 0);
 const lastMax = gmGet('pk_scan_last_max', '');
 const lastUnit = gmGet('pk_scan_last_unit', 'MB');
@@ -31831,14 +32045,14 @@ const lastKeyword = gmGet('pk_scan_last_keyword', '');
 const targetDesc = shareTargets.length > 0 ? formatI18nCount(L.lbl_scan_selected, { n: shareTargets.length }) : L.lbl_scan_current;
 const inputNonce = `${Date.now()}_${Math.random().toString(36).slice(2)}`;
 const m = showModal(`
-<div class="pk-share-modal-root pk-share-parse-insight-modal-root" style="width:480px; max-width:90vw; display:flex; flex-direction:column; overflow:visible;">
+<div class="pk-share-modal-root pk-share-parse-insight-modal-root" style="width:480px; max-width:90vw; display:flex; flex-direction:column; overflow:visible; max-height:calc(100dvh - 80px);">
 <div class="pk-share-parse-insight-head" style="padding:26px 30px 30px 30px; flex-shrink:0;">
 <h3 style="margin:0; font-size:18px; font-weight:700; border:none; line-height:1.2; color:var(--pk-fg);">${L.btn_share_parse_insight}</h3>
 </div>
 <div class="pk-share-parse-insight-desc" style="padding:0 30px 20px 30px; flex-shrink:0;">
 <div style="font-size:13px; color:#888; line-height:1.5;">${targetDesc}</div>
 </div>
-<div class="pk-share-parse-insight-form" style="padding:0 30px;">
+<div class="pk-share-parse-insight-form" style="padding:8px 30px 0 30px; overflow-y:auto; min-height:0;">
 <div class="pk-keyword-resize-wrap" style="margin-bottom:20px; position:relative;">
 <textarea id="spis_keyword" class="pk-keyword-resize-input" name="spis_keyword_${inputNonce}" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="${L.ph_keyword_filter}"
         oninput="this.style.borderColor = this.value.trim() ? 'var(--pk-pri)' : 'var(--pk-bd)'"
@@ -31873,6 +32087,15 @@ const m = showModal(`
         <div class="pk-ana-item ${lastUnit === 'GB' ? 'act' : ''}" data-v="GB">GB</div>
         <div class="pk-ana-item ${lastUnit === 'TB' ? 'act' : ''}" data-v="TB">TB</div>
     </div>
+</div>
+</div>
+<div style="border:1px solid var(--pk-bd); border-radius:8px; padding:12px; margin-bottom:4px; font-size:12px; line-height:1.6;">
+<label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="spis_save_local" ${gmGet('pk_share_insight_save_local', false) ? 'checked' : ''}><span>${L.label_share_insight_cache_save}</span></label>
+<div style="color:#888; margin-top:6px;">${L.tip_share_insight_cache}</div>
+<div id="spis_cache_status" role="status" style="margin-top:6px; overflow-wrap:anywhere;">${L.msg_share_insight_cache_checking}</div>
+<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
+<button class="pk-btn" id="spis_load_local" disabled>${L.btn_share_insight_cache_load}</button>
+<button class="pk-btn" id="spis_delete_local" disabled>${L.btn_share_insight_cache_delete}</button>
 </div>
 </div>
 </div>
@@ -31935,6 +32158,7 @@ document.removeEventListener('click', closeMenu);
 orgRemove();
 };
 const saveShareInsightScanInputs = () => {
+gmSet('pk_share_insight_save_local', m.querySelector('#spis_save_local').checked);
 gmSet('pk_scan_last_min', parseInt(inpMin.value) || 0);
 gmSet('pk_scan_last_max', inpMax.value.trim());
 gmSet('pk_scan_last_unit', currentUnit);
@@ -31946,13 +32170,14 @@ if (closeBtn) closeBtn.onclick = () => { saveShareInsightScanInputs(); m.remove(
 m.tabIndex = 0;
 setTimeout(() => m.focus(), 10);
 m.addEventListener('keydown', (e) => {
-if (e.key === 'Enter') {
+if (e.key === 'Enter' && !(e.target && e.target.closest && e.target.closest('button'))) {
 e.preventDefault();
 e.stopPropagation();
 m.querySelector('#spis_start').click();
 }
 });
-m.querySelector('#spis_start').onclick = () => {
+const startInsight = (useLocal = false) => {
+if (!S.shareParseMode || !S.shareParseListActive || snapshotKey !== getShareInsightSnapshotKey(shareTargets)) { m.remove(); return; }
 saveShareInsightScanInputs();
 const vMin = parseInt(inpMin.value) || 0;
 const vMax = parseInt(inpMax.value) || 0;
@@ -31975,9 +32200,44 @@ minBytes: Math.floor(vMin * mult),
 maxBytes: vMax > 0 ? Math.floor(vMax * mult) : 0,
 keyword: kw
 };
+const saveLocalControl = m.querySelector('#spis_save_local');
+const saveLocal = !saveLocalControl.disabled && saveLocalControl.checked;
 m.remove();
-if (typeof runShareParseInsightScan === 'function') runShareParseInsightScan(scanFilter, shareTargets);
+if (typeof runShareParseInsightScan === 'function') runShareParseInsightScan(scanFilter, shareTargets, { useLocal, saveLocal });
 };
+m.querySelector('#spis_start').onclick = () => startInsight(false);
+const loadLocal = m.querySelector('#spis_load_local');
+const deleteLocal = m.querySelector('#spis_delete_local');
+const cacheStatus = m.querySelector('#spis_cache_status');
+loadLocal.onclick = () => startInsight(true);
+const refreshSnapshotStatus = async () => {
+try {
+const meta = await getShareInsightSnapshotMeta(snapshotKey);
+if (!m.isConnected) return;
+const valid = isValidShareInsightSnapshotMeta(meta, snapshotKey);
+loadLocal.disabled = !valid;
+deleteLocal.disabled = !meta;
+cacheStatus.textContent = valid
+? `${L.label_share_insight_cache_snapshot}: ${new Date(meta.savedAt).toLocaleString()} · ${meta.count} ${L.str_files} · ${L.str_failed}: ${meta.failedFolders.length}`
+: (meta ? L.msg_share_insight_cache_read_failed : L.msg_share_insight_cache_empty);
+} catch (error) {
+if (m.isConnected) {
+cacheStatus.textContent = L.msg_share_insight_cache_unavailable;
+m.querySelector('#spis_save_local').disabled = true;
+}
+}
+};
+deleteLocal.onclick = async () => {
+loadLocal.disabled = deleteLocal.disabled = true;
+try { await deleteShareInsightSnapshot(snapshotKey); }
+catch (error) {
+if (m.isConnected) cacheStatus.textContent = L.msg_share_insight_cache_delete_failed;
+deleteLocal.disabled = false;
+return;
+}
+if (m.isConnected) refreshSnapshotStatus();
+};
+refreshSnapshotStatus();
 return m;
 }
 
@@ -31996,7 +32256,7 @@ if (S.shareParseInsightScanning) return;
 openShareParseInsightScanModal(getSelectedShareParseItems());
 }
 
-async function runShareParseInsightScan(scanFilter = null, presetTargets = null) {
+async function runShareParseInsightScan(scanFilter = null, presetTargets = null, options = {}) {
 const L = getStrings();
 if (!(S.shareParseMode && S.shareParseListActive)) {
 showToast(L.msg_share_parse_scan_need_list, 'warning');
@@ -32013,6 +32273,8 @@ try { S.shareParseInsightAbortController.abort(); } catch (e) {}
 S.shareParseInsightAbortController = null;
 }
 const insightTargets = Array.isArray(presetTargets) ? presetTargets.filter(item => item && item._isShareItem && item.id) : getSelectedShareParseItems();
+const snapshotKey = getShareInsightSnapshotKey(insightTargets);
+const snapshotScope = getShareInsightSnapshotKey();
 const oldStopHandler = UI.stopBtn ? UI.stopBtn.onclick : null;
 const scanController = new AbortController();
 S.shareParseInsightAbortController = scanController;
@@ -32027,6 +32289,8 @@ S.shareParseInsightStop = false;
 S.shareParseInsightToastStopped = false;
 S.shareParseInsightError = '';
 S.shareParseInsightFailedFolders = [];
+invalidateShareParseInsightView();
+S.shareParseInsightSnapshotAt = 0;
 S.shareParseInsightItems = [];
 S.shareParseInsightDisplay = [];
 S.shareParseInsightItemMap = new Map();
@@ -32039,7 +32303,28 @@ updateLoadTxt(`${L.str_scanning} 0 ${formatI18nUnit(L.unit_folders, 0)} | ${L.st
 if (UI.stopBtn) UI.stopBtn.onclick = handleShareParseInsightStop;
 
 try {
-const scanResult = await scanShareParseInsight(reqId, insightTargets, true, scanController.signal, () => scanController.abort());
+const isCurrent = () => S.shareParseMode && S.shareParseInsightReqId === reqId && !scanController.signal.aborted && !S.shareParseInsightStop && snapshotScope === getShareInsightSnapshotKey();
+let scanResult;
+if (options.useLocal) {
+updateLoadTxt(getStrings().msg_share_insight_cache_loading);
+scanResult = await readShareInsightSnapshot(snapshotKey, isCurrent);
+if (!isCurrent()) return;
+S.shareParseInsightSnapshotAt = scanResult.savedAt;
+S.shareParseInsightProgress = scanResult.progress || { folder: 0, file: scanResult.items.length };
+} else {
+scanResult = await scanShareParseInsight(reqId, insightTargets, true, scanController.signal, () => scanController.abort());
+if (!isCurrent() || (scanResult && scanResult.cancelled)) return;
+if (options.saveLocal) {
+updateLoadTxt(getStrings().msg_share_insight_cache_saving);
+try {
+await saveShareInsightSnapshot(snapshotKey, scanResult, isCurrent);
+if (isCurrent()) showToast(getStrings().msg_share_insight_cache_saved, 'success');
+} catch (error) {
+if (isCurrent()) showToast(getStrings().msg_share_insight_cache_save_failed, 'warning');
+}
+}
+}
+if (!isCurrent()) return;
 const rawItems = scanResult && Array.isArray(scanResult.items) ? scanResult.items : [];
 const failedFolders = scanResult && Array.isArray(scanResult.failedFolders) ? scanResult.failedFolders : [];
 S.shareParseInsightFailedFolders = failedFolders.slice();
@@ -32070,13 +32355,13 @@ S.selEx.clear();
 S.selMode = 'explicit';
 S.activeId = null;
 S.lastSelIdx = -1;
-syncShareParseInsightMirror();
-if (!failedFolders.length || !items.length) showToast(failedFolders.length ? `${L.msg_share_parse_scan_failed} (${failedFolders.length})` : L.msg_share_parse_scan_done, failedFolders.length ? 'warning' : 'success');
+if (failedFolders.length) showToast(`${L.msg_share_parse_scan_failed} (${failedFolders.length})`, 'warning');
+else showToast(options.useLocal ? L.msg_share_insight_cache_loaded : L.msg_share_parse_scan_done, 'success');
 renderShareParseCurrentView();
 } catch(e) {
 if (!S.shareParseMode || S.shareParseInsightReqId !== reqId) return;
 if (e && e.name === 'AbortError') return;
-const msg = getShareParseErrorMessage(e) || L.msg_share_parse_scan_failed;
+const msg = options.useLocal ? L.msg_share_insight_cache_read_failed : (getShareParseErrorMessage(e) || L.msg_share_parse_scan_failed);
 S.shareParseInsightError = '';
 showToast(msg, 'error');
 } finally {
@@ -34352,6 +34637,7 @@ await showAlert(`${summary}\n\n${preview}`, L.title_alert);
 
 function mergeSharePlayableDetail(item, detail) {
 if (!item || !detail) return item;
+if (item._isShareInsightItem) invalidateShareParseInsightView();
 const directUrl = getShareDirectUrl(detail);
 Object.assign(item, {
 name: detail.name || item.name,
@@ -45859,6 +46145,7 @@ if ((isMobileManagerEnvironment() || isMax) && isBlur) {
 }
 }
 let statText = formatI18nCount(L.status_ready, { n: total }) + getPagingLoadingSuffix();
+if (inShareInsight && S.shareParseInsightSnapshotAt) statText += ` · ${L.label_share_insight_cache_snapshot}: ${new Date(S.shareParseInsightSnapshotAt).toLocaleString()}`;
 if (inShareInsight && S.shareParseInsightError) {
 statText += `\u00A0\u00A0${S.shareParseInsightError}`;
 }
