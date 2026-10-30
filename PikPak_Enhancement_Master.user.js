@@ -7720,6 +7720,11 @@ zh: {
   "msg_share_parse_save_task_failed": "保存任务失败",
   "msg_share_parse_save_auth_error": "登录态已失效，请重新登录后再试",
   "msg_share_parse_save_network_error": "网络异常，保存到我的 PikPak 失败",
+  "share_save_choose_folder": "选择分享保存位置",
+  "share_save_move_progress": "正在移动 {done}/{total} 项...",
+  "share_save_move_success": "已保存到所选文件夹：{folder}",
+  "share_save_move_incomplete": "分享保存已提交，但未能确认或移动全部文件。部分文件可能已保存或移动；请检查默认保存目录和目标目录，避免重复保存。",
+  "share_save_overlapping": "选中项中包含文件夹及其子项，请只选择文件夹或子项后重试。",
   "msg_share_unzip_no_access": "未获取到分享压缩包访问凭证，请重新解析分享。",
   "label_share_parse_selected_count": "已选择 {n} 项",
   "btn_share_parse_insight": "分享文件透视",
@@ -8840,6 +8845,14 @@ zh: {
   "str_upload_3": "节点2超时，尝试最后节点...",
   "lbl_done_check": "✔ 完成"
 }
+};
+
+T_LOCAL.en = {
+  share_save_choose_folder: 'Choose where to save the share',
+  share_save_move_progress: 'Moving {done}/{total} items...',
+  share_save_move_success: 'Saved to the selected folder: {folder}',
+  share_save_move_incomplete: 'The share save was submitted, but not all files could be confirmed or moved. Some may already be saved or moved; check both the default and destination folders before retrying.',
+  share_save_overlapping: 'The selection includes a folder and its descendants. Select either the folder or its contents.'
 };
 
 function getStrings() {
@@ -32246,9 +32259,11 @@ return Array.from(new Set(ids));
 
 async function pollShareParseSaveTasks(taskIds, reqId, onProgress) {
 const completedTasks = new Map();
+const deadline = Date.now() + 5 * 60 * 1000;
 while (true) {
 await sleep(2000);
 if (S.shareParseSaveReqId !== reqId) return false;
+if (Date.now() >= deadline) throw makeShareParseError('msg_share_parse_save_task_failed');
 for (const taskId of taskIds) {
 if (completedTasks.has(taskId)) continue;
 const res = await fetch(`https://api-drive.mypikpak.com/drive/v1/tasks/${encodeURIComponent(taskId)}?_t=${Date.now()}`, { headers: getHeaders() });
@@ -32256,18 +32271,118 @@ if (!res.ok) continue;
 const data = await res.json().catch(() => ({}));
 const phase = String(data.phase || (data.task && data.task.phase) || '').toUpperCase();
 const key = resolveShareParseSaveErrorKey(0, data);
-if (key || phase === 'PHASE_TYPE_ERROR') {
+if (key || phase === 'PHASE_TYPE_ERROR' || phase === 'PHASE_TYPE_FAILED') {
 throw makeShareParseError(key || 'msg_share_parse_save_task_failed', 200, data);
 }
 if (phase === 'PHASE_TYPE_COMPLETE' || phase === 'PHASE_TYPE_COMPLETED' || phase === 'COMPLETE' || phase === 'SUCCESS') {
-completedTasks.set(taskId, data);
+completedTasks.set(taskId, { ...data, _pkShareRestoreTaskId: taskId });
 }
 }
+
 if (onProgress) onProgress(completedTasks.size, taskIds.length);
 if (completedTasks.size >= taskIds.length) return Array.from(completedTasks.values());
 }
 }
 
+// Only accept IDs explicitly associated with the items in this restore request.
+function resolveShareRestoreMoveIds(groups, completedTasks) {
+const taskById = new Map((completedTasks || []).map(task => [String(task._pkShareRestoreTaskId || ''), task]));
+const ids = [];
+const usedTaskIds = new Set();
+const allSourceIds = new Set(groups.flatMap(group => group.items.flatMap(item => [String(item.id), String(getShareParseTraceFileId(item))])));
+for (const group of groups) {
+for (const taskId of group.taskIds) {
+if (usedTaskIds.has(String(taskId))) return null;
+usedTaskIds.add(String(taskId));
+}
+const rows = [group.response, ...group.taskIds.map(id => taskById.get(String(id))).filter(Boolean)];
+if (group.taskIds.some(id => !taskById.has(String(id)))) return null;
+const mapping = new Map();
+for (const row of rows) {
+const trace = parseShareRestoreTraceMap(row || {});
+if (!trace || typeof trace !== 'object' || Array.isArray(trace)) continue;
+for (const [source, value] of Object.entries(trace)) {
+const id = typeof value === 'string' ? value.trim() : '';
+if (!id) continue;
+if (mapping.has(source) && mapping.get(source) !== id) return null;
+mapping.set(source, id);
+}
+}
+for (const item of group.items) {
+const candidates = [String(getShareParseTraceFileId(item)), String(item.id)].map(key => mapping.get(key)).filter(Boolean);
+if (new Set(candidates).size > 1) return null;
+let id = candidates[0];
+// A single-item response can also identify its restored file directly.
+if (!id && group.items.length === 1) {
+const direct = rows.map(row => {
+const data = getShareParsePayload(row || {});
+return data.file_id || data.fileId || (data.task && (data.task.file_id || data.task.fileId)) || '';
+}).filter(value => typeof value === 'string' && value.trim()).map(value => value.trim());
+if (new Set(direct).size === 1) id = direct[0];
+}
+if (!id || allSourceIds.has(id) || ids.includes(id)) return null;
+ids.push(id);
+}
+}
+return ids;
+}
+
+async function moveRestoredShareItems(ids, targetId, onProgress) {
+const target = normalizeRealFolderId(targetId);
+const explicitParent = item => {
+if (!item || typeof item !== 'object') return null;
+const value = item.parent_id !== undefined && item.parent_id !== null ? item.parent_id : item.parentId;
+if (value === undefined || value === null) return null;
+const parent = normalizeRealFolderId(value);
+return isRealHomeFolderId(parent) ? parent : null;
+};
+const items = [];
+for (const id of ids) {
+let item = null;
+for (let attempt = 0; attempt < 10; attempt++) {
+try { item = await apiGet(id); } catch (e) { item = null; }
+if (item && String(item.id || '') === id && explicitParent(item) !== null) break;
+item = null;
+await sleep(500);
+}
+if (!item) throw new Error('RESTORED_FILE_METADATA_UNAVAILABLE');
+items.push(item);
+}
+const parentById = new Map(items.map(item => [String(item.id), explicitParent(item)]));
+const sourceIds = new Set(parentById.values());
+const mutation = beginFolderMutation([...sourceIds, target], 'share_restore_move');
+let success = false;
+try {
+const pending = items.filter(item => parentById.get(String(item.id)) !== target);
+let done = items.length - pending.length;
+onProgress(done, items.length);
+for (let i = 0; i < pending.length; i += 500) {
+const chunk = pending.slice(i, i + 500);
+await requestFileTransferChunk('files:batchMove', chunk, target, parentById);
+// A successful task alone does not prove that every item reached the destination.
+for (const item of chunk) {
+let confirmed = false;
+for (let attempt = 0; attempt < 10; attempt++) {
+try {
+const meta = await apiGet(item.id);
+if (meta && String(meta.id || '') === String(item.id) && explicitParent(meta) === target) { confirmed = true; break; }
+} catch (e) {}
+await sleep(500);
+}
+if (!confirmed) throw new Error('RESTORED_FILE_MOVE_UNCONFIRMED');
+onProgress(++done, items.length);
+}
+}
+success = true;
+} finally {
+const affected = new Set([...sourceIds, target]);
+if (!mutation.finished) finishFolderMutation(mutation, { success, revalidate: true }).forEach(id => affected.add(id));
+affected.forEach(id => {
+if (window.pkGlobalIndex) window.pkGlobalIndex.markDirty(id);
+scheduleRealFolderRevalidation(id, 0);
+});
+}
+}
 async function syncShareRestoreGlobalIndex(taskResults, submitResults = [], options = {}) {
 const rawRows = [...(Array.isArray(taskResults) ? taskResults : []), ...(Array.isArray(submitResults) ? submitResults : [])];
 const restoredIds = new Set();
@@ -32361,7 +32476,25 @@ if (!selectedItems.length) {
 showToast(L.msg_share_parse_select_first, 'warning');
 return;
 }
+const selectedFolderIds = new Set(selectedItems.filter(item => item.kind === 'drive#folder').flatMap(item => [String(item.id), String(getShareParseTraceFileId(item))]));
+if (selectedItems.some(item => getShareParseAncestorIds(item).some(id => selectedFolderIds.has(String(id))))) {
+showToast(L.share_save_overlapping, 'warning');
+return;
+}
+const saveInfo = { share_id: info.share_id || '', pass_code_token: info.pass_code_token || '' };
+showFolderSelector('', (targetId, targetName) => {
+if (S.shareParseSaving) return;
+const currentInfo = S.shareParseInfo || {};
+if (!S.shareParseMode || !S.shareParseListActive || currentInfo.share_id !== saveInfo.share_id || currentInfo.pass_code_token !== saveInfo.pass_code_token) {
+showToast(L.msg_share_parse_save_need_list, 'warning');
+return;
+}
+performShareParseSaveSelected(selectedItems, saveInfo, targetId, targetName);
+}, null, null, L.share_save_choose_folder);
+}
 
+async function performShareParseSaveSelected(selectedItems, saveInfo, targetId, targetName) {
+const L = getStrings();
 const reqId = (S.shareParseSaveReqId || 0) + 1;
 S.shareParseSaveReqId = reqId;
 S.shareParseSaving = true;
@@ -32369,7 +32502,6 @@ S.shareParseSaveError = '';
 S.shareParseSaveResult = null;
 updateShareParseSaveButton();
 showToast(L.msg_share_parse_save_start);
-const saveInfo = { share_id: info.share_id || '', pass_code_token: info.pass_code_token || '' };
 const totalSaveCount = selectedItems.length;
 let savedSubmitCount = 0;
 const formatSaveProgress = (done, total) => formatI18nCount(L.msg_share_parse_save_progress || L.btn_share_parse_saving, { done, total });
@@ -32380,6 +32512,8 @@ let shareRestoreTarget = '';
 let shareRestoreBaseline = '';
 let shareRestoreCompleted = false;
 const submittedShareRestoreResults = [];
+const submittedGroups = [];
+let restoreRequestStarted = false;
 
 try {
 const headers = getHeaders();
@@ -32399,6 +32533,7 @@ for (const groupItems of groups) {
 if (S.shareParseSaveReqId !== reqId) return;
 progressTask.update(formatSaveProgress(savedSubmitCount, totalSaveCount));
 const payload = buildShareParseRestorePayload(groupItems, saveInfo);
+restoreRequestStarted = true;
 const res = await fetch('https://api-drive.mypikpak.com/drive/v1/share/restore', {
 method: 'POST',
 headers,
@@ -32415,7 +32550,8 @@ if (!res.ok) throw makeShareParseError(resolveShareParseSaveErrorKey(res.status,
 const key = resolveShareParseSaveErrorKey(0, data);
 if (key) throw makeShareParseError(key, 200, data);
 
-extractShareParseSaveTaskIds(data).forEach(id => {
+const groupTaskIds = extractShareParseSaveTaskIds(data);
+groupTaskIds.forEach(id => {
 allTaskIds.push(id);
 registerCloudTaskTarget({ id }, shareRestoreTarget, {
 taskType: 'restore',
@@ -32424,6 +32560,7 @@ baselineSignature: shareRestoreBaseline
 });
 });
 results.push(data || {});
+submittedGroups.push({ items: groupItems, response: data || {}, taskIds: groupTaskIds });
 savedSubmitCount += groupItems.length;
 progressTask.update(formatSaveProgress(Math.min(savedSubmitCount, totalSaveCount), totalSaveCount));
 }
@@ -32458,12 +32595,17 @@ if (S.shareParseMode && S.shareParseListActive) {
 S.clearSelection();
 renderVisible();
 }
-showToast(L.msg_share_parse_save_success);
+const restoredIds = resolveShareRestoreMoveIds(submittedGroups, completedTaskResults);
+if (!restoredIds || restoredIds.length !== selectedItems.length) throw new Error('RESTORED_FILE_IDS_UNAVAILABLE');
+await moveRestoredShareItems(restoredIds, targetId, (done, total) => {
+progressTask.update(formatI18nCount(L.share_save_move_progress, { done, total }));
+});
+showToast(formatI18nCount(L.share_save_move_success, { folder: targetName || L.picker_all }));
 } catch(e) {
 if (S.shareParseSaveReqId !== reqId) return;
-const msg = getShareParseSaveErrorMessage(e);
+const msg = restoreRequestStarted ? L.share_save_move_incomplete : getShareParseSaveErrorMessage(e);
 S.shareParseSaveError = msg;
-showToast(msg, 'error');
+showToast(msg, 'error', restoreRequestStarted ? 12000 : 0);
 } finally {
 if (shareRestoreMutation && !shareRestoreMutation.finished) {
 const pending = finishFolderMutation(shareRestoreMutation, { success: false, revalidate: true });
